@@ -722,12 +722,36 @@ def main():
                 try:
                     prune_cds(); 
                     if client.api_key == "placeholder": warn("Add an API key first via /api."); continue
-                    raw = client.list_models(); decorated = []
-                    for m in raw:
-                        mid = m['id']; copy_m = dict(m); copy_m["_tag"] = speed.get(mid, ""); copy_m["_uses"] = usage.get(mid, 0); copy_m["_hidden"] = mid in hidden
-                        cd = format_cooldown_until(model_cds.get(mid)); copy_m["_state"] = cd or ("hidden" if mid in hidden else ("free" if ":free" in mid else ""))
+                    raw = client.list_models()
+                    
+                    # Only show models that include ":free" in their ID
+                    free_raw = [m for m in raw if ":free" in m.get('id', '')]
+                    
+                    decorated = []
+                    for m in free_raw:
+                        mid = m['id']; copy_m = dict(m)
+                        copy_m["_tag"] = speed.get(mid, "")
+                        copy_m["_uses"] = usage.get(mid, 0)
+                        copy_m["_hidden"] = mid in hidden
+                        cd = format_cooldown_until(model_cds.get(mid))
+                        copy_m["_state"] = cd or ("hidden" if mid in hidden else "free")
                         decorated.append(copy_m)
-                    decorated.sort(key=lambda x: (not ":free" in x['id'], x['id']))
+                    
+                    decorated.sort(key=lambda x: x['id'])
+
+                    if rem:
+                        target = rem.strip()
+                        found_m = None
+                        if target.isdigit():
+                            idx = int(target)-1
+                            if 0 <= idx < len(decorated): found_m = decorated[idx]['id']
+                        else:
+                            for m in decorated:
+                                if target in m['id']: found_m = m['id']; break
+                        if found_m:
+                            client.model = found_m; info(f"Model: {client.model}"); persist()
+                        else: warn("Model not found.")
+                        continue
 
                     if rem:
                         target = rem.strip()
