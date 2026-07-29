@@ -152,7 +152,7 @@ def search_file(path: Path, query: str, recursive: bool = False, max_results: in
     else:
         it = path.rglob("*") if recursive else path.iterdir()
         for p in sorted(it):
-            if p.is_file(): scan(p);
+            if p.is_file(): scan(p)
             if len(results) >= max_results: break
     return "\n".join(results) or "No matches."
 
@@ -406,7 +406,10 @@ class OpenRouterClient:
     def list_models(self) -> List[Dict[str, Any]]:
         url = "https://openrouter.ai/api/v1/models"
         req = urllib.request.Request(url, headers={"Authorization": f"Bearer {self.api_key}"})
-        with urllib.request.urlopen(req, timeout=30) as resp: return json.loads(resp.read().decode()).get("data", [])
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp: return json.loads(resp.read().decode()).get("data", [])
+        except Exception as e:
+            raise RuntimeError(f"Could not load models: {e}")
 
 def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None) -> str:
     if name == "read_file": return read_file(resolve_path(args.get("filepath", ""), cwd))
@@ -426,22 +429,90 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
 # --- STORAGE & TUI ---
 
 def _require_api_crypto():
-    if not all([AES, PBKDF2, get_random_bytes]): raise RuntimeError("pycryptodome required.")
+    if not all([AES, PBKDF2, get_random_bytes]):
+        raise RuntimeError("pycryptodome required.")
+
 def _encrypt_api_accounts(accs: Dict[str, str], pwd: str, tav: Optional[Dict[str, str]] = None) -> bytes:
-    _require_api_crypto(); p = json.dumps({"accounts": accs, "tavily_accounts": tav or {}}, indent=2).encode()
-    s = get_random_bytes(16); k = PBKDF2(pwd.encode(), s, dkLen=32, count=200_000); cipher = AES.new(k, AES.MODE_EAX)
-    ct, tag = cipher.encrypt_and_digest(p); def pk(b): return len(b).to_bytes(4, 'big') + b
-    return API_ACCOUNTS_MAGIC + pk(s) + pk(cipher.nonce) + pk(tag) + pk(ct)
+    _require_api_crypto()
+    payload = json.dumps({"accounts": accs, "tavily_accounts": tav or {}}, indent=2).encode()
+    salt = get_random_bytes(16)
+    key = PBKDF2(pwd.encode(), salt, dkLen=32, count=200_000)
+    cipher = AES.new(key, AES.MODE_EAX)
+    ct, tag = cipher.encrypt_and_digest(payload)
+    
+    def pk(part):
+        return len(part).to_bytes(4, 'big') + part
+        
+    return API_ACCOUNTS_MAGIC + pk(salt) + pk(cipher.nonce) + pk(tag) + pk(ct)
+
 def _decrypt_api_accounts(blob: bytes, pwd: str) -> Dict[str, Any]:
-    _require_api_crypto(); 
-    if not blob.startswith(API_ACCOUNTS_MAGIC): raise ValueError("Invalid file.")
-    def upk(b, o): s = int.from_bytes(b[o:o+4], 'big'); return b[o+4:o+4+s], o+4+s
-    o = len(API_ACCOUNTS_MAGIC); s, o = upk(blob, o); n, o = upk(blob, o); t, o = upk(blob, o); ct, o = upk(blob, o)
-    k = PBKDF2(pwd.encode(), s, dkLen=32, count=200_000); cipher = AES.new(k, AES.MODE_EAX, nonce=n)
-    d = json.loads(cipher.decrypt_and_verify(ct, t).decode())
-    if not isinstance(d, dict): d = {"accounts": {}}
-    if "accounts" not in d: d = {"accounts": d, "tavily_accounts": {}}
-    return d
+    _require_api_crypto()
+    if not blob.startswith(API_ACCOUNTS_MAGIC):
+        raise ValueError("Invalid lock file.")
+        
+    def upk(b, o):
+        s = int.from_bytes(b[o:o+4], 'big')
+        return b[o+4:o+4+s], o+4+s
+        
+    offset = len(API_ACCOUNTS_MAGIC)
+    salt, offset = upk(blob, offset)
+    nonce, offset = upk(blob, offset)
+    tag, offset = upk(blob, offset)
+    ciphertext, offset = upk(blob, offset)
+    
+    key = PBKDF2(pwd.encode(), salt, dkLen=32, count=200_000)
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    data = json.loads(cipher.decrypt_and_verify(ciphertext, tag).decode())
+    
+    if not isinstance(data, dict):
+        data = {"accounts": {}}
+    if "accounts" not in data:
+        data = {"accounts": data, "tavily_accounts": {}}
+    if "tavily_accounts" not in data:
+        data["tavily_accounts"] = {}
+    return data
+
+def classify_test_speed(elapsed_seconds: float) -> str:
+    if elapsed_seconds <= 0.5: return "fast"
+    if 3.0 <= elapsed_seconds <= 5.0: return "medium"
+    if elapsed_seconds > 6.0: return "slow"
+    return "normal"
+
+def test_model(client: OpenRouterClient, model_id: str) -> str:
+    test_client = OpenRouterClient(client.api_key, model_id)
+    try:
+        resp = test_client.generate([{"role": "user", "content": "Say exactly: OK"}], system="Reply OK only.", temp=0.0)
+        content = resp["choices"][0]["message"]["content"]
+        return _clean_response_text(content)
+    except Exception as e: return f"Error: {e}"
+
+
+
+    _require_api_crypto()
+    if not blob.startswith(API_ACCOUNTS_MAGIC):
+        raise ValueError("Invalid lock file.")
+        
+    def upk(b, o):
+        s = int.from_bytes(b[o:o+4], 'big')
+        return b[o+4:o+4+s], o+4+s
+        
+    offset = len(API_ACCOUNTS_MAGIC)
+    salt, offset = upk(blob, offset)
+    nonce, offset = upk(blob, offset)
+    tag, offset = upk(blob, offset)
+    ciphertext, offset = upk(blob, offset)
+    
+    key = PBKDF2(pwd.encode(), salt, dkLen=32, count=200_000)
+    cipher = AES.new(key, AES.MODE_EAX, nonce=nonce)
+    data = json.loads(cipher.decrypt_and_verify(ciphertext, tag).decode())
+    
+    if not isinstance(data, dict):
+        data = {"accounts": {}}
+    if "accounts" not in data:
+        data = {"accounts": data, "tavily_accounts": {}}
+    if "tavily_accounts" not in data:
+        data["tavily_accounts"] = {}
+    return data
 
 def model_name(m: Dict[str, Any]) -> str: return str(m.get("id", ""))
 def short_model_name(m: Dict[str, Any]) -> str:
@@ -508,8 +579,11 @@ def pick_failover_interactive(proj: Optional[bool], sess: Optional[bool], glob: 
 
 def read_key() -> str:
     if msvcrt is None: return input().strip()
-    ch = msvcrt.getwch()
-    return ch + msvcrt.getwch() if ch in ("\x00", "\xe0") else ch
+    try:
+        ch = msvcrt.getwch()
+        if ch in ("\x00", "\xe0"): return ch + msvcrt.getwch()
+        return ch
+    except: return ""
 
 def clear_screen():
     if sys.stdout.isatty(): os.system("cls" if os.name == "nt" else "clear")
@@ -526,14 +600,50 @@ def interactive_select(title_text: str, items: List[Any], render_item: Callable)
         if k in ("\xe0H", "\x00H"): idx = (idx - 1) % len(items)
         elif k in ("\xe0P", "\x00P"): idx = (idx + 1) % len(items)
 
+# --- AUTOCOMPLETE ---
+
+if Completer is not None:
+    class ORCliCompleter(Completer):
+        SLASH_COMMANDS = [
+            ("/help", "Show available commands"),
+            ("/exit", "Quit CLI"),
+            ("/reset", "Clear conversation history"),
+            ("/mm", "Open model picker"),
+            ("/test", "Test all models and hide failures"),
+            ("/api", "Manage API accounts"),
+            ("/failover", "Open auto-failover picker"),
+            ("/tool", "Open tool manager"),
+        ]
+        def __init__(self, cwd): self.cwd = Path(cwd)
+        def get_completions(self, document, complete_event):
+            text = document.text_before_cursor
+            if text.startswith("/"):
+                if " " not in text:
+                    for cmd, d in self.SLASH_COMMANDS:
+                        if text.lower() in cmd.lower(): yield Completion(cmd, start_position=-len(text), display=cmd, display_meta=d)
+            elif "@" in text:
+                last_at = text.rfind("@"); after = text[last_at+1:]
+                if " " not in after:
+                    p = Path(after); dir_p = p.parent if "/" in after else Path("."); search = p.name if "/" in after else after
+                    target = self.cwd / dir_p
+                    if target.is_dir():
+                        try:
+                            for entry in target.iterdir():
+                                if search.lower() in entry.name.lower():
+                                    yield Completion(entry.name + ("/" if entry.is_dir() else ""), start_position=-len(search))
+                        except: pass
+
 # --- MAIN ---
 
 def main():
+    print("Starting OpenRouter CLI...")
     parser = argparse.ArgumentParser(); parser.add_argument("--api-key"); parser.add_argument("--password"); parser.add_argument("--model", default=None); args = parser.parse_args()
+    
     prefs = {}
     if MODEL_PREFS_FILE.exists():
         try: prefs = json.loads(MODEL_PREFS_FILE.read_text(encoding="utf-8"))
         except: pass
+    
     hidden = list(prefs.get("hidden_models", [])); speed = dict(prefs.get("speed_tags", {})); usage = dict(prefs.get("model_usage_counts", {}))
     dis_tools = set(prefs.get("disabled_tools", [])); last_m = str(prefs.get("last_model") or DEFAULT_MODEL); last_acc = str(prefs.get("last_api_account") or ""); sys_instr = str(prefs.get("system_instruction") or DEFAULT_SYSTEM)
     fail_u = int(prefs.get("failover_uses") or 0); af_glob = bool(prefs.get("auto_failover_default", False)); af_projs = dict(prefs.get("auto_failover_projects", {}))
@@ -542,62 +652,124 @@ def main():
     accs = {}; tav = {}
     if API_ACCOUNTS_FILE.exists():
         pwd = args.password or getpass.getpass("OpenRouter Lock Password: ")
-        try: dec = _decrypt_api_accounts(API_ACCOUNTS_FILE.read_bytes(), pwd); accs = dec["accounts"]; tav = dec["tavily_accounts"]
-        except: error("Failed to unlock."); return 1
+        try: 
+            dec = _decrypt_api_accounts(API_ACCOUNTS_FILE.read_bytes(), pwd)
+            accs = dec["accounts"]; tav = dec["tavily_accounts"]
+        except Exception as e:
+            error(f"Failed to unlock: {e}")
+            return 1
+            
     api_k = args.api_key or os.environ.get("OPENROUTER_API_KEY")
     act_acc = ""
-    if not api_k and accs: act_acc = last_acc if last_acc in accs else next(iter(sorted(accs.keys(), key=str.lower))); api_k = accs[act_acc]
-    if not api_k: error("No API key. Use /api."); api_k = "placeholder"
+    if not api_k and accs:
+        act_acc = last_acc if last_acc in accs else next(iter(sorted(accs.keys(), key=str.lower)))
+        api_k = accs[act_acc]
+    
+    if not api_k: api_k = "placeholder"
     
     client = OpenRouterClient(api_k, args.model or last_m); messages = []; model_cds = {}; history = []
     if PROMPT_HISTORY_FILE.exists():
-        lines = PROMPT_HISTORY_FILE.read_text(encoding='utf-8', errors='replace').splitlines()
-        seen = set(); history = []
-        for l in reversed(lines):
-            v = l.strip(); 
-            if v and v not in seen: history.append(v); seen.add(v)
-            if len(history) >= 200: break
-        history.reverse()
+        try:
+            lines = PROMPT_HISTORY_FILE.read_text(encoding='utf-8', errors='replace').splitlines()
+            seen = set(); history = []
+            for l in reversed(lines):
+                v = l.strip(); 
+                if v and v not in seen: history.append(v); seen.add(v)
+                if len(history) >= 200: break
+            history.reverse()
+        except: pass
 
     def persist():
-        MODEL_PREFS_FILE.write_text(json.dumps({
-            "hidden_models": sorted(set(hidden)), "speed_tags": speed, "model_usage_counts": usage, "disabled_tools": sorted(list(dis_tools)),
-            "last_model": client.model, "last_api_account": act_acc, "system_instruction": sys_instr,
-            "failover_uses": fail_u, "auto_failover_default": af_glob, "auto_failover_projects": af_projs
-        }, indent=2), encoding="utf-8")
+        try:
+            MODEL_PREFS_FILE.write_text(json.dumps({
+                "hidden_models": sorted(set(hidden)), "speed_tags": speed, "model_usage_counts": usage, "disabled_tools": sorted(list(dis_tools)),
+                "last_model": client.model, "last_api_account": act_acc, "system_instruction": sys_instr,
+                "failover_uses": fail_u, "auto_failover_default": af_glob, "auto_failover_projects": af_projs
+            }, indent=2), encoding="utf-8")
+        except: pass
     
     def effective_af(): return af_sess if af_sess is not None else af_projs.get(str(cwd.resolve()), af_glob)
     def prune_cds():
         for n in [n for n, u in model_cds.items() if u <= _now()]: model_cds.pop(n, None); write_notification()
 
-    title("OpenRouter Terminal CLI"); info(f"Model: {client.model} | Root: {cwd}"); info(f"Auto failover: {'on' if effective_af() else 'off'}")
+    clear_screen()
+    title("OpenRouter Terminal CLI"); info(f"Project root: {cwd}")
+    if api_k == "placeholder": warn("No API key found. Use /api to add one.")
+    else: info(f"Model: {client.model}"); info(f"Auto failover: {'on' if effective_af() else 'off'}")
 
     while True:
         try:
             p_text = f"openrouter:{client.model.split('/')[-1] if '/' in client.model else client.model}"; prune_cds()
             if model_cds.get(client.model): p_text += f" [{format_cooldown_until(model_cds[client.model])}]"
-            user_input = (pt_prompt(ANSI(_ansi_wrap(f"{p_text}> ", "1;32")), history=InMemoryHistory(history), completer=None, style=Style.from_dict({'': 'ansired'})) if pt_prompt else input(_ansi_wrap(f"{p_text}> ", "1;32"))).strip()
-        except: print(); break
+            
+            if pt_prompt:
+                user_input = pt_prompt(ANSI(_ansi_wrap(f"{p_text}> ", "1;32")), history=InMemoryHistory(history), auto_suggest=AutoSuggestFromHistory(), completer=ORCliCompleter(cwd), complete_while_typing=True, complete_style=CompleteStyle.COLUMN, style=Style.from_dict({'': 'ansired'})).strip()
+            else:
+                user_input = input(_ansi_wrap(f"{p_text}> ", "1;32")).strip()
+        except (EOFError, KeyboardInterrupt): print(); break
+        
         if not user_input: user_input = "continue"; info("continue")
         if user_input in history: history.remove(user_input)
-        history.append(user_input); PROMPT_HISTORY_FILE.write_text("\n".join(history[-200:])+"\n", encoding='utf-8')
+        history.append(user_input); 
+        try: PROMPT_HISTORY_FILE.write_text("\n".join(history[-200:])+"\n", encoding='utf-8')
+        except: pass
         
         if user_input.startswith("/"):
             ps = user_input.split(); cmd = ps[0].lower(); rem = " ".join(ps[1:])
-            if cmd == "/exit": break
+            if cmd == "/exit" or cmd == "/quit": break
             if cmd == "/reset": messages = []; info("Reset."); continue
             if cmd == "/mm":
                 try:
-                    prune_cds(); raw = client.list_models(); decorated = []
+                    prune_cds(); 
+                    if client.api_key == "placeholder": warn("Add an API key first via /api."); continue
+                    raw = client.list_models(); decorated = []
                     for m in raw:
                         mid = m['id']; copy_m = dict(m); copy_m["_tag"] = speed.get(mid, ""); copy_m["_uses"] = usage.get(mid, 0); copy_m["_hidden"] = mid in hidden
                         cd = format_cooldown_until(model_cds.get(mid)); copy_m["_state"] = cd or ("hidden" if mid in hidden else ("free" if ":free" in mid else ""))
                         decorated.append(copy_m)
                     decorated.sort(key=lambda x: (not ":free" in x['id'], x['id']))
+
+                    if rem:
+                        target = rem.strip()
+                        found_m = None
+                        if target.isdigit():
+                            idx = int(target)-1
+                            if 0 <= idx < len(decorated): found_m = decorated[idx]['id']
+                        else:
+                            for m in decorated:
+                                if target in m['id']: found_m = m['id']; break
+                        if found_m:
+                            client.model = found_m; info(f"Model: {client.model}"); persist()
+                        else: warn("Model not found.")
+                        continue
+
                     w = build_model_table_widths(decorated)
                     for l in build_model_table_header(w): print(l)
                     chosen = interactive_select("Select Model", decorated, lambda m, i, sel: format_model_entry(i+1, m, client.model, w, sel))
                     if chosen: client.model = chosen['id']; info(f"Model: {client.model}"); persist()
+                except Exception as e: error(str(e))
+                continue
+            if cmd == "/test":
+                if client.api_key == "placeholder": warn("Add an API key first."); continue
+                info("Testing all models and auto-hiding failures...")
+                try:
+                    raw = client.list_models()
+                    test_targets = [m for m in raw if ":free" in m['id']]
+                    if not test_targets: test_targets = raw[:10]
+                    
+                    for m in test_targets:
+                        mid = m['id']; print(f"- {mid} ... ", end="", flush=True)
+                        start_t = time.perf_counter()
+                        res = test_model(client, mid)
+                        elapsed = time.perf_counter() - start_t
+                        sp_tag = classify_test_speed(elapsed); speed[mid] = sp_tag
+                        if res == "OK":
+                            print(_ansi_wrap(f"OK [{sp_tag}] ({elapsed:.2f}s)", "32"))
+                            if mid in hidden: hidden.remove(mid)
+                        else:
+                            print(_ansi_wrap(f"FAIL ({res})", "31"))
+                            if mid not in hidden: hidden.append(mid)
+                    persist(); info("Tests complete. Preferences updated.")
                 except Exception as e: error(str(e))
                 continue
             if cmd == "/api":
@@ -605,12 +777,19 @@ def main():
                 if not chosen: continue
                 p = chosen["provider"]
                 if chosen["action"] == "add":
-                    n = input(f"{p.title()} Name: ").strip(); k = input(f"{p.title()} Key: ").strip(); pwd = args.password or getpass.getpass("Lock Password: ")
+                    n = input(f"{p.title()} Name: ").strip(); k = input(f"{p.title()} Key: ").strip()
+                    pwd = args.password or getpass.getpass("Lock Password: ")
+                    if not pwd: error("Password required."); continue
                     if p == "tavily": tav[n] = k
                     else: accs[n] = k
-                    try: API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(accs, pwd, tav)); info(f"Added {p} {n}"); 
-                    except: error("Failed.")
-                elif p == "openrouter": act_acc = chosen["name"]; api_k = accs[act_acc]; client.api_key = api_k; persist(); info(f"Switched: {act_acc}")
+                    try: 
+                        API_ACCOUNTS_FILE.write_bytes(_encrypt_api_accounts(accs, pwd, tav))
+                        if p == "openrouter": 
+                            act_acc = n; client.api_key = k; persist()
+                        info(f"Added {p} account: {n}")
+                    except Exception as e: error(f"Failed: {e}")
+                elif p == "openrouter": 
+                    act_acc = chosen["name"]; api_k = accs[act_acc]; client.api_key = api_k; persist(); info(f"Switched: {act_acc}")
                 continue
             if cmd == "/failover":
                 c_af = pick_failover_interactive(af_projs.get(str(cwd.resolve())), af_sess, af_glob)
@@ -620,7 +799,11 @@ def main():
                     af_sess = None if c_af["session"] == "none" else (c_af["session"] == "on")
                     af_glob = (c_af["default"] == "on"); persist(); info("Auto failover updated.")
                 continue
-            warn("Commands: /mm, /api, /failover, /reset, /exit"); continue
+            warn("Commands: /mm, /test, /api, /failover, /reset, /exit"); continue
+
+        if client.api_key == "placeholder":
+            warn("Please add an OpenRouter API key using /api first.")
+            continue
 
         expanded = user_input
         if user_input.startswith("@"):
@@ -655,4 +838,8 @@ def main():
                 messages.append({"role": "tool", "tool_call_id": tc["id"], "content": res}); info(f"[result] {str(res)[:80]}...")
     return 0
 
-if __name__ == "__main__": raise SystemExit(main())
+if __name__ == "__main__": 
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        pass
