@@ -98,13 +98,13 @@ QListWidget {{
 }}
 QListWidget::item:selected {{ background-color: #1a3a3a; color: {CP_CYAN}; border-left: 2px solid {CP_CYAN}; }}
 QListWidget::item:hover {{ background-color: #1a1a1a; }}
-QScrollBar:vertical {{ background: transparent; width: 5px; margin: 0; }}
-QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 2px; }}
-QScrollBar::handle:vertical:hover {{ background: {CP_YELLOW}; }}
+QScrollBar:vertical {{ background: transparent; width: 8px; margin: 0; }}
+QScrollBar::handle:vertical {{ background: #555555; min-height: 20px; border-radius: 4px; }}
+QScrollBar::handle:vertical:hover {{ background: #777777; }}
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; width: 0; background: none; }}
-QScrollBar:horizontal {{ background: transparent; height: 5px; margin: 0; }}
-QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 2px; }}
-QScrollBar::handle:horizontal:hover {{ background: {CP_YELLOW}; }}
+QScrollBar:horizontal {{ background: transparent; height: 8px; margin: 0; }}
+QScrollBar::handle:horizontal {{ background: #555555; min-width: 20px; border-radius: 4px; }}
+QScrollBar::handle:horizontal:hover {{ background: #777777; }}
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ height: 0; width: 0; background: none; }}
 QCheckBox {{ spacing: 8px; color: {CP_TEXT}; background: transparent; }}
 QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {CP_DIM}; background: {CP_PANEL}; }}
