@@ -781,6 +781,7 @@ if Completer is not None:
             ("/mm", "Open model picker / switch model"),
             ("/test", "Test all models"),
             ("/api", "Open API account picker"),
+            ("/tool", "Open tool manager"),
             ("/system", "Replace or load system instruction"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
