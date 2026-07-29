@@ -382,7 +382,7 @@ def save_recent(items: list[dict]):
     except Exception as e:
         print(f"Error saving recent projects: {e}", file=sys.stderr)
 
-def add_recent(path: str, files: list[str] = None, extensions: list[str] = None, overwrite_existing: bool = False):
+def add_recent(path: str, files: list[str] = None, extensions: list[str] = None, overwrite_existing: bool = False, disabled_files: list[str] = None):
     path = os.path.normpath(path)
 
     current = load_recent_details()
@@ -406,27 +406,34 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
             files = existing["files"]
         if existing.get("extensions"):
             extensions = existing["extensions"]
+        if disabled_files is None and existing.get("disabled_files"):
+            disabled_files = existing["disabled_files"]
     else:
-        # Fallback if none provided
         if not files:
             if existing and existing.get("files"):
                 files = existing["files"]
         if not extensions:
             if existing and existing.get("extensions"):
                 extensions = existing["extensions"]
+        if disabled_files is None and existing and existing.get("disabled_files"):
+            disabled_files = existing["disabled_files"]
 
     if files is None:
         files = []
     if extensions is None:
         extensions = []
+    if disabled_files is None:
+        disabled_files = []
 
     normalized_files = [os.path.normpath(f) for f in files]
+    normalized_disabled = [os.path.normpath(f) for f in disabled_files]
 
     # Remove existing entry to move it to the top of the list
     current = [item for item in current if os.path.normpath(item["path"]) != path]
     new_entry = {
         "path": path,
         "files": normalized_files,
+        "disabled_files": normalized_disabled,
         "extensions": extensions,
         "clicks": clicks
     }
@@ -2446,22 +2453,31 @@ class PrepTab(QWidget):
 
 
     def _sync_to_recent_projects(self):
-        if not self.files:
+        if not self.files and not self.project_root:
             return
         try:
-            common = os.path.commonpath(self.files)
-            if os.path.isfile(common):
-                common = os.path.dirname(common)
-            common = os.path.normpath(common)
+            common = os.path.normpath(self.project_root) if self.project_root else os.path.normpath(os.path.commonpath(self.files))
             
             current_recent = load_recent_details()
             updated = False
             for item in current_recent:
                 if os.path.normpath(item["path"]) == common:
                     item["files"] = [os.path.normpath(f) for f in self.files]
+                    item["disabled_files"] = [os.path.normpath(f) for f in self.disabled_files]
                     updated = True
                     break
-                    
+
+            if not updated and self.project_root:
+                # Add new entry for active root if not in recent
+                current_recent.insert(0, {
+                    "path": common,
+                    "files": [os.path.normpath(f) for f in self.files],
+                    "disabled_files": [os.path.normpath(f) for f in self.disabled_files],
+                    "extensions": [],
+                    "clicks": 1
+                })
+                updated = True
+
             if updated:
                 save_recent(current_recent)
         except Exception:
@@ -3226,23 +3242,28 @@ class PrepTab(QWidget):
         self._update_root()
         self._save_session()
 
-    def _load_specific_files(self, d: str, files: list[str], extensions: list[str]):
+    def _load_specific_files(self, d: str, files: list[str], extensions: list[str], disabled_files: list[str] = None):
+        if self.project_root:
+            self._sync_to_recent_projects()
+
         if not files:
             self._load_all_project_files(d)
             return
 
         self.files.clear()
         self.file_list.clear()
+        self.disabled_files = {os.path.normpath(f) for f in disabled_files} if disabled_files is not None else set()
         
         count = 0
         for fp in files:
-            if os.path.exists(fp):
-                self.files.append(fp)
-                self._add_file_item(fp)
+            norm_fp = os.path.normpath(fp)
+            if os.path.exists(norm_fp):
+                self.files.append(norm_fp)
+                self._add_file_item(norm_fp)
                 count += 1
                 
-        add_recent(d, self.files, extensions, overwrite_existing=False)
         self._set_project_root(d, save_recent=False)
+        add_recent(d, self.files, extensions, overwrite_existing=False, disabled_files=list(self.disabled_files))
         self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
         self._update_root()
         self._save_session()
@@ -3463,9 +3484,23 @@ class PrepTab(QWidget):
     def _on_project_clicked(self, item):
         data = item.data(Qt.ItemDataRole.UserRole)
         path = data.get("path")
-        files = data.get("files", [])
-        extensions = data.get("extensions", [])
-        self._load_specific_files(path, files, extensions)
+        if not path:
+            return
+
+        norm_p = os.path.normpath(path)
+        # Fetch fresh details from disk to avoid stale QListWidgetItem data
+        fresh_items = load_recent_details()
+        fresh_target = None
+        for fi in fresh_items:
+            if os.path.normpath(fi["path"]) == norm_p:
+                fresh_target = fi
+                break
+
+        files = fresh_target.get("files", []) if fresh_target else data.get("files", [])
+        extensions = fresh_target.get("extensions", []) if fresh_target else data.get("extensions", [])
+        disabled_files = fresh_target.get("disabled_files", []) if fresh_target else data.get("disabled_files", [])
+
+        self._load_specific_files(path, files, extensions, disabled_files)
 
     def _project_context_menu(self, pos):
         item = self.project_list.itemAt(pos)
