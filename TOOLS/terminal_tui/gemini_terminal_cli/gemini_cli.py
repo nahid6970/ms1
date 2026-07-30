@@ -2818,11 +2818,94 @@ def print_help() -> None:
               /failover             Open the auto-failover picker
               /tool                 Open the tool manager and toggle tools with Space
               /system <text|file>   Replace system instruction or load it from a file
+              /skill                Browse and apply saved skill instructions
               /save <file>          Save transcript JSON
               /load <file>          Load transcript JSON
             """
         ).strip()
     )
+def list_skills() -> List[tuple[str, str, Path]]:
+    """Scan skills directory and return a list of (title, description, path)."""
+    skills_dir = Path(__file__).parent / "skills"
+    if not skills_dir.exists() or not skills_dir.is_dir():
+        return []
+    
+    found_skills = []
+    for path in sorted(skills_dir.glob("*.md")):
+        try:
+            content = path.read_text(encoding="utf-8", errors="replace")
+            lines = content.splitlines()
+            title = path.stem.replace("_", " ").title()
+            desc = "Custom skill instruction file."
+            
+            for line in lines:
+                if line.startswith("# "):
+                    title = line[2:].strip()
+                    break
+            
+            for line in lines:
+                if line.startswith("## Goal") or line.startswith("## Description") or line.startswith("Description:"):
+                    # grab the next non-empty line or summary
+                    idx = lines.index(line)
+                    if idx + 1 < len(lines):
+                        desc = lines[idx + 1].strip()
+                    break
+            found_skills.append((title, desc, path))
+        except Exception:
+            continue
+    return found_skills
+
+
+def pick_skill_interactive() -> Optional[str]:
+    skills = list_skills()
+    if not skills:
+        warn("No skills found in 'skills/' directory.")
+        return None
+    
+    items = []
+    for title_str, desc_str, path in skills:
+        items.append({
+            "name": title_str,
+            "description": desc_str,
+            "path": path,
+        })
+    
+    widths = {
+        "name": min(max(max(len(i["name"]) for i in items), 10), 30),
+    }
+    
+    def render_skill_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
+        marker = ">" if selected else " "
+        row = f"{marker} {index:>2}  {item['name']:<{widths['name']}}  {item['description'][:50]}"
+        if selected:
+            return _ansi_wrap(row, "48;5;24;97")
+        return row
+
+    def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
+        return [
+            "----------------------------------------------------------------",
+            f"Skill File: {current_item['path'].name}",
+            f"Description: {current_item['description']}",
+            "Press Enter to load skill instruction into current conversation | Esc to cancel"
+        ]
+
+    chosen = interactive_select(
+        title_text="Select Skill Instruction",
+        items=items,
+        render_item=render_skill_item,
+        header_lines=[f"  {'Id':>2}  {'Skill Name':<{widths['name']}}  Description", f"  {'--':>2}  {'-' * widths['name']}  -----------"],
+        dynamic_footer=render_footer_info,
+        instructions="Use Up/Down, Enter to apply skill, Esc to cancel.",
+    )
+    if not chosen:
+        return None
+    
+    try:
+        return chosen["path"].read_text(encoding="utf-8", errors="replace")
+    except Exception as exc:
+        error(f"Error reading skill file: {exc}")
+        return None
+
 
 
 def make_user_content(text: str) -> Dict[str, Any]:
@@ -3556,6 +3639,13 @@ def main() -> int:
                         print(_ansi_wrap("-" * 40, "90"))
                         print("Usage: /system <text|file> to update.")
                     continue
+                if command == "/skill":
+                    skill_content = pick_skill_interactive()
+                    if skill_content:
+                        contents.append(make_user_content(f"Skill instructions loaded:\n\n{skill_content}"))
+                        info("Skill instructions injected into conversation history.")
+                    continue
+
                 if command == "/save":
                     if remainder:
                         transcript_path = resolve_path(remainder, Path.cwd())
