@@ -31,10 +31,10 @@
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore"
       ],
       "extensions": [
         "",
@@ -42,9 +42,269 @@
         ".md",
         ".json"
       ],
-      "clicks": 195,
+      "clicks": 198,
       "pinned": true,
       "pin_index": 1
+    },
+    {
+      "path": "C:\\@delta\\db\\vlr",
+      "name": "VLR STATS",
+      "category": "Flask",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\app.py",
+        "C:\\@delta\\db\\vlr\\dev.md",
+        "C:\\@delta\\db\\vlr\\ignorelist.json",
+        "C:\\@delta\\db\\vlr\\matches.db-shm",
+        "C:\\@delta\\db\\vlr\\matches.db-wal",
+        "C:\\@delta\\db\\vlr\\migration_guide.md",
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\scraper.py",
+        "C:\\@delta\\db\\vlr\\settings.json",
+        "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
+        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
+        "C:\\@delta\\db\\vlr\\templates\\index.html"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\ignorelist.json",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\matches.db-shm",
+        "C:\\@delta\\db\\vlr\\matches.db-wal",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\migration_guide.md",
+        "C:\\@delta\\db\\vlr\\settings.json"
+      ],
+      "extensions": [
+        "",
+        ".db-shm",
+        ".html",
+        ".md",
+        ".json",
+        ".js",
+        ".db-wal",
+        ".css",
+        ".txt",
+        ".py"
+      ],
+      "clicks": 44,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
+      "name": "Script-Loader",
+      "category": "Extension",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\background.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\DEV_GUIDE.md",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\manifest.json",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\page_bridge.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.html",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\assets\\icons\\.gitignore",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\checkbox_auto_checker.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\copy_table_as_markdown.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\disable_youtube.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\form_draft_saver.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\link_text_extractor.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\local_server_fallback.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_links_in_new_tab.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_local_files_in_new_tab.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_ad_skipper.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_swap_sections.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\yt_analyzer.js"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        "",
+        ".js",
+        ".md",
+        ".json",
+        ".html"
+      ],
+      "clicks": 51,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+      "name": "Script Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
+      ],
+      "extensions": [
+        "",
+        ".md",
+        ".py",
+        ".json"
+      ],
+      "clicks": 38,
+      "pinned": true,
+      "pin_index": 3
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
+      "name": "Rclone Status",
+      "category": "rclone",
+      "icon": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
+      "files": [
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\commands.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\Rclone-Status.py",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\README.md",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json"
+      ],
+      "extensions": [
+        ".json",
+        ".md",
+        ".txt",
+        ".py"
+      ],
+      "clicks": 115,
+      "pinned": true,
+      "pin_index": 5
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
+      "name": "myGemini-CLI",
+      "category": "AI-Tools",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\README.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\system_instruction.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md"
+      ],
+      "extensions": [
+        "",
+        ".md",
+        ".py",
+        ".json",
+        ".txt"
+      ],
+      "clicks": 39,
+      "pinned": true,
+      "pin_index": 6
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@@init\\application_install",
+      "name": "Application Install",
+      "category": "Tools",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
+        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".py",
+        ".json"
+      ],
+      "clicks": 27,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
+      ],
+      "extensions": [
+        ".md",
+        ".py",
+        ".json"
+      ],
+      "clicks": 29,
+      "pinned": false,
+      "pin_index": 0
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
@@ -118,148 +378,6 @@
       "pin_index": 2
     },
     {
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
-      "name": "myGemini-CLI",
-      "category": "AI-Tools",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore"
-      ],
-      "extensions": [
-        "",
-        ".md",
-        ".py",
-        ".json",
-        ".txt"
-      ],
-      "clicks": 33,
-      "pinned": true,
-      "pin_index": 6
-    },
-    {
-      "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
-      "name": "Rclone Status",
-      "category": "rclone",
-      "icon": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
-      "files": [
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\Rclone-Status.py",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\README.md",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md"
-      ],
-      "extensions": [
-        ".json",
-        ".md",
-        ".txt",
-        ".py"
-      ],
-      "clicks": 112,
-      "pinned": true,
-      "pin_index": 5
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@@init\\application_install",
-      "name": "Application Install",
-      "category": "Tools",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
-        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        ".py",
-        ".json"
-      ],
-      "clicks": 24,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\Testing\\mklink",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json"
-      ],
-      "extensions": [
-        ".md",
-        ".py",
-        ".json"
-      ],
-      "clicks": 26,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
       "path": "C:\\@delta\\ms1\\TOOLS\\Image folder mover",
       "name": "Image Mover",
       "category": "",
@@ -305,69 +423,6 @@
       "pin_index": 4
     },
     {
-      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
-      "name": "Script Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
-      ],
-      "extensions": [
-        "",
-        ".md",
-        ".py",
-        ".json"
-      ],
-      "clicks": 35,
-      "pinned": true,
-      "pin_index": 3
-    },
-    {
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
-      "name": "Script-Loader",
-      "category": "Extension",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\background.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\DEV_GUIDE.md",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\manifest.json",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\page_bridge.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.html",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\assets\\icons\\.gitignore",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\checkbox_auto_checker.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\copy_table_as_markdown.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\disable_youtube.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\form_draft_saver.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\link_text_extractor.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\local_server_fallback.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_links_in_new_tab.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_local_files_in_new_tab.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_ad_skipper.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_swap_sections.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\yt_analyzer.js"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        "",
-        ".js",
-        ".md",
-        ".json",
-        ".html"
-      ],
-      "clicks": 48,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
       "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
       "name": "Button Generator",
       "category": "AHK",
@@ -394,61 +449,6 @@
         ".py"
       ],
       "clicks": 16,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\db\\vlr",
-      "name": "VLR STATS",
-      "category": "Flask",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\app.py",
-        "C:\\@delta\\db\\vlr\\dev.md",
-        "C:\\@delta\\db\\vlr\\ignorelist.json",
-        "C:\\@delta\\db\\vlr\\matches.db-shm",
-        "C:\\@delta\\db\\vlr\\matches.db-wal",
-        "C:\\@delta\\db\\vlr\\migration_guide.md",
-        "C:\\@delta\\db\\vlr\\requirements.txt",
-        "C:\\@delta\\db\\vlr\\scraper.py",
-        "C:\\@delta\\db\\vlr\\settings.json",
-        "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
-        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
-        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
-        "C:\\@delta\\db\\vlr\\templates\\index.html"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\vlr\\settings.json",
-        "C:\\@delta\\db\\vlr\\requirements.txt",
-        "C:\\@delta\\db\\vlr\\migration_guide.md",
-        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-        "C:\\@delta\\db\\vlr\\matches.db-shm",
-        "C:\\@delta\\db\\vlr\\matches.db-wal",
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\vlr\\ignorelist.json",
-        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md"
-      ],
-      "extensions": [
-        "",
-        ".db-shm",
-        ".html",
-        ".md",
-        ".json",
-        ".js",
-        ".db-wal",
-        ".css",
-        ".txt",
-        ".py"
-      ],
-      "clicks": 40,
       "pinned": false,
       "pin_index": 0
     },
@@ -795,10 +795,10 @@
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore"
     ]
   },
   "backup": false,
