@@ -4,6 +4,7 @@
 
 # Running Commands
 - CRITICAL: Do no run any command to download or build any pkgs instead give me all the commands i will run them myself
+- When adding new features, prioritize existing libraries or tools. Use `uv add <package_name>` to manage dependencies instead of writing custom code for functionality that is already available. Import and configure existing tools to keep the codebase clean and maintainable.
 
 # Git Commit Messages
 - CRITICAL: Whenever you modify any code or files, you MUST output a git commit message at the very end of your response, formatted exactly as: `Commit message: <message>`. This is mandatory.
