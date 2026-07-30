@@ -8,22 +8,28 @@
         
         body {
             width: 467px;
-            min-height: 400px;
+            height: 520px;
+            max-height: 520px;
             margin: 0;
             padding: 16px;
+            box-sizing: border-box;
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             background: #1e1e1e;
             color: #d4d4d4;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         
         .header {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             padding-bottom: 12px;
             border-bottom: 1px solid #333;
+            flex-shrink: 0;
         }
         
         .header-icon {
@@ -348,13 +354,11 @@
         <div class="header-title">Script Manager</div>
     </div>
 
-    <div id="scriptList">
+    <div id="scriptList" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding-right: 4px;">
         <!-- Scripts will be loaded here by popup.js -->
     </div>
-
     
-    
-    <div class="status-bar">
+    <div class="status-bar" style="flex-shrink: 0;">
         <div class="status-icon">●</div>
         <span id="statusText">Loading...</span>
     </div>
