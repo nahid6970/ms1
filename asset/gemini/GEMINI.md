@@ -11,3 +11,6 @@
 
 # Adding .gitignore file
 - add a gitignore files for newly created projects with items that are unnecessary to commit
+
+# Android Projects
+- For android project i have installed android-cli so when i am working on any android project u can utilize it to build and so on
