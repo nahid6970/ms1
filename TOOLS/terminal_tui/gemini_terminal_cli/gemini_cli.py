@@ -2889,13 +2889,10 @@ def pick_skill_interactive() -> Optional[str]:
             "path": path,
         })
     
-    widths = {
-        "name": min(max(max(len(i["name"]) for i in items), 10), 30),
-    }
-    
     def render_skill_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
         marker = ">" if selected else " "
-        row = f"{marker} {index:>2}  {item['name']:<{widths['name']}}  {item['description'][:50]}"
+        title_styled = _ansi_wrap(item["name"], "1;36") if selected else item["name"]
+        row = f"{marker} {title_styled}"
         if selected:
             return _ansi_wrap(row, "48;5;24;97")
         return row
@@ -2903,7 +2900,8 @@ def pick_skill_interactive() -> Optional[str]:
     def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
         return [
             "----------------------------------------------------------------",
-            f"Skill File: {current_item['path'].name}",
+            f"Skill: {current_item['name']}",
+            f"File: {current_item['path'].name}",
             f"Description: {current_item['description']}",
             "Press Enter to load skill instruction into current conversation | Esc to cancel"
         ]
@@ -2912,7 +2910,7 @@ def pick_skill_interactive() -> Optional[str]:
         title_text="Select Skill Instruction",
         items=items,
         render_item=render_skill_item,
-        header_lines=[f"  {'Id':>2}  {'Skill Name':<{widths['name']}}  Description", f"  {'--':>2}  {'-' * widths['name']}  -----------"],
+        header_lines=["  Choose a skill to load into conversation:"],
         dynamic_footer=render_footer_info,
         instructions="Use Up/Down, Enter to apply skill, Esc to cancel.",
     )
@@ -3659,15 +3657,17 @@ def main() -> int:
                         print("Usage: /system <text|file> to update.")
                     continue
                 if command == "/skill":
+                    skills = list_skills()
+                    if not skills:
+                        warn("No skills found in 'skills/' directory.")
+                        continue
                     if remainder:
-                        skills = list_skills()
                         matched_path = None
                         for _, _, path in skills:
                             if path.stem.lower() == remainder.lower() or path.name.lower() == remainder.lower():
                                 matched_path = path
                                 break
                         if not matched_path:
-                            # try partial
                             for _, _, path in skills:
                                 if remainder.lower() in path.stem.lower():
                                     matched_path = path
@@ -3680,12 +3680,12 @@ def main() -> int:
                             except Exception as exc:
                                 error(f"Error reading skill: {exc}")
                         else:
-                            warn(f"Skill not found: {remainder}")
+                            warn(f"Skill not found: {remainder}. Available skills: {', '.join(p.stem for _, _, p in skills)}")
                     else:
-                        skill_content = pick_skill_interactive()
-                        if skill_content:
-                            contents.append(make_user_content(f"Skill instructions loaded:\n\n{skill_content}"))
-                            info("Skill instructions injected into conversation history.")
+                        info("Available skills:")
+                        for title_str, _, path in skills:
+                            print(f"  - {path.stem} : {title_str}")
+                        info("Usage: /skill <name>")
                     continue
 
                 if command == "/save":
