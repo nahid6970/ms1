@@ -7,7 +7,7 @@
 
   console.log('[AI Studio Quick Delete] Script loaded');
 
-  // Inject CSS styles for the quick delete action buttons
+  // Inject CSS styles for native-feeling Google AI Studio action icons
   function injectStyles() {
     if (document.getElementById('ai-studio-quick-delete-css')) return;
     const style = document.createElement('style');
@@ -16,59 +16,93 @@
       .ai-quick-actions-wrapper {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        margin-right: 6px;
+        gap: 2px;
         vertical-align: middle;
-        z-index: 100;
+        flex-shrink: 0;
       }
 
       .ai-quick-del-btn {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: #e3e3e3;
-        border-radius: 6px;
-        padding: 3px 7px;
-        font-size: 12px;
-        line-height: 1;
+        background: transparent;
+        border: none;
+        color: #c4c7c5;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        padding: 0;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-family: inherit;
         user-select: none;
+        outline: none;
+        flex-shrink: 0;
       }
 
-      .ai-quick-del-btn:hover {
-        background: rgba(244, 67, 54, 0.25);
-        border-color: #f44336;
-        color: #ff8a80;
-        transform: translateY(-1px);
-      }
-
-      .ai-quick-del-btn:active {
-        transform: translateY(0);
-      }
-
-      .ai-quick-del-btn.deleting {
-        opacity: 0.5;
+      .ai-quick-del-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
         pointer-events: none;
       }
 
-      .ai-quick-del-btn-subsequent {
-        background: rgba(255, 152, 0, 0.12);
-        border: 1px solid rgba(255, 152, 0, 0.35);
-        color: #ffe0b2;
+      .ai-quick-del-btn:hover {
+        background: rgba(244, 67, 54, 0.18);
+        color: #f2b8b5;
       }
 
       .ai-quick-del-btn-subsequent:hover {
-        background: rgba(255, 152, 0, 0.3);
-        border-color: #ff9800;
-        color: #ffb74d;
+        background: rgba(255, 183, 77, 0.22);
+        color: #ffcc80;
+      }
+
+      .ai-quick-del-btn:active {
+        transform: scale(0.92);
+      }
+
+      .ai-quick-del-btn.deleting {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      @keyframes ai-del-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      .ai-del-spinner {
+        animation: ai-del-spin 0.8s linear infinite;
       }
     `;
     document.head.appendChild(style);
   }
+
+  const TRASH_SVG = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"></path>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+      <line x1="10" y1="11" x2="10" y2="17"></line>
+      <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+  `;
+
+  const TRASH_SUBSEQUENT_SVG = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18"></path>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+      <path d="M12 10v7"></path>
+      <path d="M9.5 14.5L12 17l2.5-2.5"></path>
+    </svg>
+  `;
+
+  const SPINNER_SVG = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="ai-del-spinner">
+      <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+      <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+    </svg>
+  `;
 
   // Locate the 3-dot menu trigger button inside or near a turn item
   function getThreeDotButton(turnEl) {
@@ -98,7 +132,6 @@
       }
     }
 
-    // Fallback: look for button inside the actions toolbar area
     const fallbackBtn = turnEl.querySelector('button');
     return fallbackBtn || null;
   }
@@ -119,7 +152,6 @@
               return resolve(btn);
             }
           }
-          // If a menu is open, the first item is typically Delete in AI Studio
           if (menuButtons.length > 0) {
             return resolve(menuButtons[0]);
           }
@@ -179,7 +211,6 @@
     const turnsToDelete = allTurns.slice(targetIndex);
     console.log(`[AI Studio Quick Delete] Deleting ${turnsToDelete.length} turns starting from index ${targetIndex}`);
 
-    // Delete from bottom to top to preserve DOM order during deletion
     for (let i = turnsToDelete.length - 1; i >= 0; i--) {
       const turn = turnsToDelete[i];
       await deleteTurnElement(turn);
@@ -205,7 +236,7 @@
       // 1. Single Turn Delete button
       const singleDelBtn = document.createElement('button');
       singleDelBtn.className = 'ai-quick-del-btn';
-      singleDelBtn.innerHTML = '🗑️';
+      singleDelBtn.innerHTML = TRASH_SVG;
       singleDelBtn.title = 'Delete this item';
 
       singleDelBtn.addEventListener('click', async (e) => {
@@ -213,7 +244,7 @@
         e.stopPropagation();
 
         singleDelBtn.classList.add('deleting');
-        singleDelBtn.innerText = '⏳';
+        singleDelBtn.innerHTML = SPINNER_SVG;
 
         await deleteTurnElement(turnEl);
       });
@@ -221,7 +252,7 @@
       // 2. Turn + All Subsequent Turns Delete button
       const subsequentDelBtn = document.createElement('button');
       subsequentDelBtn.className = 'ai-quick-del-btn ai-quick-del-btn-subsequent';
-      subsequentDelBtn.innerHTML = '🗑️👇';
+      subsequentDelBtn.innerHTML = TRASH_SUBSEQUENT_SVG;
       subsequentDelBtn.title = 'Delete this item AND all subsequent turns below it';
 
       subsequentDelBtn.addEventListener('click', async (e) => {
@@ -230,7 +261,7 @@
 
         if (confirm('Delete this item and ALL turns below it?')) {
           subsequentDelBtn.classList.add('deleting');
-          subsequentDelBtn.innerText = '⏳';
+          subsequentDelBtn.innerHTML = SPINNER_SVG;
           await deleteTurnAndSubsequent(turnEl);
         }
       });
