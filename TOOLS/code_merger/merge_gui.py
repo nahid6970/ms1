@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QHeaderView, QSpinBox, QColorDialog, QInputDialog
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
+from PyQt6.QtWidgets import QSizePolicy
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
 
 # ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
@@ -2592,7 +2593,8 @@ class PrepTab(QWidget):
     def _update_project_label(self):
         if hasattr(self, 'project_path_lbl'):
             if self.project_root:
-                self.project_path_lbl.setText(self._elide_text(self.project_root, reserve=120))
+                elided = self.fontMetrics().elidedText(self.project_root, Qt.TextElideMode.ElideMiddle, max(50, self.project_path_lbl.width()))
+                self.project_path_lbl.setText(elided)
                 self.project_path_lbl.setToolTip(self.project_root)
                 self.project_path_lbl.setStyleSheet("color: lightgreen; font-size: 9pt; font-family: 'Consolas';")
             else:
@@ -3011,6 +3013,7 @@ class PrepTab(QWidget):
         top_bar.setSpacing(4)
 
         self.project_path_lbl = QLabel("<not set>")
+        self.project_path_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         self.project_path_lbl.setStyleSheet(
             "color: lightgreen; font-size: 9pt; font-family: 'Consolas';"
         )
