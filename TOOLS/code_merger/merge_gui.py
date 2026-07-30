@@ -2770,7 +2770,7 @@ class PrepTab(QWidget):
         btn_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_toggle.setFixedWidth(22)
         btn_toggle.setFixedHeight(18)
-        btn_toggle.setToolTip("Click to disable this file (exclude from prompt)\nRight-click to remove it from the list")
+        btn_toggle.setToolTip("Click to toggle enabled/disabled status\nRight-click to remove file from list")
         self._apply_toggle_style(btn_toggle, not is_disabled)
         btn_toggle.clicked.connect(lambda _, f=fp, b=btn_toggle, w=widget, lb=lbl, mc=mode_combo: self._toggle_file(f, b, w, lb, mc))
 
@@ -2792,12 +2792,27 @@ class PrepTab(QWidget):
 
         # Apply initial dimmed state if disabled
         if is_disabled:
-            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
+            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
             mode_combo.setEnabled(False)
 
         if icon_lbl:
             hl.addWidget(icon_lbl, 0)
-        hl.addWidget(lbl, 1)
+            
+        # Group file name and cross indicator tightly together with stretch
+        name_container = QWidget()
+        name_container.setStyleSheet("background: transparent;")
+        nc_layout = QHBoxLayout(name_container)
+        nc_layout.setContentsMargins(0, 0, 0, 0)
+        nc_layout.setSpacing(4)
+        nc_layout.addWidget(lbl, 0)
+
+        disabled_indicator = QLabel("❌" if is_disabled else "")
+        disabled_indicator.setObjectName("disabled_cross_lbl")
+        disabled_indicator.setStyleSheet(f"color: {CP_RED}; background: transparent; font-size: 8pt;")
+        nc_layout.addWidget(disabled_indicator, 0)
+        nc_layout.addStretch(1)
+
+        hl.addWidget(name_container, 1)
         hl.addWidget(mode_combo, 0)
         hl.addWidget(tok_lbl, 0)
         hl.addWidget(btn_toggle, 0)
@@ -2846,6 +2861,7 @@ class PrepTab(QWidget):
 
     def _toggle_file(self, fp: str, btn: QPushButton, widget: QWidget, lbl: QLabel, mode_combo: QComboBox):
         is_currently_disabled = fp in self.disabled_files
+        cross_lbl = widget.findChild(QLabel, "disabled_cross_lbl")
         if is_currently_disabled:
             self.disabled_files.discard(fp)
             self._apply_toggle_style(btn, True)
@@ -2855,12 +2871,16 @@ class PrepTab(QWidget):
             except Exception:
                 color = CP_TEXT
             lbl.setStyleSheet(f"color: {color}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
+            if cross_lbl:
+                cross_lbl.setText("")
             mode_combo.setEnabled(True)
             self.status_cb(f"Enabled: {os.path.basename(fp)}")
         else:
             self.disabled_files.add(fp)
             self._apply_toggle_style(btn, False)
-            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt; text-decoration: line-through;")
+            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
+            if cross_lbl:
+                cross_lbl.setText(" ❌")
             mode_combo.setEnabled(False)
             self.status_cb(f"Disabled: {os.path.basename(fp)}")
         self._save_session()

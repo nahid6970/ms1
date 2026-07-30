@@ -16,6 +16,108 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": "Code Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
+      ],
+      "extensions": [
+        "",
+        ".py",
+        ".md",
+        ".json"
+      ],
+      "clicks": 195,
+      "pinned": true,
+      "pin_index": 1
+    },
+    {
+      "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
+      "name": "myhome",
+      "category": "Convex",
+      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8 0L0 6V8H1V15H4V10H7V15H15V8H16V6L14 4.5V1H11V2.25L8 0ZM9 10H12V13H9V10Z\" fill=\"#ffffff\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\.gitignore",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\app.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\context-menu.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\dev.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\idea.txt",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\index.html",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\links-handler.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\open-folder-handler.py",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\package.json",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\README.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\sidebar-handler.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\style.css",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\background.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\manifest.json",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.html",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\README.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\actions.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\functions.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\README.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\schema.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\tsconfig.json",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\.gitignore",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.js",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts"
+      ],
+      "extensions": [
+        "",
+        ".html",
+        ".md",
+        ".json",
+        ".js",
+        ".css",
+        ".ts",
+        ".txt",
+        ".py"
+      ],
+      "clicks": 61,
+      "pinned": true,
+      "pin_index": 2
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
       "name": "myGemini-CLI",
       "category": "AI-Tools",
@@ -49,26 +151,26 @@
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py"
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore"
       ],
       "extensions": [
         "",
@@ -77,9 +179,58 @@
         ".json",
         ".txt"
       ],
-      "clicks": 26,
+      "clicks": 33,
       "pinned": true,
       "pin_index": 6
+    },
+    {
+      "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
+      "name": "Rclone Status",
+      "category": "rclone",
+      "icon": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
+      "files": [
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\commands.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\Rclone-Status.py",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\README.md",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json",
+        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md"
+      ],
+      "extensions": [
+        ".json",
+        ".md",
+        ".txt",
+        ".py"
+      ],
+      "clicks": 112,
+      "pinned": true,
+      "pin_index": 5
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@@init\\application_install",
+      "name": "Application Install",
+      "category": "Tools",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
+        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".py",
+        ".json"
+      ],
+      "clicks": 24,
+      "pinned": false,
+      "pin_index": 0
     },
     {
       "path": "C:\\@delta\\ms1\\Testing\\mklink",
@@ -95,65 +246,16 @@
         "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
       ],
       "disabled_files": [
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
         "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py"
+        "C:\\@delta\\ms1\\Testing\\mklink\\links.json"
       ],
       "extensions": [
         ".md",
         ".py",
         ".json"
       ],
-      "clicks": 23,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-      "name": "Code Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json"
-      ],
-      "extensions": [
-        "",
-        ".py",
-        ".md",
-        ".json"
-      ],
-      "clicks": 184,
-      "pinned": true,
-      "pin_index": 1
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@@init\\application_install",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
-        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        ".py",
-        ".json"
-      ],
-      "clicks": 12,
+      "clicks": 26,
       "pinned": false,
       "pin_index": 0
     },
@@ -377,108 +479,6 @@
       "clicks": 26,
       "pinned": false,
       "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status",
-      "name": "Rclone Status",
-      "category": "rclone",
-      "icon": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
-      "files": [
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\Rclone-Status.py",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\README.md",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\commands.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\recent.md",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\bk\\settings.json",
-        "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\settings.json"
-      ],
-      "extensions": [
-        ".json",
-        ".md",
-        ".txt",
-        ".py"
-      ],
-      "clicks": 106,
-      "pinned": true,
-      "pin_index": 5
-    },
-    {
-      "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
-      "name": "myhome",
-      "category": "Convex",
-      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8 0L0 6V8H1V15H4V10H7V15H15V8H16V6L14 4.5V1H11V2.25L8 0ZM9 10H12V13H9V10Z\" fill=\"#ffffff\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\.gitignore",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\app.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\context-menu.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\dev.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\idea.txt",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\index.html",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\links-handler.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\open-folder-handler.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\package.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\README.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\sidebar-handler.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\style.css",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\background.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\manifest.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.html",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\popup.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\chrome-extension\\README.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\actions.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\functions.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\README.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\schema.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\tsconfig.json",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\set_version.py",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\.gitignore",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\VERCEL_MIGRATION.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\FEATURES.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\api.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.js",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\RECENT.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\md\\UI_UX.md",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\db\\@Convex\\myhome-convex\\issue.txt"
-      ],
-      "extensions": [
-        "",
-        ".html",
-        ".md",
-        ".json",
-        ".js",
-        ".css",
-        ".ts",
-        ".txt",
-        ".py"
-      ],
-      "clicks": 58,
-      "pinned": true,
-      "pin_index": 2
     },
     {
       "path": "C:\\@delta\\db\\@Convex\\image-share",
@@ -766,74 +766,39 @@
     }
   ],
   "show_file_mode_controls": false,
-  "panel_weight_projects": 300,
+  "panel_weight_projects": 350,
   "panel_weight_files": 500,
-  "panel_weight_prompt": 300,
+  "panel_weight_prompt": 150,
   "projects_font_size": 15,
   "projects_name_color": "#55ff7f",
   "app_name": "CODE MERGER",
   "project_icons": {
-    "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
     "C:\\@delta\\ms1\\TOOLS\\code_merger": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-    "C:\\@delta\\db\\@Convex\\myhome-convex": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8 0L0 6V8H1V15H4V10H7V15H15V8H16V6L14 4.5V1H11V2.25L8 0ZM9 10H12V13H9V10Z\" fill=\"#ffffff\"></path> </g></svg>",
     "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager": "<svg viewBox=\"0 0 20 20\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <title>github [#142]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"> <g id=\"Dribbble-Light-Preview\" transform=\"translate(-140.000000, -7559.000000)\" fill=\"#ffffff\"> <g id=\"icons\" transform=\"translate(56.000000, 160.000000)\"> <path d=\"M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399\" id=\"github-[#142]\"> </path> </g> </g> </g> </g></svg>",
     "C:\\@delta\\db\\@run_from_db\\Script_Manager": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
-    "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli": ""
+    "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<svg\n   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n   xmlns:cc=\"http://creativecommons.org/ns#\"\n   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n   xmlns:svg=\"http://www.w3.org/2000/svg\"\n   xmlns=\"http://www.w3.org/2000/svg\"\n   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"\n   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"\n   width=\"64\"\n   height=\"64\"\n   viewBox=\"0 0 64 64\"\n   version=\"1.1\"\n   xml:space=\"preserve\"\n   style=\"clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41420996\"\n   id=\"svg50\"\n   sodipodi:docname=\"rclone-icon.svg\"\n   inkscape:version=\"0.92.4 (5da689c313, 2019-01-14)\"><metadata\n   id=\"metadata56\"><rdf:RDF><cc:Work\n       rdf:about=\"\"><dc:format>image/svg+xml</dc:format><dc:type\n         rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs\n   id=\"defs54\">\n        \n    \n            \n            <clipPath\n   id=\"_clip1\">\n                <rect\n   x=\"14\"\n   y=\"579\"\n   width=\"257\"\n   height=\"84\"\n   id=\"rect4\" />\n            </clipPath>\n            \n        \n                \n            \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                    \n                \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    \n                        \n                    </defs><sodipodi:namedview\n   pagecolor=\"#ffffff\"\n   bordercolor=\"#666666\"\n   borderopacity=\"1\"\n   objecttolerance=\"10\"\n   gridtolerance=\"10\"\n   guidetolerance=\"10\"\n   inkscape:pageopacity=\"0\"\n   inkscape:pageshadow=\"2\"\n   inkscape:window-width=\"1531\"\n   inkscape:window-height=\"807\"\n   id=\"namedview52\"\n   showgrid=\"false\"\n   units=\"px\"\n   inkscape:zoom=\"1.539823\"\n   inkscape:cx=\"-84.425288\"\n   inkscape:cy=\"26.5\"\n   inkscape:window-x=\"70\"\n   inkscape:window-y=\"27\"\n   inkscape:window-maximized=\"0\"\n   inkscape:current-layer=\"svg50\" />\n    <g\n   id=\"g824\"\n   transform=\"matrix(1.3422256,0,0,1.3422256,-2.2309418e-8,3.8420351)\"><path\n     d=\"m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673\"\n     style=\"fill:#70caf2;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path7\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-6.83e-4 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543\"\n     style=\"fill:#b4e3f9;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path11\"\n     inkscape:connector-curvature=\"0\" /><path\n     d=\"m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 1.6621211e-8,21.074248 1.6621211e-8,29.12381 1.6621211e-8,37.174056 6.5254965,43.70023 14.57575,43.70023 c 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183\"\n     style=\"fill:#3f79ad;fill-rule:nonzero;stroke-width:0.68344086\"\n     id=\"path15\"\n     inkscape:connector-curvature=\"0\" /></g>\n</svg>",
+    "C:\\@delta\\db\\@Convex\\myhome-convex": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8 0L0 6V8H1V15H4V10H7V15H15V8H16V6L14 4.5V1H11V2.25L8 0ZM9 10H12V13H9V10Z\" fill=\"#ffffff\"></path> </g></svg>"
   },
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\README.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
     ],
-    "project_root": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
+    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
     ]
   },
   "backup": false,
