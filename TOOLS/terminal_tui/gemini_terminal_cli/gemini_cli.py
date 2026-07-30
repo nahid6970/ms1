@@ -1482,11 +1482,15 @@ def _render_inline_markdown(text: str) -> str:
         return f"{label} ({url})"
 
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", replace_link, text)
-    text = re.sub(r"(?<!\*)\*\*(.+?)\*\*(?!\*)", lambda m: _style_text(m.group(1), "1"), text)
-    text = re.sub(r"(?<!_)__(.+?)__(?!_)", lambda m: _style_text(m.group(1), "1"), text)
-    text = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", lambda m: _style_text(m.group(1), "3"), text)
-    text = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", lambda m: _style_text(m.group(1), "3"), text)
+    # Handle bold tags robustly, stripping leftover dangling asterisks if markdown is malformed
+    # Match bold and italic cleanly, handling single or double asterisks robustly
+    text = re.sub(r"\*\*(.+?)\*\*", lambda m: _style_text(m.group(1), "1"), text)
+    text = re.sub(r"__(.+?)__", lambda m: _style_text(m.group(1), "1"), text)
+    text = re.sub(r"\*(?!\s)(.+?)(?<!\s)\*", lambda m: _style_text(m.group(1), "3"), text)
+    text = re.sub(r"_(?!\s)(.+?)(?<!\s)_", lambda m: _style_text(m.group(1), "3"), text)
     text = re.sub(r"`([^`]+)`", lambda m: _style_text(m.group(1), "38;5;214"), text)
+    # Remove any remaining stray single or double asterisks that didn't form a closed pair
+    text = re.sub(r"(?<!\w)\*{1,2}|\*{1,2}(?!\w)", "", text)
     return text
 
 
