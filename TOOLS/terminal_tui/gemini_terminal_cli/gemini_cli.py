@@ -221,14 +221,30 @@ if Completer is not None:
                 return []
 
             results: List[tuple[str, str, str]] = []
+            search_lower = search_part.lower()
             try:
                 for entry in sorted(target_dir.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower())):
                     name = entry.name
-                    if name.startswith(".") and not search_part.startswith("."):
+                    if name.startswith(".") and not search_lower.startswith("."):
                         continue
-                    if name == "__pycache__" and not search_part.startswith("__"):
+                    if name == "__pycache__" and not search_lower.startswith("__"):
                         continue
-                    if not search_part or search_part.lower() in name.lower():
+                    
+                    name_lower = name.lower()
+                    # Match if substring is anywhere or matches subsequence (e.g. "ss" matches "RcloneSS")
+                    matched = False
+                    if not search_lower or search_lower in name_lower:
+                        matched = True
+                    else:
+                        # Subsequence match check
+                        s_idx = 0
+                        for char in name_lower:
+                            if s_idx < len(search_lower) and char == search_lower[s_idx]:
+                                s_idx += 1
+                        if s_idx == len(search_lower):
+                            matched = True
+
+                    if matched:
                         is_dir = entry.is_dir()
                         item_name = name + ("/" if is_dir else "")
                         full_rel = f"{dir_part}/{item_name}" if dir_part else item_name
