@@ -315,6 +315,41 @@
     });
   }
 
+  // Get storage key for current chat URL path
+  function getPinnedStorageKey() {
+    return 'ai_studio_pins_' + window.location.pathname;
+  }
+
+  // Save pinned turns identifiers / text snippets to storage
+  function savePinnedState() {
+    const pinnedTurns = Array.from(document.querySelectorAll('.ai-turn-pinned'));
+    const pids = pinnedTurns.map(turn => {
+      const textEl = turn.querySelector('p, span, div') || turn;
+      return (textEl.innerText || '').trim().substring(0, 40);
+    });
+    chrome.storage.local.set({ [getPinnedStorageKey()]: pids });
+  }
+
+  // Load and apply saved pins from chrome storage
+  function restorePinnedState() {
+    chrome.storage.local.get([getPinnedStorageKey()], (result) => {
+      const savedPids = result[getPinnedStorageKey()] || [];
+      if (savedPids.length === 0) return;
+
+      const turns = document.querySelectorAll('[id^="turn-"], ms-turn, div.turn');
+      turns.forEach(turn => {
+        const textEl = turn.querySelector('p, span, div') || turn;
+        const text = (textEl.innerText || '').trim().substring(0, 40);
+        if (savedPids.includes(text)) {
+          turn.classList.add('ai-turn-pinned');
+          const pinBtn = turn.querySelector('.ai-quick-del-btn-pin');
+          if (pinBtn) pinBtn.classList.add('pinned');
+        }
+      });
+      updatePinnedPanel();
+    });
+  }
+
   // Floating Pinned Turns Panel
   function updatePinnedPanel() {
     let panel = document.getElementById('ai-studio-pinned-panel');
@@ -348,11 +383,28 @@
     panel.innerHTML = `
       <div class="ai-pinned-header">
         <span>📌 Pinned Turns (${pinnedTurns.length})</span>
+        <button id="ai-reset-pins-btn" style="background: rgba(244,67,54,0.2); border: 1px solid #f44336; color: #ff8a80; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-family: inherit;">Reset All</button>
       </div>
       <div class="ai-pinned-list">
         ${itemsHtml}
       </div>
     `;
+
+    // Reset All pins click
+    const resetBtn = panel.querySelector('#ai-reset-pins-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm('Reset and unpin all saved turns?')) {
+          document.querySelectorAll('.ai-turn-pinned').forEach(t => t.classList.remove('ai-turn-pinned'));
+          document.querySelectorAll('.ai-quick-del-btn-pin').forEach(b => b.classList.remove('pinned'));
+          chrome.storage.local.remove([getPinnedStorageKey()], () => {
+            updatePinnedPanel();
+            showToast('All pins reset');
+          });
+        }
+      });
+    }
 
     // Click to scroll to pinned turn
     panel.querySelectorAll('.ai-pinned-item').forEach(item => {
@@ -376,6 +428,7 @@
           targetTurn.classList.remove('ai-turn-pinned');
           const pinBtn = targetTurn.querySelector('.ai-quick-del-btn-pin');
           if (pinBtn) pinBtn.classList.remove('pinned');
+          savePinnedState();
           updatePinnedPanel();
         }
       });
@@ -387,6 +440,7 @@
     const isPinned = turnEl.classList.toggle('ai-turn-pinned');
     pinBtn.classList.toggle('pinned', isPinned);
     showToast(isPinned ? 'Turn pinned to side panel 📌' : 'Turn unpinned');
+    savePinnedState();
     updatePinnedPanel();
   }
 
@@ -535,95 +589,111 @@
     }
   }
 
-  // Attach quick action buttons inside the main toolbar row
+  // Attach quick action buttons inside the main toolbar row and restore saved pins
   function attachQuickDeleteButtons() {
     injectStyles();
 
     const turns = document.querySelectorAll('[id^="turn-"], ms-turn, div.turn');
 
-    turns.forEach((turnEl) => {
-      if (turnEl.querySelector('.ai-quick-actions-wrapper')) return;
+    chrome.storage.local.get([getPinnedStorageKey()], (result) => {
+      const savedPids = result[getPinnedStorageKey()] || [];
 
-      const slot = getToolbarSlot(turnEl);
-      if (!slot || !slot.toolbar || !slot.anchor) return;
+      turns.forEach((turnEl) => {
+        const textEl = turnEl.querySelector('p, span, div') || turnEl;
+        const text = (textEl.innerText || '').trim().substring(0, 40);
+        const shouldBePinned = savedPids.includes(text);
 
-      const { toolbar, anchor } = slot;
-
-      if (window.getComputedStyle(toolbar).display !== 'flex') {
-        toolbar.style.display = 'inline-flex';
-        toolbar.style.alignItems = 'center';
-      }
-      toolbar.style.flexWrap = 'nowrap';
-
-      const wrapper = document.createElement('div');
-      wrapper.className = 'ai-quick-actions-wrapper';
-
-      // 1. Copy Code Blocks button
-      const copyCodeBtn = document.createElement('button');
-      copyCodeBtn.className = 'ai-quick-del-btn ai-quick-del-btn-code';
-      copyCodeBtn.innerHTML = CODE_SVG;
-      copyCodeBtn.title = 'Copy only code blocks from this response';
-
-      copyCodeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        copyCodeFromTurn(turnEl, copyCodeBtn);
-      });
-
-      // 2. Pin / Bookmark Turn button
-      const pinBtn = document.createElement('button');
-      pinBtn.className = 'ai-quick-del-btn ai-quick-del-btn-pin';
-      pinBtn.innerHTML = PIN_SVG;
-      pinBtn.title = 'Bookmark / Pin this turn';
-
-      pinBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        togglePinTurn(turnEl, pinBtn);
-      });
-
-      // 3. Single Turn Delete button
-      const singleDelBtn = document.createElement('button');
-      singleDelBtn.className = 'ai-quick-del-btn';
-      singleDelBtn.innerHTML = TRASH_SVG;
-      singleDelBtn.title = 'Delete this item';
-
-      singleDelBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        singleDelBtn.classList.add('deleting');
-        singleDelBtn.innerHTML = SPINNER_SVG;
-
-        await deleteTurnElement(turnEl);
-      });
-
-      // 4. Turn + All Subsequent Turns Delete button
-      const subsequentDelBtn = document.createElement('button');
-      subsequentDelBtn.className = 'ai-quick-del-btn ai-quick-del-btn-subsequent';
-      subsequentDelBtn.innerHTML = TRASH_SUBSEQUENT_SVG;
-      subsequentDelBtn.title = 'Delete this item AND all subsequent turns below it';
-
-      subsequentDelBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (confirm('Delete this item and ALL turns below it?')) {
-          subsequentDelBtn.classList.add('deleting');
-          subsequentDelBtn.innerHTML = SPINNER_SVG;
-          await deleteTurnAndSubsequent(turnEl);
+        if (shouldBePinned) {
+          turnEl.classList.add('ai-turn-pinned');
         }
+
+        if (turnEl.querySelector('.ai-quick-actions-wrapper')) return;
+
+        const slot = getToolbarSlot(turnEl);
+        if (!slot || !slot.toolbar || !slot.anchor) return;
+
+        const { toolbar, anchor } = slot;
+
+        if (window.getComputedStyle(toolbar).display !== 'flex') {
+          toolbar.style.display = 'inline-flex';
+          toolbar.style.alignItems = 'center';
+        }
+        toolbar.style.flexWrap = 'nowrap';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ai-quick-actions-wrapper';
+
+        // 1. Copy Code Blocks button
+        const copyCodeBtn = document.createElement('button');
+        copyCodeBtn.className = 'ai-quick-del-btn ai-quick-del-btn-code';
+        copyCodeBtn.innerHTML = CODE_SVG;
+        copyCodeBtn.title = 'Copy only code blocks from this response';
+
+        copyCodeBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          copyCodeFromTurn(turnEl, copyCodeBtn);
+        });
+
+        // 2. Pin / Bookmark Turn button
+        const pinBtn = document.createElement('button');
+        pinBtn.className = 'ai-quick-del-btn ai-quick-del-btn-pin ' + (shouldBePinned ? 'pinned' : '');
+        pinBtn.innerHTML = PIN_SVG;
+        pinBtn.title = 'Bookmark / Pin this turn';
+
+        pinBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePinTurn(turnEl, pinBtn);
+        });
+
+        // 3. Single Turn Delete button
+        const singleDelBtn = document.createElement('button');
+        singleDelBtn.className = 'ai-quick-del-btn';
+        singleDelBtn.innerHTML = TRASH_SVG;
+        singleDelBtn.title = 'Delete this item';
+
+        singleDelBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          singleDelBtn.classList.add('deleting');
+          singleDelBtn.innerHTML = SPINNER_SVG;
+
+          await deleteTurnElement(turnEl);
+        });
+
+        // 4. Turn + All Subsequent Turns Delete button
+        const subsequentDelBtn = document.createElement('button');
+        subsequentDelBtn.className = 'ai-quick-del-btn ai-quick-del-btn-subsequent';
+        subsequentDelBtn.innerHTML = TRASH_SUBSEQUENT_SVG;
+        subsequentDelBtn.title = 'Delete this item AND all subsequent turns below it';
+
+        subsequentDelBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (confirm('Delete this item and ALL turns below it?')) {
+            subsequentDelBtn.classList.add('deleting');
+            subsequentDelBtn.innerHTML = SPINNER_SVG;
+            await deleteTurnAndSubsequent(turnEl);
+          }
+        });
+
+        wrapper.appendChild(copyCodeBtn);
+        wrapper.appendChild(pinBtn);
+        wrapper.appendChild(singleDelBtn);
+        wrapper.appendChild(subsequentDelBtn);
+
+        toolbar.insertBefore(wrapper, anchor);
       });
 
-      wrapper.appendChild(copyCodeBtn);
-      wrapper.appendChild(pinBtn);
-      wrapper.appendChild(singleDelBtn);
-      wrapper.appendChild(subsequentDelBtn);
-
-      toolbar.insertBefore(wrapper, anchor);
+      updatePinnedPanel();
     });
   }
 
   setInterval(attachQuickDeleteButtons, 1000);
   attachQuickDeleteButtons();
 })();
+  setTimeout(restorePinnedState, 500);
+
