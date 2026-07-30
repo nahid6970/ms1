@@ -185,9 +185,19 @@ if Completer is not None:
             ("/failover", "Open auto-failover picker"),
             ("/tool", "Open tool manager"),
             ("/system", "Replace or load system instruction"),
+            ("/skill", "Browse and apply saved skill instructions"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
         ]
+
+        def _get_skill_completions(self, search_part: str) -> List[tuple[str, str, str]]:
+            skills = list_skills()
+            results = []
+            for title_str, desc_str, path in skills:
+                name = path.stem
+                if not search_part or search_part.lower() in name.lower() or search_part.lower() in title_str.lower():
+                    results.append((name, name, title_str))
+            return results
 
         def __init__(self, cwd: Optional[Path] = None):
             self.cwd = Path(cwd) if cwd else Path.cwd()
@@ -248,6 +258,15 @@ if Completer is not None:
                     cmd_lower = cmd_part.lower()
                     if cmd_lower in {"/save", "/load", "/system"}:
                         for full_rel, display_name, meta in self._get_path_completions(arg_part):
+                            yield Completion(
+                                full_rel,
+                                start_position=-len(arg_part),
+                                display=display_name,
+                                display_meta=meta,
+                            )
+                        return
+                    if cmd_lower == "/skill":
+                        for full_rel, display_name, meta in self._get_skill_completions(arg_part):
                             yield Completion(
                                 full_rel,
                                 start_position=-len(arg_part),
@@ -3640,10 +3659,33 @@ def main() -> int:
                         print("Usage: /system <text|file> to update.")
                     continue
                 if command == "/skill":
-                    skill_content = pick_skill_interactive()
-                    if skill_content:
-                        contents.append(make_user_content(f"Skill instructions loaded:\n\n{skill_content}"))
-                        info("Skill instructions injected into conversation history.")
+                    if remainder:
+                        skills = list_skills()
+                        matched_path = None
+                        for _, _, path in skills:
+                            if path.stem.lower() == remainder.lower() or path.name.lower() == remainder.lower():
+                                matched_path = path
+                                break
+                        if not matched_path:
+                            # try partial
+                            for _, _, path in skills:
+                                if remainder.lower() in path.stem.lower():
+                                    matched_path = path
+                                    break
+                        if matched_path:
+                            try:
+                                skill_content = matched_path.read_text(encoding="utf-8", errors="replace")
+                                contents.append(make_user_content(f"Skill instructions loaded:\n\n{skill_content}"))
+                                info(f"Skill instructions loaded from {matched_path.name}.")
+                            except Exception as exc:
+                                error(f"Error reading skill: {exc}")
+                        else:
+                            warn(f"Skill not found: {remainder}")
+                    else:
+                        skill_content = pick_skill_interactive()
+                        if skill_content:
+                            contents.append(make_user_content(f"Skill instructions loaded:\n\n{skill_content}"))
+                            info("Skill instructions injected into conversation history.")
                     continue
 
                 if command == "/save":
