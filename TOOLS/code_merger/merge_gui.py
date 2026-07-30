@@ -3647,10 +3647,15 @@ class PrepTab(QWidget):
                 resequence_pinned_projects(items, target_path=norm_p, set_pinned=False)
                 self.status_cb(f"Unpinned project: {name}")
             else:
+                existing_indices = {item.get("pin_index") for item in items if item.get("pinned", False)}
+                suggested_idx = 1
+                while suggested_idx in existing_indices:
+                    suggested_idx += 1
+
                 val, ok = QInputDialog.getInt(
                     self, "Pin Project",
-                    f"Enter pin index for '{name}' (1 = top position):",
-                    value=1, min=1, max=999
+                    f"Enter pin index for '{name}' (1 = top position):\n(Already used indices: {sorted(list(existing_indices)) or 'None'})",
+                    value=suggested_idx, min=1, max=999
                 )
                 if ok:
                     resequence_pinned_projects(items, target_path=norm_p, set_pinned=True, target_index=val)
