@@ -1334,15 +1334,53 @@ class EditProjectDialog(QDialog):
         h_name.addWidget(self.input_name)
         layout.addLayout(h_name)
 
-        # Category input
+        # Category input with dynamic dropdown of existing categories
         h_cat = QHBoxLayout()
         lbl_c = QLabel("Category / Tags:")
         lbl_c.setFixedWidth(110)
         lbl_c.setStyleSheet(f"color: {CP_TEXT}; font-weight: bold;")
+
         self.input_cat = QLineEdit(category)
         self.input_cat.setPlaceholderText("e.g. Frontend, Tools, Python, AI…")
+
+        self.combo_cat = QComboBox()
+        self.combo_cat.setFixedWidth(140)
+        self.combo_cat.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.combo_cat.setStyleSheet(f"""
+            QComboBox {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+                padding: 4px;
+                font-family: 'Consolas';
+                font-size: 9pt;
+            }}
+            QComboBox::drop-down {{ border: none; }}
+            QComboBox QAbstractItemView {{
+                background-color: {CP_PANEL};
+                color: {CP_CYAN};
+                selection-background-color: {CP_CYAN};
+                selection-color: black;
+                border: 1px solid {CP_DIM};
+            }}
+        """)
+        
+        # Populate existing categories dynamically
+        existing_cats = set()
+        for p in load_recent_details():
+            c = p.get("category", "").strip()
+            if c:
+                existing_cats.add(c)
+        
+        self.combo_cat.addItem("Select category…")
+        for c in sorted(existing_cats):
+            self.combo_cat.addItem(c)
+
+        self.combo_cat.currentTextChanged.connect(self._on_category_combo_changed)
+
         h_cat.addWidget(lbl_c)
-        h_cat.addWidget(self.input_cat)
+        h_cat.addWidget(self.input_cat, 1)
+        h_cat.addWidget(self.combo_cat, 0)
         layout.addLayout(h_cat)
 
         # Custom Icon input + preview
@@ -1494,6 +1532,10 @@ class EditProjectDialog(QDialog):
             li = QListWidgetItem("No hidden/disabled files for this project.")
             li.setFlags(Qt.ItemFlag.NoItemFlags)
             self.file_list.addItem(li)
+    def _on_category_combo_changed(self, text: str):
+        if text and text != "Select category…":
+            self.input_cat.setText(text)
+
 
 
     def get_details(self) -> tuple[str, str, str, list[str], bool, int]:
