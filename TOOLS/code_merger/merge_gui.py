@@ -3506,10 +3506,10 @@ class PrepTab(QWidget):
             hl_title.addWidget(lbl_name, 0)
 
             if is_pinned:
-                red_dot = QLabel("🔴")
-                red_dot.setStyleSheet(f"font-size: 7.5pt; color: {CP_RED}; background: transparent;")
-                red_dot.setToolTip(f"Pinned Project (Index #{pin_idx})")
-                hl_title.addWidget(red_dot, 0)
+                pin_badge = QLabel(str(pin_idx))
+                pin_badge.setStyleSheet(f"font-size: 9pt; color: {CP_RED}; font-weight: bold; background: transparent; margin-left: 2px;")
+                pin_badge.setToolTip(f"Pinned Project (Index #{pin_idx})")
+                hl_title.addWidget(pin_badge, 0)
 
             hl_title.addStretch(1)
 
