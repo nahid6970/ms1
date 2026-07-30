@@ -34,12 +34,11 @@
         // Check if already swapped by looking at DOM structure
         if (secondary.contains(comments) && document.getElementById('swapped-video-list')) {
             isSwapped = true;
-            addIndicator(); // Ensure indicator is present
             return true;
         }
 
-        // Clone the related videos before clearing
-        const relatedContainer = secondary.querySelector('ytd-watch-next-secondary-results-renderer');
+        // Find the related videos container
+        const relatedContainer = document.querySelector('ytd-watch-next-secondary-results-renderer');
 
         if (!relatedContainer) {
             return false;
@@ -61,7 +60,7 @@
         // Move comments to secondary sidebar
         secondary.appendChild(comments);
 
-        // Add indicator and styling
+        // Add styling
         injectSwapCSS();
 
         isSwapped = true;
@@ -216,36 +215,15 @@
         addIndicator();
     }
 
-    // Add visual indicator
+    // Add visual indicator (disabled)
     function addIndicator() {
-        if (document.getElementById('youtube-swap-indicator')) return;
-
-        const comments = document.querySelector('#secondary ytd-comments#comments, #secondary-inner ytd-comments#comments');
-        if (!comments) return;
-
-        const indicator = document.createElement('div');
-        indicator.id = 'youtube-swap-indicator';
-        indicator.innerHTML = `
-            <span>🔄 Comments ↔ Videos Swapped</span>
-            <span class="swap-hotkey">Alt+Q to toggle</span>
-        `;
-        
-        // Insert at the top of comments section
-        const header = comments.querySelector('#sections');
-        if (header) {
-            comments.insertBefore(indicator, header);
-        } else {
-            comments.insertBefore(indicator, comments.firstChild);
-        }
+        // Indicator removed per user request
     }
 
     // Remove swap CSS
     function removeSwapCSS() {
         const style = document.getElementById('youtube-section-swap-css');
         if (style) style.remove();
-
-        const indicator = document.getElementById('youtube-swap-indicator');
-        if (indicator) indicator.remove();
     }
 
     // Toggle function
@@ -257,22 +235,23 @@
         }
     }
 
-    // Add keyboard shortcut (Alt + Q)
+    // Add keyboard shortcut (Shift + F) with immediate stopPropagation
     function setupKeyboardShortcut() {
-        // Remove existing listener if any (though IIFE prevents some of this)
-        document.removeEventListener('keydown', window._ytSwapKeyHandler);
+        document.removeEventListener('keydown', window._ytSwapKeyHandler, true);
         
         window._ytSwapKeyHandler = (e) => {
-            if (e.altKey && e.key.toLowerCase() === 'q') {
+            if (e.shiftKey && e.key.toLowerCase() === 'f') {
                 if (window.location.pathname.includes('/watch')) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     toggleSwap();
                 }
             }
         };
         
-        document.addEventListener('keydown', window._ytSwapKeyHandler);
-        console.log('YouTube Section Swapper: 🎹 Alt+Q toggle active');
+        document.addEventListener('keydown', window._ytSwapKeyHandler, true);
+        console.log('YouTube Section Swapper: 🎹 Shift+F toggle active (captured)');
     }
 
     // Polling function for robustness
@@ -316,32 +295,9 @@
         waitForElementsAndSwap();
     }
 
-    // Watch for DOM changes to detect when YouTube re-renders the layout
+    // Watch for DOM changes (removed auto-re-swap to allow manual toggling back)
     function setupMutationObserver() {
         if (window._ytSwapObserver) window._ytSwapObserver.disconnect();
-
-        window._ytSwapObserver = new MutationObserver((mutations) => {
-            if (!window.location.pathname.includes('/watch')) return;
-
-            // Check if comments or related videos were moved back by YouTube
-            const comments = document.querySelector('ytd-comments#comments');
-            const secondary = document.querySelector('#secondary-inner') || document.querySelector('#secondary');
-            const below = document.querySelector('#below');
-
-            if (comments && below && below.contains(comments)) {
-                // YouTube put comments back in the main section, swap them again!
-                swapSections();
-            }
-            
-            // Ensure indicator is always there if swapped
-            if (isSwapped && comments && secondary && secondary.contains(comments)) {
-                if (!document.getElementById('youtube-swap-indicator')) {
-                    addIndicator();
-                }
-            }
-        });
-
-        window._ytSwapObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     // Global initializer function that can be called on navigation
