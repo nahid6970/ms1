@@ -14,55 +14,67 @@
     style.id = 'ai-studio-quick-delete-css';
     style.textContent = `
       .ai-quick-actions-wrapper {
-        display: inline-flex;
-        align-items: center;
-        gap: 2px;
-        vertical-align: middle;
-        flex-shrink: 0;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 2px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        height: auto !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
       }
 
       .ai-quick-del-btn {
-        background: transparent;
-        border: none;
-        color: #c4c7c5;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        padding: 0;
-        cursor: pointer;
-        transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-        outline: none;
-        flex-shrink: 0;
+        background: transparent !important;
+        border: none !important;
+        color: #c4c7c5 !important;
+        border-radius: 50% !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        user-select: none !important;
+        outline: none !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
       }
 
       .ai-quick-del-btn svg {
-        width: 16px;
-        height: 16px;
-        stroke: currentColor;
-        pointer-events: none;
+        width: 16px !important;
+        height: 16px !important;
+        stroke: currentColor !important;
+        pointer-events: none !important;
       }
 
       .ai-quick-del-btn:hover {
-        background: rgba(244, 67, 54, 0.18);
-        color: #f2b8b5;
+        background: rgba(244, 67, 54, 0.18) !important;
+        color: #f2b8b5 !important;
       }
 
       .ai-quick-del-btn-subsequent:hover {
-        background: rgba(255, 183, 77, 0.22);
-        color: #ffcc80;
+        background: rgba(255, 183, 77, 0.22) !important;
+        color: #ffcc80 !important;
       }
 
       .ai-quick-del-btn:active {
-        transform: scale(0.92);
+        transform: scale(0.92) !important;
       }
 
       .ai-quick-del-btn.deleting {
-        opacity: 0.6;
-        pointer-events: none;
+        opacity: 0.6 !important;
+        pointer-events: none !important;
       }
 
       @keyframes ai-del-spin {
@@ -71,7 +83,7 @@
       }
 
       .ai-del-spinner {
-        animation: ai-del-spin 0.8s linear infinite;
+        animation: ai-del-spin 0.8s linear infinite !important;
       }
     `;
     document.head.appendChild(style);
@@ -136,6 +148,34 @@
     return fallbackBtn || null;
   }
 
+  // Find the parent toolbar pill that holds all action buttons
+  function getToolbarSlot(turnEl) {
+    const threeDotBtn = getThreeDotButton(turnEl);
+    if (!threeDotBtn) return null;
+
+    let curr = threeDotBtn;
+    while (curr && curr !== turnEl && curr !== document.body) {
+      const parent = curr.parentElement;
+      if (!parent) break;
+
+      const buttons = parent.querySelectorAll('button, [role="button"]');
+      if (buttons.length > 1) {
+        return {
+          toolbar: parent,
+          anchor: curr,
+          threeDotBtn: threeDotBtn
+        };
+      }
+      curr = parent;
+    }
+
+    return {
+      toolbar: threeDotBtn.parentNode,
+      anchor: threeDotBtn,
+      threeDotBtn: threeDotBtn
+    };
+  }
+
   // Poll for the open Angular Material menu and find the "Delete" item
   function waitForMenuItem(maxWaitMs = 500) {
     return new Promise((resolve) => {
@@ -179,7 +219,9 @@
 
   // Triggers 3-dot menu and clicks Delete for a single turn
   async function deleteTurnElement(turnEl) {
-    const threeDotBtn = getThreeDotButton(turnEl);
+    const slot = getToolbarSlot(turnEl);
+    const threeDotBtn = slot?.threeDotBtn || getThreeDotButton(turnEl);
+
     if (!threeDotBtn) {
       console.warn('[AI Studio Quick Delete] Could not locate 3-dot menu trigger for turn');
       return false;
@@ -194,7 +236,7 @@
       return true;
     } else {
       console.warn('[AI Studio Quick Delete] Delete menu item not found');
-      document.body.click(); // Close opened menu
+      document.body.click();
       return false;
     }
   }
@@ -218,7 +260,7 @@
     }
   }
 
-  // Attach quick delete buttons beside 3-dot menu triggers
+  // Attach quick delete buttons beside 3-dot menu triggers inside the main toolbar row
   function attachQuickDeleteButtons() {
     injectStyles();
 
@@ -227,8 +269,17 @@
     turns.forEach((turnEl) => {
       if (turnEl.querySelector('.ai-quick-actions-wrapper')) return;
 
-      const threeDotBtn = getThreeDotButton(turnEl);
-      if (!threeDotBtn) return;
+      const slot = getToolbarSlot(turnEl);
+      if (!slot || !slot.toolbar || !slot.anchor) return;
+
+      const { toolbar, anchor } = slot;
+
+      // Ensure toolbar container displays items in a single horizontal flex row
+      if (window.getComputedStyle(toolbar).display !== 'flex') {
+        toolbar.style.display = 'inline-flex';
+        toolbar.style.alignItems = 'center';
+      }
+      toolbar.style.flexWrap = 'nowrap';
 
       const wrapper = document.createElement('div');
       wrapper.className = 'ai-quick-actions-wrapper';
@@ -269,9 +320,7 @@
       wrapper.appendChild(singleDelBtn);
       wrapper.appendChild(subsequentDelBtn);
 
-      if (threeDotBtn.parentNode) {
-        threeDotBtn.parentNode.insertBefore(wrapper, threeDotBtn);
-      }
+      toolbar.insertBefore(wrapper, anchor);
     });
   }
 
