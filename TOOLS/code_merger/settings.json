@@ -16,6 +16,33 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py",
+        "C:\\@delta\\ms1\\Testing\\mklink\\links.json"
+      ],
+      "extensions": [
+        ".md",
+        ".py",
+        ".json"
+      ],
+      "clicks": 21,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Code Manager",
       "category": "Tools",
@@ -31,10 +58,10 @@
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json"
       ],
       "extensions": [
         "",
@@ -42,7 +69,7 @@
         ".md",
         ".json"
       ],
-      "clicks": 181,
+      "clicks": 184,
       "pinned": true,
       "pin_index": 1
     },
@@ -111,33 +138,6 @@
       "clicks": 21,
       "pinned": true,
       "pin_index": 6
-    },
-    {
-      "path": "C:\\@delta\\ms1\\Testing\\mklink",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
-      ],
-      "extensions": [
-        ".md",
-        ".py",
-        ".json"
-      ],
-      "clicks": 18,
-      "pinned": false,
-      "pin_index": 0
     },
     {
       "path": "C:\\@delta\\ms1\\@@init\\application_install",
@@ -783,23 +783,20 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
+      "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
+      "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
+      "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
+      "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+      "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
     ],
-    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+    "project_root": "C:\\@delta\\ms1\\Testing\\mklink",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
+      "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py",
+      "C:\\@delta\\ms1\\Testing\\mklink\\links.json"
     ]
   },
   "backup": false,
