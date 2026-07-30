@@ -188,7 +188,11 @@ if Completer is not None:
             ("/skill", "Browse and apply saved skill instructions"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
+            ("/tokens", "Show estimated conversation token usage"),
+            ("/run", "Execute code blocks from the last AI response"),
+            ("/alias", "Manage custom prompt macros"),
         ]
+
 
         def _get_skill_completions(self, search_part: str) -> List[tuple[str, str, str]]:
             skills = list_skills()
@@ -197,6 +201,13 @@ if Completer is not None:
                 name = path.stem
                 if not search_part or search_part.lower() in name.lower() or search_part.lower() in title_str.lower():
                     results.append((name, name, title_str))
+            return results
+
+        def _get_alias_completions(self, aliases: Dict[str, str], search_part: str) -> List[tuple[str, str, str]]:
+            results = []
+            for name, prompt in sorted(aliases.items()):
+                if not search_part or search_part.lower() in name.lower() or search_part.lower() in prompt.lower():
+                    results.append((name, name, prompt[:40]))
             return results
 
         def __init__(self, cwd: Optional[Path] = None):
@@ -289,6 +300,16 @@ if Completer is not None:
                                 display=display_name,
                                 display_meta=meta,
                             )
+                        return
+                    if cmd_lower == "/alias":
+                        # Suggest existing aliases or subcommands
+                        sub_choices = [("list", "List all aliases"), ("add", "Add alias"), ("remove", "Remove alias")]
+                        for sc, desc in sub_choices:
+                            if not arg_part or arg_part.lower() in sc:
+                                yield Completion(sc, start_position=-len(arg_part), display=sc, display_meta=desc)
+                        # Also suggest alias names for running
+                        for full_rel, display_name, meta in self._get_alias_completions(load_model_prefs().get("aliases", {}), arg_part):
+                            yield Completion(full_rel, start_position=-len(arg_part), display=display_name, display_meta=meta)
                         return
 
             # 2. @ file and folder completions anywhere in the line
@@ -1904,6 +1925,7 @@ def default_model_prefs() -> Dict[str, Any]:
         **empty_account_model_prefs(),
         "api_accounts": {},
         "disabled_tools": [],
+        "aliases": {},
         "last_model": DEFAULT_MODEL,
         "last_api_account": "",
         "tool_loop_limit": DEFAULT_TOOL_LOOPS,
@@ -1950,6 +1972,9 @@ def load_model_prefs() -> Dict[str, Any]:
         disabled_tools = data.get("disabled_tools", [])
         if not isinstance(disabled_tools, list):
             disabled_tools = []
+        aliases = data.get("aliases", {})
+        if not isinstance(aliases, dict):
+            aliases = {}
         auto_failover_projects = data.get("auto_failover_projects", {})
         if not isinstance(auto_failover_projects, dict):
             auto_failover_projects = {}
@@ -1957,6 +1982,7 @@ def load_model_prefs() -> Dict[str, Any]:
         prefs.update({
             "api_accounts": normalized_api_accounts,
             "disabled_tools": [str(item) for item in disabled_tools],
+            "aliases": {str(k): str(v) for k, v in aliases.items()},
             "last_model": str(data.get("last_model") or DEFAULT_MODEL),
             "last_api_account": last_api_account,
             "system_instruction": str(data.get("system_instruction") or DEFAULT_SYSTEM),
@@ -1992,6 +2018,7 @@ def save_model_prefs(
     model_usage_counts: Dict[str, int],
     failover_uses: int,
     disabled_tools: List[str],
+    aliases: Dict[str, str],
     last_model: str,
     last_api_account: str,
     system_instruction: str,
@@ -2011,6 +2038,7 @@ def save_model_prefs(
         **account_model_prefs,
         "api_accounts": dict(sorted(api_accounts.items())),
         "disabled_tools": sorted(set(disabled_tools)),
+        "aliases": dict(sorted(aliases.items())),
         "last_model": last_model,
         "last_api_account": last_api_account,
         "system_instruction": system_instruction,
@@ -2858,6 +2886,9 @@ def print_help() -> None:
               /tool                 Open the tool manager and toggle tools with Space
               /system <text|file>   Replace system instruction or load it from a file
               /skill                Browse and apply saved skill instructions
+              /tokens               Show estimated conversation token count
+              /run                  Execute code blocks from last AI response
+              /alias                Manage custom prompt macros/shortcuts
               /save <file>          Save transcript JSON
               /load <file>          Load transcript JSON
             """
@@ -3011,6 +3042,8 @@ def main() -> int:
     speed_tags: Dict[str, str] = dict(model_prefs.get("speed_tags", {}))
     model_usage_counts: Dict[str, int] = dict(model_prefs.get("model_usage_counts", {}))
     disabled_tools: Set[str] = set(str(item) for item in model_prefs.get("disabled_tools", []))
+    aliases: Dict[str, str] = dict(model_prefs.get("aliases", {}))
+    last_assistant_response_text = ""
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
     saved_system_instruction = str(model_prefs.get("system_instruction") or DEFAULT_SYSTEM)
@@ -3304,6 +3337,7 @@ def main() -> int:
             model_usage_counts,
             failover_uses,
             sorted(disabled_tools),
+            aliases,
             client.model,
             account_name,
             system_instruction,
@@ -3448,6 +3482,8 @@ def main() -> int:
                 parts = content_obj.get("parts", [])
                 text = render_model_parts(parts)
                 if text:
+                    nonlocal last_assistant_response_text
+                    last_assistant_response_text = text
                     print()
                     print(text)
                     print()
@@ -3707,6 +3743,75 @@ def main() -> int:
                             print(f"  - {path.stem} : {title_str}")
                         info("Usage: /skill <name>")
                     continue
+                if command == "/tokens":
+                    # Rough token estimation: total characters across all contents / 4
+                    total_chars = 0
+                    for msg in contents:
+                        for part in msg.get("parts", []):
+                            if "text" in part:
+                                total_chars += len(str(part["text"]))
+                    est_tokens = total_chars // 4
+                    info(f"Estimated conversation tokens: ~{est_tokens:,} tokens ({total_chars:,} chars across {len(contents)} messages)")
+                    continue
+
+                if command == "/run":
+                    if not last_assistant_response_text:
+                        warn("No recent assistant response with code blocks found.")
+                        continue
+                    # Extract code blocks from markdown text
+                    code_block_pattern = re.compile(r"```(?:\w+)?\s*\n(.*?)```", re.DOTALL)
+                    blocks = code_block_pattern.findall(last_assistant_response_text)
+                    if not blocks:
+                        warn("No code blocks found in the last assistant response.")
+                        continue
+                    
+                    for idx, block in enumerate(blocks, start=1):
+                        code = block.strip()
+                        info(f"--- Executing Code Block {idx} ---")
+                        print(_ansi_wrap(code, "90"))
+                        res = run_powershell_command(code, cwd)
+                        print(res)
+                        info("------------------------------------")
+                    continue
+
+                if command == "/alias":
+                    parts = remainder.split(maxsplit=1)
+                    sub = parts[0].lower() if parts else "list"
+                    arg = parts[1].strip() if len(parts) > 1 else ""
+
+                    if sub == "list":
+                        if not aliases:
+                            info("No custom aliases saved. Use /alias add <name> <prompt>.")
+                        else:
+                            info("Saved Aliases:")
+                            for name, prompt in sorted(aliases.items()):
+                                print(f"  {name} -> {prompt}")
+                        continue
+                    elif sub == "add":
+                        name_prompt = arg.split(maxsplit=1)
+                        if len(name_prompt) < 2:
+                            warn("Usage: /alias add <name> <prompt text>")
+                            continue
+                        a_name, a_text = name_prompt[0], name_prompt[1]
+                        aliases[a_name] = a_text
+                        persist_selection()
+                        info(f"Added alias '{a_name}' -> {a_text}")
+                        continue
+                    elif sub == "remove" or sub == "rm":
+                        if not arg:
+                            warn("Usage: /alias remove <name>")
+                            continue
+                        if arg in aliases:
+                            aliases.pop(arg)
+                            persist_selection()
+                            info(f"Removed alias '{arg}'")
+                        else:
+                            warn(f"Alias not found: {arg}")
+                        continue
+                    else:
+                        warn("Usage: /alias [list|add <name> <prompt>|remove <name>]")
+                        continue
+
 
                 if command == "/save":
                     if remainder:
