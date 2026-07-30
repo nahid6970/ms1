@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'form_draft_saver': 'Form Draft Saver - Automatically saves and restores typed form inputs',
       'copy_table_as_markdown': 'Copy Table As Markdown - Shows a button on table hover to copy HTML tables as Markdown',
       'link_text_extractor': 'Link Text Extractor - Copies the text of a link to your clipboard when holding Ctrl and clicking',
-      'ai_studio_quick_delete': 'AI Studio Quick Delete - Direct delete & delete-below buttons for Google AI Studio turns'
+      'ai_studio_quick_delete': 'AI Studio Quick Tools - Delete, copy code blocks & bookmark turns in Google AI Studio'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];

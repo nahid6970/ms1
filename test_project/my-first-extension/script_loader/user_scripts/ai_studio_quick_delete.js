@@ -5,9 +5,9 @@
   if (window.__aiStudioQuickDeleteLoaded) return;
   window.__aiStudioQuickDeleteLoaded = true;
 
-  console.log('[AI Studio Quick Delete] Script loaded');
+  console.log('[AI Studio Quick Tools] Script loaded');
 
-  // Inject CSS styles for native-feeling Google AI Studio action icons
+  // Inject CSS styles for action buttons, floating pinned panel, and toasts
   function injectStyles() {
     if (document.getElementById('ai-studio-quick-delete-css')) return;
     const style = document.createElement('style');
@@ -58,6 +58,21 @@
         pointer-events: none !important;
       }
 
+      /* Hover effects for each action type */
+      .ai-quick-del-btn-code:hover {
+        background: rgba(76, 175, 80, 0.18) !important;
+        color: #81c784 !important;
+      }
+
+      .ai-quick-del-btn-pin:hover {
+        background: rgba(255, 215, 0, 0.18) !important;
+        color: #ffe066 !important;
+      }
+
+      .ai-quick-del-btn-pin.pinned {
+        color: #ffd700 !important;
+      }
+
       .ai-quick-del-btn:hover {
         background: rgba(244, 67, 54, 0.18) !important;
         color: #f2b8b5 !important;
@@ -77,6 +92,119 @@
         pointer-events: none !important;
       }
 
+      /* Pinned turn highlight */
+      .ai-turn-pinned {
+        border-left: 3px solid #ffd700 !important;
+        box-shadow: inset 3px 0 10px -2px rgba(255, 215, 0, 0.25) !important;
+      }
+
+      /* Floating Pinned Turns Panel */
+      #ai-studio-pinned-panel {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        z-index: 10000;
+        width: 250px;
+        max-height: 380px;
+        background: rgba(22, 22, 26, 0.94);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        font-family: 'JetBrains Mono', -apple-system, monospace;
+        font-size: 11px;
+        color: #e3e3e3;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .ai-pinned-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: rgba(255, 215, 0, 0.08);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-weight: bold;
+        color: #ffd700;
+      }
+
+      .ai-pinned-list {
+        overflow-y: auto;
+        max-height: 320px;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .ai-pinned-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+
+      .ai-pinned-item:hover {
+        background: rgba(255, 215, 0, 0.15);
+      }
+
+      .ai-pinned-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+        color: #d4d4d4;
+      }
+
+      .ai-pinned-unpin {
+        background: transparent;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        padding: 2px 4px;
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .ai-pinned-unpin:hover {
+        color: #ff5252;
+      }
+
+      /* Notification Toast */
+      #ai-studio-tools-toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #1e1e24;
+        color: #4ec9b0;
+        border: 1px solid #3c3c42;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        z-index: 100000;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      }
+
+      #ai-studio-tools-toast.ai-toast-visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      #ai-studio-tools-toast.warn {
+        color: #ffb74d;
+      }
+
       @keyframes ai-del-spin {
         from { transform: rotate(0deg); }
         to { transform: rotate(360deg); }
@@ -88,6 +216,27 @@
     `;
     document.head.appendChild(style);
   }
+
+  // SVG Icons
+  const CODE_SVG = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="16 18 22 12 16 6"></polyline>
+      <polyline points="8 6 2 12 8 18"></polyline>
+    </svg>
+  `;
+
+  const CHECKMARK_SVG = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  `;
+
+  const PIN_SVG = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 17v5"></path>
+      <path d="M9 2v3l-2 5v3h10v-3l-2-5V2H9z"></path>
+    </svg>
+  `;
 
   const TRASH_SVG = `
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -115,6 +264,131 @@
       <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
     </svg>
   `;
+
+  // Toast notification helper
+  function showToast(msg, type = 'info') {
+    let toast = document.getElementById('ai-studio-tools-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'ai-studio-tools-toast';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.className = `ai-toast-visible ${type}`;
+
+    clearTimeout(window.__aiToastTimer);
+    window.__aiToastTimer = setTimeout(() => {
+      toast.className = '';
+    }, 2200);
+  }
+
+  // Copy only code blocks from a turn
+  function copyCodeFromTurn(turnEl, copyBtn) {
+    const preElements = Array.from(turnEl.querySelectorAll('pre, .code-block, ms-code-block'));
+    let codeTexts = [];
+
+    if (preElements.length > 0) {
+      codeTexts = preElements.map(el => {
+        const codeEl = el.querySelector('code') || el;
+        return codeEl.innerText.trim();
+      }).filter(text => text.length > 0);
+    } else {
+      const codeElements = Array.from(turnEl.querySelectorAll('code'));
+      codeTexts = codeElements.map(el => el.innerText.trim()).filter(text => text.length > 0);
+    }
+
+    if (codeTexts.length === 0) {
+      showToast('No code blocks found in this turn', 'warn');
+      return;
+    }
+
+    const fullCode = codeTexts.join('\n\n// --- Next Code Block ---\n\n');
+    navigator.clipboard.writeText(fullCode).then(() => {
+      copyBtn.innerHTML = CHECKMARK_SVG;
+      showToast(`Copied ${codeTexts.length} code block${codeTexts.length > 1 ? 's' : ''}!`);
+      setTimeout(() => {
+        copyBtn.innerHTML = CODE_SVG;
+      }, 1800);
+    }).catch(err => {
+      console.error('Copy failed:', err);
+      showToast('Copy failed', 'warn');
+    });
+  }
+
+  // Floating Pinned Turns Panel
+  function updatePinnedPanel() {
+    let panel = document.getElementById('ai-studio-pinned-panel');
+    const pinnedTurns = Array.from(document.querySelectorAll('.ai-turn-pinned'));
+
+    if (pinnedTurns.length === 0) {
+      if (panel) panel.remove();
+      return;
+    }
+
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'ai-studio-pinned-panel';
+      document.body.appendChild(panel);
+    }
+
+    let itemsHtml = '';
+    pinnedTurns.forEach((turn, idx) => {
+      const textEl = turn.querySelector('p, span, div') || turn;
+      const rawText = (textEl.innerText || '').trim().replace(/\s+/g, ' ');
+      const snippet = rawText ? rawText.substring(0, 28) + (rawText.length > 28 ? '...' : '') : `Turn #${idx + 1}`;
+
+      itemsHtml += `
+        <div class="ai-pinned-item" data-turn-idx="${idx}">
+          <span class="ai-pinned-text" title="${rawText}">${snippet}</span>
+          <button class="ai-pinned-unpin" data-turn-idx="${idx}" title="Unpin">✕</button>
+        </div>
+      `;
+    });
+
+    panel.innerHTML = `
+      <div class="ai-pinned-header">
+        <span>📌 Pinned Turns (${pinnedTurns.length})</span>
+      </div>
+      <div class="ai-pinned-list">
+        ${itemsHtml}
+      </div>
+    `;
+
+    // Click to scroll to pinned turn
+    panel.querySelectorAll('.ai-pinned-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (e.target.classList.contains('ai-pinned-unpin')) return;
+        const idx = parseInt(item.dataset.turnIdx, 10);
+        const targetTurn = pinnedTurns[idx];
+        if (targetTurn) {
+          targetTurn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+
+    // Unpin click
+    panel.querySelectorAll('.ai-pinned-unpin').forEach(unpinBtn => {
+      unpinBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(unpinBtn.dataset.turnIdx, 10);
+        const targetTurn = pinnedTurns[idx];
+        if (targetTurn) {
+          targetTurn.classList.remove('ai-turn-pinned');
+          const pinBtn = targetTurn.querySelector('.ai-quick-del-btn-pin');
+          if (pinBtn) pinBtn.classList.remove('pinned');
+          updatePinnedPanel();
+        }
+      });
+    });
+  }
+
+  // Toggle Pin / Bookmark on turn
+  function togglePinTurn(turnEl, pinBtn) {
+    const isPinned = turnEl.classList.toggle('ai-turn-pinned');
+    pinBtn.classList.toggle('pinned', isPinned);
+    showToast(isPinned ? 'Turn pinned to side panel 📌' : 'Turn unpinned');
+    updatePinnedPanel();
+  }
 
   // Locate the 3-dot menu trigger button inside or near a turn item
   function getThreeDotButton(turnEl) {
@@ -176,7 +450,7 @@
     };
   }
 
-  // Poll for the open Angular Material menu and find the "Delete" item
+  // Poll for open Angular Material menu and find "Delete" item
   function waitForMenuItem(maxWaitMs = 500) {
     return new Promise((resolve) => {
       const startTime = Date.now();
@@ -223,7 +497,7 @@
     const threeDotBtn = slot?.threeDotBtn || getThreeDotButton(turnEl);
 
     if (!threeDotBtn) {
-      console.warn('[AI Studio Quick Delete] Could not locate 3-dot menu trigger for turn');
+      console.warn('[AI Studio Quick Tools] Could not locate 3-dot menu trigger for turn');
       return false;
     }
 
@@ -233,9 +507,10 @@
     if (deleteMenuItem) {
       deleteMenuItem.click();
       await handleConfirmationDialog();
+      updatePinnedPanel();
       return true;
     } else {
-      console.warn('[AI Studio Quick Delete] Delete menu item not found');
+      console.warn('[AI Studio Quick Tools] Delete menu item not found');
       document.body.click();
       return false;
     }
@@ -251,7 +526,7 @@
     }
 
     const turnsToDelete = allTurns.slice(targetIndex);
-    console.log(`[AI Studio Quick Delete] Deleting ${turnsToDelete.length} turns starting from index ${targetIndex}`);
+    console.log(`[AI Studio Quick Tools] Deleting ${turnsToDelete.length} turns starting from index ${targetIndex}`);
 
     for (let i = turnsToDelete.length - 1; i >= 0; i--) {
       const turn = turnsToDelete[i];
@@ -260,7 +535,7 @@
     }
   }
 
-  // Attach quick delete buttons beside 3-dot menu triggers inside the main toolbar row
+  // Attach quick action buttons inside the main toolbar row
   function attachQuickDeleteButtons() {
     injectStyles();
 
@@ -274,7 +549,6 @@
 
       const { toolbar, anchor } = slot;
 
-      // Ensure toolbar container displays items in a single horizontal flex row
       if (window.getComputedStyle(toolbar).display !== 'flex') {
         toolbar.style.display = 'inline-flex';
         toolbar.style.alignItems = 'center';
@@ -284,7 +558,31 @@
       const wrapper = document.createElement('div');
       wrapper.className = 'ai-quick-actions-wrapper';
 
-      // 1. Single Turn Delete button
+      // 1. Copy Code Blocks button
+      const copyCodeBtn = document.createElement('button');
+      copyCodeBtn.className = 'ai-quick-del-btn ai-quick-del-btn-code';
+      copyCodeBtn.innerHTML = CODE_SVG;
+      copyCodeBtn.title = 'Copy only code blocks from this response';
+
+      copyCodeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        copyCodeFromTurn(turnEl, copyCodeBtn);
+      });
+
+      // 2. Pin / Bookmark Turn button
+      const pinBtn = document.createElement('button');
+      pinBtn.className = 'ai-quick-del-btn ai-quick-del-btn-pin';
+      pinBtn.innerHTML = PIN_SVG;
+      pinBtn.title = 'Bookmark / Pin this turn';
+
+      pinBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePinTurn(turnEl, pinBtn);
+      });
+
+      // 3. Single Turn Delete button
       const singleDelBtn = document.createElement('button');
       singleDelBtn.className = 'ai-quick-del-btn';
       singleDelBtn.innerHTML = TRASH_SVG;
@@ -300,7 +598,7 @@
         await deleteTurnElement(turnEl);
       });
 
-      // 2. Turn + All Subsequent Turns Delete button
+      // 4. Turn + All Subsequent Turns Delete button
       const subsequentDelBtn = document.createElement('button');
       subsequentDelBtn.className = 'ai-quick-del-btn ai-quick-del-btn-subsequent';
       subsequentDelBtn.innerHTML = TRASH_SUBSEQUENT_SVG;
@@ -317,6 +615,8 @@
         }
       });
 
+      wrapper.appendChild(copyCodeBtn);
+      wrapper.appendChild(pinBtn);
       wrapper.appendChild(singleDelBtn);
       wrapper.appendChild(subsequentDelBtn);
 
