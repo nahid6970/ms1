@@ -333,6 +333,11 @@
             "kind": "Title",
             "id": "Bitwarden",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Alpha).exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -419,6 +424,11 @@
         {
             "kind": "Title",
             "id": "Bitwarden",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Alpha).exe",
             "matching_strategy": "Equals"
         }
     ],
