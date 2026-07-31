@@ -1,5 +1,5 @@
 {
-    "project_0": {
+    "ms1": {
         "label": "ms1",
         "src": "C:\\@delta\\ms1",
         "dst": "gu:\\ms1",
@@ -11,7 +11,7 @@
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames",
         "last_flags_state": {
-            "--dry-run": true,
+            "--dry-run": false,
             "--fast-list": true,
             "-P": true,
             "--track-renames": true,
@@ -19,7 +19,7 @@
         },
         "last_transfers": "10"
     },
-    "p_1": {
+    "db": {
         "label": "db",
         "src": "C:\\@delta\\db",
         "dst": "gu:\\db",
@@ -31,15 +31,15 @@
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10",
         "last_flags_state": {
+            "--dry-run": false,
             "--fast-list": true,
             "-P": true,
-            "--dry-run": false,
             "--track-renames": true,
             "--size-only": true
         },
         "last_transfers": "10"
     },
-    "p_2": {
+    "song": {
         "label": "\uf001",
         "src": "gu:\\song",
         "dst": "C:\\Users\\nahid\\Downloads\\song",
@@ -51,7 +51,7 @@
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames"
     },
-    "p_3": {
+    "msBackups": {
         "label": "msBackups",
         "src": "gu:/msBackups/",
         "dst": "C:/@delta/msBackups/",
@@ -63,7 +63,7 @@
         "last_ignore": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "last_flags": "--fast-list -P --size-only --transfers 10 --track-renames",
         "last_flags_state": {
-            "--dry-run": true,
+            "--dry-run": false,
             "--fast-list": true,
             "-P": true,
             "--track-renames": true,
