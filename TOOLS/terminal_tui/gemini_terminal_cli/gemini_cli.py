@@ -2188,6 +2188,7 @@ def interactive_select(
     dynamic_footer: Optional[Callable[[Dict[str, Any]], List[str]]] = None,
     instructions: str = "Use Up/Down, Enter to choose, Esc to cancel.",
     on_space: Optional[Callable[[Dict[str, Any], int], None]] = None,
+    on_key: Optional[Callable[[str, List[Dict[str, Any]], int], Optional[str]]] = None,
 ) -> Optional[Dict[str, Any]]:
     if not items:
         return None
@@ -2195,6 +2196,9 @@ def interactive_select(
     footer_lines = footer_lines or []
 
     while True:
+        if not items:
+            return None
+        index = max(0, min(index, len(items) - 1))
         clear_screen()
         title(title_text)
         print(instructions)
@@ -2226,6 +2230,8 @@ def interactive_select(
             index = (index + 1) % len(items)
         elif key == " " and on_space is not None:
             on_space(items[index], index)
+        elif on_key is not None and on_key(key, items, index) is not None:
+            pass
         elif key.lower() == "q":
             return None
 
@@ -3020,8 +3026,22 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
             f"File: {current_item['path'].name}",
             f"Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
             f"First Prompt: {current_item['first_prompt']}",
-            "Press Enter to resume conversation | Esc to cancel"
+            "Press Enter to resume | Press 'd' to delete transcript | Esc/Q to cancel"
         ]
+
+    def handle_key(key: str, items_list: List[Dict[str, Any]], idx: int) -> Optional[str]:
+        if key.lower() == "d":
+            if 0 <= idx < len(items_list):
+                item = items_list[idx]
+                try:
+                    path = item["path"]
+                    if path.exists():
+                        path.unlink()
+                except Exception:
+                    pass
+                items_list.pop(idx)
+                return "deleted"
+        return None
 
     chosen = interactive_select(
         title_text="Resume Recent Conversation",
@@ -3029,7 +3049,8 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         render_item=render_item,
         header_lines=["  Choose a recent session to resume:"],
         dynamic_footer=render_footer_info,
-        instructions="Use Up/Down, Enter to resume session, Esc to cancel.",
+        instructions="Use Up/Down to navigate, Enter to resume, 'd' to delete, Esc/Q to cancel.",
+        on_key=handle_key,
     )
     if not chosen:
         return None
