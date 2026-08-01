@@ -108,6 +108,15 @@ def _format_seconds(seconds: float) -> str:
     return f"{minutes:02d}:{secs:02d}"
 
 
+def _format_token_count(num_tokens: int) -> str:
+    if num_tokens >= 1_000_000:
+        return f"{num_tokens / 1_000_000:.1f}M tok"
+    if num_tokens >= 1_000:
+        return f"{num_tokens / 1_000:.1f}k tok"
+    return f"{num_tokens} tok"
+
+
+
 def info(text: str) -> None:
     print(_ansi_wrap(text, "36"))
 
@@ -3082,6 +3091,7 @@ def main() -> int:
     disabled_tools: Set[str] = set(str(item) for item in model_prefs.get("disabled_tools", []))
     aliases: Dict[str, str] = dict(model_prefs.get("aliases", {}))
     last_assistant_response_text = ""
+    last_turn_tokens: Optional[int] = None
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
     saved_system_instruction = str(model_prefs.get("system_instruction") or DEFAULT_SYSTEM)
@@ -3356,6 +3366,18 @@ def main() -> int:
             decorated.append(copy_model)
         return decorated
 
+    def get_token_estimate() -> int:
+        total_chars = len(system_instruction) if system_instruction else 0
+        for msg in contents:
+            for part in msg.get("parts", []):
+                if "text" in part:
+                    total_chars += len(str(part["text"]))
+                elif "functionCall" in part:
+                    total_chars += len(json.dumps(part["functionCall"]))
+                elif "functionResponse" in part:
+                    total_chars += len(json.dumps(part["functionResponse"]))
+        return total_chars // 4
+
     def prompt_text() -> str:
         prune_model_cooldowns()
         acc = active_api_account if active_api_account else "api"
@@ -3363,6 +3385,11 @@ def main() -> int:
         cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
+        
+        tok_count = last_turn_tokens if last_turn_tokens is not None else get_token_estimate()
+        if tok_count > 0:
+            prefix += f" [{_format_token_count(tok_count)}]"
+
         return _ansi_wrap(f"{prefix}> ", "1;32")
 
     def persist_selection() -> None:
@@ -3494,6 +3521,10 @@ def main() -> int:
                         max_output_tokens=args.max_output_tokens,
                     )
                     record_model_usage(client.model)
+                    usage = response.get("usageMetadata", {})
+                    if isinstance(usage, dict) and "totalTokenCount" in usage:
+                        nonlocal last_turn_tokens
+                        last_turn_tokens = int(usage["totalTokenCount"])
                 except RuntimeError as exc:
                     msg = str(exc).strip()
                     error(msg)
@@ -3582,6 +3613,7 @@ def main() -> int:
                     continue
                 if command == "/reset":
                     contents = []
+                    last_turn_tokens = None
                     info("Conversation cleared.")
                     continue
                 if command in {"/mm", "/test"}:
