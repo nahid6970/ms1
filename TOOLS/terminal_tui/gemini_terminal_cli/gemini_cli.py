@@ -3004,26 +3004,69 @@ def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
     return transcripts[:limit]
 
 
+def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str, int]:
+    folder_width = 0
+    model_width = 0
+    msg_width = 0
+    for item in transcripts:
+        p_root = item.get("project_root", "")
+        folder_s = Path(p_root).name if p_root else ""
+        folder_width = max(folder_width, len(folder_s))
+        model_s = short_model_label(item["model"])
+        model_width = max(model_width, len(model_s))
+        msg_s = str(item["msg_count"])
+        msg_width = max(msg_width, len(msg_s))
+    return {
+        "folder": min(max(folder_width, 8), 20),
+        "model": min(max(model_width, 8), 24),
+        "msg": min(max(msg_width, 4), 8),
+    }
+
+
+def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
+    return [
+        f"  {'Id':>2}  {'Date/Time':<16}  {'Folder':<{widths['folder']}}  {'Model':<{widths['model']}}  {'Msgs':>{widths['msg']}}  First Prompt",
+        f"  {'--':>2}  {'-' * 16}  {'-' * widths['folder']}  {'-' * widths['model']}  {'-' * widths['msg']}  ------------",
+    ]
+
+
+def format_transcript_entry(
+    index: int,
+    item: Dict[str, Any],
+    widths: Dict[str, int],
+    selected: bool = False,
+) -> str:
+    date_s = item["date_str"]
+    p_root = item.get("project_root", "")
+    folder_s = Path(p_root).name if p_root else ""
+    model_s = short_model_label(item["model"])
+    msg_s = str(item["msg_count"])
+    prompt_s = item["first_prompt"]
+
+    marker = ">" if selected else " "
+    row = (
+        f"{marker} {index:>2}. "
+        f"{date_s:<16}  "
+        f"{folder_s:<{widths['folder']}}  "
+        f"{model_s:<{widths['model']}}  "
+        f"{msg_s:>{widths['msg']}}  "
+        f"{prompt_s}"
+    ).rstrip()
+    if selected:
+        return _ansi_wrap(row, "48;5;24;97")
+    return row
+
+
 def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
     items = list_recent_transcripts()
     if not items:
         warn("No recent transcripts found in 'transcripts/' directory.")
         return None
 
-    def render_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
-        marker = ">" if selected else " "
-        date_s = item["date_str"]
-        model_s = short_model_label(item["model"])
-        msg_s = f"{item['msg_count']} msgs"
-        p_root = item.get("project_root", "")
-        folder_s = Path(p_root).name if p_root else ""
-        folder_tag = f"[{folder_s}] " if folder_s else ""
-        prompt_s = item["first_prompt"]
+    widths = build_transcript_table_widths(items)
 
-        row = f"{marker} {index + 1:>2}. [{date_s}] {folder_tag}({model_s}, {msg_s}) {prompt_s}"
-        if selected:
-            return _ansi_wrap(row, "48;5;24;97")
-        return row
+    def render_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
+        return format_transcript_entry(index + 1, item, widths, selected=selected)
 
     def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
         p_root = current_item.get("project_root") or "Not set"
@@ -3054,7 +3097,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         title_text="Resume Recent Conversation",
         items=items,
         render_item=render_item,
-        header_lines=["  Choose a recent session to resume:"],
+        header_lines=build_transcript_table_header(widths),
         dynamic_footer=render_footer_info,
         instructions="Use Up/Down to navigate, Enter to resume & cd, 'd' to delete, Esc/Q to cancel.",
         on_key=handle_key,
