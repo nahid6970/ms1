@@ -83,6 +83,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/system <text|file>` - replace the system instruction or load it from a file
 - `/tool` - open the categorized tool manager; browse by category, toggle with Space
 - `/skill` - interactive browser for custom skill files inside the `skills/` directory
+- `/resume`, `/r [file]` - open interactive picker to select and resume a recent conversation session
 
 - `/save <file>` - write transcript JSON
 - `/load <file>` - load transcript JSON

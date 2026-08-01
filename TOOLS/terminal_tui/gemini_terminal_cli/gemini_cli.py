@@ -48,6 +48,7 @@ API_ACCOUNTS_FILE = Path(__file__).with_name("api_accounts.lock")
 API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
 API_ACCOUNTS_MAGIC = b"GEMAPI1"
 NOTIFICATION_FILE = Path(r"C:\Users\nahid\notification.txt")
+TRANSCRIPTS_DIR = Path(__file__).parent / "transcripts"
 
 try:
     import msvcrt
@@ -196,6 +197,8 @@ if Completer is not None:
             ("/tool", "Open tool manager"),
             ("/system", "Replace or load system instruction"),
             ("/skill", "Browse and apply saved skill instructions"),
+            ("/resume", "Resume a recent conversation session"),
+            ("/r", "Resume a recent conversation session"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
             ("/tokens", "Show estimated conversation token usage"),
@@ -293,7 +296,7 @@ if Completer is not None:
                 else:
                     cmd_part, _, arg_part = text.partition(" ")
                     cmd_lower = cmd_part.lower()
-                    if cmd_lower in {"/save", "/load", "/system"}:
+                    if cmd_lower in {"/save", "/load", "/system", "/resume", "/r"}:
                         for full_rel, display_name, meta in self._get_path_completions(arg_part):
                             yield Completion(
                                 full_rel,
@@ -2933,6 +2936,7 @@ def print_help() -> None:
               /tool                 Open the tool manager and toggle tools with Space
               /system <text|file>   Replace system instruction or load it from a file
               /skill                Browse and apply saved skill instructions
+              /resume, /r [file]    Resume a recent conversation session
               /tokens               Show estimated conversation token count
               /run                  Execute code blocks from last AI response
               /alias                Manage custom prompt macros/shortcuts
@@ -2941,6 +2945,95 @@ def print_help() -> None:
             """
         ).strip()
     )
+
+
+def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
+    """Scan transcripts directory and return a list of metadata for recent sessions."""
+    if not TRANSCRIPTS_DIR.exists():
+        return []
+
+    transcripts: List[Dict[str, Any]] = []
+    for path in TRANSCRIPTS_DIR.glob("*.json"):
+        try:
+            mtime = path.stat().st_mtime
+            data = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+            if not isinstance(data, dict) or "contents" not in data:
+                continue
+            contents = data.get("contents", [])
+            if not contents:
+                continue
+
+            first_prompt = ""
+            for msg in contents:
+                if msg.get("role") == "user":
+                    parts = msg.get("parts", [])
+                    for p in parts:
+                        if "text" in p:
+                            first_prompt = str(p["text"]).strip().replace("\n", " ")
+                            break
+                    if first_prompt:
+                        break
+            if not first_prompt:
+                first_prompt = "<No user text>"
+
+            model = str(data.get("model", "unknown"))
+            msg_count = len(contents)
+            dt_str = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+
+            transcripts.append({
+                "path": path,
+                "mtime": mtime,
+                "date_str": dt_str,
+                "model": model,
+                "msg_count": msg_count,
+                "first_prompt": first_prompt[:60],
+                "data": data,
+            })
+        except Exception:
+            continue
+
+    transcripts.sort(key=lambda x: x["mtime"], reverse=True)
+    return transcripts[:limit]
+
+
+def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
+    items = list_recent_transcripts()
+    if not items:
+        warn("No recent transcripts found in 'transcripts/' directory.")
+        return None
+
+    def render_item(item: Dict[str, Any], index: int, selected: bool = False) -> str:
+        marker = ">" if selected else " "
+        date_s = item["date_str"]
+        model_s = short_model_label(item["model"])
+        msg_s = f"{item['msg_count']} msgs"
+        prompt_s = item["first_prompt"]
+
+        row = f"{marker} {index + 1:>2}. [{date_s}] ({model_s}, {msg_s}) {prompt_s}"
+        if selected:
+            return _ansi_wrap(row, "48;5;24;97")
+        return row
+
+    def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
+        return [
+            "----------------------------------------------------------------",
+            f"File: {current_item['path'].name}",
+            f"Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
+            f"First Prompt: {current_item['first_prompt']}",
+            "Press Enter to resume conversation | Esc to cancel"
+        ]
+
+    chosen = interactive_select(
+        title_text="Resume Recent Conversation",
+        items=items,
+        render_item=render_item,
+        header_lines=["  Choose a recent session to resume:"],
+        dynamic_footer=render_footer_info,
+        instructions="Use Up/Down, Enter to resume session, Esc to cancel.",
+    )
+    if not chosen:
+        return None
+    return chosen
 def list_skills() -> List[tuple[str, str, Path]]:
     """Scan skills directory and return a list of (title, description, path)."""
     skills_dir = Path(__file__).parent / "skills"
@@ -3074,6 +3167,7 @@ def main() -> int:
     parser.add_argument("--max-output-tokens", type=int, default=2048, help="Max output tokens")
     parser.add_argument("--max-tool-loops", type=int, default=None, help="Max tool-call loops per turn")
     parser.add_argument("--no-tools", action="store_true", help="Disable local tool calling")
+    parser.add_argument("-r", "--resume", nargs="?", const="interactive", help="Resume a recent conversation session")
     parser.add_argument("--load-transcript", help="Load transcript JSON at startup")
     parser.add_argument("--save-transcript", help="Auto-save transcript on exit")
     args = parser.parse_args()
@@ -3266,6 +3360,61 @@ def main() -> int:
     system_instruction = saved_system_instruction if args.system == DEFAULT_SYSTEM else args.system
     contents: List[Dict[str, Any]] = []
     model_cooldowns: Dict[str, dt.datetime] = {}
+    current_session_path: Optional[Path] = None
+
+    def auto_save_session() -> None:
+        nonlocal current_session_path
+        if not contents:
+            return
+        if current_session_path is None:
+            TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+            current_session_path = TRANSCRIPTS_DIR / f"session_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        state = {
+            "model": client.model,
+            "system_instruction": system_instruction,
+            "project_root": str(cwd),
+            "disabled_tools": sorted(disabled_tools),
+            "contents": contents,
+            "tool_loop_limit": tool_loop_limit,
+        }
+        save_transcript(current_session_path, state)
+
+    if args.resume:
+        target_file = args.resume.strip() if isinstance(args.resume, str) else "interactive"
+        chosen_transcript = None
+        if target_file == "interactive":
+            if sys.stdout.isatty():
+                chosen_transcript = pick_transcript_interactive()
+            else:
+                recent = list_recent_transcripts()
+                if recent:
+                    chosen_transcript = recent[0]
+        else:
+            cand = resolve_path(target_file, Path.cwd())
+            if not cand.exists() and TRANSCRIPTS_DIR.exists():
+                cand = TRANSCRIPTS_DIR / target_file
+            if cand.exists():
+                try:
+                    data = load_transcript(cand)
+                    chosen_transcript = {"path": cand, "data": data}
+                except Exception as exc:
+                    error(f"Error loading transcript '{target_file}': {exc}")
+            else:
+                error(f"Transcript file not found: {target_file}")
+
+        if chosen_transcript:
+            t_data = chosen_transcript["data"]
+            t_path = chosen_transcript["path"]
+            system_instruction = t_data.get("system_instruction", system_instruction)
+            client.model = t_data.get("model", client.model)
+            cwd = resolve_path(t_data.get("project_root", str(cwd)), Path.cwd())
+            contents = list(t_data.get("contents", []))
+            tool_loop_limit = int(t_data.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
+            loaded_disabled_tools = t_data.get("disabled_tools")
+            if isinstance(loaded_disabled_tools, list):
+                disabled_tools = set(str(item) for item in loaded_disabled_tools)
+            current_session_path = t_path
+            info(f"Resumed session from {t_path.name} ({len(contents)} messages).")
 
     if args.load_transcript:
         transcript_path = resolve_path(args.load_transcript, Path.cwd())
@@ -3280,6 +3429,7 @@ def main() -> int:
             disabled_tools = set(str(item) for item in loaded_disabled_tools)
         elif "tools_enabled" in loaded and not bool(loaded.get("tools_enabled")):
             disabled_tools = set(all_tool_names)
+        current_session_path = transcript_path
 
     title("Gemini Terminal CLI")
     info(f"Project root: {cwd}")
@@ -3585,6 +3735,7 @@ def main() -> int:
             print()
             warn("Interrupted by user.")
         finally:
+            auto_save_session()
             write_notification()
 
     if args.prompt:
@@ -3811,6 +3962,38 @@ def main() -> int:
                             print(f"  - {path.stem} : {title_str}")
                         info("Usage: /skill <name>")
                     continue
+                if command in {"/resume", "/r"}:
+                    chosen_transcript = None
+                    if remainder:
+                        cand = resolve_path(remainder, Path.cwd())
+                        if not cand.exists() and TRANSCRIPTS_DIR.exists():
+                            cand = TRANSCRIPTS_DIR / remainder
+                        if cand.exists():
+                            try:
+                                data = load_transcript(cand)
+                                chosen_transcript = {"path": cand, "data": data}
+                            except Exception as exc:
+                                error(f"Error loading transcript '{remainder}': {exc}")
+                        else:
+                            warn(f"Transcript file not found: {remainder}")
+                    else:
+                        chosen_transcript = pick_transcript_interactive()
+
+                    if chosen_transcript:
+                        t_data = chosen_transcript["data"]
+                        t_path = chosen_transcript["path"]
+                        system_instruction = t_data.get("system_instruction", system_instruction)
+                        client.model = t_data.get("model", client.model)
+                        cwd = resolve_path(t_data.get("project_root", str(cwd)), Path.cwd())
+                        contents = list(t_data.get("contents", []))
+                        tool_loop_limit = int(t_data.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
+                        loaded_disabled_tools = t_data.get("disabled_tools")
+                        if isinstance(loaded_disabled_tools, list):
+                            disabled_tools = set(str(item) for item in loaded_disabled_tools)
+                        current_session_path = t_path
+                        last_turn_tokens = None
+                        info(f"Resumed session from {t_path.name} ({len(contents)} messages).")
+                    continue
                 if command == "/tokens":
                     # Calculate total character count including text, function calls, responses, and system instruction
                     total_chars = len(system_instruction) if system_instruction else 0
@@ -3946,6 +4129,7 @@ def main() -> int:
         }
         print(save_transcript(transcript_path, state))
 
+    auto_save_session()
     persist_selection()
 
     return 0
