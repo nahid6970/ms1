@@ -549,8 +549,6 @@ def _replace_nth(text: str, old: str, new: str, occurrence: int = 1) -> tuple[st
 def replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
     if not path.exists():
         return f"Error: path not found: {path}"
-    if old_text == new_text:
-        return "Error: old_text and new_text are identical; no replacement performed."
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
         updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
@@ -937,8 +935,6 @@ def replace_lines_in_file(path: Path, start_line: int, end_line: int, new_text: 
 def smart_replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
     if not path.exists():
         return f"Error: path not found: {path}"
-    if old_text == new_text:
-        return "Error: old_text and new_text are identical; no replacement performed."
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
         updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
@@ -3448,7 +3444,6 @@ def main() -> int:
         nonlocal contents
         contents.append(make_user_content(user_text))
         failed_accounts: Set[str] = set()
-        recent_tool_signatures: List[str] = []
 
         try:
             for _ in range(tool_loop_limit):
@@ -3462,8 +3457,6 @@ def main() -> int:
                     )
                     record_model_usage(client.model)
                 except RuntimeError as exc:
-                    if contents and contents[-1] == make_user_content(user_text):
-                        contents.pop()
                     msg = str(exc).strip()
                     error(msg)
                     retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
@@ -3474,7 +3467,6 @@ def main() -> int:
                         failed_accounts.add(active_api_account)
                     if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
                         warn(f"Retrying the same request with {active_api_account}.")
-                        contents.append(make_user_content(user_text))
                         continue
                     if retryable_account_error(msg):
                         warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
@@ -3502,24 +3494,6 @@ def main() -> int:
                     write_notification()
                     return
 
-                call_sig = json.dumps([{"name": fc.get("name"), "args": fc.get("args")} for fc in function_calls], sort_keys=True)
-                if recent_tool_signatures.count(call_sig) >= 1:
-                    warn("Detected repeated identical tool call loop. Aborting loop.")
-                    contents.append(content_obj)
-                    responses: List[Dict[str, Any]] = []
-                    for function_call in function_calls:
-                        name = function_call.get("name", "tool")
-                        responses.append({
-                            "functionResponse": {
-                                "name": name,
-                                "response": {"result": "Error: Repeated identical tool call detected. Stopping loop to prevent infinite repetition. Please summarize your progress or provide a final answer."},
-                            }
-                        })
-                    contents.append({"role": "user", "parts": responses})
-                    write_notification()
-                    return
-
-                recent_tool_signatures.append(call_sig)
                 contents.append(content_obj)
                 responses: List[Dict[str, Any]] = []
                 for function_call in function_calls:
