@@ -3386,7 +3386,8 @@ def main() -> int:
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
         
-        tok_count = last_turn_tokens if last_turn_tokens is not None else get_token_estimate()
+        # Only display token count once conversation history exists
+        tok_count = last_turn_tokens if last_turn_tokens is not None else (get_token_estimate() if contents else 0)
         if tok_count > 0:
             prefix += f" [{_format_token_count(tok_count)}]"
 
