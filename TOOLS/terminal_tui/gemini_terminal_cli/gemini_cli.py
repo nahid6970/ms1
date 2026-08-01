@@ -3381,7 +3381,7 @@ def main() -> int:
     def prompt_text() -> str:
         prune_model_cooldowns()
         acc = active_api_account if active_api_account else "api"
-        prefix = f"{acc} : {short_model_label(client.model)}"
+        prefix = f"{acc} : {client.model}"
         cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
