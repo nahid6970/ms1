@@ -110,10 +110,10 @@ def _format_seconds(seconds: float) -> str:
 
 def _format_token_count(num_tokens: int) -> str:
     if num_tokens >= 1_000_000:
-        return f"{num_tokens / 1_000_000:.1f}M tok"
+        return f"{num_tokens / 1_000_000:.1f}M"
     if num_tokens >= 1_000:
-        return f"{num_tokens / 1_000:.1f}k tok"
-    return f"{num_tokens} tok"
+        return f"{num_tokens / 1_000:.1f}k"
+    return str(num_tokens)
 
 
 
@@ -1426,7 +1426,7 @@ def format_cooldown_until(until: Optional[dt.datetime]) -> str:
     remaining = int((until - _now()).total_seconds() + 0.999)
     if remaining <= 0:
         return ""
-    return f"cooldown {_format_seconds(remaining)}"
+    return _format_seconds(remaining)
 
 
 class GeminiClient:
@@ -2801,7 +2801,7 @@ def format_model_entry(
     tag = str(model.get("_tag") or "")
     usage = int(model.get("_uses") or 0)
     state = str(model.get("_state") or hidden)
-    if state.startswith("cooldown"):
+    if state and state != "hidden":
         state = _ansi_wrap(state, "31")
     marker = ">" if selected else " "
     row = (
@@ -3381,7 +3381,7 @@ def main() -> int:
     def prompt_text() -> str:
         prune_model_cooldowns()
         acc = active_api_account if active_api_account else "api"
-        prefix = f"{acc} : {client.model}"
+        prefix = f"{acc} -> {client.model}"
         cooldown_text = format_cooldown_until(model_cooldowns.get(client.model))
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
