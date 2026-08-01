@@ -76,7 +76,8 @@ except Exception:
 
 
 def _now_stamp() -> str:
-    return dt.datetime.now().strftime("%Y-%m-%d-%H:%M")
+    # High resolution timestamp ensures notification daemon sees unique text on every call
+    return dt.datetime.now().strftime("%Y-%m-%d-%H:%M:%S.%f")
 
 
 def _now() -> dt.datetime:
@@ -3480,12 +3481,10 @@ def main() -> int:
                         continue
                     if retryable_account_error(msg):
                         warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
-                        write_notification()
                     return
                 candidates = response.get("candidates", [])
                 if not candidates:
                     error("Gemini returned no candidates.")
-                    write_notification()
                     return
 
                 content_obj = candidates[0].get("content", {})
@@ -3501,7 +3500,6 @@ def main() -> int:
                 function_calls = extract_function_calls(parts)
                 if not function_calls:
                     contents.append(content_obj)
-                    write_notification()
                     return
 
                 contents.append(content_obj)
@@ -3527,8 +3525,8 @@ def main() -> int:
         except KeyboardInterrupt:
             print()
             warn("Interrupted by user.")
-        
-        write_notification()
+        finally:
+            write_notification()
 
     if args.prompt:
         run_turn(args.prompt)
