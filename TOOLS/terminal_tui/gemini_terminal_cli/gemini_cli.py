@@ -549,6 +549,9 @@ def _replace_nth(text: str, old: str, new: str, occurrence: int = 1) -> tuple[st
 def replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
     if not path.exists():
         return f"Error: path not found: {path}"
+    # Prevent infinite loop when AI attempts no-op replacement where old_text == new_text
+    if old_text == new_text:
+        return f"Error: old_text and new_text are identical. No changes made to {path}."
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
         updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
@@ -565,6 +568,8 @@ def insert_after_in_file(path: Path, anchor_text: str, insert_text: str, occurre
         return f"Error: path not found: {path}"
     if not anchor_text:
         return "Error: anchor_text is required."
+    if not insert_text:
+        return f"Error: insert_text is empty. No changes made to {path}."
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
         anchor_index = -1
@@ -925,6 +930,8 @@ def replace_lines_in_file(path: Path, start_line: int, end_line: int, new_text: 
         idx_end = min(end_line, len(lines))
         
         new_lines = new_text.splitlines() if new_text else []
+        if lines[idx_start:idx_end] == new_lines:
+            return f"Error: lines {start_line}-{end_line} in {path} already match new_text. No changes made."
         lines[idx_start:idx_end] = new_lines
         path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
         return f"Replaced lines {start_line}-{end_line} in {path}"
@@ -935,6 +942,9 @@ def replace_lines_in_file(path: Path, start_line: int, end_line: int, new_text: 
 def smart_replace_block_in_file(path: Path, old_text: str, new_text: str, occurrence: int = 1) -> str:
     if not path.exists():
         return f"Error: path not found: {path}"
+    # Prevent infinite loop when AI attempts no-op replacement where old_text == new_text
+    if old_text == new_text:
+        return f"Error: old_text and new_text are identical. No changes made to {path}."
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
         updated, found = _replace_nth(content, old_text, new_text, occurrence=occurrence)
