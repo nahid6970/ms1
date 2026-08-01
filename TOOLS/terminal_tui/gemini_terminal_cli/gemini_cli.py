@@ -2983,6 +2983,7 @@ def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
                 first_prompt = "<No user text>"
 
             model = str(data.get("model", "unknown"))
+            project_root = str(data.get("project_root", ""))
             msg_count = len(contents)
             dt_str = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
 
@@ -2991,6 +2992,7 @@ def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
                 "mtime": mtime,
                 "date_str": dt_str,
                 "model": model,
+                "project_root": project_root,
                 "msg_count": msg_count,
                 "first_prompt": first_prompt[:60],
                 "data": data,
@@ -3013,20 +3015,25 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         date_s = item["date_str"]
         model_s = short_model_label(item["model"])
         msg_s = f"{item['msg_count']} msgs"
+        p_root = item.get("project_root", "")
+        folder_s = Path(p_root).name if p_root else ""
+        folder_tag = f"[{folder_s}] " if folder_s else ""
         prompt_s = item["first_prompt"]
 
-        row = f"{marker} {index + 1:>2}. [{date_s}] ({model_s}, {msg_s}) {prompt_s}"
+        row = f"{marker} {index + 1:>2}. [{date_s}] {folder_tag}({model_s}, {msg_s}) {prompt_s}"
         if selected:
             return _ansi_wrap(row, "48;5;24;97")
         return row
 
     def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
+        p_root = current_item.get("project_root") or "Not set"
         return [
             "----------------------------------------------------------------",
             f"File: {current_item['path'].name}",
+            f"Project Root: {p_root}",
             f"Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
             f"First Prompt: {current_item['first_prompt']}",
-            "Press Enter to resume | Press 'd' to delete transcript | Esc/Q to cancel"
+            "Press Enter to resume & cd | Press 'd' to delete transcript | Esc/Q to cancel"
         ]
 
     def handle_key(key: str, items_list: List[Dict[str, Any]], idx: int) -> Optional[str]:
@@ -3049,7 +3056,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         render_item=render_item,
         header_lines=["  Choose a recent session to resume:"],
         dynamic_footer=render_footer_info,
-        instructions="Use Up/Down to navigate, Enter to resume, 'd' to delete, Esc/Q to cancel.",
+        instructions="Use Up/Down to navigate, Enter to resume & cd, 'd' to delete, Esc/Q to cancel.",
         on_key=handle_key,
     )
     if not chosen:
@@ -3428,7 +3435,16 @@ def main() -> int:
             t_path = chosen_transcript["path"]
             system_instruction = t_data.get("system_instruction", system_instruction)
             client.model = t_data.get("model", client.model)
-            cwd = resolve_path(t_data.get("project_root", str(cwd)), Path.cwd())
+            p_root = t_data.get("project_root")
+            if p_root:
+                new_cwd = resolve_path(p_root, Path.cwd())
+                if new_cwd.exists() and new_cwd.is_dir():
+                    try:
+                        os.chdir(new_cwd)
+                        cwd = new_cwd
+                        info(f"Changed working directory to: {cwd}")
+                    except Exception as exc:
+                        warn(f"Could not cd to project root '{new_cwd}': {exc}")
             contents = list(t_data.get("contents", []))
             tool_loop_limit = int(t_data.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
             loaded_disabled_tools = t_data.get("disabled_tools")
@@ -4005,7 +4021,16 @@ def main() -> int:
                         t_path = chosen_transcript["path"]
                         system_instruction = t_data.get("system_instruction", system_instruction)
                         client.model = t_data.get("model", client.model)
-                        cwd = resolve_path(t_data.get("project_root", str(cwd)), Path.cwd())
+                        p_root = t_data.get("project_root")
+                        if p_root:
+                            new_cwd = resolve_path(p_root, Path.cwd())
+                            if new_cwd.exists() and new_cwd.is_dir():
+                                try:
+                                    os.chdir(new_cwd)
+                                    cwd = new_cwd
+                                    info(f"Changed working directory to: {cwd}")
+                                except Exception as exc:
+                                    warn(f"Could not cd to project root '{new_cwd}': {exc}")
                         contents = list(t_data.get("contents", []))
                         tool_loop_limit = int(t_data.get("tool_loop_limit", tool_loop_limit) or tool_loop_limit)
                         loaded_disabled_tools = t_data.get("disabled_tools")
