@@ -1425,6 +1425,33 @@ class GeminiClient:
         self.api_key = api_key
         self.model = model
 
+    def count_tokens(
+        self,
+        contents: List[Dict[str, Any]],
+        system_instruction: Optional[str] = None,
+    ) -> int:
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{urllib.parse.quote(self.model, safe='')}:countTokens?key={urllib.parse.quote(self.api_key)}"
+        )
+        payload: Dict[str, Any] = {"contents": contents}
+        if system_instruction:
+            payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
+
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                raw = response.read().decode("utf-8", errors="replace")
+                body = json.loads(raw)
+                return int(body.get("totalTokens", 0))
+        except Exception:
+            return 0
+
     def generate(
         self,
         contents: List[Dict[str, Any]],
@@ -3752,14 +3779,29 @@ def main() -> int:
                         info("Usage: /skill <name>")
                     continue
                 if command == "/tokens":
-                    # Rough token estimation: total characters across all contents / 4
-                    total_chars = 0
+                    # Calculate total character count including text, function calls, responses, and system instruction
+                    total_chars = len(system_instruction) if system_instruction else 0
                     for msg in contents:
                         for part in msg.get("parts", []):
                             if "text" in part:
                                 total_chars += len(str(part["text"]))
+                            elif "functionCall" in part:
+                                total_chars += len(json.dumps(part["functionCall"]))
+                            elif "functionResponse" in part:
+                                total_chars += len(json.dumps(part["functionResponse"]))
+
+                    actual_tokens = None
+                    if contents and api_key:
+                        try:
+                            actual_tokens = client.count_tokens(contents, system_instruction=system_instruction)
+                        except Exception:
+                            actual_tokens = None
+
                     est_tokens = total_chars // 4
-                    info(f"Estimated conversation tokens: ~{est_tokens:,} tokens ({total_chars:,} chars across {len(contents)} messages)")
+                    if actual_tokens is not None and actual_tokens > 0:
+                        info(f"Conversation tokens ({client.model}): {actual_tokens:,} tokens ({total_chars:,} chars across {len(contents)} messages)")
+                    else:
+                        info(f"Estimated conversation tokens (~4 chars/token): ~{est_tokens:,} tokens ({total_chars:,} chars across {len(contents)} messages)")
                     continue
 
                 if command == "/run":
