@@ -2,7 +2,7 @@ import os
 import random
 
 # Configuration
-song_folder = r"D:\song"
+song_folder = r"C:\Users\nahid\Downloads\song"
 output_file = r"C:\Users\nahid\Desktop\playlist.dpl"
 ignore_folders = {
     os.path.join(song_folder, ".stfolder"),

@@ -51,6 +51,7 @@ def show_notification(title, message):
     toast = tk.Toplevel(root)
     toast.overrideredirect(True)
     toast.attributes("-topmost", True)
+    # Prevent focus stealing
     toast.attributes("-alpha", 0.01) # Start transparent
     
     BORDER_COLOR = "#313244"
@@ -131,8 +132,8 @@ def show_notification(title, message):
     
     toast.geometry(f"{width}x{height}+{x}+{y_start}")
     toast.deiconify()
-    toast.lift()
-    toast.focus_force()
+    # toast.lift() # Removed to prevent stealing focus
+    # toast.focus_force() # Removed to prevent stealing focus
     root.update_idletasks()
     
     # Slide up & Fade in animation
