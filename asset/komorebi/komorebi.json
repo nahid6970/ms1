@@ -338,6 +338,11 @@
             "kind": "Exe",
             "id": "T3 Code (Alpha).exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "input-leap.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -429,6 +434,11 @@
         {
             "kind": "Exe",
             "id": "T3 Code (Alpha).exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "input-leap.exe",
             "matching_strategy": "Equals"
         }
     ],
