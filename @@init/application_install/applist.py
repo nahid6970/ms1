@@ -14,6 +14,7 @@ from tkinter import ttk
 import customtkinter
 import os
 import ctypes
+import webbrowser
 
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
@@ -113,13 +114,13 @@ search_entry.grid(row=0, column=0, padx=(20, 10), pady=(0, 0))
 def add_app_window():
     add_window = customtkinter.CTkToplevel(ROOT)
     add_window.title("Add New Application")
-    add_window.geometry("450x380")
+    add_window.geometry("450x440")
     add_window.attributes('-topmost', True)
 
     frame = customtkinter.CTkFrame(add_window)
     frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:"]
+    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:", "Link:"]
     entries = {}
 
     for i, text in enumerate(labels):
@@ -134,7 +135,8 @@ def add_app_window():
             "scoop_name": entries["scoop_name"].get(),
             "scoop_path": entries["scoop_path"].get(),
             "winget_name": entries["winget_name"].get(),
-            "winget_path": entries["winget_path"].get()
+            "winget_path": entries["winget_path"].get(),
+            "link": entries["link"].get()
         }
         applications.append(new_app)
         save_applications(applications)
@@ -193,6 +195,19 @@ def open_file_location(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
         options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'explorer /select,"{scoop_path}"')})
     show_options(options)
 
+def normalize_link(link):
+    link = (link or "").strip()
+    if not link:
+        return ""
+    if link.startswith(("http://", "https://", "mailto:", "file:", "ftp://")):
+        return link
+    return f"https://{link}"
+
+def open_application_link(app_name, link, chkbx_var, chkbox_bt):
+    normalized_link = normalize_link(link)
+    if normalized_link:
+        webbrowser.open_new_tab(normalized_link)
+
 def show_options(options):
     top = tk.Toplevel()
     top.title("Select Source")
@@ -225,13 +240,13 @@ def show_options(options):
 def edit_application(app_to_edit):
     edit_window = customtkinter.CTkToplevel(ROOT)
     edit_window.title("Edit Application")
-    edit_window.geometry("450x380")
+    edit_window.geometry("450x440")
     edit_window.attributes('-topmost', True)
 
     frame = customtkinter.CTkFrame(edit_window)
     frame.pack(pady=20, padx=20, fill="both", expand=True)
 
-    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:"]
+    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:", "Link:"]
     entries = {}
 
     for i, text in enumerate(labels):
@@ -246,6 +261,7 @@ def edit_application(app_to_edit):
     entries["scoop_path"].insert(0, app_to_edit.get("scoop_path", ""))
     entries["winget_name"].insert(0, app_to_edit.get("winget_name", ""))
     entries["winget_path"].insert(0, app_to_edit.get("winget_path", ""))
+    entries["link"].insert(0, app_to_edit.get("link", ""))
 
     def save_edited_app():
         app_to_edit["name"] = entries["app_name"].get()
@@ -253,6 +269,7 @@ def edit_application(app_to_edit):
         app_to_edit["scoop_path"] = entries["scoop_path"].get()
         app_to_edit["winget_name"] = entries["winget_name"].get()
         app_to_edit["winget_path"] = entries["winget_path"].get()
+        app_to_edit["link"] = entries["link"].get()
         save_applications(applications)
         edit_window.destroy()
         refresh_app_list()
@@ -298,7 +315,8 @@ def save_applications(apps):
             "scoop_name": app["scoop_name"],
             "scoop_path": scoop_path,
             "winget_name": app["winget_name"],
-            "winget_path": app["winget_path"]
+            "winget_path": app["winget_path"],
+            "link": app.get("link", "")
         })
     with open(DATA_FILE, "w") as f:
         json.dump(serializable_apps, f, indent=4)
@@ -396,6 +414,7 @@ def refresh_app_list():
         scoop_path = app["scoop_path"]
         winget_name = app["winget_name"]
         winget_path = app["winget_path"]
+        link = app.get("link", "")
         chkbx_var = app["chkbx_var"]
 
         # Frame for action buttons (initially hidden)
@@ -408,16 +427,22 @@ def refresh_app_list():
         ins_bt = tk.Button(actions_frame, text="\uf192", foreground="#00FF00", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
         unins_bt = tk.Button(actions_frame, text="\uf192", foreground="#FF0000",  background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
         open_bt = tk.Button(actions_frame, text="\uf192", foreground="#eac353", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
+        link_bt = tk.Button(actions_frame, text="Link", foreground="#ffffff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, url=link, var=chkbx_var, cb=chkbox_bt: open_application_link(name, url, var, cb))
         edit_bt = tk.Button(actions_frame, text="\uf044", foreground="#007bff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: edit_application(app))
         delete_bt = tk.Button(actions_frame, text="\uf192", foreground="#dc3545", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: delete_application(app))
 
         # Layout for buttons inside the actions_frame
-        actions_frame.grid_columnconfigure((0, 1, 2, 3, 4), weight=1)
+        actions_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
         ins_bt.grid(row=0, column=0)
         unins_bt.grid(row=0, column=1)
         open_bt.grid(row=0, column=2)
-        edit_bt.grid(row=0, column=3)
-        delete_bt.grid(row=0, column=4)
+        if link:
+            link_bt.grid(row=0, column=3)
+            edit_bt.grid(row=0, column=4)
+            delete_bt.grid(row=0, column=5)
+        else:
+            edit_bt.grid(row=0, column=3)
+            delete_bt.grid(row=0, column=4)
 
         # Layout for the main app entry
         chkbox_bt.grid(row=0, column=0, sticky="ew")
