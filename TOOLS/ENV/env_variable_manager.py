@@ -1376,20 +1376,6 @@ class EnvVariableManager(QMainWindow):
         except Exception as e:
             self.set_status(f"Import failed: {e}", CP_RED)
 
-    def _import_shell_entries(self, hkey, path, entries):
-        for n, d in entries.items():
-            fp = f"{path}\\{n}"
-            key = winreg.CreateKey(hkey, fp)
-            for k in ["MUIVerb", "Icon", "SubCommands"]:
-                if k in d: winreg.SetValueEx(key, k, 0, winreg.REG_SZ, d[k])
-            if "CommandFlags" in d: winreg.SetValueEx(key, "CommandFlags", 0, winreg.REG_DWORD, d["CommandFlags"])
-            winreg.CloseKey(key)
-            if "command" in d:
-                with winreg.CreateKey(hkey, f"{fp}\\command") as ck: winreg.SetValue(ck, "", winreg.REG_SZ, d["command"])
-            if "children" in d:
-                winreg.CreateKey(hkey, f"{fp}\\shell")
-                self._import_shell_entries(hkey, f"{fp}\\shell", d["children"])
-
     def show_command_help(self):
         """Show a detailed help guide dialog for context menu commands"""
         from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QDialogButtonBox
