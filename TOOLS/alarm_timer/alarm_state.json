@@ -129,6 +129,15 @@
           "input_mode": "custom_3",
           "input_value": "23:06 on 8 Aug",
           "use_custom_colors": false
+        },
+        {
+          "id": "523e5c0e",
+          "label": "BS-6970",
+          "fires_at": 1785826586.4112973,
+          "created_at": 1785826286.417512,
+          "input_mode": "text",
+          "input_value": "5m",
+          "use_custom_colors": false
         }
       ]
     },
