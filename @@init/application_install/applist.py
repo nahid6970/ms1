@@ -15,6 +15,18 @@ import customtkinter
 import os
 import ctypes
 import webbrowser
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QGridLayout,
+    QGroupBox,
+    QLabel,
+    QLineEdit,
+    QVBoxLayout,
+)
 
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
@@ -112,38 +124,7 @@ search_entry = customtkinter.CTkEntry(search_controls_frame, font=("calibri", 14
 search_entry.grid(row=0, column=0, padx=(20, 10), pady=(0, 0))
 
 def add_app_window():
-    add_window = customtkinter.CTkToplevel(ROOT)
-    add_window.title("Add New Application")
-    add_window.geometry("450x440")
-    add_window.attributes('-topmost', True)
-
-    frame = customtkinter.CTkFrame(add_window)
-    frame.pack(pady=20, padx=20, fill="both", expand=True)
-
-    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:", "Link:"]
-    entries = {}
-
-    for i, text in enumerate(labels):
-        customtkinter.CTkLabel(frame, text=text, font=("calibri", 14)).grid(row=i, column=0, padx=10, pady=10, sticky="w")
-        entry = customtkinter.CTkEntry(frame, width=250)
-        entry.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
-        entries[text.replace(":", "").replace(" ", "_").lower()] = entry
-
-    def save_new_app():
-        new_app = {
-            "name": entries["app_name"].get(),
-            "scoop_name": entries["scoop_name"].get(),
-            "scoop_path": entries["scoop_path"].get(),
-            "winget_name": entries["winget_name"].get(),
-            "winget_path": entries["winget_path"].get(),
-            "link": entries["link"].get()
-        }
-        applications.append(new_app)
-        save_applications(applications)
-        add_window.destroy()
-        refresh_app_list()
-
-    customtkinter.CTkButton(frame, text="Save App", command=save_new_app, font=("calibri", 14, "bold"), fg_color="#4CAF50", hover_color="#45a049").grid(row=len(labels), columnspan=2, pady=20)
+    open_app_form("Add New Application", "Save App")
 
 add_app_button = customtkinter.CTkButton(search_controls_frame, text="+", command=add_app_window, width=32, height=32, font=("calibri", 18, "bold"), fg_color="#007bff", hover_color="#0056b3")
 add_app_button.grid(row=0, column=1, padx=(0, 20), pady=(0, 0))
@@ -238,43 +219,119 @@ def show_options(options):
         btn.pack(side="left", padx=5, pady=5, anchor="center")
 
 def edit_application(app_to_edit):
-    edit_window = customtkinter.CTkToplevel(ROOT)
-    edit_window.title("Edit Application")
-    edit_window.geometry("450x440")
-    edit_window.attributes('-topmost', True)
+    open_app_form("Edit Application", "Save Changes", app_to_edit)
 
-    frame = customtkinter.CTkFrame(edit_window)
-    frame.pack(pady=20, padx=20, fill="both", expand=True)
+def open_app_form(window_title, submit_text, app_to_edit=None):
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
 
-    labels = ["App Name:", "Scoop Name:", "Scoop Path:", "Winget Name:", "Winget Path:", "Link:"]
-    entries = {}
+    class AppFormDialog(QDialog):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.setWindowTitle(window_title)
+            self.setModal(True)
+            self.setMinimumWidth(560)
+            self.setMaximumWidth(680)
+            self.fields = {}
+            self._build_ui(submit_text)
+            if app_to_edit:
+                self._load_values(app_to_edit)
 
-    for i, text in enumerate(labels):
-        customtkinter.CTkLabel(frame, text=text, font=("calibri", 14)).grid(row=i, column=0, padx=10, pady=10, sticky="w")
-        entry = customtkinter.CTkEntry(frame, width=250)
-        entry.grid(row=i, column=1, padx=10, pady=10, sticky="ew")
-        entries[text.replace(":", "").replace(" ", "_").lower()] = entry
+        def _line_edit(self, placeholder=""):
+            widget = QLineEdit()
+            widget.setPlaceholderText(placeholder)
+            return widget
 
-    # Pre-fill entries with current app data
-    entries["app_name"].insert(0, app_to_edit["name"])
-    entries["scoop_name"].insert(0, app_to_edit.get("scoop_name", ""))
-    entries["scoop_path"].insert(0, app_to_edit.get("scoop_path", ""))
-    entries["winget_name"].insert(0, app_to_edit.get("winget_name", ""))
-    entries["winget_path"].insert(0, app_to_edit.get("winget_path", ""))
-    entries["link"].insert(0, app_to_edit.get("link", ""))
+        def _build_ui(self, submit_text):
+            outer = QVBoxLayout(self)
+            outer.setContentsMargins(16, 16, 16, 16)
+            outer.setSpacing(12)
 
-    def save_edited_app():
-        app_to_edit["name"] = entries["app_name"].get()
-        app_to_edit["scoop_name"] = entries["scoop_name"].get()
-        app_to_edit["scoop_path"] = entries["scoop_path"].get()
-        app_to_edit["winget_name"] = entries["winget_name"].get()
-        app_to_edit["winget_path"] = entries["winget_path"].get()
-        app_to_edit["link"] = entries["link"].get()
+            title = QLabel(window_title)
+            title.setStyleSheet("font-size: 22px; font-weight: 700;")
+            subtitle = QLabel("Add a package source or a direct website link.")
+            subtitle.setStyleSheet("color: #b8b8b8; font-size: 12px;")
+            outer.addWidget(title)
+            outer.addWidget(subtitle)
+
+            app_group = QGroupBox("App Details")
+            app_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            app_layout = QFormLayout(app_group)
+            app_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
+            self.fields["name"] = self._line_edit("Display name")
+            app_layout.addRow("App Name", self.fields["name"])
+            outer.addWidget(app_group)
+
+            source_group = QGroupBox("Package Sources")
+            source_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            source_layout = QGridLayout(source_group)
+            source_layout.setHorizontalSpacing(12)
+            source_layout.setVerticalSpacing(10)
+            self.fields["scoop_name"] = self._line_edit("scoop package")
+            self.fields["winget_name"] = self._line_edit("winget package id")
+            self.fields["scoop_path"] = self._line_edit("Executable or folder path")
+            self.fields["winget_path"] = self._line_edit("Executable path")
+            source_layout.addWidget(QLabel("Scoop Name"), 0, 0)
+            source_layout.addWidget(QLabel("Winget Name"), 0, 1)
+            source_layout.addWidget(self.fields["scoop_name"], 1, 0)
+            source_layout.addWidget(self.fields["winget_name"], 1, 1)
+            source_layout.addWidget(QLabel("Scoop Path"), 2, 0)
+            source_layout.addWidget(QLabel("Winget Path"), 2, 1)
+            source_layout.addWidget(self.fields["scoop_path"], 3, 0)
+            source_layout.addWidget(self.fields["winget_path"], 3, 1)
+            outer.addWidget(source_group)
+
+            link_group = QGroupBox("Website Link")
+            link_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            link_layout = QFormLayout(link_group)
+            self.fields["link"] = self._line_edit("https://...")
+            link_layout.addRow("Link", self.fields["link"])
+            outer.addWidget(link_group)
+
+            buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+            buttons.button(QDialogButtonBox.StandardButton.Save).setText(submit_text)
+            buttons.accepted.connect(self.accept)
+            buttons.rejected.connect(self.reject)
+            outer.addWidget(buttons)
+
+            self.setStyleSheet("""
+                QDialog { background: #232323; color: #f0f0f0; }
+                QGroupBox { background: #2b2b2b; border: 1px solid #3c3c3c; border-radius: 10px; margin-top: 10px; padding: 10px; }
+                QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 4px; }
+                QLabel { color: #f0f0f0; }
+                QLineEdit { background: #2a2f36; border: 1px solid #565a61; border-radius: 6px; padding: 7px 10px; color: #f0f0f0; }
+                QLineEdit:focus { border: 1px solid #5da9ff; }
+                QDialogButtonBox QPushButton { min-width: 110px; padding: 7px 12px; border-radius: 6px; }
+            """)
+
+        def _load_values(self, data):
+            self.fields["name"].setText(data.get("name", ""))
+            self.fields["scoop_name"].setText(data.get("scoop_name", ""))
+            self.fields["scoop_path"].setText(data.get("scoop_path", ""))
+            self.fields["winget_name"].setText(data.get("winget_name", ""))
+            self.fields["winget_path"].setText(data.get("winget_path", ""))
+            self.fields["link"].setText(data.get("link", ""))
+
+        def get_data(self):
+            return {
+                "name": self.fields["name"].text(),
+                "scoop_name": self.fields["scoop_name"].text(),
+                "scoop_path": self.fields["scoop_path"].text(),
+                "winget_name": self.fields["winget_name"].text(),
+                "winget_path": self.fields["winget_path"].text(),
+                "link": self.fields["link"].text(),
+            }
+
+    dialog = AppFormDialog()
+    if dialog.exec() == QDialog.DialogCode.Accepted:
+        app_data = dialog.get_data()
+        if app_to_edit is None:
+            applications.append(app_data)
+        else:
+            app_to_edit.update(app_data)
         save_applications(applications)
-        edit_window.destroy()
         refresh_app_list()
-
-    customtkinter.CTkButton(frame, text="Save Changes", command=save_edited_app, font=("calibri", 14, "bold"), fg_color="#007bff", hover_color="#0056b3").grid(row=len(labels), columnspan=2, pady=20)
 
 def delete_application(app_to_delete):
     global applications
