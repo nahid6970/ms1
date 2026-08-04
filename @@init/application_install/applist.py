@@ -1,53 +1,180 @@
 # Type1: Global
-import sys
-import os
-import json
-import ctypes
-import subprocess
-import webbrowser
-
+import sys, os
 UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path:
-    sys.path.append(UTILITY_PATH)
-
+if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
 import install_deps
-
 install_deps.bootstrap(__file__)
 
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QAction, QFont, QKeySequence
+
+import subprocess
+import subprocess
+import tkinter as tk
+from tkinter import Canvas, Scrollbar
+from tkinter import ttk
+import customtkinter
+import os
+import ctypes
+import webbrowser
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
-    QCheckBox,
     QDialog,
     QDialogButtonBox,
-    QFrame,
+    QFormLayout,
     QGridLayout,
     QGroupBox,
-    QHBoxLayout,
     QLabel,
     QLineEdit,
-    QMainWindow,
-    QMessageBox,
-    QPushButton,
-    QScrollArea,
-    QSizePolicy,
-    QToolButton,
     QVBoxLayout,
-    QWidget,
-    QFormLayout,
 )
-
 
 def set_console_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
-
-
 set_console_title("App List")
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(SCRIPT_DIR, "data.json")
+# Vaiables to track the position of the mouse when clicking​⁡
+drag_data = {"x": 0, "y": 0}
 
+def start_drag(event):
+    drag_data["x"] = event.x
+    drag_data["y"] = event.y
+
+def stop_drag(event):
+    drag_data["x"] = None
+    drag_data["y"] = None
+
+def do_drag(event):
+    if drag_data["x"] is not None and drag_data["y"] is not None:
+        x, y = (event.x - drag_data["x"] + ROOT.winfo_x(), event.y - drag_data["y"] + ROOT.winfo_y())
+        ROOT.geometry("+%s+%s" % (x, y))
+
+def create_custom_border(parent):
+    BORDER_FRAME = tk.Frame(parent, bg="#d32f2f", bd=0, highlightthickness=0)
+    BORDER_FRAME.place(x=0, y=0, relwidth=1, relheight=1)
+    return BORDER_FRAME
+
+# Create main window
+ROOT = tk.Tk()
+ROOT.title("Folder")
+ROOT.attributes('-topmost', True)  # Set always on top
+# ROOT.geometry("520x800")
+ROOT.configure(bg="#d32f2f")
+ROOT.overrideredirect(True)  # Remove default borders
+
+# Create custom border
+BORDER_FRAME = create_custom_border(ROOT)
+
+# Drag only from the header area so interactive widgets like the search bar
+# do not move the whole window.
+DRAG_BAR = tk.Frame(BORDER_FRAME, bg="#1d2027", height=24)
+DRAG_BAR.pack(side="top", fill="x")
+DRAG_BAR.pack_propagate(False)
+
+# Add bindings to make the window movable
+DRAG_BAR.bind("<ButtonPress-1>", start_drag)
+DRAG_BAR.bind("<ButtonRelease-1>", stop_drag)
+DRAG_BAR.bind("<B1-Motion>", do_drag)
+
+screen_width = ROOT.winfo_screenwidth()
+screen_height = ROOT.winfo_screenheight()
+
+x = screen_width - 430
+y = screen_height//2 - 600//2
+ROOT.geometry(f"430x600+{x}+{y}") #! overall size of the window
+
+MAIN_FRAME = tk.Frame(BORDER_FRAME, bg="#1D2027", width=430, height=600) #!
+MAIN_FRAME.pack_propagate(False)
+MAIN_FRAME.pack(fill="both", expand=True, padx=1, pady=1)
+
+
+#! Close Window
+def close_window(event=None):
+    ROOT.destroy()
+
+#!? Main ROOT BOX
+ROOT1 = tk.Frame(DRAG_BAR, bg="#1d2027")
+ROOT1.pack(side="right", anchor="ne", pady=(1, 0), padx=(3, 1))
+
+def create_label(text, parent, bg, fg, width, height, relief, font, ht, htc, padx, pady, anchor, row, column, rowspan, columnspan):
+    label = tk.Label(parent, text=text, bg=bg, fg=fg, width=width, height=height, relief=relief, font=font, highlightthickness=ht, highlightbackground=htc)
+    label.grid(row=row, column=column, padx=padx, pady=pady, sticky=anchor, rowspan=rowspan, columnspan=columnspan)
+    return label
+
+label_properties = [
+{"text": "r","parent": ROOT1,"bg": "#1d2027","fg": "#ff0000","width": 0  ,"height": "0","relief": "flat","font": ("Webdings",10,"bold")  ,"ht": 0,"htc": "#FFFFFF","padx": (0 ,2) ,"pady": (0,0),"anchor": "w","row": 1,"column": 1 ,"rowspan": 1,"columnspan": 1},#! LB_X alternative wingdings x
+]
+labels = [create_label(**prop) for prop in label_properties]
+LB_XXX, = labels
+LB_XXX.bind("<Button-1>", close_window)
+
+#! Applist
+LB_INITIALSPC = tk.Label(MAIN_FRAME, text="",  bg="#1d2027", fg="#fff", relief="flat", height=1, width=2, font=("calibri", 16, "bold"))
+LB_INITIALSPC.pack(side="top", anchor="ne", padx=(0,0), pady=(0,0))
+
+# # Create the search box label
+# search_label = tk.Label(Page1, text="Search:", bg="#1d2027", fg="#fff", font=("calibri", 12, "bold"))
+# search_label.pack(side="top", anchor="center", padx=(20, 0), pady=(10, 0))
+
+# Create a frame for search and add button
+search_controls_frame = tk.Frame(MAIN_FRAME, bg="#1d2027")
+search_controls_frame.pack(side="top", anchor="center", pady=(0, 10))
+
+# Create the search entry
+search_entry = customtkinter.CTkEntry(search_controls_frame, font=("calibri", 14), width=250, placeholder_text="Search apps...")
+search_entry.grid(row=0, column=0, padx=(20, 10), pady=(0, 0))
+
+def add_app_window():
+    open_app_form("Add New Application", "Save App")
+
+add_app_button = customtkinter.CTkButton(search_controls_frame, text="+", command=add_app_window, width=32, height=32, font=("calibri", 18, "bold"), fg_color="#007bff", hover_color="#0056b3")
+add_app_button.grid(row=0, column=1, padx=(0, 20), pady=(0, 0))
+
+def check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
+    scoop_installed = os.path.exists(scoop_path)
+    winget_installed = os.path.exists(winget_path)
+    application_installed = scoop_installed or winget_installed
+    chkbx_var.set(1 if application_installed else 0)
+
+    # Change text color based on installation status if not already checked
+    text_color = "green" if application_installed else "red"
+
+    # Update the label with installation source
+    installation_source = ""
+    if scoop_installed:
+        installation_source = "[S]"
+        text_color = "#FFFFFF"  # Set color to white for [S]
+    elif winget_installed:
+        installation_source = "[W]"
+        text_color = "#41abff"   # Set color to blue for [W]
+    else:
+        installation_source = "[X]"
+        text_color = "#FF0000"    # Set color to red for [X]
+
+    chkbox_bt.config(text=f"{app_name} {installation_source}", foreground=text_color)
+
+def install_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
+    install_options = []
+    if winget_name:
+        install_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "winget install {winget_name}"', shell=True)})
+    if scoop_name:
+        install_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "scoop install {scoop_name}"', shell=True)})
+    show_options(install_options)
+
+def uninstall_application(app_name, scoop_name, scoop_path, winget_name, winget_path, chkbx_var, chkbox_bt):
+    uninstall_options = []
+    if winget_name:
+        uninstall_options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "winget uninstall {winget_name}"', shell=True)})
+    if scoop_name:
+        uninstall_options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'start pwsh -NoExit -Command "scoop uninstall {scoop_name}"', shell=True)})
+    show_options(uninstall_options)
+
+def open_file_location(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt):
+    options = []
+    if winget_path:
+        options.append({"text": "Winget", "command": lambda: subprocess.Popen(f'explorer /select,"{winget_path}"')})
+    if scoop_path:
+        options.append({"text": "Scoop", "command": lambda: subprocess.Popen(f'explorer /select,"{scoop_path}"')})
+    show_options(options)
 
 def normalize_link(link):
     link = (link or "").strip()
@@ -57,650 +184,359 @@ def normalize_link(link):
         return link
     return f"https://{link}"
 
+def open_application_link(app_name, link, chkbx_var, chkbox_bt):
+    normalized_link = normalize_link(link)
+    if normalized_link:
+        webbrowser.open_new_tab(normalized_link)
+
+def show_options(options):
+    top = tk.Toplevel()
+    top.title("Select Source")
+    top.geometry("300x100")
+    top.configure(bg="#282c34")
+    screen_width = top.winfo_screenwidth()
+    screen_height = top.winfo_screenheight()
+    x = (screen_width - 300) // 2
+    y = 800
+    top.geometry(f"300x100+{x}+{y}")
+
+    frame = tk.Frame(top, bg="#1d2027")
+    frame.pack(side="top", expand=True, fill="none", anchor="center")
+
+    for option in options:
+        # Set background color based on the source type
+        if "Winget" in option["text"]:
+            bg_color = "#0078D7"
+            fg_color = "#FFFFFF"
+        elif "Scoop" in option["text"]:
+            bg_color = "#FFFFFF"
+            fg_color = "#000000"
+        else:
+            bg_color = "#1d2027"
+            fg_color = "#000000"
+
+        btn = tk.Button(frame, text=option["text"], command=option["command"], background=bg_color, foreground=fg_color, padx=10, pady=5, borderwidth=2, relief="raised")
+        btn.pack(side="left", padx=5, pady=5, anchor="center")
+
+def edit_application(app_to_edit):
+    open_app_form("Edit Application", "Save Changes", app_to_edit)
+
+def open_app_form(window_title, submit_text, app_to_edit=None):
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+
+    class AppFormDialog(QDialog):
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.setWindowTitle(window_title)
+            self.setModal(True)
+            self.setMinimumWidth(560)
+            self.setMaximumWidth(680)
+            self.fields = {}
+            self._build_ui(submit_text)
+            if app_to_edit:
+                self._load_values(app_to_edit)
+
+        def _line_edit(self, placeholder=""):
+            widget = QLineEdit()
+            widget.setPlaceholderText(placeholder)
+            return widget
+
+        def _build_ui(self, submit_text):
+            outer = QVBoxLayout(self)
+            outer.setContentsMargins(16, 16, 16, 16)
+            outer.setSpacing(12)
+
+            title = QLabel(window_title)
+            title.setStyleSheet("font-size: 22px; font-weight: 700;")
+            subtitle = QLabel("Add a package source or a direct website link.")
+            subtitle.setStyleSheet("color: #b8b8b8; font-size: 12px;")
+            outer.addWidget(title)
+            outer.addWidget(subtitle)
+
+            app_group = QGroupBox("App Details")
+            app_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            app_layout = QFormLayout(app_group)
+            app_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
+            self.fields["name"] = self._line_edit("Display name")
+            app_layout.addRow("App Name", self.fields["name"])
+            outer.addWidget(app_group)
+
+            source_group = QGroupBox("Package Sources")
+            source_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            source_layout = QGridLayout(source_group)
+            source_layout.setHorizontalSpacing(12)
+            source_layout.setVerticalSpacing(10)
+            self.fields["scoop_name"] = self._line_edit("scoop package")
+            self.fields["winget_name"] = self._line_edit("winget package id")
+            self.fields["scoop_path"] = self._line_edit("Executable or folder path")
+            self.fields["winget_path"] = self._line_edit("Executable path")
+            source_layout.addWidget(QLabel("Scoop Name"), 0, 0)
+            source_layout.addWidget(QLabel("Winget Name"), 0, 1)
+            source_layout.addWidget(self.fields["scoop_name"], 1, 0)
+            source_layout.addWidget(self.fields["winget_name"], 1, 1)
+            source_layout.addWidget(QLabel("Scoop Path"), 2, 0)
+            source_layout.addWidget(QLabel("Winget Path"), 2, 1)
+            source_layout.addWidget(self.fields["scoop_path"], 3, 0)
+            source_layout.addWidget(self.fields["winget_path"], 3, 1)
+            outer.addWidget(source_group)
+
+            link_group = QGroupBox("Website Link")
+            link_group.setStyleSheet("QGroupBox { font-weight: 700; margin-top: 8px; }")
+            link_layout = QFormLayout(link_group)
+            self.fields["link"] = self._line_edit("https://...")
+            link_layout.addRow("Link", self.fields["link"])
+            outer.addWidget(link_group)
+
+            buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+            buttons.button(QDialogButtonBox.StandardButton.Save).setText(submit_text)
+            buttons.accepted.connect(self.accept)
+            buttons.rejected.connect(self.reject)
+            outer.addWidget(buttons)
+
+            self.setStyleSheet("""
+                QDialog { background: #232323; color: #f0f0f0; }
+                QGroupBox { background: #2b2b2b; border: 1px solid #3c3c3c; border-radius: 10px; margin-top: 10px; padding: 10px; }
+                QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 4px; }
+                QLabel { color: #f0f0f0; }
+                QLineEdit { background: #2a2f36; border: 1px solid #565a61; border-radius: 6px; padding: 7px 10px; color: #f0f0f0; }
+                QLineEdit:focus { border: 1px solid #5da9ff; }
+                QDialogButtonBox QPushButton { min-width: 110px; padding: 7px 12px; border-radius: 6px; }
+            """)
+
+        def _load_values(self, data):
+            self.fields["name"].setText(data.get("name", ""))
+            self.fields["scoop_name"].setText(data.get("scoop_name", ""))
+            self.fields["scoop_path"].setText(data.get("scoop_path", ""))
+            self.fields["winget_name"].setText(data.get("winget_name", ""))
+            self.fields["winget_path"].setText(data.get("winget_path", ""))
+            self.fields["link"].setText(data.get("link", ""))
+
+        def get_data(self):
+            return {
+                "name": self.fields["name"].text(),
+                "scoop_name": self.fields["scoop_name"].text(),
+                "scoop_path": self.fields["scoop_path"].text(),
+                "winget_name": self.fields["winget_name"].text(),
+                "winget_path": self.fields["winget_path"].text(),
+                "link": self.fields["link"].text(),
+            }
+
+    dialog = AppFormDialog()
+    if dialog.exec() == QDialog.DialogCode.Accepted:
+        app_data = dialog.get_data()
+        if app_to_edit is None:
+            applications.append(app_data)
+        else:
+            app_to_edit.update(app_data)
+        save_applications(applications)
+        refresh_app_list()
+
+def delete_application(app_to_delete):
+    global applications
+    applications = [app for app in applications if app != app_to_delete]
+    save_applications(applications)
+    refresh_app_list()
+
+import json
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(SCRIPT_DIR, "data.json")
 
 def load_applications():
-    if not os.path.exists(DATA_FILE):
-        return []
-
-    with open(DATA_FILE, "r", encoding="utf-8") as f:
-        apps = json.load(f)
-
-    apps.sort(key=lambda x: x.get("name", "").lower())
-    for app in apps:
-        if app.get("scoop_name") and not app.get("scoop_path"):
-            app["scoop_path"] = os.path.join(
-                os.path.expanduser("~"),
-                "scoop",
-                "apps",
-                app["scoop_name"],
-                "current",
-            )
-    return apps
-
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            apps = json.load(f)
+            # Sort applications by name
+            apps.sort(key=lambda x: x.get("name", "").lower())
+            
+            for app in apps:
+                if app.get("scoop_name") and not app.get("scoop_path"):
+                    app["scoop_path"] = os.path.join(os.path.expanduser("~"), "scoop", "apps", app["scoop_name"], "current")
+            
+            return apps
+    return []
 
 def save_applications(apps):
     serializable_apps = []
     for app in apps:
         scoop_path = app.get("scoop_path", "")
         if not scoop_path and app.get("scoop_name"):
-            scoop_path = os.path.join(
-                os.path.expanduser("~"),
-                "scoop",
-                "apps",
-                app["scoop_name"],
-                "current",
-            )
+            scoop_path = os.path.join(os.path.expanduser("~"), "scoop", "apps", app["scoop_name"], "current")
             app["scoop_path"] = scoop_path
-
-        serializable_apps.append(
-            {
-                "name": app.get("name", ""),
-                "scoop_name": app.get("scoop_name", ""),
-                "scoop_path": scoop_path,
-                "winget_name": app.get("winget_name", ""),
-                "winget_path": app.get("winget_path", ""),
-                "link": app.get("link", ""),
-            }
-        )
-
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
+            
+        serializable_apps.append({
+            "name": app["name"],
+            "scoop_name": app["scoop_name"],
+            "scoop_path": scoop_path,
+            "winget_name": app["winget_name"],
+            "winget_path": app["winget_path"],
+            "link": app.get("link", "")
+        })
+    with open(DATA_FILE, "w") as f:
         json.dump(serializable_apps, f, indent=4)
 
+applications = load_applications()
 
-def open_application_link(link, parent=None):
-    normalized_link = normalize_link(link)
-    if normalized_link:
-        webbrowser.open_new_tab(normalized_link)
+customtkinter.set_appearance_mode("System")  # Modes: "System" (default), "Dark", "Light"
+customtkinter.set_default_color_theme("blue")  # Themes: "blue" (default), "dark-blue", "green"
 
+# Create canvas and scrollbar
+canvas = tk.Canvas(MAIN_FRAME, bg="#1d2027", highlightthickness=0)
+canvas.pack(side="left", fill="both", expand=True)
 
-def run_shell_command(command):
-    subprocess.Popen(f'start pwsh -NoExit -Command "{command}"', shell=True)
+#! scrollbar Start
+def on_mousewheel(event):
+    # Get current scroll position
+    current_top = canvas.canvasy(0)
+    scroll_region = canvas.cget('scrollregion')
+    
+    if scroll_region:
+        # Parse scroll region to get bounds
+        x1, y1, x2, y2 = map(float, scroll_region.split())
+        
+        # Calculate scroll amount
+        scroll_amount = -1 * (event.delta // 120)
+        
+        # Prevent scrolling above the top of content
+        if current_top <= y1 and scroll_amount < 0:
+            canvas.yview_moveto(0.0)
+            return "break"
+        
+        # Prevent scrolling below the bottom of content
+        canvas_height = canvas.winfo_height()
+        if current_top + canvas_height >= y2 and scroll_amount > 0:
+            return "break"
+        
+        canvas.yview_scroll(scroll_amount, "units")
+    return "break"
 
+# Bind mousewheel to the main frame and canvas
+def bind_mousewheel_to_widget(widget):
+    widget.bind("<MouseWheel>", on_mousewheel)
+    for child in widget.winfo_children():
+        bind_mousewheel_to_widget(child)
 
-def choice_dialog(title, options, parent=None):
-    if not options:
-        return
-    if len(options) == 1:
-        options[0]["command"]()
-        return
+# Initial binding
+MAIN_FRAME.bind("<MouseWheel>", on_mousewheel)
+canvas.bind("<MouseWheel>", on_mousewheel)
 
-    dialog = QDialog(parent)
-    dialog.setWindowTitle(title)
-    dialog.setModal(True)
-    dialog.setMinimumWidth(360)
+scrollbar = customtkinter.CTkScrollbar(MAIN_FRAME, orientation="vertical", command=canvas.yview)
+scrollbar.pack(side="right", fill="y")
+canvas.configure(yscrollcommand=scrollbar.set)
 
-    layout = QVBoxLayout(dialog)
-    layout.setContentsMargins(16, 16, 16, 16)
-    layout.setSpacing(10)
+#! scrollbar End
 
-    label = QLabel(title)
-    label.setStyleSheet("font-size: 16px; font-weight: 700;")
-    layout.addWidget(label)
+# Create a frame inside the canvas
+frame = tk.Frame(canvas, bg="#1d2027")
+canvas_window = canvas.create_window((0, 0), window=frame, anchor="nw")
 
-    row = QHBoxLayout()
-    row.setSpacing(8)
-    layout.addLayout(row)
+# Function to update scroll region and canvas window
+def update_scroll_region():
+    # Update the scroll region
+    canvas.update_idletasks()
+    canvas.configure(scrollregion=canvas.bbox("all"))
+    
+    # Make sure the frame fills the canvas width
+    canvas_width = canvas.winfo_width()
+    frame_width = frame.winfo_reqwidth()
+    if canvas_width > frame_width:
+        canvas.itemconfig(canvas_window, width=canvas_width)
 
-    for option in options:
-        btn = QPushButton(option["text"])
-        btn.clicked.connect(lambda checked=False, cmd=option["command"], d=dialog: (cmd(), d.accept()))
-        row.addWidget(btn)
+def toggle_actions(a_frame):
+    if a_frame.winfo_viewable():
+        a_frame.grid_remove()
+    else:
+        a_frame.grid(row=1, column=0, pady=(0,5), padx=(32,0), sticky="w")
+    ROOT.after(10, update_scroll_region)
 
-    dialog.exec()
+def refresh_app_list():
+    global applications
+    applications = load_applications()
+    for widget in frame.winfo_children():
+        widget.destroy()
+    
+    row_number = 0
+    for app in applications:
+        app["chkbx_var"] = tk.IntVar()
+        app_frame = tk.Frame(frame, bg="#1d2027")
+        app_frame.grid(row=row_number, column=0, padx=(10,0), pady=(0,0), sticky="ew")
+        app["frame"] = app_frame
+        row_number += 1
 
+        app_name = app["name"]
+        scoop_name = app["scoop_name"]
+        scoop_path = app["scoop_path"]
+        winget_name = app["winget_name"]
+        winget_path = app["winget_path"]
+        link = app.get("link", "")
+        chkbx_var = app["chkbx_var"]
 
-class AppFormDialog(QDialog):
-    def __init__(self, title, submit_text, app_data=None, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle(title)
-        self.setModal(True)
-        self.setMinimumWidth(540)
-        self.setStyleSheet(
-            """
-            QDialog { background: #232323; color: #f0f0f0; }
-            QGroupBox {
-                background: #2b2b2b;
-                border: 1px solid #3c3c3c;
-                border-radius: 10px;
-                margin-top: 10px;
-                padding: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 12px;
-                padding: 0 4px;
-                font-weight: 700;
-            }
-            QLabel { color: #f0f0f0; }
-            QLineEdit {
-                background: #2a2f36;
-                border: 1px solid #565a61;
-                border-radius: 6px;
-                padding: 7px 10px;
-                color: #f0f0f0;
-            }
-            QLineEdit:focus { border: 1px solid #5da9ff; }
-            QDialogButtonBox QPushButton {
-                min-width: 110px;
-                padding: 7px 12px;
-                border-radius: 6px;
-            }
-            """
-        )
+        # Frame for action buttons (initially hidden)
+        actions_frame = tk.Frame(app_frame, bg="#1d2027")
 
-        self.fields = {}
-        self._build_ui(title, submit_text)
-        if app_data:
-            self._load_values(app_data)
+        chkbox_bt = tk.Checkbutton(app_frame, text=app_name, variable=chkbx_var, font=("JetBrainsMono NF", 12, "bold"), background="#1d2027", activebackground="#1d2027", selectcolor="#1d2027", padx=10, pady=1, borderwidth=2, relief="flat", anchor="w")
+        chkbox_bt.configure(command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: check_installation(name, scoop, winget, var, cb))
+        chkbox_bt.bind("<Button-1>", lambda event, a_frame=actions_frame: toggle_actions(a_frame))
 
-    def _line_edit(self, placeholder=""):
-        widget = QLineEdit()
-        widget.setPlaceholderText(placeholder)
-        return widget
+        ins_bt = tk.Button(actions_frame, text="\uf192", foreground="#00FF00", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: install_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+        unins_bt = tk.Button(actions_frame, text="\uf192", foreground="#FF0000",  background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_name, scoop_path=scoop_path, winget=winget_name, winget_path=winget_path, var=chkbx_var, cb=chkbox_bt: uninstall_application(name, scoop, scoop_path, winget, winget_path, var, cb))
+        open_bt = tk.Button(actions_frame, text="\uf192", foreground="#eac353", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, scoop=scoop_path, winget=winget_path, var=chkbx_var, cb=chkbox_bt: open_file_location(name, scoop, winget, var, cb))
+        link_bt = tk.Button(actions_frame, text="Link", foreground="#ffffff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda name=app_name, url=link, var=chkbx_var, cb=chkbox_bt: open_application_link(name, url, var, cb))
+        edit_bt = tk.Button(actions_frame, text="\uf044", foreground="#007bff", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: edit_application(app))
+        delete_bt = tk.Button(actions_frame, text="\uf192", foreground="#dc3545", background="#1d2027", font=("Jetbrainsmono nfp", 10), relief="flat", command=lambda app=app: delete_application(app))
 
-    def _build_ui(self, title, submit_text):
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(16, 16, 16, 16)
-        outer.setSpacing(12)
-
-        header = QLabel(title)
-        header.setStyleSheet("font-size: 22px; font-weight: 700;")
-        sub = QLabel("Add a package source or a direct website link.")
-        sub.setStyleSheet("color: #b8b8b8; font-size: 12px;")
-        outer.addWidget(header)
-        outer.addWidget(sub)
-
-        app_group = QGroupBox("App Details")
-        app_layout = QFormLayout(app_group)
-        app_layout.setLabelAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.fields["name"] = self._line_edit("Display name")
-        app_layout.addRow("App Name", self.fields["name"])
-        outer.addWidget(app_group)
-
-        source_group = QGroupBox("Package Sources")
-        source_layout = QGridLayout(source_group)
-        source_layout.setHorizontalSpacing(12)
-        source_layout.setVerticalSpacing(8)
-
-        self.fields["scoop_name"] = self._line_edit("scoop package")
-        self.fields["winget_name"] = self._line_edit("winget package id")
-        self.fields["scoop_path"] = self._line_edit("Executable or folder path")
-        self.fields["winget_path"] = self._line_edit("Executable path")
-
-        source_layout.addWidget(QLabel("Scoop Name"), 0, 0)
-        source_layout.addWidget(QLabel("Winget Name"), 0, 1)
-        source_layout.addWidget(self.fields["scoop_name"], 1, 0)
-        source_layout.addWidget(self.fields["winget_name"], 1, 1)
-        source_layout.addWidget(QLabel("Scoop Path"), 2, 0)
-        source_layout.addWidget(QLabel("Winget Path"), 2, 1)
-        source_layout.addWidget(self.fields["scoop_path"], 3, 0)
-        source_layout.addWidget(self.fields["winget_path"], 3, 1)
-        outer.addWidget(source_group)
-
-        link_group = QGroupBox("Website Link")
-        link_layout = QFormLayout(link_group)
-        self.fields["link"] = self._line_edit("https://...")
-        link_layout.addRow("Link", self.fields["link"])
-        outer.addWidget(link_group)
-
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.button(QDialogButtonBox.StandardButton.Save).setText(submit_text)
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        outer.addWidget(buttons)
-
-    def _load_values(self, data):
-        self.fields["name"].setText(data.get("name", ""))
-        self.fields["scoop_name"].setText(data.get("scoop_name", ""))
-        self.fields["scoop_path"].setText(data.get("scoop_path", ""))
-        self.fields["winget_name"].setText(data.get("winget_name", ""))
-        self.fields["winget_path"].setText(data.get("winget_path", ""))
-        self.fields["link"].setText(data.get("link", ""))
-
-    def get_data(self):
-        return {
-            "name": self.fields["name"].text().strip(),
-            "scoop_name": self.fields["scoop_name"].text().strip(),
-            "scoop_path": self.fields["scoop_path"].text().strip(),
-            "winget_name": self.fields["winget_name"].text().strip(),
-            "winget_path": self.fields["winget_path"].text().strip(),
-            "link": self.fields["link"].text().strip(),
-        }
-
-
-class DragBar(QWidget):
-    def __init__(self, window, parent=None):
-        super().__init__(parent)
-        self._window = window
-        self._drag_pos = None
-        self.setFixedHeight(26)
-        self.setObjectName("dragBar")
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._drag_pos = event.globalPosition().toPoint() - self._window.frameGeometry().topLeft()
-            event.accept()
-
-    def mouseMoveEvent(self, event):
-        if self._drag_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
-            self._window.move(event.globalPosition().toPoint() - self._drag_pos)
-            event.accept()
-
-    def mouseReleaseEvent(self, event):
-        self._drag_pos = None
-        event.accept()
-
-
-class AppRowWidget(QFrame):
-    def __init__(self, app_data, callbacks, parent=None):
-        super().__init__(parent)
-        self.app_data = app_data
-        self.callbacks = callbacks
-        self.actions_visible = False
-        self.setObjectName("appRow")
-        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
-        self._build_ui()
-        self.refresh_status()
-
-    def _build_ui(self):
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(10, 8, 10, 8)
-        outer.setSpacing(8)
-
-        header = QHBoxLayout()
-        header.setSpacing(8)
-
-        self.checkbox = QCheckBox(self.app_data.get("name", ""))
-        self.checkbox.setObjectName("appCheck")
-        self.checkbox.stateChanged.connect(self.refresh_status)
-        header.addWidget(self.checkbox, 1)
-
-        self.status_badge = QLabel()
-        self.status_badge.setFixedHeight(22)
-        self.status_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_badge.setStyleSheet(
-            "padding: 0 10px; border-radius: 11px; font-weight: 700;"
-        )
-        header.addWidget(self.status_badge, 0)
-
-        self.expand_btn = QToolButton()
-        self.expand_btn.setText("▾")
-        self.expand_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.expand_btn.clicked.connect(self.toggle_actions)
-        header.addWidget(self.expand_btn, 0)
-
-        outer.addLayout(header)
-
-        self.actions_panel = QFrame()
-        actions = QGridLayout(self.actions_panel)
-        actions.setContentsMargins(0, 0, 0, 0)
-        actions.setHorizontalSpacing(6)
-        actions.setVerticalSpacing(6)
-
-        self.install_btn = QPushButton("Install")
-        self.uninstall_btn = QPushButton("Uninstall")
-        self.open_btn = QPushButton("Open Path")
-        self.link_btn = QPushButton("Link")
-        self.edit_btn = QPushButton("Edit")
-        self.delete_btn = QPushButton("Delete")
-
-        self.install_btn.clicked.connect(self._install)
-        self.uninstall_btn.clicked.connect(self._uninstall)
-        self.open_btn.clicked.connect(self._open_location)
-        self.link_btn.clicked.connect(self._open_link)
-        self.edit_btn.clicked.connect(self._edit)
-        self.delete_btn.clicked.connect(self._delete)
-
-        buttons = [
-            self.install_btn,
-            self.uninstall_btn,
-            self.open_btn,
-            self.link_btn,
-            self.edit_btn,
-            self.delete_btn,
-        ]
-
-        for index, button in enumerate(buttons):
-            button.setCursor(Qt.CursorShape.PointingHandCursor)
-            button.setMinimumHeight(30)
-            actions.addWidget(button, 0, index)
-
-        self.link_btn.setVisible(bool(self.app_data.get("link", "").strip()))
-        self.actions_panel.setVisible(False)
-        outer.addWidget(self.actions_panel)
-
-        self.setStyleSheet(
-            """
-            QFrame#appRow {
-                background: #20242b;
-                border: 1px solid #2d323b;
-                border-radius: 10px;
-            }
-            QCheckBox {
-                color: #f0f0f0;
-                font-weight: 700;
-                spacing: 8px;
-            }
-            QCheckBox::indicator {
-                width: 14px;
-                height: 14px;
-            }
-            QToolButton {
-                background: transparent;
-                border: none;
-                color: #cfcfcf;
-                font-size: 16px;
-                padding: 0 4px;
-            }
-            QPushButton {
-                background: #2f3640;
-                color: #f0f0f0;
-                border: 1px solid #424a55;
-                border-radius: 6px;
-                padding: 5px 10px;
-            }
-            QPushButton:hover {
-                background: #3b4451;
-            }
-            """
-        )
-
-    def toggle_actions(self):
-        self.actions_visible = not self.actions_visible
-        self.actions_panel.setVisible(self.actions_visible)
-        self.expand_btn.setText("▴" if self.actions_visible else "▾")
-
-    def matches(self, query):
-        query = (query or "").strip().lower()
-        return not query or query in self.app_data.get("name", "").lower()
-
-    def refresh_status(self):
-        scoop_path = self.app_data.get("scoop_path", "")
-        winget_path = self.app_data.get("winget_path", "")
-        scoop_installed = os.path.exists(scoop_path)
-        winget_installed = os.path.exists(winget_path)
-        installed = scoop_installed or winget_installed
-        self.checkbox.blockSignals(True)
-        self.checkbox.setChecked(installed)
-        self.checkbox.blockSignals(False)
-
-        if scoop_installed:
-            badge = "[S]"
-            badge_style = "background: #2d4b35; color: #ffffff;"
-        elif winget_installed:
-            badge = "[W]"
-            badge_style = "background: #224d77; color: #d9ecff;"
+        # Layout for buttons inside the actions_frame
+        actions_frame.grid_columnconfigure((0, 1, 2, 3, 4, 5), weight=1)
+        ins_bt.grid(row=0, column=0)
+        unins_bt.grid(row=0, column=1)
+        open_bt.grid(row=0, column=2)
+        if link:
+            link_bt.grid(row=0, column=3)
+            edit_bt.grid(row=0, column=4)
+            delete_bt.grid(row=0, column=5)
         else:
-            badge = "[X]"
-            badge_style = "background: #5a2222; color: #ffd6d6;"
+            edit_bt.grid(row=0, column=3)
+            delete_bt.grid(row=0, column=4)
 
-        self.status_badge.setText(badge)
-        self.status_badge.setStyleSheet(
-            f"padding: 0 10px; border-radius: 11px; font-weight: 700; {badge_style}"
-        )
+        # Layout for the main app entry
+        chkbox_bt.grid(row=0, column=0, sticky="ew")
+        actions_frame.grid_remove()  # Hide by default
 
-    def _install(self):
-        options = []
-        if self.app_data.get("winget_name"):
-            options.append(
-                {
-                    "text": "Winget",
-                    "command": lambda: run_shell_command(
-                        f"winget install {self.app_data['winget_name']}"
-                    ),
-                }
-            )
-        if self.app_data.get("scoop_name"):
-            options.append(
-                {
-                    "text": "Scoop",
-                    "command": lambda: run_shell_command(
-                        f"scoop install {self.app_data['scoop_name']}"
-                    ),
-                }
-            )
-        choice_dialog("Select Source", options, self)
+        check_installation(app_name, scoop_path, winget_path, chkbx_var, chkbox_bt)
+    
+    # Update scroll region after all widgets are created
+    ROOT.after(1, update_scroll_region)
+    
+    # Bind mousewheel to all new widgets
+    ROOT.after(10, lambda: bind_mousewheel_to_widget(frame))
 
-    def _uninstall(self):
-        options = []
-        if self.app_data.get("winget_name"):
-            options.append(
-                {
-                    "text": "Winget",
-                    "command": lambda: run_shell_command(
-                        f"winget uninstall {self.app_data['winget_name']}"
-                    ),
-                }
-            )
-        if self.app_data.get("scoop_name"):
-            options.append(
-                {
-                    "text": "Scoop",
-                    "command": lambda: run_shell_command(
-                        f"scoop uninstall {self.app_data['scoop_name']}"
-                    ),
-                }
-            )
-        choice_dialog("Select Source", options, self)
+# Initial display of applications
+refresh_app_list()
 
-    def _open_location(self):
-        options = []
-        if self.app_data.get("winget_path"):
-            options.append(
-                {
-                    "text": "Winget",
-                    "command": lambda: subprocess.Popen(
-                        f'explorer /select,"{self.app_data["winget_path"]}"',
-                        shell=True,
-                    ),
-                }
-            )
-        if self.app_data.get("scoop_path"):
-            options.append(
-                {
-                    "text": "Scoop",
-                    "command": lambda: subprocess.Popen(
-                        f'explorer /select,"{self.app_data["scoop_path"]}"',
-                        shell=True,
-                    ),
-                }
-            )
-        choice_dialog("Select Source", options, self)
+def filter_apps(event=None):
+    search_query = search_entry.get().lower()
+    for app in applications:
+        app_name = app["name"]
+        app_frame = app["frame"]
+        if search_query in app_name.lower():
+            app_frame.grid()
+        else:
+            app_frame.grid_remove()
+    
+    # Update scroll region after filtering
+    ROOT.after(1, update_scroll_region)
 
-    def _open_link(self):
-        open_application_link(self.app_data.get("link", ""), self)
+# Bind the filtering function to the KeyRelease event of the search entry
+search_entry.bind("<KeyRelease>", filter_apps)
 
-    def _edit(self):
-        self.callbacks["edit"](self.app_data)
+# Handle canvas resize
+def on_canvas_configure(event):
+    canvas.itemconfig(canvas_window, width=event.width)
 
-    def _delete(self):
-        self.callbacks["delete"](self.app_data)
+canvas.bind("<Configure>", on_canvas_configure)
 
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.applications = []
-        self.rows = []
-        self.setWindowTitle("Folder")
-        self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-        )
-        self.setMinimumSize(520, 680)
-        self.resize(560, 760)
-        self._build_ui()
-        self.reload_applications()
-
-    def _build_ui(self):
-        root = QFrame()
-        root.setObjectName("rootFrame")
-        self.setCentralWidget(root)
-
-        root_layout = QVBoxLayout(root)
-        root_layout.setContentsMargins(1, 1, 1, 1)
-        root_layout.setSpacing(0)
-
-        outer_border = QFrame()
-        outer_border.setObjectName("outerBorder")
-        outer_layout = QVBoxLayout(outer_border)
-        outer_layout.setContentsMargins(0, 0, 0, 0)
-        outer_layout.setSpacing(0)
-        root_layout.addWidget(outer_border)
-
-        self.drag_bar = DragBar(self, outer_border)
-        self.drag_bar.setStyleSheet("background: #1d2027;")
-        drag_layout = QHBoxLayout(self.drag_bar)
-        drag_layout.setContentsMargins(10, 0, 10, 0)
-        drag_layout.setSpacing(8)
-
-        drag_spacer = QWidget()
-        drag_spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        drag_layout.addWidget(drag_spacer)
-
-        close_btn = QToolButton()
-        close_btn.setText("✕")
-        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        close_btn.clicked.connect(self.close)
-        close_btn.setStyleSheet(
-            "QToolButton { color: #ff6b6b; border: none; font-size: 15px; padding: 0 4px; }"
-            "QToolButton:hover { color: #ffffff; }"
-        )
-        drag_layout.addWidget(close_btn)
-        outer_layout.addWidget(self.drag_bar)
-
-        body = QFrame()
-        body.setObjectName("bodyFrame")
-        body_layout = QVBoxLayout(body)
-        body_layout.setContentsMargins(14, 12, 14, 14)
-        body_layout.setSpacing(12)
-        outer_layout.addWidget(body, 1)
-
-        top_row = QHBoxLayout()
-        top_row.setSpacing(10)
-        body_layout.addLayout(top_row)
-
-        self.search = QLineEdit()
-        self.search.setPlaceholderText("Search apps...")
-        self.search.textChanged.connect(self.filter_rows)
-        self.search.setMinimumHeight(34)
-        top_row.addWidget(self.search, 1)
-
-        add_btn = QPushButton("+")
-        add_btn.setFixedSize(QSize(36, 34))
-        add_btn.clicked.connect(self.add_app)
-        top_row.addWidget(add_btn, 0)
-
-        self.scroll = QScrollArea()
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
-        body_layout.addWidget(self.scroll, 1)
-
-        self.list_container = QWidget()
-        self.list_layout = QVBoxLayout(self.list_container)
-        self.list_layout.setContentsMargins(0, 0, 0, 0)
-        self.list_layout.setSpacing(10)
-        self.list_layout.addStretch(1)
-        self.scroll.setWidget(self.list_container)
-
-        self.setStyleSheet(
-            """
-            QMainWindow { background: #d32f2f; }
-            QFrame#outerBorder { background: #1d2027; border: 1px solid #d32f2f; }
-            QFrame#bodyFrame { background: #1d2027; }
-            QLineEdit {
-                background: #2a2f36;
-                color: #f0f0f0;
-                border: 1px solid #565a61;
-                border-radius: 8px;
-                padding: 7px 10px;
-            }
-            QLineEdit:focus { border: 1px solid #5da9ff; }
-            QPushButton {
-                background: #007bff;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 7px 12px;
-                font-weight: 700;
-            }
-            QPushButton:hover { background: #0056b3; }
-            QScrollArea { background: transparent; }
-            """
-        )
-
-        quit_action = QAction(self)
-        quit_action.setShortcut(QKeySequence.StandardKey.Close)
-        quit_action.triggered.connect(self.close)
-        self.addAction(quit_action)
-
-    def reload_applications(self):
-        self.applications = load_applications()
-        self._rebuild_rows()
-
-    def _rebuild_rows(self):
-        while self.list_layout.count():
-            item = self.list_layout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
-
-        self.rows = []
-        callbacks = {"edit": self.edit_app, "delete": self.delete_app}
-        for app in self.applications:
-            row = AppRowWidget(app, callbacks, self.list_container)
-            self.list_layout.addWidget(row)
-            self.rows.append(row)
-
-        self.list_layout.addStretch(1)
-        self.filter_rows()
-
-    def filter_rows(self):
-        query = self.search.text()
-        for row in self.rows:
-            row.setVisible(row.matches(query))
-
-    def add_app(self):
-        dialog = AppFormDialog("Add New Application", "Save App", parent=self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            self.applications.append(dialog.get_data())
-            save_applications(self.applications)
-            self.reload_applications()
-
-    def edit_app(self, app_data):
-        dialog = AppFormDialog("Edit Application", "Save Changes", app_data, parent=self)
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            app_data.update(dialog.get_data())
-            save_applications(self.applications)
-            self.reload_applications()
-
-    def delete_app(self, app_data):
-        reply = QMessageBox.question(
-            self,
-            "Delete Application",
-            f"Delete {app_data.get('name', 'this app')}?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            self.applications = [app for app in self.applications if app != app_data]
-            save_applications(self.applications)
-            self.reload_applications()
-
-
-def main():
-    app = QApplication.instance() or QApplication(sys.argv)
-    window = MainWindow()
-
-    screen = app.primaryScreen().availableGeometry()
-    x = screen.width() - window.width() - 12
-    y = (screen.height() - window.height()) // 2
-    window.move(max(0, x), max(0, y))
-    window.show()
-
-    sys.exit(app.exec())
-
-
-if __name__ == "__main__":
-    main()
+#! Ending
+ROOT.mainloop()
