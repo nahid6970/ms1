@@ -1,11 +1,12 @@
 {
     "version": "1.3",
-    "timestamp": "2026-07-26T10:13:17.804675",
+    "timestamp": "2026-08-05T08:51:23.583167",
     "aliases": {
         "ll": "ls -la",
         "gl": "git log --oneline",
         "cls": "clear",
-        "gg": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358"
+        "gg": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358",
+        "kiro-cli": "kiro-cli chat --trust-all-tools"
     },
     "context_menu": {
         "Background": {
