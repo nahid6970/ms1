@@ -16,6 +16,32 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+      "name": "Script Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
+      ],
+      "extensions": [
+        "",
+        ".md",
+        ".py",
+        ".json"
+      ],
+      "clicks": 62,
+      "pinned": true,
+      "pin_index": 3
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Code Manager",
       "category": "Tools",
@@ -41,35 +67,9 @@
         ".md",
         ".json"
       ],
-      "clicks": 212,
+      "clicks": 213,
       "pinned": true,
       "pin_index": 1
-    },
-    {
-      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
-      "name": "Script Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
-      ],
-      "extensions": [
-        "",
-        ".md",
-        ".py",
-        ".json"
-      ],
-      "clicks": 58,
-      "pinned": true,
-      "pin_index": 3
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
@@ -776,22 +776,18 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
     ],
-    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+    "project_root": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore"
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
     ]
   },
   "backup": false,
