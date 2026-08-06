@@ -100,7 +100,7 @@ def _ansi_wrap(text: str, code: str) -> str:
 
 def _visible_len(text: str) -> int:
     """Calculate the visible length of a string, ignoring ANSI escape codes."""
-    return len(re.sub(r'\x1b\[[0-9;]*[mK]', '', text))
+    return len(re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', text))
 
 
 def _format_seconds(seconds: float) -> str:
@@ -1583,28 +1583,107 @@ def _render_inline_markdown(text: str) -> str:
 
 def _wrap_visible(text: str, max_width: int) -> List[str]:
     """Wraps text containing ANSI codes into multiple lines based on visible width."""
+    max_width = max(1, max_width)
     if _visible_len(text) <= max_width:
         return [text]
-    
-    # Simple word wrap logic that preserves ANSI
-    words = text.split(' ')
-    lines = []
-    cur_line = []
-    cur_len = 0
-    
-    for word in words:
-        w_len = _visible_len(word)
-        if cur_len + w_len + (1 if cur_line else 0) <= max_width:
-            cur_line.append(word)
-            cur_len += w_len + (1 if cur_line else 0)
+
+    ansi_pattern = re.compile(r'(\x1b\[[0-9;?]*[a-zA-Z])')
+    parts = ansi_pattern.split(text)
+
+    items = []
+    for i, part in enumerate(parts):
+        if not part:
+            continue
+        if i % 2 == 1:
+            items.append((part, True))
         else:
-            if cur_line:
-                lines.append(' '.join(cur_line))
-            cur_line = [word]
-            cur_len = w_len
-    if cur_line:
-        lines.append(' '.join(cur_line))
-    return lines
+            for char in part:
+                items.append((char, False))
+
+    words = []
+    current_word = []
+
+    for item in items:
+        content, is_ansi = item
+        if not is_ansi and content == ' ':
+            if current_word:
+                words.append(current_word)
+                current_word = []
+            words.append([(content, False)])
+        else:
+            current_word.append(item)
+    if current_word:
+        words.append(current_word)
+
+    def word_vis_len(w):
+        return sum(1 for c, is_ansi in w if not is_ansi)
+
+    split_words = []
+    for w in words:
+        v_len = word_vis_len(w)
+        if v_len <= max_width or (len(w) == 1 and not w[0][1] and w[0][0] == ' '):
+            split_words.append(w)
+        else:
+            chunk = []
+            chunk_vis = 0
+            for item in w:
+                c, is_ansi = item
+                if is_ansi:
+                    chunk.append(item)
+                else:
+                    if chunk_vis >= max_width:
+                        split_words.append(chunk)
+                        chunk = []
+                        chunk_vis = 0
+                    chunk.append(item)
+                    chunk_vis += 1
+            if chunk:
+                split_words.append(chunk)
+
+    lines = []
+    cur_line_items = []
+    cur_line_vis = 0
+    active_ansi = []
+
+    for w in split_words:
+        w_vis = word_vis_len(w)
+        is_space = (len(w) == 1 and not w[0][1] and w[0][0] == ' ')
+
+        if is_space:
+            if cur_line_vis > 0 and cur_line_vis + 1 <= max_width:
+                cur_line_items.extend(w)
+                cur_line_vis += 1
+            continue
+
+        if cur_line_vis > 0 and cur_line_vis + w_vis > max_width:
+            line_str = "".join(c for c, _ in cur_line_items)
+            if active_ansi:
+                line_str += "\033[0m"
+            lines.append(line_str)
+
+            cur_line_items = []
+            if active_ansi:
+                for code in active_ansi:
+                    cur_line_items.append((code, True))
+            cur_line_vis = 0
+
+        for c, is_ansi in w:
+            cur_line_items.append((c, is_ansi))
+            if is_ansi:
+                if c in ("\033[0m", "\x1b[0m", "\x1b[m"):
+                    active_ansi.clear()
+                else:
+                    active_ansi.append(c)
+            else:
+                cur_line_vis += 1
+
+    if cur_line_items:
+        line_str = "".join(c for c, _ in cur_line_items)
+        if active_ansi:
+            line_str += "\033[0m"
+        lines.append(line_str)
+
+    return lines if lines else [text]
 
 def render_markdown_text(text: str) -> str:
     lines: List[str] = []
@@ -1648,63 +1727,80 @@ def render_markdown_text(text: str) -> str:
                     row_content = row.strip()
                     if row_content.startswith("|"): row_content = row_content[1:]
                     if row_content.endswith("|"): row_content = row_content[:-1]
-                    cells = [c.strip() for c in row_content.split("|")]
-                    is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells)
+                    row_content = row_content.replace(r"\|", "\x00PIPE\x00")
+                    cells = [c.strip().replace("\x00PIPE\x00", "|") for c in row_content.split("|")]
+                    is_sep = all(set(c.replace(" ", "")) <= {"-", ":"} and "-" in c for c in cells) if cells else False
                     rendered = [_render_inline_markdown(c) for c in cells] if not is_sep else []
                     grid.append({"rendered": rendered, "is_sep": is_sep})
                 
-                col_count = max(len(r["rendered"]) for r in grid if not r["is_sep"])
-                
-                # Calculate basic widths
-                col_widths = [0] * col_count
-                for row in grid:
-                    if row["is_sep"]: continue
-                    for c_idx, cell in enumerate(row["rendered"]):
-                        if c_idx < col_count:
-                            col_widths[c_idx] = max(col_widths[c_idx], _visible_len(cell))
-                
-                # Constrain width if table exceeds terminal
-                total_w = sum(col_widths) + (col_count * 3) + 1
-                if total_w > term_width:
-                    shrink_factor = (term_width - 10) / total_w
-                    col_widths = [max(10, int(w * shrink_factor)) for w in col_widths]
+                non_sep_rows = [r for r in grid if not r["is_sep"]]
+                col_count = max((len(r["rendered"]) for r in non_sep_rows), default=0)
 
-                border_color = "36"
-                def get_sep_line(left, mid, right):
-                    return _style_text(left + mid.join("─" * (w + 2) for w in col_widths) + right, border_color)
+                if col_count > 0:
+                    # Calculate basic widths
+                    col_widths = [0] * col_count
+                    for row in grid:
+                        if row["is_sep"]: continue
+                        for c_idx, cell in enumerate(row["rendered"]):
+                            if c_idx < col_count:
+                                col_widths[c_idx] = max(col_widths[c_idx], _visible_len(cell))
+                    
+                    col_widths = [max(1, w) for w in col_widths]
 
-                lines.append(get_sep_line("┌", "┬", "┐"))
-                v_bar = _style_text("│", border_color)
+                    # Constrain width if table exceeds terminal
+                    total_w = sum(col_widths) + (col_count * 3) + 1
+                    if total_w > term_width:
+                        avail_w = max(col_count * 4, term_width - (col_count * 3 + 1))
+                        min_w = max(4, avail_w // (col_count * 2))
+                        curr_sum = sum(col_widths)
+                        if curr_sum > 0:
+                            col_widths = [
+                                max(min_w, int(w * avail_w / curr_sum))
+                                for w in col_widths
+                            ]
+                        while sum(col_widths) > avail_w:
+                            max_idx = max(range(col_count), key=lambda i: col_widths[i])
+                            if col_widths[max_idx] <= min_w:
+                                break
+                            col_widths[max_idx] -= 1
 
-                for r_idx, row in enumerate(grid):
-                    if row["is_sep"]:
-                        lines.append(get_sep_line("├", "┼", "┤"))
-                        continue
-                    
-                    # Multi-line cell wrapping
-                    wrapped_cells = []
-                    for c_idx in range(col_count):
-                        content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
-                        wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
-                    
-                    row_height = max(len(c) for c in wrapped_cells)
-                    
-                    # Render all lines of this row
-                    for sub_idx in range(row_height):
-                        line_parts = []
+                    border_color = "36"
+                    def get_sep_line(left, mid, right):
+                        return _style_text(left + mid.join("─" * (w + 2) for w in col_widths) + right, border_color)
+
+                    lines.append(get_sep_line("┌", "┬", "┐"))
+                    v_bar = _style_text("│", border_color)
+
+                    for r_idx, row in enumerate(grid):
+                        if row["is_sep"]:
+                            lines.append(get_sep_line("├", "┼", "┤"))
+                            continue
+                        
+                        # Multi-line cell wrapping
+                        wrapped_cells = []
                         for c_idx in range(col_count):
-                            cell_lines = wrapped_cells[c_idx]
-                            cell_line = cell_lines[sub_idx] if sub_idx < len(cell_lines) else ""
-                            pad = " " * (col_widths[c_idx] - _visible_len(cell_line))
-                            line_parts.append(f" {cell_line}{pad} ")
-                        lines.append(f"{v_bar}{v_bar.join(line_parts)}{v_bar}")
+                            content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
+                            wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
+                        
+                        row_height = max((len(c) for c in wrapped_cells), default=1)
+                        
+                        # Render all lines of this row
+                        for sub_idx in range(row_height):
+                            line_parts = []
+                            for c_idx in range(col_count):
+                                cell_lines = wrapped_cells[c_idx]
+                                cell_line = cell_lines[sub_idx] if sub_idx < len(cell_lines) else ""
+                                pad_len = max(0, col_widths[c_idx] - _visible_len(cell_line))
+                                pad = " " * pad_len
+                                line_parts.append(f" {cell_line}{pad} ")
+                            lines.append(f"{v_bar}{v_bar.join(line_parts)}{v_bar}")
 
-                    # Separator between content rows
-                    if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
-                        lines.append(get_sep_line("├", "┼", "┤"))
+                        # Separator between content rows
+                        if r_idx < len(grid) - 1 and not grid[r_idx+1]["is_sep"]:
+                            lines.append(get_sep_line("├", "┼", "┤"))
 
-                lines.append(get_sep_line("└", "┴", "┘"))
-                continue
+                    lines.append(get_sep_line("└", "┴", "┘"))
+                    continue
             else:
                 line = table_rows[0]
                 stripped_line = line.strip()
