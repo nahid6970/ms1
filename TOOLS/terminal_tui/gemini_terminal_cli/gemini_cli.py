@@ -13,6 +13,7 @@ import time
 import subprocess
 import sys
 import textwrap
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -98,9 +99,35 @@ def _ansi_wrap(text: str, code: str) -> str:
     return f"\033[{code}m{text}\033[0m"
 
 
+def _char_width(char: str) -> int:
+    """Returns terminal display width of a single character (1 for narrow, 2 for wide/emoji, 0 for zero-width)."""
+    if not char:
+        return 0
+    cp = ord(char)
+    if cp < 32 or (0x7F <= cp <= 0x9F) or unicodedata.category(char) in ("Mn", "Me", "Cf"):
+        return 0
+    eaw = unicodedata.east_asian_width(char)
+    if eaw in ("W", "F"):
+        return 2
+    if (
+        (0x1F300 <= cp <= 0x1F1FF) or
+        (0x1F300 <= cp <= 0x1F5FF) or
+        (0x1F600 <= cp <= 0x1F64F) or
+        (0x1F680 <= cp <= 0x1F6FF) or
+        (0x1F900 <= cp <= 0x1F9FF) or
+        (0x1FA70 <= cp <= 0x1FAFF) or
+        (0x2600 <= cp <= 0x27BF) or
+        (0x2300 <= cp <= 0x23FF)
+    ):
+        return 2
+    return 1
+
+
 def _visible_len(text: str) -> int:
-    """Calculate the visible length of a string, ignoring ANSI escape codes."""
-    return len(re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', text))
+    """Calculate the visible terminal display width of a string, ignoring ANSI escape codes and accounting for emojis."""
+    clean = re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', text)
+    clean = clean.replace('\ufe0f', '').replace('\ufe0e', '')
+    return sum(_char_width(c) for c in clean)
 
 
 def _format_seconds(seconds: float) -> str:
@@ -1598,6 +1625,8 @@ def _wrap_visible(text: str, max_width: int) -> List[str]:
             items.append((part, True))
         else:
             for char in part:
+                if char in ('\ufe0f', '\ufe0e'):
+                    continue
                 items.append((char, False))
 
     words = []
@@ -1616,7 +1645,7 @@ def _wrap_visible(text: str, max_width: int) -> List[str]:
         words.append(current_word)
 
     def word_vis_len(w):
-        return sum(1 for c, is_ansi in w if not is_ansi)
+        return sum(_char_width(c) for c, is_ansi in w if not is_ansi)
 
     split_words = []
     for w in words:
@@ -1631,12 +1660,13 @@ def _wrap_visible(text: str, max_width: int) -> List[str]:
                 if is_ansi:
                     chunk.append(item)
                 else:
-                    if chunk_vis >= max_width:
+                    cw = _char_width(c)
+                    if chunk_vis + cw > max_width and chunk:
                         split_words.append(chunk)
                         chunk = []
                         chunk_vis = 0
                     chunk.append(item)
-                    chunk_vis += 1
+                    chunk_vis += cw
             if chunk:
                 split_words.append(chunk)
 
@@ -1675,7 +1705,7 @@ def _wrap_visible(text: str, max_width: int) -> List[str]:
                 else:
                     active_ansi.append(c)
             else:
-                cur_line_vis += 1
+                cur_line_vis += _char_width(c)
 
     if cur_line_items:
         line_str = "".join(c for c, _ in cur_line_items)
@@ -1776,11 +1806,15 @@ def render_markdown_text(text: str) -> str:
                             lines.append(get_sep_line("├", "┼", "┤"))
                             continue
                         
-                        # Multi-line cell wrapping
+                        # Multi-line cell wrapping (handles <br> and \n)
                         wrapped_cells = []
                         for c_idx in range(col_count):
                             content = row["rendered"][c_idx] if c_idx < len(row["rendered"]) else ""
-                            wrapped_cells.append(_wrap_visible(content, col_widths[c_idx]))
+                            content = re.sub(r'<br\s*/?>', '\n', content, flags=re.IGNORECASE)
+                            cell_lines = []
+                            for paragraph in content.split('\n'):
+                                cell_lines.extend(_wrap_visible(paragraph, col_widths[c_idx]))
+                            wrapped_cells.append(cell_lines if cell_lines else [""])
                         
                         row_height = max((len(c) for c in wrapped_cells), default=1)
                         
