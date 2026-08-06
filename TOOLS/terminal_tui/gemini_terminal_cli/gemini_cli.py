@@ -1933,9 +1933,12 @@ def format_tool_call(name: str, args: Dict[str, Any]) -> str:
 
 def format_tool_result(result: str) -> str:
     text = result[:4000].rstrip()
-    lines = ["[tool-result]"]
+    is_err = text.lower().startswith("error") or "error:" in text.lower()
+    header = _ansi_wrap("[tool-result: ERROR]", "31") if is_err else "[tool-result]"
+    lines = [header]
     if text:
-        lines.extend(f"  {line}" for line in text.splitlines())
+        for line in text.splitlines():
+            lines.append(f"  {_ansi_wrap(line, '31')}" if is_err else f"  {line}")
     else:
         lines.append("  <empty>")
     if len(result) > 4000:
@@ -3945,7 +3948,11 @@ def main() -> int:
                             }
                         }
                     )
-                    info(format_tool_result(result))
+                    formatted_res = format_tool_result(result)
+                    if result.lower().startswith("error") or "error:" in result.lower():
+                        error(formatted_res)
+                    else:
+                        info(formatted_res)
 
                 contents.append({"role": "user", "parts": responses})
 
