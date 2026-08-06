@@ -16,6 +16,32 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+      "name": "Script Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
+      ],
+      "extensions": [
+        "",
+        ".md",
+        ".py",
+        ".json"
+      ],
+      "clicks": 66,
+      "pinned": true,
+      "pin_index": 3
+    },
+    {
       "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
       "name": "myGemini-CLI",
       "category": "AI-Tools",
@@ -44,26 +70,26 @@
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\skills\\media.md"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
         "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json"
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
+        "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py"
       ],
       "extensions": [
         "",
@@ -72,7 +98,7 @@
         ".py",
         ".txt"
       ],
-      "clicks": 86,
+      "clicks": 87,
       "pinned": true,
       "pin_index": 6
     },
@@ -103,32 +129,6 @@
       "clicks": 30,
       "pinned": false,
       "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
-      "name": "Script Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M8.01005 0.858582L6.01005 14.8586L7.98995 15.1414L9.98995 1.14142L8.01005 0.858582Z\" fill=\"#ffffff\"></path> <path d=\"M12.5 11.5L11.0858 10.0858L13.1716 8L11.0858 5.91422L12.5 4.5L16 8L12.5 11.5Z\" fill=\"#ffffff\"></path> <path d=\"M2.82843 8L4.91421 10.0858L3.5 11.5L0 8L3.5 4.5L4.91421 5.91422L2.82843 8Z\" fill=\"#ffffff\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-        "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
-      ],
-      "extensions": [
-        "",
-        ".md",
-        ".py",
-        ".json"
-      ],
-      "clicks": 63,
-      "pinned": true,
-      "pin_index": 3
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
@@ -776,52 +776,18 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\README.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\skills\\media.md"
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
     ],
-    "project_root": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
+    "project_root": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\openrouter_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\tools.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\groq_cli.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\recent.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\prompt_history.txt",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__main__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\system_instruction.md",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\groq_terminal_cli\\__init__.py",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\model_prefs.json",
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\openrouter_terminal_cli\\tools.json"
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
+      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
     ]
   },
   "backup": false,
