@@ -1870,9 +1870,52 @@ def format_tool_call(name: str, args: Dict[str, Any]) -> str:
         if command:
             return f"Ran {command}"
 
-    if name == "apply_patch" and isinstance(args.get("patch"), str):
-        lines = ["[tool] apply_patch", "  patch:"]
+    if name in {"apply_patch", "fuzzy_apply_patch"} and isinstance(args.get("patch"), str):
+        lines = [f"[tool] {name}", "  patch:"]
         lines.extend(_format_patch_preview(str(args.get("patch", ""))))
+        return "\n".join(lines)
+
+    if name in {"smart_replace_block", "replace_block"}:
+        filepath = args.get("filepath", "")
+        old_text = str(args.get("old_text", ""))
+        new_text = str(args.get("new_text", ""))
+        occ = args.get("occurrence")
+        lines = [f"[tool] {name}", f"  filepath: {filepath}"]
+        if occ and int(occ) > 1:
+            lines.append(f"  occurrence: {occ}")
+        lines.append("  old_text (removed):")
+        for l in old_text.rstrip().splitlines():
+            lines.append(f"    {_ansi_wrap('- ' + l, '31')}")
+        lines.append("  new_text (added):")
+        for l in new_text.rstrip().splitlines():
+            lines.append(f"    {_ansi_wrap('+ ' + l, '32')}")
+        return "\n".join(lines)
+
+    if name == "replace_lines":
+        filepath = args.get("filepath", "")
+        start_line = args.get("start_line", "")
+        end_line = args.get("end_line", "")
+        new_text = str(args.get("new_text", ""))
+        lines = [f"[tool] {name}", f"  filepath: {filepath}", f"  lines: {start_line}-{end_line}", "  new_text (added):"]
+        for l in new_text.rstrip().splitlines():
+            lines.append(f"    {_ansi_wrap('+ ' + l, '32')}")
+        return "\n".join(lines)
+
+    if name == "insert_after":
+        filepath = args.get("filepath", "")
+        anchor_text = str(args.get("anchor_text", ""))
+        insert_text = str(args.get("insert_text", ""))
+        lines = [f"[tool] {name}", f"  filepath: {filepath}", f"  after anchor: {anchor_text}", "  insert_text (added):"]
+        for l in insert_text.rstrip().splitlines():
+            lines.append(f"    {_ansi_wrap('+ ' + l, '32')}")
+        return "\n".join(lines)
+
+    if name == "delete_block":
+        filepath = args.get("filepath", "")
+        block_text = str(args.get("block_text", ""))
+        lines = [f"[tool] {name}", f"  filepath: {filepath}", "  block_text (removed):"]
+        for l in block_text.rstrip().splitlines():
+            lines.append(f"    {_ansi_wrap('- ' + l, '31')}")
         return "\n".join(lines)
 
     lines = [f"[tool] {name}"]
