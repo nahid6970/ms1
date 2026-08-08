@@ -86,10 +86,36 @@ def render_svg_pixmap(svg_str, color=CP_CYAN, size=18):
     pix = QPixmap(size, size)
     pix.fill(Qt.GlobalColor.transparent)
     p = QPainter(pix)
-    r = QSvgRenderer(QByteArray(svg_str.replace("currentColor", color).encode('utf-8')))
-    r.render(p)
+    svg_xml = svg_str
+    if "currentColor" in svg_xml:
+        svg_xml = svg_xml.replace("currentColor", color)
+    r = QSvgRenderer(QByteArray(svg_xml.encode('utf-8')))
+    if r.isValid():
+        r.render(p)
     p.end()
     return pix
+
+def get_app_icon_pixmap(app_config, size=22, default_color=CP_CYAN):
+    custom_svg = app_config.get("icon_svg", "").strip()
+    if custom_svg and "<svg" in custom_svg.lower():
+        try:
+            pix = QPixmap(size, size)
+            pix.fill(Qt.GlobalColor.transparent)
+            p = QPainter(pix)
+            svg_xml = custom_svg
+            if "currentColor" in svg_xml:
+                svg_xml = svg_xml.replace("currentColor", default_color)
+            r = QSvgRenderer(QByteArray(svg_xml.encode('utf-8')))
+            if r.isValid():
+                r.render(p)
+                p.end()
+                return pix
+            p.end()
+        except Exception:
+            pass
+
+    fallback_svg = SVG_LOCK if app_config.get("is_locked") else SVG_DIAMOND
+    return render_svg_pixmap(fallback_svg, color=default_color, size=size)
 
 
 # ── CRYPTOGRAPHY HELPERS ──────────────────────────────────────────────────────
@@ -517,7 +543,8 @@ class AppDialog(QDialog):
         self.app_config = app_config or {
             "target_path": "",
             "sync_items": [],
-            "is_locked": True
+            "is_locked": True,
+            "icon_svg": ""
         }
         self.init_ui()
         if self.app_config.get("target_path"):
@@ -570,10 +597,31 @@ class AppDialog(QDialog):
 
         layout.addWidget(make_divider())
 
+        # Custom SVG Icon Code
+        svg_row = QHBoxLayout()
+        svg_row.setSpacing(10)
+
+        self.svg_input = QLineEdit(self.app_config.get("icon_svg", ""))
+        self.svg_input.setPlaceholderText("Paste raw <svg>...</svg> code here...")
+        self.svg_input.textChanged.connect(self.update_svg_preview)
+
+        self.svg_preview_lbl = QLabel()
+        self.svg_preview_lbl.setFixedSize(30, 30)
+        self.svg_preview_lbl.setStyleSheet(f"background: {CP_PANEL}; border: 1px solid {CP_DIM};")
+        self.svg_preview_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        svg_row.addWidget(self.svg_input, 1)
+        svg_row.addWidget(self.svg_preview_lbl)
+
+        layout.addWidget(make_label("Custom App Icon SVG Code (Optional)", size=10, color=CP_CYAN))
+        layout.addLayout(svg_row)
+
+        layout.addWidget(make_divider())
+
         # Auto-Scanned Files/Folders Checklist
         layout.addWidget(make_label("Check Files & Folders to Sync / Swap with Profile:", size=10, color=CP_YELLOW))
         self.items_list = QListWidget()
-        self.items_list.setFixedHeight(140)
+        self.items_list.setFixedHeight(120)
 
         items_btn_row = QHBoxLayout()
         items_btn_row.setSpacing(8)
@@ -598,7 +646,10 @@ class AppDialog(QDialog):
         # Encryption Checkbox
         self.lock_checkbox = QCheckBox("Encrypt stored profile files using Master Password (.enc)")
         self.lock_checkbox.setChecked(self.app_config.get("is_locked", True))
+        self.lock_checkbox.toggled.connect(self.update_svg_preview)
         layout.addWidget(self.lock_checkbox)
+
+        self.update_svg_preview()
 
         root.addWidget(body)
 
@@ -616,6 +667,29 @@ class AppDialog(QDialog):
         f_layout.addWidget(cancel_btn)
         f_layout.addWidget(save_btn)
         root.addWidget(footer)
+
+    def update_svg_preview(self):
+        custom_svg = self.svg_input.text().strip()
+        if custom_svg and "<svg" in custom_svg.lower():
+            try:
+                pix = QPixmap(20, 20)
+                pix.fill(Qt.GlobalColor.transparent)
+                p = QPainter(pix)
+                svg_xml = custom_svg
+                if "currentColor" in svg_xml:
+                    svg_xml = svg_xml.replace("currentColor", CP_CYAN)
+                r = QSvgRenderer(QByteArray(svg_xml.encode('utf-8')))
+                if r.isValid():
+                    r.render(p)
+                    p.end()
+                    self.svg_preview_lbl.setPixmap(pix)
+                    return
+                p.end()
+            except Exception:
+                pass
+
+        fallback_svg = SVG_LOCK if self.lock_checkbox.isChecked() else SVG_DIAMOND
+        self.svg_preview_lbl.setPixmap(render_svg_pixmap(fallback_svg, color=CP_CYAN, size=20))
 
     def browse_target(self):
         path = QFileDialog.getExistingDirectory(self, "Select Target Application Directory")
@@ -684,7 +758,8 @@ class AppDialog(QDialog):
         self.app_config = {
             "target_path": target_path,
             "sync_items": sync_items,
-            "is_locked": self.lock_checkbox.isChecked()
+            "is_locked": self.lock_checkbox.isChecked(),
+            "icon_svg": self.svg_input.text().strip()
         }
         self.accept()
 
@@ -885,8 +960,7 @@ class AppCard(QFrame):
         layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         icon_lbl = QLabel()
-        icon_svg = SVG_LOCK if self.app_config.get("is_locked") else SVG_DIAMOND
-        icon_lbl.setPixmap(render_svg_pixmap(icon_svg, color=CP_CYAN, size=18))
+        icon_lbl.setPixmap(get_app_icon_pixmap(self.app_config, size=22, default_color=CP_CYAN))
         icon_lbl.setStyleSheet("background: transparent;")
         layout.addWidget(icon_lbl)
 
@@ -1149,7 +1223,8 @@ class AppProfileManager(QMainWindow):
                             self.apps[app_name] = {
                                 "target_path": p.get("target_path", ""),
                                 "sync_items": ["*"],
-                                "is_locked": True
+                                "is_locked": True,
+                                "icon_svg": ""
                             }
                         if p.get("password") and not self.master_password:
                             self.master_password = p.get("password")
