@@ -93,6 +93,23 @@ INPUT_STYLE = f"""
         color: {TEXT_MUTED};
         border-color: {BORDER};
     }}
+    QListWidget::item {{
+        padding: 6px 8px;
+        color: {TEXT_PRIMARY};
+    }}
+    QListWidget::item:hover {{
+        background-color: {BG_RAISED};
+    }}
+    QListWidget::indicator {{
+        width: 16px;
+        height: 16px;
+        border: 1px solid {BORDER};
+        background-color: {BG_DEEP};
+    }}
+    QListWidget::indicator:checked {{
+        background-color: {ACCENT};
+        border-color: {ACCENT};
+    }}
     QDateTimeEdit::up-button, QDateTimeEdit::down-button {{
         background: {BG_RAISED}; border: none; width: 18px;
     }}
@@ -288,11 +305,13 @@ class AppDialog(QDialog):
             "is_locked": True
         }
         self.init_ui()
+        if self.app_config.get("target_path"):
+            self.populate_target_items()
 
     def init_ui(self):
         title = f"App Settings ({self.app_name_orig})" if self.app_name_orig else "New Application"
         self.setWindowTitle(title)
-        self.setFixedWidth(540)
+        self.setFixedWidth(560)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
             {INPUT_STYLE}
@@ -329,6 +348,8 @@ class AppDialog(QDialog):
         tgt_row.setSpacing(8)
         self.target_input = QLineEdit(self.app_config.get("target_path", ""))
         self.target_input.setPlaceholderText("Select main App target directory path...")
+        self.target_input.editingFinished.connect(self.populate_target_items)
+
         tgt_browse = make_secondary_btn("Browse", min_width=80)
         tgt_browse.setFixedHeight(36)
         tgt_browse.clicked.connect(self.browse_target)
@@ -339,32 +360,25 @@ class AppDialog(QDialog):
 
         layout.addWidget(make_divider())
 
-        # Files/Folders to Sync
-        layout.addWidget(make_label("Files & Folders to Swap/Sync (Relative to Target Path)", size=12))
+        # Auto-Scanned Files/Folders Checklist
+        layout.addWidget(make_label("Check Files & Folders to Sync / Swap with Profile:", size=12))
         self.items_list = QListWidget()
-        self.items_list.setFixedHeight(120)
-        self.items_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-
-        for item in self.app_config.get("sync_items", []):
-            self.items_list.addItem(item)
+        self.items_list.setFixedHeight(150)
 
         items_btn_row = QHBoxLayout()
         items_btn_row.setSpacing(8)
         
-        add_file_btn = make_secondary_btn("+ Add Files", min_width=90)
-        add_folder_btn = make_secondary_btn("+ Add Folder", min_width=90)
-        sync_all_btn = make_secondary_btn("Sync All (*)", min_width=90)
-        remove_btn = make_secondary_btn("Remove", min_width=70)
+        select_all_btn = make_secondary_btn("Select All", min_width=85)
+        deselect_all_btn = make_secondary_btn("Deselect All", min_width=85)
+        rescan_btn = make_secondary_btn("🔄 Rescan Path", min_width=100)
 
-        add_file_btn.clicked.connect(self.add_files)
-        add_folder_btn.clicked.connect(self.add_folder)
-        sync_all_btn.clicked.connect(self.set_sync_all)
-        remove_btn.clicked.connect(self.remove_selected_items)
+        select_all_btn.clicked.connect(self.select_all_items)
+        deselect_all_btn.clicked.connect(self.deselect_all_items)
+        rescan_btn.clicked.connect(self.populate_target_items)
 
-        items_btn_row.addWidget(add_file_btn)
-        items_btn_row.addWidget(add_folder_btn)
-        items_btn_row.addWidget(sync_all_btn)
-        items_btn_row.addWidget(remove_btn)
+        items_btn_row.addWidget(select_all_btn)
+        items_btn_row.addWidget(deselect_all_btn)
+        items_btn_row.addWidget(rescan_btn)
 
         layout.addWidget(self.items_list)
         layout.addLayout(items_btn_row)
@@ -396,43 +410,48 @@ class AppDialog(QDialog):
     def browse_target(self):
         path = QFileDialog.getExistingDirectory(self, "Select Target Application Directory")
         if path:
-            self.target_input.setText(os.path.normpath(path))
+            norm_path = os.path.normpath(path)
+            self.target_input.setText(norm_path)
+            self.populate_target_items()
 
-    def add_files(self):
+    def populate_target_items(self):
         target_dir = self.target_input.text().strip()
-        if not target_dir or not os.path.exists(target_dir):
-            QMessageBox.warning(self, "Warning", "Please set a valid Target Directory first.")
+        if not target_dir or not os.path.exists(target_dir) or not os.path.isdir(target_dir):
             return
-        files, _ = QFileDialog.getOpenFileNames(self, "Select Files to Sync", target_dir)
-        for f in files:
-            rel = os.path.relpath(f, target_dir)
-            if not self._item_exists(rel):
-                self.items_list.addItem(rel)
 
-    def add_folder(self):
-        target_dir = self.target_input.text().strip()
-        if not target_dir or not os.path.exists(target_dir):
-            QMessageBox.warning(self, "Warning", "Please set a valid Target Directory first.")
-            return
-        folder = QFileDialog.getExistingDirectory(self, "Select Folder to Sync", target_dir)
-        if folder:
-            rel = os.path.relpath(folder, target_dir)
-            if not self._item_exists(rel):
-                self.items_list.addItem(rel)
+        saved_sync = set(self.app_config.get("sync_items", []))
+        is_default_check = len(saved_sync) == 0 or "*" in saved_sync
 
-    def set_sync_all(self):
         self.items_list.clear()
-        self.items_list.addItem("*")
 
-    def remove_selected_items(self):
-        for item in self.items_list.selectedItems():
-            self.items_list.takeItem(self.items_list.row(item))
+        try:
+            entries = sorted(os.listdir(target_dir))
+        except Exception:
+            return
 
-    def _item_exists(self, text):
+        for entry in entries:
+            full_path = os.path.join(target_dir, entry)
+            is_dir = os.path.isdir(full_path)
+            display_name = entry + ("/" if is_dir else "")
+            clean_name = entry
+
+            item = QListWidgetItem(display_name)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+
+            if is_default_check or clean_name in saved_sync or display_name in saved_sync:
+                item.setCheckState(Qt.CheckState.Checked)
+            else:
+                item.setCheckState(Qt.CheckState.Unchecked)
+
+            self.items_list.addItem(item)
+
+    def select_all_items(self):
         for i in range(self.items_list.count()):
-            if self.items_list.item(i).text() == text:
-                return True
-        return False
+            self.items_list.item(i).setCheckState(Qt.CheckState.Checked)
+
+    def deselect_all_items(self):
+        for i in range(self.items_list.count()):
+            self.items_list.item(i).setCheckState(Qt.CheckState.Unchecked)
 
     def save(self):
         app_name = self.app_input.text().strip()
@@ -443,7 +462,10 @@ class AppDialog(QDialog):
 
         sync_items = []
         for i in range(self.items_list.count()):
-            sync_items.append(self.items_list.item(i).text())
+            item = self.items_list.item(i)
+            if item.checkState() == Qt.CheckState.Checked:
+                clean_text = item.text().rstrip('/')
+                sync_items.append(clean_text)
 
         if not sync_items:
             sync_items = ["*"]

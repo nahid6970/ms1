@@ -1,5 +1,13 @@
 {
     "master_password": "182358",
-    "apps": {},
+    "apps": {
+        "freebuff": {
+            "target_path": "C:\\Users\\nahid\\.config\\manicode",
+            "sync_items": [
+                "credentials.json"
+            ],
+            "is_locked": true
+        }
+    },
     "profiles": []
 }
