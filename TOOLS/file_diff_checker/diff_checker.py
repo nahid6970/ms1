@@ -139,7 +139,8 @@ class App(QMainWindow):
             }}
             QTreeWidget::item {{ padding: 2px 4px; }}
             QTreeWidget::item:hover {{ background-color: #1c1c1c; }}
-            QTreeWidget::item:selected {{ background-color: {CP_YELLOW}; color: #000000; }}
+            QTreeWidget::item:selected {{ background-color: #2a2a2a; color: {CP_TEXT}; border: none; outline: none; }}
+            QTreeWidget::item:focus {{ border: none; outline: none; }}
             QHeaderView::section {{
                 background-color: {CP_PANEL}; color: {CP_YELLOW}; border: 1px solid {CP_DIM};
                 padding: 4px; font-weight: bold;
@@ -240,6 +241,7 @@ class App(QMainWindow):
         self.tree_widget = QTreeWidget()
         self.tree_widget.setHeaderLabels(["Name"])
         self.tree_widget.setAlternatingRowColors(True)
+        self.tree_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tree_widget.customContextMenuRequested.connect(self._tree_context_menu)
         splitter.addWidget(self.output_area)
