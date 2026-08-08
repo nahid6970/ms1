@@ -19,7 +19,7 @@
             "timer_enabled": false,
             "target_time": null,
             "app_name": "freebuff",
-            "active": false,
+            "active": true,
             "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00"
         },
         {
