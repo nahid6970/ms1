@@ -276,7 +276,8 @@ class App(QMainWindow):
         right_layout = QVBoxLayout(right_widget)
         right_layout.setContentsMargins(4, 0, 0, 0)
 
-        # Filter search box
+        # Filter search box + collapse button
+        search_row = QHBoxLayout()
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Filter file tree...")
         self.search_input.setClearButtonEnabled(True)
@@ -286,7 +287,30 @@ class App(QMainWindow):
         self._filter_timer.setInterval(150)
         self._filter_timer.timeout.connect(self.apply_filter)
         self.search_input.textChanged.connect(self._schedule_filter)
-        right_layout.addWidget(self.search_input)
+
+        ICON_COLLAPSE = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 14 10 14 10 20"/>
+          <polyline points="20 10 14 10 14 4"/>
+          <line x1="10" y1="14" x2="3" y2="21"/>
+          <line x1="21" y1="3" x2="14" y2="10"/>
+        </svg>"""
+
+        self.btn_collapse = QToolButton()
+        self.btn_collapse.setIcon(svg_icon(ICON_COLLAPSE, 18))
+        self.btn_collapse.setIconSize(QSize(18, 18))
+        self.btn_collapse.setFixedSize(30, 30)
+        self.btn_collapse.setToolTip("Collapse all folders")
+        self.btn_collapse.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_collapse.setStyleSheet("""
+            QToolButton { background: transparent; border: none; }
+            QToolButton:hover { background: #1e1e1e; border-radius: 4px; }
+            QToolButton:pressed { background: #2a2a2a; }
+        """)
+        self.btn_collapse.clicked.connect(self._collapse_all)
+
+        search_row.addWidget(self.search_input, 1)
+        search_row.addWidget(self.btn_collapse)
+        right_layout.addLayout(search_row)
 
         # File tree
         self.tree_widget = QTreeWidget()
@@ -590,6 +614,13 @@ class App(QMainWindow):
         self.save_settings()
         self.progress_label.setText(f'Added "{folder_name}" to ignore list.')
 
+    def _collapse_all(self):
+        """Collapse all folders, keeping only root expanded."""
+        self.tree_widget.collapseAll()
+        root = self.tree_widget.topLevelItem(0)
+        if root:
+            root.setExpanded(True)
+
     # ---- Tree filter search box ----
 
     def _schedule_filter(self):
@@ -597,15 +628,39 @@ class App(QMainWindow):
         self._filter_timer.start()
 
     def apply_filter(self):
-        """Filter the tree by path substring (case-insensitive). Applies immediately."""
+        """Filter the tree and log by path substring (case-insensitive)."""
         query = self.search_input.text().strip().lower()
+
+        # --- tree ---
         root = self.tree_widget.topLevelItem(0)
-        if root is None:
-            return
-        if not query:
-            self._show_all(root)
-            return  # leave expansion state untouched
-        self._apply_filter_item(root, query)
+        if root is not None:
+            if not query:
+                self._show_all(root)
+                self._collapse_all()
+            else:
+                self._apply_filter_item(root, query)
+
+        # --- log ---
+        self._filter_log(query)
+
+    def _filter_log(self, query):
+        """Dim log lines that don't contain query; restore all when query is empty."""
+        from PyQt6.QtGui import QTextCursor, QTextCharFormat, QColor
+        doc = self.output_area.document()
+        cursor = QTextCursor(doc)
+        cursor.beginEditBlock()
+        block = doc.begin()
+        while block.isValid():
+            fmt = QTextCharFormat()
+            if query and query not in block.text().lower():
+                fmt.setForeground(QColor("#3a3a3a"))  # dim non-matching lines
+            else:
+                fmt.setForeground(QColor(CP_TEXT))    # restore matching lines
+            cursor.setPosition(block.position())
+            cursor.select(QTextCursor.SelectionType.LineUnderCursor)
+            cursor.setCharFormat(fmt)
+            block = block.next()
+        cursor.endEditBlock()
 
     def _show_all(self, item):
         item.setHidden(False)
@@ -721,6 +776,9 @@ class App(QMainWindow):
 
     def log(self, message):
         self.output_area.append(message)
+        query = self.search_input.text().strip().lower()
+        if query:
+            self._filter_log(query)
 
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
