@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QFileDialog, QTextEdit, QDialog)
+                             QFileDialog, QTextEdit, QDialog, QCheckBox)
 from PyQt6.QtCore import Qt
 
 # CYBERPUNK THEME PALETTE
@@ -14,6 +14,18 @@ CP_RED = "#FF003C"
 CP_GREEN = "#00ff21"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
+
+# File extensions treated as text (compared only when "text files only" is enabled)
+TEXT_EXTENSIONS = {
+    '.json', '.txt', '.html', '.htm', '.xml', '.yaml', '.yml', '.csv', '.tsv',
+    '.md', '.ini', '.cfg', '.conf', '.log', '.toml', '.sql', '.env',
+    '.py', '.js', '.ts', '.jsx', '.tsx', '.css', '.scss', '.sass', '.less',
+    '.bat', '.cmd', '.sh', '.ps1', '.rb', '.go', '.java', '.c', '.cpp', '.h',
+    '.cs', '.php', '.swift', '.kt', '.rs', '.vue', '.svelte', '.json5', '.lock'
+}
+
+# Filenames without a useful extension that should still count as text
+TEXT_FILENAMES = {'.gitignore', '.dockerignore', '.editorconfig', '.npmrc', 'dockerfile'}
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -53,6 +65,15 @@ class App(QMainWindow):
             }}
             QPushButton:pressed {{
                 background-color: {CP_YELLOW}; color: black;
+            }}
+            
+            QCheckBox {{ color: {CP_TEXT}; spacing: 8px; }}
+            QCheckBox::indicator {{
+                width: 16px; height: 16px; border: 1px solid {CP_DIM}; background-color: {CP_PANEL};
+            }}
+            QCheckBox::indicator:hover {{ border: 1px solid {CP_CYAN}; }}
+            QCheckBox::indicator:checked {{
+                background-color: {CP_YELLOW}; border: 1px solid {CP_YELLOW};
             }}
             
             QGroupBox {{
@@ -106,6 +127,12 @@ class App(QMainWindow):
         folder_layout.addWidget(self.btn_browse)
         
         form.addRow("Target Folder:", folder_layout)
+
+        self.only_text_files = QCheckBox("Only compare text files (json, txt, html, xml, csv, md, code, ...)")
+        self.only_text_files.setChecked(True)
+        self.only_text_files.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.only_text_files.setToolTip("Only take snapshots and compare files with text extensions (json, txt, html, etc.).")
+        form.addRow("", self.only_text_files)
         grp.setLayout(form)
         layout.addWidget(grp)
         
@@ -133,11 +160,18 @@ class App(QMainWindow):
         if folder:
             self.folder_input.setText(folder)
 
-    def get_file_state(self, folder):
+    def is_text_file(self, path):
+        """Return True if the file has a text extension / is a known text filename."""
+        name = os.path.basename(path).lower()
+        return os.path.splitext(name)[1] in TEXT_EXTENSIONS or name in TEXT_FILENAMES
+
+    def get_file_state(self, folder, text_only=False):
         state = {}
         for root, dirs, files in os.walk(folder):
             for f in files:
                 filepath = os.path.join(root, f)
+                if text_only and not self.is_text_file(filepath):
+                    continue
                 try:
                     state[filepath] = os.path.getmtime(filepath)
                 except Exception:
@@ -150,8 +184,11 @@ class App(QMainWindow):
             self.log(f"<span style='color:{CP_RED};'>ERROR: Invalid directory.</span>")
             return
             
-        self.snapshot = self.get_file_state(folder)
-        self.log(f"Snapshot taken for {len(self.snapshot)} files in {folder}.")
+        # Remember which filter mode the snapshot was taken with
+        self.text_only_enabled = self.only_text_files.isChecked()
+        self.snapshot = self.get_file_state(folder, text_only=self.text_only_enabled)
+        mode = "text files only" if self.text_only_enabled else "all files"
+        self.log(f"Snapshot taken for {len(self.snapshot)} files ({mode}) in {folder}.")
 
     def check_changes(self):
         folder = self.folder_input.text()
@@ -163,7 +200,11 @@ class App(QMainWindow):
             self.log(f"<span style='color:{CP_RED};'>ERROR: No snapshot found. Please take a snapshot first.</span>")
             return
             
-        current_state = self.get_file_state(folder)
+        # Use the same filter mode the snapshot was taken with so the sets match
+        if hasattr(self, 'text_only_enabled') and self.only_text_files.isChecked() != self.text_only_enabled:
+            self.log(f"<span style='color:{CP_YELLOW};'>Note: text-file filter changed since the snapshot; using the snapshot's setting.</span>")
+        
+        current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False))
         
         added = []
         modified = []
