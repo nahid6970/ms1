@@ -4,7 +4,7 @@ import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
                              QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar, 
-                             QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter)
+                             QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter, QMenu)
 from PyQt6.QtCore import Qt, QTimer
 
 # CYBERPUNK THEME PALETTE
@@ -240,6 +240,8 @@ class App(QMainWindow):
         self.tree_widget = QTreeWidget()
         self.tree_widget.setHeaderLabels(["Name"])
         self.tree_widget.setAlternatingRowColors(True)
+        self.tree_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree_widget.customContextMenuRequested.connect(self._tree_context_menu)
         splitter.addWidget(self.output_area)
         splitter.addWidget(self.tree_widget)
         splitter.setStretchFactor(0, 3)
@@ -484,6 +486,32 @@ class App(QMainWindow):
         # Collapse everything first — addChild during sort can leave nodes expanded
         self.tree_widget.collapseAll()
         root.setExpanded(True)
+
+    # ---- Tree right-click context menu ----
+
+    def _tree_context_menu(self, pos):
+        """Show a context menu when right-clicking a folder item in the tree."""
+        item = self.tree_widget.itemAt(pos)
+        if item is None:
+            return
+        data = item.data(0, Qt.ItemDataRole.UserRole)
+        if data is None or data[0] != "dir":
+            return  # only show menu for folders
+        folder_name = os.path.basename(data[1]) or data[1]
+        menu = QMenu(self)
+        action = menu.addAction(f'Add "{folder_name}" to Ignore List')
+        action.triggered.connect(lambda: self._add_to_ignore(folder_name))
+        menu.exec(self.tree_widget.viewport().mapToGlobal(pos))
+
+    def _add_to_ignore(self, folder_name):
+        """Append folder_name to the ignore list if not already present."""
+        existing = [n.strip().lower() for n in self.ignore_text.splitlines() if n.strip()]
+        if folder_name.lower() in existing:
+            self.progress_label.setText(f'"{folder_name}" is already in the ignore list.')
+            return
+        self.ignore_text = (self.ignore_text.rstrip("\n") + "\n" + folder_name).lstrip("\n")
+        self.save_settings()
+        self.progress_label.setText(f'Added "{folder_name}" to ignore list.')
 
     # ---- Tree filter search box ----
 
