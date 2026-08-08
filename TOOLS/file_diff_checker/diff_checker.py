@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
                              QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar,
                              QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter, QMenu, QToolButton)
-from PyQt6.QtGui import QIcon, QPixmap, QPainter
+from PyQt6.QtGui import QIcon, QPixmap, QPainter, QColor
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize
 
@@ -741,27 +741,31 @@ class App(QMainWindow):
         self.tree_start(folder)
         self.scan_start()
         try:
+            # No tree_cb — we'll build the tree from changed files only after diffing
             current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False),
-                                                progress_cb=self.update_progress, tree_cb=self._add_tree_file)
+                                                progress_cb=self.update_progress)
         finally:
             self.scan_end()
-        
+
         added = []
         modified = []
         deleted = []
-        
+
         for path, mtime in current_state.items():
             if path not in self.snapshot:
                 added.append(path)
             elif self.snapshot[path] != mtime:
                 modified.append(path)
-                
+
         for path in self.snapshot:
             if path not in current_state:
                 deleted.append(path)
-                
+
         if not added and not modified and not deleted:
             self.log(f"<span style='color:{CP_YELLOW};'>No changes detected.</span>")
+            # Clear tree to show nothing changed
+            self.tree_widget.clear()
+            root = self.tree_widget.topLevelItem(0)
         else:
             self.log("<br>--- CHANGES DETECTED ---")
             for f in added:
@@ -770,9 +774,44 @@ class App(QMainWindow):
                 self.log(f"<span style='color:{CP_CYAN};'>[MODIFIED]</span> {f}")
             for f in deleted:
                 self.log(f"<span style='color:{CP_RED};'>[DELETED]</span> {f}")
-        
+
+            # Build tree with only changed files, colour-coded by status
+            self._build_changes_tree(folder, added, modified, deleted)
+
         # Update snapshot to current so sequential checks work
         self.snapshot = current_state
+
+    def _build_changes_tree(self, folder, added, modified, deleted):
+        """Populate the tree with only changed files, grouped under their folders."""
+        self.tree_widget.clear()
+        self._tree_items = {}
+        norm_root = os.path.normpath(folder)
+        name = os.path.basename(norm_root.rstrip("\\/")) or norm_root
+        root_item = QTreeWidgetItem([name])
+        root_item.setData(0, Qt.ItemDataRole.UserRole, ("dir", norm_root))
+        root_item.setExpanded(True)
+        self.tree_widget.addTopLevelItem(root_item)
+        self._tree_items[norm_root] = root_item
+
+        color_map = {}
+        for p in added:
+            color_map[p] = CP_GREEN
+        for p in modified:
+            color_map[p] = CP_CYAN
+        for p in deleted:
+            color_map[p] = CP_RED
+
+        for path, color in sorted(color_map.items()):
+            dirpath = os.path.dirname(path)
+            parent = self._ensure_dir_item(dirpath)
+            fname = os.path.basename(path)
+            item = QTreeWidgetItem([fname])
+            item.setData(0, Qt.ItemDataRole.UserRole, ("file", path))
+            item.setForeground(0, QColor(color))
+            parent.addChild(item)
+
+        # Expand all folders in the changes tree so everything is visible
+        self.tree_widget.expandAll()
 
     def log(self, message):
         self.output_area.append(message)
