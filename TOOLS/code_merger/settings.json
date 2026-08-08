@@ -16,6 +16,53 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\@AI-Tool",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".py"
+      ],
+      "clicks": 6,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": "Code Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
+      ],
+      "extensions": [
+        ".py",
+        "",
+        ".md",
+        ".json"
+      ],
+      "clicks": 216,
+      "pinned": true,
+      "pin_index": 1
+    },
+    {
       "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
       "name": "Script Manager",
       "category": "Tools",
@@ -37,7 +84,7 @@
         ".py",
         ".json"
       ],
-      "clicks": 67,
+      "clicks": 68,
       "pinned": true,
       "pin_index": 3
     },
@@ -129,36 +176,6 @@
       "clicks": 30,
       "pinned": false,
       "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-      "name": "Code Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore"
-      ],
-      "extensions": [
-        "",
-        ".py",
-        ".md",
-        ".json"
-      ],
-      "clicks": 213,
-      "pinned": true,
-      "pin_index": 1
     },
     {
       "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
@@ -776,19 +793,12 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md",
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\README.md",
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_launcher_config.json",
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py"
+      "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
     ],
-    "project_root": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+    "project_root": "C:\\@delta\\ms1\\@AI-Tool",
     "minify": false,
     "file_modes": {},
-    "disabled_files": [
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\.gitignore",
-      "C:\\@delta\\db\\@run_from_db\\Script_Manager\\lastsession.md"
-    ]
+    "disabled_files": []
   },
   "backup": false,
   "preview": true
