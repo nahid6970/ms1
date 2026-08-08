@@ -11,6 +11,13 @@
                 "freebuff-metadata.json"
             ],
             "is_locked": true
+        },
+        "Rclone Config": {
+            "target_path": "C:\\Users\\nahid\\scoop\\apps\\rclone\\current",
+            "sync_items": [
+                "rclone.conf"
+            ],
+            "is_locked": true
         }
     },
     "profiles": [
@@ -29,6 +36,14 @@
             "app_name": "freebuff",
             "active": false,
             "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01"
+        },
+        {
+            "name": "rclone config",
+            "timer_enabled": false,
+            "target_time": null,
+            "app_name": "Rclone Config",
+            "active": false,
+            "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\Rclone Config\\rclone config"
         }
     ]
 }
