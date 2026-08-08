@@ -2,8 +2,8 @@ import sys
 import os
 import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar, 
+                             QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
+                             QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar,
                              QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter, QMenu)
 from PyQt6.QtCore import Qt, QTimer
 
@@ -45,9 +45,9 @@ class SettingsDialog(QDialog):
         self.resize(420, 380)
         self.setStyleSheet(self.parent().styleSheet())
         layout = QVBoxLayout(self)
-        
+
         tabs = QTabWidget()
-        
+
         # Tab: Ignore Folders
         ignore_tab = QWidget()
         ignore_layout = QVBoxLayout(ignore_tab)
@@ -59,9 +59,9 @@ class SettingsDialog(QDialog):
         ignore_layout.addWidget(hint)
         ignore_layout.addWidget(self.ignore_edit)
         tabs.addTab(ignore_tab, "Ignore Folders")
-        
+
         layout.addWidget(tabs)
-        
+
         # Save / Cancel
         btn_row = QHBoxLayout()
         btn_row.addStretch()
@@ -74,7 +74,7 @@ class SettingsDialog(QDialog):
         btn_row.addWidget(btn_save)
         btn_row.addWidget(btn_cancel)
         layout.addLayout(btn_row)
-    
+
     def get_ignore_text(self):
         return self.ignore_edit.toPlainText()
 
@@ -170,6 +170,7 @@ class App(QMainWindow):
 
         # Top-level horizontal splitter: left panel = controls + log, right panel = tree
         main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.main_splitter = main_splitter
 
         # ---- LEFT PANEL ----
         left_widget = QWidget()
@@ -265,6 +266,7 @@ class App(QMainWindow):
 
         main_splitter.setStretchFactor(0, 1)
         main_splitter.setStretchFactor(1, 1)
+        main_splitter.splitterMoved.connect(lambda *_: self.save_settings())
 
         root_layout = QVBoxLayout(central)
         root_layout.setContentsMargins(0, 0, 0, 0)
@@ -283,6 +285,11 @@ class App(QMainWindow):
         # Persist settings whenever anything changes, then restore saved values
         self.folder_input.textChanged.connect(lambda *_: self.save_settings())
         self.only_text_files.stateChanged.connect(lambda *_: self.save_settings())
+        # Debounce window resize saves so we don't hammer disk while dragging
+        self._resize_save_timer = QTimer(self)
+        self._resize_save_timer.setSingleShot(True)
+        self._resize_save_timer.setInterval(400)
+        self._resize_save_timer.timeout.connect(self.save_settings)
         self.load_settings()
         self.ensure_gitignore()
 
@@ -294,6 +301,9 @@ class App(QMainWindow):
             "target_folder": self.folder_input.text(),
             "only_text_files": self.only_text_files.isChecked(),
             "ignore_folders": self.ignore_text,
+            "window_width": self.width(),
+            "window_height": self.height(),
+            "splitter_sizes": self.main_splitter.sizes(),
         }
         try:
             with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
@@ -317,6 +327,12 @@ class App(QMainWindow):
             # Key-presence check so an intentionally emptied list stays empty
             if "ignore_folders" in data:
                 self.ignore_text = data["ignore_folders"]
+            if "window_width" in data and "window_height" in data:
+                self.resize(int(data["window_width"]), int(data["window_height"]))
+            if "splitter_sizes" in data:
+                sizes = [int(x) for x in data["splitter_sizes"]]
+                if len(sizes) == 2 and all(s > 0 for s in sizes):
+                    self.main_splitter.setSizes(sizes)
         finally:
             self._suppress_save = False
 
@@ -340,6 +356,10 @@ class App(QMainWindow):
     def closeEvent(self, event):
         self.save_settings()
         super().closeEvent(event)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._resize_save_timer.start()
 
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Directory")
