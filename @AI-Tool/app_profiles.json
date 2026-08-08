@@ -10,7 +10,8 @@
                 "freebuff-instance-owner.json",
                 "freebuff-metadata.json"
             ],
-            "is_locked": true
+            "is_locked": true,
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"28\" height=\"28\" viewBox=\"0 0 28 28\">\n  <path fill=\"#fff\" d=\"M7.5 2 8.35 7.15 13.5 8 8.35 8.85 7.5 14 6.65 8.85 1.5 8l5.15-.85L7.5 2Z\"/>\n  <path fill=\"#fff\" d=\"M18 14 18.35 14.65 23 15 18.35 15.35 18 16l-.35-.65L13 15l4.65-.35L18 14Z\"/>\n</svg>"
         },
         "Rclone Config": {
             "target_path": "C:\\Users\\nahid\\scoop\\apps\\rclone\\current",
