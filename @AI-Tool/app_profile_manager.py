@@ -14,9 +14,6 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QDateTime, QDate, QTime
 from PyQt6.QtGui import QFont, QColor
 
-from Cryptodome.Cipher import AES
-from Cryptodome.Protocol.KDF import PBKDF2
-
 # ── CYBERPUNK THEME PALETTE ──────────────────────────────────────────────────
 CP_BG      = "#050505"  # Main Window Background
 CP_PANEL   = "#111111"  # Panel/Input Background
@@ -39,6 +36,9 @@ PROFILE_DATA_DIR = os.path.join(BASE_DIR, "profile_data")
 os.makedirs(PROFILE_DATA_DIR, exist_ok=True)
 
 # ── CRYPTOGRAPHY HELPERS ──────────────────────────────────────────────────────
+from Cryptodome.Cipher import AES
+from Cryptodome.Protocol.KDF import PBKDF2
+
 def derive_key(password, salt, key_length=32):
     return PBKDF2(password.encode('utf-8'), salt, dkLen=key_length)
 
@@ -228,17 +228,50 @@ def make_secondary_btn(text, min_width=90):
     return btn
 
 
-def make_ghost_btn(text):
-    btn = QPushButton(text)
+def make_icon_btn(symbol, tooltip="", size=34):
+    btn = QPushButton(symbol)
+    btn.setFixedSize(size, size)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
-    btn.setFixedSize(30, 30)
+    if tooltip:
+        btn.setToolTip(tooltip)
     btn.setStyleSheet(f"""
         QPushButton {{
-            background-color: transparent;
-            color: {CP_SUBTEXT};
-            border: 1px solid transparent;
+            background-color: {CP_PANEL};
+            border: 1px solid {CP_DIM};
+            color: {CP_TEXT};
             font-weight: bold;
             font-family: '{FONT_MAIN}', monospace;
+            font-size: 11pt;
+            padding: 0px;
+        }}
+        QPushButton:hover {{
+            background-color: #2A2A2A;
+            border: 1px solid {CP_CYAN};
+            color: {CP_CYAN};
+        }}
+        QPushButton:pressed {{
+            background-color: {CP_YELLOW};
+            color: #000000;
+        }}
+    """)
+    return btn
+
+
+def make_card_action_btn(symbol, tooltip=""):
+    btn = QPushButton(symbol)
+    btn.setFixedSize(30, 30)
+    btn.setCursor(Qt.CursorShape.PointingHandCursor)
+    if tooltip:
+        btn.setToolTip(tooltip)
+    btn.setStyleSheet(f"""
+        QPushButton {{
+            background-color: {CP_BG};
+            color: {CP_SUBTEXT};
+            border: 1px solid {CP_DIM};
+            font-weight: bold;
+            font-family: '{FONT_MAIN}', monospace;
+            font-size: 10pt;
+            padding: 0px;
         }}
         QPushButton:hover {{
             background-color: {CP_PANEL};
@@ -246,6 +279,7 @@ def make_ghost_btn(text):
             color: {CP_CYAN};
         }}
         QPushButton:pressed {{
+            border-color: {CP_RED};
             color: {CP_RED};
         }}
     """)
@@ -780,7 +814,7 @@ class AppCard(QFrame):
     def init_ui(self):
         self.setObjectName("appCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.setFixedHeight(85)
+        self.setFixedHeight(80)
         self.setStyleSheet(f"""
             #appCard {{
                 background-color: {CP_PANEL};
@@ -793,11 +827,13 @@ class AppCard(QFrame):
         """)
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(18, 0, 14, 0)
-        layout.setSpacing(14)
+        layout.setContentsMargins(16, 0, 16, 0)
+        layout.setSpacing(12)
+        layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         icon = QLabel("🔒" if self.app_config.get("is_locked") else "◈")
-        icon.setStyleSheet(f"color: {CP_CYAN}; font-size: 16pt; background: transparent;")
+        icon.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; background: transparent;")
+        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon)
 
         text_col = QVBoxLayout()
@@ -810,7 +846,7 @@ class AppCard(QFrame):
         if len(path_str) > 50:
             path_str = "..." + path_str[-47:]
         path_lbl = QLabel(f"Target: {path_str}")
-        path_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: '{FONT_MAIN}', monospace; font-size: 9pt; background: transparent;")
+        path_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: '{FONT_MAIN}', monospace; font-size: 8pt; background: transparent;")
 
         count_lbl = make_label(
             f"{self.profile_count} account{'s' if self.profile_count != 1 else ''}",
@@ -827,10 +863,8 @@ class AppCard(QFrame):
         text_col.addLayout(sub_row)
         layout.addLayout(text_col, 1)
 
-        edit_btn = make_ghost_btn("⚙")
-        delete_btn = make_ghost_btn("✕")
-        edit_btn.setToolTip("App Settings")
-        delete_btn.setToolTip("Delete App")
+        edit_btn = make_card_action_btn("⚙", tooltip="Configure Application")
+        delete_btn = make_card_action_btn("✕", tooltip="Delete Application")
 
         edit_btn.clicked.connect(lambda: self.settings_click.emit(self.app_name))
         delete_btn.clicked.connect(lambda: self.delete_click.emit(self.app_name))
@@ -838,7 +872,8 @@ class AppCard(QFrame):
         layout.addWidget(edit_btn)
         layout.addWidget(delete_btn)
 
-        chevron = make_label("›", size=16, color=CP_SUBTEXT)
+        chevron = make_label("›", size=14, color=CP_SUBTEXT, bold=True)
+        chevron.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(chevron)
 
     def mousePressEvent(self, event):
@@ -874,8 +909,9 @@ class ProfileCard(QFrame):
         outer.setContentsMargins(0, 0, 0, 0)
 
         row = QHBoxLayout()
-        row.setContentsMargins(18, 14, 14, 14)
+        row.setContentsMargins(16, 12, 16, 12)
         row.setSpacing(12)
+        row.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         info_col = QVBoxLayout()
         info_col.setSpacing(4)
@@ -909,7 +945,7 @@ class ProfileCard(QFrame):
         row.addLayout(info_col, 1)
 
         # Update Session Button
-        update_btn = make_secondary_btn("UPDATE", min_width=80)
+        update_btn = make_secondary_btn("UPDATE", min_width=75)
         update_btn.setToolTip("Overwrite backup with current target directory state")
         update_btn.setFixedHeight(30)
         update_btn.clicked.connect(lambda: self.update_click.emit(self.profile))
@@ -927,8 +963,8 @@ class ProfileCard(QFrame):
             act_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
             row.addWidget(act_btn)
 
-        edit_btn   = make_ghost_btn("✎")
-        delete_btn = make_ghost_btn("✕")
+        edit_btn   = make_card_action_btn("✎", tooltip="Edit Account")
+        delete_btn = make_card_action_btn("✕", tooltip="Delete Account")
         edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
         delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
         row.addWidget(edit_btn)
@@ -1082,34 +1118,31 @@ class AppProfileManager(QMainWindow):
 
         # Topbar
         topbar = QFrame()
-        topbar.setFixedHeight(60)
+        topbar.setFixedHeight(56)
         topbar.setStyleSheet(f"QFrame {{ background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM}; }}")
         tb_layout = QHBoxLayout(topbar)
-        tb_layout.setContentsMargins(20, 0, 16, 0)
-        tb_layout.setSpacing(10)
+        tb_layout.setContentsMargins(16, 0, 16, 0)
+        tb_layout.setSpacing(8)
+        tb_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        self.back_btn = make_secondary_btn("← APPLICATIONS", min_width=120)
-        self.back_btn.setFixedHeight(34)
+        self.back_btn = make_icon_btn("←", tooltip="Back to Applications list")
         self.back_btn.clicked.connect(self.show_apps)
         self.back_btn.setVisible(False)
         tb_layout.addWidget(self.back_btn)
 
-        self.header_label = make_label("APPLICATIONS", size=12, color=CP_YELLOW, bold=True)
+        self.header_label = make_label("APPLICATIONS", size=11, color=CP_YELLOW, bold=True)
         tb_layout.addWidget(self.header_label)
         tb_layout.addStretch()
 
-        restart_btn = make_secondary_btn("↺ RESTART", min_width=90)
-        restart_btn.setFixedHeight(34)
+        restart_btn = make_icon_btn("↺", tooltip="Restart Application")
         restart_btn.clicked.connect(self.restart_app)
         tb_layout.addWidget(restart_btn)
 
-        settings_btn = make_secondary_btn("⚙ SETTINGS", min_width=95)
-        settings_btn.setFixedHeight(34)
+        settings_btn = make_icon_btn("⚙", tooltip="Global Settings & Encryption")
         settings_btn.clicked.connect(self.open_settings)
         tb_layout.addWidget(settings_btn)
 
-        self.app_settings_btn = make_secondary_btn("App Config", min_width=100)
-        self.app_settings_btn.setFixedHeight(34)
+        self.app_settings_btn = make_icon_btn("🔧", tooltip="Configure Current App")
         self.app_settings_btn.clicked.connect(self.edit_current_app)
         self.app_settings_btn.setVisible(False)
         tb_layout.addWidget(self.app_settings_btn)
