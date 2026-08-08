@@ -3,7 +3,8 @@ import os
 import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar)
+                             QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar, 
+                             QTabWidget, QPlainTextEdit)
 from PyQt6.QtCore import Qt
 
 # CYBERPUNK THEME PALETTE
@@ -31,18 +32,51 @@ TEXT_FILENAMES = {'.gitignore', '.dockerignore', '.editorconfig', '.npmrc', 'doc
 # Where the app remembers its settings
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
 
+# Default ignored folders (one per line, editable in Settings)
+DEFAULT_IGNORE_TEXT = "\n".join([
+    "node_modules", ".git", "__pycache__", "dist", "build",
+    "venv", ".venv", ".cache", ".idea", ".vscode", "target",
+])
+
 class SettingsDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, ignore_text=""):
         super().__init__(parent)
         self.setWindowTitle("Settings")
-        self.resize(300, 200)
+        self.resize(420, 380)
         self.setStyleSheet(self.parent().styleSheet())
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Settings (Empty)"))
-        btn = QPushButton("CLOSE")
-        btn.clicked.connect(self.accept)
-        layout.addStretch()
-        layout.addWidget(btn)
+        
+        tabs = QTabWidget()
+        
+        # Tab: Ignore Folders
+        ignore_tab = QWidget()
+        ignore_layout = QVBoxLayout(ignore_tab)
+        hint = QLabel("One folder name per line. These folders are skipped during scanning (matched by name at any depth, case-insensitive).")
+        hint.setWordWrap(True)
+        self.ignore_edit = QPlainTextEdit()
+        self.ignore_edit.setPlainText(ignore_text)
+        self.ignore_edit.setPlaceholderText("node_modules\n.git\n__pycache__\n...")
+        ignore_layout.addWidget(hint)
+        ignore_layout.addWidget(self.ignore_edit)
+        tabs.addTab(ignore_tab, "Ignore Folders")
+        
+        layout.addWidget(tabs)
+        
+        # Save / Cancel
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        btn_save = QPushButton("SAVE")
+        btn_save.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_save.clicked.connect(self.accept)
+        btn_cancel = QPushButton("CANCEL")
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(btn_save)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+    
+    def get_ignore_text(self):
+        return self.ignore_edit.toPlainText()
 
 class App(QMainWindow):
     def __init__(self):
@@ -55,11 +89,19 @@ class App(QMainWindow):
             QMainWindow, QDialog {{ background-color: {CP_BG}; }}
             QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
             
-            QLineEdit, QTextEdit {{
+            QLineEdit, QTextEdit, QPlainTextEdit {{
                 background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 4px;
                 selection-background-color: {CP_CYAN}; selection-color: #000000;
             }}
-            QLineEdit:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            
+            QTabWidget::pane {{ border: 1px solid {CP_DIM}; background: {CP_BG}; }}
+            QTabBar::tab {{
+                background: {CP_PANEL}; color: {CP_TEXT}; padding: 6px 14px;
+                border: 1px solid {CP_DIM}; border-bottom: none; font-weight: bold;
+            }}
+            QTabBar::tab:hover {{ border: 1px solid {CP_CYAN}; color: {CP_CYAN}; }}
+            QTabBar::tab:selected {{ background: {CP_YELLOW}; color: black; }}
             
             QPushButton {{
                 background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold;
@@ -106,6 +148,7 @@ class App(QMainWindow):
         """)
 
         self.snapshot = {}
+        self.ignore_text = DEFAULT_IGNORE_TEXT
         
         # Layout
         central = QWidget()
@@ -148,11 +191,6 @@ class App(QMainWindow):
         self.only_text_files.setCursor(Qt.CursorShape.PointingHandCursor)
         self.only_text_files.setToolTip("Only take snapshots and compare files with text extensions (json, txt, html, etc.).")
         form.addRow("", self.only_text_files)
-
-        self.ignore_input = QLineEdit()
-        self.ignore_input.setText("node_modules, .git, __pycache__, dist, build, venv, .venv, .cache, .idea, .vscode, target")
-        self.ignore_input.setToolTip("Folders to skip during scanning. Comma-separated names, matched by folder name at any depth (case-insensitive).")
-        form.addRow("Ignore Folders:", self.ignore_input)
         grp.setLayout(form)
         layout.addWidget(grp)
         
@@ -188,16 +226,17 @@ class App(QMainWindow):
         # Persist settings whenever anything changes, then restore saved values
         self.folder_input.textChanged.connect(lambda *_: self.save_settings())
         self.only_text_files.stateChanged.connect(lambda *_: self.save_settings())
-        self.ignore_input.textChanged.connect(lambda *_: self.save_settings())
         self.load_settings()
         self.ensure_gitignore()
 
     def save_settings(self):
         """Write the current UI settings to settings.json."""
+        if getattr(self, '_suppress_save', False):
+            return
         data = {
             "target_folder": self.folder_input.text(),
             "only_text_files": self.only_text_files.isChecked(),
-            "ignore_folders": self.ignore_input.text(),
+            "ignore_folders": self.ignore_text,
         }
         try:
             with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
@@ -210,13 +249,19 @@ class App(QMainWindow):
         try:
             with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+        except Exception:
+            return
+        # Suppress the auto-save that setText/setChecked would trigger
+        self._suppress_save = True
+        try:
             if data.get("target_folder"):
                 self.folder_input.setText(data["target_folder"])
             self.only_text_files.setChecked(bool(data.get("only_text_files", True)))
-            if data.get("ignore_folders"):
-                self.ignore_input.setText(data["ignore_folders"])
-        except Exception:
-            pass
+            # Key-presence check so an intentionally emptied list stays empty
+            if "ignore_folders" in data:
+                self.ignore_text = data["ignore_folders"]
+        finally:
+            self._suppress_save = False
 
     def ensure_gitignore(self):
         """Make sure settings.json is listed in the local .gitignore."""
@@ -250,9 +295,11 @@ class App(QMainWindow):
         return os.path.splitext(name)[1] in TEXT_EXTENSIONS or name in TEXT_FILENAMES
 
     def get_ignored_folders(self):
-        """Parse the ignore-folders field into a set of lowercase folder names."""
-        raw = self.ignore_input.text().replace(';', ',')
-        return {name.strip().lower() for name in raw.split(',') if name.strip()}
+        """Parse the ignore-folders text into a set of lowercase folder names.
+        Accepts one name per line (Settings) or comma/semicolon-separated."""
+        raw = self.ignore_text.replace(';', ',')
+        names = [n for part in raw.split(',') for n in part.splitlines()]
+        return {name.strip().lower() for name in names if name.strip()}
 
     def scan_start(self):
         self.btn_scan.setEnabled(False)
@@ -370,8 +417,10 @@ class App(QMainWindow):
         os.execv(sys.executable, [sys.executable] + sys.argv)
         
     def open_settings(self):
-        dlg = SettingsDialog(self)
-        dlg.exec()
+        dlg = SettingsDialog(self, ignore_text=self.ignore_text)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            self.ignore_text = dlg.get_ignore_text()
+            self.save_settings()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
