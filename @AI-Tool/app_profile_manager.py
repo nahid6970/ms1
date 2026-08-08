@@ -11,8 +11,12 @@ from PyQt6.QtWidgets import (
     QMessageBox, QDialog, QCheckBox, QDateTimeEdit, QRadioButton, QButtonGroup,
     QListWidget, QListWidgetItem, QAbstractItemView, QGroupBox, QFormLayout
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QDateTime, QDate, QTime
-from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QDateTime, QDate, QTime, QSize, QByteArray
+from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon
+from PyQt6.QtSvg import QSvgRenderer
+
+from Cryptodome.Cipher import AES
+from Cryptodome.Protocol.KDF import PBKDF2
 
 # ── CYBERPUNK THEME PALETTE ──────────────────────────────────────────────────
 CP_BG      = "#050505"  # Main Window Background
@@ -35,10 +39,60 @@ PROFILE_DATA_DIR = os.path.join(BASE_DIR, "profile_data")
 
 os.makedirs(PROFILE_DATA_DIR, exist_ok=True)
 
-# ── CRYPTOGRAPHY HELPERS ──────────────────────────────────────────────────────
-from Cryptodome.Cipher import AES
-from Cryptodome.Protocol.KDF import PBKDF2
+# ── INLINE VECTOR SVG DEFINITIONS ────────────────────────────────────────────
+SVG_RESTART = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>"""
 
+SVG_SETTINGS = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>"""
+
+SVG_CONFIG = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>"""
+
+SVG_BACK = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>"""
+
+SVG_EDIT = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>"""
+
+SVG_DELETE = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>"""
+
+SVG_CHEVRON = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>"""
+
+SVG_LOCK = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>"""
+
+SVG_DIAMOND = """<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 12 12 22 2 12 12 2"/></svg>"""
+
+# ── SVG ICON GENERATION ───────────────────────────────────────────────────────
+def make_svg_icon(svg_str, normal_color=CP_TEXT, hover_color=CP_CYAN, size=24):
+    icon = QIcon()
+    
+    # Normal State
+    pix1 = QPixmap(size, size)
+    pix1.fill(Qt.GlobalColor.transparent)
+    p1 = QPainter(pix1)
+    r1 = QSvgRenderer(QByteArray(svg_str.replace("currentColor", normal_color).encode('utf-8')))
+    r1.render(p1)
+    p1.end()
+    icon.addPixmap(pix1, QIcon.Mode.Normal, QIcon.State.Off)
+    
+    # Active/Hover State
+    pix2 = QPixmap(size, size)
+    pix2.fill(Qt.GlobalColor.transparent)
+    p2 = QPainter(pix2)
+    r2 = QSvgRenderer(QByteArray(svg_str.replace("currentColor", hover_color).encode('utf-8')))
+    r2.render(p2)
+    p2.end()
+    icon.addPixmap(pix2, QIcon.Mode.Active, QIcon.State.Off)
+    
+    return icon
+
+def render_svg_pixmap(svg_str, color=CP_CYAN, size=18):
+    pix = QPixmap(size, size)
+    pix.fill(Qt.GlobalColor.transparent)
+    p = QPainter(pix)
+    r = QSvgRenderer(QByteArray(svg_str.replace("currentColor", color).encode('utf-8')))
+    r.render(p)
+    p.end()
+    return pix
+
+
+# ── CRYPTOGRAPHY HELPERS ──────────────────────────────────────────────────────
 def derive_key(password, salt, key_length=32):
     return PBKDF2(password.encode('utf-8'), salt, dkLen=key_length)
 
@@ -65,6 +119,7 @@ def decrypt_file_data(encrypted_bytes, password):
 
 def sanitize_filename(name):
     return re.sub(r'[\\/*?:"<>|]', '_', name).strip()
+
 
 # ── GLOBAL QSS STYLESHEET ─────────────────────────────────────────────────────
 GLOBAL_STYLE = f"""
@@ -228,59 +283,57 @@ def make_secondary_btn(text, min_width=90):
     return btn
 
 
-def make_icon_btn(symbol, tooltip="", size=34):
-    btn = QPushButton(symbol)
+def make_svg_button(svg_xml, tooltip="", size=34, icon_size=16, normal_color=CP_TEXT, hover_color=CP_CYAN):
+    btn = QPushButton()
     btn.setFixedSize(size, size)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
     if tooltip:
         btn.setToolTip(tooltip)
+    
+    icon = make_svg_icon(svg_xml, normal_color=normal_color, hover_color=hover_color, size=icon_size)
+    btn.setIcon(icon)
+    btn.setIconSize(QSize(icon_size, icon_size))
+    
     btn.setStyleSheet(f"""
         QPushButton {{
             background-color: {CP_PANEL};
             border: 1px solid {CP_DIM};
-            color: {CP_TEXT};
-            font-weight: bold;
-            font-family: '{FONT_MAIN}', monospace;
-            font-size: 11pt;
             padding: 0px;
         }}
         QPushButton:hover {{
             background-color: #2A2A2A;
             border: 1px solid {CP_CYAN};
-            color: {CP_CYAN};
         }}
         QPushButton:pressed {{
             background-color: {CP_YELLOW};
-            color: #000000;
         }}
     """)
     return btn
 
 
-def make_card_action_btn(symbol, tooltip=""):
-    btn = QPushButton(symbol)
-    btn.setFixedSize(30, 30)
+def make_card_svg_button(svg_xml, tooltip="", size=28, icon_size=14, normal_color=CP_SUBTEXT, hover_color=CP_CYAN):
+    btn = QPushButton()
+    btn.setFixedSize(size, size)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
     if tooltip:
         btn.setToolTip(tooltip)
+    
+    icon = make_svg_icon(svg_xml, normal_color=normal_color, hover_color=hover_color, size=icon_size)
+    btn.setIcon(icon)
+    btn.setIconSize(QSize(icon_size, icon_size))
+    
     btn.setStyleSheet(f"""
         QPushButton {{
             background-color: {CP_BG};
-            color: {CP_SUBTEXT};
             border: 1px solid {CP_DIM};
-            font-weight: bold;
-            font-family: '{FONT_MAIN}', monospace;
-            font-size: 10pt;
             padding: 0px;
         }}
         QPushButton:hover {{
             background-color: {CP_PANEL};
             border: 1px solid {CP_CYAN};
-            color: {CP_CYAN};
         }}
         QPushButton:pressed {{
             border-color: {CP_RED};
-            color: {CP_RED};
         }}
     """)
     return btn
@@ -831,10 +884,11 @@ class AppCard(QFrame):
         layout.setSpacing(12)
         layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        icon = QLabel("🔒" if self.app_config.get("is_locked") else "◈")
-        icon.setStyleSheet(f"color: {CP_CYAN}; font-size: 14pt; background: transparent;")
-        icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(icon)
+        icon_lbl = QLabel()
+        icon_svg = SVG_LOCK if self.app_config.get("is_locked") else SVG_DIAMOND
+        icon_lbl.setPixmap(render_svg_pixmap(icon_svg, color=CP_CYAN, size=18))
+        icon_lbl.setStyleSheet("background: transparent;")
+        layout.addWidget(icon_lbl)
 
         text_col = QVBoxLayout()
         text_col.setSpacing(2)
@@ -863,8 +917,8 @@ class AppCard(QFrame):
         text_col.addLayout(sub_row)
         layout.addLayout(text_col, 1)
 
-        edit_btn = make_card_action_btn("⚙", tooltip="Configure Application")
-        delete_btn = make_card_action_btn("✕", tooltip="Delete Application")
+        edit_btn = make_card_svg_button(SVG_CONFIG, tooltip="Configure Application")
+        delete_btn = make_card_svg_button(SVG_DELETE, tooltip="Delete Application")
 
         edit_btn.clicked.connect(lambda: self.settings_click.emit(self.app_name))
         delete_btn.clicked.connect(lambda: self.delete_click.emit(self.app_name))
@@ -872,9 +926,10 @@ class AppCard(QFrame):
         layout.addWidget(edit_btn)
         layout.addWidget(delete_btn)
 
-        chevron = make_label("›", size=14, color=CP_SUBTEXT, bold=True)
-        chevron.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(chevron)
+        chevron_lbl = QLabel()
+        chevron_lbl.setPixmap(render_svg_pixmap(SVG_CHEVRON, color=CP_SUBTEXT, size=16))
+        chevron_lbl.setStyleSheet("background: transparent;")
+        layout.addWidget(chevron_lbl)
 
     def mousePressEvent(self, event):
         child = self.childAt(event.position().toPoint())
@@ -922,7 +977,10 @@ class ProfileCard(QFrame):
         name_row.addWidget(self.name_label)
 
         if self.app_config.get("is_locked"):
-            name_row.addWidget(make_label("🔒", size=9))
+            lock_lbl = QLabel()
+            lock_lbl.setPixmap(render_svg_pixmap(SVG_LOCK, color=CP_CYAN, size=14))
+            lock_lbl.setStyleSheet("background: transparent;")
+            name_row.addWidget(lock_lbl)
 
         self.countdown_label = QLabel("")
         self.countdown_label.setStyleSheet(
@@ -963,8 +1021,8 @@ class ProfileCard(QFrame):
             act_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
             row.addWidget(act_btn)
 
-        edit_btn   = make_card_action_btn("✎", tooltip="Edit Account")
-        delete_btn = make_card_action_btn("✕", tooltip="Delete Account")
+        edit_btn   = make_card_svg_button(SVG_EDIT, tooltip="Edit Account")
+        delete_btn = make_card_svg_button(SVG_DELETE, tooltip="Delete Account")
         edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
         delete_btn.clicked.connect(lambda: self.delete_clicked.emit(self.profile))
         row.addWidget(edit_btn)
@@ -1125,7 +1183,7 @@ class AppProfileManager(QMainWindow):
         tb_layout.setSpacing(8)
         tb_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        self.back_btn = make_icon_btn("←", tooltip="Back to Applications list")
+        self.back_btn = make_svg_button(SVG_BACK, tooltip="Back to Applications list")
         self.back_btn.clicked.connect(self.show_apps)
         self.back_btn.setVisible(False)
         tb_layout.addWidget(self.back_btn)
@@ -1134,15 +1192,15 @@ class AppProfileManager(QMainWindow):
         tb_layout.addWidget(self.header_label)
         tb_layout.addStretch()
 
-        restart_btn = make_icon_btn("↺", tooltip="Restart Application")
+        restart_btn = make_svg_button(SVG_RESTART, tooltip="Restart Application")
         restart_btn.clicked.connect(self.restart_app)
         tb_layout.addWidget(restart_btn)
 
-        settings_btn = make_icon_btn("⚙", tooltip="Global Settings & Encryption")
+        settings_btn = make_svg_button(SVG_SETTINGS, tooltip="Global Settings & Encryption")
         settings_btn.clicked.connect(self.open_settings)
         tb_layout.addWidget(settings_btn)
 
-        self.app_settings_btn = make_icon_btn("🔧", tooltip="Configure Current App")
+        self.app_settings_btn = make_svg_button(SVG_CONFIG, tooltip="Configure Current App")
         self.app_settings_btn.clicked.connect(self.edit_current_app)
         self.app_settings_btn.setVisible(False)
         tb_layout.addWidget(self.app_settings_btn)
