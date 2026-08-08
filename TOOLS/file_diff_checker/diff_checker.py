@@ -408,10 +408,11 @@ class App(QMainWindow):
         
         def get_sort_key(item):
             data = item.data(0, Qt.ItemDataRole.UserRole)
+            # Folders (dir) first, then files
             if data[0] == "dir":
                 count = self._tree_counts.get(data[1], [0, 0])[1]
-                return (0, -count)
-            return (1, item.text(0))
+                return (0, -count)  # 0 for folder, negative count for descending order
+            return (1, item.text(0))  # 1 for file, alphabetical order
         
         children.sort(key=get_sort_key)
         for child in children:
