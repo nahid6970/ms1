@@ -400,6 +400,23 @@ class App(QMainWindow):
         self._tree_counts.setdefault(norm, [0, 0])
         return item
 
+    def _sort_children(self, parent):
+        """Sort children of a tree item: folders first (by count descending), then files."""
+        children = []
+        for i in range(parent.childCount()):
+            children.append(parent.takeChild(0))
+        
+        def get_sort_key(item):
+            data = item.data(0, Qt.ItemDataRole.UserRole)
+            if data[0] == "dir":
+                count = self._tree_counts.get(data[1], [0, 0])[1]
+                return (0, -count)
+            return (1, item.text(0))
+        
+        children.sort(key=get_sort_key)
+        for child in children:
+            parent.addChild(child)
+
     def _add_tree_file(self, root, f):
         """Add one file to the tree and buffer its folder so labels refresh in batches."""
         pn = os.path.normpath(root)
@@ -418,6 +435,7 @@ class App(QMainWindow):
         item = QTreeWidgetItem([f])
         item.setData(0, Qt.ItemDataRole.UserRole, ("file", os.path.normpath(os.path.join(root, f))))
         parent.addChild(item)
+        self._sort_children(parent)
         self._tree_buffer.add(pn)
 
     def _set_tree_label(self, pn):
@@ -451,8 +469,11 @@ class App(QMainWindow):
 
     def _finalize_tree(self):
         """After a scan: refresh every folder label once, then expand root + first level."""
-        for pn in list(self._tree_counts):
+        # Sort all folders by count
+        for pn in self._tree_items:
+            self._sort_children(self._tree_items[pn])
             self._set_tree_label(pn)
+        
         root = self.tree_widget.topLevelItem(0)
         if root is None:
             return
