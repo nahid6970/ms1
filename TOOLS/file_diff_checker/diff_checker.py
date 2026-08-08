@@ -4,8 +4,8 @@ import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
                              QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar, 
-                             QTabWidget, QPlainTextEdit)
-from PyQt6.QtCore import Qt
+                             QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter)
+from PyQt6.QtCore import Qt, QTimer
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -133,6 +133,19 @@ class App(QMainWindow):
             
             QLabel#scanLabel {{ color: {CP_CYAN}; font-size: 9pt; }}
             
+            QTreeWidget {{
+                background-color: #0a0a0a; color: {CP_TEXT}; border: 1px solid {CP_DIM};
+                alternate-background-color: #0d0d0d;
+            }}
+            QTreeWidget::item {{ padding: 2px 4px; }}
+            QTreeWidget::item:hover {{ background-color: #1c1c1c; }}
+            QTreeWidget::item:selected {{ background-color: {CP_YELLOW}; color: #000000; }}
+            QHeaderView::section {{
+                background-color: {CP_PANEL}; color: {CP_YELLOW}; border: 1px solid {CP_DIM};
+                padding: 4px; font-weight: bold;
+            }}
+            QSplitter::handle {{ background-color: {CP_DIM}; }}
+            
             QGroupBox {{
                 border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
             }}
@@ -165,7 +178,19 @@ class App(QMainWindow):
         self.btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_settings.clicked.connect(self.open_settings)
         
-        top_bar.addStretch()
+        # Filter search box (filters the file tree below)
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filter file tree...")
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setToolTip("Type to filter the file tree below (matches folder/file paths).")
+        # Debounce filtering so typing stays smooth even on huge trees
+        self._filter_timer = QTimer(self)
+        self._filter_timer.setSingleShot(True)
+        self._filter_timer.setInterval(150)
+        self._filter_timer.timeout.connect(self.apply_filter)
+        self.search_input.textChanged.connect(self._schedule_filter)
+        
+        top_bar.addWidget(self.search_input, 1)
         top_bar.addWidget(self.btn_settings)
         top_bar.addWidget(self.btn_restart)
         layout.addLayout(top_bar)
@@ -208,10 +233,18 @@ class App(QMainWindow):
         action_layout.addWidget(self.btn_check)
         layout.addLayout(action_layout)
         
-        # Output
+        # Output + live file tree (vertical splitter)
+        splitter = QSplitter(Qt.Orientation.Vertical)
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
-        layout.addWidget(self.output_area)
+        self.tree_widget = QTreeWidget()
+        self.tree_widget.setHeaderLabels(["Name"])
+        self.tree_widget.setAlternatingRowColors(True)
+        splitter.addWidget(self.output_area)
+        splitter.addWidget(self.tree_widget)
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 2)
+        layout.addWidget(splitter, 1)
         
         # Slim progress bar + status text pinned to the bottom of the window
         self.progress_bar = QProgressBar()
@@ -310,6 +343,10 @@ class App(QMainWindow):
         QApplication.processEvents()
 
     def scan_end(self):
+        self._flush_tree()
+        self._finalize_tree()
+        if self.search_input.text().strip():
+            self.apply_filter()
         self.progress_bar.setVisible(False)
         self.btn_scan.setEnabled(True)
         self.btn_check.setEnabled(True)
@@ -323,9 +360,145 @@ class App(QMainWindow):
         # Truncate long paths so the status bar doesn't stretch the window
         display = path if len(path) <= 80 else "..." + path[-(80 - 3):]
         self.progress_label.setText(f"Scanning ({count} files) ... {display}")
+        self._flush_tree()
         QApplication.processEvents()
 
-    def get_file_state(self, folder, text_only=False, progress_cb=None):
+    # ---- Live file tree (folder/file view with counts) ----
+
+    def tree_start(self, folder):
+        """Reset the tree widget and add the root item for a new scan."""
+        self.tree_widget.clear()
+        self._tree_items = {}
+        self._tree_counts = {}
+        self._tree_buffer = set()
+        norm = os.path.normpath(folder)
+        name = os.path.basename(norm.rstrip("\\/")) or norm
+        root = QTreeWidgetItem([f"{name}  (0)"])
+        root.setData(0, Qt.ItemDataRole.UserRole, ("dir", norm))
+        root.setExpanded(True)
+        self.tree_widget.addTopLevelItem(root)
+        self._tree_items[norm] = root
+        self._tree_counts[norm] = [0, 0]
+
+    def _ensure_dir_item(self, dirpath):
+        """Return (creating if needed) the tree item for a directory path."""
+        norm = os.path.normpath(dirpath)
+        item = self._tree_items.get(norm)
+        if item is not None:
+            return item
+        parent_norm = os.path.normpath(os.path.dirname(norm))
+        parent = self._tree_items.get(parent_norm)
+        if parent is None:
+            if parent_norm == norm:  # safety guard against drive-root loops
+                return self.tree_widget.topLevelItem(0)
+            parent = self._ensure_dir_item(parent_norm)
+        name = os.path.basename(norm) or norm
+        item = QTreeWidgetItem([name])
+        item.setData(0, Qt.ItemDataRole.UserRole, ("dir", norm))
+        parent.addChild(item)
+        self._tree_items[norm] = item
+        self._tree_counts.setdefault(norm, [0, 0])
+        return item
+
+    def _add_tree_file(self, root, f):
+        """Add one file to the tree and buffer its folder so labels refresh in batches."""
+        pn = os.path.normpath(root)
+        parent = self._tree_items.get(pn)
+        if parent is None:
+            parent = self._ensure_dir_item(pn)
+        counts = self._tree_counts.setdefault(pn, [0, 0])
+        counts[0] += 1
+        cur = pn
+        while cur in self._tree_counts:
+            self._tree_counts[cur][1] += 1
+            nxt = os.path.normpath(os.path.dirname(cur))
+            if nxt == cur:
+                break
+            cur = nxt
+        item = QTreeWidgetItem([f])
+        item.setData(0, Qt.ItemDataRole.UserRole, ("file", os.path.normpath(os.path.join(root, f))))
+        parent.addChild(item)
+        self._tree_buffer.add(pn)
+
+    def _set_tree_label(self, pn):
+        """Refresh one folder item's text with its current recursive file count."""
+        item = self._tree_items.get(pn)
+        if item is None:
+            return
+        total = self._tree_counts.get(pn, [0, 0])[1]
+        name = os.path.basename(pn) or pn
+        item.setText(0, f"{name}  ({total})")
+
+    def _flush_tree(self):
+        """Apply buffered additions: refresh labels of affected folders AND their ancestors."""
+        if not getattr(self, '_tree_buffer', None):
+            return
+        refresh = set()
+        for pn in self._tree_buffer:
+            cur = pn
+            while cur in self._tree_counts:
+                refresh.add(cur)
+                nxt = os.path.normpath(os.path.dirname(cur))
+                if nxt == cur:
+                    break
+                cur = nxt
+        for pn in refresh:
+            self._set_tree_label(pn)
+        self._tree_buffer = set()
+        # Keep an active filter applied live while new items stream in
+        if self.search_input.text().strip():
+            self._schedule_filter()
+
+    def _finalize_tree(self):
+        """After a scan: refresh every folder label once, then expand root + first level."""
+        for pn in list(self._tree_counts):
+            self._set_tree_label(pn)
+        root = self.tree_widget.topLevelItem(0)
+        if root is None:
+            return
+        root.setExpanded(True)
+        for i in range(root.childCount()):
+            root.child(i).setExpanded(True)
+
+    # ---- Tree filter search box ----
+
+    def _schedule_filter(self):
+        """Debounced entry point: restart the timer so filtering happens after typing pauses."""
+        self._filter_timer.start()
+
+    def apply_filter(self):
+        """Filter the tree by path substring (case-insensitive). Applies immediately."""
+        query = self.search_input.text().strip().lower()
+        root = self.tree_widget.topLevelItem(0)
+        if root is None:
+            return
+        if not query:
+            self._show_all(root)
+            return  # leave expansion state untouched
+        self._apply_filter_item(root, query)
+
+    def _show_all(self, item):
+        item.setHidden(False)
+        for i in range(item.childCount()):
+            self._show_all(item.child(i))
+
+    def _apply_filter_item(self, item, query):
+        """Hide items that don't match; a folder stays visible if any descendant matches."""
+        if item.childCount() == 0:
+            path = item.data(0, Qt.ItemDataRole.UserRole)[1].lower()
+            visible = query in path
+            item.setHidden(not visible)
+            return visible
+        any_visible = False
+        for i in range(item.childCount()):
+            if self._apply_filter_item(item.child(i), query):
+                any_visible = True
+        item.setHidden(not any_visible)
+        if any_visible:
+            item.setExpanded(True)
+        return any_visible
+
+    def get_file_state(self, folder, text_only=False, progress_cb=None, tree_cb=None):
         state = {}
         ignored = self.get_ignored_folders()
         count = 0
@@ -339,6 +512,8 @@ class App(QMainWindow):
                     progress_cb(filepath, count)
                 if text_only and not self.is_text_file(filepath):
                     continue
+                if tree_cb:
+                    tree_cb(root, f)
                 try:
                     state[filepath] = os.path.getmtime(filepath)
                 except Exception:
@@ -353,9 +528,11 @@ class App(QMainWindow):
             
         # Remember which filter mode the snapshot was taken with
         self.text_only_enabled = self.only_text_files.isChecked()
+        self.tree_start(folder)
         self.scan_start()
         try:
-            self.snapshot = self.get_file_state(folder, text_only=self.text_only_enabled, progress_cb=self.update_progress)
+            self.snapshot = self.get_file_state(folder, text_only=self.text_only_enabled,
+                                                progress_cb=self.update_progress, tree_cb=self._add_tree_file)
         finally:
             self.scan_end()
         mode = "text files only" if self.text_only_enabled else "all files"
@@ -376,9 +553,11 @@ class App(QMainWindow):
             self.log(f"<span style='color:{CP_YELLOW};'>Note: text-file filter changed since the snapshot; using the snapshot's setting.</span>")
         
         current_state = None
+        self.tree_start(folder)
         self.scan_start()
         try:
-            current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False), progress_cb=self.update_progress)
+            current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False),
+                                                progress_cb=self.update_progress, tree_cb=self._add_tree_file)
         finally:
             self.scan_end()
         
