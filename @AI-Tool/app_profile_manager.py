@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QScrollArea, QFrame, QLineEdit, QFileDialog,
     QMessageBox, QDialog, QCheckBox, QDateTimeEdit, QRadioButton, QButtonGroup,
-    QListWidget, QListWidgetItem, QAbstractItemView
+    QListWidget, QListWidgetItem, QAbstractItemView, QGroupBox, QFormLayout
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QDateTime, QDate, QTime
 from PyQt6.QtGui import QFont, QColor
@@ -17,30 +17,24 @@ from PyQt6.QtGui import QFont, QColor
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 
-# ── CATPPUCCIN MOCHA PALETTE ─────────────────────────────────────────────────
-BG_DEEP      = "#1E1E2E"  # base
-BG_SURFACE   = "#181825"  # mantle
-BG_RAISED    = "#313244"  # surface0
-BORDER       = "#45475A"  # surface1
-BORDER_FOCUS = "#89B4FA"  # blue
+# ── CYBERPUNK THEME PALETTE ──────────────────────────────────────────────────
+CP_BG      = "#050505"  # Main Window Background
+CP_PANEL   = "#111111"  # Panel/Input Background
+CP_YELLOW  = "#FCEE0A"  # Accent: Yellow
+CP_CYAN    = "#00F0FF"  # Accent: Cyan
+CP_RED     = "#FF003C"  # Accent: Red
+CP_GREEN   = "#00FF21"  # Accent: Green
+CP_ORANGE  = "#FF934B"  # Accent: Orange
+CP_DIM     = "#3A3A3A"  # Dimmed/Borders/Inactive
+CP_TEXT    = "#E0E0E0"  # Primary Text
+CP_SUBTEXT = "#808080"  # Secondary Text
 
-ACCENT       = "#89B4FA"  # blue
-ACCENT_SOFT  = "#74C7EC"  # sapphire
-ACCENT_GLOW  = "#B4BEFE"  # lavender
-SUCCESS      = "#A6E3A1"  # green
-WARNING      = "#F9E2AF"  # yellow
-DANGER       = "#F38BA8"  # red
+FONT_MAIN  = "Consolas"
 
-TEXT_PRIMARY   = "#CDD6F4"  # text
-TEXT_SECONDARY = "#BAC2DE"  # subtext1
-TEXT_MUTED     = "#585B70"  # surface2
-
-FONT_MAIN = "Segoe UI"
-FONT_MONO = "Cascadia Code"
-
-DATA_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_FILE = os.path.join(DATA_DIR, "app_profiles.json")
-PROFILE_DATA_DIR = os.path.join(DATA_DIR, "profile_data")
+# ── RELATIVE PATH INITIALIZATION ─────────────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_FILE = os.path.join(BASE_DIR, "app_profiles.json")
+PROFILE_DATA_DIR = os.path.join(BASE_DIR, "profile_data")
 
 os.makedirs(PROFILE_DATA_DIR, exist_ok=True)
 
@@ -72,119 +66,164 @@ def decrypt_file_data(encrypted_bytes, password):
 def sanitize_filename(name):
     return re.sub(r'[\\/*?:"<>|]', '_', name).strip()
 
-# ── SHARED STYLESHEET FRAGMENTS ───────────────────────────────────────────────
-INPUT_STYLE = f"""
+# ── GLOBAL QSS STYLESHEET ─────────────────────────────────────────────────────
+GLOBAL_STYLE = f"""
+    QMainWindow, QDialog {{
+        background-color: {CP_BG};
+    }}
+    QWidget {{
+        color: {CP_TEXT};
+        font-family: '{FONT_MAIN}', monospace;
+        font-size: 10pt;
+    }}
     QLineEdit, QDateTimeEdit, QListWidget {{
-        background-color: {BG_DEEP};
-        border: 1px solid {BORDER};
-        border-radius: 0px;
-        padding: 8px 12px;
-        color: {TEXT_PRIMARY};
-        font-family: '{FONT_MAIN}';
-        font-size: 13px;
-        selection-background-color: {ACCENT};
-        selection-color: #ffffff;
+        background-color: {CP_PANEL};
+        color: {CP_CYAN};
+        border: 1px solid {CP_DIM};
+        padding: 6px 10px;
+        selection-background-color: {CP_CYAN};
+        selection-color: #000000;
     }}
     QLineEdit:focus, QDateTimeEdit:focus, QListWidget:focus {{
-        border: 1px solid {BORDER_FOCUS};
-        background-color: {BG_RAISED};
+        border: 1px solid {CP_CYAN};
     }}
     QLineEdit:disabled {{
-        color: {TEXT_MUTED};
-        border-color: {BORDER};
+        color: {CP_SUBTEXT};
+        border-color: {CP_DIM};
     }}
     QListWidget::item {{
-        padding: 6px 8px;
-        color: {TEXT_PRIMARY};
+        padding: 6px;
+        color: {CP_TEXT};
     }}
     QListWidget::item:hover {{
-        background-color: {BG_RAISED};
+        background-color: #1A1A1A;
+        color: {CP_CYAN};
     }}
     QListWidget::indicator {{
-        width: 16px;
-        height: 16px;
-        border: 1px solid {BORDER};
-        background-color: {BG_DEEP};
+        width: 14px; height: 14px;
+        border: 1px solid {CP_DIM};
+        background-color: {CP_PANEL};
     }}
     QListWidget::indicator:checked {{
-        background-color: {ACCENT};
-        border-color: {ACCENT};
+        background-color: {CP_YELLOW};
+        border-color: {CP_YELLOW};
     }}
-    QDateTimeEdit::up-button, QDateTimeEdit::down-button {{
-        background: {BG_RAISED}; border: none; width: 18px;
-    }}
-"""
-
-CHECKBOX_STYLE = f"""
     QCheckBox, QRadioButton {{
-        color: {TEXT_SECONDARY};
-        font-family: '{FONT_MAIN}';
-        font-size: 13px;
         spacing: 8px;
+        color: {CP_TEXT};
     }}
     QCheckBox::indicator, QRadioButton::indicator {{
-        width: 16px; height: 16px;
-        border: 1px solid {BORDER};
-        border-radius: 0px;
-        background: {BG_DEEP};
+        width: 14px; height: 14px;
+        border: 1px solid {CP_DIM};
+        background: {CP_PANEL};
     }}
-    QRadioButton::indicator {{ border-radius: 0px; }}
     QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
-        background: {ACCENT};
-        border-color: {ACCENT};
-        image: none;
+        background: {CP_YELLOW};
+        border-color: {CP_YELLOW};
     }}
-    QCheckBox:hover, QRadioButton:hover {{ color: {TEXT_PRIMARY}; }}
+    QGroupBox {{
+        border: 1px solid {CP_DIM};
+        margin-top: 10px;
+        padding-top: 10px;
+        font-weight: bold;
+        color: {CP_YELLOW};
+    }}
+    QGroupBox::title {{
+        subcontrol-origin: margin;
+        subcontrol-position: top left;
+        padding: 0 5px;
+    }}
+    QScrollArea {{
+        background: transparent;
+        border: none;
+    }}
+    QScrollBar:vertical {{
+        background: {CP_BG};
+        width: 10px;
+        margin: 0px;
+    }}
+    QScrollBar::handle:vertical {{
+        background: {CP_CYAN};
+        min-height: 20px;
+        border-radius: 5px;
+    }}
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+        height: 0px;
+        background: none;
+    }}
+    QMenu {{
+        background-color: {CP_PANEL};
+        color: {CP_TEXT};
+        border: 1px solid {CP_CYAN};
+    }}
+    QMenu::item:selected {{
+        background-color: {CP_CYAN};
+        color: {CP_BG};
+    }}
+    QMessageBox {{
+        background-color: {CP_PANEL};
+        color: {CP_TEXT};
+    }}
 """
 
 
-def make_label(text, size=13, color=TEXT_SECONDARY, bold=False):
+def make_label(text, size=10, color=CP_TEXT, bold=False):
     lbl = QLabel(text)
     weight = "bold" if bold else "normal"
     lbl.setStyleSheet(
-        f"color: {color}; font-family: '{FONT_MAIN}'; font-size: {size}px; font-weight: {weight}; background: transparent;"
+        f"color: {color}; font-family: '{FONT_MAIN}', monospace; font-size: {size}pt; font-weight: {weight}; background: transparent;"
     )
     return lbl
 
 
-def make_primary_btn(text, min_width=120):
+def make_primary_btn(text, min_width=110):
     btn = QPushButton(text)
     btn.setMinimumWidth(min_width)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
     btn.setStyleSheet(f"""
         QPushButton {{
-            background-color: {ACCENT};
-            color: #ffffff;
-            border: none;
-            border-radius: 0px;
-            padding: 9px 20px;
-            font-family: '{FONT_MAIN}';
-            font-size: 13px;
-            font-weight: 600;
+            background-color: {CP_DIM};
+            border: 1px solid {CP_CYAN};
+            color: {CP_CYAN};
+            padding: 7px 14px;
+            font-weight: bold;
+            font-family: '{FONT_MAIN}', monospace;
         }}
-        QPushButton:hover  {{ background-color: {ACCENT_GLOW}; }}
-        QPushButton:pressed {{ background-color: {ACCENT_SOFT}; }}
+        QPushButton:hover {{
+            background-color: {CP_CYAN};
+            color: #000000;
+            border: 1px solid {CP_CYAN};
+        }}
+        QPushButton:pressed {{
+            background-color: {CP_YELLOW};
+            color: #000000;
+        }}
     """)
     return btn
 
 
-def make_secondary_btn(text, min_width=100):
+def make_secondary_btn(text, min_width=90):
     btn = QPushButton(text)
     btn.setMinimumWidth(min_width)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
     btn.setStyleSheet(f"""
         QPushButton {{
-            background-color: {BG_RAISED};
-            color: {TEXT_SECONDARY};
-            border: 1px solid {BORDER};
-            border-radius: 0px;
-            padding: 9px 20px;
-            font-family: '{FONT_MAIN}';
-            font-size: 13px;
-            font-weight: 500;
+            background-color: {CP_PANEL};
+            border: 1px solid {CP_DIM};
+            color: {CP_TEXT};
+            padding: 6px 12px;
+            font-weight: bold;
+            font-family: '{FONT_MAIN}', monospace;
         }}
-        QPushButton:hover  {{ border-color: {ACCENT}; color: {ACCENT_GLOW}; background-color: {BG_RAISED}; }}
-        QPushButton:pressed {{ background-color: {BG_DEEP}; }}
+        QPushButton:hover {{
+            background-color: #2A2A2A;
+            border: 1px solid {CP_YELLOW};
+            color: {CP_YELLOW};
+        }}
+        QPushButton:pressed {{
+            background-color: {CP_YELLOW};
+            color: #000000;
+        }}
     """)
     return btn
 
@@ -192,17 +231,23 @@ def make_secondary_btn(text, min_width=100):
 def make_ghost_btn(text):
     btn = QPushButton(text)
     btn.setCursor(Qt.CursorShape.PointingHandCursor)
-    btn.setFixedSize(32, 32)
+    btn.setFixedSize(30, 30)
     btn.setStyleSheet(f"""
         QPushButton {{
             background-color: transparent;
-            color: {TEXT_MUTED};
-            border: none;
-            border-radius: 0px;
-            font-size: 15px;
+            color: {CP_SUBTEXT};
+            border: 1px solid transparent;
+            font-weight: bold;
+            font-family: '{FONT_MAIN}', monospace;
         }}
-        QPushButton:hover {{ background-color: {BG_RAISED}; color: {TEXT_PRIMARY}; }}
-        QPushButton:pressed {{ color: {DANGER}; }}
+        QPushButton:hover {{
+            background-color: {CP_PANEL};
+            border: 1px solid {CP_CYAN};
+            color: {CP_CYAN};
+        }}
+        QPushButton:pressed {{
+            color: {CP_RED};
+        }}
     """)
     return btn
 
@@ -210,7 +255,7 @@ def make_ghost_btn(text):
 def make_divider():
     line = QFrame()
     line.setFrameShape(QFrame.Shape.HLine)
-    line.setStyleSheet(f"background: {BORDER}; border: none; max-height: 1px;")
+    line.setStyleSheet(f"background: {CP_DIM}; border: none; max-height: 1px;")
     return line
 
 
@@ -222,61 +267,57 @@ class MasterPasswordDialog(QDialog):
         self.init_ui()
 
     def init_ui(self):
-        title = "Change Master Password" if self.current_password else "Set Master Password"
+        title = "CHANGE MASTER PASSWORD" if self.current_password else "SET MASTER PASSWORD"
         self.setWindowTitle(title)
-        self.setFixedWidth(420)
-        self.setStyleSheet(f"""
-            QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
-            {INPUT_STYLE}
-        """)
+        self.setFixedWidth(440)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
         header = QFrame()
-        header.setStyleSheet(f"background: {BG_RAISED}; border-bottom: 1px solid {BORDER};")
+        header.setStyleSheet(f"background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM};")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(20, 16, 20, 16)
-        h_layout.addWidget(make_label(title, size=15, color=TEXT_PRIMARY, bold=True))
+        h_layout.addWidget(make_label(f"// {title}", size=12, color=CP_YELLOW, bold=True))
         root.addWidget(header)
 
         body = QWidget()
-        body.setStyleSheet(f"background: {BG_SURFACE};")
+        body.setStyleSheet(f"background: {CP_BG};")
         layout = QVBoxLayout(body)
         layout.setContentsMargins(20, 18, 20, 18)
         layout.setSpacing(12)
 
-        info_text = "This master password will be used automatically to encrypt and lock stored session data across all applications."
-        layout.addWidget(make_label(info_text, size=12, color=TEXT_SECONDARY))
+        info_text = "Master password will automatically lock/encrypt session files across all applications."
+        layout.addWidget(make_label(info_text, size=9, color=CP_SUBTEXT))
 
         self.pwd_input = QLineEdit()
         self.pwd_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.pwd_input.setPlaceholderText("Enter master password...")
-        layout.addWidget(make_label("Master Password", size=12))
+        layout.addWidget(make_label("Master Password", size=10, color=CP_CYAN))
         layout.addWidget(self.pwd_input)
 
         self.confirm_input = QLineEdit()
         self.confirm_input.setEchoMode(QLineEdit.EchoMode.Password)
         self.confirm_input.setPlaceholderText("Confirm master password...")
-        layout.addWidget(make_label("Confirm Password", size=12))
+        layout.addWidget(make_label("Confirm Password", size=10, color=CP_CYAN))
         layout.addWidget(self.confirm_input)
 
         root.addWidget(body)
 
         footer = QFrame()
-        footer.setStyleSheet(f"background: {BG_RAISED}; border-top: 1px solid {BORDER};")
+        footer.setStyleSheet(f"background: {CP_PANEL}; border-top: 1px solid {CP_DIM};")
         f_layout = QHBoxLayout(footer)
         f_layout.setContentsMargins(20, 12, 20, 12)
         f_layout.setSpacing(10)
         f_layout.addStretch()
 
         if self.current_password:
-            cancel_btn = make_secondary_btn("Cancel", min_width=80)
+            cancel_btn = make_secondary_btn("CANCEL", min_width=80)
             cancel_btn.clicked.connect(self.reject)
             f_layout.addWidget(cancel_btn)
 
-        save_btn = make_primary_btn("Save Password", min_width=110)
+        save_btn = make_primary_btn("SAVE PASSWORD", min_width=120)
         save_btn.clicked.connect(self.save)
         f_layout.addWidget(save_btn)
         root.addWidget(footer)
@@ -285,12 +326,99 @@ class MasterPasswordDialog(QDialog):
         p1 = self.pwd_input.text()
         p2 = self.confirm_input.text()
         if not p1:
-            QMessageBox.warning(self, "Validation Error", "Password cannot be empty.")
+            QMessageBox.warning(self, "Validation Error", "Master password cannot be empty.")
             return
         if p1 != p2:
             QMessageBox.warning(self, "Validation Error", "Passwords do not match.")
             return
         self.master_password = p1
+        self.accept()
+
+
+# ── EXTENSIBLE SETTINGS DIALOG ───────────────────────────────────────────────
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None, master_password="", auto_capture=True):
+        super().__init__(parent)
+        self.master_password = master_password
+        self.auto_capture = auto_capture
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("SETTINGS")
+        self.setFixedWidth(460)
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+
+        header = QFrame()
+        header.setStyleSheet(f"background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM};")
+        h_layout = QHBoxLayout(header)
+        h_layout.setContentsMargins(20, 16, 20, 16)
+        h_layout.addWidget(make_label("// GLOBAL CONFIGURATION", size=12, color=CP_YELLOW, bold=True))
+        root.addWidget(header)
+
+        body = QWidget()
+        body.setStyleSheet(f"background: {CP_BG};")
+        layout = QVBoxLayout(body)
+        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setSpacing(14)
+
+        # Security Box
+        sec_box = QGroupBox("SECURITY & ENCRYPTION")
+        sec_layout = QVBoxLayout(sec_box)
+        sec_layout.setSpacing(10)
+
+        pwd_row = QHBoxLayout()
+        pwd_row.setSpacing(8)
+        self.pwd_input = QLineEdit(self.master_password)
+        self.pwd_input.setEchoMode(QLineEdit.EchoMode.Password)
+        pwd_btn = make_secondary_btn("Update", min_width=70)
+        pwd_btn.clicked.connect(self.update_password_dialog)
+        pwd_row.addWidget(self.pwd_input)
+        pwd_row.addWidget(pwd_btn)
+
+        sec_layout.addWidget(make_label("Master Encryption Password:", size=9, color=CP_SUBTEXT))
+        sec_layout.addLayout(pwd_row)
+        layout.addWidget(sec_box)
+
+        # Preferences Box
+        pref_box = QGroupBox("PREFERENCES")
+        pref_layout = QVBoxLayout(pref_box)
+        pref_layout.setSpacing(10)
+
+        self.auto_capture_cb = QCheckBox("Auto-capture session files when adding new account")
+        self.auto_capture_cb.setChecked(self.auto_capture)
+        pref_layout.addWidget(self.auto_capture_cb)
+
+        layout.addWidget(pref_box)
+        root.addWidget(body)
+
+        # Footer
+        footer = QFrame()
+        footer.setStyleSheet(f"background: {CP_PANEL}; border-top: 1px solid {CP_DIM};")
+        f_layout = QHBoxLayout(footer)
+        f_layout.setContentsMargins(20, 12, 20, 12)
+        f_layout.setSpacing(10)
+        f_layout.addStretch()
+
+        cancel_btn = make_secondary_btn("CANCEL", min_width=80)
+        save_btn = make_primary_btn("SAVE SETTINGS", min_width=120)
+        cancel_btn.clicked.connect(self.reject)
+        save_btn.clicked.connect(self.save)
+        f_layout.addWidget(cancel_btn)
+        f_layout.addWidget(save_btn)
+        root.addWidget(footer)
+
+    def update_password_dialog(self):
+        dialog = MasterPasswordDialog(self, current_password=self.master_password)
+        if dialog.exec():
+            self.master_password = dialog.master_password
+            self.pwd_input.setText(self.master_password)
+
+    def save(self):
+        self.master_password = self.pwd_input.text().strip()
+        self.auto_capture = self.auto_capture_cb.isChecked()
         self.accept()
 
 
@@ -309,14 +437,9 @@ class AppDialog(QDialog):
             self.populate_target_items()
 
     def init_ui(self):
-        title = f"App Settings ({self.app_name_orig})" if self.app_name_orig else "New Application"
+        title = f"APP SETTINGS ({self.app_name_orig})" if self.app_name_orig else "NEW APPLICATION"
         self.setWindowTitle(title)
         self.setFixedWidth(560)
-        self.setStyleSheet(f"""
-            QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
-            {INPUT_STYLE}
-            {CHECKBOX_STYLE}
-        """)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
@@ -324,15 +447,15 @@ class AppDialog(QDialog):
 
         # Header
         header = QFrame()
-        header.setStyleSheet(f"background: {BG_RAISED}; border-bottom: 1px solid {BORDER};")
+        header.setStyleSheet(f"background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM};")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 18, 24, 18)
-        h_layout.addWidget(make_label(title, size=16, color=TEXT_PRIMARY, bold=True))
+        h_layout.addWidget(make_label(f"// {title}", size=12, color=CP_YELLOW, bold=True))
         root.addWidget(header)
 
         # Body
         body = QWidget()
-        body.setStyleSheet(f"background: {BG_SURFACE};")
+        body.setStyleSheet(f"background: {CP_BG};")
         layout = QVBoxLayout(body)
         layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(14)
@@ -340,7 +463,7 @@ class AppDialog(QDialog):
         # App Name
         self.app_input = QLineEdit(self.app_name_orig)
         self.app_input.setPlaceholderText("e.g. Discord, Stable Diffusion, Steam")
-        layout.addWidget(make_label("Application Name", size=12))
+        layout.addWidget(make_label("Application Name", size=10, color=CP_CYAN))
         layout.addWidget(self.app_input)
 
         # Target Path
@@ -351,26 +474,26 @@ class AppDialog(QDialog):
         self.target_input.editingFinished.connect(self.populate_target_items)
 
         tgt_browse = make_secondary_btn("Browse", min_width=80)
-        tgt_browse.setFixedHeight(36)
+        tgt_browse.setFixedHeight(34)
         tgt_browse.clicked.connect(self.browse_target)
         tgt_row.addWidget(self.target_input)
         tgt_row.addWidget(tgt_browse)
-        layout.addWidget(make_label("Target Application Directory Path", size=12))
+        layout.addWidget(make_label("Target Application Directory Path", size=10, color=CP_CYAN))
         layout.addLayout(tgt_row)
 
         layout.addWidget(make_divider())
 
         # Auto-Scanned Files/Folders Checklist
-        layout.addWidget(make_label("Check Files & Folders to Sync / Swap with Profile:", size=12))
+        layout.addWidget(make_label("Check Files & Folders to Sync / Swap with Profile:", size=10, color=CP_YELLOW))
         self.items_list = QListWidget()
-        self.items_list.setFixedHeight(150)
+        self.items_list.setFixedHeight(140)
 
         items_btn_row = QHBoxLayout()
         items_btn_row.setSpacing(8)
         
         select_all_btn = make_secondary_btn("Select All", min_width=85)
         deselect_all_btn = make_secondary_btn("Deselect All", min_width=85)
-        rescan_btn = make_secondary_btn("🔄 Rescan Path", min_width=100)
+        rescan_btn = make_secondary_btn("Rescan Path", min_width=95)
 
         select_all_btn.clicked.connect(self.select_all_items)
         deselect_all_btn.clicked.connect(self.deselect_all_items)
@@ -394,13 +517,13 @@ class AppDialog(QDialog):
 
         # Footer
         footer = QFrame()
-        footer.setStyleSheet(f"background: {BG_RAISED}; border-top: 1px solid {BORDER};")
+        footer.setStyleSheet(f"background: {CP_PANEL}; border-top: 1px solid {CP_DIM};")
         f_layout = QHBoxLayout(footer)
         f_layout.setContentsMargins(24, 14, 24, 14)
         f_layout.setSpacing(10)
         f_layout.addStretch()
-        cancel_btn = make_secondary_btn("Cancel", min_width=90)
-        save_btn   = make_primary_btn("Save App Settings", min_width=140)
+        cancel_btn = make_secondary_btn("CANCEL", min_width=90)
+        save_btn   = make_primary_btn("SAVE APP SETTINGS", min_width=140)
         cancel_btn.clicked.connect(self.reject)
         save_btn.clicked.connect(self.save)
         f_layout.addWidget(cancel_btn)
@@ -491,40 +614,35 @@ class AccountDialog(QDialog):
 
     def init_ui(self):
         is_edit = bool(self.profile.get("name"))
-        title = "Edit Account" if is_edit else "New Account"
+        title = "EDIT ACCOUNT" if is_edit else "NEW ACCOUNT"
         self.setWindowTitle(title)
         self.setFixedWidth(480)
-        self.setStyleSheet(f"""
-            QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
-            {INPUT_STYLE}
-            {CHECKBOX_STYLE}
-        """)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
         header = QFrame()
-        header.setStyleSheet(f"background: {BG_RAISED}; border-bottom: 1px solid {BORDER};")
+        header.setStyleSheet(f"background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM};")
         h_layout = QHBoxLayout(header)
         h_layout.setContentsMargins(24, 18, 24, 18)
-        h_layout.addWidget(make_label(title, size=16, color=TEXT_PRIMARY, bold=True))
+        h_layout.addWidget(make_label(f"// {title}", size=12, color=CP_YELLOW, bold=True))
         root.addWidget(header)
 
         body = QWidget()
-        body.setStyleSheet(f"background: {BG_SURFACE};")
+        body.setStyleSheet(f"background: {CP_BG};")
         layout = QVBoxLayout(body)
         layout.setContentsMargins(24, 20, 24, 20)
         layout.setSpacing(14)
 
         self.name_input = QLineEdit(self.profile["name"])
         self.name_input.setPlaceholderText("e.g. Account 1, Main, Work Account")
-        layout.addWidget(make_label("Account Name", size=12))
+        layout.addWidget(make_label("Account Name", size=10, color=CP_CYAN))
         layout.addWidget(self.name_input)
 
         if not is_edit:
             layout.addWidget(make_divider())
-            layout.addWidget(make_label("Initial Action:", size=12, bold=True))
+            layout.addWidget(make_label("Initial Action:", size=10, color=CP_YELLOW, bold=True))
             self.radio_capture = QRadioButton("Automatically capture current target app files right now")
             self.radio_empty = QRadioButton("Create empty profile without copying now")
             self.radio_capture.setChecked(True)
@@ -533,20 +651,23 @@ class AccountDialog(QDialog):
 
         layout.addWidget(make_divider())
 
-        # Timer
+        # Timer Box
+        timer_box = QGroupBox("COUNTDOWN TIMER")
+        tb_layout = QVBoxLayout(timer_box)
+        tb_layout.setSpacing(10)
+
         self.timer_checkbox = QCheckBox("Enable Countdown Timer")
         self.timer_checkbox.setChecked(self.profile.get("timer_enabled", False))
-        layout.addWidget(self.timer_checkbox)
+        tb_layout.addWidget(self.timer_checkbox)
 
-        self.timer_frame = QFrame()
-        self.timer_frame.setStyleSheet(f"QFrame {{ background: {BG_RAISED}; border: 1px solid {BORDER}; }}")
+        self.timer_frame = QWidget()
         tf_layout = QVBoxLayout(self.timer_frame)
-        tf_layout.setContentsMargins(14, 12, 14, 12)
+        tf_layout.setContentsMargins(0, 5, 0, 0)
         tf_layout.setSpacing(10)
 
         fmt_row = QHBoxLayout()
         fmt_row.setSpacing(12)
-        fmt_row.addWidget(make_label("Format:", size=12))
+        fmt_row.addWidget(make_label("Format:", size=9, color=CP_SUBTEXT))
         self.radio_12h = QRadioButton("12-Hour")
         self.radio_24h = QRadioButton("24-Hour")
         self.radio_24h.setChecked(True)
@@ -559,7 +680,7 @@ class AccountDialog(QDialog):
         fmt_row.addStretch()
         tf_layout.addLayout(fmt_row)
 
-        tf_layout.addWidget(make_label("Target Date & Time", size=12))
+        tf_layout.addWidget(make_label("Target Date & Time", size=9, color=CP_SUBTEXT))
         self.dt_edit = QDateTimeEdit(QDateTime.currentDateTime())
         self.dt_edit.setCalendarPopup(True)
         if self.profile.get("target_time"):
@@ -573,13 +694,14 @@ class AccountDialog(QDialog):
         self.paste_input = QLineEdit()
         self.paste_input.setPlaceholderText("Paste time string...")
         parse_btn = make_secondary_btn("Apply", min_width=70)
-        parse_btn.setFixedHeight(34)
+        parse_btn.setFixedHeight(32)
         parse_btn.clicked.connect(self.parse_pasted_time)
         paste_row.addWidget(self.paste_input)
         paste_row.addWidget(parse_btn)
         tf_layout.addLayout(paste_row)
 
-        layout.addWidget(self.timer_frame)
+        tb_layout.addWidget(self.timer_frame)
+        layout.addWidget(timer_box)
 
         self.timer_checkbox.toggled.connect(self.toggle_timer_fields)
         self.toggle_timer_fields(self.timer_checkbox.isChecked())
@@ -588,13 +710,13 @@ class AccountDialog(QDialog):
         root.addWidget(body)
 
         footer = QFrame()
-        footer.setStyleSheet(f"background: {BG_RAISED}; border-top: 1px solid {BORDER};")
+        footer.setStyleSheet(f"background: {CP_PANEL}; border-top: 1px solid {CP_DIM};")
         f_layout = QHBoxLayout(footer)
         f_layout.setContentsMargins(24, 14, 24, 14)
         f_layout.setSpacing(10)
         f_layout.addStretch()
-        cancel_btn = make_secondary_btn("Cancel", min_width=90)
-        save_btn   = make_primary_btn("Save Account", min_width=120)
+        cancel_btn = make_secondary_btn("CANCEL", min_width=90)
+        save_btn   = make_primary_btn("SAVE ACCOUNT", min_width=120)
         cancel_btn.clicked.connect(self.reject)
         save_btn.clicked.connect(self.save)
         f_layout.addWidget(cancel_btn)
@@ -661,12 +783,12 @@ class AppCard(QFrame):
         self.setFixedHeight(85)
         self.setStyleSheet(f"""
             #appCard {{
-                background-color: {BG_SURFACE};
-                border: 1px solid {BORDER};
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
             }}
             #appCard:hover {{
-                background-color: {BG_RAISED};
-                border-color: {ACCENT};
+                background-color: #1A1A1A;
+                border-color: {CP_CYAN};
             }}
         """)
 
@@ -675,24 +797,24 @@ class AppCard(QFrame):
         layout.setSpacing(14)
 
         icon = QLabel("🔒" if self.app_config.get("is_locked") else "◈")
-        icon.setStyleSheet(f"color: {ACCENT}; font-size: 20px; background: transparent;")
+        icon.setStyleSheet(f"color: {CP_CYAN}; font-size: 16pt; background: transparent;")
         layout.addWidget(icon)
 
         text_col = QVBoxLayout()
         text_col.setSpacing(2)
         text_col.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
-        name_lbl = make_label(self.app_name, size=15, color=TEXT_PRIMARY, bold=True)
+        name_lbl = make_label(self.app_name, size=11, color=CP_YELLOW, bold=True)
         
         path_str = self.app_config.get("target_path", "")
         if len(path_str) > 50:
             path_str = "..." + path_str[-47:]
         path_lbl = QLabel(f"Target: {path_str}")
-        path_lbl.setStyleSheet(f"color: {TEXT_MUTED}; font-family: '{FONT_MONO}'; font-size: 11px; background: transparent;")
+        path_lbl.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: '{FONT_MAIN}', monospace; font-size: 9pt; background: transparent;")
 
         count_lbl = make_label(
             f"{self.profile_count} account{'s' if self.profile_count != 1 else ''}",
-            size=12, color=ACCENT_SOFT
+            size=9, color=CP_CYAN
         )
 
         sub_row = QHBoxLayout()
@@ -716,7 +838,7 @@ class AppCard(QFrame):
         layout.addWidget(edit_btn)
         layout.addWidget(delete_btn)
 
-        chevron = make_label("›", size=22, color=TEXT_MUTED)
+        chevron = make_label("›", size=16, color=CP_SUBTEXT)
         layout.addWidget(chevron)
 
     def mousePressEvent(self, event):
@@ -760,15 +882,15 @@ class ProfileCard(QFrame):
 
         name_row = QHBoxLayout()
         name_row.setSpacing(8)
-        self.name_label = make_label(self.profile["name"], size=14, color=TEXT_PRIMARY, bold=True)
+        self.name_label = make_label(self.profile["name"], size=11, color=CP_TEXT, bold=True)
         name_row.addWidget(self.name_label)
 
         if self.app_config.get("is_locked"):
-            name_row.addWidget(make_label("🔒", size=12))
+            name_row.addWidget(make_label("🔒", size=9))
 
         self.countdown_label = QLabel("")
         self.countdown_label.setStyleSheet(
-            f"color: {WARNING}; background: transparent; font-family: '{FONT_MONO}'; font-size: 12px;"
+            f"color: {CP_YELLOW}; background: transparent; font-family: '{FONT_MAIN}', monospace; font-size: 9pt;"
         )
         self.countdown_label.setVisible(False)
         name_row.addWidget(self.countdown_label)
@@ -779,7 +901,7 @@ class ProfileCard(QFrame):
             store_path = "..." + store_path[-52:]
         self.path_label = QLabel(f"Stored: {store_path}")
         self.path_label.setStyleSheet(
-            f"color: {TEXT_MUTED}; font-family: '{FONT_MONO}'; font-size: 11px; background: transparent;"
+            f"color: {CP_SUBTEXT}; font-family: '{FONT_MAIN}', monospace; font-size: 8pt; background: transparent;"
         )
 
         info_col.addLayout(name_row)
@@ -787,21 +909,21 @@ class ProfileCard(QFrame):
         row.addLayout(info_col, 1)
 
         # Update Session Button
-        update_btn = make_secondary_btn("🔄 Update", min_width=85)
-        update_btn.setToolTip("Overwrite this account's backup with current target directory state")
-        update_btn.setFixedHeight(32)
+        update_btn = make_secondary_btn("UPDATE", min_width=80)
+        update_btn.setToolTip("Overwrite backup with current target directory state")
+        update_btn.setFixedHeight(30)
         update_btn.clicked.connect(lambda: self.update_click.emit(self.profile))
         row.addWidget(update_btn)
 
         if self.profile.get("active", False):
-            status = make_label("● ACTIVE", size=11, color=SUCCESS, bold=True)
+            status = make_label("● ACTIVE", size=9, color=CP_GREEN, bold=True)
             status.setStyleSheet(
-                f"color: {SUCCESS}; font-size: 11px; font-weight: bold; background: transparent; letter-spacing: 1px;"
+                f"color: {CP_GREEN}; font-size: 9pt; font-weight: bold; background: transparent; letter-spacing: 1px;"
             )
             row.addWidget(status)
         else:
-            act_btn = make_primary_btn("Activate", min_width=85)
-            act_btn.setFixedHeight(32)
+            act_btn = make_primary_btn("ACTIVATE", min_width=85)
+            act_btn.setFixedHeight(30)
             act_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
             row.addWidget(act_btn)
 
@@ -817,21 +939,21 @@ class ProfileCard(QFrame):
     def _apply_style(self, expired=False):
         is_active = self.profile.get("active", False)
         if is_active:
-            border = SUCCESS
+            border = CP_GREEN
         elif expired:
-            border = DANGER
+            border = CP_RED
         elif self.profile.get("timer_enabled"):
-            border = WARNING
+            border = CP_YELLOW
         else:
-            border = BORDER
+            border = CP_DIM
 
         self.setStyleSheet(f"""
             #profileCard {{
-                background-color: {BG_SURFACE};
+                background-color: {CP_PANEL};
                 border: 1px solid {border};
             }}
             #profileCard:hover {{
-                background-color: {BG_RAISED};
+                background-color: #1A1A1A;
             }}
         """)
 
@@ -856,13 +978,13 @@ class ProfileCard(QFrame):
             if not d: parts.append(f"{s:02d}s")
             self.countdown_label.setText(f"⏱ {' '.join(parts)}")
             self.countdown_label.setStyleSheet(
-                f"color: {WARNING}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;"
+                f"color: {CP_YELLOW}; font-family: '{FONT_MAIN}', monospace; font-size: 9pt; background: transparent;"
             )
             self.countdown_label.setVisible(True)
         else:
             self.countdown_label.setText("⏰ Expired")
             self.countdown_label.setStyleSheet(
-                f"color: {DANGER}; font-family: '{FONT_MONO}'; font-size: 12px; background: transparent;"
+                f"color: {CP_RED}; font-family: '{FONT_MAIN}', monospace; font-size: 9pt; background: transparent;"
             )
             self.countdown_label.setVisible(True)
             self._apply_style(expired=True)
@@ -876,6 +998,7 @@ class AppProfileManager(QMainWindow):
         self.apps = {}
         self.profiles = []
         self.master_password = ""
+        self.auto_capture = True
         self.current_app = None
         self.load_data()
         self.init_ui()
@@ -885,6 +1008,7 @@ class AppProfileManager(QMainWindow):
         self.apps = {}
         self.profiles = []
         self.master_password = ""
+        self.auto_capture = True
         if os.path.exists(JSON_FILE):
             try:
                 with open(JSON_FILE, 'r') as f:
@@ -893,6 +1017,7 @@ class AppProfileManager(QMainWindow):
                     self.apps = data.get("apps", {})
                     self.profiles = data.get("profiles", [])
                     self.master_password = data.get("master_password", "")
+                    self.auto_capture = data.get("auto_capture", True)
                 elif isinstance(data, list):
                     for p in data:
                         app_name = p.get("app_name", "Default App")
@@ -920,6 +1045,7 @@ class AppProfileManager(QMainWindow):
         with open(JSON_FILE, 'w') as f:
             json.dump({
                 "master_password": self.master_password,
+                "auto_capture": self.auto_capture,
                 "apps": self.apps,
                 "profiles": self.profiles
             }, f, indent=4)
@@ -933,29 +1059,19 @@ class AppProfileManager(QMainWindow):
             else:
                 QMessageBox.warning(self, "Password Required", "A Master Password is required for encryption functionality.")
 
-    def change_master_password(self):
-        dialog = MasterPasswordDialog(self, current_password=self.master_password)
+    def open_settings(self):
+        dialog = SettingsDialog(self, master_password=self.master_password, auto_capture=self.auto_capture)
         if dialog.exec():
             self.master_password = dialog.master_password
+            self.auto_capture = dialog.auto_capture
             self.save_data()
-            QMessageBox.information(self, "Password Updated", "Master Password updated successfully.")
+
+    def restart_app(self):
+        os.execv(sys.executable, [sys.executable] + sys.argv)
 
     def init_ui(self):
-        self.setWindowTitle("App Profile Manager")
-        self.setMinimumSize(750, 680)
-
-        self.setStyleSheet(f"""
-            QMainWindow, QWidget#central {{ background-color: {BG_DEEP}; }}
-            QScrollArea {{ border: none; background: transparent; }}
-            QWidget#scrollContent {{ background: transparent; }}
-            QScrollBar:vertical {{
-                border: none; background: {BG_DEEP}; width: 6px; margin: 4px 0;
-            }}
-            QScrollBar::handle:vertical {{ background: {BORDER}; min-height: 30px; }}
-            QScrollBar::handle:vertical:hover {{ background: {TEXT_MUTED}; }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
-            QMessageBox {{ background: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
-        """)
+        self.setWindowTitle("CYBERPUNK APP PROFILE MANAGER")
+        self.setMinimumSize(820, 680)
 
         central = QWidget()
         central.setObjectName("central")
@@ -967,33 +1083,38 @@ class AppProfileManager(QMainWindow):
         # Topbar
         topbar = QFrame()
         topbar.setFixedHeight(60)
-        topbar.setStyleSheet(f"QFrame {{ background: {BG_SURFACE}; border-bottom: 1px solid {BORDER}; }}")
+        topbar.setStyleSheet(f"QFrame {{ background: {CP_PANEL}; border-bottom: 1px solid {CP_DIM}; }}")
         tb_layout = QHBoxLayout(topbar)
-        tb_layout.setContentsMargins(24, 0, 16, 0)
+        tb_layout.setContentsMargins(20, 0, 16, 0)
         tb_layout.setSpacing(10)
 
-        self.back_btn = make_secondary_btn("← Applications", min_width=110)
+        self.back_btn = make_secondary_btn("← APPLICATIONS", min_width=120)
         self.back_btn.setFixedHeight(34)
         self.back_btn.clicked.connect(self.show_apps)
         self.back_btn.setVisible(False)
         tb_layout.addWidget(self.back_btn)
 
-        self.header_label = make_label("Applications", size=16, color=TEXT_PRIMARY, bold=True)
+        self.header_label = make_label("APPLICATIONS", size=12, color=CP_YELLOW, bold=True)
         tb_layout.addWidget(self.header_label)
         tb_layout.addStretch()
 
-        self.pwd_btn = make_secondary_btn("🔑 Master Password", min_width=130)
-        self.pwd_btn.setFixedHeight(34)
-        self.pwd_btn.clicked.connect(self.change_master_password)
-        tb_layout.addWidget(self.pwd_btn)
+        restart_btn = make_secondary_btn("↺ RESTART", min_width=90)
+        restart_btn.setFixedHeight(34)
+        restart_btn.clicked.connect(self.restart_app)
+        tb_layout.addWidget(restart_btn)
 
-        self.app_settings_btn = make_secondary_btn("⚙ App Settings", min_width=110)
+        settings_btn = make_secondary_btn("⚙ SETTINGS", min_width=95)
+        settings_btn.setFixedHeight(34)
+        settings_btn.clicked.connect(self.open_settings)
+        tb_layout.addWidget(settings_btn)
+
+        self.app_settings_btn = make_secondary_btn("App Config", min_width=100)
         self.app_settings_btn.setFixedHeight(34)
         self.app_settings_btn.clicked.connect(self.edit_current_app)
         self.app_settings_btn.setVisible(False)
         tb_layout.addWidget(self.app_settings_btn)
 
-        self.action_btn = make_primary_btn("+ Add App", min_width=110)
+        self.action_btn = make_primary_btn("+ ADD APP", min_width=110)
         self.action_btn.setFixedHeight(34)
         self.action_btn.clicked.connect(self.on_action_clicked)
         tb_layout.addWidget(self.action_btn)
@@ -1002,9 +1123,9 @@ class AppProfileManager(QMainWindow):
 
         # Content
         content = QWidget()
-        content.setStyleSheet(f"background: {BG_DEEP};")
+        content.setStyleSheet(f"background: {CP_BG};")
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(24, 24, 24, 24)
+        content_layout.setContentsMargins(20, 20, 20, 20)
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -1030,15 +1151,15 @@ class AppProfileManager(QMainWindow):
 
     def show_apps(self):
         self.current_app = None
-        self.header_label.setText("Applications")
+        self.header_label.setText("APPLICATIONS")
         self.back_btn.setVisible(False)
         self.app_settings_btn.setVisible(False)
-        self.action_btn.setText("+ Add App")
+        self.action_btn.setText("+ ADD APP")
         self._clear_scroll()
 
         if not self.apps:
-            empty = make_label("No applications added yet. Click '+ Add App' to configure an app.",
-                               size=13, color=TEXT_MUTED)
+            empty = make_label("SYSTEM READY... No applications added. Click '+ ADD APP' to configure.",
+                               size=10, color=CP_SUBTEXT)
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setContentsMargins(0, 60, 0, 0)
             self.scroll_layout.addWidget(empty)
@@ -1055,17 +1176,17 @@ class AppProfileManager(QMainWindow):
 
     def show_profiles(self, app_name):
         self.current_app = app_name
-        self.header_label.setText(f"Accounts : {app_name}")
+        self.header_label.setText(f"ACCOUNTS // {app_name}")
         self.back_btn.setVisible(True)
         self.app_settings_btn.setVisible(True)
-        self.action_btn.setText("+ Add Account")
+        self.action_btn.setText("+ ADD ACCOUNT")
         self._clear_scroll()
 
         filtered = [p for p in self.profiles if p.get("app_name") == app_name]
         app_cfg = self.apps.get(app_name, {})
 
         if not filtered:
-            empty = make_label("No accounts created for this application yet.", size=13, color=TEXT_MUTED)
+            empty = make_label("NO ACCOUNTS STORED FOR THIS APPLICATION.", size=10, color=CP_SUBTEXT)
             empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
             empty.setContentsMargins(0, 60, 0, 0)
             self.scroll_layout.addWidget(empty)
@@ -1124,7 +1245,7 @@ class AppProfileManager(QMainWindow):
     def delete_app(self, app_name):
         reply = QMessageBox.question(
             self, 'Delete Application',
-            f"Delete application '{app_name}' and all its accounts?",
+            f"Delete application '{app_name}' and all associated accounts?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
@@ -1154,9 +1275,9 @@ class AppProfileManager(QMainWindow):
             if dialog.capture_now:
                 try:
                     self.capture_account_files(profile)
-                    QMessageBox.information(self, "Account Added", f"Account '{profile['name']}' created and session captured successfully!")
+                    QMessageBox.information(self, "Account Created", f"Account '{profile['name']}' created & captured!")
                 except Exception as e:
-                    QMessageBox.warning(self, "Capture Warning", f"Account created, but capture failed:\n{e}")
+                    QMessageBox.warning(self, "Capture Failed", f"Account created, but capture failed:\n{e}")
 
             self.show_profiles(self.current_app)
 
@@ -1172,7 +1293,7 @@ class AppProfileManager(QMainWindow):
     def delete_account(self, profile):
         reply = QMessageBox.question(
             self, 'Delete Account',
-            f"Delete account '{profile['name']}'? Local backup data will also be deleted.",
+            f"Delete account '{profile['name']}'? Backup files will be removed.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
@@ -1188,13 +1309,13 @@ class AppProfileManager(QMainWindow):
     def update_account_session(self, profile):
         reply = QMessageBox.question(
             self, 'Update Session',
-            f"Overwrite saved session for '{profile['name']}' with current files from target directory?",
+            f"Overwrite backup for '{profile['name']}' with current live session files?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply == QMessageBox.StandardButton.Yes:
             try:
                 self.capture_account_files(profile)
-                QMessageBox.information(self, "Success", f"Session files updated for '{profile['name']}'.")
+                QMessageBox.information(self, "Success", f"Session updated for '{profile['name']}'.")
             except Exception as e:
                 QMessageBox.critical(self, "Update Failed", str(e))
 
@@ -1221,7 +1342,7 @@ class AppProfileManager(QMainWindow):
         if is_locked and not self.master_password:
             self.ensure_master_password()
             if not self.master_password:
-                raise Exception("Master password is required for encrypted capture.")
+                raise Exception("Master password required for encrypted capture.")
 
         sync_items = app_cfg.get("sync_items", ["*"])
 
@@ -1272,7 +1393,7 @@ class AppProfileManager(QMainWindow):
                     p["active"] = (p == profile)
             self.save_data()
             self.show_profiles(profile["app_name"])
-            QMessageBox.information(self, "Account Activated", f"Account '{profile['name']}' activated successfully.")
+            QMessageBox.information(self, "Account Activated", f"Account '{profile['name']}' is now ACTIVE.")
         except Exception as e:
             QMessageBox.critical(self, "Activation Failed", str(e))
 
@@ -1295,7 +1416,7 @@ class AppProfileManager(QMainWindow):
         if is_locked and not self.master_password:
             self.ensure_master_password()
             if not self.master_password:
-                raise Exception("Master password is required for decryption.")
+                raise Exception("Master password required for decryption.")
 
         for root, _, files in os.walk(storage_dir):
             for file in files:
@@ -1320,6 +1441,7 @@ class AppProfileManager(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setStyleSheet(GLOBAL_STYLE)
     app.setFont(QFont(FONT_MAIN, 10))
     window = AppProfileManager()
     window.show()
