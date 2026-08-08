@@ -16,6 +16,56 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\db\\vlr",
+      "name": "VLR STATS",
+      "category": "Flask",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\app.py",
+        "C:\\@delta\\db\\vlr\\dev.md",
+        "C:\\@delta\\db\\vlr\\migration_guide.md",
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\scraper.py",
+        "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
+        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
+        "C:\\@delta\\db\\vlr\\templates\\index.html"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\ignorelist.json",
+        "C:\\@delta\\db\\vlr\\matches.db-wal",
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\matches.db-shm",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\settings.json"
+      ],
+      "extensions": [
+        "",
+        ".db-shm",
+        ".html",
+        ".md",
+        ".json",
+        ".js",
+        ".db-wal",
+        ".css",
+        ".txt",
+        ".py"
+      ],
+      "clicks": 57,
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
       "path": "C:\\@delta\\ms1\\@AI-Tool",
       "name": "",
       "category": "",
@@ -27,7 +77,7 @@
       "extensions": [
         ".py"
       ],
-      "clicks": 7,
+      "clicks": 8,
       "pinned": false,
       "pin_index": 0
     },
@@ -227,57 +277,6 @@
       "clicks": 118,
       "pinned": true,
       "pin_index": 5
-    },
-    {
-      "path": "C:\\@delta\\db\\vlr",
-      "name": "VLR STATS",
-      "category": "Flask",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\app.py",
-        "C:\\@delta\\db\\vlr\\dev.md",
-        "C:\\@delta\\db\\vlr\\migration_guide.md",
-        "C:\\@delta\\db\\vlr\\requirements.txt",
-        "C:\\@delta\\db\\vlr\\scraper.py",
-        "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
-        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
-        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
-        "C:\\@delta\\db\\vlr\\templates\\index.html"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\vlr\\migration_guide.md",
-        "C:\\@delta\\db\\vlr\\settings.json",
-        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-        "C:\\@delta\\db\\vlr\\matches.db-wal",
-        "C:\\@delta\\db\\vlr\\ignorelist.json",
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-        "C:\\@delta\\db\\vlr\\matches.db-shm",
-        "C:\\@delta\\db\\vlr\\requirements.txt",
-        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md"
-      ],
-      "extensions": [
-        "",
-        ".db-shm",
-        ".html",
-        ".md",
-        ".json",
-        ".js",
-        ".db-wal",
-        ".css",
-        ".txt",
-        ".py"
-      ],
-      "clicks": 54,
-      "pinned": false,
-      "pin_index": 0
     },
     {
       "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
@@ -793,12 +792,37 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+      "C:\\@delta\\db\\vlr\\.gitignore",
+      "C:\\@delta\\db\\vlr\\app.py",
+      "C:\\@delta\\db\\vlr\\dev.md",
+      "C:\\@delta\\db\\vlr\\migration_guide.md",
+      "C:\\@delta\\db\\vlr\\requirements.txt",
+      "C:\\@delta\\db\\vlr\\scraper.py",
+      "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
+      "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+      "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+      "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+      "C:\\@delta\\db\\vlr\\static\\css\\style.css",
+      "C:\\@delta\\db\\vlr\\static\\js\\main.js",
+      "C:\\@delta\\db\\vlr\\templates\\index.html"
     ],
-    "project_root": "C:\\@delta\\ms1\\@AI-Tool",
+    "project_root": "C:\\@delta\\db\\vlr",
     "minify": false,
     "file_modes": {},
-    "disabled_files": []
+    "disabled_files": [
+      "C:\\@delta\\db\\vlr\\.gitignore",
+      "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+      "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+      "C:\\@delta\\db\\vlr\\ignorelist.json",
+      "C:\\@delta\\db\\vlr\\matches.db-wal",
+      "C:\\@delta\\db\\vlr\\requirements.txt",
+      "C:\\@delta\\db\\vlr\\matches.db-shm",
+      "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+      "C:\\@delta\\db\\vlr\\settings.json"
+    ]
   },
   "backup": false,
   "preview": true
