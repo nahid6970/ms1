@@ -417,6 +417,9 @@ class App(QMainWindow):
         children.sort(key=get_sort_key)
         for child in children:
             parent.addChild(child)
+            # Recursively sort children if it's a directory
+            if child.data(0, Qt.ItemDataRole.UserRole)[0] == "dir":
+                self._sort_children(child)
 
     def _add_tree_file(self, root, f):
         """Add one file to the tree and buffer its folder so labels refresh in batches."""
@@ -463,6 +466,11 @@ class App(QMainWindow):
                 cur = nxt
         for pn in refresh:
             self._set_tree_label(pn)
+            item = self._tree_items.get(pn)
+            if item:
+                parent = item.parent()
+                if parent:
+                    self._sort_children(parent)
         self._tree_buffer = set()
         # Keep an active filter applied live while new items stream in
         if self.search_input.text().strip():
