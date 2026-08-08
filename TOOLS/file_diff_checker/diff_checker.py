@@ -4,8 +4,10 @@ import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout,
                              QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar,
-                             QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter, QMenu)
-from PyQt6.QtCore import Qt, QTimer
+                             QTabWidget, QPlainTextEdit, QTreeWidget, QTreeWidgetItem, QSplitter, QMenu, QToolButton)
+from PyQt6.QtGui import QIcon, QPixmap, QPainter
+from PyQt6.QtSvg import QSvgRenderer
+from PyQt6.QtCore import Qt, QTimer, QByteArray, QSize
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"
@@ -177,15 +179,48 @@ class App(QMainWindow):
         layout = QVBoxLayout(left_widget)
         layout.setContentsMargins(0, 0, 4, 0)
 
-        # Top bar: Restart & Settings
+        # Top bar: Restart & Settings (compact icon-only buttons)
         top_bar = QHBoxLayout()
-        self.btn_restart = QPushButton("↺ RESTART")
-        self.btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_restart.clicked.connect(self.restart_app)
+        top_bar.addStretch()
 
-        self.btn_settings = QPushButton("⚙ SETTINGS")
-        self.btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
+        def svg_icon(svg_str, size=20):
+            renderer = QSvgRenderer(QByteArray(svg_str.encode()))
+            pixmap = QPixmap(size, size)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            renderer.render(painter)
+            painter.end()
+            return QIcon(pixmap)
+
+        ICON_SETTINGS = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>"""
+
+        ICON_RESTART = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+          <polyline points="21 3 21 8 16 8"/>
+        </svg>"""
+
+        def make_icon_btn(icon_svg, tooltip):
+            btn = QToolButton()
+            btn.setIcon(svg_icon(icon_svg, 18))
+            btn.setIconSize(QSize(18, 18))
+            btn.setFixedSize(30, 30)
+            btn.setToolTip(tooltip)
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet("""
+                QToolButton { background: transparent; border: none; }
+                QToolButton:hover { background: #1e1e1e; border-radius: 4px; }
+                QToolButton:pressed { background: #2a2a2a; }
+            """)
+            return btn
+
+        self.btn_settings = make_icon_btn(ICON_SETTINGS, "Settings")
         self.btn_settings.clicked.connect(self.open_settings)
+
+        self.btn_restart = make_icon_btn(ICON_RESTART, "Restart")
+        self.btn_restart.clicked.connect(self.restart_app)
 
         top_bar.addWidget(self.btn_settings)
         top_bar.addWidget(self.btn_restart)
