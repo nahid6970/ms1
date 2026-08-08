@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
                              QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar)
@@ -26,6 +27,9 @@ TEXT_EXTENSIONS = {
 
 # Filenames without a useful extension that should still count as text
 TEXT_FILENAMES = {'.gitignore', '.dockerignore', '.editorconfig', '.npmrc', 'dockerfile'}
+
+# Where the app remembers its settings
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -76,13 +80,16 @@ class App(QMainWindow):
                 background-color: {CP_YELLOW}; border: 1px solid {CP_YELLOW};
             }}
             
-            QProgressBar {{
-                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 3px;
-                color: {CP_TEXT}; text-align: center;
+            QStatusBar {{
+                background: {CP_BG}; border-top: 1px solid {CP_DIM}; color: {CP_TEXT};
             }}
-            QProgressBar::chunk {{ background-color: {CP_YELLOW}; }}
+            QStatusBar::item {{ border: none; }}
+            QProgressBar {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 2px;
+            }}
+            QProgressBar::chunk {{ background-color: {CP_CYAN}; }}
             
-            QLabel#scanLabel {{ color: {CP_CYAN}; }}
+            QLabel#scanLabel {{ color: {CP_CYAN}; font-size: 9pt; }}
             
             QGroupBox {{
                 border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
@@ -163,20 +170,74 @@ class App(QMainWindow):
         action_layout.addWidget(self.btn_check)
         layout.addLayout(action_layout)
         
-        # Progress area (shown while scanning)
-        progress_layout = QHBoxLayout()
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setVisible(False)
-        self.progress_label = QLabel("Ready.")
-        self.progress_label.setObjectName("scanLabel")
-        progress_layout.addWidget(self.progress_bar, 1)
-        progress_layout.addWidget(self.progress_label, 2)
-        layout.addLayout(progress_layout)
-        
         # Output
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
         layout.addWidget(self.output_area)
+        
+        # Slim progress bar + status text pinned to the bottom of the window
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setFixedHeight(6)
+        self.progress_bar.setVisible(False)
+        self.progress_label = QLabel("Ready.")
+        self.progress_label.setObjectName("scanLabel")
+        status = self.statusBar()
+        status.addWidget(self.progress_label)
+        status.addWidget(self.progress_bar, 1)
+        
+        # Persist settings whenever anything changes, then restore saved values
+        self.folder_input.textChanged.connect(lambda *_: self.save_settings())
+        self.only_text_files.stateChanged.connect(lambda *_: self.save_settings())
+        self.ignore_input.textChanged.connect(lambda *_: self.save_settings())
+        self.load_settings()
+        self.ensure_gitignore()
+
+    def save_settings(self):
+        """Write the current UI settings to settings.json."""
+        data = {
+            "target_folder": self.folder_input.text(),
+            "only_text_files": self.only_text_files.isChecked(),
+            "ignore_folders": self.ignore_input.text(),
+        }
+        try:
+            with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+        except Exception:
+            pass
+
+    def load_settings(self):
+        """Restore saved settings from settings.json (if it exists)."""
+        try:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if data.get("target_folder"):
+                self.folder_input.setText(data["target_folder"])
+            self.only_text_files.setChecked(bool(data.get("only_text_files", True)))
+            if data.get("ignore_folders"):
+                self.ignore_input.setText(data["ignore_folders"])
+        except Exception:
+            pass
+
+    def ensure_gitignore(self):
+        """Make sure settings.json is listed in the local .gitignore."""
+        gi_path = os.path.join(os.path.dirname(__file__), ".gitignore")
+        try:
+            content = ""
+            if os.path.exists(gi_path):
+                with open(gi_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            if "settings.json" not in content.splitlines():
+                entry = "settings.json\n"
+                if content and not content.endswith("\n"):
+                    entry = "\n" + entry
+                with open(gi_path, 'a', encoding='utf-8') as f:
+                    f.write(entry)
+        except Exception:
+            pass
+
+    def closeEvent(self, event):
+        self.save_settings()
+        super().closeEvent(event)
 
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Directory")
@@ -209,12 +270,12 @@ class App(QMainWindow):
         QApplication.processEvents()
 
     def update_progress(self, path, count):
-        """Show the current file being scanned. Throttled so huge folders stay fast."""
+        """Show the current file being scanned in the bottom status bar. Throttled for speed."""
         if count > 20 and count % 50 != 0:
             return
-        # Truncate long paths so the label doesn't stretch the window
+        # Truncate long paths so the status bar doesn't stretch the window
         display = path if len(path) <= 80 else "..." + path[-(80 - 3):]
-        self.progress_label.setText(f"Scanning ({count} files): {display}")
+        self.progress_label.setText(f"Scanning ({count} files) ... {display}")
         QApplication.processEvents()
 
     def get_file_state(self, folder, text_only=False, progress_cb=None):
@@ -251,11 +312,7 @@ class App(QMainWindow):
         finally:
             self.scan_end()
         mode = "text files only" if self.text_only_enabled else "all files"
-        msg = f"Snapshot taken for {len(self.snapshot)} files ({mode}) in {folder}."
-        ignored = self.get_ignored_folders()
-        if ignored:
-            msg += f" Ignoring folders: {', '.join(sorted(ignored))}."
-        self.log(msg)
+        self.log(f"Snapshot taken for {len(self.snapshot)} files ({mode}) in {folder}.")
 
     def check_changes(self):
         folder = self.folder_input.text()
