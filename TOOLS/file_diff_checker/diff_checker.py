@@ -167,31 +167,25 @@ class App(QMainWindow):
         # Layout
         central = QWidget()
         self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
-        
+
+        # Top-level horizontal splitter: left panel = controls + log, right panel = tree
+        main_splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        # ---- LEFT PANEL ----
+        left_widget = QWidget()
+        layout = QVBoxLayout(left_widget)
+        layout.setContentsMargins(0, 0, 4, 0)
+
         # Top bar: Restart & Settings
         top_bar = QHBoxLayout()
         self.btn_restart = QPushButton("↺ RESTART")
         self.btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_restart.clicked.connect(self.restart_app)
-        
+
         self.btn_settings = QPushButton("⚙ SETTINGS")
         self.btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_settings.clicked.connect(self.open_settings)
-        
-        # Filter search box (filters the file tree below)
-        self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Filter file tree...")
-        self.search_input.setClearButtonEnabled(True)
-        self.search_input.setToolTip("Type to filter the file tree below (matches folder/file paths).")
-        # Debounce filtering so typing stays smooth even on huge trees
-        self._filter_timer = QTimer(self)
-        self._filter_timer.setSingleShot(True)
-        self._filter_timer.setInterval(150)
-        self._filter_timer.timeout.connect(self.apply_filter)
-        self.search_input.textChanged.connect(self._schedule_filter)
-        
-        top_bar.addWidget(self.search_input, 1)
+
         top_bar.addWidget(self.btn_settings)
         top_bar.addWidget(self.btn_restart)
         layout.addLayout(top_bar)
@@ -199,17 +193,17 @@ class App(QMainWindow):
         # Folder Selection
         grp = QGroupBox("DIRECTORY SCANNER")
         form = QFormLayout()
-        
+
         self.folder_input = QLineEdit()
         # Default to current directory
         self.folder_input.setText(os.path.dirname(__file__))
         self.btn_browse = QPushButton("BROWSE")
         self.btn_browse.clicked.connect(self.browse_folder)
-        
+
         folder_layout = QHBoxLayout()
         folder_layout.addWidget(self.folder_input)
         folder_layout.addWidget(self.btn_browse)
-        
+
         form.addRow("Target Folder:", folder_layout)
 
         self.only_text_files = QCheckBox("Only compare text files (json, txt, html, xml, csv, md, code, ...)")
@@ -219,37 +213,63 @@ class App(QMainWindow):
         form.addRow("", self.only_text_files)
         grp.setLayout(form)
         layout.addWidget(grp)
-        
+
         # Actions
         action_layout = QHBoxLayout()
         self.btn_scan = QPushButton("TAKE SNAPSHOT")
         self.btn_scan.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_scan.clicked.connect(self.take_snapshot)
-        
+
         self.btn_check = QPushButton("CHECK CHANGES")
         self.btn_check.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_check.clicked.connect(self.check_changes)
-        
+
         action_layout.addWidget(self.btn_scan)
         action_layout.addWidget(self.btn_check)
         layout.addLayout(action_layout)
-        
-        # Output + live file tree (vertical splitter)
-        splitter = QSplitter(Qt.Orientation.Vertical)
+
+        # Log output
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
+        layout.addWidget(self.output_area, 1)
+
+        main_splitter.addWidget(left_widget)
+
+        # ---- RIGHT PANEL ----
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        right_layout.setContentsMargins(4, 0, 0, 0)
+
+        # Filter search box
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("Filter file tree...")
+        self.search_input.setClearButtonEnabled(True)
+        self.search_input.setToolTip("Type to filter the file tree below (matches folder/file paths).")
+        self._filter_timer = QTimer(self)
+        self._filter_timer.setSingleShot(True)
+        self._filter_timer.setInterval(150)
+        self._filter_timer.timeout.connect(self.apply_filter)
+        self.search_input.textChanged.connect(self._schedule_filter)
+        right_layout.addWidget(self.search_input)
+
+        # File tree
         self.tree_widget = QTreeWidget()
         self.tree_widget.setHeaderLabels(["Name"])
         self.tree_widget.setAlternatingRowColors(True)
         self.tree_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.tree_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tree_widget.customContextMenuRequested.connect(self._tree_context_menu)
-        splitter.addWidget(self.output_area)
-        splitter.addWidget(self.tree_widget)
-        splitter.setStretchFactor(0, 3)
-        splitter.setStretchFactor(1, 2)
-        layout.addWidget(splitter, 1)
-        
+        right_layout.addWidget(self.tree_widget, 1)
+
+        main_splitter.addWidget(right_widget)
+
+        main_splitter.setStretchFactor(0, 1)
+        main_splitter.setStretchFactor(1, 1)
+
+        root_layout = QVBoxLayout(central)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.addWidget(main_splitter, 1)
+
         # Slim progress bar + status text pinned to the bottom of the window
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedHeight(6)
