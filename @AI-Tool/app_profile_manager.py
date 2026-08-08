@@ -197,6 +197,86 @@ def make_divider():
     return line
 
 
+# ── MASTER PASSWORD DIALOG ──────────────────────────────────────────────────
+class MasterPasswordDialog(QDialog):
+    def __init__(self, parent=None, current_password=""):
+        super().__init__(parent)
+        self.current_password = current_password
+        self.init_ui()
+
+    def init_ui(self):
+        title = "Change Master Password" if self.current_password else "Set Master Password"
+        self.setWindowTitle(title)
+        self.setFixedWidth(420)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
+            {INPUT_STYLE}
+        """)
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(0, 0, 0, 0)
+        root.setSpacing(0)
+
+        header = QFrame()
+        header.setStyleSheet(f"background: {BG_RAISED}; border-bottom: 1px solid {BORDER};")
+        h_layout = QHBoxLayout(header)
+        h_layout.setContentsMargins(20, 16, 20, 16)
+        h_layout.addWidget(make_label(title, size=15, color=TEXT_PRIMARY, bold=True))
+        root.addWidget(header)
+
+        body = QWidget()
+        body.setStyleSheet(f"background: {BG_SURFACE};")
+        layout = QVBoxLayout(body)
+        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setSpacing(12)
+
+        info_text = "This master password will be used automatically to encrypt and lock stored session data across all applications."
+        layout.addWidget(make_label(info_text, size=12, color=TEXT_SECONDARY))
+
+        self.pwd_input = QLineEdit()
+        self.pwd_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.pwd_input.setPlaceholderText("Enter master password...")
+        layout.addWidget(make_label("Master Password", size=12))
+        layout.addWidget(self.pwd_input)
+
+        self.confirm_input = QLineEdit()
+        self.confirm_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.confirm_input.setPlaceholderText("Confirm master password...")
+        layout.addWidget(make_label("Confirm Password", size=12))
+        layout.addWidget(self.confirm_input)
+
+        root.addWidget(body)
+
+        footer = QFrame()
+        footer.setStyleSheet(f"background: {BG_RAISED}; border-top: 1px solid {BORDER};")
+        f_layout = QHBoxLayout(footer)
+        f_layout.setContentsMargins(20, 12, 20, 12)
+        f_layout.setSpacing(10)
+        f_layout.addStretch()
+
+        if self.current_password:
+            cancel_btn = make_secondary_btn("Cancel", min_width=80)
+            cancel_btn.clicked.connect(self.reject)
+            f_layout.addWidget(cancel_btn)
+
+        save_btn = make_primary_btn("Save Password", min_width=110)
+        save_btn.clicked.connect(self.save)
+        f_layout.addWidget(save_btn)
+        root.addWidget(footer)
+
+    def save(self):
+        p1 = self.pwd_input.text()
+        p2 = self.confirm_input.text()
+        if not p1:
+            QMessageBox.warning(self, "Validation Error", "Password cannot be empty.")
+            return
+        if p1 != p2:
+            QMessageBox.warning(self, "Validation Error", "Passwords do not match.")
+            return
+        self.master_password = p1
+        self.accept()
+
+
 # ── APPLICATION DIALOG ───────────────────────────────────────────────────────
 class AppDialog(QDialog):
     def __init__(self, parent=None, app_name="", app_config=None):
@@ -205,15 +285,14 @@ class AppDialog(QDialog):
         self.app_config = app_config or {
             "target_path": "",
             "sync_items": [],
-            "is_locked": False,
-            "password": ""
+            "is_locked": True
         }
         self.init_ui()
 
     def init_ui(self):
         title = f"App Settings ({self.app_name_orig})" if self.app_name_orig else "New Application"
         self.setWindowTitle(title)
-        self.setFixedWidth(560)
+        self.setFixedWidth(540)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {BG_SURFACE}; color: {TEXT_PRIMARY}; }}
             {INPUT_STYLE}
@@ -249,7 +328,7 @@ class AppDialog(QDialog):
         tgt_row = QHBoxLayout()
         tgt_row.setSpacing(8)
         self.target_input = QLineEdit(self.app_config.get("target_path", ""))
-        self.target_input.setPlaceholderText("Select main App directory path...")
+        self.target_input.setPlaceholderText("Select main App target directory path...")
         tgt_browse = make_secondary_btn("Browse", min_width=80)
         tgt_browse.setFixedHeight(36)
         tgt_browse.clicked.connect(self.browse_target)
@@ -292,20 +371,10 @@ class AppDialog(QDialog):
 
         layout.addWidget(make_divider())
 
-        # Encryption Settings
-        self.lock_checkbox = QCheckBox("Encrypt profile data stored on disk (.enc)")
-        self.lock_checkbox.setChecked(self.app_config.get("is_locked", False))
+        # Encryption Checkbox
+        self.lock_checkbox = QCheckBox("Encrypt stored profile files using Master Password (.enc)")
+        self.lock_checkbox.setChecked(self.app_config.get("is_locked", True))
         layout.addWidget(self.lock_checkbox)
-
-        self.password_label = make_label("Encryption Password", size=12)
-        self.password_input = QLineEdit(self.app_config.get("password", ""))
-        self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_input.setPlaceholderText("Enter password to lock profile data...")
-        layout.addWidget(self.password_label)
-        layout.addWidget(self.password_input)
-
-        self.lock_checkbox.toggled.connect(self.toggle_password_fields)
-        self.toggle_password_fields(self.lock_checkbox.isChecked())
 
         root.addWidget(body)
 
@@ -323,10 +392,6 @@ class AppDialog(QDialog):
         f_layout.addWidget(cancel_btn)
         f_layout.addWidget(save_btn)
         root.addWidget(footer)
-
-    def toggle_password_fields(self, checked):
-        self.password_label.setVisible(checked)
-        self.password_input.setVisible(checked)
 
     def browse_target(self):
         path = QFileDialog.getExistingDirectory(self, "Select Target Application Directory")
@@ -375,9 +440,6 @@ class AppDialog(QDialog):
         if not app_name or not target_path:
             QMessageBox.warning(self, "Validation Error", "Application Name and Target Path are required.")
             return
-        if self.lock_checkbox.isChecked() and not self.password_input.text():
-            QMessageBox.warning(self, "Validation Error", "Password is required when encryption is enabled.")
-            return
 
         sync_items = []
         for i in range(self.items_list.count()):
@@ -390,8 +452,7 @@ class AppDialog(QDialog):
         self.app_config = {
             "target_path": target_path,
             "sync_items": sync_items,
-            "is_locked": self.lock_checkbox.isChecked(),
-            "password": self.password_input.text() if self.lock_checkbox.isChecked() else ""
+            "is_locked": self.lock_checkbox.isChecked()
         }
         self.accept()
 
@@ -792,13 +853,16 @@ class AppProfileManager(QMainWindow):
         super().__init__()
         self.apps = {}
         self.profiles = []
+        self.master_password = ""
         self.current_app = None
         self.load_data()
         self.init_ui()
+        QTimer.singleShot(100, self.ensure_master_password)
 
     def load_data(self):
         self.apps = {}
         self.profiles = []
+        self.master_password = ""
         if os.path.exists(JSON_FILE):
             try:
                 with open(JSON_FILE, 'r') as f:
@@ -806,17 +870,18 @@ class AppProfileManager(QMainWindow):
                 if isinstance(data, dict):
                     self.apps = data.get("apps", {})
                     self.profiles = data.get("profiles", [])
+                    self.master_password = data.get("master_password", "")
                 elif isinstance(data, list):
-                    # Legacy migration
                     for p in data:
                         app_name = p.get("app_name", "Default App")
                         if app_name not in self.apps:
                             self.apps[app_name] = {
                                 "target_path": p.get("target_path", ""),
                                 "sync_items": ["*"],
-                                "is_locked": p.get("is_locked", False),
-                                "password": p.get("password", "")
+                                "is_locked": True
                             }
+                        if p.get("password") and not self.master_password:
+                            self.master_password = p.get("password")
                         self.profiles.append({
                             "app_name": app_name,
                             "name": p.get("name", "Account"),
@@ -831,7 +896,27 @@ class AppProfileManager(QMainWindow):
 
     def save_data(self):
         with open(JSON_FILE, 'w') as f:
-            json.dump({"apps": self.apps, "profiles": self.profiles}, f, indent=4)
+            json.dump({
+                "master_password": self.master_password,
+                "apps": self.apps,
+                "profiles": self.profiles
+            }, f, indent=4)
+
+    def ensure_master_password(self):
+        if not self.master_password:
+            dialog = MasterPasswordDialog(self, current_password="")
+            if dialog.exec():
+                self.master_password = dialog.master_password
+                self.save_data()
+            else:
+                QMessageBox.warning(self, "Password Required", "A Master Password is required for encryption functionality.")
+
+    def change_master_password(self):
+        dialog = MasterPasswordDialog(self, current_password=self.master_password)
+        if dialog.exec():
+            self.master_password = dialog.master_password
+            self.save_data()
+            QMessageBox.information(self, "Password Updated", "Master Password updated successfully.")
 
     def init_ui(self):
         self.setWindowTitle("App Profile Manager")
@@ -874,6 +959,11 @@ class AppProfileManager(QMainWindow):
         self.header_label = make_label("Applications", size=16, color=TEXT_PRIMARY, bold=True)
         tb_layout.addWidget(self.header_label)
         tb_layout.addStretch()
+
+        self.pwd_btn = make_secondary_btn("🔑 Master Password", min_width=130)
+        self.pwd_btn.setFixedHeight(34)
+        self.pwd_btn.clicked.connect(self.change_master_password)
+        tb_layout.addWidget(self.pwd_btn)
 
         self.app_settings_btn = make_secondary_btn("⚙ App Settings", min_width=110)
         self.app_settings_btn.setFixedHeight(34)
@@ -1033,7 +1123,6 @@ class AppProfileManager(QMainWindow):
             profile["app_name"] = self.current_app
             profile["active"] = False
 
-            # Set storage path
             acc_dir = os.path.join(PROFILE_DATA_DIR, sanitize_filename(self.current_app), sanitize_filename(profile["name"]))
             profile["storage_path"] = acc_dir
 
@@ -1106,19 +1195,23 @@ class AppProfileManager(QMainWindow):
             shutil.rmtree(storage_dir)
         os.makedirs(storage_dir, exist_ok=True)
 
-        is_locked = app_cfg.get("is_locked", False)
-        password = app_cfg.get("password", "")
+        is_locked = app_cfg.get("is_locked", True)
+        if is_locked and not self.master_password:
+            self.ensure_master_password()
+            if not self.master_password:
+                raise Exception("Master password is required for encrypted capture.")
+
         sync_items = app_cfg.get("sync_items", ["*"])
 
         if not sync_items or "*" in sync_items:
             for item in os.listdir(target_dir):
                 src_path = os.path.join(target_dir, item)
-                self._copy_recursive(src_path, target_dir, storage_dir, is_locked, password)
+                self._copy_recursive(src_path, target_dir, storage_dir, is_locked, self.master_password)
         else:
             for rel_path in sync_items:
                 src_path = os.path.normpath(os.path.join(target_dir, rel_path))
                 if os.path.exists(src_path):
-                    self._copy_recursive(src_path, target_dir, storage_dir, is_locked, password)
+                    self._copy_recursive(src_path, target_dir, storage_dir, is_locked, self.master_password)
 
     def _copy_recursive(self, src_path, base_target, base_storage, is_locked, password):
         if os.path.isfile(src_path):
@@ -1176,8 +1269,11 @@ class AppProfileManager(QMainWindow):
         if not storage_dir or not os.path.exists(storage_dir):
             raise Exception(f"Stored profile directory not found:\n{storage_dir}")
 
-        is_locked = app_cfg.get("is_locked", False)
-        password = app_cfg.get("password", "")
+        is_locked = app_cfg.get("is_locked", True)
+        if is_locked and not self.master_password:
+            self.ensure_master_password()
+            if not self.master_password:
+                raise Exception("Master password is required for decryption.")
 
         for root, _, files in os.walk(storage_dir):
             for file in files:
@@ -1190,7 +1286,7 @@ class AppProfileManager(QMainWindow):
                     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
                     with open(full_src, 'rb') as f:
                         enc_bytes = f.read()
-                    data = decrypt_file_data(enc_bytes, password)
+                    data = decrypt_file_data(enc_bytes, self.master_password)
                     with open(dest_path, 'wb') as f:
                         f.write(data)
                 else:
