@@ -9,5 +9,14 @@
             "is_locked": true
         }
     },
-    "profiles": []
+    "profiles": [
+        {
+            "name": "00",
+            "timer_enabled": false,
+            "target_time": null,
+            "app_name": "freebuff",
+            "active": false,
+            "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00"
+        }
+    ]
 }
