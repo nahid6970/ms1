@@ -965,7 +965,7 @@ class ProfileCard(QFrame):
 
         row = QHBoxLayout()
         row.setContentsMargins(16, 12, 16, 12)
-        row.setSpacing(12)
+        row.setSpacing(10)
         row.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
         info_col = QVBoxLayout()
@@ -1002,25 +1002,55 @@ class ProfileCard(QFrame):
         info_col.addWidget(self.path_label)
         row.addLayout(info_col, 1)
 
-        # Update Session Button
+        # 1. Activate / Active Button (Fixed size so layout never jumps)
+        is_active = self.profile.get("active", False)
+        act_btn = QPushButton("ACTIVE" if is_active else "ACTIVATE")
+        act_btn.setFixedWidth(90)
+        act_btn.setFixedHeight(30)
+
+        if is_active:
+            act_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_PANEL};
+                    border: 1px solid {CP_GREEN};
+                    color: {CP_GREEN};
+                    font-weight: bold;
+                    font-family: '{FONT_MAIN}', monospace;
+                    font-size: 9pt;
+                }}
+            """)
+        else:
+            act_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            act_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {CP_DIM};
+                    border: 1px solid {CP_CYAN};
+                    color: {CP_CYAN};
+                    font-weight: bold;
+                    font-family: '{FONT_MAIN}', monospace;
+                    font-size: 9pt;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_CYAN};
+                    color: #000000;
+                }}
+                QPushButton:pressed {{
+                    background-color: {CP_YELLOW};
+                    color: #000000;
+                }}
+            """)
+            act_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
+
+        row.addWidget(act_btn)
+
+        # 2. Update Session Button
         update_btn = make_secondary_btn("UPDATE", min_width=75)
         update_btn.setToolTip("Overwrite backup with current target directory state")
         update_btn.setFixedHeight(30)
         update_btn.clicked.connect(lambda: self.update_click.emit(self.profile))
         row.addWidget(update_btn)
 
-        if self.profile.get("active", False):
-            status = make_label("● ACTIVE", size=9, color=CP_GREEN, bold=True)
-            status.setStyleSheet(
-                f"color: {CP_GREEN}; font-size: 9pt; font-weight: bold; background: transparent; letter-spacing: 1px;"
-            )
-            row.addWidget(status)
-        else:
-            act_btn = make_primary_btn("ACTIVATE", min_width=85)
-            act_btn.setFixedHeight(30)
-            act_btn.clicked.connect(lambda: self.clicked.emit(self.profile))
-            row.addWidget(act_btn)
-
+        # 3. Edit & Delete SVG Action Buttons
         edit_btn   = make_card_svg_button(SVG_EDIT, tooltip="Edit Account")
         delete_btn = make_card_svg_button(SVG_DELETE, tooltip="Delete Account")
         edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.profile))
