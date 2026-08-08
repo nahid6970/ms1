@@ -439,7 +439,7 @@ class App(QMainWindow):
         item = QTreeWidgetItem([f])
         item.setData(0, Qt.ItemDataRole.UserRole, ("file", os.path.normpath(os.path.join(root, f))))
         parent.addChild(item)
-        self._sort_children(parent)
+        # No sorting here — deferred to _finalize_tree for O(n log n) total cost
         self._tree_buffer.add(pn)
 
     def _set_tree_label(self, pn):
@@ -466,26 +466,21 @@ class App(QMainWindow):
                 cur = nxt
         for pn in refresh:
             self._set_tree_label(pn)
-            item = self._tree_items.get(pn)
-            if item:
-                parent = item.parent()
-                if parent:
-                    self._sort_children(parent)
         self._tree_buffer = set()
         # Keep an active filter applied live while new items stream in
         if self.search_input.text().strip():
             self._schedule_filter()
 
     def _finalize_tree(self):
-        """After a scan: refresh every folder label once, then expand root + first level."""
-        # Sort all folders by count
+        """After a scan: refresh every folder label once, sort folders by count, then expand root + first level."""
+        # Update all labels first so counts are correct before sorting
         for pn in self._tree_items:
-            self._sort_children(self._tree_items[pn])
             self._set_tree_label(pn)
-        
+        # Sort once, top-down only from the root level items — _sort_children recurses down itself
         root = self.tree_widget.topLevelItem(0)
         if root is None:
             return
+        self._sort_children(root)
         root.setExpanded(True)
         for i in range(root.childCount()):
             root.child(i).setExpanded(True)
