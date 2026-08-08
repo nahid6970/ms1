@@ -1,10 +1,14 @@
 {
     "master_password": "182358",
+    "auto_capture": true,
     "apps": {
         "freebuff": {
             "target_path": "C:\\Users\\nahid\\.config\\manicode",
             "sync_items": [
-                "credentials.json"
+                "analytics-id.json",
+                "credentials.json",
+                "freebuff-instance-owner.json",
+                "freebuff-metadata.json"
             ],
             "is_locked": true
         }
