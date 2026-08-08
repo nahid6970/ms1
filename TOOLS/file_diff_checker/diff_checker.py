@@ -481,9 +481,9 @@ class App(QMainWindow):
         if root is None:
             return
         self._sort_children(root)
+        # Collapse everything first — addChild during sort can leave nodes expanded
+        self.tree_widget.collapseAll()
         root.setExpanded(True)
-        for i in range(root.childCount()):
-            root.child(i).setExpanded(True)
 
     # ---- Tree filter search box ----
 
