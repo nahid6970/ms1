@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QLineEdit, QGroupBox, QFormLayout, 
-                             QFileDialog, QTextEdit, QDialog, QCheckBox)
+                             QFileDialog, QTextEdit, QDialog, QCheckBox, QProgressBar)
 from PyQt6.QtCore import Qt
 
 # CYBERPUNK THEME PALETTE
@@ -76,6 +76,14 @@ class App(QMainWindow):
                 background-color: {CP_YELLOW}; border: 1px solid {CP_YELLOW};
             }}
             
+            QProgressBar {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; border-radius: 3px;
+                color: {CP_TEXT}; text-align: center;
+            }}
+            QProgressBar::chunk {{ background-color: {CP_YELLOW}; }}
+            
+            QLabel#scanLabel {{ color: {CP_CYAN}; }}
+            
             QGroupBox {{
                 border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
             }}
@@ -133,6 +141,11 @@ class App(QMainWindow):
         self.only_text_files.setCursor(Qt.CursorShape.PointingHandCursor)
         self.only_text_files.setToolTip("Only take snapshots and compare files with text extensions (json, txt, html, etc.).")
         form.addRow("", self.only_text_files)
+
+        self.ignore_input = QLineEdit()
+        self.ignore_input.setText("node_modules, .git, __pycache__, dist, build, venv, .venv, .cache, .idea, .vscode, target")
+        self.ignore_input.setToolTip("Folders to skip during scanning. Comma-separated names, matched by folder name at any depth (case-insensitive).")
+        form.addRow("Ignore Folders:", self.ignore_input)
         grp.setLayout(form)
         layout.addWidget(grp)
         
@@ -150,6 +163,16 @@ class App(QMainWindow):
         action_layout.addWidget(self.btn_check)
         layout.addLayout(action_layout)
         
+        # Progress area (shown while scanning)
+        progress_layout = QHBoxLayout()
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        self.progress_label = QLabel("Ready.")
+        self.progress_label.setObjectName("scanLabel")
+        progress_layout.addWidget(self.progress_bar, 1)
+        progress_layout.addWidget(self.progress_label, 2)
+        layout.addLayout(progress_layout)
+        
         # Output
         self.output_area = QTextEdit()
         self.output_area.setReadOnly(True)
@@ -165,11 +188,47 @@ class App(QMainWindow):
         name = os.path.basename(path).lower()
         return os.path.splitext(name)[1] in TEXT_EXTENSIONS or name in TEXT_FILENAMES
 
-    def get_file_state(self, folder, text_only=False):
+    def get_ignored_folders(self):
+        """Parse the ignore-folders field into a set of lowercase folder names."""
+        raw = self.ignore_input.text().replace(';', ',')
+        return {name.strip().lower() for name in raw.split(',') if name.strip()}
+
+    def scan_start(self):
+        self.btn_scan.setEnabled(False)
+        self.btn_check.setEnabled(False)
+        self.progress_bar.setRange(0, 0)
+        self.progress_bar.setVisible(True)
+        self.progress_label.setText("Scanning...")
+        QApplication.processEvents()
+
+    def scan_end(self):
+        self.progress_bar.setVisible(False)
+        self.btn_scan.setEnabled(True)
+        self.btn_check.setEnabled(True)
+        self.progress_label.setText("Ready.")
+        QApplication.processEvents()
+
+    def update_progress(self, path, count):
+        """Show the current file being scanned. Throttled so huge folders stay fast."""
+        if count > 20 and count % 50 != 0:
+            return
+        # Truncate long paths so the label doesn't stretch the window
+        display = path if len(path) <= 80 else "..." + path[-(80 - 3):]
+        self.progress_label.setText(f"Scanning ({count} files): {display}")
+        QApplication.processEvents()
+
+    def get_file_state(self, folder, text_only=False, progress_cb=None):
         state = {}
+        ignored = self.get_ignored_folders()
+        count = 0
         for root, dirs, files in os.walk(folder):
+            # Prune ignored directories so os.walk never descends into them
+            dirs[:] = [d for d in dirs if d.lower() not in ignored]
             for f in files:
                 filepath = os.path.join(root, f)
+                count += 1
+                if progress_cb:
+                    progress_cb(filepath, count)
                 if text_only and not self.is_text_file(filepath):
                     continue
                 try:
@@ -186,9 +245,17 @@ class App(QMainWindow):
             
         # Remember which filter mode the snapshot was taken with
         self.text_only_enabled = self.only_text_files.isChecked()
-        self.snapshot = self.get_file_state(folder, text_only=self.text_only_enabled)
+        self.scan_start()
+        try:
+            self.snapshot = self.get_file_state(folder, text_only=self.text_only_enabled, progress_cb=self.update_progress)
+        finally:
+            self.scan_end()
         mode = "text files only" if self.text_only_enabled else "all files"
-        self.log(f"Snapshot taken for {len(self.snapshot)} files ({mode}) in {folder}.")
+        msg = f"Snapshot taken for {len(self.snapshot)} files ({mode}) in {folder}."
+        ignored = self.get_ignored_folders()
+        if ignored:
+            msg += f" Ignoring folders: {', '.join(sorted(ignored))}."
+        self.log(msg)
 
     def check_changes(self):
         folder = self.folder_input.text()
@@ -204,7 +271,12 @@ class App(QMainWindow):
         if hasattr(self, 'text_only_enabled') and self.only_text_files.isChecked() != self.text_only_enabled:
             self.log(f"<span style='color:{CP_YELLOW};'>Note: text-file filter changed since the snapshot; using the snapshot's setting.</span>")
         
-        current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False))
+        current_state = None
+        self.scan_start()
+        try:
+            current_state = self.get_file_state(folder, text_only=getattr(self, 'text_only_enabled', False), progress_cb=self.update_progress)
+        finally:
+            self.scan_end()
         
         added = []
         modified = []
