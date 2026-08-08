@@ -353,6 +353,11 @@
             "kind": "Exe",
             "id": "RustDesk.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Freebuff.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -459,6 +464,11 @@
         {
             "kind": "Exe",
             "id": "RustDesk.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Freebuff.exe",
             "matching_strategy": "Equals"
         }
     ],
