@@ -16,6 +16,90 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": "Code Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
+      "extensions": [
+        ".py",
+        "",
+        ".md",
+        ".json"
+      ],
+      "pinned": true,
+      "pin_index": 1
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AI-Tool",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@AI-Tool\\app_profiles.json",
+        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".enc",
+        ".json",
+        ".py"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
+      "name": "Script-Loader",
+      "category": "Extension",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\background.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\DEV_GUIDE.md",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\manifest.json",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\page_bridge.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.html",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\assets\\icons\\.gitignore",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\checkbox_auto_checker.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\copy_table_as_markdown.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\disable_youtube.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\form_draft_saver.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\link_text_extractor.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\local_server_fallback.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_links_in_new_tab.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_local_files_in_new_tab.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_ad_skipper.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_swap_sections.js",
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\yt_analyzer.js"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        "",
+        ".js",
+        ".md",
+        ".json",
+        ".html"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
       "name": "Tab Saver",
       "category": "Extension",
@@ -110,42 +194,6 @@
         ".md",
         ".ahk",
         ".py"
-      ],
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader",
-      "name": "Script-Loader",
-      "category": "Extension",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\background.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\DEV_GUIDE.md",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\manifest.json",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\page_bridge.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.html",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\popup.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\assets\\icons\\.gitignore",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\checkbox_auto_checker.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\copy_table_as_markdown.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\disable_youtube.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\form_draft_saver.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\link_text_extractor.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\local_server_fallback.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_links_in_new_tab.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\open_local_files_in_new_tab.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_ad_skipper.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\youtube_swap_sections.js",
-        "C:\\@delta\\ms1\\test_project\\my-first-extension\\script_loader\\user_scripts\\yt_analyzer.js"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        "",
-        ".js",
-        ".md",
-        ".json",
-        ".html"
       ],
       "pinned": false,
       "pin_index": 0
@@ -761,43 +809,6 @@
       "pin_index": 0
     },
     {
-      "path": "C:\\@delta\\ms1\\@AI-Tool",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profiles.json",
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\analytics-id.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\credentials.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\freebuff-instance-owner.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\freebuff-metadata.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\analytics-id.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\credentials.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\freebuff-instance-owner.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\freebuff-metadata.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\Rclone Config\\rclone config\\rclone.conf.enc"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\credentials.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\freebuff-instance-owner.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\analytics-id.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\Rclone Config\\rclone config\\rclone.conf.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\freebuff-instance-owner.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\freebuff-metadata.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\credentials.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00\\freebuff-metadata.json.enc",
-        "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01\\analytics-id.json.enc"
-      ],
-      "extensions": [
-        ".json",
-        ".enc",
-        ".py"
-      ],
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
       "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
       "name": "myGemini-CLI",
       "category": "AI-Tools",
@@ -1000,36 +1011,6 @@
       ],
       "pinned": true,
       "pin_index": 2
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-      "name": "Code Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json"
-      ],
-      "extensions": [
-        ".py",
-        "",
-        ".md",
-        ".json"
-      ],
-      "pinned": true,
-      "pin_index": 1
     }
   ],
   "show_file_mode_controls": false,
@@ -1052,19 +1033,24 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\background.js",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\manifest.json",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.css",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.html",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\popup.js",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\README.md",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\shared-modal.css",
-      "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\icons\\.gitignore"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
     ],
-    "project_root": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver",
+    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "minify": false,
     "file_modes": {},
-    "disabled_files": []
+    "disabled_files": [
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+    ]
   },
   "backup": false,
   "preview": true

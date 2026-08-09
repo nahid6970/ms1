@@ -352,10 +352,12 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     current = load_recent_details()
     
     # Locate existing entry to avoid overwriting previously stored selection details
+    existing_index = None
     existing = None
-    for item in current:
+    for idx, item in enumerate(current):
         if os.path.normpath(item["path"]) == path:
             existing = item
+            existing_index = idx
             break
 
     name = existing.get("name", "") if existing else ""
@@ -392,8 +394,6 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     normalized_files = [os.path.normpath(f) for f in files]
     normalized_disabled = [os.path.normpath(f) for f in disabled_files]
 
-    # Remove existing entry to move it to the top of the list
-    current = [item for item in current if os.path.normpath(item["path"]) != path]
     new_entry = {
         "path": path,
         "files": normalized_files,
@@ -408,7 +408,14 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
         new_entry["category"] = category
     if icon:
         new_entry["icon"] = icon
-    current.insert(0, new_entry)
+
+    if existing_index is not None:
+        # Preserve original position in recent projects array when clicking/updating
+        current[existing_index] = new_entry
+    else:
+        # Insert brand new projects at the top
+        current.insert(0, new_entry)
+
     save_recent(current[:MAX_RECENT])
 
 def remove_recent(path: str):
