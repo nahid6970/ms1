@@ -16,99 +16,6 @@
   "extension_icon_size": 20,
   "projects": [
     {
-      "path": "C:\\@delta\\db\\vlr",
-      "name": "VLR STATS",
-      "category": "Flask",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\db\\vlr\\.env.example",
-        "C:\\@delta\\db\\vlr\\.env.local",
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\next-env.d.ts",
-        "C:\\@delta\\db\\vlr\\next.config.js",
-        "C:\\@delta\\db\\vlr\\package-lock.json",
-        "C:\\@delta\\db\\vlr\\package.json",
-        "C:\\@delta\\db\\vlr\\README.md",
-        "C:\\@delta\\db\\vlr\\tsconfig.json",
-        "C:\\@delta\\db\\vlr\\vercel.json",
-        "C:\\@delta\\db\\vlr\\app\\ConvexClientProvider.tsx",
-        "C:\\@delta\\db\\vlr\\app\\globals.css",
-        "C:\\@delta\\db\\vlr\\app\\layout.tsx",
-        "C:\\@delta\\db\\vlr\\app\\page.tsx",
-        "C:\\@delta\\db\\vlr\\app\\api\\sync\\route.ts",
-        "C:\\@delta\\db\\vlr\\components\\AppShell.tsx",
-        "C:\\@delta\\db\\vlr\\components\\LeaderboardModal.tsx",
-        "C:\\@delta\\db\\vlr\\components\\MatchCard.tsx",
-        "C:\\@delta\\db\\vlr\\components\\MatchDetailModal.tsx",
-        "C:\\@delta\\db\\vlr\\components\\SettingsModal.tsx",
-        "C:\\@delta\\db\\vlr\\components\\Sidebar.tsx",
-        "C:\\@delta\\db\\vlr\\components\\StandingsModal.tsx",
-        "C:\\@delta\\db\\vlr\\components\\TeamHistoryModal.tsx",
-        "C:\\@delta\\db\\vlr\\convex\\http.ts",
-        "C:\\@delta\\db\\vlr\\convex\\matches.ts",
-        "C:\\@delta\\db\\vlr\\convex\\README.md",
-        "C:\\@delta\\db\\vlr\\convex\\schema.ts",
-        "C:\\@delta\\db\\vlr\\convex\\settings.ts",
-        "C:\\@delta\\db\\vlr\\convex\\tsconfig.json",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
-        "C:\\@delta\\db\\vlr\\lib\\types.ts",
-        "C:\\@delta\\db\\vlr\\lib\\utils.ts",
-        "C:\\@delta\\db\\vlr\\scripts\\vercel-build-retry.mjs"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-        "C:\\@delta\\db\\vlr\\requirements.txt",
-        "C:\\@delta\\db\\vlr\\.gitignore",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-        "C:\\@delta\\db\\vlr\\ignorelist.json",
-        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-        "C:\\@delta\\db\\vlr\\matches.db-shm",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
-        "C:\\@delta\\db\\vlr\\matches.db-wal",
-        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
-        "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\db\\vlr\\settings.json"
-      ],
-      "extensions": [
-        "",
-        ".local",
-        ".js",
-        ".tsx",
-        ".css",
-        ".md",
-        ".mjs",
-        ".json",
-        ".ts",
-        ".example"
-      ],
-      "clicks": 67,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
-      "path": "C:\\@delta\\ms1\\@AI-Tool",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        ".py"
-      ],
-      "clicks": 8,
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
       "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
       "name": "Code Manager",
       "category": "Tools",
@@ -125,8 +32,8 @@
       ],
       "disabled_files": [
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
       ],
       "extensions": [
@@ -135,9 +42,63 @@
         ".md",
         ".json"
       ],
-      "clicks": 216,
       "pinned": true,
       "pin_index": 1
+    },
+    {
+      "path": "C:\\@delta\\db\\vlr",
+      "name": "VLR STATS",
+      "category": "Flask",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\db\\vlr\\.gitignore"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\settings.json",
+        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\db\\vlr\\matches.db-wal",
+        "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
+        "C:\\@delta\\db\\vlr\\matches.db-shm",
+        "C:\\@delta\\db\\vlr\\ignorelist.json"
+      ],
+      "extensions": [
+        "",
+        ".local",
+        ".js",
+        ".tsx",
+        ".css",
+        ".md",
+        ".mjs",
+        ".json",
+        ".ts",
+        ".example"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AI-Tool",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".py"
+      ],
+      "pinned": false,
+      "pin_index": 0
     },
     {
       "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
@@ -161,7 +122,6 @@
         ".py",
         ".json"
       ],
-      "clicks": 68,
       "pinned": true,
       "pin_index": 3
     },
@@ -222,7 +182,6 @@
         ".py",
         ".txt"
       ],
-      "clicks": 87,
       "pinned": true,
       "pin_index": 6
     },
@@ -250,7 +209,6 @@
         ".json",
         ".html"
       ],
-      "clicks": 30,
       "pinned": false,
       "pin_index": 0
     },
@@ -270,7 +228,6 @@
         ".py",
         ".md"
       ],
-      "clicks": 80,
       "pinned": true,
       "pin_index": 4
     },
@@ -301,7 +258,6 @@
         ".txt",
         ".py"
       ],
-      "clicks": 118,
       "pinned": true,
       "pin_index": 5
     },
@@ -345,7 +301,6 @@
         ".py",
         ".json"
       ],
-      "clicks": 39,
       "pinned": false,
       "pin_index": 0
     },
@@ -375,7 +330,6 @@
         ".ahk",
         ".py"
       ],
-      "clicks": 22,
       "pinned": false,
       "pin_index": 0
     },
@@ -412,7 +366,6 @@
         ".json",
         ".html"
       ],
-      "clicks": 51,
       "pinned": false,
       "pin_index": 0
     },
@@ -430,7 +383,6 @@
         ".py",
         ".json"
       ],
-      "clicks": 27,
       "pinned": false,
       "pin_index": 0
     },
@@ -457,7 +409,6 @@
         ".py",
         ".json"
       ],
-      "clicks": 29,
       "pinned": false,
       "pin_index": 0
     },
@@ -528,7 +479,6 @@
         ".txt",
         ".py"
       ],
-      "clicks": 61,
       "pinned": true,
       "pin_index": 2
     },
@@ -553,7 +503,6 @@
         ".py",
         ".svg"
       ],
-      "clicks": 3,
       "pinned": false,
       "pin_index": 0
     },
@@ -608,7 +557,6 @@
         ".bat",
         ".py"
       ],
-      "clicks": 15,
       "pinned": false,
       "pin_index": 0
     },
@@ -632,7 +580,6 @@
         ".py",
         ".md"
       ],
-      "clicks": 37,
       "pinned": false,
       "pin_index": 0
     },
@@ -650,7 +597,6 @@
         ".py",
         ".json"
       ],
-      "clicks": 3,
       "pinned": false,
       "pin_index": 0
     },
@@ -692,7 +638,6 @@
         ".py",
         ".spec"
       ],
-      "clicks": 14,
       "pinned": false,
       "pin_index": 0
     },
@@ -709,7 +654,6 @@
       "extensions": [
         ".py"
       ],
-      "clicks": 18,
       "pinned": false,
       "pin_index": 0
     },
@@ -734,7 +678,6 @@
         ".json",
         ".bat"
       ],
-      "clicks": 15,
       "pinned": false,
       "pin_index": 0
     },
@@ -746,7 +689,6 @@
       "files": [],
       "disabled_files": [],
       "extensions": [],
-      "clicks": 0,
       "pinned": false,
       "pin_index": 0
     },
@@ -758,7 +700,6 @@
       "files": [],
       "disabled_files": [],
       "extensions": [],
-      "clicks": 0,
       "pinned": false,
       "pin_index": 0
     },
@@ -770,7 +711,6 @@
       "files": [],
       "disabled_files": [],
       "extensions": [],
-      "clicks": 0,
       "pinned": false,
       "pin_index": 0
     },
@@ -782,7 +722,6 @@
       "files": [],
       "disabled_files": [],
       "extensions": [],
-      "clicks": 0,
       "pinned": false,
       "pin_index": 0
     },
@@ -794,7 +733,6 @@
       "files": [],
       "disabled_files": [],
       "extensions": [],
-      "clicks": 0,
       "pinned": false,
       "pin_index": 0
     }
@@ -819,63 +757,23 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\db\\vlr\\.env.example",
-      "C:\\@delta\\db\\vlr\\.env.local",
-      "C:\\@delta\\db\\vlr\\.gitignore",
-      "C:\\@delta\\db\\vlr\\next-env.d.ts",
-      "C:\\@delta\\db\\vlr\\next.config.js",
-      "C:\\@delta\\db\\vlr\\package-lock.json",
-      "C:\\@delta\\db\\vlr\\package.json",
-      "C:\\@delta\\db\\vlr\\README.md",
-      "C:\\@delta\\db\\vlr\\tsconfig.json",
-      "C:\\@delta\\db\\vlr\\vercel.json",
-      "C:\\@delta\\db\\vlr\\app\\ConvexClientProvider.tsx",
-      "C:\\@delta\\db\\vlr\\app\\globals.css",
-      "C:\\@delta\\db\\vlr\\app\\layout.tsx",
-      "C:\\@delta\\db\\vlr\\app\\page.tsx",
-      "C:\\@delta\\db\\vlr\\app\\api\\sync\\route.ts",
-      "C:\\@delta\\db\\vlr\\components\\AppShell.tsx",
-      "C:\\@delta\\db\\vlr\\components\\LeaderboardModal.tsx",
-      "C:\\@delta\\db\\vlr\\components\\MatchCard.tsx",
-      "C:\\@delta\\db\\vlr\\components\\MatchDetailModal.tsx",
-      "C:\\@delta\\db\\vlr\\components\\SettingsModal.tsx",
-      "C:\\@delta\\db\\vlr\\components\\Sidebar.tsx",
-      "C:\\@delta\\db\\vlr\\components\\StandingsModal.tsx",
-      "C:\\@delta\\db\\vlr\\components\\TeamHistoryModal.tsx",
-      "C:\\@delta\\db\\vlr\\convex\\http.ts",
-      "C:\\@delta\\db\\vlr\\convex\\matches.ts",
-      "C:\\@delta\\db\\vlr\\convex\\README.md",
-      "C:\\@delta\\db\\vlr\\convex\\schema.ts",
-      "C:\\@delta\\db\\vlr\\convex\\settings.ts",
-      "C:\\@delta\\db\\vlr\\convex\\tsconfig.json",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
-      "C:\\@delta\\db\\vlr\\lib\\types.ts",
-      "C:\\@delta\\db\\vlr\\lib\\utils.ts",
-      "C:\\@delta\\db\\vlr\\scripts\\vercel-build-retry.mjs"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
     ],
-    "project_root": "C:\\@delta\\db\\vlr",
+    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-      "C:\\@delta\\db\\vlr\\requirements.txt",
-      "C:\\@delta\\db\\vlr\\.gitignore",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
-      "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-      "C:\\@delta\\db\\vlr\\ignorelist.json",
-      "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-      "C:\\@delta\\db\\vlr\\matches.db-shm",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
-      "C:\\@delta\\db\\vlr\\matches.db-wal",
-      "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
-      "C:\\@delta\\db\\vlr\\settings.json"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
     ]
   },
   "backup": false,

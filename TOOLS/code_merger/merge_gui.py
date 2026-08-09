@@ -289,7 +289,6 @@ def load_recent_details() -> list[dict]:
                     "files": [os.path.normpath(f) for f in p.get("files", [])],
                     "disabled_files": [os.path.normpath(f) for f in p.get("disabled_files", [])],
                     "extensions": p.get("extensions", []),
-                    "clicks": p.get("clicks", 0),
                     "pinned": p.get("pinned", False),
                     "pin_index": p.get("pin_index", 0)
                 })
@@ -318,7 +317,6 @@ def save_recent(items: list[dict]):
                 "files": [os.path.normpath(f) for f in item.get("files", [])],
                 "disabled_files": [os.path.normpath(f) for f in item.get("disabled_files", [])],
                 "extensions": item.get("extensions", []),
-                "clicks": item.get("clicks", 0),
                 "pinned": item.get("pinned", False),
                 "pin_index": item.get("pin_index", 0)
             }
@@ -348,10 +346,8 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
     name = existing.get("name", "") if existing else ""
     category = existing.get("category", "") if existing else ""
     icon = existing.get("icon", "") if existing else ""
-    clicks = existing.get("clicks", 0) if existing else 0
     pinned = existing.get("pinned", False) if existing else False
     pin_index = existing.get("pin_index", 0) if existing else 0
-    clicks += 1
 
     # If overwrite_existing is False, preserve any existing saved selection details
     if not overwrite_existing and existing:
@@ -388,7 +384,6 @@ def add_recent(path: str, files: list[str] = None, extensions: list[str] = None,
         "files": normalized_files,
         "disabled_files": normalized_disabled,
         "extensions": extensions,
-        "clicks": clicks,
         "pinned": pinned,
         "pin_index": pin_index
     }
@@ -1104,7 +1099,6 @@ class RecentPopup(QFrame):
             name = item.get("name")
             files = item.get("files", [])
             extensions = item.get("extensions", [])
-            clicks = item.get("clicks", 0)
 
             row = QWidget()
             row.setStyleSheet("background: transparent;")
@@ -1116,9 +1110,9 @@ class RecentPopup(QFrame):
             btn_load = QPushButton(display_text)
             btn_load.setMinimumWidth(320)
             if name:
-                btn_load.setToolTip(f"{path}\n\nLoad only the {len(files)} saved file(s) for this project (Opened: {clicks} time(s))")
+                btn_load.setToolTip(f"{path}\n\nLoad only the {len(files)} saved file(s) for this project")
             else:
-                btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project (Opened: {clicks} time(s))")
+                btn_load.setToolTip(f"Load only the {len(files)} saved file(s) for this project")
             btn_load.clicked.connect(lambda _, p=path, f=files, e=extensions: (self.close(), self.on_load(p, f, e)))
 
             btn_rename = QPushButton("I")
@@ -1156,8 +1150,7 @@ class RecentPopup(QFrame):
                 "widget": row,
                 "display_text": display_text,
                 "path": path,
-                "order_index": idx,
-                "clicks": clicks
+                "order_index": idx
             })
 
         scroll.setWidget(content)
@@ -1214,8 +1207,9 @@ class RecentPopup(QFrame):
             self.btn_sort.setText("SORT: A-Z")
         elif self.sort_mode == "Path":
             self.btn_sort.setText("SORT: DIR")
-        elif self.sort_mode == "Clicks":
-            self.btn_sort.setText("SORT: CLK")
+        else:
+            self.sort_mode = "Rec"
+            self.btn_sort.setText("SORT: REC")
 
         self.btn_sort.clicked.connect(self._toggle_sort)
         search_layout.addWidget(self.btn_sort, 0)
@@ -1234,9 +1228,6 @@ class RecentPopup(QFrame):
         elif self.sort_mode == "Name":
             self.sort_mode = "Path"
             self.btn_sort.setText("SORT: DIR")
-        elif self.sort_mode == "Path":
-            self.sort_mode = "Clicks"
-            self.btn_sort.setText("SORT: CLK")
         else:
             self.sort_mode = "Rec"
             self.btn_sort.setText("SORT: REC")
@@ -1264,8 +1255,6 @@ class RecentPopup(QFrame):
             self.project_rows.sort(key=lambda x: x["display_text"].lower())
         elif self.sort_mode == "Path":
             self.project_rows.sort(key=lambda x: x["path"].lower())
-        elif self.sort_mode == "Clicks":
-            self.project_rows.sort(key=lambda x: x["clicks"], reverse=True)
 
         while self.list_layout.count() > 0:
             item = self.list_layout.takeAt(0)
@@ -4493,6 +4482,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     load_settings()
+    # Auto-update and clean settings.json on GUI launch
+    save_recent(load_recent_details())
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     w = MainWindow()
