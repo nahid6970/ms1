@@ -2654,11 +2654,12 @@ class PrepTab(QWidget):
             return
         self.file_list.setUpdatesEnabled(False)
         try:
-            # Rebuild with enabled files first, disabled files at the end
+            # Rebuild with enabled files first, disabled files strictly at the end
             enabled = [fp for fp in self.files if fp not in self.disabled_files]
             disabled = [fp for fp in self.files if fp in self.disabled_files]
+            self.files = enabled + disabled
             self.file_list.clear()
-            for fp in enabled + disabled:
+            for fp in self.files:
                 self._add_file_item(fp)
         finally:
             self.file_list.setUpdatesEnabled(True)
@@ -2869,28 +2870,13 @@ class PrepTab(QWidget):
 
     def _toggle_file(self, fp: str, btn: QPushButton, widget: QWidget, lbl: QLabel, mode_combo: QComboBox):
         is_currently_disabled = fp in self.disabled_files
-        cross_lbl = widget.findChild(QLabel, "disabled_cross_lbl")
         if is_currently_disabled:
             self.disabled_files.discard(fp)
-            self._apply_toggle_style(btn, True)
-            try:
-                sz_kb = os.path.getsize(fp) / 1024
-                color = CP_RED if sz_kb > 500 else CP_YELLOW if sz_kb > 250 else CP_TEXT
-            except Exception:
-                color = CP_TEXT
-            lbl.setStyleSheet(f"color: {color}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
-            if cross_lbl:
-                cross_lbl.setText("")
-            mode_combo.setEnabled(True)
             self.status_cb(f"Enabled: {os.path.basename(fp)}")
         else:
             self.disabled_files.add(fp)
-            self._apply_toggle_style(btn, False)
-            lbl.setStyleSheet(f"color: {CP_SUB}; background: transparent; font-size: {SOURCE_FILES_FONT_SIZE}pt;")
-            if cross_lbl:
-                cross_lbl.setText(" ❌")
-            mode_combo.setEnabled(False)
             self.status_cb(f"Disabled: {os.path.basename(fp)}")
+        self._refresh_file_items()
         self._save_session()
 
     def _file_item_context_menu(self, fp: str, item: QListWidgetItem, pos, widget: QWidget):
@@ -3385,27 +3371,23 @@ class PrepTab(QWidget):
             self._load_all_project_files(d)
             return
 
-        self.file_list.setUpdatesEnabled(False)
-        try:
-            self.files.clear()
-            self.file_list.clear()
-            self.disabled_files = {os.path.normpath(f) for f in disabled_files} if disabled_files is not None else set()
-            
-            count = 0
-            for fp in files:
-                norm_fp = os.path.normpath(fp)
-                if os.path.exists(norm_fp):
-                    self.files.append(norm_fp)
-                    self._add_file_item(norm_fp)
-                    count += 1
-                    
-            self._set_project_root(d, save_recent=False)
-            add_recent(d, self.files, extensions, overwrite_existing=False, disabled_files=sorted(self.disabled_files))
-            self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
-            self._update_root()
-            self._save_session()
-        finally:
-            self.file_list.setUpdatesEnabled(True)
+        self.files.clear()
+        self.file_list.clear()
+        self.disabled_files = {os.path.normpath(f) for f in disabled_files} if disabled_files is not None else set()
+        
+        count = 0
+        for fp in files:
+            norm_fp = os.path.normpath(fp)
+            if os.path.exists(norm_fp):
+                self.files.append(norm_fp)
+                count += 1
+                
+        self._refresh_file_items()
+        self._set_project_root(d, save_recent=False)
+        add_recent(d, self.files, extensions, overwrite_existing=False, disabled_files=sorted(self.disabled_files))
+        self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
+        self._update_root()
+        self._save_session()
 
     def _load_all_project_files(self, d: str):
         d = os.path.normpath(d)
@@ -3423,42 +3405,38 @@ class PrepTab(QWidget):
         old_external = [f for f in self.files if not is_subpath(f, d)]
         old_disabled_ext = [f for f in self.disabled_files if not is_subpath(f, d)]
 
-        self.file_list.setUpdatesEnabled(False)
-        try:
-            self.files.clear()
-            self.file_list.clear()
-            self.disabled_files = target_disabled
-            
-            count = 0
-            added_files = []
-            discovered_exts = set()
-            for root, dirs, fnames in os.walk(d):
-                dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
-                for fn in fnames:
-                    ext = os.path.splitext(fn)[1].lower()
-                    if ext in IGNORE_EXTS:
-                        continue
-                    discovered_exts.add(ext)
-                    fp = os.path.normpath(os.path.join(root, fn))
-                    added_files.append(fp)
-                    if fp not in self.files:
-                        self.files.append(fp)
-                        self._add_file_item(fp)
-                        count += 1
-                        
-            self._set_project_root(d, save_recent=False)
-            add_recent(d, added_files, list(discovered_exts), overwrite_existing=True, disabled_files=sorted(self.disabled_files))
+        self.files.clear()
+        self.file_list.clear()
+        self.disabled_files = target_disabled
+        
+        count = 0
+        added_files = []
+        discovered_exts = set()
+        for root, dirs, fnames in os.walk(d):
+            dirs[:] = [x for x in dirs if x not in IGNORE_PATTERNS and not x.startswith('.')]
+            for fn in fnames:
+                ext = os.path.splitext(fn)[1].lower()
+                if ext in IGNORE_EXTS:
+                    continue
+                discovered_exts.add(ext)
+                fp = os.path.normpath(os.path.join(root, fn))
+                added_files.append(fp)
+                if fp not in self.files:
+                    self.files.append(fp)
+                    count += 1
+                    
+        self._refresh_file_items()
+        self._set_project_root(d, save_recent=False)
+        add_recent(d, added_files, list(discovered_exts), overwrite_existing=True, disabled_files=sorted(self.disabled_files))
 
-            total_removed = len(old_external) + len(old_disabled_ext)
-            if total_removed > 0:
-                self.status_cb(f"Re-scanned {count} file(s). Purged {total_removed} external file(s) outside project folder.")
-            else:
-                self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
+        total_removed = len(old_external) + len(old_disabled_ext)
+        if total_removed > 0:
+            self.status_cb(f"Re-scanned {count} file(s). Purged {total_removed} external file(s) outside project folder.")
+        else:
+            self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
 
-            self._update_root()
-            self._save_session()
-        finally:
-            self.file_list.setUpdatesEnabled(True)
+        self._update_root()
+        self._save_session()
 
     def _edit_project(self, path: str):
         norm_p = os.path.normpath(path)
