@@ -2897,6 +2897,66 @@ class PrepTab(QWidget):
         if action == act_remove:
             self._remove_file(fp, item)
 
+    def _show_ext_filter_menu(self):
+        if not self.files:
+            self.status_cb("⚠ No files loaded in current project")
+            return
+
+        ext_map = {}
+        for fp in self.files:
+            ext = os.path.splitext(fp)[1].lower() or "(no ext)"
+            if ext not in ext_map:
+                ext_map[ext] = []
+            ext_map[ext].append(fp)
+
+        if not ext_map:
+            return
+
+        menu = QMenu(self)
+        menu.setStyleSheet(f"""
+            QMenu {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_TEXT};
+                font-family: 'Consolas'; font-size: 9pt; padding: 4px;
+            }}
+            QMenu::item {{
+                padding: 4px 18px 4px 10px;
+            }}
+            QMenu::item:selected {{
+                background-color: #1a3a3a; color: {CP_CYAN};
+            }}
+            QMenu::indicator {{
+                width: 13px; height: 13px;
+            }}
+        """)
+
+        for ext in sorted(ext_map.keys()):
+            fps = ext_map[ext]
+            total_count = len(fps)
+            enabled_count = sum(1 for fp in fps if fp not in self.disabled_files)
+
+            act = menu.addAction(f"{ext}  ({enabled_count}/{total_count})")
+            act.setCheckable(True)
+            act.setChecked(enabled_count > 0)
+            act.triggered.connect(lambda checked, e=ext: self._toggle_extension_files(e, checked))
+
+        menu.exec(self.btn_ext_filter.mapToGlobal(QPoint(0, self.btn_ext_filter.height())))
+
+    def _toggle_extension_files(self, target_ext: str, enable: bool):
+        count = 0
+        for fp in self.files:
+            f_ext = os.path.splitext(fp)[1].lower() or "(no ext)"
+            if f_ext == target_ext:
+                if enable:
+                    self.disabled_files.discard(fp)
+                else:
+                    self.disabled_files.add(fp)
+                count += 1
+
+        self._refresh_file_items()
+        self._save_session()
+        self.status_cb(f"{'Enabled' if enable else 'Disabled'} all {target_ext} files ({count} file(s))")
+
+
     def _on_file_mode_changed(self, fp: str, mode: str):
         self.file_modes[fp] = mode
         self._save_session()
@@ -3094,6 +3154,19 @@ class PrepTab(QWidget):
         """)
         btn_open_folder.clicked.connect(self._open_project_folder)
 
+        self.btn_ext_filter = QPushButton("🏷️ EXTS ▾")
+        self.btn_ext_filter.setFixedHeight(22)
+        self.btn_ext_filter.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_ext_filter.setToolTip("Quick toggle files by extension")
+        self.btn_ext_filter.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_CYAN};
+                font-size: 8pt; padding: 2px 6px; font-weight: bold;
+            }}
+            QPushButton:hover {{ border-color: {CP_CYAN}; background-color: #2a2a2a; }}
+        """)
+        self.btn_ext_filter.clicked.connect(self._show_ext_filter_menu)
+
         btn_clear = QPushButton("✕ CLEAR")
         btn_clear.setFixedHeight(22)
         btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -3121,6 +3194,7 @@ class PrepTab(QWidget):
 
         top_bar.addWidget(self.project_path_lbl, 1)
         top_bar.addWidget(btn_open_folder, 0)
+        top_bar.addWidget(self.btn_ext_filter, 0)
         top_bar.addWidget(btn_clear, 0)
         top_bar.addWidget(btn_all_en, 0)
 
