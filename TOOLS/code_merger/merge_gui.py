@@ -187,6 +187,23 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
         
     return pixmap
 
+def _write_json_if_changed(filepath: str, data: dict):
+    """Write data as formatted JSON to filepath only if the content actually changed."""
+    new_content = json.dumps(data, indent=2, ensure_ascii=False) + '\n'
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                old_content = f.read().replace('\r\n', '\n')
+            if old_content == new_content:
+                return  # Content is identical, skip writing to disk
+        except Exception:
+            pass
+    try:
+        with open(filepath, 'w', encoding='utf-8', newline='\n') as f:
+            f.write(new_content)
+    except Exception as e:
+        print(f"Error saving settings: {e}", file=sys.stderr)
+
 def load_settings():
     global CUSTOM_IGNORED_EXTS, EXTENSION_ICONS, PROJECT_ICONS, SOURCE_FILES_FONT_SIZE, PROJECTS_FONT_SIZE, EXTENSION_ICON_SIZE, SHOW_FILE_MODE_CONTROLS
     global PANEL_WEIGHT_PROJECTS, PANEL_WEIGHT_FILES, PANEL_WEIGHT_PROMPT, PROJECTS_NAME_COLOR, APP_NAME, SHOW_PROJECT_PATHS
@@ -251,8 +268,7 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
         data['panel_weight_projects'] = PANEL_WEIGHT_PROJECTS
         data['panel_weight_files'] = PANEL_WEIGHT_FILES
         data['panel_weight_prompt'] = PANEL_WEIGHT_PROMPT
-        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        _write_json_if_changed(SETTINGS_PATH, data)
     except Exception as e:
         print(f"Error saving settings: {e}", file=sys.stderr)
 
@@ -326,8 +342,7 @@ def save_recent(items: list[dict]):
 
         settings_data['projects'] = proj_list
         settings_data['project_icons'] = PROJECT_ICONS
-        with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-            json.dump(settings_data, f, indent=2, ensure_ascii=False)
+        _write_json_if_changed(SETTINGS_PATH, settings_data)
     except Exception as e:
         print(f"Error saving recent projects: {e}", file=sys.stderr)
 
@@ -1241,8 +1256,7 @@ class RecentPopup(QFrame):
             if not isinstance(data, dict):
                 data = {}
             data['recent_sort_mode'] = self.sort_mode
-            with open(SETTINGS_PATH, 'w') as f:
-                json.dump(data, f, indent=2)
+            _write_json_if_changed(SETTINGS_PATH, data)
         except Exception:
             pass
             
@@ -2515,11 +2529,7 @@ class PrepTab(QWidget):
             'disabled_files': list(self.disabled_files)
         }
 
-        try:
-            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"Error saving session: {e}", file=sys.stderr)
+        _write_json_if_changed(SETTINGS_PATH, data)
         self._sync_to_recent_projects()
 
     def apply_panel_sizes(self):
@@ -4069,11 +4079,7 @@ class MergeTab(QWidget):
             data = {}
         data['backup']  = self.chk_backup.isChecked()
         data['preview'] = self.chk_preview.isChecked()
-        try:
-            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"Error saving prefs: {e}", file=sys.stderr)
+        _write_json_if_changed(SETTINGS_PATH, data)
 
     def _load_prefs(self):
         import json
@@ -4470,8 +4476,7 @@ class MainWindow(QMainWindow):
             if not isinstance(data, dict):
                 data = {}
             data['match_mode'] = text
-            with open(SETTINGS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+            _write_json_if_changed(SETTINGS_PATH, data)
         except Exception:
             pass
 
@@ -4482,8 +4487,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     load_settings()
-    # Auto-update and clean settings.json on GUI launch
-    save_recent(load_recent_details())
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     w = MainWindow()

@@ -16,12 +16,55 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "name": "Code Manager",
+      "category": "Tools",
+      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+      "files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
+      ],
+      "extensions": [
+        ".py",
+        "",
+        ".md",
+        ".json"
+      ],
+      "pinned": true,
+      "pin_index": 1
+    },
+    {
       "path": "C:\\@delta\\db\\vlr",
       "name": "VLR STATS",
       "category": "Flask",
       "icon": "",
       "files": [
-        "C:\\@delta\\db\\vlr\\.gitignore"
+        "C:\\@delta\\db\\vlr\\.gitignore",
+        "C:\\@delta\\db\\vlr\\app.py",
+        "C:\\@delta\\db\\vlr\\dev.md",
+        "C:\\@delta\\db\\vlr\\requirements.txt",
+        "C:\\@delta\\db\\vlr\\scraper.py",
+        "C:\\@delta\\db\\vlr\\md\\AI_CONTEXT.md",
+        "C:\\@delta\\db\\vlr\\md\\MATCH_DETAIL_FEATURE.md",
+        "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
+        "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
+        "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\db\\vlr\\md\\RECENT.md",
+        "C:\\@delta\\db\\vlr\\static\\css\\style.css",
+        "C:\\@delta\\db\\vlr\\static\\js\\main.js",
+        "C:\\@delta\\db\\vlr\\templates\\index.html"
       ],
       "disabled_files": [
         "C:\\@delta\\db\\vlr\\ignorelist.json",
@@ -42,15 +85,27 @@
       ],
       "extensions": [
         "",
-        ".local",
-        ".js",
-        ".tsx",
         ".css",
+        ".js",
         ".md",
-        ".mjs",
-        ".json",
-        ".ts",
-        ".example"
+        ".txt",
+        ".py",
+        ".html"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
+      "path": "C:\\@delta\\ms1\\@AI-Tool",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".py"
       ],
       "pinned": false,
       "pin_index": 0
@@ -751,21 +806,6 @@
       "pin_index": 0
     },
     {
-      "path": "C:\\@delta\\ms1\\@AI-Tool",
-      "name": "",
-      "category": "",
-      "icon": "",
-      "files": [
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
-      ],
-      "disabled_files": [],
-      "extensions": [
-        ".py"
-      ],
-      "pinned": false,
-      "pin_index": 0
-    },
-    {
       "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli",
       "name": "myGemini-CLI",
       "category": "AI-Tools",
@@ -968,36 +1008,6 @@
       ],
       "pinned": true,
       "pin_index": 2
-    },
-    {
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
-      "name": "Code Manager",
-      "category": "Tools",
-      "icon": "<svg viewBox=\"0 0 48 48\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <rect width=\"48\" height=\"48\" fill=\"white\" fill-opacity=\"0.01\"></rect> <path d=\"M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M28 24H44\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M5 24H20\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\"></path> <path d=\"M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724\" stroke=\"#FFFFFF\" stroke-width=\"4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-      "files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
-      ],
-      "disabled_files": [
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
-      ],
-      "extensions": [
-        ".py",
-        "",
-        ".md",
-        ".json"
-      ],
-      "pinned": true,
-      "pin_index": 1
     }
   ],
   "show_file_mode_controls": false,
@@ -1020,27 +1030,23 @@
   "show_project_paths": false,
   "active_session": {
     "files": [
-      "C:\\@delta\\db\\vlr\\.gitignore"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\PROMPT_GUIDE.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\README.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\AI_CONTEXT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
     ],
-    "project_root": "C:\\@delta\\db\\vlr",
+    "project_root": "C:\\@delta\\ms1\\TOOLS\\code_merger",
     "minify": false,
     "file_modes": {},
     "disabled_files": [
-      "C:\\@delta\\db\\vlr\\ignorelist.json",
-      "C:\\@delta\\db\\vlr\\settings.json",
-      "C:\\@delta\\db\\vlr\\md\\RECENT.md",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.js",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\dataModel.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.d.ts",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\api.d.ts",
-      "C:\\@delta\\db\\vlr\\matches.db-wal",
-      "C:\\@delta\\db\\vlr\\convex\\_generated\\server.js",
-      "C:\\@delta\\db\\vlr\\.gitignore",
-      "C:\\@delta\\db\\vlr\\requirements.txt",
-      "C:\\@delta\\db\\vlr\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\db\\vlr\\md\\match_detail_mockup.html",
-      "C:\\@delta\\db\\vlr\\md\\PAGINATION_IMPROVEMENT.md",
-      "C:\\@delta\\db\\vlr\\matches.db-shm"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md"
     ]
   },
   "backup": false,
