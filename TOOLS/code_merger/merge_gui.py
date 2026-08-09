@@ -4110,7 +4110,7 @@ class DiffPreviewDialog(QDialog):
                 failed_indices.append((orig_idx, res))
 
         if hasattr(self.parent(), 'result_out'):
-            self.parent().result_out.setPlainText("\n\n".join(results))
+            self.parent().result_out.setPlainText("\n".join(results))
 
         # Remove UI cards for successful merges
         for orig_idx in sorted(successful_indices, reverse=True):
