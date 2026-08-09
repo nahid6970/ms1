@@ -112,6 +112,8 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 **Code Modifications** (editing tools, toggleable):
 - `fuzzy_apply_patch` — unified diff with ±50 line fuzzy search + normalized whitespace matching
 - `smart_replace_block` — find-and-replace with 3-tier fallback (exact → CRLF normalized → trailing whitespace stripped)
+- `verify_file_content` — double-check if expected text is present and/or unexpected text is absent after editing
+
 - `replace_lines` — replace 1-indexed line range (lowest token cost)
 - `replace_block` — strict exact find-and-replace (no fallback)
 - `apply_patch` — strict unified diff (no fuzzy search)

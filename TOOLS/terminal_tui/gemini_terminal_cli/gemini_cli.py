@@ -36,7 +36,8 @@ DEFAULT_SYSTEM = (
     "Be concise, practical, and ask before making destructive changes. "
     "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
-    "Prefer apply_patch for edits only after refreshing the exact surrounding context."
+    "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
+    "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -1021,6 +1022,35 @@ def smart_replace_block_in_file(path: Path, old_text: str, new_text: str, occurr
         return f"Error replacing smart block: {exc}"
 
 
+def verify_file_content(
+    path: Path,
+    expected_text: Optional[str] = None,
+    unexpected_text: Optional[str] = None,
+) -> str:
+    if not path.exists():
+        return f"Error: path not found: {path}"
+    try:
+        content = path.read_text(encoding="utf-8", errors="replace")
+        failures = []
+        if expected_text:
+            norm_content = content.replace("\r\n", "\n")
+            norm_exp = expected_text.replace("\r\n", "\n")
+            if norm_exp not in norm_content:
+                failures.append("expected_text was NOT found in file")
+        if unexpected_text:
+            norm_content = content.replace("\r\n", "\n")
+            norm_unexp = unexpected_text.replace("\r\n", "\n")
+            if norm_unexp in norm_content:
+                failures.append("unexpected_text is STILL PRESENT in file")
+
+        if failures:
+            return f"VERIFICATION FAILED for {path}:\n" + "\n".join(f"- {f}" for f in failures)
+        return f"VERIFICATION SUCCESSFUL: {path} matches expected state."
+    except Exception as exc:
+        return f"Error verifying file content: {exc}"
+
+
+
 def list_directory(path: Path) -> str:
     try:
         if not path.exists():
@@ -1316,6 +1346,19 @@ FUNCTIONS = {
             "required": ["filepath", "old_text", "new_text"],
         },
     },
+    "verify_file_content": {
+        "name": "verify_file_content",
+        "description": "Verify that a file contains expected_text and/or does not contain unexpected_text after making edits to confirm changes were successfully applied.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING"},
+                "expected_text": {"type": "STRING", "description": "Snippet that must exist in the file."},
+                "unexpected_text": {"type": "STRING", "description": "Snippet that must NOT exist in the file (e.g. old code removed)."},
+            },
+            "required": ["filepath"],
+        },
+    },
 }
 
 
@@ -1365,6 +1408,12 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         new_text = str(args.get("new_text", ""))
         occurrence = int(args.get("occurrence", 1) or 1)
         return smart_replace_block_in_file(filepath, old_text, new_text, occurrence=occurrence)
+    if name == "verify_file_content":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        expected_text = args.get("expected_text")
+        unexpected_text = args.get("unexpected_text")
+        return verify_file_content(filepath, expected_text, unexpected_text)
+
     if name == "replace_lines":
         filepath = resolve_path(args.get("filepath", ""), cwd)
         start_line = int(args.get("start_line", 1) or 1)
@@ -1429,6 +1478,8 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "search_tavily", "category": "Inspection & File System", "rating": "Safe", "description": "Search the web with saved Tavily API keys."},
         {"name": "fuzzy_apply_patch", "category": "Code Modifications", "rating": "Best for multi-file changes (Resilient)", "description": "[Code-Merge] Unified diff with fuzzy window fallback."},
         {"name": "smart_replace_block", "category": "Code Modifications", "rating": "Best for targeted edits (High accuracy)", "description": "[Code-Merge] Replace block with fuzzy fallback."},
+        {"name": "verify_file_content", "category": "Code Modifications", "rating": "Best for post-edit verification", "description": "Verify that expected_text exists and/or unexpected_text is absent after modifications."},
+
         {"name": "replace_lines", "category": "Code Modifications", "rating": "Best for exact line ranges (Low token)", "description": "[Code-Merge] Replace 1-indexed line range."},
         {"name": "replace_block", "category": "Code Modifications", "rating": "Good (Requires exact text match)", "description": "[Code-Merge] Replace an exact block of text in a file."},
         {"name": "apply_patch", "category": "Code Modifications", "rating": "Strict (Fails on small line drifts)", "description": "[Code-Merge] Apply a strict unified diff across files."},

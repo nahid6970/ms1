@@ -66,6 +66,13 @@
     "description": "Find-and-replace a text block in a file with 3-tier matching: (1) exact string match, (2) normalized line endings (CRLF vs LF), (3) trailing whitespace stripped per line. Supports occurrence param for nth match. Best for single-file targeted replacements where you know the old text."
   },
   {
+    "name": "verify_file_content",
+    "category": "Code Modifications",
+    "rating": "Best for post-edit verification",
+    "description": "Verify that a file contains expected_text and/or does not contain unexpected_text after making edits to confirm changes were successfully applied."
+  },
+
+  {
     "name": "replace_lines",
     "category": "Code Modifications",
     "rating": "Best for exact line ranges (Low token)",
