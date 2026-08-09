@@ -31,10 +31,10 @@
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
       ],
       "disabled_files": [
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
         "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-        "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+        "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json"
       ],
       "extensions": [
         ".py",
@@ -148,15 +148,15 @@
         "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\UI_UX.md"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\RECENT.md",
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_shortcuts.json",
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\lastsession.md",
         "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\FEATURES.md",
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\.gitignore",
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\PROBLEMS_AND_FIXES.md",
         "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\example.txt",
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\KEYBOARD_SHORTCUTS.md",
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\PROBLEMS_AND_FIXES.md",
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\RECENT.md",
         "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\generated_shortcuts.ahk",
-        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\lastsession.md"
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\ahk_shortcuts.json",
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\md\\KEYBOARD_SHORTCUTS.md",
+        "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\.gitignore"
       ],
       "extensions": [
         "",
@@ -1046,10 +1046,10 @@
     "minify": false,
     "file_modes": {},
     "disabled_files": [
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md",
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\PROBLEMS_AND_FIXES.md",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json",
       "C:\\@delta\\ms1\\TOOLS\\code_merger\\.gitignore",
-      "C:\\@delta\\ms1\\TOOLS\\code_merger\\md\\RECENT.md"
+      "C:\\@delta\\ms1\\TOOLS\\code_merger\\settings.json"
     ]
   },
   "backup": false,
