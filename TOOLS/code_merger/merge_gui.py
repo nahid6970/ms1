@@ -2423,6 +2423,7 @@ class PrepTab(QWidget):
             self.status_cb(f"Dropped: {count_files} file(s) and {count_dirs} directory/directories processed")
 
     def _load_dropped_dir(self, d: str):
+        d = os.path.normpath(d)
         # Scan for existing file extensions first, respecting ignore patterns
         found_exts = set()
         for root, dirs, fnames in os.walk(d):
@@ -2434,6 +2435,9 @@ class PrepTab(QWidget):
                 found_exts.add(ext)
 
         if not found_exts:
+            self._set_project_root(d, save_recent=True)
+            self._populate_projects()
+            self.status_cb(f"Project root set and added to projects: {d}")
             return
 
         # Show selector dialog for toggling extensions
@@ -3362,6 +3366,7 @@ class PrepTab(QWidget):
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
         self._save_session()
+        self._populate_projects()
 
     def _load_specific_files(self, d: str, files: list[str], extensions: list[str], disabled_files: list[str] = None):
         if self.project_root:
