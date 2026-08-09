@@ -117,6 +117,7 @@ QStatusBar {{ background: {CP_PANEL}; color: {CP_SUB}; border-top: 1px solid {CP
 _HERE        = os.path.dirname(os.path.abspath(__file__))
 GUIDE_PATH   = os.path.join(_HERE, "PROMPT_GUIDE.md")
 SETTINGS_PATH = os.path.join(_HERE, "settings.json")
+SESSION_PATH  = os.path.join(_HERE, "session.json")
 MAX_RECENT   = 999999
 
 IGNORE_PATTERNS = {
@@ -271,6 +272,36 @@ def save_settings(ignores: list[str], icons: dict[str, str], font_size: int, pro
         _write_json_if_changed(SETTINGS_PATH, data)
     except Exception as e:
         print(f"Error saving settings: {e}", file=sys.stderr)
+
+def clean_and_migrate_settings():
+    """Migrates settings.json on startup: removes deprecated 'clicks' and moves 'active_session' to session.json."""
+    if not os.path.exists(SETTINGS_PATH):
+        return
+    try:
+        with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return
+
+        modified = False
+        projects = data.get('projects', [])
+        if isinstance(projects, list):
+            for p in projects:
+                if isinstance(p, dict) and 'clicks' in p:
+                    del p['clicks']
+                    modified = True
+
+        if 'active_session' in data:
+            if not os.path.exists(SESSION_PATH) and isinstance(data['active_session'], dict):
+                _write_json_if_changed(SESSION_PATH, data['active_session'])
+            del data['active_session']
+            modified = True
+
+        if modified:
+            _write_json_if_changed(SETTINGS_PATH, data)
+    except Exception as e:
+        print(f"Error migrating settings: {e}", file=sys.stderr)
+
 
 
 def load_recent() -> list[str]:
@@ -2522,17 +2553,7 @@ class PrepTab(QWidget):
 
     def _save_session(self):
         import json
-        try:
-            data = {}
-            if os.path.exists(SETTINGS_PATH):
-                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                if not isinstance(data, dict):
-                    data = {}
-        except Exception:
-            data = {}
-
-        data['active_session'] = {
+        data = {
             'files': self.files,
             'project_root': self.project_root.strip(),
             'minify': self.chk_minify.isChecked(),
@@ -2540,7 +2561,7 @@ class PrepTab(QWidget):
             'disabled_files': sorted(self.disabled_files)
         }
 
-        _write_json_if_changed(SETTINGS_PATH, data)
+        _write_json_if_changed(SESSION_PATH, data)
         self._sync_to_recent_projects()
 
     def apply_panel_sizes(self):
@@ -2581,12 +2602,13 @@ class PrepTab(QWidget):
     def _load_session(self):
         import json
         try:
-            if os.path.exists(SETTINGS_PATH):
-                with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+            target_path = SESSION_PATH if os.path.exists(SESSION_PATH) else SETTINGS_PATH
+            if os.path.exists(target_path):
+                with open(target_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if not isinstance(data, dict):
                     return
-                session = data.get('active_session', {})
+                session = data.get('active_session', data) if target_path == SETTINGS_PATH else data
                 if isinstance(session, dict):
                     saved = session.get('files', [])
                     self.project_root = session.get('project_root', '')
