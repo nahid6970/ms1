@@ -1895,10 +1895,34 @@ def open_github(path):
 
 def _get_current_branch(path):
     try:
-        r = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        r = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
         return r.stdout.strip()
     except Exception:
         return ""
+
+
+def _get_branches(path):
+    """Return (local_branches, remote_branches) for the repo at `path`."""
+    local = []
+    remote = []
+    try:
+        r = subprocess.run(["git", "branch", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        local = [ln.strip() for ln in r.stdout.splitlines() if ln.strip()]
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(["git", "branch", "-r", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        remote = [ln.strip() for ln in r.stdout.splitlines() if ln.strip() and not ln.strip().endswith("/HEAD")]
+    except Exception:
+        pass
+    return local, remote
+
+
+def _new_branch(path):
+    name, ok = QInputDialog.getText(None, "New Branch", "Branch name (created from current HEAD):")
+    if ok and name.strip():
+        name = name.strip().replace(" ", "-")
+        open_git_cmd(path, "Git Switch", f"git switch -c '{name}'")
 
 
 def _show_git_menu(path, lbl=None):
@@ -1914,6 +1938,32 @@ def _show_git_menu(path, lbl=None):
     header = menu.addAction(f"// {os.path.basename(path)}")
     header.setEnabled(False)
     menu.addSeparator()
+
+    switch_menu = menu.addMenu("Switch Branch")
+    switch_menu.setStyleSheet(
+        f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px; }}"
+        f"QMenu::item {{ padding: 4px 18px; }}"
+        f"QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}"
+        f"QMenu::item:disabled {{ color: {CP_DIM}; }}"
+        f"QMenu::separator {{ height: 1px; background: {CP_DIM}; margin: 4px 6px; }}"
+    )
+    cur_branch = _get_current_branch(path)
+    branches, remotes = _get_branches(path)
+    for b in branches:
+        act = switch_menu.addAction(("\u2713 " if b == cur_branch else "    ") + b)
+        act.triggered.connect(lambda checked=False, name=b: open_git_cmd(path, "Git Switch", f"git switch '{name}'"))
+    if remotes:
+        switch_menu.addSeparator()
+        local_short = {b.split("/", 1)[1] if "/" in b else b for b in branches}
+        for b in remotes:
+            short = b.split("/", 1)[1] if "/" in b else b
+            if short in local_short:
+                continue
+            act = switch_menu.addAction(b)
+            act.triggered.connect(lambda checked=False, name=short, full=b: open_git_cmd(path, "Git Switch", f"git switch -c '{name}' '{full}'"))
+    switch_menu.addSeparator()
+    switch_menu.addAction("New Branch...").triggered.connect(lambda: _new_branch(path))
+
     menu.addAction("Commit & Push").triggered.connect(lambda: git_sync(path))
     menu.addAction("Pull (rebase)").triggered.connect(lambda: open_git_cmd(path, "Git Pull", "git pull --rebase --autostash"))
     menu.addAction("Push").triggered.connect(lambda: open_git_cmd(path, "Git Push", "git push"))
