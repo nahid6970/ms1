@@ -1679,20 +1679,14 @@ def _git_status_loop(repos, q):
 # ─── Komorebi status ──────────────────────────────────────────────────────────
 _komorebi_queue = Queue()
 
-def check_komorebi_status(q):
-    """Poll komorebic state, push a compact dict into q. Never raises."""
+def _komorebi_parse_state(data):
+    """Turn a parsed komorebi state dict into the compact snapshot dict pushed
+    to the GUI. Shared by the poll loop and the event-pipe listener. Returns
+    None when the state looks unusable (e.g. no monitors)."""
     try:
-        result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
-                                encoding="utf-8", errors="replace",
-                                creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
-        if result.returncode != 0:
-            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
-            return
-        data = json.loads(result.stdout)
         monitors = data.get("monitors", {}).get("elements", [])
         if not monitors:
-            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
-            return
+            return None
         screen = monitors[0]
         wss = screen.get("workspaces", {}).get("elements", [])
         focused = screen.get("workspaces", {}).get("focused", 0)
@@ -1726,9 +1720,26 @@ def check_komorebi_status(q):
             })
         if not focused_layout and 0 <= focused < len(wss):
             focused_layout = (wss[focused].get("layout") or {}).get("Default", "")
-        q.put({"ok": True, "workspaces": workspaces, "focused": focused,
-               "focused_layout": focused_layout, "apps": apps,
-               "paused": bool(data.get("is_paused", False))})
+        return {"ok": True, "workspaces": workspaces, "focused": focused,
+                "focused_layout": focused_layout, "apps": apps,
+                "paused": bool(data.get("is_paused", False))}
+    except Exception:
+        return None
+
+
+def check_komorebi_status(q):
+    """Poll komorebic state, push a compact dict into q. Never raises."""
+    try:
+        result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace",
+                                creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
+        if result.returncode != 0:
+            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            return
+        data = json.loads(result.stdout)
+        item = _komorebi_parse_state(data)
+        q.put(item if item is not None else
+              {"ok": False, "workspaces": [], "focused": -1, "paused": False})
     except Exception as e:
         logging.error(f"check_komorebi_status error: {e}")
         q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
@@ -1760,11 +1771,151 @@ def _komorebi_status_loop(q):
         if time.time() < _komorebi_fast_until:
             time.sleep(0.3)
         else:
-            # sleep in short chunks so a kick mid-sleep is noticed promptly
-            for _ in range(4):
+            # Event-pipe pushes below drive instant updates, so the idle poll is
+            # only a safety net: 5s cadence when events are active, old 2s when
+            # they are not (pywin32/komorebi unavailable). Chunked so a kick
+            # mid-sleep is noticed promptly.
+            chunks = 4 if not _komorebi_events_ok else 10
+            for _ in range(chunks):
                 if time.time() >= _komorebi_fast_until:
                     break
                 time.sleep(0.5)
+
+
+# ─── Komorebi event subscription (instant updates) ───────────────────────────
+# komorebi pushes every state change over a named pipe (`komorebic subscribe`).
+# Each message is one JSON line: {"event": {...}, "state": <full komorebi state>}.
+# We parse the embedded state directly, so the status bar updates the moment
+# anything changes — no subprocess, no polling. If komorebi or pywin32 is
+# unavailable, the slow poll loop above stays as the safety net.
+_komorebi_events_ok = False
+_komorebi_listener_warned = False
+_komorebi_last_sig = None
+
+
+def _komorebi_item_sig(item):
+    """Cheap signature of a snapshot, used to drop duplicate event pushes
+    (e.g. every single resize event while dragging a window)."""
+    try:
+        return (
+            item.get("focused"), bool(item.get("paused")),
+            tuple((w["name"], w["layout"], w["windows"], bool(w["tile"]),
+                   bool(w["monocle"]), bool(w["maximized"]))
+                  for w in item.get("workspaces", [])),
+            tuple(sorted((a.get("hwnd"), a.get("ws"), a.get("title"))
+                         for a in item.get("apps", []))),
+        )
+    except Exception:
+        return None
+
+
+def _komorebi_handle_event_line(line):
+    """Called from the listener thread for every komorebi event line.
+    Pushes a parsed snapshot into the queue only when something actually
+    changed on screen."""
+    global _komorebi_last_sig
+    try:
+        msg = json.loads(line)
+        state = msg.get("state")
+        if not isinstance(state, dict):
+            # Unknown/older message shape — fall back to a fresh state fetch
+            check_komorebi_status(_komorebi_queue)
+            return
+        item = _komorebi_parse_state(state)
+        if item is None:
+            check_komorebi_status(_komorebi_queue)
+            return
+        sig = _komorebi_item_sig(item)
+        if sig is None or sig != _komorebi_last_sig:
+            _komorebi_last_sig = sig
+            _komorebi_queue.put(item)
+    except Exception:
+        pass
+
+
+def _komorebi_event_listener():
+    """Create a named pipe, subscribe komorebi to it, and push parsed state on
+    every event. Retries forever in the background; never touches the GUI."""
+    global _komorebi_events_ok, _komorebi_listener_warned
+    try:
+        import win32pipe, win32file, win32event, pywintypes
+        import uuid
+    except ImportError:
+        if not _komorebi_listener_warned:
+            _komorebi_listener_warned = True
+            logging.warning("pywin32 not installed — komorebi stays on 2s polling")
+        return
+    while True:
+        handle = None
+        proc = None
+        try:
+            pipe_name = "mypygui-komorebi-" + uuid.uuid4().hex[:8]
+            handle = win32pipe.CreateNamedPipe(
+                "\\\\.\\pipe\\" + pipe_name,
+                win32pipe.PIPE_ACCESS_DUPLEX | win32file.FILE_FLAG_OVERLAPPED,
+                win32pipe.PIPE_TYPE_BYTE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT,
+                1, 1024 * 1024, 1024 * 1024, 0, None)
+            proc = subprocess.Popen(
+                ["komorebic", "subscribe", pipe_name],
+                creationflags=subprocess.CREATE_NO_WINDOW,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # Overlapped connect with a hard timeout, so a missing or dying
+            # komorebi can never block this thread forever (works regardless
+            # of whether komorebic subscribe exits after registering).
+            ov = win32file.OVERLAPPED()
+            ov.hEvent = win32event.CreateEvent(None, True, False, None)
+            try:
+                try:
+                    win32pipe.ConnectNamedPipe(handle, ov)
+                except pywintypes.error as e:
+                    if e.winerror == 997:  # ERROR_IO_PENDING → wait for client
+                        if win32event.WaitForSingleObject(ov.hEvent, 5000) != win32event.WAIT_OBJECT_0:
+                            raise RuntimeError("komorebi never connected to the event pipe")
+                    elif e.winerror != 535:  # ERROR_PIPE_CONNECTED → already connected
+                        raise
+            finally:
+                try:
+                    win32event.CloseHandle(ov.hEvent)
+                except Exception:
+                    pass
+            if not _komorebi_events_ok:
+                _komorebi_events_ok = True
+                _komorebi_listener_warned = False
+                logging.info(f"komorebi event pipe active ({pipe_name})")
+            buf = b""
+            while True:
+                try:
+                    avail = win32pipe.PeekNamedPipe(handle, 1024)[1]
+                except pywintypes.error:
+                    raise
+                if avail:
+                    _, data = win32file.ReadFile(handle, avail)
+                    buf += data
+                    while b"\n" in buf:
+                        line, buf = buf.split(b"\n", 1)
+                        line = line.strip()
+                        if line:
+                            _komorebi_handle_event_line(line)
+                else:
+                    time.sleep(0.02)
+        except Exception as e:
+            if _komorebi_events_ok:
+                _komorebi_events_ok = False
+                logging.error(f"komorebi event listener stopped: {e}")
+            elif not _komorebi_listener_warned:
+                _komorebi_listener_warned = True
+                logging.warning(f"komorebi event listener unavailable: {e}")
+            if proc is not None:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+            if handle is not None:
+                try:
+                    win32file.CloseHandle(handle)
+                except Exception:
+                    pass
+            time.sleep(5)
 
 _KOMOREBI_LAYOUTS = ["bsp", "columns", "rows", "vertical-stack", "horizontal-stack",
                      "ultrawide-vertical-stack", "grid", "right-main-vertical-stack"]
@@ -4120,6 +4271,7 @@ class StatusBar(QMainWindow):
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
         self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(100)
         threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
+        threading.Thread(target=_komorebi_event_listener, daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
