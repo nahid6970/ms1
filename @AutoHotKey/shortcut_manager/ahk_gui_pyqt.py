@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy, QScrollArea,
                             QFileDialog)
-from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray, QUrl
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray, QUrl, QPointF
 from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor, QIcon, QPixmap, QPainter
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -2904,23 +2904,58 @@ class AHKShortcutEditor(QMainWindow):
             self.remove_action.setEnabled(False)
             # For a cleaner UX, we won't show the menu if nothing is selected
 
+    def _row_select_url_at(self, pos):
+        """Return the select:// URL of the shortcut row under pos, or None.
+
+        QTextBrowser only treats clicks on anchor *text* as links, so the empty
+        space inside a row (right of the name, below the rule sub-lines) has no
+        anchor and clicks there currently do nothing. Each row is rendered as
+        table cells whose blocks carry the select:// anchor (the name cell
+        spans the full row width), so we scan the block under the cursor for
+        that anchor and verify the click lands inside the block's layout rect
+        (which excludes the gaps between rows).
+        """
+        cursor = self.text_browser.cursorForPosition(pos)
+        block = cursor.block()
+        if not block.isValid():
+            return None
+        rect = self.text_browser.document().documentLayout().blockBoundingRect(block)
+        if not rect.contains(QPointF(pos)):
+            return None
+        it = block.begin()
+        while not it.atEnd():
+            frag = it.fragment()
+            if frag.isValid() and frag.charFormat().anchorHref().startswith('select://'):
+                return QUrl(frag.charFormat().anchorHref())
+            it += 1
+        return None
+
     def eventFilter(self, obj, event):
-        """Handle double-click events on the text browser"""
-        if obj == self.text_browser.viewport() and event.type() == event.Type.MouseButtonDblClick:
-            if event.button() == Qt.MouseButton.LeftButton:
-                # Get the position of the click
+        """Handle clicks on the text browser.
+
+        Double-clicking anywhere inside a row opens the edit dialog. A single
+        click on empty row space (no anchor text) selects the row, because
+        QTextBrowser only emits anchorClicked for clicks on anchor text.
+        """
+        viewport = self.text_browser.viewport()
+        if obj == viewport:
+            if event.type() == event.Type.MouseButtonDblClick and event.button() == Qt.MouseButton.LeftButton:
                 pos = event.pos()
-                # Get the anchor at the click position
                 anchor = self.text_browser.anchorAt(pos)
-                
-                if anchor:
-                    # Handle the click to select the item first
-                    from PyQt6.QtCore import QUrl
-                    self.handle_click(QUrl(anchor))
-                    # Then open the edit dialog
+                url = QUrl(anchor) if anchor else self._row_select_url_at(pos)
+                if url is not None and url.isValid():
+                    self.handle_click(url)
                     self.edit_selected()
-                    
                 return True  # Event handled
+            if event.type() == event.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
+                # Only intercept clicks that are NOT on anchor text; those are
+                # handled normally via anchorClicked -> handle_click.
+                pos = event.pos()
+                if not self.text_browser.anchorAt(pos):
+                    url = self._row_select_url_at(pos)
+                    if url is not None:
+                        self.handle_click(url)
+                        return True
         return super().eventFilter(obj, event)
 
     def load_shortcuts_json(self):
