@@ -1653,6 +1653,49 @@ def apply_git_style(lbl, cfg):
     lbl.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 15}pt; font-weight: {fw}; border: none; background: transparent;")
 
 
+_GIT_SYNC_PS = (
+    "& {$host.UI.RawUI.WindowTitle='GiTSync';"
+    "Set-Location -Path '{path}';"
+    "if (-not (Test-Path '.git')) { Write-Host 'This is not a Git repository.' -ForegroundColor Red; return };"
+    "$Branch = git branch --show-current;"
+    "if (-not $Branch) {"
+    "  $Short = git rev-parse --short HEAD 2>$null;"
+    "  if ($LASTEXITCODE -eq 0 -and $Short) { $Branch = 'DETACHED @ ' + $Short } else { $Branch = 'UNBORN (no commits yet)' }"
+    "};"
+    "Write-Host '';"
+    'Write-Host "On branch: $Branch" -ForegroundColor Cyan;'
+    "Write-Host '--------------------------------------------' -ForegroundColor DarkGray;"
+    "git status;"
+    "git add .;"
+    "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git add. Window will remain open.' -ForegroundColor Red; return };"
+    "$UserInput = Read-Host 'Enter commit message (press Enter to use Auto-commit)';"
+    "if ([string]::IsNullOrWhiteSpace($UserInput)) { $CommitMessage = 'Auto-commit' } else { $CommitMessage = $UserInput };"
+    "while ($true) {"
+    "  git commit -m $CommitMessage;"
+    "  if ($LASTEXITCODE -eq 0) { break };"
+    "  Write-Host 'Commit failed. Press Enter to retry or type a new message:' -ForegroundColor Yellow;"
+    '  $Retry = Read-Host "[$CommitMessage]";'
+    "  if (-not [string]::IsNullOrWhiteSpace($Retry)) { $CommitMessage = $Retry }"
+    "};"
+    "git push;"
+    "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git push. Window will remain open.' -ForegroundColor Red; return };"
+    "Write-Host '============================================' -ForegroundColor Green;"
+    "Write-Host '  >>  COMMIT & PUSH COMPLETE' -ForegroundColor Green;"
+    'Write-Host "       Branch: $Branch" -ForegroundColor Cyan;'
+    "Write-Host '============================================' -ForegroundColor Green;"
+    "exit}"
+)
+
+def git_sync(path):
+    """Open a GiTSync window that stages, commits & pushes the repo at `path`.
+
+    Embedded copy of the old `gitter` PowerShell-profile function so the GUI
+    no longer depends on the user's profile being loaded. Prints the current
+    branch before committing.
+    """
+    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", _GIT_SYNC_PS.replace("{path}", path)], shell=True)
+
+
 # ─── Rclone ───────────────────────────────────────────────────────────────────
 LOG_DIR = r"C:\Users\nahid\script_output\rclone"
 try:
@@ -2673,7 +2716,7 @@ class StatusBar(QMainWindow):
                     if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
                     if btn == Qt.MouseButton.LeftButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(f'explorer "{path}"', shell=True)
-                        else: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='GiTSync' ; cd '{path}' ; gitter}}"], shell=True)
+                        else: git_sync(path)
                     elif btn == Qt.MouseButton.RightButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
                         else: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
