@@ -73,7 +73,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QHeaderView, QListWidget, QSpinBox,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction
+from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction, QCursor
 from PyQt6.QtSvg import QSvgRenderer
 
 sys.stderr = StreamToLogger(logging.ERROR)
@@ -1592,8 +1592,8 @@ class CpuCoreFrame(QWidget):
 # ─── Git status ───────────────────────────────────────────────────────────────
 _git_queue = Queue()
 def check_git_status(repo, q):
-    if not os.path.exists(repo["path"]): q.put((repo["name"], repo["label"], "#000000")); return
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
+    if not os.path.exists(repo["path"]): q.put({"name": repo["name"], "text": repo["label"], "color": "#000000", "tooltip": "Path not found"}); return
+    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
     lines = result.stdout.strip().splitlines()
     
     config = load_config()
@@ -1628,7 +1628,44 @@ def check_git_status(repo, q):
         else:
             color = default_color
             
-    q.put((repo["name"], repo["label"], color))
+    # Current branch (empty when detached or no commits)
+    branch = ""
+    try:
+        b = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
+        branch = b.stdout.strip()
+    except Exception:
+        pass
+
+    # Ahead/behind vs upstream: `git rev-list --left-right --count @{u}...HEAD` prints "behind ahead"
+    ahead = behind = 0
+    try:
+        r = subprocess.run(["git", "rev-list", "--left-right", "--count", "@{u}...HEAD"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
+        if r.returncode == 0:
+            parts = r.stdout.strip().split()
+            if len(parts) == 2:
+                try:
+                    behind, ahead = int(parts[0]), int(parts[1])
+                except ValueError:
+                    pass
+    except Exception:
+        pass
+
+    text = repo["label"]
+    if ahead > 0 or behind > 0:
+        text += f" \u21e1{ahead}\u21e3{behind}"
+
+    tip = [f"Branch: {branch}" if branch else "Branch: (detached / none)"]
+    if ahead > 0 or behind > 0:
+        tip.append(f"Upstream: {ahead} ahead, {behind} behind")
+    if lines:
+        for ln in lines[:15]:
+            tip.append(ln[:90])
+        if len(lines) > 15:
+            tip.append(f"... and {len(lines) - 15} more")
+    else:
+        tip.append("Clean")
+
+    q.put({"name": repo["name"], "text": text, "color": color, "tooltip": "\n".join(tip)})
 
 def _git_status_loop(repos, q):
     while True:
@@ -1673,10 +1710,14 @@ _GIT_SYNC_PS = (
     "while ($true) {"
     "  git commit -m $CommitMessage;"
     "  if ($LASTEXITCODE -eq 0) { break };"
+    "  git diff --cached --quiet;"
+    "  if ($LASTEXITCODE -eq 0) { Write-Host 'Nothing to commit - working tree clean.' -ForegroundColor Yellow; break };"
     "  Write-Host 'Commit failed. Press Enter to retry or type a new message:' -ForegroundColor Yellow;"
     '  $Retry = Read-Host "[$CommitMessage]";'
     "  if (-not [string]::IsNullOrWhiteSpace($Retry)) { $CommitMessage = $Retry }"
     "};"
+    "git pull --rebase --autostash;"
+    "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git pull --rebase. Resolve conflicts (or push manually). Window will remain open.' -ForegroundColor Red; return };"
     "git push;"
     "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git push. Window will remain open.' -ForegroundColor Red; return };"
     "Write-Host '============================================' -ForegroundColor Green;"
@@ -1694,6 +1735,58 @@ def git_sync(path):
     branch before committing.
     """
     subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", _GIT_SYNC_PS.replace("{path}", path)], shell=True)
+
+
+def open_git_cmd(path, title, command):
+    """Open a pwsh window running `command` inside the repo at `path`."""
+    ps = f"& {{$host.UI.RawUI.WindowTitle='{title}' ; Set-Location -Path '{path}' ; {command}}}"
+    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", ps], shell=True)
+
+
+def open_github(path):
+    import webbrowser
+    try:
+        r = subprocess.run(["git", "remote", "get-url", "origin"], capture_output=True, text=True, cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        url = (r.stdout or "").strip()
+    except Exception:
+        url = ""
+    if not url:
+        QMessageBox.information(None, "Open on GitHub", "No 'origin' remote configured for this repo.")
+        return
+    url = re.sub(r"^git@([^:]+):", r"https://\1/", url)
+    url = re.sub(r"^ssh://git@", "https://", url)
+    url = re.sub(r"^git://", "https://", url)
+    url = re.sub(r"\.git$", "", url)
+    if not url.lower().startswith("http"):
+        url = "https://" + url
+    webbrowser.open(url)
+
+
+def _show_git_menu(path):
+    """Right-click power menu for a git repo button."""
+    menu = QMenu()
+    menu.setStyleSheet(
+        f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px; }}"
+        f"QMenu::item {{ padding: 4px 20px; }}"
+        f"QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}"
+        f"QMenu::item:disabled {{ color: {CP_DIM}; }}"
+        f"QMenu::separator {{ height: 1px; background: {CP_DIM}; margin: 4px 6px; }}"
+    )
+    header = menu.addAction(f"// {os.path.basename(path)}")
+    header.setEnabled(False)
+    menu.addSeparator()
+    menu.addAction("Commit & Push").triggered.connect(lambda: git_sync(path))
+    menu.addAction("Pull (rebase)").triggered.connect(lambda: open_git_cmd(path, "Git Pull", "git pull --rebase --autostash"))
+    menu.addAction("Push").triggered.connect(lambda: open_git_cmd(path, "Git Push", "git push"))
+    menu.addSeparator()
+    menu.addAction("Stash (incl. untracked)").triggered.connect(lambda: open_git_cmd(path, "Git Stash", "git stash push -u"))
+    menu.addAction("Pop Stash").triggered.connect(lambda: open_git_cmd(path, "Git Pop Stash", "git stash pop"))
+    menu.addAction("Discard Changes").triggered.connect(lambda: open_git_cmd(path, "Git Restore", "git restore ."))
+    menu.addSeparator()
+    menu.addAction("Status & Diff").triggered.connect(lambda: open_git_cmd(path, "Git Status", "git status; Write-Host '----------------------------' -ForegroundColor DarkGray; git diff --stat"))
+    menu.addAction("lazygit").triggered.connect(lambda: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True))
+    menu.addAction("Open on GitHub").triggered.connect(lambda: open_github(path))
+    menu.exec(QCursor.pos())
 
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
@@ -2719,7 +2812,7 @@ class StatusBar(QMainWindow):
                         else: git_sync(path)
                     elif btn == Qt.MouseButton.RightButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
-                        else: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
+                        else: _show_git_menu(path)
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
         del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
@@ -3035,11 +3128,14 @@ class StatusBar(QMainWindow):
     def _drain_git_queue(self):
         try:
             while True:
-                name, text, color = _git_queue.get_nowait()
+                item = _git_queue.get_nowait()
+                name = item.get("name")
                 if name in self._git_labels:
-                    self._git_labels[name].setText(text)
+                    lbl = self._git_labels[name]
+                    lbl.setText(item.get("text", lbl.text()))
+                    lbl.setToolTip(item.get("tooltip", ""))
                     font = get_default_font()
-                    self._git_labels[name].setStyleSheet(f"color: {color}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
+                    lbl.setStyleSheet(f"color: {item.get('color')}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
         except Empty: pass
 
 from pathlib import Path

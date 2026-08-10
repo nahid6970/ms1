@@ -207,7 +207,9 @@
         "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
         "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
       ],
-      "disabled_files": [],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
+      ],
       "extensions": [
         ".py",
         ".json"
