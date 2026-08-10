@@ -1629,12 +1629,7 @@ def check_git_status(repo, q):
             color = default_color
             
     # Current branch (empty when detached or no commits)
-    branch = ""
-    try:
-        b = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
-        branch = b.stdout.strip()
-    except Exception:
-        pass
+    branch = _get_current_branch(repo["path"])
 
     # Ahead/behind vs upstream: `git rev-list --left-right --count @{u}...HEAD` prints "behind ahead"
     ahead = behind = 0
@@ -1702,10 +1697,16 @@ _BRANCH_FIXED_COLORS = {
 }
 
 def branch_color(name):
-    """Stable color per branch: fixed palette for common branches, deterministic
-    hue for anything else - the same branch always gets the same color."""
+    """Stable color per branch: user override from config first, then fixed
+    palette for common branches, deterministic hue for anything else."""
     if not name:
         return "#666666"
+    try:
+        overrides = load_config().get("branch_colors") or {}
+        if isinstance(overrides, dict) and overrides.get(name):
+            return overrides[name]
+    except Exception:
+        pass
     nl = name.lower()
     for key, col in _BRANCH_FIXED_COLORS.items():
         if nl == key or nl.startswith(key + "/") or nl.startswith(key + "-") or nl.startswith(key + "_"):
@@ -1892,7 +1893,15 @@ def open_github(path):
     webbrowser.open(url)
 
 
-def _show_git_menu(path):
+def _get_current_branch(path):
+    try:
+        r = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        return r.stdout.strip()
+    except Exception:
+        return ""
+
+
+def _show_git_menu(path, lbl=None):
     """Right-click power menu for a git repo button."""
     menu = QMenu()
     menu.setStyleSheet(
@@ -1916,6 +1925,42 @@ def _show_git_menu(path):
     menu.addAction("Status & Diff").triggered.connect(lambda: open_git_cmd(path, "Git Status", "git status; Write-Host '----------------------------' -ForegroundColor DarkGray; git diff --stat"))
     menu.addAction("lazygit").triggered.connect(lambda: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True))
     menu.addAction("Open on GitHub").triggered.connect(lambda: open_github(path))
+    menu.addSeparator()
+
+    def _set_dot_color():
+        branch = _get_current_branch(path)
+        if not branch:
+            QMessageBox.information(None, "Branch Dot Color", "No branch to color (detached HEAD / no commits).")
+            return
+        curr = branch_color(branch)
+        c = QColorDialog.getColor(QColor(curr), None, f"Dot color for branch: {branch}")
+        if c.isValid():
+            col = c.name().upper()
+            cfg = load_config()
+            overrides = cfg.get("branch_colors")
+            if not isinstance(overrides, dict):
+                overrides = {}
+            overrides[branch] = col
+            cfg["branch_colors"] = overrides
+            save_config(cfg)
+            if lbl is not None:
+                lbl.set_branch_color(col)
+
+    def _reset_dot_color():
+        branch = _get_current_branch(path)
+        if not branch:
+            return
+        cfg = load_config()
+        overrides = cfg.get("branch_colors")
+        if isinstance(overrides, dict) and branch in overrides:
+            del overrides[branch]
+            cfg["branch_colors"] = overrides
+            save_config(cfg)
+        if lbl is not None:
+            lbl.set_branch_color(branch_color(branch))
+
+    menu.addAction("Set Branch Dot Color...").triggered.connect(_set_dot_color)
+    menu.addAction("Reset Branch Dot Color").triggered.connect(_reset_dot_color)
     menu.exec(QCursor.pos())
 
 
@@ -2933,7 +2978,7 @@ class StatusBar(QMainWindow):
         bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); git_row.addWidget(bkup)
         for idx, repo in enumerate(repos):
             lbl = GitIconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); _install_tip_filter(lbl); p = repo["path"]
-            def _make_click(path, _cfg, _idx):
+            def _make_click(path, _cfg, _idx, lbl):
                 def click(event):
                     mods, btn = event.modifiers(), event.button()
                     if mods & Qt.KeyboardModifier.ShiftModifier: open_edit_gui(_cfg, "git_repos", _idx); return
@@ -2942,9 +2987,9 @@ class StatusBar(QMainWindow):
                         else: git_sync(path)
                     elif btn == Qt.MouseButton.RightButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
-                        else: _show_git_menu(path)
+                        else: _show_git_menu(path, lbl)
                 return click
-            lbl.mousePressEvent = _make_click(p, repo, idx); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
+            lbl.mousePressEvent = _make_click(p, repo, idx, lbl); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
         del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
         if repos: threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
 
