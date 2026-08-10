@@ -1702,7 +1702,7 @@ def check_komorebi_status(q):
             windows = 0
             for cont in ws.get("containers", {}).get("elements", []):
                 windows += len(cont.get("windows", {}).get("elements", []))
-            windows += len(ws.get("floating_windows", []) or [])
+            # Only count tiled windows; floating ones are excluded from the count
             layout = (ws.get("layout") or {}).get("Default", "BSP")
             if i == focused:
                 focused_layout = layout
