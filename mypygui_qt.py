@@ -1708,8 +1708,10 @@ def _glaze_query_paused():
         )
         if r.returncode == 0:
             _glaze_paused_cache = bool(json.loads(r.stdout).get("data", {}).get("isPaused", False))
+        else:
+            _glaze_paused_cache = False
     except Exception:
-        pass
+        _glaze_paused_cache = False
 
 def _glaze_status_loop(q):
     """Background thread: subscribe to WM events, push state on every event.
@@ -1730,8 +1732,16 @@ def _glaze_status_loop(q):
             )
             # Push initial state immediately
             q.put(_glaze_build_state())
+            last_build = 0.0
             for raw in proc.stdout:
                 try:
+                    # Debounce bursts: a workspace switch fires several events in
+                    # quick succession; state is a full snapshot, so skip rebuilds
+                    # within 120ms of the last one (still correct, much faster).
+                    now = time.time()
+                    if now - last_build < 0.12:
+                        continue
+                    last_build = now
                     line = raw.decode("utf-8", "replace")
                     if '"eventType":"pause_changed"' in line:
                         _glaze_query_paused()
