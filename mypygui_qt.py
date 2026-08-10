@@ -1708,7 +1708,7 @@ def check_komorebi_status(q):
                         # apps are collected from ALL workspaces (dots below cap at 3)
                         apps.append({"hwnd": w.get("hwnd"), "title": w.get("title") or "",
                                      "exe": w.get("exe") or "", "ws": i,
-                                     "ws_name": ws.get("name") or f"WS{i + 1}"})
+                                     "ws_name": _komorebi_ws_name(ws, i)})
             # Only count tiled windows; floating ones are excluded from the count
             if i >= 3:
                 continue
@@ -1717,7 +1717,7 @@ def check_komorebi_status(q):
                 focused_layout = layout
             workspaces.append({
                 "index": i,
-                "name": ws.get("name") or f"WS{i + 1}",
+                "name": _komorebi_ws_name(ws, i),
                 "layout": layout,
                 "windows": windows,
                 "tile": ws.get("tile", True),
@@ -1780,6 +1780,17 @@ def _komorebi_layout_short(name):
         "RightMainVerticalStack": "RMAIN",
     }
     return m.get(name, name[:4].upper())
+
+
+_ROMAN_WS = ("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X")
+
+
+def _komorebi_ws_name(ws, i):
+    """Workspace display name: use komorebi's name, else roman numeral."""
+    n = ws.get("name") if isinstance(ws, dict) else None
+    if n:
+        return n
+    return _ROMAN_WS[i] if i < len(_ROMAN_WS) else f"WS{i + 1}"
 
 
 # ─── komorebi.json workspace app rules ────────────────────────────────────────
@@ -2128,7 +2139,8 @@ class KomorebiWidget(QWidget):
 
     # ── workspace app rules (right-click a dot) ────────────────────────────────
     def _show_ws_menu(self, i, pos):
-        name = self._ws_names[i] if i < len(self._ws_names) else f"WS{i + 1}"
+        name = self._ws_names[i] if i < len(self._ws_names) else \
+            (_ROMAN_WS[i] if i < len(_ROMAN_WS) else f"WS{i + 1}")
         menu = QMenu(self)
         menu.setStyleSheet(_KOMOREBI_MENU_QSS)
         _menu_rich_action(
@@ -2255,7 +2267,7 @@ class KomorebiWidget(QWidget):
         focused = item.get("focused", -1)
         paused = item.get("paused", False)
         self._focused_layout = item.get("focused_layout", "")
-        self._ws_names = [w.get("name") or f"WS{i + 1}"
+        self._ws_names = [_komorebi_ws_name(w, i)
                           for i, w in enumerate(workspaces)]
         tip = []
         for i, b in enumerate(self._buttons):
