@@ -1890,9 +1890,10 @@ class KomorebiWidget(QWidget):
     """Up to 3 clickable komorebi workspace dots + active layout label.
 
     Left-click a dot -> focus that workspace.
-    Right-click (dots or layout label) -> menu to change the workspace layout
-    (BSP, Columns, Rows, Stacks, Grid, ...). Hover shows each workspace's
-    window count and layout. Styled to match the status bar.
+    Left-click the layout label (or right-click the dots) -> menu to change
+    the workspace layout (BSP, Columns, Rows, Stacks, Grid, ...). Hovering the
+    dots shows each workspace's window count and layout; hovering the layout
+    label shows just the active layout. Styled to match the status bar.
     """
 
     def __init__(self, parent=None):
@@ -1914,9 +1915,12 @@ class KomorebiWidget(QWidget):
         self._layout_lbl = QLabel("—")
         self._layout_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 3px;")
         self._layout_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._layout_lbl.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
+        self._layout_lbl.mouseReleaseEvent = self._layout_lbl_left_click
         lay.addWidget(self._layout_lbl)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._show_layout_menu)
+        self.customContextMenuRequested.connect(
+            lambda pos: self._show_layout_menu(self.mapToGlobal(pos)))
         self._install_self_tip()
 
     def _install_self_tip(self):
@@ -1945,7 +1949,11 @@ class KomorebiWidget(QWidget):
                          creationflags=subprocess.CREATE_NO_WINDOW)
         _kick_komorebi_refresh()
 
-    def _show_layout_menu(self, pos):
+    def _layout_lbl_left_click(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._show_layout_menu(event.globalPosition().toPoint())
+
+    def _show_layout_menu(self, gpos):
         menu = QMenu(self)
         menu.setStyleSheet(DIALOG_QSS)
         for layout in _KOMOREBI_LAYOUTS:
@@ -1960,7 +1968,7 @@ class KomorebiWidget(QWidget):
         a.triggered.connect(lambda: self._toggle("monocle"))
         a = menu.addAction("Toggle Pause")
         a.triggered.connect(lambda: self._toggle("pause"))
-        menu.exec(self.mapToGlobal(pos))
+        menu.exec(gpos)
 
     def apply_state(self, item):
         """Called on the GUI thread from _drain_komorebi_queue."""
@@ -2003,11 +2011,17 @@ class KomorebiWidget(QWidget):
             tip.append('<span style="color:#666666;">no workspaces</span>')
         tip_html = "<br/>".join(tip)
         self._tip_text = tip_html
-        self._layout_lbl._tip_text = tip_html
+        # Layout label tooltip: layout info only (no workspace list).
+        focused_layout = item.get("focused_layout", "")
+        self._layout_lbl._tip_text = (
+            f'<span style="color:#8f9bae;">Layout: {_tip_esc(focused_layout) or "—"}</span>'
+            if focused_layout else '<span style="color:#666666;">Layout: —</span>'
+        )
         # Layout label: active workspace layout (even if focused is beyond the
         # first 3 dots, we still know it from state), or paused
         if paused:
             self._layout_lbl.setText("⏸")
+            self._layout_lbl._tip_text = '<span style="color:#FFD740;">⏸ komorebi paused</span>'
         else:
             self._layout_lbl.setText(_komorebi_layout_short(item.get("focused_layout", "")))
 
