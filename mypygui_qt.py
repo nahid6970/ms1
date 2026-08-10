@@ -1782,6 +1782,96 @@ def _komorebi_layout_short(name):
     return m.get(name, name[:4].upper())
 
 
+# ─── komorebi.json workspace app rules ────────────────────────────────────────
+# Apps can be pinned to a workspace via `workspace_rules` on that workspace in
+# komorebi.json (same {kind, id, matching_strategy} shape as ignore_rules).
+_KOMOREBI_CFG_CANDIDATES = (
+    os.path.join(os.path.expanduser("~"), ".config", "komorebi", "komorebi.json"),
+    os.path.join(os.path.expanduser("~"), "komorebi.json"),
+    os.path.join(os.environ.get("LOCALAPPDATA", ""), "komorebi", "komorebi.json"),
+)
+
+
+def _komorebi_config_path():
+    """Path of the active komorebi.json (first existing candidate, or the
+    default komorebi location if none exists yet)."""
+    for p in _KOMOREBI_CFG_CANDIDATES:
+        if p and os.path.exists(p):
+            return p
+    return _KOMOREBI_CFG_CANDIDATES[0]
+
+
+def _komorebi_find_workspaces(cfg, name):
+    """Yield every workspace dict named `name` across all monitors."""
+    for mon in cfg.get("monitors") or []:
+        for ws in mon.get("workspaces") or []:
+            if (ws.get("name") or "") == name:
+                yield ws
+
+
+def _komorebi_get_workspace_rules(name):
+    """Existing {kind, id, matching_strategy} rules pinned to a workspace."""
+    try:
+        with open(_komorebi_config_path(), encoding="utf-8") as f:
+            cfg = json.load(f)
+    except Exception:
+        return []
+    out = []
+    for ws in _komorebi_find_workspaces(cfg, name):
+        out.extend(ws.get("workspace_rules") or [])
+    seen, dedup = set(), []
+    for r in out:
+        key = (r.get("kind"), r.get("id"))
+        if key not in seen:
+            seen.add(key)
+            dedup.append(r)
+    return dedup
+
+
+def _komorebi_save_workspace_rule(name, kind, ident, strategy, remove=False):
+    """Add (or with remove=True remove) an app→workspace rule in komorebi.json,
+    then reload komorebi so it takes effect immediately. True on success.
+    Preserves the file's original indentation and line endings so the whole
+    config is not reformatted."""
+    path = _komorebi_config_path()
+    try:
+        with open(path, encoding="utf-8", newline="") as f:
+            raw = f.read()
+        cfg = json.loads(raw)
+    except Exception:
+        return False
+    ws_list = list(_komorebi_find_workspaces(cfg, name))
+    if not ws_list:
+        return False
+    for ws in ws_list:
+        rules = ws.setdefault("workspace_rules", [])
+        rules[:] = [r for r in rules
+                    if not (r.get("kind") == kind and r.get("id") == ident)]
+        if remove:
+            if not rules:
+                ws.pop("workspace_rules", None)
+        else:
+            rules.append({"kind": kind, "id": ident,
+                          "matching_strategy": strategy})
+    indent = 4
+    m = re.search(r"\n( +)\"", raw)
+    if m:
+        indent = len(m.group(1))
+    newline = "\r\n" if "\r\n" in raw else "\n"
+    try:
+        text = json.dumps(cfg, indent=indent, ensure_ascii=False)
+        text = text.replace("\n", newline)
+        if raw.endswith(("\r\n", "\n")):
+            text += newline
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+    except Exception:
+        return False
+    subprocess.Popen(["komorebic", "reload-configuration"],
+                     creationflags=subprocess.CREATE_NO_WINDOW)
+    return True
+
+
 # Menus can't render HTML in plain actions, so komorebi menus use
 # QWidgetAction + rich-text QLabels (transparent so hover highlight shows).
 _KOMOREBI_MENU_QSS = (
@@ -1977,6 +2067,7 @@ class KomorebiWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._buttons = []
+        self._ws_names = []
         self._layout_lbl = None
         self._tip_text = ""
         self._focused_layout = ""
@@ -1989,6 +2080,9 @@ class KomorebiWidget(QWidget):
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.setStyleSheet(self._dot_css("#333333"))
             b.clicked.connect(partial(self._focus_ws, i))
+            b.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            b.customContextMenuRequested.connect(
+                lambda pos, i=i: self._show_ws_menu(i, pos))
             lay.addWidget(b)
             self._buttons.append(b)
         self._layout_lbl = QLabel("—")
@@ -2032,6 +2126,95 @@ class KomorebiWidget(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:
             self._show_layout_menu(event.globalPosition().toPoint())
 
+    # ── workspace app rules (right-click a dot) ────────────────────────────────
+    def _show_ws_menu(self, i, pos):
+        name = self._ws_names[i] if i < len(self._ws_names) else f"WS{i + 1}"
+        menu = QMenu(self)
+        menu.setStyleSheet(_KOMOREBI_MENU_QSS)
+        _menu_rich_action(
+            menu,
+            f'<span style="color:#00F0FF; font-weight:bold;">● {_tip_esc(name)}</span> '
+            f'<span style="color:#8f9bae;">app rules</span>',
+            disabled=True)
+        _menu_rich_action(
+            menu,
+            '<span style="color:#E0E0E0;">＋ Assign App to Workspace...</span>',
+            partial(self._assign_app, name))
+        rules = _komorebi_get_workspace_rules(name)
+        if rules:
+            menu.addSeparator()
+            for r in rules:
+                label = f"{r.get('kind') or '?'} · {r.get('id') or '?'}"
+                _menu_rich_action(
+                    menu,
+                    f'<span style="color:#8f9bae;">✕ {_tip_esc(label)}</span>',
+                    partial(self._remove_rule, name,
+                            r.get("kind", ""), r.get("id", "")))
+        menu.exec(_menu_gpos(self, menu, self.mapToGlobal(pos)))
+
+    def _assign_app(self, name):
+        dlg = QDialog(self)
+        dlg.setWindowTitle(f"Assign App → Workspace {name}")
+        dlg.setStyleSheet(DIALOG_QSS)
+        form = QFormLayout(dlg)
+        form.setSpacing(8)
+        kind_cb = QComboBox()
+        kind_cb.addItems(["Exe", "Class", "Title", "Path"])
+        id_le = QLineEdit()
+        id_le.setPlaceholderText("e.g. chrome.exe, Calculator, or a window title")
+        strat_cb = QComboBox()
+        strat_cb.addItems(["Equals", "Contains", "StartsWith", "EndsWith", "Regex"])
+
+        def _on_kind_changed(kind):
+            # Titles usually contain app + page name → Contains is the
+            # common case; Exe/Class are exact process/class matches.
+            if kind == "Title":
+                strat_cb.setCurrentText("Contains")
+            elif strat_cb.currentText() == "Contains":
+                strat_cb.setCurrentText("Equals")
+        kind_cb.currentTextChanged.connect(_on_kind_changed)
+        form.addRow("KIND", kind_cb)
+        form.addRow("IDENTIFIER", id_le)
+        form.addRow("MATCH", strat_cb)
+        hint = QLabel(f'Apps matching this rule will open on workspace '
+                      f'<b>{_tip_esc(name)}</b>.')
+        hint.setWordWrap(True)
+        form.addRow(hint)
+        btns = QHBoxLayout()
+        ok_btn = QPushButton("Assign")
+        ok_btn.setDefault(True)
+        cancel_btn = QPushButton("Cancel")
+        btns.addStretch()
+        btns.addWidget(cancel_btn)
+        btns.addWidget(ok_btn)
+        form.addRow(btns)
+
+        def _go():
+            ident = id_le.text().strip()
+            if not ident:
+                return
+            if _komorebi_save_workspace_rule(
+                    name, kind_cb.currentText(), ident, strat_cb.currentText()):
+                dlg.accept()
+            else:
+                QMessageBox.warning(
+                    dlg, "Assign App",
+                    f"Could not write komorebi.json, or workspace "
+                    f"'{name}' was not found in it.")
+
+        ok_btn.clicked.connect(_go)
+        cancel_btn.clicked.connect(dlg.reject)
+        dlg.exec()
+
+    def _remove_rule(self, name, kind, ident):
+        r = QMessageBox.question(
+            self, "Remove App Rule",
+            f"Stop sending '{ident}' to workspace {name}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if r != QMessageBox.StandardButton.Yes:
+            return
+        _komorebi_save_workspace_rule(name, kind, ident, "", remove=True)
+
     def _show_layout_menu(self, cursor_pos=None):
         menu = QMenu(self)
         menu.setStyleSheet(_KOMOREBI_MENU_QSS)
@@ -2059,6 +2242,7 @@ class KomorebiWidget(QWidget):
     def apply_state(self, item):
         """Called on the GUI thread from _drain_komorebi_queue."""
         if not item.get("ok"):
+            self._ws_names = []
             for b in self._buttons:
                 b.setStyleSheet(self._dot_css("#222222"))
             self._layout_lbl.setText("—")
@@ -2071,6 +2255,8 @@ class KomorebiWidget(QWidget):
         focused = item.get("focused", -1)
         paused = item.get("paused", False)
         self._focused_layout = item.get("focused_layout", "")
+        self._ws_names = [w.get("name") or f"WS{i + 1}"
+                          for i, w in enumerate(workspaces)]
         tip = []
         for i, b in enumerate(self._buttons):
             if i < len(workspaces):
