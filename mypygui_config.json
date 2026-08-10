@@ -1617,7 +1617,7 @@
             "icon_position": "left"
         }
     },
-    "buttons_left_page_size": 20,
+    "buttons_left_page_size": 16,
     "edit_panel_width": 1250,
     "edit_panel_height": 850,
     "status_bar_bg": "red",
@@ -2893,5 +2893,6 @@
     "branch_colors": {
         "vlr-cloudflare+convex": "#FF5500",
         "main": "#00FF00"
-    }
+    },
+    "git_indicator_style": "underline"
 }

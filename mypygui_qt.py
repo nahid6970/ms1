@@ -1660,7 +1660,7 @@ def check_git_status(repo, q):
     else:
         tip.append("Clean")
 
-    q.put({"name": repo["name"], "text": text, "color": color, "branch": branch, "tooltip": "\n".join(tip)})
+    q.put({"name": repo["name"], "text": text, "color": color, "branch": branch, "indicator_style": config.get("git_indicator_style", "dot"), "tooltip": "\n".join(tip)})
 
 def _git_status_loop(repos, q):
     while True:
@@ -1720,13 +1720,20 @@ def branch_color(name):
 
 
 class GitIconLabel(IconLabel):
-    """IconLabel with a small branch-color dot pinned to the bottom-right corner."""
+    """IconLabel with a branch-color indicator (dot or underline) at the bottom,
+    configurable from the settings dialog."""
+
     def __init__(self, text, btn_cfg, parent=None):
         super().__init__(text, btn_cfg, parent)
         self._branch_color = None
+        self._indicator_style = "dot"
 
     def set_branch_color(self, color):
         self._branch_color = color
+        self.update()
+
+    def set_indicator_style(self, style):
+        self._indicator_style = style if style in ("dot", "underline") else "dot"
         self.update()
 
     def paintEvent(self, event):
@@ -1736,15 +1743,21 @@ class GitIconLabel(IconLabel):
         try:
             p = QPainter(self)
             p.setRenderHint(QPainter.RenderHint.Antialiasing)
-            r = 3
-            cx = self.width() - r - 2
-            cy = self.height() - r - 2
-            p.setPen(QPen(QColor("#111111"), 1))
             p.setBrush(QColor(self._branch_color))
-            p.drawEllipse(cx - r, cy - r, r * 2, r * 2)
+            if self._indicator_style == "underline":
+                p.setPen(Qt.PenStyle.NoPen)
+                bar_w = min(self.width() - 2, 48)
+                bx = (self.width() - bar_w) // 2
+                p.drawRect(bx, self.height() - 4, bar_w, 3)
+            else:
+                p.setPen(QPen(QColor("#111111"), 1))
+                r = 3
+                cx = self.width() - r - 2
+                cy = self.height() - r - 2
+                p.drawEllipse(cx - r, cy - r, r * 2, r * 2)
             p.end()
         except Exception as e:
-            logging.error(f"GitIconLabel dot error: {e}")
+            logging.error(f"GitIconLabel indicator error: {e}")
 
 
 _tip_label = None
@@ -2834,9 +2847,14 @@ class StatusBar(QMainWindow):
         git_def_btn.clicked.connect(_pick_git_def)
         
         git_rules_le = QLineEdit(git_cfg.get("rules", ".json:#ff55ff"))
+        git_ind_cb = QComboBox()
+        git_ind_cb.addItems(["Dot", "Underline"])
+        git_ind_cb.setCurrentText(str(self._config.get("git_indicator_style", "dot")).title())
+        git_ind_cb.setToolTip("Dot = small colored dot, Underline = colored bar at the bottom")
         form_git.addRow("DEFAULT", git_def_btn)
         form_git.addRow("RULES", git_rules_le)
         git_rules_le.setToolTip("Format: .ext:color, .ext2:color (e.g. .json:#ff55ff, .md:#00ffff)")
+        form_git.addRow("BRANCH INDICATOR", git_ind_cb)
         left_col.addWidget(grp_git)
         
         left_col.addStretch()
@@ -2931,8 +2949,12 @@ class StatusBar(QMainWindow):
                     "rules": git_rules_le.text(),
                     "default": self._temp_git_def
                 }
+                cfg["git_indicator_style"] = git_ind_cb.currentText().lower()
                 
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
+                for _lbl in getattr(self, "_git_labels", {}).values():
+                    if hasattr(_lbl, "set_indicator_style"):
+                        _lbl.set_indicator_style(cfg.get("git_indicator_style", "dot"))
                 
                 if rclone_enabled_chk.isChecked():
                     self._rclone_toggle.show()
@@ -3359,6 +3381,7 @@ class StatusBar(QMainWindow):
                     lbl = self._git_labels[name]
                     lbl.setText(item.get("text", lbl.text()))
                     lbl._tip_text = item.get("tooltip", "")
+                    lbl.set_indicator_style(item.get("indicator_style") or getattr(lbl, "_indicator_style", "dot"))
                     lbl.set_branch_color(branch_color(item.get("branch", "")))
                     font = get_default_font()
                     lbl.setStyleSheet(f"color: {item.get('color')}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
