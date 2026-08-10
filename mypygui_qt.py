@@ -1741,6 +1741,19 @@ def _kick_komorebi_refresh(seconds=8):
     global _komorebi_fast_until
     _komorebi_fast_until = time.time() + seconds
 
+
+def _komorebi_refresh_once(delay=0.2):
+    """After a user action, wait briefly for komorebi to apply the command,
+    then push a fresh state snapshot right away in a background thread.
+    Bypasses the poll loop's sleep so the status bar updates almost instantly
+    even if the loop is mid-sleep or mid-poll. Also starts the fast-poll
+    cadence immediately."""
+    _kick_komorebi_refresh()
+    def _do():
+        time.sleep(delay)
+        check_komorebi_status(_komorebi_queue)
+    threading.Thread(target=_do, daemon=True).start()
+
 def _komorebi_status_loop(q):
     while True:
         check_komorebi_status(q)
@@ -1937,17 +1950,17 @@ class KomorebiWidget(QWidget):
     def _focus_ws(self, idx):
         subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
                          creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+        _komorebi_refresh_once()
 
     def _change_layout(self, layout):
         subprocess.Popen(["komorebic", "change-layout", layout],
                          creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+        _komorebi_refresh_once()
 
     def _toggle(self, arg):
         subprocess.Popen(["komorebic", "toggle-" + arg],
                          creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+        _komorebi_refresh_once()
 
     def _layout_lbl_left_click(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -1961,7 +1974,7 @@ class KomorebiWidget(QWidget):
             act.triggered.connect(partial(self._change_layout, layout))
         menu.addSeparator()
         a = menu.addAction("Flip Layout")
-        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _kick_komorebi_refresh()))
+        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _komorebi_refresh_once()))
         a = menu.addAction("Toggle Floating")
         a.triggered.connect(lambda: self._toggle("float"))
         a = menu.addAction("Toggle Monocle")
@@ -2104,7 +2117,7 @@ class KomorebiAppsWidget(QWidget):
         # uncloaked the window, restore + focus it so SetForegroundWindow works
         subprocess.Popen(["komorebic", "focus-workspace", str(ws_idx)],
                          creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+        _komorebi_refresh_once()
         if hwnd:
             def _focus_later():
                 try:
@@ -3803,7 +3816,7 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
-        self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(300)
+        self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(100)
         threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
@@ -3842,15 +3855,19 @@ class StatusBar(QMainWindow):
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
     def _drain_komorebi_queue(self):
-        try:
-            while True:
+        # Drain all pending snapshots but apply only the newest one, so a stale
+        # poll-loop snapshot can never land AFTER a fresh one-shot snapshot.
+        item = None
+        while True:
+            try:
                 item = _komorebi_queue.get_nowait()
-                if hasattr(self, "komorebi_widget"):
-                    self.komorebi_widget.apply_state(item)
-                if hasattr(self, "komorebi_apps"):
-                    self.komorebi_apps.apply_state(item)
-        except Empty:
-            pass
+            except Empty:
+                break
+        if item is not None:
+            if hasattr(self, "komorebi_widget"):
+                self.komorebi_widget.apply_state(item)
+            if hasattr(self, "komorebi_apps"):
+                self.komorebi_apps.apply_state(item)
 
     def _drain_git_queue(self):
         try:
