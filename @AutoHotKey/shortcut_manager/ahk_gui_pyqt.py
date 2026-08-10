@@ -66,7 +66,10 @@ SVGS = {
     # uses currentColor so the accent is user-configurable (Settings window); the
     # knob stays white. OFF stays dim gray regardless of accent.
     "TOGGLE_ON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="currentColor"/><circle cx="33" cy="12" r="9" fill="#FFFFFF"/></svg>',
-    "TOGGLE_OFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#242424" stroke="#3a3a3a" stroke-width="1"/><circle cx="13" cy="12" r="9" fill="#9a9a9a"/></svg>'
+    "TOGGLE_OFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#242424" stroke="#3a3a3a" stroke-width="1"/><circle cx="13" cy="12" r="9" fill="#9a9a9a"/></svg>',
+    # Bold check for the '✅ Active in' rule line — same Lucide style as the
+    # other icons, recolored via currentColor.
+    "CHECK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
 }
 
 # Toggle switch dimensions (must match the SVG viewBox and the <img> attrs).
@@ -3486,14 +3489,18 @@ class AHKShortcutEditor(QMainWindow):
                         render_svg_pixmap(SVGS["TOGGLE_ON"], self.toggle_accent_color, TOGGLE_W, height=TOGGLE_H))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://toggle-off"),
                         render_svg_pixmap(SVGS["TOGGLE_OFF"], CP_DIM, TOGGLE_W, height=TOGGLE_H))
+        # Green check for the '✅ Active in' rule sub-line (same size/alignment
+        # as the red ban used by 'Inactive in').
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://check-sm"),
+                        render_svg_pixmap(SVGS["CHECK"], CP_GREEN, sm))
 
     def _key_html_with_icons(self, key):
         """Swap true-color 🚀/🚫 emojis in startup/exclusion keys for SVG icons.
 
         The leading emoji becomes the main key icon (rocket/ban, same sizes as
-        Favourites); any inner 🚫 badge (e.g. the inactive indicator in
-        '🚀 🚫[label]') becomes the small ban used on the rule sub-lines. The
-        ✅ active indicator keeps its emoji to match the '✅ Active in' rule line.
+        Favourites). Startup/exclusion keys are plain ('🚀 Startup', '🚫
+        Exclusion') — the old embedded 🚀 🚫[label] badges were removed when
+        the window context moved to the dim rule sub-lines below the name.
         """
         if not key:
             return key
@@ -3561,13 +3568,12 @@ class AHKShortcutEditor(QMainWindow):
         elif shortcut_type == "startup":
             mode = shortcut.get('context_mode', 'none')
             if mode in ('active', 'inactive') and lines:
-                if mode == 'active':
-                    lines.insert(0, "✅ Active in")
-                else:
-                    # SVG ban icon instead of the true-color emoji, sized for the
-                    # dim rule lines (0.82em text)
-                    sm = rules_ban_size(self.app_font_size)
-                    lines.insert(0, f'<img src="icon://ban-sm" width="{sm}" height="{sm}" align="middle"> Inactive in')
+                # SVG check/ban icons instead of the true-color ✅/🚫 emojis,
+                # sized for the dim rule lines (0.82em text).
+                sm = rules_ban_size(self.app_font_size)
+                icon = 'icon://check-sm' if mode == 'active' else 'icon://ban-sm'
+                label = 'Active in' if mode == 'active' else 'Inactive in'
+                lines.insert(0, f'<img src="{icon}" width="{sm}" height="{sm}" align="middle"> {label}')
 
         if not lines:
             return ''
