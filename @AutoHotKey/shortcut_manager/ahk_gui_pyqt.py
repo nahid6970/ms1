@@ -2208,7 +2208,7 @@ class SettingsDialog(QDialog):
         self.parent_window = parent
         self.setWindowTitle("Settings")
         self.setModal(True)
-        self.resize(500, 560)
+        self.resize(500, 600)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
@@ -2289,6 +2289,17 @@ class SettingsDialog(QDialog):
         self.toggle_color_combo.setCurrentIndex(idx)
         toggle_layout.addWidget(self.toggle_color_combo)
         layout.addLayout(toggle_layout)
+
+        # Keyboard Icon Position
+        kicon_layout = QHBoxLayout()
+        kicon_layout.addWidget(QLabel("Keyboard Icon Position:"))
+        self.kicon_spin = QSpinBox()
+        self.kicon_spin.setRange(30, 250)
+        self.kicon_spin.setSuffix(" px")
+        self.kicon_spin.setValue(self.parent_window.key_icon_width)
+        kicon_layout.addWidget(self.kicon_spin)
+        kicon_layout.addStretch()
+        layout.addLayout(kicon_layout)
 
         # Shortcut Preview Font Selection
         pfont_layout = QHBoxLayout()
@@ -2413,6 +2424,7 @@ class SettingsDialog(QDialog):
         self.parent_window.app_font_size = new_size
         
         self.parent_window.toggle_accent_color = self.toggle_color_combo.currentData()
+        self.parent_window.key_icon_width = self.kicon_spin.value()
         self.parent_window.selection_menu_font_family = self.sm_font_combo.currentFont().family()
         self.parent_window.selection_menu_font_size = self.sm_size_spin.value()
         self.parent_window.use_native_menu = self.menu_style_checkbox.isChecked()
@@ -2459,6 +2471,7 @@ class AHKShortcutEditor(QMainWindow):
         self.app_font_family = "Consolas" # Default per theme guide
         self.app_font_size = 10
         self.toggle_accent_color = TOGGLE_COLOR_OPTIONS[0][1]  # Green by default
+        self.key_icon_width = 60  # Width of the keyboard-icon column (px)
         self.selection_menu_font_family = "Segoe UI"
         self.selection_menu_font_size = 12
         self.selection_menu_submenu_indicator = " >"
@@ -2985,6 +2998,9 @@ class AHKShortcutEditor(QMainWindow):
                     self.app_font_family = data.get("app_font_family", "Consolas")
                     self.app_font_size = data.get("app_font_size", 10)
                     self.toggle_accent_color = data.get("toggle_accent_color", TOGGLE_COLOR_OPTIONS[0][1])
+                    self.key_icon_width = data.get("key_icon_width", 60)
+                    if not isinstance(self.key_icon_width, int) or not (30 <= self.key_icon_width <= 250):
+                        self.key_icon_width = 60
                     self.selection_menu_font_family = data.get("selection_menu_font_family", "Segoe UI")
                     self.selection_menu_font_size = data.get("selection_menu_font_size", 12)
                     self.selection_menu_submenu_indicator = data.get("selection_menu_submenu_indicator", " >")
@@ -3053,6 +3069,7 @@ class AHKShortcutEditor(QMainWindow):
                 "app_font_family": self.app_font_family,
                 "app_font_size": self.app_font_size,
                 "toggle_accent_color": self.toggle_accent_color,
+                "key_icon_width": self.key_icon_width,
                 "selection_menu_font_family": self.selection_menu_font_family,
                 "selection_menu_font_size": self.selection_menu_font_size,
                 "selection_menu_submenu_indicator": self.selection_menu_submenu_indicator,
@@ -3222,6 +3239,29 @@ class AHKShortcutEditor(QMainWindow):
             <div class="container">
                 <div class="column">
         """
+
+        # ── Key column sizing ──────────────────────────────
+        # HTML auto table layout treats a cell's width attribute as a minimum,
+        # so any row whose hotkey is wider than the fixed key column would grow
+        # that one row's cell and push its keyboard icon out of line. Size each
+        # section's key column to its widest rendered key (measured with the
+        # same bold font the keys use) so every row shares one uniform width.
+        fm = QFontMetrics(QFont(self.app_font_family, self.app_font_size, QFont.Weight.Bold))
+        self._key_fm = fm  # reused by generate_shortcut_html for truncation checks
+        self._key_col_widths = {}
+        for stype, items, keyfn in (
+            ("script", script_shortcuts, lambda s: s.get('hotkey', '')),
+            ("launcher", launcher_shortcuts, lambda s: s.get('hotkey', '')),
+            ("context", context_shortcuts, lambda s: s.get('hotkey', '')),
+            ("remap", remap_shortcuts, lambda s: f"{s.get('origin_key','')} {chr(0x2794)} {s.get('destination_key','')}"),
+            ("text", text_shortcuts, lambda s: s.get('trigger', '')),
+            ("file", file_shortcuts, lambda s: s.get('trigger', '')),
+            ("startup", startup_scripts, lambda s: 'Startup'),
+            ("exclude", exclusion_rules, lambda s: 'Rule'),
+        ):
+            floor = 220 if stype in ("text", "file") else 170
+            widest = max((fm.horizontalAdvance(keyfn(s)) for s in items if keyfn(s)), default=0)
+            self._key_col_widths[stype] = max(floor, widest + 24)
 
         # ── FAVOURITE section ──────────────────────────────
         all_shortcuts_with_type = []
@@ -3666,39 +3706,48 @@ class AHKShortcutEditor(QMainWindow):
 
         if shortcut_type == "script":
             key = shortcut.get('hotkey', '')
-            key_width = 170
         elif shortcut_type == "launcher":
             key = shortcut.get('hotkey', '')
-            key_width = 170
         elif shortcut_type == "remap":
             origin = shortcut.get('origin_key', '')
             dest = shortcut.get('destination_key', '')
             key = f"{origin} ➔ {dest}"
-            key_width = 170
         elif shortcut_type == "context":
             # Plain hotkey — the window/process/class context lives on the dim
             # rule sub-lines below the name (same look as Favourites).
             key = shortcut.get('hotkey', '')
-            key_width = 170
         elif shortcut_type == "exclude":
             # Plain key — the window/hotkey context lives on the dim rule
             # sub-lines below the name (same look as Favourites).
             key = "🚫 Exclusion"
-            key_width = 170
         elif shortcut_type == "startup":
             # Plain key — the active/inactive window context lives on the dim
             # rule sub-lines below the name (same look as Favourites).
             key = "🚀 Startup"
-            key_width = 170
         else: # text
             key = shortcut.get('trigger', '')
-            key_width = 220
 
-        key_html = key  # non-favourite rows render the key as-is
-        # Non-favourite startup/exclusion rows still carry true-color emojis
-        # (🚀/🚫) — swap them for the same crisp SVG icons used in Favourites.
-        if not is_favourite and shortcut_type in ("startup", "exclude"):
-            key_html = self._key_html_with_icons(key)
+        # Uniform, content-sized key column (computed per section in
+        # generate_html) so the keyboard-icon column lines up on every row.
+        key_width = getattr(self, '_key_col_widths', {}).get(
+            shortcut_type, 220 if shortcut_type in ("text", "file") else 170)
+
+        key_html = key
+        if not is_favourite:
+            # Truncate only when the key truly exceeds its fixed column,
+            # measured with the same bold font the keys render in (the
+            # content-sized columns make this a no-op for ordinary keys; it is
+            # a safety net for unusually long ones). The ellipsis keeps the
+            # keyboard-icon column aligned on every row.
+            fm = getattr(self, '_key_fm', None)
+            if fm is None:
+                fm = QFontMetrics(QFont(self.app_font_family, self.app_font_size, QFont.Weight.Bold))
+            if fm.horizontalAdvance(key) + 15 > key_width:
+                key_html = self._truncate_to_width(key, key_width - 15)
+            # Startup/exclusion keys carry true-color emojis (🚀/🚫) — swap
+            # them for the same crisp SVG icons used in Favourites.
+            if shortcut_type in ("startup", "exclude"):
+                key_html = self._key_html_with_icons(key_html)
 
         if is_favourite:
             # Uniform favourites rows: plain key for every type (no embedded
@@ -3715,7 +3764,7 @@ class AHKShortcutEditor(QMainWindow):
             else:  # exclude
                 key = "🚫 Rule"
             key_width = 170
-            key = self._truncate_to_width(key, key_width - 12)
+            key = self._truncate_to_width(key, key_width - 15)
             # True-color emojis (🚀/🚫) get clipped by Qt's line box and push the
             # following text off-baseline, so render them as crisp SVG icons. A
             # fixed-size <img> keeps the line box at text height, so 'Startup'/
@@ -3726,8 +3775,8 @@ class AHKShortcutEditor(QMainWindow):
                 key_html = (f'<img src="{KEY_ICON_SRC[key[0]]}" width="{icon_size}" '
                             f'height="{icon_size}" align="middle">&nbsp;{key[1:]}')
 
-        # Ensure icon column is stable
-        icon_width = 60
+        # Ensure icon column is stable (user-adjustable keyboard icon position)
+        icon_width = self.key_icon_width
 
         name = shortcut.get('name', 'Unnamed')
         favourite = shortcut.get('favourite', False)
