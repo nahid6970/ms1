@@ -946,7 +946,8 @@
             "window_title_enabled": true,
             "process_name_enabled": true,
             "window_class_enabled": true,
-            "match_foreground": true
+            "match_foreground": true,
+            "favourite": true
         },
         {
             "action": "SendText(\"/chat save \" FormatTime(, \"yyyy-MM-dd_HH-mm-ss\"))",

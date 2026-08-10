@@ -3665,11 +3665,10 @@ class AHKShortcutEditor(QMainWindow):
             key = f"{origin} ➔ {dest}"
             key_width = 170
         elif shortcut_type == "context":
+            # Plain hotkey — the window/process/class context lives on the dim
+            # rule sub-lines below the name (same look as Favourites).
             key = shortcut.get('hotkey', '')
-            window_title = shortcut.get('window_title', '')
-            if window_title:
-                key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
-            key_width = 220
+            key_width = 170
         elif shortcut_type == "exclude":
             # Plain key — the window/hotkey context lives on the dim rule
             # sub-lines below the name (same look as Favourites).
@@ -3733,10 +3732,10 @@ class AHKShortcutEditor(QMainWindow):
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
-        # Favourites plus the Startup/Exclusion-Rules categories show window-
-        # context rules as dim sub-lines below the name — identical look in
-        # every section, with the key column kept to the plain icon + label.
-        use_rules_below = is_favourite or shortcut_type in ("startup", "exclude")
+        # Favourites plus the Startup/Exclusion-Rules/Context categories show
+        # window-context rules as dim sub-lines below the name — identical look
+        # in every section, with the key column kept to the plain hotkey/label.
+        use_rules_below = is_favourite or shortcut_type in ("startup", "exclude", "context")
         rules_html = self._build_favourite_rules(shortcut, shortcut_type) if use_rules_below else ''
 
         # Calculate background color inline for best QTextBrowser compatibility
