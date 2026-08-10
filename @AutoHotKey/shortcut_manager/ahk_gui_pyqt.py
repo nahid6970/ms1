@@ -12,6 +12,7 @@ import os
 import re
 import urllib.request
 import webbrowser
+from html import escape as html_escape
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
@@ -3360,6 +3361,83 @@ class AHKShortcutEditor(QMainWindow):
 
         return html
 
+    @staticmethod
+    def _char_display_width(ch):
+        """Approximate rendered width: wide glyphs (emoji, CJK, symbols) count as 2."""
+        o = ord(ch)
+        if (0x1100 <= o <= 0x115F or 0x2E80 <= o <= 0xA4CF or 0xAC00 <= o <= 0xD7A3
+                or 0xF900 <= o <= 0xFAFF or 0xFE30 <= o <= 0xFE4F or 0xFF00 <= o <= 0xFF60
+                or 0xFFE0 <= o <= 0xFFE6 or 0x1F300 <= o <= 0x1FAFF or 0x20000 <= o <= 0x3FFFD
+                or 0x2600 <= o <= 0x27BF or 0x2B00 <= o <= 0x2BFF):
+            return 2
+        return 1
+
+    def _truncate_to_width(self, text, max_px):
+        """Truncate text with an ellipsis so it fits the fixed key column.
+
+        Uses display-width columns (emoji/CJK count double) scaled to the UI
+        font size, which is deterministic and immune to broken emoji fallback
+        metrics on systems without a suitable glyph font.
+        """
+        if not text:
+            return text
+        per_col = max(6.0, self.app_font_size * 0.78)
+        max_cols = max(4, int(max_px / per_col))
+        total = sum(self._char_display_width(c) for c in text)
+        if total <= max_cols:
+            return text
+        budget = max_cols - 3
+        result = ""
+        for ch in text:
+            if sum(self._char_display_width(c) for c in result) + self._char_display_width(ch) > budget:
+                break
+            result += ch
+        return result + "..."
+
+    def _build_favourite_rules(self, shortcut, shortcut_type):
+        """Build dim, one-per-line window-context rules shown below the name in Favourites.
+
+        Returns an empty string when the shortcut has no active rules, so the
+        main line stays perfectly uniform across all favourites rows.
+        """
+        lines = []
+
+        # Match the dialog/generation defaults: legacy context/exclude/startup
+        # data treats missing *_enabled flags as True, text/file as False.
+        legacy_default = shortcut_type not in ("text", "file")
+
+        def _add(label, value_key, enabled_key):
+            if shortcut.get(enabled_key, legacy_default) and (shortcut.get(value_key, '') or '').strip():
+                val = shortcut.get(value_key, '').strip()
+                if len(val) > 30:
+                    val = val[:30] + '...'
+                lines.append(f"{label}: {html_escape(val)}")
+
+        if shortcut_type in ("context", "text", "file", "exclude", "startup"):
+            _add("Window", "window_title", "window_title_enabled")
+            _add("Process", "process_name", "process_name_enabled")
+            _add("Class", "window_class", "window_class_enabled")
+
+        if shortcut_type == "exclude":
+            hks = (shortcut.get('excluded_hotkeys', '') or '').strip()
+            if hks:
+                hk_list = [h.strip() for h in hks.splitlines() if h.strip()]
+                shown = ', '.join(hk_list[:4]) + ('...' if len(hk_list) > 4 else '')
+                lines.append(f"Excludes: {html_escape(shown)}")
+        elif shortcut_type == "startup":
+            mode = shortcut.get('context_mode', 'none')
+            if mode in ('active', 'inactive') and lines:
+                lines.insert(0, "✅ Active in" if mode == 'active' else "🚫 Inactive in")
+
+        if not lines:
+            return ''
+
+        rows = ''.join(
+            f'<br><span style="color: #8a97a8; font-size: 0.82em;">&nbsp;&nbsp;&nbsp;&nbsp;▸ {l}</span>'
+            for l in lines
+        )
+        return rows
+
     def generate_shortcut_html(self, shortcut, shortcut_type, index, indented, is_favourite=False):
         enabled = shortcut.get('enabled', True)
         status = "✅" if enabled else "❌"
@@ -3422,10 +3500,21 @@ class AHKShortcutEditor(QMainWindow):
             key_width = 220
         
         if is_favourite:
-            key_width = 220
-            # Truncate overly long key values for favourites to keep alignment clean
-            if len(key) > 22:
-                key = key[:19] + "..."
+            # Uniform favourites rows: plain key for every type (no embedded
+            # window-context decorations), fixed width, pixel-truncated so the
+            # ⌨ icon column stays perfectly aligned across all mixed types.
+            if shortcut_type == "remap":
+                key = f"{shortcut.get('origin_key', '')} ➔ {shortcut.get('destination_key', '')}"
+            elif shortcut_type in ("script", "launcher", "context"):
+                key = shortcut.get('hotkey', '')
+            elif shortcut_type in ("text", "file"):
+                key = shortcut.get('trigger', '')
+            elif shortcut_type == "startup":
+                key = "🚀 Startup"
+            else:  # exclude
+                key = "🚫 Rule"
+            key_width = 170
+            key = self._truncate_to_width(key, key_width - 12)
 
         # Ensure icon column is stable
         icon_width = 60
@@ -3439,6 +3528,9 @@ class AHKShortcutEditor(QMainWindow):
             file_icon = '<span style="color: #00F0FF; font-size: 13px;" title="📄 Auto-loaded from file">📄 </span>'
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
+
+        # Favourites: window-context rules shown as dim sub-lines below the name
+        rules_html = self._build_favourite_rules(shortcut, shortcut_type) if is_favourite else ''
 
         # Calculate background color inline for best QTextBrowser compatibility
         bg_color = "transparent"
@@ -3464,7 +3556,7 @@ class AHKShortcutEditor(QMainWindow):
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="middle" align="center">󰌌</td>
-                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}{rules_html}</td>
                                 </tr>
                             </table>
                         </a>

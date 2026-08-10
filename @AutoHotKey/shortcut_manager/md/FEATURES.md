@@ -168,7 +168,9 @@
 - Shortcuts of any category can be favourited using the "⭐ Favourite" checkbox in the Add/Edit dialog.
 - Favourited items display a ⭐ icon before their name in the editor.
 - A collapsible "⭐ Favourites" category appears at the very top of the editor layout to aggregate and display all bookmarked shortcuts across all sections.
-- Keyboard icons (⌨) and names are vertically aligned cleanly in the Favourites section using a fixed key column width.
+- Keyboard icons (⌨) and names are vertically aligned cleanly in the Favourites section using a fixed key column width and display-width-aware truncation (emoji/CJK count as double-width) so no key ever overflows the column.
+- Favourites rows use a uniform main line — status, plain key (hotkey/trigger/type label), ⌨ icon, then ⭐ name + info — regardless of shortcut type.
+- Window-context rules (window title / process / class / exclude hotkeys / startup context mode) render as dim `▸` sub-lines **below the name**, one rule per line, instead of being crammed into the key cell.
 
 ## Search and Organization
 
