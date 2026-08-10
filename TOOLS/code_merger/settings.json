@@ -114,7 +114,9 @@
         "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\shared-modal.css",
         "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\icons\\.gitignore"
       ],
-      "disabled_files": [],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\tab_saver\\icons\\.gitignore"
+      ],
       "extensions": [
         "",
         ".css",

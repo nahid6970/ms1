@@ -1646,8 +1646,9 @@ def check_git_status(repo, q):
         pass
 
     text = repo["label"]
-    if ahead > 0 or behind > 0:
-        text += f" \u21e1{ahead}\u21e3{behind}"
+    # Note: no ⇡/⇣ arrows on the label — they flashed for 1-2s after pushing
+    # (commit lands before push finishes, so the repo is briefly ahead).
+    # Ahead/behind info is still available in the hover tooltip below.
 
     tip = []
     if branch:
