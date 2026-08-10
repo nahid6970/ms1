@@ -65,13 +65,19 @@ SVGS = {
 }
 
 
-def render_svg_pixmap(svg, color, size):
-    """Render an SVG string to a transparent QPixmap, replacing 'currentColor'."""
+def render_svg_pixmap(svg, color, size, nudge_y=0):
+    """Render an SVG string to a transparent QPixmap, replacing 'currentColor'.
+
+    nudge_y shifts the drawing up by that many pixels (used with a slightly
+    smaller icon so the shift never clips the full-bleed circle).
+    """
     colored_svg = svg.replace('currentColor', color)
     renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
     pix = QPixmap(size, size)
     pix.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pix)
+    if nudge_y:
+        painter.translate(0, -nudge_y)
     renderer.render(painter)
     painter.end()
     return pix
@@ -3406,12 +3412,15 @@ class AHKShortcutEditor(QMainWindow):
         setHtml so they are always present when the document parses.
         """
         doc = self.text_browser.document()
-        for emoji, url in KEY_ICON_SRC.items():
-            size = max(10, int(self.app_font_size * KEY_ICON_SCALE[emoji]))
-            svg = SVGS["ROCKET"] if emoji == '🚀' else SVGS["BAN"]
-            color = CP_CYAN if emoji == '🚀' else CP_RED
-            doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl(url),
-                            render_svg_pixmap(svg, color, size))
+        rocket_size = max(10, int(self.app_font_size * KEY_ICON_SCALE['🚀']))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://rocket"),
+                        render_svg_pixmap(SVGS["ROCKET"], CP_CYAN, rocket_size))
+        # The ban is slightly smaller than the rocket and nudged up 1px so its
+        # full-bleed circle both fits unclipped and centers on 'Rule' (whose
+        # mixed-case letters sit higher than the line-box middle).
+        ban_size = max(10, int(self.app_font_size * KEY_ICON_SCALE['🚫']))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban"),
+                        render_svg_pixmap(SVGS["BAN"], CP_RED, ban_size, nudge_y=1))
         # Small ban icon for the dim rule sub-lines (e.g. '▸ 🚫 Inactive in')
         sm = max(8, int(self.app_font_size * 0.82))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
