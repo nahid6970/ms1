@@ -2011,6 +2011,39 @@ def _show_git_menu(path, lbl=None):
     switch_menu.addSeparator()
     switch_menu.addAction("New Branch...").triggered.connect(lambda: _new_branch(path))
 
+    def _force_checkout(name, track_ref=None):
+        if track_ref:
+            cmd = f"git checkout -f -b '{name}' --track '{track_ref}'"
+        else:
+            cmd = f"git checkout -f '{name}'"
+        if QMessageBox.question(None, "Force Checkout",
+            f"Discard uncommitted edits and switch to '{name}'?\n\n"
+            "Your commits and untracked files are KEPT.\n"
+            "Only unsaved edits to tracked files will be lost.\n\n"
+            "Continue?") == QMessageBox.StandardButton.Yes:
+            open_git_cmd(path, "Git Force Checkout", cmd)
+
+    force_menu = menu.addMenu("Force Checkout (discard edits)")
+    force_menu.setStyleSheet(
+        f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px; }}"
+        f"QMenu::item {{ padding: 4px 18px; }}"
+        f"QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}"
+        f"QMenu::item:disabled {{ color: {CP_DIM}; }}"
+        f"QMenu::separator {{ height: 1px; background: {CP_DIM}; margin: 4px 6px; }}"
+    )
+    local_short = {b.split("/", 1)[1] if "/" in b else b for b in branches}
+    for b in branches:
+        act = force_menu.addAction(("\u2713 " if b == cur_branch else "    ") + b)
+        act.triggered.connect(lambda checked=False, name=b: _force_checkout(name))
+    if remotes:
+        force_menu.addSeparator()
+        for b in remotes:
+            short = b.split("/", 1)[1] if "/" in b else b
+            if short in local_short:
+                continue
+            act = force_menu.addAction(b)
+            act.triggered.connect(lambda checked=False, name=short, full=b: _force_checkout(name, full))
+
     menu.addAction("Commit & Push").triggered.connect(lambda: git_sync(path))
     menu.addAction("Pull (rebase)").triggered.connect(lambda: open_git_cmd(path, "Git Pull", "git pull --rebase --autostash"))
     menu.addAction("Push").triggered.connect(lambda: open_git_cmd(path, "Git Push", "git push"))
