@@ -1676,97 +1676,155 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 
-# ─── Komorebi status ──────────────────────────────────────────────────────────
-_komorebi_queue = Queue()
+# ─── GlazeWM status ───────────────────────────────────────────────────────────
+_glaze_queue = Queue()
 
-def check_komorebi_status(q):
-    """Poll komorebic state, push a compact dict into q. Never raises."""
+def _glaze_poll():
+    """Query glazewm workspaces. Returns list of workspace dicts or []."""
     try:
-        result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
-                                encoding="utf-8", errors="replace",
-                                creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
-        if result.returncode != 0:
-            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
-            return
-        data = json.loads(result.stdout)
-        monitors = data.get("monitors", {}).get("elements", [])
-        if not monitors:
-            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
-            return
-        screen = monitors[0]
-        wss = screen.get("workspaces", {}).get("elements", [])
-        focused = screen.get("workspaces", {}).get("focused", 0)
-        workspaces = []
-        focused_layout = ""
-        apps = []  # every window on EVERY workspace: {hwnd, title, exe, ws_index, ws_name}
-        for i, ws in enumerate(wss):
-            windows = 0
-            for cont in ws.get("containers", {}).get("elements", []):
-                for w in cont.get("windows", {}).get("elements", []):
-                    if isinstance(w, dict):
-                        windows += 1
-                        # apps are collected from ALL workspaces (dots below cap at 3)
-                        apps.append({"hwnd": w.get("hwnd"), "title": w.get("title") or "",
-                                     "exe": w.get("exe") or "", "ws": i,
-                                     "ws_name": ws.get("name") or f"WS{i + 1}"})
-            # Only count tiled windows; floating ones are excluded from the count
-            if i >= 3:
-                continue
-            layout = (ws.get("layout") or {}).get("Default", "BSP")
-            if i == focused:
-                focused_layout = layout
-            workspaces.append({
-                "index": i,
-                "name": ws.get("name") or f"WS{i + 1}",
-                "layout": layout,
-                "windows": windows,
-                "tile": ws.get("tile", True),
-                "monocle": bool(ws.get("monocle_container")),
-                "maximized": bool(ws.get("maximized_window")),
-            })
-        if not focused_layout and 0 <= focused < len(wss):
-            focused_layout = (wss[focused].get("layout") or {}).get("Default", "")
-        q.put({"ok": True, "workspaces": workspaces, "focused": focused,
-               "focused_layout": focused_layout, "apps": apps,
-               "paused": bool(data.get("is_paused", False))})
+        r = subprocess.run(
+            ["glazewm", "query", "workspaces"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
+        )
+        if r.returncode != 0:
+            return []
+        data = json.loads(r.stdout)
+        return data.get("data", {}).get("workspaces", [])
     except Exception as e:
-        logging.error(f"check_komorebi_status error: {e}")
-        q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+        logging.error(f"_glaze_poll error: {e}")
+        return []
 
-_komorebi_fast_until = 0.0  # when > now, the poll loop ticks every 0.3s
+def _glaze_focused_tiling_dir():
+    """Return tiling direction of focused container ('horizontal'/'vertical'/''). """
+    try:
+        r = subprocess.run(
+            ["glazewm", "query", "tiling-direction"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
+        )
+        if r.returncode != 0:
+            return ""
+        data = json.loads(r.stdout)
+        return data.get("data", {}).get("tilingDirection", "")
+    except Exception:
+        return ""
 
-def _kick_komorebi_refresh(seconds=8):
-    """Speed up the poll loop briefly after a user action (focus/change layout)
-    so the status bar reflects the new komorebi state almost instantly."""
-    global _komorebi_fast_until
-    _komorebi_fast_until = time.time() + seconds
-
-def _komorebi_status_loop(q):
+def _glaze_status_loop(q):
+    """Background thread: subscribe to workspace events, push state on change."""
     while True:
-        check_komorebi_status(q)
-        if time.time() < _komorebi_fast_until:
-            time.sleep(0.3)
-        else:
-            # sleep in short chunks so a kick mid-sleep is noticed promptly
-            for _ in range(4):
-                if time.time() >= _komorebi_fast_until:
-                    break
-                time.sleep(0.5)
+        try:
+            proc = subprocess.Popen(
+                ["glazewm", "sub", "--events",
+                 "workspace_activated,workspace_deactivated,workspace_updated,focus_changed,pause_changed"],
+                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            # Push initial state immediately
+            q.put(_glaze_build_state())
+            for raw in proc.stdout:
+                try:
+                    q.put(_glaze_build_state())
+                except Exception as e:
+                    logging.error(f"glaze event parse error: {e}")
+        except Exception as e:
+            logging.error(f"_glaze_status_loop error: {e}")
+            time.sleep(3)
 
-_KOMOREBI_LAYOUTS = ["bsp", "columns", "rows", "vertical-stack", "horizontal-stack",
-                     "ultrawide-vertical-stack", "grid", "right-main-vertical-stack"]
+_GLAZE_DISPLAY_FALLBACK = {"1": "I", "2": "II", "3": "III"}
+_glaze_display_cache = {"mtime": 0.0, "map": {}}
 
-def _komorebi_layout_short(name):
-    """Map komorebi layout name (e.g. 'VerticalStack') to a compact label."""
-    if not name:
-        return "—"
-    m = {
-        "BSP": "BSP", "Columns": "COL", "Rows": "ROW",
-        "VerticalStack": "VSTK", "HorizontalStack": "HSTK",
-        "UltrawideVerticalStack": "ULTW", "Grid": "GRID",
-        "RightMainVerticalStack": "RMAIN",
-    }
-    return m.get(name, name[:4].upper())
+def _glaze_workspace_display_names():
+    """Read name -> display_name from ~/.glzr/glazewm/config.yaml (best effort,
+    cached on file mtime).
+
+    GlazeWM's `query workspaces` only returns ACTIVE workspaces, so for the
+    always-visible minimum dots we need the display names of the first three
+    (I/II/III) straight from the config. Falls back to a hardcoded map.
+    """
+    global _glaze_display_cache
+    try:
+        cfg = os.path.expanduser("~/.glzr/glazewm/config.yaml")
+        mt = os.path.getmtime(cfg)
+        if mt == _glaze_display_cache["mtime"]:
+            return _glaze_display_cache["map"]
+        with open(cfg, encoding="utf-8") as f:
+            txt = f.read()
+        m = re.search(r"^workspaces:\s*\n(.*?)(?=^\w)", txt, re.M | re.S)
+        mapping = {}
+        if m:
+            cur = None
+            for line in m.group(1).splitlines():
+                nm = re.match(r"\s*-\s*name:\s*['\"]?([^'\"]+)", line)
+                if nm:
+                    cur = nm.group(1).strip()
+                    continue
+                dm = re.match(r"\s*display_name:\s*['\"]?([^'\"]+)", line)
+                if dm and cur:
+                    mapping[cur] = dm.group(1).strip()
+        _glaze_display_cache = {"mtime": mt, "map": mapping}
+        return mapping
+    except Exception:
+        return {}
+
+
+def _glaze_build_state():
+    """Build the state dict pushed into the queue."""
+    workspaces = _glaze_poll()
+    if not workspaces:
+        return {"ok": False, "workspaces": [], "focused_name": "", "tiling_dir": "", "paused": False}
+    focused_name = ""
+    ws_list = []
+    for ws in workspaces:
+        name        = ws.get("name") or ws.get("id", "?")
+        display     = ws.get("displayName") or name
+        is_focused  = ws.get("hasFocus", False)
+        is_shown    = ws.get("isDisplayed", False)
+        win_count   = len([c for c in ws.get("children", []) if c.get("type") == "window"])
+        if is_focused:
+            focused_name = name
+        ws_list.append({
+            "name":       name,
+            "display":    display,
+            "focused":    is_focused,
+            "displayed":  is_shown,
+            "windows":    win_count,
+        })
+
+    # Always show at least 3 dots (I/II/III) even when only 1-2 workspaces are
+    # active yet — pad missing ones as empty entries.
+    if len(ws_list) < 3:
+        displays = _glaze_workspace_display_names()
+        active_names = {w["name"] for w in ws_list}
+        for n in ("1", "2", "3"):
+            if n in active_names:
+                continue
+            ws_list.append({
+                "name":       n,
+                "display":    displays.get(n, _GLAZE_DISPLAY_FALLBACK.get(n, n)),
+                "focused":    False,
+                "displayed":  False,
+                "windows":    0,
+            })
+    # Keep dots in numeric order so I/II/III always appear left-to-right
+    def _ws_key(w):
+        try:
+            return (0, int(w["name"]))
+        except (ValueError, TypeError):
+            return (1, w["name"])
+    ws_list.sort(key=_ws_key)
+    try:
+        paused_r = subprocess.run(
+            ["glazewm", "query", "paused"],
+            capture_output=True, text=True, encoding="utf-8",
+            creationflags=subprocess.CREATE_NO_WINDOW, timeout=2
+        )
+        paused = json.loads(paused_r.stdout).get("data", {}).get("isPaused", False) if paused_r.returncode == 0 else False
+    except Exception:
+        paused = False
+    tiling_dir = _glaze_focused_tiling_dir()
+    return {"ok": True, "workspaces": ws_list, "focused_name": focused_name,
+            "tiling_dir": tiling_dir, "paused": paused}
 
 
 def delete_git_lock_files(path):
@@ -1886,195 +1944,191 @@ class GitIconLabel(IconLabel):
             logging.error(f"GitIconLabel indicator error: {e}")
 
 
-try:
-    import pyvda as _pyvda
-    _HAS_PYVDA = True
-except Exception:
-    _HAS_PYVDA = False
+class GlazeWmWidget(QWidget):
+    """Workspace dots + tiling-direction label for GlazeWM.
 
-
-def _vd_poll():
-    """Return (desktops, current_index) using Windows Virtual Desktop API.
-    desktops is a list of pyvda.VirtualDesktop objects.
-    Returns ([], -1) if pyvda is unavailable or call fails."""
-    if not _HAS_PYVDA:
-        return [], -1
-    try:
-        desktops = _pyvda.get_virtual_desktops()
-        current = _pyvda.VirtualDesktop.current()
-        cur_idx = next((i for i, d in enumerate(desktops) if d.id == current.id), 0)
-        return desktops, cur_idx
-    except Exception as e:
-        logging.error(f"_vd_poll error: {e}")
-        return [], -1
-
-
-class VirtualDesktopWidget(QWidget):
-    """Clickable dots — one per Windows Virtual Desktop.
-
-    Left-click a dot  -> switch to that desktop.
-    Right-click       -> menu: New desktop, Rename, Remove.
-    Hover             -> tooltip showing desktop name & index.
-    Updates every 600 ms via an internal QTimer (no background thread needed
-    because pyvda calls are fast COM calls on the GUI thread).
+    • One dot per workspace (dynamic, matches actual glazewm state).
+    • Active workspace = bright green dot, has windows but inactive = dim green,
+      empty = dark. Displayed (visible on monitor) but not focused = cyan.
+    • Tiling direction label next to the dots (H / V).
+    • Left-click dot   → focus that workspace.
+    • Right-click      → menu: toggle tiling direction, toggle pause,
+                         reload config, set-floating / set-tiling for focused.
+    • Hover            → tooltip with workspace name, window count, state.
+    • Paused indicator on the direction label.
+    • Image icon (🖥 + number) shown like the screenshot — workspace name
+      rendered as a number badge on the monitor icon using a QLabel.
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._desktops = []   # list of pyvda.VirtualDesktop
-        self._cur_idx  = -1
-        self._buttons  = []   # QPushButton dots, rebuilt when count changes
-        self._tip_text = ""
+        self._state     = {}
+        self._buttons   = []   # (QPushButton dot, ws_name)
+        self._tip_text  = ""
+        self._dir_lbl   = None
 
         lay = QHBoxLayout(self)
         lay.setContentsMargins(10, 0, 4, 0)
         lay.setSpacing(3)
         self._lay = lay
 
+        # Tiling direction label
+        self._dir_lbl = QLabel("—")
+        self._dir_lbl.setStyleSheet(
+            "color: #8f9bae; background: transparent; "
+            "font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 2px;"
+        )
+        self._dir_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        _install_tip_filter(self._dir_lbl)
+        lay.addWidget(self._dir_lbl)
+
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_menu)
         _install_tip_filter(self)
 
-        self._timer = QTimer(self)
-        self._timer.timeout.connect(self.refresh)
-        self._timer.start(600)
-        self.refresh()
-
-    # ── helpers ───────────────────────────────────────────────────────────────
+    # ── style ─────────────────────────────────────────────────────────────────
     @staticmethod
     def _dot_css(color):
         return (f"QPushButton {{ background: {color}; border: 1px solid #555555; "
                 f"border-radius: 5px; padding: 0px; }}"
-                f"QPushButton:hover {{ border: 1px solid #aaaaaa; }}")
+                f"QPushButton:hover {{ border: 1px solid #cccccc; }}")
 
-    def _rebuild_buttons(self, count):
-        """Recreate dot buttons when the desktop count changes."""
-        for b in self._buttons:
-            self._lay.removeWidget(b)
-            b.deleteLater()
-        self._buttons.clear()
-        for i in range(count):
-            b = QPushButton()
-            b.setFixedSize(11, 11)
-            b.setCursor(Qt.CursorShape.PointingHandCursor)
-            b.setStyleSheet(self._dot_css("#333333"))
-            b.clicked.connect(partial(self._switch_to, i))
-            _install_tip_filter(b)
-            self._lay.addWidget(b)
-            self._buttons.append(b)
-
-    # ── public ────────────────────────────────────────────────────────────────
-    MIN_DESKTOPS = 3
-
-    def refresh(self):
-        """Poll Windows VD state and update dots. Safe to call any time."""
-        if not _HAS_PYVDA:
-            self._tip_text = '<span style="color:#666666;">pyvda not available</span>'
+    # ── update from queue ─────────────────────────────────────────────────────
+    def apply_state(self, item):
+        if not item.get("ok"):
+            for b, _ in self._buttons:
+                b.setStyleSheet(self._dot_css("#222222"))
+            self._dir_lbl.setText("—")
+            tip = '<span style="color:#666666;">glazewm not running</span>'
+            self._tip_text = tip
+            self._dir_lbl._tip_text = tip
             return
+
+        workspaces   = item.get("workspaces", [])
+        focused_name = item.get("focused_name", "")
+        tiling_dir   = item.get("tiling_dir", "")
+        paused       = item.get("paused", False)
+
+        # Rebuild dot buttons if workspace count changed
+        if len(self._buttons) != len(workspaces):
+            for b, _ in self._buttons:
+                self._lay.removeWidget(b)
+                b.deleteLater()
+            self._buttons.clear()
+            # Insert dots BEFORE the direction label
+            dir_idx = self._lay.indexOf(self._dir_lbl)
+            for i, ws in enumerate(workspaces):
+                b = QPushButton()
+                b.setFixedSize(11, 11)
+                b.setCursor(Qt.CursorShape.PointingHandCursor)
+                b.setStyleSheet(self._dot_css("#333333"))
+                name = ws["name"]
+                b.clicked.connect(partial(self._focus_ws, name))
+                _install_tip_filter(b)
+                self._lay.insertWidget(dir_idx + i, b)
+                self._buttons.append((b, name))
+
+        # Color dots and build tooltip
+        tip_lines = []
+        for (b, _), ws in zip(self._buttons, workspaces):
+            name    = ws["name"]
+            display = ws["display"] or name
+            active  = ws["focused"]
+            shown   = ws["displayed"]
+            wins    = ws["windows"]
+
+            if active:
+                color = "#00ff21"
+            elif shown:
+                color = "#00F0FF"
+            elif wins > 0:
+                color = "#1d6b2f"
+            else:
+                color = "#333333"
+
+            b.setStyleSheet(self._dot_css(color))
+            # Update the button's name binding in case workspaces were reordered
+            b.clicked.disconnect()
+            b.clicked.connect(partial(self._focus_ws, name))
+
+            state_str = "ACTIVE" if active else ("shown" if shown else ("idle" if wins > 0 else "empty"))
+            tip_line = (
+                f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(display)}</span> '
+                f'<span style="color:#8f9bae;">({wins} win) {state_str}</span>'
+            )
+            b._tip_text = tip_line
+            tip_lines.append(tip_line)
+
+        if paused:
+            tip_lines.insert(0, '<span style="color:#FFD740;">⏸ glazewm paused</span>')
+
+        self._tip_text = "<br/>".join(tip_lines)
+        self._dir_lbl._tip_text = self._tip_text
+
+        # Direction label
+        if paused:
+            self._dir_lbl.setText("⏸")
+        elif tiling_dir == "horizontal":
+            self._dir_lbl.setText("H")
+        elif tiling_dir == "vertical":
+            self._dir_lbl.setText("V")
+        else:
+            self._dir_lbl.setText("—")
+
+    # ── actions ───────────────────────────────────────────────────────────────
+    def _focus_ws(self, name):
         try:
-            desktops, cur_idx = _vd_poll()
-
-            # Ensure minimum desktop count exists
-            while len(desktops) < self.MIN_DESKTOPS:
-                _pyvda.VirtualDesktop.create()
-                desktops, cur_idx = _vd_poll()
-
-            if not desktops:
-                self._tip_text = '<span style="color:#666666;">no virtual desktops</span>'
-                return
-
-            self._desktops = desktops
-            self._cur_idx  = cur_idx
-
-            # Rebuild buttons only if count changed
-            if len(self._buttons) != len(desktops):
-                self._rebuild_buttons(len(desktops))
-
-            tip_lines = []
-            for i, (b, d) in enumerate(zip(self._buttons, desktops)):
-                active = (i == cur_idx)
-                name = d.name or f"Desktop {i + 1}"
-                color = "#00ff21" if active else "#1d6b2f"
-                b.setStyleSheet(self._dot_css(color))
-                b._tip_text = (
-                    f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(name)}</span>'
-                    f'<span style="color:#8f9bae;"> ({i + 1}/{len(desktops)})'
-                    f'{" · ACTIVE" if active else ""}</span>'
-                )
-                state = "ACTIVE" if active else "idle"
-                tip_lines.append(
-                    f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(name)}</span> '
-                    f'<span style="color:#8f9bae;">({i + 1}) {state}</span>'
-                )
-            self._tip_text = "<br/>".join(tip_lines)
+            subprocess.Popen(
+                ["glazewm", "command", "focus", "--workspace", name],
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
         except Exception as e:
-            logging.error(f"VirtualDesktopWidget.refresh error: {e}")
+            logging.error(f"GlazeWmWidget focus error: {e}")
 
-    # ── slots ─────────────────────────────────────────────────────────────────
-    def _switch_to(self, idx):
+    def _glaze_cmd(self, *args):
         try:
-            if 0 <= idx < len(self._desktops):
-                self._desktops[idx].go()
-                # Refresh quickly after switching so the dot updates immediately
-                QTimer.singleShot(150, self.refresh)
-                QTimer.singleShot(400, self.refresh)
+            subprocess.Popen(
+                ["glazewm", "command"] + list(args),
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
         except Exception as e:
-            logging.error(f"VirtualDesktopWidget switch error: {e}")
+            logging.error(f"GlazeWmWidget cmd error: {e}")
 
     def _show_menu(self, pos):
         menu = QMenu(self)
         menu.setStyleSheet(DIALOG_QSS)
 
-        # Switch submenu
-        for i, d in enumerate(self._desktops):
-            name = d.name or f"Desktop {i + 1}"
-            active = (i == self._cur_idx)
-            act = menu.addAction(("✓ " if active else "    ") + name)
-            act.triggered.connect(partial(self._switch_to, i))
-
+        workspaces = self._state.get("workspaces", []) if self._state else []
+        # Workspace switcher
+        for ws in workspaces:
+            name   = ws["name"]
+            active = ws["focused"]
+            act    = menu.addAction(("✓ " if active else "    ") + (ws["display"] or name))
+            act.triggered.connect(partial(self._focus_ws, name))
         menu.addSeparator()
 
-        act_new = menu.addAction("＋ New Desktop")
-        act_new.triggered.connect(self._new_desktop)
+        # Tiling direction
+        act_h = menu.addAction("Tiling → Horizontal")
+        act_h.triggered.connect(lambda: self._glaze_cmd("set-tiling-direction", "horizontal"))
+        act_v = menu.addAction("Tiling → Vertical")
+        act_v.triggered.connect(lambda: self._glaze_cmd("set-tiling-direction", "vertical"))
+        act_tog = menu.addAction("Toggle Tiling Direction")
+        act_tog.triggered.connect(lambda: self._glaze_cmd("toggle-tiling-direction"))
+        menu.addSeparator()
 
-        if self._desktops:
-            act_ren = menu.addAction("✎ Rename Current")
-            act_ren.triggered.connect(self._rename_current)
+        # Window state
+        menu.addAction("Set Floating").triggered.connect(lambda: self._glaze_cmd("set-floating"))
+        menu.addAction("Set Tiling").triggered.connect(lambda: self._glaze_cmd("set-tiling"))
+        menu.addAction("Toggle Floating").triggered.connect(lambda: self._glaze_cmd("toggle-floating"))
+        menu.addAction("Toggle Fullscreen").triggered.connect(lambda: self._glaze_cmd("toggle-fullscreen"))
+        menu.addSeparator()
 
-        if len(self._desktops) > 1:
-            act_del = menu.addAction("✕ Remove Current")
-            act_del.triggered.connect(self._remove_current)
+        # WM controls
+        menu.addAction("Toggle Pause").triggered.connect(lambda: self._glaze_cmd("wm-toggle-pause"))
+        menu.addAction("Reload Config").triggered.connect(lambda: self._glaze_cmd("wm-reload-config"))
+        menu.addAction("Redraw").triggered.connect(lambda: self._glaze_cmd("wm-redraw"))
 
         menu.exec(self.mapToGlobal(pos))
-
-    def _new_desktop(self):
-        try:
-            _pyvda.VirtualDesktop.create()
-            QTimer.singleShot(200, self.refresh)
-        except Exception as e:
-            logging.error(f"VD new desktop error: {e}")
-
-    def _rename_current(self):
-        try:
-            if 0 <= self._cur_idx < len(self._desktops):
-                d = self._desktops[self._cur_idx]
-                current_name = d.name or f"Desktop {self._cur_idx + 1}"
-                new_name, ok = QInputDialog.getText(
-                    self, "Rename Desktop", "New name:", text=current_name
-                )
-                if ok and new_name.strip():
-                    d.rename(new_name.strip())
-                    QTimer.singleShot(200, self.refresh)
-        except Exception as e:
-            logging.error(f"VD rename error: {e}")
-
-    def _remove_current(self):
-        try:
-            if 0 <= self._cur_idx < len(self._desktops) and len(self._desktops) > 1:
-                self._desktops[self._cur_idx].remove()
-                QTimer.singleShot(200, self.refresh)
-        except Exception as e:
-            logging.error(f"VD remove error: {e}")
 
 
 _tip_label = None
@@ -3099,7 +3153,7 @@ class StatusBar(QMainWindow):
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
         
-        self.komorebi_widget = VirtualDesktopWidget()
+        self.komorebi_widget = GlazeWmWidget()
         ll.addWidget(self.komorebi_widget)
         
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
@@ -3724,6 +3778,8 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
+        self._glaze_timer = QTimer(self); self._glaze_timer.timeout.connect(self._drain_glaze_queue); self._glaze_timer.start(100)
+        threading.Thread(target=_glaze_status_loop, args=(_glaze_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
@@ -3760,6 +3816,16 @@ class StatusBar(QMainWindow):
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
+    def _drain_glaze_queue(self):
+        try:
+            while True:
+                item = _glaze_queue.get_nowait()
+                if hasattr(self, "komorebi_widget"):
+                    self.komorebi_widget.apply_state(item)
+                    self.komorebi_widget._state = item
+        except Empty:
+            pass
+
     def _drain_git_queue(self):
         try:
             while True:
