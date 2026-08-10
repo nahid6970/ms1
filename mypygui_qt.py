@@ -1266,7 +1266,7 @@ def open_edit_gui(item_cfg, category, index=None):
         dlg.accept()
         if r == QMessageBox.StandardButton.Yes: _app_restart()
 
-    btn_save.clicked.connect(save); btn_delete.clicked.connect(delete); dlg.show()
+    btn_save.clicked.connect(save); btn_delete.clicked.connect(delete); dlg.exec()
 
 
 # ─── Rclone settings dialog ───────────────────────────────────────────────────
@@ -1793,28 +1793,28 @@ _KOMOREBI_MENU_QSS = (
 )
 
 
-def _komorebi_menu_gpos(anchor_widget, cursor_pos=None):
-    """Position a komorebi menu below the statusbar when it is docked (like the
-    hover tooltip), instead of popping up over the bar. Falls back to the
-    cursor position when not docked."""
+def _menu_gpos(anchor_widget, menu, cursor_pos=None):
+    """Return a global QPoint for menu.exec() so the menu pops BELOW the
+    statusbar when it is docked (bar pinned top) and ABOVE it when not docked
+    (like the popup windows). x follows the cursor (clamped to screen),
+    anchor_widget can be None (falls back to the main window)."""
+    if anchor_widget is None:
+        anchor_widget = _main_window
     try:
         docked = load_config().get("statusbar", {}).get("docked", False)
     except Exception:
         docked = False
-    if not docked:
-        if cursor_pos is not None:
-            return cursor_pos
-        # no cursor -> open below the anchor widget (like a button dropdown)
-        topl = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
-        return QPoint(topl.x(), topl.y() + anchor_widget.height() + 2)
-    # Docked statusbar is pinned to the top of the screen
     win = anchor_widget.window()
     gw = win.geometry()
-    y = gw.y() + gw.height() + 2
+    mh = menu.sizeHint().height()
     if cursor_pos is not None:
         x = cursor_pos.x()
     else:
         x = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft()).x()
+    if docked:
+        y = gw.y() + gw.height() + 2       # below the top-docked bar
+    else:
+        y = gw.y() - mh - 2                # above the (bottom) bar
     try:
         scr = QApplication.screenAt(gw.center()) or QApplication.primaryScreen()
         avail = scr.availableGeometry()
@@ -1999,8 +1999,7 @@ class KomorebiWidget(QWidget):
         lay.addWidget(self._layout_lbl)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(
-            lambda pos: self._show_layout_menu(
-                _komorebi_menu_gpos(self, self.mapToGlobal(pos))))
+            lambda pos: self._show_layout_menu(self.mapToGlobal(pos)))
         self._install_self_tip()
 
     def _install_self_tip(self):
@@ -2031,10 +2030,9 @@ class KomorebiWidget(QWidget):
 
     def _layout_lbl_left_click(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self._show_layout_menu(
-                _komorebi_menu_gpos(self._layout_lbl, event.globalPosition().toPoint()))
+            self._show_layout_menu(event.globalPosition().toPoint())
 
-    def _show_layout_menu(self, gpos):
+    def _show_layout_menu(self, cursor_pos=None):
         menu = QMenu(self)
         menu.setStyleSheet(_KOMOREBI_MENU_QSS)
         current = (self._focused_layout or "").lower()
@@ -2056,7 +2054,7 @@ class KomorebiWidget(QWidget):
                           lambda: self._toggle("monocle"))
         _menu_rich_action(menu, '<span style="color:#8f9bae;">⏸ Toggle Pause</span>',
                           lambda: self._toggle("pause"))
-        menu.exec(gpos)
+        menu.exec(_menu_gpos(self, menu, cursor_pos))
 
     def apply_state(self, item):
         """Called on the GUI thread from _drain_komorebi_queue."""
@@ -2191,7 +2189,7 @@ class KomorebiAppsWidget(QWidget):
                         f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>',
                         partial(self._jump_to_app, ap["hwnd"], ws_idx))
                 menu.addSeparator()
-        menu.exec(_komorebi_menu_gpos(self))
+        menu.exec(_menu_gpos(self, menu))
 
     def _jump_to_app(self, hwnd, ws_idx):
         # 1) switch komorebi to that workspace (async), 2) after komorebi has
@@ -2299,6 +2297,14 @@ class _TipFilter(QObject):
             lbl.setText(text)
             lbl.adjustSize()
             pos = QCursor.pos() + QPoint(16, 20)
+            # Position tooltip relative to the statusbar: below when docked
+            # (bar at top), above when undocked (bar near screen bottom).
+            try:
+                is_docked = load_config().get("statusbar", {}).get("docked", False)
+            except Exception:
+                is_docked = False
+            if not is_docked:
+                pos.setY(QCursor.pos().y() - lbl.height() - 8)
             scr = QApplication.screenAt(QCursor.pos()) or QApplication.primaryScreen()
             avail = scr.availableGeometry()
             pos.setX(max(avail.left() + 4, min(pos.x(), avail.right() - lbl.width() - 4)))
@@ -2580,7 +2586,7 @@ def _show_git_menu(path, lbl=None):
 
     menu.addAction("Set Branch Dot Color...").triggered.connect(_set_dot_color)
     menu.addAction("Reset Branch Dot Color").triggered.connect(_reset_dot_color)
-    menu.exec(QCursor.pos())
+    menu.exec(_menu_gpos(lbl, menu, QCursor.pos()) if lbl else QCursor.pos())
 
 
 # ─── Rclone ───────────────────────────────────────────────────────────────────
