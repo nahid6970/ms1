@@ -2014,6 +2014,39 @@ def _show_git_menu(path, lbl=None):
     menu.addAction("Commit & Push").triggered.connect(lambda: git_sync(path))
     menu.addAction("Pull (rebase)").triggered.connect(lambda: open_git_cmd(path, "Git Pull", "git pull --rebase --autostash"))
     menu.addAction("Push").triggered.connect(lambda: open_git_cmd(path, "Git Push", "git push"))
+
+    def _force_push():
+        if QMessageBox.question(None, "Force Push",
+            "Overwrite the REMOTE branch with your local state?\n\n"
+            "All local changes (committed or not) will be committed and pushed, "
+            "replacing the remote. Remote-only commits from other machines will be lost.\n\n"
+            "Continue?") == QMessageBox.StandardButton.Yes:
+            open_git_cmd(path, "Git Force Push",
+                "git add -A; if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git add.' -ForegroundColor Red; return }; "
+                "git commit -m 'Force push - Auto-commit' 2>$null; "
+                "if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 1) { Write-Host 'Commit failed - aborting force push.' -ForegroundColor Red; return }; "
+                "git fetch origin; "
+                "git push --force-with-lease origin HEAD; "
+                "if ($LASTEXITCODE -ne 0) { Write-Host 'Force push failed (remote may have moved again - run it again). Window will remain open.' -ForegroundColor Red; return }; "
+                "Write-Host 'FORCE PUSH COMPLETE - remote replaced with local' -ForegroundColor Green")
+
+    def _force_pull():
+        if QMessageBox.question(None, "Force Pull",
+            "Replace ALL local files with the remote version?\n\n"
+            "Local commits, uncommitted changes AND untracked files will be "
+            "permanently discarded. This cannot be undone.\n\n"
+            "Continue?") == QMessageBox.StandardButton.Yes:
+            open_git_cmd(path, "Git Force Pull",
+                "git fetch origin --prune; "
+                "if ($LASTEXITCODE -ne 0) { Write-Host 'Fetch failed.' -ForegroundColor Red; return }; "
+                "git reset --hard '@{u}'; "
+                "if ($LASTEXITCODE -ne 0) { Write-Host 'Reset failed (no upstream?).' -ForegroundColor Red; return }; "
+                "git clean -fd; "
+                "if ($LASTEXITCODE -ne 0) { Write-Host 'Warning: some untracked files could not be removed.' -ForegroundColor Yellow }; "
+                "Write-Host 'FORCE PULL COMPLETE - local replaced with remote' -ForegroundColor Green")
+
+    menu.addAction("Force Push (overwrite remote)").triggered.connect(lambda: _force_push())
+    menu.addAction("Force Pull (overwrite local)").triggered.connect(lambda: _force_pull())
     menu.addSeparator()
     menu.addAction("Stash (incl. untracked)").triggered.connect(lambda: open_git_cmd(path, "Git Stash", "git stash push -u"))
     menu.addAction("Pop Stash").triggered.connect(lambda: open_git_cmd(path, "Git Pop Stash", "git stash pop"))
