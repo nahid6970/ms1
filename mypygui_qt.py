@@ -1698,11 +1698,20 @@ def check_komorebi_status(q):
         focused = screen.get("workspaces", {}).get("focused", 0)
         workspaces = []
         focused_layout = ""
-        for i, ws in enumerate(wss[:3]):
+        apps = []  # every window on EVERY workspace: {hwnd, title, exe, ws_index, ws_name}
+        for i, ws in enumerate(wss):
             windows = 0
             for cont in ws.get("containers", {}).get("elements", []):
-                windows += len(cont.get("windows", {}).get("elements", []))
+                for w in cont.get("windows", {}).get("elements", []):
+                    if isinstance(w, dict):
+                        windows += 1
+                        # apps are collected from ALL workspaces (dots below cap at 3)
+                        apps.append({"hwnd": w.get("hwnd"), "title": w.get("title") or "",
+                                     "exe": w.get("exe") or "", "ws": i,
+                                     "ws_name": ws.get("name") or f"WS{i + 1}"})
             # Only count tiled windows; floating ones are excluded from the count
+            if i >= 3:
+                continue
             layout = (ws.get("layout") or {}).get("Default", "BSP")
             if i == focused:
                 focused_layout = layout
@@ -1718,7 +1727,7 @@ def check_komorebi_status(q):
         if not focused_layout and 0 <= focused < len(wss):
             focused_layout = (wss[focused].get("layout") or {}).get("Default", "")
         q.put({"ok": True, "workspaces": workspaces, "focused": focused,
-               "focused_layout": focused_layout,
+               "focused_layout": focused_layout, "apps": apps,
                "paused": bool(data.get("is_paused", False))})
     except Exception as e:
         logging.error(f"check_komorebi_status error: {e}")
@@ -2001,6 +2010,134 @@ class KomorebiWidget(QWidget):
             self._layout_lbl.setText("⏸")
         else:
             self._layout_lbl.setText(_komorebi_layout_short(item.get("focused_layout", "")))
+
+
+class KomorebiAppsWidget(QWidget):
+    """Shows the total number of open windows across ALL komorebi workspaces.
+
+    Left-click opens a menu listing every window grouped by workspace (with the
+    workspace's dot color); clicking an entry jumps to that workspace and
+    focuses the window. Hover shows the same list read-only. This solves the
+    'I can't tell Chrome is already open on another workspace' duplicate-launch
+    problem — every instance is visible here even though the taskbar only shows
+    the active workspace.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._apps = []          # [{hwnd, title, exe, ws, ws_name}]
+        self._focused = -1
+        self._tip_text = ""
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(1, 0, 1, 0)
+        lay.setSpacing(3)
+        self._icon_lbl = QLabel("🖥")  # 🖥
+        self._icon_lbl.setStyleSheet("color: #00F0FF; background: transparent; font-size: 9pt;")
+        self._count_lbl = QLabel("0")
+        self._count_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold;")
+        lay.addWidget(self._icon_lbl)
+        lay.addWidget(self._count_lbl)
+        # clicks anywhere on the widget (including over the labels) must reach
+        # this widget's mousePressEvent handler
+        self._icon_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._count_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._install_self_tip()
+
+    def _install_self_tip(self):
+        _install_tip_filter(self)
+        _install_tip_filter(self._icon_lbl)
+        _install_tip_filter(self._count_lbl)
+
+    def mousePressEvent(self, event):
+        event.accept()
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._show_apps_menu()
+        elif event.button() == Qt.MouseButton.RightButton:
+            self._show_apps_menu()
+
+    def _show_apps_menu(self):
+        menu = QMenu(self)
+        menu.setStyleSheet(DIALOG_QSS)
+        if not self._apps:
+            act = menu.addAction("No apps running")
+            act.setEnabled(False)
+        else:
+            # group by workspace, preserving order (plain text — QMenu actions
+            # do not render HTML)
+            by_ws = {}
+            for ap in self._apps:
+                by_ws.setdefault(ap["ws"], []).append(ap)
+            for ws_idx in sorted(by_ws):
+                group = by_ws[ws_idx]
+                ws_name = group[0]["ws_name"]
+                active = (ws_idx == self._focused)
+                marker = "●" if active else "○"
+                header = menu.addAction(f"{marker} {ws_name}  ({len(group)})")
+                header.setEnabled(False)
+                for ap in group:
+                    title = ap["title"] or ap["exe"]
+                    if len(title) > 60:
+                        title = title[:57] + "..."
+                    act = menu.addAction(f"{ap['exe']} — {title}")
+                    act.triggered.connect(partial(self._jump_to_app, ap["hwnd"], ws_idx))
+                menu.addSeparator()
+        gpos = self.mapToGlobal(QPoint(0, self.height()))
+        menu.exec(QPoint(gpos.x(), gpos.y() + 2))
+
+    def _jump_to_app(self, hwnd, ws_idx):
+        # 1) switch komorebi to that workspace (async), 2) after komorebi has
+        # uncloaked the window, restore + focus it so SetForegroundWindow works
+        subprocess.Popen(["komorebic", "focus-workspace", str(ws_idx)],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
+        if hwnd:
+            def _focus_later():
+                try:
+                    h = int(hwnd)
+                    user32 = ctypes.windll.user32
+                    user32.ShowWindow(h, 9)  # SW_RESTORE (de-minimize)
+                    user32.SetForegroundWindow(h)
+                except Exception as e:
+                    logging.error(f"komorebi apps focus error: {e}")
+            QTimer.singleShot(250, _focus_later)
+
+    def apply_state(self, item):
+        self._focused = item.get("focused", -1)
+        self._apps = item.get("apps", []) or []
+        if not item.get("ok"):
+            self._count_lbl.setText("—")
+            tip = '<span style="color:#666666;">komorebi not running</span>'
+            self._tip_text = tip
+            self._count_lbl._tip_text = tip
+            self._icon_lbl._tip_text = tip
+            return
+        self._count_lbl.setText(str(len(self._apps)))
+        tip = []
+        if not self._apps:
+            tip.append('<span style="color:#666666;">no windows open</span>')
+        else:
+            by_ws = {}
+            for ap in self._apps:
+                by_ws.setdefault(ap["ws"], []).append(ap)
+            for ws_idx in sorted(by_ws):
+                group = by_ws[ws_idx]
+                ws_name = group[0]["ws_name"]
+                active = (ws_idx == self._focused)
+                color = "#00ff21" if active else "#8f9bae"
+                tag = "ACTIVE" if active else "idle"
+                tip.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
+                           f'<span style="color:#8f9bae;">({len(group)}) {tag}</span>')
+                for ap in group:
+                    title = ap["title"] or ap["exe"]
+                    if len(title) > 60:
+                        title = title[:57] + "..."
+                    tip.append(f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(title)}</span>')
+            tip.append('<span style="color:#555555;">click to jump to an app</span>')
+        tip_html = "<br/>".join(tip)
+        self._tip_text = tip_html
+        self._count_lbl._tip_text = tip_html
+        self._icon_lbl._tip_text = tip_html
 
 
 _tip_label = None
@@ -3027,6 +3164,8 @@ class StatusBar(QMainWindow):
         
         self.komorebi_widget = KomorebiWidget()
         ll.addWidget(self.komorebi_widget)
+        self.komorebi_apps = KomorebiAppsWidget()
+        ll.addWidget(self.komorebi_apps)
         
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
@@ -3694,6 +3833,8 @@ class StatusBar(QMainWindow):
                 item = _komorebi_queue.get_nowait()
                 if hasattr(self, "komorebi_widget"):
                     self.komorebi_widget.apply_state(item)
+                if hasattr(self, "komorebi_apps"):
+                    self.komorebi_apps.apply_state(item)
         except Empty:
             pass
 
