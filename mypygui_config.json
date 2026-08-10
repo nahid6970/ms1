@@ -2891,6 +2891,7 @@
     "script_monitor_color1": "#FF5500",
     "script_monitor_color2": "#0000FF",
     "branch_colors": {
-        "vlr-cloudflare+convex": "#FF55FF"
+        "vlr-cloudflare+convex": "#FF5500",
+        "main": "#00FF00"
     }
 }
