@@ -15,7 +15,8 @@ import webbrowser
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
-                            QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy, QScrollArea)
+                            QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy, QScrollArea,
+                            QFileDialog)
 from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray
 from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor, QIcon, QPixmap, QPainter
 from PyQt6.QtSvg import QSvgRenderer
@@ -25,6 +26,20 @@ AHK_SCRIPT_PATH = os.path.join(SCRIPT_DIR, "ahk_v2.ahk")
 SHORTCUTS_JSON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ahk_shortcuts.json")
 # Ensure directory exists
 os.makedirs(os.path.dirname(SHORTCUTS_JSON_PATH), exist_ok=True)
+
+
+def read_text_file_content(path):
+    """Read a UTF-8 text file and return its content, or None on failure.
+
+    Uses utf-8-sig so a UTF-8 BOM (common from Notepad++/Windows editors) is
+    stripped instead of leaking into the replacement text or breaking the
+    first line of a selection-menu definition.
+    """
+    try:
+        with open(path, 'r', encoding='utf-8-sig') as f:
+            return f.read()
+    except Exception:
+        return None
 
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"           # Main Window Background
@@ -1152,7 +1167,31 @@ SendText("Hello World")"""
             self.replacement_edit.setMinimumHeight(300)
             self.replacement_edit.setMinimumWidth(400)
             replacement_layout.addWidget(self.replacement_edit)
-            
+
+            # Source File (optional): auto-load replacement from an external txt/md file
+            source_row = QHBoxLayout()
+            self.source_file_edit = QLineEdit()
+            self.source_file_edit.setPlaceholderText("Optional: C:\\path\\to\\file.txt or .md — content auto-loads from here")
+            self.source_file_browse_btn = QPushButton("Browse…")
+            self.source_file_browse_btn.setFixedWidth(90)
+            self.source_file_browse_btn.clicked.connect(self.browse_source_file)
+            self.source_file_reload_btn = QPushButton("⟳ Reload")
+            self.source_file_reload_btn.setFixedWidth(90)
+            self.source_file_reload_btn.clicked.connect(self.load_source_file_content)
+            source_row.addWidget(self.source_file_edit, 1)
+            source_row.addWidget(self.source_file_browse_btn)
+            source_row.addWidget(self.source_file_reload_btn)
+
+            self.source_file_hint = QLabel("")
+            self.source_file_hint.setWordWrap(True)
+            self.source_file_hint.setStyleSheet(f"color: {CP_ORANGE}; font-family: 'Consolas'; font-size: 9pt;")
+            # Clearing the source file path re-enables direct editing of the text box
+            self.source_file_edit.textChanged.connect(self.on_source_file_text_changed)
+
+            replacement_layout.addWidget(QLabel("Source File (optional):"))
+            replacement_layout.addLayout(source_row)
+            replacement_layout.addWidget(self.source_file_hint)
+
             # Delivery method dropdown
             delivery_row = QHBoxLayout()
             delivery_label = QLabel("Delivery:")
@@ -1357,6 +1396,33 @@ SendText("Hello World")"""
         if file_path:
             self.file_path_edit.setText(file_path)
 
+    def browse_source_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Source File (auto-loads as replacement text)", "", "Text Files (*.txt *.md *.markdown *.log *.csv *.json *.ini);;All Files (*)")
+        if file_path:
+            self.source_file_edit.setText(file_path)
+            self.load_source_file_content()
+
+    def load_source_file_content(self):
+        """Load the file referenced in source_file_edit into the replacement box (read-only)."""
+        path = self.source_file_edit.text().strip()
+        if not path:
+            self.replacement_edit.setReadOnly(False)
+            self.source_file_hint.setText("")
+            return
+        content = read_text_file_content(path)
+        if content is None:
+            self.source_file_hint.setText(f"⚠ Could not read file: {path}")
+            return
+        self.replacement_edit.setPlainText(content)
+        self.replacement_edit.setReadOnly(True)
+        self.source_file_hint.setText(f"📄 Content auto-loaded from: {path}  (edit the file, then click ⟳ Reload or Generate AHK)")
+
+    def on_source_file_text_changed(self, text):
+        # If the user clears the source file path, re-enable direct editing of the box
+        if not text.strip():
+            self.replacement_edit.setReadOnly(False)
+            self.source_file_hint.setText("")
+
     def import_windows_default(self):
         dialog = WindowsDefaultLookupDialog(self)
         if dialog.exec():
@@ -1431,6 +1497,11 @@ SendText("Hello World")"""
         else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
+            # Source file: auto-load content from the file when present
+            source_file = self.shortcut_data.get("source_file", "")
+            self.source_file_edit.setText(source_file)
+            if source_file:
+                self.load_source_file_content()
             # Backward compat: old use_clipboard bool -> new delivery_method string
             delivery = self.shortcut_data.get("delivery_method", "")
             if not delivery:
@@ -1913,6 +1984,15 @@ SendText("Hello World")"""
             }
         else: # self.shortcut_type == "text"
             trigger = self.trigger_edit.text().strip()
+            source_file = self.source_file_edit.text().strip()
+
+            # If a source file is set, refresh content from it (keeps preview honest)
+            if source_file:
+                if not os.path.exists(source_file):
+                    QMessageBox.warning(self, "Warning", f"Source file not found:\n{source_file}\n\nPlease check the path or clear the field.")
+                    return
+                self.load_source_file_content()
+
             replacement = self.replacement_edit.toPlainText().strip()
 
             if not trigger or not replacement:
@@ -1925,6 +2005,7 @@ SendText("Hello World")"""
                 "description": description,
                 "trigger": trigger,
                 "replacement": replacement,
+                "source_file": source_file,
                 "delivery_method": ["paste", "sendtext", "sendinput", "sendevent"][self.delivery_method_combo.currentIndex()],
                 "show_as_menu": self.show_as_menu_checkbox.isChecked(),
                 "window_title": self.window_title_edit.text().strip(),
@@ -3352,6 +3433,10 @@ class AHKShortcutEditor(QMainWindow):
         name = shortcut.get('name', 'Unnamed')
         favourite = shortcut.get('favourite', False)
         fav_icon = '<span style="color: #FCEE0A; font-size: 14px;">⭐</span> ' if favourite else ''
+        # Show a file icon for text shortcuts that auto-load from an external file
+        file_icon = ''
+        if shortcut_type == "text" and shortcut.get('source_file', '').strip():
+            file_icon = '<span style="color: #00F0FF; font-size: 13px;" title="📄 Auto-loaded from file">📄 </span>'
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
@@ -3379,7 +3464,7 @@ class AHKShortcutEditor(QMainWindow):
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="middle" align="center">󰌌</td>
-                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{name}{desc_html}</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}</td>
                                 </tr>
                             </table>
                         </a>
@@ -4895,6 +4980,14 @@ class AHKShortcutEditor(QMainWindow):
                         output_lines.append(f";! {shortcut.get('description')}")
                     
                     replacement = shortcut.get('replacement', '')
+                    # Auto-load from external source file if configured (fresh read at generate time)
+                    source_file = shortcut.get('source_file', '').strip()
+                    if source_file:
+                        file_content = read_text_file_content(source_file)
+                        if file_content is not None:
+                            replacement = file_content
+                        else:
+                            self.statusBar().showMessage(f"⚠ Could not read source file for '{shortcut.get('name', 'Unnamed')}': {source_file} — using last saved text", 6000)
                     trigger = shortcut.get('trigger', '')
                     # Resolve delivery method (backward compat with use_clipboard)
                     delivery_method = shortcut.get('delivery_method', '')

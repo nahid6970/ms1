@@ -78,6 +78,7 @@ Important behavior:
 - Multi-line script actions are wrapped into block syntax.
 - Text/file shortcuts use helper paste functions in the generated AHK script.
 - Text shortcuts can be configured as selection menus. When enabled, multi-line replacements compile into interactive hierarchical menus (using leading dashes for submenus up to 5 levels) with bracketed modular action tags (such as `[name:]`, `[text:]`, and `[folder:]`).
+- Text shortcuts support an optional `source_file` field: the replacement text is auto-loaded from an external `.txt`/`.md` file (re-read fresh on Generate) so the user can maintain the text in Notepad++ without using the GUI text box. See `md/FEATURES.md` for details.
 
 ## Development Conventions
 

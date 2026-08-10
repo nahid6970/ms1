@@ -125,6 +125,7 @@
 - Supports smooth keyboard arrow-key navigation (Esc to close, Left Arrow to go Back, Right/Enter to select).
 - Supports modular option tags enclosed in brackets: `[name:Display Label]`, `[text:Text to paste]`, `[folder:Folder path to open in Explorer]`, and `[cmd:Shell command]` (configurable via `[shell:]` and `[show:]`).
 - Uses standard AutoHotkey `Paste(...)` (or other selected delivery modes) for text insertion, and `OpenFolderInTab(...)` for opening folders (opening in a new tab if an existing Explorer window is present).
+- **External source file support**: an optional `source_file` field (absolute path to a `.txt`/`.md`/etc. file) can be set in the edit dialog. The file content is auto-loaded into the replacement preview (read-only) and re-read fresh on every **Generate AHK**, so the user can edit the text in Notepad++ and regenerate without copy-pasting into the GUI. Missing files fall back to the last-saved text with a warning. File-backed shortcuts display a 📄 icon in the list.
 
 ## File Shortcuts
 

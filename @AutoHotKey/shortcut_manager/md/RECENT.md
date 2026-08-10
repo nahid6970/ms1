@@ -2,6 +2,24 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-08-10 - External Source File Support for Text Shortcuts
+
+**What We Accomplished:**
+
+- Text shortcuts can now reference an external file (`.txt`, `.md`, `.markdown`, `.log`, `.csv`, `.json`, `.ini`) as the source of their replacement text.
+- Added a **Source File (optional)** field to the Edit Text Shortcut dialog with **Browse…** and **⟳ Reload** buttons.
+- When a source file is configured, the GUI auto-loads the file content into the Replacement Text box (read-only, with an orange hint) so the user can preview exactly what will be used.
+- On **Generate AHK**, the app re-reads the source file fresh and embeds the current content — flow is: edit the file in Notepad++ → click Generate AHK → done. No copy-pasting into the GUI text box.
+- If a source file is missing, the dialog blocks saving with a warning; generation falls back to the last-saved text and shows a status-bar warning.
+- File-backed text shortcuts show a 📄 icon next to their name in the main list.
+- Added module-level `read_text_file_content()` helper; also added missing `QFileDialog` to module-level imports (previously only imported locally).
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/RECENT.md`
+- `md/FEATURES.md`
+
 ## 2026-07-19 15:30 - Native Menu Toggle & Stability Fixes
 
 **What We Accomplished:**
