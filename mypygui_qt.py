@@ -1793,6 +1793,37 @@ _KOMOREBI_MENU_QSS = (
 )
 
 
+def _komorebi_menu_gpos(anchor_widget, cursor_pos=None):
+    """Position a komorebi menu below the statusbar when it is docked (like the
+    hover tooltip), instead of popping up over the bar. Falls back to the
+    cursor position when not docked."""
+    try:
+        docked = load_config().get("statusbar", {}).get("docked", False)
+    except Exception:
+        docked = False
+    if not docked:
+        if cursor_pos is not None:
+            return cursor_pos
+        # no cursor -> open below the anchor widget (like a button dropdown)
+        topl = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
+        return QPoint(topl.x(), topl.y() + anchor_widget.height() + 2)
+    # Docked statusbar is pinned to the top of the screen
+    win = anchor_widget.window()
+    gw = win.geometry()
+    y = gw.y() + gw.height() + 2
+    if cursor_pos is not None:
+        x = cursor_pos.x()
+    else:
+        x = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft()).x()
+    try:
+        scr = QApplication.screenAt(gw.center()) or QApplication.primaryScreen()
+        avail = scr.availableGeometry()
+        x = max(avail.left() + 2, min(x, avail.right() - 150))
+    except Exception:
+        pass
+    return QPoint(x, y)
+
+
 def _menu_rich_action(menu, html, callback=None, disabled=False):
     """Add a menu item rendered as rich colored HTML (matches tooltip style).
     QMenu actions cannot render HTML, so each item is a QWidgetAction hosting
@@ -1968,7 +1999,8 @@ class KomorebiWidget(QWidget):
         lay.addWidget(self._layout_lbl)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(
-            lambda pos: self._show_layout_menu(self.mapToGlobal(pos)))
+            lambda pos: self._show_layout_menu(
+                _komorebi_menu_gpos(self, self.mapToGlobal(pos))))
         self._install_self_tip()
 
     def _install_self_tip(self):
@@ -1999,7 +2031,8 @@ class KomorebiWidget(QWidget):
 
     def _layout_lbl_left_click(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self._show_layout_menu(event.globalPosition().toPoint())
+            self._show_layout_menu(
+                _komorebi_menu_gpos(self._layout_lbl, event.globalPosition().toPoint()))
 
     def _show_layout_menu(self, gpos):
         menu = QMenu(self)
@@ -2158,8 +2191,7 @@ class KomorebiAppsWidget(QWidget):
                         f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>',
                         partial(self._jump_to_app, ap["hwnd"], ws_idx))
                 menu.addSeparator()
-        gpos = self.mapToGlobal(QPoint(0, self.height()))
-        menu.exec(QPoint(gpos.x(), gpos.y() + 2))
+        menu.exec(_komorebi_menu_gpos(self))
 
     def _jump_to_app(self, hwnd, ws_idx):
         # 1) switch komorebi to that workspace (async), 2) after komorebi has
