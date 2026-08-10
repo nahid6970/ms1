@@ -3403,9 +3403,9 @@ class AHKShortcutEditor(QMainWindow):
         setHtml so they are always present when the document parses.
         """
         doc = self.text_browser.document()
-        # Icon tracks the key-cell text size; keeping it at ~text height means it
-        # never inflates the line box (which would push the key text off-baseline).
-        size = max(12, int(self.app_font_size * 1.1))
+        # Slightly larger than the text height so the icons read clearly next to
+        # the bold key labels; verified to stay centered on the name line.
+        size = max(12, int(self.app_font_size * 1.5))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban"),
                         render_svg_pixmap(SVGS["BAN"], CP_RED, size))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://rocket"),
@@ -3562,7 +3562,7 @@ class AHKShortcutEditor(QMainWindow):
             # 'Rule' sit on the same baseline as the name.
             key_html = key
             if key and key[0] in KEY_ICON_SRC and len(key) > 1:
-                icon_size = max(12, int(self.app_font_size * 1.1))
+                icon_size = max(12, int(self.app_font_size * 1.5))
                 key_html = (f'<img src="{KEY_ICON_SRC[key[0]]}" width="{icon_size}" '
                             f'height="{icon_size}" align="middle">&nbsp;{key[1:]}')
 
