@@ -121,7 +121,7 @@
                 "fake": "C:\\Users\\nahid\\komorebi.json"
             }
         ],
-        "copy_mode": false
+        "copy_mode": true
     },
     {
         "name": "Reference",
