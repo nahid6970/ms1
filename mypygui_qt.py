@@ -2271,11 +2271,11 @@ class _WindowCaptureDialog(QDialog):
         cancel = QPushButton("Cancel")
         cancel.clicked.connect(self.reject)
         v.addWidget(cancel)
-        try:  # bottom-right corner so it stays off the target window
+        try:  # center of the primary screen
             scr = QApplication.primaryScreen()
             g = scr.availableGeometry()
-            self.move(g.right() - self.width() - 60,
-                      g.bottom() - self.height() - 60)
+            self.move(g.center().x() - self.width() // 2,
+                      g.center().y() - self.height() // 2)
         except Exception:
             pass
         if mode == "click":
