@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
                             QSplitter, QFrame, QTextBrowser, QMenu, QSizePolicy, QScrollArea,
                             QFileDialog)
-from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray
+from PyQt6.QtCore import Qt, pyqtSignal, QSettings, QPoint, QSize, QByteArray, QUrl
 from PyQt6.QtGui import QFont, QTextCursor, QKeySequence, QTextDocument, QFontDatabase, QFontMetrics, QTextCharFormat, QColor, QIcon, QPixmap, QPainter
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -60,8 +60,27 @@ SVGS = {
     "SETTINGS": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
     "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10a2 2 0 0 0 2-2 2 2 0 0 0-2-2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 10 10 0 0 0-10-10z"></path><circle cx="7.5" cy="10.5" r=".5"></circle><circle cx="10.5" cy="7.5" r=".5"></circle><circle cx="13.5" cy="7.5" r=".5"></circle><circle cx="16.5" cy="10.5" r=".5"></circle></svg>',
     "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
-    "ROCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>'
+    "ROCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>',
+    "BAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>'
 }
+
+
+def render_svg_pixmap(svg, color, size):
+    """Render an SVG string to a transparent QPixmap, replacing 'currentColor'."""
+    colored_svg = svg.replace('currentColor', color)
+    renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
+    pix = QPixmap(size, size)
+    pix.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pix)
+    renderer.render(painter)
+    painter.end()
+    return pix
+
+
+# Favourites key-cell icons: emoji char -> document resource URL. True-color
+# emojis get clipped by Qt's line box and push following text off-baseline, so
+# they are rendered as crisp SVG images registered via _register_key_icons().
+KEY_ICON_SRC = {'🚀': 'icon://rocket', '🚫': 'icon://ban'}
 
 class CyberButton(QPushButton):
     """Modern button with SVG icon support and dynamic hover color-switching."""
@@ -2959,6 +2978,9 @@ class AHKShortcutEditor(QMainWindow):
                          if search_query in f"{s.get('name', '')} {s.get('origin_key', '')} {s.get('destination_key', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         
         html = self.generate_html(filtered_script, filtered_launcher, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category)
+
+        # Make sure the SVG icons referenced by the HTML are registered before parsing
+        self._register_key_icons()
         
         # Block signals and updates to prevent flickering/jumping
         v_bar.blockSignals(True)
@@ -3372,6 +3394,23 @@ class AHKShortcutEditor(QMainWindow):
             return 2
         return 1
 
+    def _register_key_icons(self):
+        """Register the SVG icons used in shortcut key cells as document resources.
+
+        The Favourites section renders '🚀 Startup' / '🚫 Rule' keys with crisp SVG
+        icons instead of true-color emojis, which get clipped by Qt's line box and
+        push following text off-baseline. Resources are re-registered before every
+        setHtml so they are always present when the document parses.
+        """
+        doc = self.text_browser.document()
+        # Icon tracks the key-cell text size; keeping it at ~text height means it
+        # never inflates the line box (which would push the key text off-baseline).
+        size = max(12, int(self.app_font_size * 1.1))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban"),
+                        render_svg_pixmap(SVGS["BAN"], CP_RED, size))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://rocket"),
+                        render_svg_pixmap(SVGS["ROCKET"], CP_CYAN, size))
+
     def _truncate_to_width(self, text, max_px):
         """Truncate text with an ellipsis so it fits the fixed key column.
 
@@ -3517,15 +3556,15 @@ class AHKShortcutEditor(QMainWindow):
                 key = "🚫 Rule"
             key_width = 170
             key = self._truncate_to_width(key, key_width - 12)
-            # True-color emojis (🚀/🚫) have a taller line box than Consolas text,
-            # which pushes following text a few px below the name line. Rendering
-            # the emoji in its own narrow cell keeps the text on a normal line box
-            # so 'Startup'/'Rule' sit on the same baseline as the name.
+            # True-color emojis (🚀/🚫) get clipped by Qt's line box and push the
+            # following text off-baseline, so render them as crisp SVG icons. A
+            # fixed-size <img> keeps the line box at text height, so 'Startup'/
+            # 'Rule' sit on the same baseline as the name.
             key_html = key
-            if key and key[0] in ('🚀', '🚫') and len(key) > 1:
-                key_html = (f'<table cellpadding="0" cellspacing="0"><tr>'
-                            f'<td valign="top">{key[0]}</td>'
-                            f'<td valign="top">&nbsp;{key[1:]}</td></tr></table>')
+            if key and key[0] in KEY_ICON_SRC and len(key) > 1:
+                icon_size = max(12, int(self.app_font_size * 1.1))
+                key_html = (f'<img src="{KEY_ICON_SRC[key[0]]}" width="{icon_size}" '
+                            f'height="{icon_size}" align="middle">&nbsp;{key[1:]}')
 
         # Ensure icon column is stable
         icon_width = 60
