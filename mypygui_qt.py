@@ -1727,22 +1727,30 @@ def _komorebi_parse_state(data):
         return None
 
 
+def _komorebi_put(q, item):
+    """Timestamp a snapshot so the GUI drain can always pick the freshest one.
+    Events, the poll, and one-shot refreshes race with each other, so
+    last-pushed is not necessarily newest-data."""
+    item["t"] = time.time()
+    q.put(item)
+
+
 def check_komorebi_status(q):
     """Poll komorebic state, push a compact dict into q. Never raises."""
+    fail = {"ok": False, "workspaces": [], "focused": -1, "paused": False}
     try:
         result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
                                 encoding="utf-8", errors="replace",
                                 creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
         if result.returncode != 0:
-            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            _komorebi_put(q, dict(fail))
             return
         data = json.loads(result.stdout)
         item = _komorebi_parse_state(data)
-        q.put(item if item is not None else
-              {"ok": False, "workspaces": [], "focused": -1, "paused": False})
+        _komorebi_put(q, item if item is not None else dict(fail))
     except Exception as e:
         logging.error(f"check_komorebi_status error: {e}")
-        q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+        _komorebi_put(q, dict(fail))
 
 _komorebi_fast_until = 0.0  # when > now, the poll loop ticks every 0.3s
 
@@ -1757,24 +1765,37 @@ def _komorebi_refresh_once(delay=0.2):
     """After a user action, wait briefly for komorebi to apply the command,
     then push a fresh state snapshot right away in a background thread.
     Bypasses the poll loop's sleep so the status bar updates almost instantly
-    even if the loop is mid-sleep or mid-poll. Also starts the fast-poll
-    cadence immediately."""
+    even if the loop is mid-sleep or mid-poll.
+
+    When the event pipe is active it already delivers the change within
+    milliseconds, so the manual push is skipped whenever an event has arrived
+    since the action — this stops stale delayed snapshots from fighting the
+    event stream (the rapid-click workspace jiggle)."""
     _kick_komorebi_refresh()
+    event_time = _komorebi_last_event_time
     def _do():
         time.sleep(delay)
+        if _komorebi_events_ok and _komorebi_last_event_time > event_time:
+            return  # events already delivered the fresh state
         check_komorebi_status(_komorebi_queue)
     threading.Thread(target=_do, daemon=True).start()
 
 def _komorebi_status_loop(q):
     while True:
+        if _komorebi_events_ok:
+            # The event pipe drives instant updates; skip polling entirely
+            # while events are flowing, so a poll can never inject a stale
+            # snapshot into a rapid-click burst. Only poll as a watchdog when
+            # events have been quiet for 15s (missed-event safety net).
+            if time.time() - _komorebi_last_event_time < 15.0:
+                time.sleep(0.5)
+                continue
         check_komorebi_status(q)
         if time.time() < _komorebi_fast_until:
             time.sleep(0.3)
         else:
-            # Event-pipe pushes below drive instant updates, so the idle poll is
-            # only a safety net: 5s cadence when events are active, old 2s when
-            # they are not (pywin32/komorebi unavailable). Chunked so a kick
-            # mid-sleep is noticed promptly.
+            # Fallback cadence when events are not active: 2s. Chunked so a
+            # kick mid-sleep is noticed promptly.
             chunks = 4 if not _komorebi_events_ok else 10
             for _ in range(chunks):
                 if time.time() >= _komorebi_fast_until:
@@ -1791,6 +1812,7 @@ def _komorebi_status_loop(q):
 _komorebi_events_ok = False
 _komorebi_listener_warned = False
 _komorebi_last_sig = None
+_komorebi_last_event_time = 0.0  # time of the last event received from the pipe
 
 
 def _komorebi_item_sig(item):
@@ -1813,7 +1835,7 @@ def _komorebi_handle_event_line(line):
     """Called from the listener thread for every komorebi event line.
     Pushes a parsed snapshot into the queue only when something actually
     changed on screen."""
-    global _komorebi_last_sig
+    global _komorebi_last_sig, _komorebi_last_event_time
     try:
         msg = json.loads(line)
         state = msg.get("state")
@@ -1825,10 +1847,11 @@ def _komorebi_handle_event_line(line):
         if item is None:
             check_komorebi_status(_komorebi_queue)
             return
+        _komorebi_last_event_time = time.time()
         sig = _komorebi_item_sig(item)
         if sig is None or sig != _komorebi_last_sig:
             _komorebi_last_sig = sig
-            _komorebi_queue.put(item)
+            _komorebi_put(_komorebi_queue, item)
     except Exception:
         pass
 
@@ -4309,15 +4332,18 @@ class StatusBar(QMainWindow):
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
     def _drain_komorebi_queue(self):
-        # Drain all pending snapshots but apply only the newest one, so a stale
-        # poll-loop snapshot can never land AFTER a fresh one-shot snapshot.
-        item = None
+        # Drain all pending snapshots but apply the one with the newest
+        # timestamp, so a stale snapshot (event vs poll vs one-shot refresh)
+        # can never land on screen after a fresher one — even when several are
+        # queued during a rapid-click burst.
+        items = []
         while True:
             try:
-                item = _komorebi_queue.get_nowait()
+                items.append(_komorebi_queue.get_nowait())
             except Empty:
                 break
-        if item is not None:
+        if items:
+            item = max(items, key=lambda it: it.get("t", 0.0))
             if hasattr(self, "komorebi_widget"):
                 self.komorebi_widget.apply_state(item)
             if hasattr(self, "komorebi_apps"):
