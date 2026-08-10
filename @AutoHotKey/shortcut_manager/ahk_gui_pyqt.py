@@ -69,7 +69,11 @@ SVGS = {
     "TOGGLE_OFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#242424" stroke="#3a3a3a" stroke-width="1"/><circle cx="13" cy="12" r="9" fill="#9a9a9a"/></svg>',
     # Bold check for the '✅ Active in' rule line — same Lucide style as the
     # other icons, recolored via currentColor.
-    "CHECK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+    "CHECK": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+    # Filled star for the Favourites marker in the name column.
+    "STAR": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" fill="currentColor"/></svg>',
+    # File icon for text shortcuts auto-loaded from an external source file.
+    "FILE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>'
 }
 
 # Toggle switch dimensions (must match the SVG viewBox and the <img> attrs).
@@ -126,6 +130,11 @@ def key_icon_size(emoji, app_font_size):
 def rules_ban_size(app_font_size):
     """Pixel size for the small ban icon in the dim rule sub-lines (0.82em text)."""
     return max(8, int(app_font_size * 0.82))
+
+
+def name_icon_size(app_font_size):
+    """Pixel size for the inline star/file icons in the name column (~text size)."""
+    return max(12, int(app_font_size))
 
 class CyberButton(QPushButton):
     """Modern button with SVG icon support and dynamic hover color-switching."""
@@ -3204,7 +3213,9 @@ class AHKShortcutEditor(QMainWindow):
                 all_shortcuts_with_type.append((s, 'file', idx))
 
         if all_shortcuts_with_type:
-            html += f'<div class="section-title"><a href="toggle-section://favourite">{get_toggle_icon("favourite")} ⭐ Favourites</a></div>'
+            _hs = max(16, int(self.app_font_size * 1.3))
+            html += (f'<div class="section-title"><a href="toggle-section://favourite">'
+                     f'{get_toggle_icon("favourite")} <img src="icon://star-lg" width="{_hs}" height="{_hs}" align="middle"> Favourites</a></div>')
             if self.section_states.get("favourite", True):
                 for shortcut, stype, sidx in all_shortcuts_with_type:
                     html += self.generate_shortcut_html(shortcut, stype, sidx, False, is_favourite=True)
@@ -3493,6 +3504,17 @@ class AHKShortcutEditor(QMainWindow):
         # as the red ban used by 'Inactive in').
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://check-sm"),
                         render_svg_pixmap(SVGS["CHECK"], CP_GREEN, sm))
+        # Inline name-column icons: yellow star for favourites, cyan file for
+        # text shortcuts auto-loaded from an external file.
+        ns = name_icon_size(self.app_font_size)
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://star"),
+                        render_svg_pixmap(SVGS["STAR"], CP_YELLOW, ns))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://file"),
+                        render_svg_pixmap(SVGS["FILE"], CP_CYAN, ns))
+        # Larger star for the 1.4em 'Favourites' section header.
+        hs = max(16, int(self.app_font_size * 1.3))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://star-lg"),
+                        render_svg_pixmap(SVGS["STAR"], CP_YELLOW, hs))
 
     def _key_html_with_icons(self, key):
         """Swap true-color 🚀/🚫 emojis in startup/exclusion keys for SVG icons.
@@ -3664,11 +3686,15 @@ class AHKShortcutEditor(QMainWindow):
 
         name = shortcut.get('name', 'Unnamed')
         favourite = shortcut.get('favourite', False)
-        fav_icon = '<span style="color: #FCEE0A; font-size: 14px;">⭐</span> ' if favourite else ''
+        # SVG star/file icons instead of the ⭐/📄 emojis (crisp at any DPI,
+        # no emoji fallback metrics). Sized to the text line like the old spans.
+        ns = name_icon_size(self.app_font_size)
+        fav_icon = (f'<img src="icon://star" width="{ns}" height="{ns}" align="middle"> ' if favourite else '')
         # Show a file icon for text shortcuts that auto-load from an external file
         file_icon = ''
         if shortcut_type == "text" and shortcut.get('source_file', '').strip():
-            file_icon = '<span style="color: #00F0FF; font-size: 13px;" title="📄 Auto-loaded from file">📄 </span>'
+            file_icon = (f'<img src="icon://file" width="{ns}" height="{ns}" '
+                         f'align="middle" title="Auto-loaded from file"> ')
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
