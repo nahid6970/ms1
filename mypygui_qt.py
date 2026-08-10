@@ -1676,6 +1676,75 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 
+# ─── Komorebi status ──────────────────────────────────────────────────────────
+_komorebi_queue = Queue()
+
+def check_komorebi_status(q):
+    """Poll komorebic state, push a compact dict into q. Never raises."""
+    try:
+        result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace",
+                                creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
+        if result.returncode != 0:
+            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            return
+        data = json.loads(result.stdout)
+        monitors = data.get("monitors", {}).get("elements", [])
+        if not monitors:
+            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            return
+        screen = monitors[0]
+        wss = screen.get("workspaces", {}).get("elements", [])
+        focused = screen.get("workspaces", {}).get("focused", 0)
+        workspaces = []
+        focused_layout = ""
+        for i, ws in enumerate(wss[:3]):
+            windows = 0
+            for cont in ws.get("containers", {}).get("elements", []):
+                windows += len(cont.get("windows", {}).get("elements", []))
+            windows += len(ws.get("floating_windows", []) or [])
+            layout = (ws.get("layout") or {}).get("Default", "BSP")
+            if i == focused:
+                focused_layout = layout
+            workspaces.append({
+                "index": i,
+                "name": ws.get("name") or f"WS{i + 1}",
+                "layout": layout,
+                "windows": windows,
+                "tile": ws.get("tile", True),
+                "monocle": bool(ws.get("monocle_container")),
+                "maximized": bool(ws.get("maximized_window")),
+            })
+        if not focused_layout and 0 <= focused < len(wss):
+            focused_layout = (wss[focused].get("layout") or {}).get("Default", "")
+        q.put({"ok": True, "workspaces": workspaces, "focused": focused,
+               "focused_layout": focused_layout,
+               "paused": bool(data.get("is_paused", False))})
+    except Exception as e:
+        logging.error(f"check_komorebi_status error: {e}")
+        q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+
+def _komorebi_status_loop(q):
+    while True:
+        check_komorebi_status(q)
+        time.sleep(2)
+
+_KOMOREBI_LAYOUTS = ["bsp", "columns", "rows", "vertical-stack", "horizontal-stack",
+                     "ultrawide-vertical-stack", "grid", "right-main-vertical-stack"]
+
+def _komorebi_layout_short(name):
+    """Map komorebi layout name (e.g. 'VerticalStack') to a compact label."""
+    if not name:
+        return "—"
+    m = {
+        "BSP": "BSP", "Columns": "COL", "Rows": "ROW",
+        "VerticalStack": "VSTK", "HorizontalStack": "HSTK",
+        "UltrawideVerticalStack": "ULTW", "Grid": "GRID",
+        "RightMainVerticalStack": "RMAIN",
+    }
+    return m.get(name, name[:4].upper())
+
+
 def delete_git_lock_files(path):
     """Remove .git/index.lock for the repo at `path` (a stuck lock causes
     'Unable to create index.lock' errors when committing/pulling)."""
@@ -1791,6 +1860,129 @@ class GitIconLabel(IconLabel):
             p.end()
         except Exception as e:
             logging.error(f"GitIconLabel indicator error: {e}")
+
+
+class KomorebiWidget(QWidget):
+    """Up to 3 clickable komorebi workspace dots + active layout label.
+
+    Left-click a dot -> focus that workspace.
+    Right-click (dots or layout label) -> menu to change the workspace layout
+    (BSP, Columns, Rows, Stacks, Grid, ...). Hover shows each workspace's
+    window count and layout. Styled to match the status bar.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._buttons = []
+        self._layout_lbl = None
+        self._tip_text = ""
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(2, 0, 2, 0)
+        lay.setSpacing(2)
+        for i in range(3):
+            b = QPushButton()
+            b.setFixedSize(11, 11)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setStyleSheet(self._dot_css("#333333"))
+            b.clicked.connect(partial(self._focus_ws, i))
+            lay.addWidget(b)
+            self._buttons.append(b)
+        self._layout_lbl = QLabel("—")
+        self._layout_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 3px;")
+        self._layout_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        lay.addWidget(self._layout_lbl)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_layout_menu)
+        self._install_self_tip()
+
+    def _install_self_tip(self):
+        _install_tip_filter(self)
+        _install_tip_filter(self._layout_lbl)
+        for b in self._buttons:
+            _install_tip_filter(b)
+
+    @staticmethod
+    def _dot_css(color):
+        return (f"QPushButton {{ background: {color}; border: 1px solid #666666; "
+                f"border-radius: 5px; padding: 0px; }}")
+
+    def _focus_ws(self, idx):
+        subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+
+    def _change_layout(self, layout):
+        subprocess.Popen(["komorebic", "change-layout", layout],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+
+    def _toggle(self, arg):
+        subprocess.Popen(["komorebic", "toggle-" + arg],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+
+    def _show_layout_menu(self, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet(DIALOG_QSS)
+        for layout in _KOMOREBI_LAYOUTS:
+            act = menu.addAction(layout.replace("-", " ").title())
+            act.triggered.connect(partial(self._change_layout, layout))
+        menu.addSeparator()
+        a = menu.addAction("Flip Layout")
+        a.triggered.connect(lambda: subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW))
+        a = menu.addAction("Toggle Floating")
+        a.triggered.connect(lambda: self._toggle("float"))
+        a = menu.addAction("Toggle Monocle")
+        a.triggered.connect(lambda: self._toggle("monocle"))
+        a = menu.addAction("Toggle Pause")
+        a.triggered.connect(lambda: self._toggle("pause"))
+        menu.exec(self.mapToGlobal(pos))
+
+    def apply_state(self, item):
+        """Called on the GUI thread from _drain_komorebi_queue."""
+        if not item.get("ok"):
+            for b in self._buttons:
+                b.setStyleSheet(self._dot_css("#222222"))
+            self._layout_lbl.setText("—")
+            tip = '<span style="color:#666666;">komorebi not running</span>'
+            self._tip_text = tip
+            self._layout_lbl._tip_text = tip
+            return
+        workspaces = item.get("workspaces", [])
+        focused = item.get("focused", -1)
+        paused = item.get("paused", False)
+        tip = []
+        for i, b in enumerate(self._buttons):
+            if i < len(workspaces):
+                ws = workspaces[i]
+                active = (i == focused)
+                if ws.get("maximized"):
+                    color = "#FFD740" if active else "#6b5f28"
+                elif ws.get("monocle"):
+                    color = "#00F0FF" if active else "#2b5f66"
+                elif ws["windows"] > 0:
+                    color = "#00ff21" if active else "#1d6b2f"
+                else:
+                    color = "#00ff21" if active else "#333333"
+                b.setStyleSheet(self._dot_css(color))
+                name = _tip_esc(ws["name"])
+                layout = _tip_esc(ws["layout"])
+                win = ws["windows"]
+                state = "ACTIVE" if active else "idle"
+                tip.append(f'<span style="color:{color}; font-weight:bold;">● {name}</span> '
+                           f'({win} win) <span style="color:#8f9bae;">{layout} · {state}</span>')
+            else:
+                b.setStyleSheet(self._dot_css("#1a1a1a"))
+        if paused:
+            tip.insert(0, '<span style="color:#FFD740;">⏸ komorebi paused</span>')
+        elif not tip:
+            tip.append('<span style="color:#666666;">no workspaces</span>')
+        tip_html = "<br/>".join(tip)
+        self._tip_text = tip_html
+        self._layout_lbl._tip_text = tip_html
+        # Layout label: active workspace layout (even if focused is beyond the
+        # first 3 dots, we still know it from state), or paused
+        if paused:
+            self._layout_lbl.setText("⏸")
+        else:
+            self._layout_lbl.setText(_komorebi_layout_short(item.get("focused_layout", "")))
 
 
 _tip_label = None
@@ -2815,6 +3007,9 @@ class StatusBar(QMainWindow):
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
         
+        self.komorebi_widget = KomorebiWidget()
+        ll.addWidget(self.komorebi_widget)
+        
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
         self._bl_container = QWidget(); self._bl_container_layout = QHBoxLayout(self._bl_container); self._bl_container_layout.setContentsMargins(0, 0, 0, 0); self._bl_container_layout.setSpacing(0); ll.addWidget(self._bl_container)
@@ -3437,6 +3632,8 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
+        self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(300)
+        threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
@@ -3473,6 +3670,15 @@ class StatusBar(QMainWindow):
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
+    def _drain_komorebi_queue(self):
+        try:
+            while True:
+                item = _komorebi_queue.get_nowait()
+                if hasattr(self, "komorebi_widget"):
+                    self.komorebi_widget.apply_state(item)
+        except Empty:
+            pass
+
     def _drain_git_queue(self):
         try:
             while True:
