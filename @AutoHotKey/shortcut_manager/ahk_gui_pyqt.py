@@ -3557,35 +3557,15 @@ class AHKShortcutEditor(QMainWindow):
                 key = f"{key} [{window_title[:15]}...]" if len(window_title) > 15 else f"{key} [{window_title}]"
             key_width = 220
         elif shortcut_type == "exclude":
+            # Plain key — the window/hotkey context lives on the dim rule
+            # sub-lines below the name (same look as Favourites).
             key = "🚫 Exclusion"
-            process_name = shortcut.get('process_name', '')
-            window_title = shortcut.get('window_title', '')
-            excluded_hotkeys = shortcut.get('excluded_hotkeys', '').strip()
-            label_parts = []
-            if process_name:
-                label_parts.append(process_name.split(',')[0].strip())
-            elif window_title:
-                t = window_title.split(',')[0].strip()
-                label_parts.append(t[:12] + '...' if len(t) > 12 else t)
-            if excluded_hotkeys:
-                hks = [h.strip() for h in excluded_hotkeys.splitlines() if h.strip()]
-                label_parts.append(', '.join(hks[:3]) + ('...' if len(hks) > 3 else ''))
-            else:
-                label_parts.append('all')
-            if label_parts:
-                key = f"🚫 [{' | '.join(label_parts)}]"
-            key_width = 240
+            key_width = 170
         elif shortcut_type == "startup":
+            # Plain key — the active/inactive window context lives on the dim
+            # rule sub-lines below the name (same look as Favourites).
             key = "🚀 Startup"
-            context_mode = shortcut.get('context_mode', 'none')
-            process_name = shortcut.get('process_name', '')
-            window_title = shortcut.get('window_title', '')
-            if context_mode in ('active', 'inactive') and any([process_name, window_title]):
-                label = (process_name or window_title).split(',')[0].strip()
-                label = label[:12] + '...' if len(label) > 12 else label
-                prefix = '✅' if context_mode == 'active' else '🚫'
-                key = f"🚀 {prefix}[{label}]"
-            key_width = 200
+            key_width = 170
         else: # text
             key = shortcut.get('trigger', '')
             key_width = 220
@@ -3635,8 +3615,11 @@ class AHKShortcutEditor(QMainWindow):
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
-        # Favourites: window-context rules shown as dim sub-lines below the name
-        rules_html = self._build_favourite_rules(shortcut, shortcut_type) if is_favourite else ''
+        # Favourites plus the Startup/Exclusion-Rules categories show window-
+        # context rules as dim sub-lines below the name — identical look in
+        # every section, with the key column kept to the plain icon + label.
+        use_rules_below = is_favourite or shortcut_type in ("startup", "exclude")
+        rules_html = self._build_favourite_rules(shortcut, shortcut_type) if use_rules_below else ''
 
         # Calculate background color inline for best QTextBrowser compatibility
         bg_color = "transparent"
@@ -3647,10 +3630,10 @@ class AHKShortcutEditor(QMainWindow):
 
         text_style = 'style="color: #888;"' if not enabled else ""
 
-        # Favourites rows may have multi-line rules below the name; top-align the
-        # status/key/icon cells so they line up with the first (name) line instead
-        # of floating in the vertical middle of the taller row.
-        left_valign = "top" if is_favourite else "middle"
+        # Rows with multi-line rules below the name are top-aligned so the
+        # status/key/icon cells line up with the first (name) line instead of
+        # floating in the vertical middle of the taller row.
+        left_valign = "top" if use_rules_below else "middle"
 
         return f'''
         <div class="shortcut-item {indent_class}">
