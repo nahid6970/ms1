@@ -1649,18 +1649,25 @@ def check_git_status(repo, q):
     if ahead > 0 or behind > 0:
         text += f" \u21e1{ahead}\u21e3{behind}"
 
-    tip = [f"Branch: {branch}" if branch else "Branch: (detached / none)"]
+    tip = []
+    if branch:
+        bcol = branch_color(branch)
+        tip.append(f'<span style="color:{bcol}; font-weight:bold;">\u25cf {_tip_esc(branch)}</span>')
+    else:
+        tip.append('<span style="color:#888888;">(detached / no branch)</span>')
     if ahead > 0 or behind > 0:
         tip.append(f"Upstream: {ahead} ahead, {behind} behind")
     if lines:
         for ln in lines[:15]:
-            tip.append(ln[:90])
+            fcol = _git_file_color(ln)
+            shown = _tip_esc(ln[:90])
+            tip.append(f'<span style="color:{fcol};">{shown}</span>' if fcol else shown)
         if len(lines) > 15:
             tip.append(f"... and {len(lines) - 15} more")
     else:
-        tip.append("Clean")
+        tip.append('<span style="color:#00ff21;">\u2713 Clean</span>')
 
-    q.put({"name": repo["name"], "text": text, "color": color, "branch": branch, "indicator_style": config.get("git_indicator_style", "dot"), "tooltip": "\n".join(tip)})
+    q.put({"name": repo["name"], "text": text, "color": color, "branch": branch, "indicator_style": config.get("git_indicator_style", "dot"), "tooltip": "<br/>".join(tip)})
 
 def _git_status_loop(repos, q):
     while True:
@@ -1719,6 +1726,25 @@ def branch_color(name):
     return qc.name()
 
 
+def _tip_esc(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+def _git_file_color(line):
+    """Color a porcelain status line: A=added(green) M=modified(yellow)
+    D=deleted(pink) R/C=renamed(cyan) ??=untracked(red) U=unmerged(magenta)."""
+    code = (line[:2] or "").strip()
+    if code == "??":
+        return "#FF003C"
+    for ch in code:
+        if ch == "A": return "#00ff21"
+        if ch == "M": return "#FFD740"
+        if ch == "D": return "#FF6B6B"
+        if ch in "RC": return "#00F0FF"
+        if ch == "U": return "#FF4081"
+    return ""
+
+
 class GitIconLabel(IconLabel):
     """IconLabel with a branch-color indicator (dot or underline) at the bottom,
     configurable from the settings dialog."""
@@ -1773,6 +1799,7 @@ def _get_tip_label():
             f"QLabel {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};"
             f" padding: 6px 8px; font-family: 'Consolas'; font-size: 9pt; }}"
         )
+        _tip_label.setTextFormat(Qt.TextFormat.RichText)
         _tip_label.hide()
     return _tip_label
 
