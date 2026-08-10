@@ -1818,7 +1818,7 @@ def _komorebi_menu_gpos(anchor_widget, cursor_pos=None):
     try:
         scr = QApplication.screenAt(gw.center()) or QApplication.primaryScreen()
         avail = scr.availableGeometry()
-        x = max(avail.left() + 2, min(x, avail.right() - 150))
+        x = max(avail.left() + 2, min(x, avail.right() - 400))
     except Exception:
         pass
     return QPoint(x, y)
