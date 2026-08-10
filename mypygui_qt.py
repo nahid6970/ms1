@@ -69,7 +69,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QDialog, QLineEdit, QComboBox, QCheckBox,
     QGroupBox, QFormLayout, QScrollArea, QMessageBox, QInputDialog,
     QFrame, QSizePolicy, QPlainTextEdit, QColorDialog,
-    QStyle, QStyleOption, QGridLayout, QMenu, QTableWidget,
+    QStyle, QStyleOption, QGridLayout, QMenu, QWidgetAction, QTableWidget,
     QTableWidgetItem, QHeaderView, QListWidget, QSpinBox,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
@@ -1782,6 +1782,40 @@ def _komorebi_layout_short(name):
     return m.get(name, name[:4].upper())
 
 
+# Menus can't render HTML in plain actions, so komorebi menus use
+# QWidgetAction + rich-text QLabels (transparent so hover highlight shows).
+_KOMOREBI_MENU_QSS = (
+    f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px; }}"
+    f"QMenu::item {{ padding: 4px 8px; }}"
+    f"QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}"
+    f"QMenu::item:disabled {{ color: {CP_DIM}; }}"
+    f"QMenu::separator {{ height: 1px; background: {CP_DIM}; margin: 4px 6px; }}"
+)
+
+
+def _menu_rich_action(menu, html, callback=None, disabled=False):
+    """Add a menu item rendered as rich colored HTML (matches tooltip style).
+    QMenu actions cannot render HTML, so each item is a QWidgetAction hosting
+    a transparent rich-text QLabel; the menu's hover highlight shows through.
+    """
+    act = QWidgetAction(menu)
+    lbl = QLabel(html)
+    lbl.setTextFormat(Qt.TextFormat.RichText)
+    lbl.setWordWrap(False)
+    lbl.setStyleSheet(
+        "background: transparent; padding: 2px 8px 2px 4px;"
+        " font-family: 'Consolas'; font-size: 9pt;")
+    lbl.setCursor(Qt.CursorShape.PointingHandCursor if not disabled
+                   else Qt.CursorShape.ArrowCursor)
+    act.setDefaultWidget(lbl)
+    if disabled:
+        act.setEnabled(False)
+    elif callback is not None:
+        act.triggered.connect(callback)
+    menu.addAction(act)
+    return act
+
+
 def delete_git_lock_files(path):
     """Remove .git/index.lock for the repo at `path` (a stuck lock causes
     'Unable to create index.lock' errors when committing/pulling)."""
@@ -1914,6 +1948,7 @@ class KomorebiWidget(QWidget):
         self._buttons = []
         self._layout_lbl = None
         self._tip_text = ""
+        self._focused_layout = ""
         lay = QHBoxLayout(self)
         lay.setContentsMargins(10, 0, 1, 0)  # match pagination arrows' padx
         lay.setSpacing(2)
@@ -1968,19 +2003,26 @@ class KomorebiWidget(QWidget):
 
     def _show_layout_menu(self, gpos):
         menu = QMenu(self)
-        menu.setStyleSheet(DIALOG_QSS)
+        menu.setStyleSheet(_KOMOREBI_MENU_QSS)
+        current = (self._focused_layout or "").lower()
         for layout in _KOMOREBI_LAYOUTS:
-            act = menu.addAction(layout.replace("-", " ").title())
-            act.triggered.connect(partial(self._change_layout, layout))
+            label = layout.replace("-", " ").title()
+            if layout == current:
+                html = f'<span style="color:#00F0FF; font-weight:bold;">● {_tip_esc(label)}</span>'
+            else:
+                html = f'<span style="color:#E0E0E0;">&nbsp;&nbsp;{_tip_esc(label)}</span>'
+            _menu_rich_action(menu, html, partial(self._change_layout, layout))
         menu.addSeparator()
-        a = menu.addAction("Flip Layout")
-        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _komorebi_refresh_once()))
-        a = menu.addAction("Toggle Floating")
-        a.triggered.connect(lambda: self._toggle("float"))
-        a = menu.addAction("Toggle Monocle")
-        a.triggered.connect(lambda: self._toggle("monocle"))
-        a = menu.addAction("Toggle Pause")
-        a.triggered.connect(lambda: self._toggle("pause"))
+        _menu_rich_action(
+            menu, '<span style="color:#8f9bae;">⇄ Flip Layout</span>',
+            lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW),
+                     _komorebi_refresh_once()))
+        _menu_rich_action(menu, '<span style="color:#8f9bae;">⊞ Toggle Floating</span>',
+                          lambda: self._toggle("float"))
+        _menu_rich_action(menu, '<span style="color:#8f9bae;">▣ Toggle Monocle</span>',
+                          lambda: self._toggle("monocle"))
+        _menu_rich_action(menu, '<span style="color:#8f9bae;">⏸ Toggle Pause</span>',
+                          lambda: self._toggle("pause"))
         menu.exec(gpos)
 
     def apply_state(self, item):
@@ -1989,6 +2031,7 @@ class KomorebiWidget(QWidget):
             for b in self._buttons:
                 b.setStyleSheet(self._dot_css("#222222"))
             self._layout_lbl.setText("—")
+            self._focused_layout = ""
             tip = '<span style="color:#666666;">komorebi not running</span>'
             self._tip_text = tip
             self._layout_lbl._tip_text = tip
@@ -1996,6 +2039,7 @@ class KomorebiWidget(QWidget):
         workspaces = item.get("workspaces", [])
         focused = item.get("focused", -1)
         paused = item.get("paused", False)
+        self._focused_layout = item.get("focused_layout", "")
         tip = []
         for i, b in enumerate(self._buttons):
             if i < len(workspaces):
@@ -2085,13 +2129,12 @@ class KomorebiAppsWidget(QWidget):
 
     def _show_apps_menu(self):
         menu = QMenu(self)
-        menu.setStyleSheet(DIALOG_QSS)
+        menu.setStyleSheet(_KOMOREBI_MENU_QSS)
         if not self._apps:
-            act = menu.addAction("No apps running")
-            act.setEnabled(False)
+            _menu_rich_action(menu, '<span style="color:#666666;">No apps running</span>',
+                              disabled=True)
         else:
-            # group by workspace, preserving order (plain text — QMenu actions
-            # do not render HTML)
+            # group by workspace, rich text matching the hover tooltip
             by_ws = {}
             for ap in self._apps:
                 by_ws.setdefault(ap["ws"], []).append(ap)
@@ -2099,15 +2142,21 @@ class KomorebiAppsWidget(QWidget):
                 group = by_ws[ws_idx]
                 ws_name = group[0]["ws_name"]
                 active = (ws_idx == self._focused)
-                marker = "●" if active else "○"
-                header = menu.addAction(f"{marker} {ws_name}  ({len(group)})")
-                header.setEnabled(False)
+                color = "#00ff21" if active else "#8f9bae"
+                tag = "ACTIVE" if active else "idle"
+                _menu_rich_action(
+                    menu,
+                    f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
+                    f'<span style="color:#8f9bae;">({len(group)}) {tag}</span>',
+                    disabled=True)
                 for ap in group:
                     title = ap["title"] or ap["exe"]
                     if len(title) > 60:
                         title = title[:57] + "..."
-                    act = menu.addAction(f"{ap['exe']} — {title}")
-                    act.triggered.connect(partial(self._jump_to_app, ap["hwnd"], ws_idx))
+                    _menu_rich_action(
+                        menu,
+                        f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>',
+                        partial(self._jump_to_app, ap["hwnd"], ws_idx))
                 menu.addSeparator()
         gpos = self.mapToGlobal(QPoint(0, self.height()))
         menu.exec(QPoint(gpos.x(), gpos.y() + 2))
