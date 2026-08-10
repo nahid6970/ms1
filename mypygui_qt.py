@@ -2451,7 +2451,9 @@ class KomorebiAppsWidget(QWidget):
                     title = ap["title"] or ap["exe"]
                     if len(title) > 60:
                         title = title[:57] + "..."
-                    tip.append(f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(title)}</span>')
+                    tip.append(
+                        f'&nbsp;&nbsp;<span style="color:#E0E0E0;">'
+                        f'{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>')
             tip.append('<span style="color:#555555;">click to jump to an app</span>')
         tip_html = "<br/>".join(tip)
         self._tip_text = tip_html
