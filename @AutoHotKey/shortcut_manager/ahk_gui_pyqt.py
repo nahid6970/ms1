@@ -61,19 +61,30 @@ SVGS = {
     "PALETTE": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10a2 2 0 0 0 2-2 2 2 0 0 0-2-2H10a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 10 10 0 0 0-10-10z"></path><circle cx="7.5" cy="10.5" r=".5"></circle><circle cx="10.5" cy="7.5" r=".5"></circle><circle cx="13.5" cy="7.5" r=".5"></circle><circle cx="16.5" cy="10.5" r=".5"></circle></svg>',
     "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
     "ROCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>',
-    "BAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>'
+    "BAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>',
+    # Android-style toggle switches for the enable/disable column. Colours are
+    # hardcoded (no currentColor) because track and knob differ; they match the
+    # cyberpunk palette (cyan ON, dim gray OFF).
+    "TOGGLE_ON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#00F0FF"/><circle cx="33" cy="12" r="9" fill="#FFFFFF"/></svg>',
+    "TOGGLE_OFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#242424" stroke="#3a3a3a" stroke-width="1"/><circle cx="13" cy="12" r="9" fill="#9a9a9a"/></svg>'
 }
 
+# Toggle switch dimensions (must match the SVG viewBox and the <img> attrs).
+TOGGLE_W, TOGGLE_H = 46, 24
 
-def render_svg_pixmap(svg, color, size, nudge_y=0):
+
+def render_svg_pixmap(svg, color, size, nudge_y=0, height=None):
     """Render an SVG string to a transparent QPixmap, replacing 'currentColor'.
 
     nudge_y shifts the drawing up by that many pixels (used with a slightly
-    smaller icon so the shift never clips the full-bleed circle).
+    smaller icon so the shift never clips the full-bleed circle). Pass height
+    for non-square pixmaps (e.g. the toggle switches).
     """
+    if height is None:
+        height = size
     colored_svg = svg.replace('currentColor', color)
     renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
-    pix = QPixmap(size, size)
+    pix = QPixmap(size, height)
     pix.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pix)
     if nudge_y:
@@ -3110,9 +3121,6 @@ class AHKShortcutEditor(QMainWindow):
                     color: {CP_SUBTEXT};
                     font-size: 0.85em;
                 }}
-                .status-enabled {{ color: {CP_GREEN}; }}
-                .status-disabled {{ color: {CP_RED}; }}
-                
                 .indent {{ margin-left: 15px; }}
                 a {{ text-decoration: none; color: inherit; }}
             </style>
@@ -3437,6 +3445,11 @@ class AHKShortcutEditor(QMainWindow):
         sm = rules_ban_size(self.app_font_size)
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
                         render_svg_pixmap(SVGS["BAN"], CP_RED, sm))
+        # Android-style enable/disable toggles for the status column.
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://toggle-on"),
+                        render_svg_pixmap(SVGS["TOGGLE_ON"], CP_CYAN, TOGGLE_W, height=TOGGLE_H))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://toggle-off"),
+                        render_svg_pixmap(SVGS["TOGGLE_OFF"], CP_DIM, TOGGLE_W, height=TOGGLE_H))
 
     def _key_html_with_icons(self, key):
         """Swap true-color 🚀/🚫 emojis in startup/exclusion keys for SVG icons.
@@ -3531,8 +3544,10 @@ class AHKShortcutEditor(QMainWindow):
 
     def generate_shortcut_html(self, shortcut, shortcut_type, index, indented, is_favourite=False):
         enabled = shortcut.get('enabled', True)
-        status = "✅" if enabled else "❌"
-        status_class = "status-enabled" if enabled else "status-disabled"
+        # Android-style toggle switch instead of the ✅/❌ emoji (the emoji
+        # renders as a square 3D checkbox and gets clipped by the line box).
+        status_img = "icon://toggle-on" if enabled else "icon://toggle-off"
+        toggle_title = "Click to disable" if enabled else "Click to enable"
         indent_class = "indent" if indented else ""
 
         # Check if this is the selected shortcut
@@ -3640,8 +3655,8 @@ class AHKShortcutEditor(QMainWindow):
             <table width="100%" cellpadding="3" cellspacing="0" style="background-color: {bg_color}; border-radius: 0px; border-collapse: separate;">
                 <tr>
                     <td width="40" valign="{left_valign}">
-                        <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;">
-                            <span class="{status_class}" style="font-size: 18px;">{status}</span>
+                        <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;" title="{toggle_title}">
+                            <img src="{status_img}" width="{TOGGLE_W}" height="{TOGGLE_H}">
                         </a>
                     </td>
                     <td valign="{left_valign}">
