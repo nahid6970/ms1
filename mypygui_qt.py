@@ -2391,9 +2391,8 @@ class KomorebiWidget(QWidget):
         lay.setSpacing(2)
         for i in range(3):
             b = QPushButton()
-            b.setFixedSize(11, 11)
+            self._set_dot(b, "#333333")
             b.setCursor(Qt.CursorShape.PointingHandCursor)
-            b.setStyleSheet(self._dot_css("#333333"))
             b.clicked.connect(partial(self._focus_ws, i))
             b.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
             b.customContextMenuRequested.connect(
@@ -2421,6 +2420,14 @@ class KomorebiWidget(QWidget):
     def _dot_css(color):
         return (f"QPushButton {{ background: {color}; border: 1px solid #666666; "
                 f"border-radius: 5px; padding: 0px; }}")
+
+    def _set_dot(self, b, color, active=False):
+        """Style a workspace dot; the active one is a slightly wider pill."""
+        if active:
+            b.setFixedSize(15, 11)
+        else:
+            b.setFixedSize(11, 11)
+        b.setStyleSheet(self._dot_css(color))
 
     def _focus_ws(self, idx):
         subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
@@ -2667,7 +2674,7 @@ class KomorebiWidget(QWidget):
         if not item.get("ok"):
             self._ws_names = []
             for b in self._buttons:
-                b.setStyleSheet(self._dot_css("#222222"))
+                self._set_dot(b, "#222222")
             self._layout_lbl.setText("—")
             self._focused_layout = ""
             tip = '<span style="color:#666666;">komorebi not running</span>'
@@ -2693,7 +2700,7 @@ class KomorebiWidget(QWidget):
                     color = "#00ff21" if active else "#1d6b2f"
                 else:
                     color = "#00ff21" if active else "#333333"
-                b.setStyleSheet(self._dot_css(color))
+                self._set_dot(b, color, active=active)
                 name = _tip_esc(ws["name"])
                 layout = _tip_esc(ws["layout"])
                 win = ws["windows"]
@@ -2701,7 +2708,7 @@ class KomorebiWidget(QWidget):
                 tip.append(f'<span style="color:{color}; font-weight:bold;">● {name}</span> '
                            f'({win} win) <span style="color:#8f9bae;">{layout} · {state}</span>')
             else:
-                b.setStyleSheet(self._dot_css("#1a1a1a"))
+                self._set_dot(b, "#1a1a1a")
         if paused:
             tip.insert(0, '<span style="color:#FFD740;">⏸ komorebi paused</span>')
         elif not tip:
