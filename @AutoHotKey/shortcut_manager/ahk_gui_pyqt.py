@@ -3438,6 +3438,25 @@ class AHKShortcutEditor(QMainWindow):
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
                         render_svg_pixmap(SVGS["BAN"], CP_RED, sm))
 
+    def _key_html_with_icons(self, key):
+        """Swap true-color 🚀/🚫 emojis in startup/exclusion keys for SVG icons.
+
+        The leading emoji becomes the main key icon (rocket/ban, same sizes as
+        Favourites); any inner 🚫 badge (e.g. the inactive indicator in
+        '🚀 🚫[label]') becomes the small ban used on the rule sub-lines. The
+        ✅ active indicator keeps its emoji to match the '✅ Active in' rule line.
+        """
+        if not key:
+            return key
+        out = key
+        if out[0] in KEY_ICON_SRC:
+            size = key_icon_size(out[0], self.app_font_size)
+            out = f'<img src="{KEY_ICON_SRC[out[0]]}" width="{size}" height="{size}" align="middle">{out[1:]}'
+        if '🚫' in out:
+            sm = rules_ban_size(self.app_font_size)
+            out = out.replace('🚫', f'<img src="icon://ban-sm" width="{sm}" height="{sm}" align="middle">')
+        return out
+
     def _truncate_to_width(self, text, max_px):
         """Truncate text with an ellipsis so it fits the fixed key column.
 
@@ -3572,7 +3591,11 @@ class AHKShortcutEditor(QMainWindow):
             key_width = 220
 
         key_html = key  # non-favourite rows render the key as-is
-        
+        # Non-favourite startup/exclusion rows still carry true-color emojis
+        # (🚀/🚫) — swap them for the same crisp SVG icons used in Favourites.
+        if not is_favourite and shortcut_type in ("startup", "exclude"):
+            key_html = self._key_html_with_icons(key)
+
         if is_favourite:
             # Uniform favourites rows: plain key for every type (no embedded
             # window-context decorations), fixed width, pixel-truncated so the
