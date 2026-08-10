@@ -1695,28 +1695,36 @@ def _glaze_poll():
         logging.error(f"_glaze_poll error: {e}")
         return []
 
-def _glaze_focused_tiling_dir():
-    """Return tiling direction of focused container ('horizontal'/'vertical'/''). """
+_glaze_paused_cache = None
+
+def _glaze_query_paused():
+    """Refresh the cached paused state (called once at startup + on pause_changed)."""
+    global _glaze_paused_cache
     try:
         r = subprocess.run(
-            ["glazewm", "query", "tiling-direction"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace",
-            creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
+            ["glazewm", "query", "paused"],
+            capture_output=True, text=True, encoding="utf-8",
+            creationflags=subprocess.CREATE_NO_WINDOW, timeout=2
         )
-        if r.returncode != 0:
-            return ""
-        data = json.loads(r.stdout)
-        return data.get("data", {}).get("tilingDirection", "")
+        if r.returncode == 0:
+            _glaze_paused_cache = bool(json.loads(r.stdout).get("data", {}).get("isPaused", False))
     except Exception:
-        return ""
+        pass
 
 def _glaze_status_loop(q):
-    """Background thread: subscribe to workspace events, push state on change."""
+    """Background thread: subscribe to WM events, push state on every event.
+
+    NOTE: `glazewm sub --events` takes SPACE-separated event names; a
+    comma-joined string makes the sub process exit immediately with an error,
+    silently killing live updates. Each event triggers ONE subprocess query
+    (`query workspaces`, which also carries tilingDirection + pause cache).
+    """
     while True:
         try:
             proc = subprocess.Popen(
                 ["glazewm", "sub", "--events",
-                 "workspace_activated,workspace_deactivated,workspace_updated,focus_changed,pause_changed"],
+                 "workspace_activated", "workspace_deactivated", "workspace_updated",
+                 "focus_changed", "pause_changed", "tiling_direction_changed"],
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                 creationflags=subprocess.CREATE_NO_WINDOW
             )
@@ -1724,9 +1732,14 @@ def _glaze_status_loop(q):
             q.put(_glaze_build_state())
             for raw in proc.stdout:
                 try:
+                    line = raw.decode("utf-8", "replace")
+                    if '"eventType":"pause_changed"' in line:
+                        _glaze_query_paused()
                     q.put(_glaze_build_state())
                 except Exception as e:
                     logging.error(f"glaze event parse error: {e}")
+            # Stream ended (glazewm restarted / not running) - avoid busy loop
+            time.sleep(1)
         except Exception as e:
             logging.error(f"_glaze_status_loop error: {e}")
             time.sleep(3)
@@ -1774,6 +1787,7 @@ def _glaze_build_state():
     if not workspaces:
         return {"ok": False, "workspaces": [], "focused_name": "", "tiling_dir": "", "paused": False}
     focused_name = ""
+    tiling_dir = ""
     ws_list = []
     for ws in workspaces:
         name        = ws.get("name") or ws.get("id", "?")
@@ -1783,6 +1797,7 @@ def _glaze_build_state():
         win_count   = len([c for c in ws.get("children", []) if c.get("type") == "window"])
         if is_focused:
             focused_name = name
+            tiling_dir = ws.get("tilingDirection", "") or tiling_dir
         ws_list.append({
             "name":       name,
             "display":    display,
@@ -1813,16 +1828,9 @@ def _glaze_build_state():
         except (ValueError, TypeError):
             return (1, w["name"])
     ws_list.sort(key=_ws_key)
-    try:
-        paused_r = subprocess.run(
-            ["glazewm", "query", "paused"],
-            capture_output=True, text=True, encoding="utf-8",
-            creationflags=subprocess.CREATE_NO_WINDOW, timeout=2
-        )
-        paused = json.loads(paused_r.stdout).get("data", {}).get("isPaused", False) if paused_r.returncode == 0 else False
-    except Exception:
-        paused = False
-    tiling_dir = _glaze_focused_tiling_dir()
+    if _glaze_paused_cache is None:
+        _glaze_query_paused()
+    paused = _glaze_paused_cache if _glaze_paused_cache is not None else False
     return {"ok": True, "workspaces": ws_list, "focused_name": focused_name,
             "tiling_dir": tiling_dir, "paused": paused}
 
@@ -3778,7 +3786,7 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
-        self._glaze_timer = QTimer(self); self._glaze_timer.timeout.connect(self._drain_glaze_queue); self._glaze_timer.start(100)
+        self._glaze_timer = QTimer(self); self._glaze_timer.timeout.connect(self._drain_glaze_queue); self._glaze_timer.start(40)
         threading.Thread(target=_glaze_status_loop, args=(_glaze_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
