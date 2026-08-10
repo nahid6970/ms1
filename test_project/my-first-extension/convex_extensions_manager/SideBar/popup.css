@@ -21,9 +21,14 @@
     display: none !important;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+}
+
 body {
     width: 320px; /* Default, will be adjusted by JS */
-    background-color: var(--bg-color);
     color: var(--text-main);
     font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
     font-size: 13px;

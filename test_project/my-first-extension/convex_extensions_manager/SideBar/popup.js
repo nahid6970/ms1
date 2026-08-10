@@ -133,6 +133,8 @@ function applyGridLayout(itemsPerRow, extraPadding = 20) {
     
     let popupWidth = (itemSize * itemsPerRow) + (gap * (itemsPerRow - 1)) + containerPaddingLeft + containerPaddingRight + extraPadding;
     popupWidth = Math.max(popupWidth, minWidth);
+    /* Set width on both html and body elements so Chrome popup window shrinks to fit without right-side empty space */
+    document.documentElement.style.width = `${popupWidth}px`;
     document.body.style.width = `${popupWidth}px`;
     linksList.style.gridTemplateColumns = `repeat(${itemsPerRow}, 1fr)`;
 }
