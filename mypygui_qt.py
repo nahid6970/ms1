@@ -2692,14 +2692,12 @@ class KomorebiWidget(QWidget):
             if i < len(workspaces):
                 ws = workspaces[i]
                 active = (i == focused)
-                if ws.get("maximized"):
-                    color = "#FFD740" if active else "#6b5f28"
-                elif ws.get("monocle"):
-                    color = "#00F0FF" if active else "#2b5f66"
+                if active:
+                    color = "#FFFFFF"          # active workspace: white
                 elif ws["windows"] > 0:
-                    color = "#00ff21" if active else "#1d6b2f"
+                    color = "#8a8a8a"          # idle with windows: gray
                 else:
-                    color = "#00ff21" if active else "#333333"
+                    color = "#333333"          # idle empty: unchanged
                 self._set_dot(b, color, active=active)
                 name = _tip_esc(ws["name"])
                 layout = _tip_esc(ws["layout"])
