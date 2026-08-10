@@ -1991,13 +1991,14 @@ class GlazeWmWidget(QWidget):
     • Active workspace = bright green dot, has windows but inactive = dim green,
       empty = dark. Displayed (visible on monitor) but not focused = cyan.
     • Tiling direction label next to the dots (H / V).
-    • Left-click dot   → focus that workspace.
-    • Right-click      → menu: toggle tiling direction, toggle pause,
-                         reload config, set-floating / set-tiling for focused.
-    • Hover            → tooltip with workspace name, window count, state.
+    • Left-click dot → focus that workspace.
+    • Left-click the H/V label → menu: tiling direction, window state
+      (floating/tiling/fullscreen), pause/reload/redraw. Right-click on the
+      layout label does nothing (no workspace items in this menu — the dots
+      handle switching).
+    • Hover on the label → layout-only tooltip; hover on the widget →
+      workspace name, window count, state.
     • Paused indicator on the direction label.
-    • Image icon (🖥 + number) shown like the screenshot — workspace name
-      rendered as a number badge on the monitor icon using a QLabel.
     """
 
     def __init__(self, parent=None):
@@ -2019,11 +2020,14 @@ class GlazeWmWidget(QWidget):
             "font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 2px;"
         )
         self._dir_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        # Layout menu opens on LEFT click only; right-click on the layout does nothing
+        self._dir_lbl.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
         _install_tip_filter(self._dir_lbl)
         lay.addWidget(self._dir_lbl)
+        self._dir_lbl.mouseReleaseEvent = self._dir_lbl_left_click
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._show_menu)
+        self.customContextMenuRequested.connect(lambda pos: self._show_menu(self.mapToGlobal(pos)))
         _install_tip_filter(self)
 
     # ── style ─────────────────────────────────────────────────────────────────
@@ -2041,7 +2045,7 @@ class GlazeWmWidget(QWidget):
             self._dir_lbl.setText("—")
             tip = '<span style="color:#666666;">glazewm not running</span>'
             self._tip_text = tip
-            self._dir_lbl._tip_text = tip
+            self._dir_lbl._tip_text = '<span style="color:#666666;">Tiling: —</span>'
             return
 
         workspaces   = item.get("workspaces", [])
@@ -2103,17 +2107,20 @@ class GlazeWmWidget(QWidget):
             tip_lines.insert(0, '<span style="color:#FFD740;">⏸ glazewm paused</span>')
 
         self._tip_text = "<br/>".join(tip_lines)
-        self._dir_lbl._tip_text = self._tip_text
 
-        # Direction label
+        # Direction label: layout info only (no workspace items)
         if paused:
             self._dir_lbl.setText("⏸")
+            self._dir_lbl._tip_text = '<span style="color:#FFD740;">⏸ glazewm paused</span>'
         elif tiling_dir == "horizontal":
             self._dir_lbl.setText("H")
+            self._dir_lbl._tip_text = '<span style="color:#8f9bae;">Tiling: Horizontal</span>'
         elif tiling_dir == "vertical":
             self._dir_lbl.setText("V")
+            self._dir_lbl._tip_text = '<span style="color:#8f9bae;">Tiling: Vertical</span>'
         else:
             self._dir_lbl.setText("—")
+            self._dir_lbl._tip_text = '<span style="color:#666666;">Tiling: —</span>'
 
     # ── actions ───────────────────────────────────────────────────────────────
     def _focus_ws(self, name):
@@ -2134,18 +2141,13 @@ class GlazeWmWidget(QWidget):
         except Exception as e:
             logging.error(f"GlazeWmWidget cmd error: {e}")
 
-    def _show_menu(self, pos):
+    def _dir_lbl_left_click(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._show_menu(self._dir_lbl.mapToGlobal(event.position().toPoint()))
+
+    def _show_menu(self, gpos):
         menu = QMenu(self)
         menu.setStyleSheet(DIALOG_QSS)
-
-        workspaces = self._state.get("workspaces", []) if self._state else []
-        # Workspace switcher
-        for ws in workspaces:
-            name   = ws["name"]
-            active = ws["focused"]
-            act    = menu.addAction(("✓ " if active else "    ") + (ws["display"] or name))
-            act.triggered.connect(partial(self._focus_ws, name))
-        menu.addSeparator()
 
         # Tiling direction
         act_h = menu.addAction("Tiling → Horizontal")
@@ -2168,7 +2170,7 @@ class GlazeWmWidget(QWidget):
         menu.addAction("Reload Config").triggered.connect(lambda: self._glaze_cmd("wm-reload-config"))
         menu.addAction("Redraw").triggered.connect(lambda: self._glaze_cmd("wm-redraw"))
 
-        menu.exec(self.mapToGlobal(pos))
+        menu.exec(gpos)
 
 
 class GlazeAppsWidget(QWidget):
