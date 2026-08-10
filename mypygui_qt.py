@@ -1838,11 +1838,33 @@ def _glaze_build_state():
         except (ValueError, TypeError):
             return (1, w["name"])
     ws_list.sort(key=_ws_key)
+
+    # Every open window across ALL workspaces (from the same query - no extra
+    # subprocess): id/handle for jumping, title/exe for display.
+    apps = []
+    for ws in workspaces:
+        ws_name    = ws.get("name") or ws.get("id", "?")
+        ws_disp    = ws.get("displayName") or ws_name
+        ws_focused = ws.get("hasFocus", False)
+        for c in ws.get("children", []):
+            if c.get("type") != "window":
+                continue
+            apps.append({
+                "id":         c.get("id", ""),
+                "handle":     c.get("handle"),
+                "title":      (c.get("title") or "").strip(),
+                "exe":        c.get("processName") or "?",
+                "ws":         ws_name,
+                "ws_display": ws_disp,
+                "ws_focused": ws_focused,
+                "focused":    c.get("hasFocus", False),
+            })
+    apps.sort(key=lambda a: (a["ws"], a["title"].lower()))
     if _glaze_paused_cache is None:
         _glaze_query_paused()
     paused = _glaze_paused_cache if _glaze_paused_cache is not None else False
     return {"ok": True, "workspaces": ws_list, "focused_name": focused_name,
-            "tiling_dir": tiling_dir, "paused": paused}
+            "tiling_dir": tiling_dir, "paused": paused, "apps": apps}
 
 
 def delete_git_lock_files(path):
@@ -2146,6 +2168,125 @@ class GlazeWmWidget(QWidget):
         menu.addAction("Reload Config").triggered.connect(lambda: self._glaze_cmd("wm-reload-config"))
         menu.addAction("Redraw").triggered.connect(lambda: self._glaze_cmd("wm-redraw"))
 
+        menu.exec(self.mapToGlobal(pos))
+
+
+class GlazeAppsWidget(QWidget):
+    """🖥 + count of every open window across ALL workspaces.
+
+    • Left/right click → menu grouped by workspace; click an app → jump to it
+      (`glazewm command focus --container-id` + delayed restore/foreground).
+    • Hover → tooltip with the same grouped list (read-only).
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._state    = {}
+        self._tip_text = ""
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(2, 0, 4, 0)
+        lay.setSpacing(2)
+
+        self._icon_lbl = QLabel("\U0001f5a5")
+        self._icon_lbl.setStyleSheet("background: transparent; color: #8f9bae; font-size: 9pt;")
+        self._icon_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._count_lbl = QLabel("0")
+        self._count_lbl.setStyleSheet(
+            "background: transparent; color: #00F0FF; font-size: 8pt; font-weight: bold;"
+        )
+        self._count_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        _install_tip_filter(self._icon_lbl)
+        _install_tip_filter(self._count_lbl)
+        lay.addWidget(self._icon_lbl)
+        lay.addWidget(self._count_lbl)
+
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_menu)
+        _install_tip_filter(self)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._show_menu(event.position().toPoint())
+        super().mouseReleaseEvent(event)
+
+    # -- data helpers --------------------------------------------------------
+    def _grouped(self):
+        apps = (self._state.get("apps") or []) if self._state else []
+        groups, order = {}, []
+        for ap in apps:
+            key = ap["ws_display"]
+            if key not in groups:
+                groups[key] = []
+                order.append(key)
+            groups[key].append(ap)
+        return order, groups
+
+    # -- update from queue ----------------------------------------------------
+    def apply_state(self, item):
+        self._state = item
+        apps = item.get("apps", []) if item.get("ok") else []
+        self._count_lbl.setText(str(len(apps)))
+        order, groups = self._grouped()
+        if not order:
+            tip = '<span style="color:#666666;">no windows open</span>'
+        else:
+            lines = []
+            for ws_key in order:
+                group = groups[ws_key]
+                active = group[0]["ws_focused"]
+                color = "#00ff21" if active else "#8f9bae"
+                lines.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_key)} ({len(group)})</span>')
+                for ap in group:
+                    mark = "●" if ap.get("focused") else "○"
+                    t = ap["title"] or ap["exe"]
+                    lines.append(f'<span style="color:#E0E0E0;">{mark} {_tip_esc(ap["exe"])} — {_tip_esc(t)}</span>')
+            tip = "<br/>".join(lines)
+        self._tip_text = tip
+        self._icon_lbl._tip_text = tip
+        self._count_lbl._tip_text = tip
+
+    # -- actions ---------------------------------------------------------------
+    def _jump(self, ap):
+        wid = ap.get("id")
+        hwnd = ap.get("handle")
+        try:
+            subprocess.Popen(
+                ["glazewm", "command", "focus", "--container-id", wid],
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+        except Exception as e:
+            logging.error(f"GlazeAppsWidget focus error: {e}")
+            return
+        if hwnd:
+            QTimer.singleShot(180, lambda h=hwnd: self._activate_window(h))
+
+    @staticmethod
+    def _activate_window(hwnd):
+        try:
+            user32 = ctypes.windll.user32
+            if user32.IsIconic(hwnd):
+                user32.ShowWindow(hwnd, 9)  # SW_RESTORE
+            user32.SetForegroundWindow(hwnd)
+        except Exception as e:
+            logging.error(f"GlazeAppsWidget activate error: {e}")
+
+    def _show_menu(self, pos):
+        menu = QMenu(self)
+        menu.setStyleSheet(DIALOG_QSS)
+        order, groups = self._grouped()
+        if not order:
+            act = menu.addAction("No windows open")
+            act.setEnabled(False)
+        else:
+            for ws_key in order:
+                group = groups[ws_key]
+                header = menu.addAction(f"{len(group)}  {ws_key}")
+                header.setEnabled(False)
+                for ap in group:
+                    label = f"{ap['exe']} — {ap['title']}" if ap["title"] else ap["exe"]
+                    act = menu.addAction(label)
+                    act.triggered.connect(partial(self._jump, ap))
         menu.exec(self.mapToGlobal(pos))
 
 
@@ -3173,6 +3314,9 @@ class StatusBar(QMainWindow):
         
         self.komorebi_widget = GlazeWmWidget()
         ll.addWidget(self.komorebi_widget)
+
+        self.glaze_apps_widget = GlazeAppsWidget()
+        ll.addWidget(self.glaze_apps_widget)
         
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
@@ -3841,6 +3985,8 @@ class StatusBar(QMainWindow):
                 if hasattr(self, "komorebi_widget"):
                     self.komorebi_widget.apply_state(item)
                     self.komorebi_widget._state = item
+                if hasattr(self, "glaze_apps_widget"):
+                    self.glaze_apps_widget.apply_state(item)
         except Empty:
             pass
 
