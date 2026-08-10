@@ -1676,195 +1676,97 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 
-# ─── GlazeWM status ───────────────────────────────────────────────────────────
-_glaze_queue = Queue()
+# ─── Komorebi status ──────────────────────────────────────────────────────────
+_komorebi_queue = Queue()
 
-def _glaze_poll():
-    """Query glazewm workspaces. Returns list of workspace dicts or []."""
+def check_komorebi_status(q):
+    """Poll komorebic state, push a compact dict into q. Never raises."""
     try:
-        r = subprocess.run(
-            ["glazewm", "query", "workspaces"],
-            capture_output=True, text=True, encoding="utf-8", errors="replace",
-            creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
-        )
-        if r.returncode != 0:
-            return []
-        data = json.loads(r.stdout)
-        return data.get("data", {}).get("workspaces", [])
+        result = subprocess.run(["komorebic", "state"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace",
+                                creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
+        if result.returncode != 0:
+            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            return
+        data = json.loads(result.stdout)
+        monitors = data.get("monitors", {}).get("elements", [])
+        if not monitors:
+            q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
+            return
+        screen = monitors[0]
+        wss = screen.get("workspaces", {}).get("elements", [])
+        focused = screen.get("workspaces", {}).get("focused", 0)
+        workspaces = []
+        focused_layout = ""
+        apps = []  # every window on EVERY workspace: {hwnd, title, exe, ws_index, ws_name}
+        for i, ws in enumerate(wss):
+            windows = 0
+            for cont in ws.get("containers", {}).get("elements", []):
+                for w in cont.get("windows", {}).get("elements", []):
+                    if isinstance(w, dict):
+                        windows += 1
+                        # apps are collected from ALL workspaces (dots below cap at 3)
+                        apps.append({"hwnd": w.get("hwnd"), "title": w.get("title") or "",
+                                     "exe": w.get("exe") or "", "ws": i,
+                                     "ws_name": ws.get("name") or f"WS{i + 1}"})
+            # Only count tiled windows; floating ones are excluded from the count
+            if i >= 3:
+                continue
+            layout = (ws.get("layout") or {}).get("Default", "BSP")
+            if i == focused:
+                focused_layout = layout
+            workspaces.append({
+                "index": i,
+                "name": ws.get("name") or f"WS{i + 1}",
+                "layout": layout,
+                "windows": windows,
+                "tile": ws.get("tile", True),
+                "monocle": bool(ws.get("monocle_container")),
+                "maximized": bool(ws.get("maximized_window")),
+            })
+        if not focused_layout and 0 <= focused < len(wss):
+            focused_layout = (wss[focused].get("layout") or {}).get("Default", "")
+        q.put({"ok": True, "workspaces": workspaces, "focused": focused,
+               "focused_layout": focused_layout, "apps": apps,
+               "paused": bool(data.get("is_paused", False))})
     except Exception as e:
-        logging.error(f"_glaze_poll error: {e}")
-        return []
+        logging.error(f"check_komorebi_status error: {e}")
+        q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
 
-_glaze_paused_cache = None
+_komorebi_fast_until = 0.0  # when > now, the poll loop ticks every 0.3s
 
-def _glaze_query_paused():
-    """Refresh the cached paused state (called once at startup + on pause_changed)."""
-    global _glaze_paused_cache
-    try:
-        r = subprocess.run(
-            ["glazewm", "query", "paused"],
-            capture_output=True, text=True, encoding="utf-8",
-            creationflags=subprocess.CREATE_NO_WINDOW, timeout=2
-        )
-        if r.returncode == 0:
-            _glaze_paused_cache = bool(json.loads(r.stdout).get("data", {}).get("isPaused", False))
-        else:
-            _glaze_paused_cache = False
-    except Exception:
-        _glaze_paused_cache = False
+def _kick_komorebi_refresh(seconds=8):
+    """Speed up the poll loop briefly after a user action (focus/change layout)
+    so the status bar reflects the new komorebi state almost instantly."""
+    global _komorebi_fast_until
+    _komorebi_fast_until = time.time() + seconds
 
-def _glaze_status_loop(q):
-    """Background thread: subscribe to WM events, push state on every event.
-
-    NOTE: `glazewm sub --events` takes SPACE-separated event names; a
-    comma-joined string makes the sub process exit immediately with an error,
-    silently killing live updates. Each event triggers ONE subprocess query
-    (`query workspaces`, which also carries tilingDirection + pause cache).
-    """
+def _komorebi_status_loop(q):
     while True:
-        try:
-            proc = subprocess.Popen(
-                ["glazewm", "sub", "--events",
-                 "workspace_activated", "workspace_deactivated", "workspace_updated",
-                 "focus_changed", "pause_changed", "tiling_direction_changed"],
-                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NO_WINDOW
-            )
-            # Push initial state immediately
-            q.put(_glaze_build_state())
-            last_build = 0.0
-            for raw in proc.stdout:
-                try:
-                    # Debounce bursts: a workspace switch fires several events in
-                    # quick succession; state is a full snapshot, so skip rebuilds
-                    # within 120ms of the last one (still correct, much faster).
-                    now = time.time()
-                    if now - last_build < 0.12:
-                        continue
-                    last_build = now
-                    line = raw.decode("utf-8", "replace")
-                    if '"eventType":"pause_changed"' in line:
-                        _glaze_query_paused()
-                    q.put(_glaze_build_state())
-                except Exception as e:
-                    logging.error(f"glaze event parse error: {e}")
-            # Stream ended (glazewm restarted / not running) - avoid busy loop
-            time.sleep(1)
-        except Exception as e:
-            logging.error(f"_glaze_status_loop error: {e}")
-            time.sleep(3)
+        check_komorebi_status(q)
+        if time.time() < _komorebi_fast_until:
+            time.sleep(0.3)
+        else:
+            # sleep in short chunks so a kick mid-sleep is noticed promptly
+            for _ in range(4):
+                if time.time() >= _komorebi_fast_until:
+                    break
+                time.sleep(0.5)
 
-_GLAZE_DISPLAY_FALLBACK = {"1": "I", "2": "II", "3": "III"}
-_glaze_display_cache = {"mtime": 0.0, "map": {}}
+_KOMOREBI_LAYOUTS = ["bsp", "columns", "rows", "vertical-stack", "horizontal-stack",
+                     "ultrawide-vertical-stack", "grid", "right-main-vertical-stack"]
 
-def _glaze_workspace_display_names():
-    """Read name -> display_name from ~/.glzr/glazewm/config.yaml (best effort,
-    cached on file mtime).
-
-    GlazeWM's `query workspaces` only returns ACTIVE workspaces, so for the
-    always-visible minimum dots we need the display names of the first three
-    (I/II/III) straight from the config. Falls back to a hardcoded map.
-    """
-    global _glaze_display_cache
-    try:
-        cfg = os.path.expanduser("~/.glzr/glazewm/config.yaml")
-        mt = os.path.getmtime(cfg)
-        if mt == _glaze_display_cache["mtime"]:
-            return _glaze_display_cache["map"]
-        with open(cfg, encoding="utf-8") as f:
-            txt = f.read()
-        m = re.search(r"^workspaces:\s*\n(.*?)(?=^\w)", txt, re.M | re.S)
-        mapping = {}
-        if m:
-            cur = None
-            for line in m.group(1).splitlines():
-                nm = re.match(r"\s*-\s*name:\s*['\"]?([^'\"]+)", line)
-                if nm:
-                    cur = nm.group(1).strip()
-                    continue
-                dm = re.match(r"\s*display_name:\s*['\"]?([^'\"]+)", line)
-                if dm and cur:
-                    mapping[cur] = dm.group(1).strip()
-        _glaze_display_cache = {"mtime": mt, "map": mapping}
-        return mapping
-    except Exception:
-        return {}
-
-
-def _glaze_build_state():
-    """Build the state dict pushed into the queue."""
-    workspaces = _glaze_poll()
-    if not workspaces:
-        return {"ok": False, "workspaces": [], "focused_name": "", "tiling_dir": "", "paused": False}
-    focused_name = ""
-    tiling_dir = ""
-    ws_list = []
-    for ws in workspaces:
-        name        = ws.get("name") or ws.get("id", "?")
-        display     = ws.get("displayName") or name
-        is_focused  = ws.get("hasFocus", False)
-        is_shown    = ws.get("isDisplayed", False)
-        win_count   = len([c for c in ws.get("children", []) if c.get("type") == "window"])
-        if is_focused:
-            focused_name = name
-            tiling_dir = ws.get("tilingDirection", "") or tiling_dir
-        ws_list.append({
-            "name":       name,
-            "display":    display,
-            "focused":    is_focused,
-            "displayed":  is_shown,
-            "windows":    win_count,
-        })
-
-    # Always show at least 3 dots (I/II/III) even when only 1-2 workspaces are
-    # active yet — pad missing ones as empty entries.
-    if len(ws_list) < 3:
-        displays = _glaze_workspace_display_names()
-        active_names = {w["name"] for w in ws_list}
-        for n in ("1", "2", "3"):
-            if n in active_names:
-                continue
-            ws_list.append({
-                "name":       n,
-                "display":    displays.get(n, _GLAZE_DISPLAY_FALLBACK.get(n, n)),
-                "focused":    False,
-                "displayed":  False,
-                "windows":    0,
-            })
-    # Keep dots in numeric order so I/II/III always appear left-to-right
-    def _ws_key(w):
-        try:
-            return (0, int(w["name"]))
-        except (ValueError, TypeError):
-            return (1, w["name"])
-    ws_list.sort(key=_ws_key)
-
-    # Every open window across ALL workspaces (from the same query - no extra
-    # subprocess): id/handle for jumping, title/exe for display.
-    apps = []
-    for ws in workspaces:
-        ws_name    = ws.get("name") or ws.get("id", "?")
-        ws_disp    = ws.get("displayName") or ws_name
-        ws_focused = ws.get("hasFocus", False)
-        for c in ws.get("children", []):
-            if c.get("type") != "window":
-                continue
-            apps.append({
-                "id":         c.get("id", ""),
-                "handle":     c.get("handle"),
-                "title":      (c.get("title") or "").strip(),
-                "exe":        c.get("processName") or "?",
-                "ws":         ws_name,
-                "ws_display": ws_disp,
-                "ws_focused": ws_focused,
-                "focused":    c.get("hasFocus", False),
-            })
-    apps.sort(key=lambda a: (a["ws"], a["title"].lower()))
-    if _glaze_paused_cache is None:
-        _glaze_query_paused()
-    paused = _glaze_paused_cache if _glaze_paused_cache is not None else False
-    return {"ok": True, "workspaces": ws_list, "focused_name": focused_name,
-            "tiling_dir": tiling_dir, "paused": paused, "apps": apps}
+def _komorebi_layout_short(name):
+    """Map komorebi layout name (e.g. 'VerticalStack') to a compact label."""
+    if not name:
+        return "—"
+    m = {
+        "BSP": "BSP", "Columns": "COL", "Rows": "ROW",
+        "VerticalStack": "VSTK", "HorizontalStack": "HSTK",
+        "UltrawideVerticalStack": "ULTW", "Grid": "GRID",
+        "RightMainVerticalStack": "RMAIN",
+    }
+    return m.get(name, name[:4].upper())
 
 
 def delete_git_lock_files(path):
@@ -1984,312 +1886,258 @@ class GitIconLabel(IconLabel):
             logging.error(f"GitIconLabel indicator error: {e}")
 
 
-class GlazeWmWidget(QWidget):
-    """Workspace dots + tiling-direction label for GlazeWM.
+class KomorebiWidget(QWidget):
+    """Up to 3 clickable komorebi workspace dots + active layout label.
 
-    • One dot per workspace (dynamic, matches actual glazewm state).
-    • Active workspace = bright green dot, has windows but inactive = dim green,
-      empty = dark. Displayed (visible on monitor) but not focused = cyan.
-    • Tiling direction label next to the dots (H / V).
-    • Left-click dot → focus that workspace.
-    • Left-click the H/V label → menu: tiling direction, window state
-      (floating/tiling/fullscreen), pause/reload/redraw. Right-click on the
-      layout label does nothing (no workspace items in this menu — the dots
-      handle switching).
-    • Hover on the label → layout-only tooltip; hover on the widget →
-      workspace name, window count, state.
-    • Paused indicator on the direction label.
+    Left-click a dot -> focus that workspace.
+    Right-click (dots or layout label) -> menu to change the workspace layout
+    (BSP, Columns, Rows, Stacks, Grid, ...). Hover shows each workspace's
+    window count and layout. Styled to match the status bar.
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._state     = {}
-        self._buttons   = []   # (QPushButton dot, ws_name)
-        self._tip_text  = ""
-        self._dir_lbl   = None
-
-        lay = QHBoxLayout(self)
-        lay.setContentsMargins(10, 0, 4, 0)
-        lay.setSpacing(3)
-        self._lay = lay
-
-        # Tiling direction label
-        self._dir_lbl = QLabel("—")
-        self._dir_lbl.setStyleSheet(
-            "color: #8f9bae; background: transparent; "
-            "font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 2px;"
-        )
-        self._dir_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-        # Layout menu opens on LEFT click only; right-click on the layout does nothing
-        self._dir_lbl.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
-        _install_tip_filter(self._dir_lbl)
-        lay.addWidget(self._dir_lbl)
-        self._dir_lbl.mouseReleaseEvent = self._dir_lbl_left_click
-
-        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(lambda pos: self._show_menu(self.mapToGlobal(pos)))
-        _install_tip_filter(self)
-
-    # ── style ─────────────────────────────────────────────────────────────────
-    @staticmethod
-    def _dot_css(color):
-        return (f"QPushButton {{ background: {color}; border: 1px solid #555555; "
-                f"border-radius: 5px; padding: 0px; }}"
-                f"QPushButton:hover {{ border: 1px solid #cccccc; }}")
-
-    # ── update from queue ─────────────────────────────────────────────────────
-    def apply_state(self, item):
-        if not item.get("ok"):
-            for b, _ in self._buttons:
-                b.setStyleSheet(self._dot_css("#222222"))
-            self._dir_lbl.setText("—")
-            tip = '<span style="color:#666666;">glazewm not running</span>'
-            self._tip_text = tip
-            self._dir_lbl._tip_text = '<span style="color:#666666;">Tiling: —</span>'
-            return
-
-        workspaces   = item.get("workspaces", [])
-        focused_name = item.get("focused_name", "")
-        tiling_dir   = item.get("tiling_dir", "")
-        paused       = item.get("paused", False)
-
-        # Rebuild dot buttons if workspace count changed
-        if len(self._buttons) != len(workspaces):
-            for b, _ in self._buttons:
-                self._lay.removeWidget(b)
-                b.deleteLater()
-            self._buttons.clear()
-            # Insert dots BEFORE the direction label
-            dir_idx = self._lay.indexOf(self._dir_lbl)
-            for i, ws in enumerate(workspaces):
-                b = QPushButton()
-                b.setFixedSize(11, 11)
-                b.setCursor(Qt.CursorShape.PointingHandCursor)
-                b.setStyleSheet(self._dot_css("#333333"))
-                name = ws["name"]
-                b.clicked.connect(partial(self._focus_ws, name))
-                _install_tip_filter(b)
-                self._lay.insertWidget(dir_idx + i, b)
-                self._buttons.append((b, name))
-
-        # Color dots and build tooltip
-        tip_lines = []
-        for (b, _), ws in zip(self._buttons, workspaces):
-            name    = ws["name"]
-            display = ws["display"] or name
-            active  = ws["focused"]
-            shown   = ws["displayed"]
-            wins    = ws["windows"]
-
-            if active:
-                color = "#00ff21"
-            elif shown:
-                color = "#00F0FF"
-            elif wins > 0:
-                color = "#1d6b2f"
-            else:
-                color = "#333333"
-
-            b.setStyleSheet(self._dot_css(color))
-            # Update the button's name binding in case workspaces were reordered
-            b.clicked.disconnect()
-            b.clicked.connect(partial(self._focus_ws, name))
-
-            state_str = "ACTIVE" if active else ("shown" if shown else ("idle" if wins > 0 else "empty"))
-            tip_line = (
-                f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(display)}</span> '
-                f'<span style="color:#8f9bae;">({wins} win) {state_str}</span>'
-            )
-            b._tip_text = tip_line
-            tip_lines.append(tip_line)
-
-        if paused:
-            tip_lines.insert(0, '<span style="color:#FFD740;">⏸ glazewm paused</span>')
-
-        self._tip_text = "<br/>".join(tip_lines)
-
-        # Direction label: layout info only (no workspace items)
-        if paused:
-            self._dir_lbl.setText("⏸")
-            self._dir_lbl._tip_text = '<span style="color:#FFD740;">⏸ glazewm paused</span>'
-        elif tiling_dir == "horizontal":
-            self._dir_lbl.setText("H")
-            self._dir_lbl._tip_text = '<span style="color:#8f9bae;">Tiling: Horizontal</span>'
-        elif tiling_dir == "vertical":
-            self._dir_lbl.setText("V")
-            self._dir_lbl._tip_text = '<span style="color:#8f9bae;">Tiling: Vertical</span>'
-        else:
-            self._dir_lbl.setText("—")
-            self._dir_lbl._tip_text = '<span style="color:#666666;">Tiling: —</span>'
-
-    # ── actions ───────────────────────────────────────────────────────────────
-    def _focus_ws(self, name):
-        try:
-            subprocess.Popen(
-                ["glazewm", "command", "focus", "--workspace", name],
-                creationflags=subprocess.CREATE_NO_WINDOW
-            )
-        except Exception as e:
-            logging.error(f"GlazeWmWidget focus error: {e}")
-
-    def _glaze_cmd(self, *args):
-        try:
-            subprocess.Popen(
-                ["glazewm", "command"] + list(args),
-                creationflags=subprocess.CREATE_NO_WINDOW
-            )
-        except Exception as e:
-            logging.error(f"GlazeWmWidget cmd error: {e}")
-
-    def _dir_lbl_left_click(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._show_menu(self._dir_lbl.mapToGlobal(event.position().toPoint()))
-
-    def _show_menu(self, gpos):
-        menu = QMenu(self)
-        menu.setStyleSheet(DIALOG_QSS)
-
-        # Tiling direction
-        act_h = menu.addAction("Tiling → Horizontal")
-        act_h.triggered.connect(lambda: self._glaze_cmd("set-tiling-direction", "horizontal"))
-        act_v = menu.addAction("Tiling → Vertical")
-        act_v.triggered.connect(lambda: self._glaze_cmd("set-tiling-direction", "vertical"))
-        act_tog = menu.addAction("Toggle Tiling Direction")
-        act_tog.triggered.connect(lambda: self._glaze_cmd("toggle-tiling-direction"))
-        menu.addSeparator()
-
-        # Window state
-        menu.addAction("Set Floating").triggered.connect(lambda: self._glaze_cmd("set-floating"))
-        menu.addAction("Set Tiling").triggered.connect(lambda: self._glaze_cmd("set-tiling"))
-        menu.addAction("Toggle Floating").triggered.connect(lambda: self._glaze_cmd("toggle-floating"))
-        menu.addAction("Toggle Fullscreen").triggered.connect(lambda: self._glaze_cmd("toggle-fullscreen"))
-        menu.addSeparator()
-
-        # WM controls
-        menu.addAction("Toggle Pause").triggered.connect(lambda: self._glaze_cmd("wm-toggle-pause"))
-        menu.addAction("Reload Config").triggered.connect(lambda: self._glaze_cmd("wm-reload-config"))
-        menu.addAction("Redraw").triggered.connect(lambda: self._glaze_cmd("wm-redraw"))
-
-        menu.exec(gpos)
-
-
-class GlazeAppsWidget(QWidget):
-    """🖥 + count of every open window across ALL workspaces.
-
-    • Left/right click → menu grouped by workspace; click an app → jump to it
-      (`glazewm command focus --container-id` + delayed restore/foreground).
-    • Hover → tooltip with the same grouped list (read-only).
-    """
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._state    = {}
+        self._buttons = []
+        self._layout_lbl = None
         self._tip_text = ""
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(2, 0, 4, 0)
+        lay.setContentsMargins(10, 0, 1, 0)  # match pagination arrows' padx
         lay.setSpacing(2)
-
-        self._icon_lbl = QLabel("\U0001f5a5")
-        self._icon_lbl.setStyleSheet("background: transparent; color: #8f9bae; font-size: 9pt;")
-        self._icon_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self._count_lbl = QLabel("0")
-        self._count_lbl.setStyleSheet(
-            "background: transparent; color: #00F0FF; font-size: 8pt; font-weight: bold;"
-        )
-        self._count_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        _install_tip_filter(self._icon_lbl)
-        _install_tip_filter(self._count_lbl)
-        lay.addWidget(self._icon_lbl)
-        lay.addWidget(self._count_lbl)
-
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        for i in range(3):
+            b = QPushButton()
+            b.setFixedSize(11, 11)
+            b.setCursor(Qt.CursorShape.PointingHandCursor)
+            b.setStyleSheet(self._dot_css("#333333"))
+            b.clicked.connect(partial(self._focus_ws, i))
+            lay.addWidget(b)
+            self._buttons.append(b)
+        self._layout_lbl = QLabel("—")
+        self._layout_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 3px;")
+        self._layout_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
+        lay.addWidget(self._layout_lbl)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._show_menu)
+        self.customContextMenuRequested.connect(self._show_layout_menu)
+        self._install_self_tip()
+
+    def _install_self_tip(self):
         _install_tip_filter(self)
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._show_menu(event.position().toPoint())
-        super().mouseReleaseEvent(event)
-
-    # -- data helpers --------------------------------------------------------
-    def _grouped(self):
-        apps = (self._state.get("apps") or []) if self._state else []
-        groups, order = {}, []
-        for ap in apps:
-            key = ap["ws_display"]
-            if key not in groups:
-                groups[key] = []
-                order.append(key)
-            groups[key].append(ap)
-        return order, groups
-
-    # -- update from queue ----------------------------------------------------
-    def apply_state(self, item):
-        self._state = item
-        apps = item.get("apps", []) if item.get("ok") else []
-        self._count_lbl.setText(str(len(apps)))
-        order, groups = self._grouped()
-        if not order:
-            tip = '<span style="color:#666666;">no windows open</span>'
-        else:
-            lines = []
-            for ws_key in order:
-                group = groups[ws_key]
-                active = group[0]["ws_focused"]
-                color = "#00ff21" if active else "#8f9bae"
-                lines.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_key)} ({len(group)})</span>')
-                for ap in group:
-                    mark = "●" if ap.get("focused") else "○"
-                    t = ap["title"] or ap["exe"]
-                    lines.append(f'<span style="color:#E0E0E0;">{mark} {_tip_esc(ap["exe"])} — {_tip_esc(t)}</span>')
-            tip = "<br/>".join(lines)
-        self._tip_text = tip
-        self._icon_lbl._tip_text = tip
-        self._count_lbl._tip_text = tip
-
-    # -- actions ---------------------------------------------------------------
-    def _jump(self, ap):
-        wid = ap.get("id")
-        hwnd = ap.get("handle")
-        try:
-            subprocess.Popen(
-                ["glazewm", "command", "focus", "--container-id", wid],
-                creationflags=subprocess.CREATE_NO_WINDOW
-            )
-        except Exception as e:
-            logging.error(f"GlazeAppsWidget focus error: {e}")
-            return
-        if hwnd:
-            QTimer.singleShot(180, lambda h=hwnd: self._activate_window(h))
+        _install_tip_filter(self._layout_lbl)
+        for b in self._buttons:
+            _install_tip_filter(b)
 
     @staticmethod
-    def _activate_window(hwnd):
-        try:
-            user32 = ctypes.windll.user32
-            if user32.IsIconic(hwnd):
-                user32.ShowWindow(hwnd, 9)  # SW_RESTORE
-            user32.SetForegroundWindow(hwnd)
-        except Exception as e:
-            logging.error(f"GlazeAppsWidget activate error: {e}")
+    def _dot_css(color):
+        return (f"QPushButton {{ background: {color}; border: 1px solid #666666; "
+                f"border-radius: 5px; padding: 0px; }}")
 
-    def _show_menu(self, pos):
+    def _focus_ws(self, idx):
+        subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
+
+    def _change_layout(self, layout):
+        subprocess.Popen(["komorebic", "change-layout", layout],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
+
+    def _toggle(self, arg):
+        subprocess.Popen(["komorebic", "toggle-" + arg],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
+
+    def _show_layout_menu(self, pos):
         menu = QMenu(self)
         menu.setStyleSheet(DIALOG_QSS)
-        order, groups = self._grouped()
-        if not order:
-            act = menu.addAction("No windows open")
+        for layout in _KOMOREBI_LAYOUTS:
+            act = menu.addAction(layout.replace("-", " ").title())
+            act.triggered.connect(partial(self._change_layout, layout))
+        menu.addSeparator()
+        a = menu.addAction("Flip Layout")
+        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _kick_komorebi_refresh()))
+        a = menu.addAction("Toggle Floating")
+        a.triggered.connect(lambda: self._toggle("float"))
+        a = menu.addAction("Toggle Monocle")
+        a.triggered.connect(lambda: self._toggle("monocle"))
+        a = menu.addAction("Toggle Pause")
+        a.triggered.connect(lambda: self._toggle("pause"))
+        menu.exec(self.mapToGlobal(pos))
+
+    def apply_state(self, item):
+        """Called on the GUI thread from _drain_komorebi_queue."""
+        if not item.get("ok"):
+            for b in self._buttons:
+                b.setStyleSheet(self._dot_css("#222222"))
+            self._layout_lbl.setText("—")
+            tip = '<span style="color:#666666;">komorebi not running</span>'
+            self._tip_text = tip
+            self._layout_lbl._tip_text = tip
+            return
+        workspaces = item.get("workspaces", [])
+        focused = item.get("focused", -1)
+        paused = item.get("paused", False)
+        tip = []
+        for i, b in enumerate(self._buttons):
+            if i < len(workspaces):
+                ws = workspaces[i]
+                active = (i == focused)
+                if ws.get("maximized"):
+                    color = "#FFD740" if active else "#6b5f28"
+                elif ws.get("monocle"):
+                    color = "#00F0FF" if active else "#2b5f66"
+                elif ws["windows"] > 0:
+                    color = "#00ff21" if active else "#1d6b2f"
+                else:
+                    color = "#00ff21" if active else "#333333"
+                b.setStyleSheet(self._dot_css(color))
+                name = _tip_esc(ws["name"])
+                layout = _tip_esc(ws["layout"])
+                win = ws["windows"]
+                state = "ACTIVE" if active else "idle"
+                tip.append(f'<span style="color:{color}; font-weight:bold;">● {name}</span> '
+                           f'({win} win) <span style="color:#8f9bae;">{layout} · {state}</span>')
+            else:
+                b.setStyleSheet(self._dot_css("#1a1a1a"))
+        if paused:
+            tip.insert(0, '<span style="color:#FFD740;">⏸ komorebi paused</span>')
+        elif not tip:
+            tip.append('<span style="color:#666666;">no workspaces</span>')
+        tip_html = "<br/>".join(tip)
+        self._tip_text = tip_html
+        self._layout_lbl._tip_text = tip_html
+        # Layout label: active workspace layout (even if focused is beyond the
+        # first 3 dots, we still know it from state), or paused
+        if paused:
+            self._layout_lbl.setText("⏸")
+        else:
+            self._layout_lbl.setText(_komorebi_layout_short(item.get("focused_layout", "")))
+
+
+class KomorebiAppsWidget(QWidget):
+    """Shows the total number of open windows across ALL komorebi workspaces.
+
+    Left-click opens a menu listing every window grouped by workspace (with the
+    workspace's dot color); clicking an entry jumps to that workspace and
+    focuses the window. Hover shows the same list read-only. This solves the
+    'I can't tell Chrome is already open on another workspace' duplicate-launch
+    problem — every instance is visible here even though the taskbar only shows
+    the active workspace.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._apps = []          # [{hwnd, title, exe, ws, ws_name}]
+        self._focused = -1
+        self._tip_text = ""
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(1, 0, 1, 0)
+        lay.setSpacing(3)
+        self._icon_lbl = QLabel("🖥")  # 🖥
+        self._icon_lbl.setStyleSheet("color: #00F0FF; background: transparent; font-size: 9pt;")
+        self._count_lbl = QLabel("0")
+        self._count_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold;")
+        lay.addWidget(self._icon_lbl)
+        lay.addWidget(self._count_lbl)
+        # clicks anywhere on the widget (including over the labels) must reach
+        # this widget's mousePressEvent handler
+        self._icon_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._count_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._install_self_tip()
+
+    def _install_self_tip(self):
+        _install_tip_filter(self)
+        _install_tip_filter(self._icon_lbl)
+        _install_tip_filter(self._count_lbl)
+
+    def mousePressEvent(self, event):
+        event.accept()
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._show_apps_menu()
+        elif event.button() == Qt.MouseButton.RightButton:
+            self._show_apps_menu()
+
+    def _show_apps_menu(self):
+        menu = QMenu(self)
+        menu.setStyleSheet(DIALOG_QSS)
+        if not self._apps:
+            act = menu.addAction("No apps running")
             act.setEnabled(False)
         else:
-            for ws_key in order:
-                group = groups[ws_key]
-                header = menu.addAction(f"{len(group)}  {ws_key}")
+            # group by workspace, preserving order (plain text — QMenu actions
+            # do not render HTML)
+            by_ws = {}
+            for ap in self._apps:
+                by_ws.setdefault(ap["ws"], []).append(ap)
+            for ws_idx in sorted(by_ws):
+                group = by_ws[ws_idx]
+                ws_name = group[0]["ws_name"]
+                active = (ws_idx == self._focused)
+                marker = "●" if active else "○"
+                header = menu.addAction(f"{marker} {ws_name}  ({len(group)})")
                 header.setEnabled(False)
                 for ap in group:
-                    label = f"{ap['exe']} — {ap['title']}" if ap["title"] else ap["exe"]
-                    act = menu.addAction(label)
-                    act.triggered.connect(partial(self._jump, ap))
-        menu.exec(self.mapToGlobal(pos))
+                    title = ap["title"] or ap["exe"]
+                    if len(title) > 60:
+                        title = title[:57] + "..."
+                    act = menu.addAction(f"{ap['exe']} — {title}")
+                    act.triggered.connect(partial(self._jump_to_app, ap["hwnd"], ws_idx))
+                menu.addSeparator()
+        gpos = self.mapToGlobal(QPoint(0, self.height()))
+        menu.exec(QPoint(gpos.x(), gpos.y() + 2))
+
+    def _jump_to_app(self, hwnd, ws_idx):
+        # 1) switch komorebi to that workspace (async), 2) after komorebi has
+        # uncloaked the window, restore + focus it so SetForegroundWindow works
+        subprocess.Popen(["komorebic", "focus-workspace", str(ws_idx)],
+                         creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
+        if hwnd:
+            def _focus_later():
+                try:
+                    h = int(hwnd)
+                    user32 = ctypes.windll.user32
+                    user32.ShowWindow(h, 9)  # SW_RESTORE (de-minimize)
+                    user32.SetForegroundWindow(h)
+                except Exception as e:
+                    logging.error(f"komorebi apps focus error: {e}")
+            QTimer.singleShot(250, _focus_later)
+
+    def apply_state(self, item):
+        self._focused = item.get("focused", -1)
+        self._apps = item.get("apps", []) or []
+        if not item.get("ok"):
+            self._count_lbl.setText("—")
+            tip = '<span style="color:#666666;">komorebi not running</span>'
+            self._tip_text = tip
+            self._count_lbl._tip_text = tip
+            self._icon_lbl._tip_text = tip
+            return
+        self._count_lbl.setText(str(len(self._apps)))
+        tip = []
+        if not self._apps:
+            tip.append('<span style="color:#666666;">no windows open</span>')
+        else:
+            by_ws = {}
+            for ap in self._apps:
+                by_ws.setdefault(ap["ws"], []).append(ap)
+            for ws_idx in sorted(by_ws):
+                group = by_ws[ws_idx]
+                ws_name = group[0]["ws_name"]
+                active = (ws_idx == self._focused)
+                color = "#00ff21" if active else "#8f9bae"
+                tag = "ACTIVE" if active else "idle"
+                tip.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
+                           f'<span style="color:#8f9bae;">({len(group)}) {tag}</span>')
+                for ap in group:
+                    title = ap["title"] or ap["exe"]
+                    if len(title) > 60:
+                        title = title[:57] + "..."
+                    tip.append(f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(title)}</span>')
+            tip.append('<span style="color:#555555;">click to jump to an app</span>')
+        tip_html = "<br/>".join(tip)
+        self._tip_text = tip_html
+        self._count_lbl._tip_text = tip_html
+        self._icon_lbl._tip_text = tip_html
 
 
 _tip_label = None
@@ -3314,11 +3162,10 @@ class StatusBar(QMainWindow):
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
         
-        self.komorebi_widget = GlazeWmWidget()
+        self.komorebi_widget = KomorebiWidget()
         ll.addWidget(self.komorebi_widget)
-
-        self.glaze_apps_widget = GlazeAppsWidget()
-        ll.addWidget(self.glaze_apps_widget)
+        self.komorebi_apps = KomorebiAppsWidget()
+        ll.addWidget(self.komorebi_apps)
         
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
@@ -3942,8 +3789,8 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
-        self._glaze_timer = QTimer(self); self._glaze_timer.timeout.connect(self._drain_glaze_queue); self._glaze_timer.start(40)
-        threading.Thread(target=_glaze_status_loop, args=(_glaze_queue,), daemon=True).start()
+        self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(300)
+        threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
@@ -3980,15 +3827,14 @@ class StatusBar(QMainWindow):
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
-    def _drain_glaze_queue(self):
+    def _drain_komorebi_queue(self):
         try:
             while True:
-                item = _glaze_queue.get_nowait()
+                item = _komorebi_queue.get_nowait()
                 if hasattr(self, "komorebi_widget"):
                     self.komorebi_widget.apply_state(item)
-                    self.komorebi_widget._state = item
-                if hasattr(self, "glaze_apps_widget"):
-                    self.glaze_apps_widget.apply_state(item)
+                if hasattr(self, "komorebi_apps"):
+                    self.komorebi_apps.apply_state(item)
         except Empty:
             pass
 
