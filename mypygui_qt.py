@@ -13,6 +13,8 @@ import subprocess
 import sys, os, math, time, threading
 import re
 import logging
+import base64
+from io import BytesIO
 from functools import partial
 from datetime import datetime
 from queue import Queue, Empty
@@ -1793,6 +1795,91 @@ _KOMOREBI_MENU_QSS = (
 )
 
 
+# ─── Layout thumbnail icons (komorebi) ────────────────────────────────────────
+# Simple 16x16 inline SVGs, rendered once to base64 PNG and cached.
+_LAYOUT_SVG = {
+    "bsp": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="9" height="14" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="11" y="1" width="4" height="14" rx="1" fill="#555" stroke="none"/></svg>'),
+    "columns": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="4" height="14" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="6" y="1" width="4" height="14" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="11" y="1" width="4" height="14" rx="1" fill="#666" stroke="none"/></svg>'),
+    "rows": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="14" height="4" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="1" y="6" width="14" height="4" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="1" y="11" width="14" height="4" rx="1" fill="#666" stroke="none"/></svg>'),
+    "vertical-stack": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="10" height="14" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="12" y="1" width="3" height="6" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="12" y="8" width="3" height="7" rx="1" fill="#666" stroke="none"/></svg>'),
+    "horizontal-stack": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="14" height="10" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="1" y="12" width="6" height="3" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="8" y="12" width="7" height="3" rx="1" fill="#666" stroke="none"/></svg>'),
+    "grid": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="6" height="6" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="8" y="1" width="7" height="6" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="1" y="8" width="6" height="7" rx="1" fill="#666" stroke="none"/>'
+        '<rect x="8" y="8" width="7" height="7" rx="1" fill="#777" stroke="none"/></svg>'),
+    "ultrawide-vertical-stack": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="11" height="14" rx="1" fill="#444" stroke="none"/>'
+        '<rect x="13" y="1" width="2" height="6" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="13" y="8" width="2" height="7" rx="1" fill="#666" stroke="none"/></svg>'),
+    "right-main-vertical-stack": (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+        '<rect x="0.5" y="0.5" width="15" height="15" rx="1.5" fill="#2a2a3e" stroke="#8f9bae" stroke-width="1"/>'
+        '<rect x="1" y="1" width="4" height="6" rx="1" fill="#555" stroke="none"/>'
+        '<rect x="1" y="8" width="4" height="7" rx="1" fill="#666" stroke="none"/>'
+        '<rect x="6" y="1" width="9" height="14" rx="1" fill="#444" stroke="none"/></svg>'),
+}
+
+_LAYOUT_ICON_CACHE = {}  # name -> '<img src="data:image/png;base64,...">'
+
+
+def _layout_thumb(name):
+    """Return an <img> HTML snippet with a 16x16 layout thumbnail icon for
+    the given komorebi layout name, or '' if no icon is defined. The icon is
+    rendered once from inline SVG and cached."""
+    if name in _LAYOUT_ICON_CACHE:
+        return _LAYOUT_ICON_CACHE[name]
+    svg = _LAYOUT_SVG.get(name)
+    if not svg:
+        _LAYOUT_ICON_CACHE[name] = ""
+        return ""
+    try:
+        pix = QPixmap(16, 16)
+        pix.fill(Qt.GlobalColor.transparent)
+        p = QPainter(pix)
+        renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
+        renderer.render(p)
+        p.end()
+        buf = BytesIO()
+        pix.save(buf, "PNG")
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        html = f'<img src="data:image/png;base64,{b64}" width="16" height="16" style="vertical-align:middle; margin-right:3px;">'
+        _LAYOUT_ICON_CACHE[name] = html
+        return html
+    except Exception as e:
+        logging.error(f"layout thumb error for {name}: {e}")
+        _LAYOUT_ICON_CACHE[name] = ""
+        return ""
+
+
 def _menu_gpos(anchor_widget, menu, cursor_pos=None):
     """Return a global QPoint for menu.exec() so the menu pops BELOW the
     statusbar when it is docked (bar pinned top) and ABOVE it when not docked
@@ -2038,10 +2125,11 @@ class KomorebiWidget(QWidget):
         current = (self._focused_layout or "").lower()
         for layout in _KOMOREBI_LAYOUTS:
             label = layout.replace("-", " ").title()
-            if layout == current:
-                html = f'<span style="color:#00F0FF; font-weight:bold;">● {_tip_esc(label)}</span>'
+            thumb = _layout_thumb(layout)
+            if layout.replace("-", "") == current:
+                html = f'{thumb}<span style="color:#00F0FF; font-weight:bold;">{_tip_esc(label)}</span>'
             else:
-                html = f'<span style="color:#E0E0E0;">&nbsp;&nbsp;{_tip_esc(label)}</span>'
+                html = f'{thumb}<span style="color:#E0E0E0;">{_tip_esc(label)}</span>'
             _menu_rich_action(menu, html, partial(self._change_layout, layout))
         menu.addSeparator()
         _menu_rich_action(
