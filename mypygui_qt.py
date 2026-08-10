@@ -1886,258 +1886,195 @@ class GitIconLabel(IconLabel):
             logging.error(f"GitIconLabel indicator error: {e}")
 
 
-class KomorebiWidget(QWidget):
-    """Up to 3 clickable komorebi workspace dots + active layout label.
+try:
+    import pyvda as _pyvda
+    _HAS_PYVDA = True
+except Exception:
+    _HAS_PYVDA = False
 
-    Left-click a dot -> focus that workspace.
-    Right-click (dots or layout label) -> menu to change the workspace layout
-    (BSP, Columns, Rows, Stacks, Grid, ...). Hover shows each workspace's
-    window count and layout. Styled to match the status bar.
+
+def _vd_poll():
+    """Return (desktops, current_index) using Windows Virtual Desktop API.
+    desktops is a list of pyvda.VirtualDesktop objects.
+    Returns ([], -1) if pyvda is unavailable or call fails."""
+    if not _HAS_PYVDA:
+        return [], -1
+    try:
+        desktops = _pyvda.get_virtual_desktops()
+        current = _pyvda.VirtualDesktop.current()
+        cur_idx = next((i for i, d in enumerate(desktops) if d.id == current.id), 0)
+        return desktops, cur_idx
+    except Exception as e:
+        logging.error(f"_vd_poll error: {e}")
+        return [], -1
+
+
+class VirtualDesktopWidget(QWidget):
+    """Clickable dots — one per Windows Virtual Desktop.
+
+    Left-click a dot  -> switch to that desktop.
+    Right-click       -> menu: New desktop, Rename, Remove.
+    Hover             -> tooltip showing desktop name & index.
+    Updates every 600 ms via an internal QTimer (no background thread needed
+    because pyvda calls are fast COM calls on the GUI thread).
     """
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._buttons = []
-        self._layout_lbl = None
+        self._desktops = []   # list of pyvda.VirtualDesktop
+        self._cur_idx  = -1
+        self._buttons  = []   # QPushButton dots, rebuilt when count changes
         self._tip_text = ""
+
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(10, 0, 1, 0)  # match pagination arrows' padx
-        lay.setSpacing(2)
-        for i in range(3):
+        lay.setContentsMargins(10, 0, 4, 0)
+        lay.setSpacing(3)
+        self._lay = lay
+
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_menu)
+        _install_tip_filter(self)
+
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self.refresh)
+        self._timer.start(600)
+        self.refresh()
+
+    # ── helpers ───────────────────────────────────────────────────────────────
+    @staticmethod
+    def _dot_css(color):
+        return (f"QPushButton {{ background: {color}; border: 1px solid #555555; "
+                f"border-radius: 5px; padding: 0px; }}"
+                f"QPushButton:hover {{ border: 1px solid #aaaaaa; }}")
+
+    def _rebuild_buttons(self, count):
+        """Recreate dot buttons when the desktop count changes."""
+        for b in self._buttons:
+            self._lay.removeWidget(b)
+            b.deleteLater()
+        self._buttons.clear()
+        for i in range(count):
             b = QPushButton()
             b.setFixedSize(11, 11)
             b.setCursor(Qt.CursorShape.PointingHandCursor)
             b.setStyleSheet(self._dot_css("#333333"))
-            b.clicked.connect(partial(self._focus_ws, i))
-            lay.addWidget(b)
-            self._buttons.append(b)
-        self._layout_lbl = QLabel("—")
-        self._layout_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold; padding-left: 3px;")
-        self._layout_lbl.setCursor(Qt.CursorShape.PointingHandCursor)
-        lay.addWidget(self._layout_lbl)
-        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(self._show_layout_menu)
-        self._install_self_tip()
-
-    def _install_self_tip(self):
-        _install_tip_filter(self)
-        _install_tip_filter(self._layout_lbl)
-        for b in self._buttons:
+            b.clicked.connect(partial(self._switch_to, i))
             _install_tip_filter(b)
+            self._lay.addWidget(b)
+            self._buttons.append(b)
 
-    @staticmethod
-    def _dot_css(color):
-        return (f"QPushButton {{ background: {color}; border: 1px solid #666666; "
-                f"border-radius: 5px; padding: 0px; }}")
+    # ── public ────────────────────────────────────────────────────────────────
+    MIN_DESKTOPS = 3
 
-    def _focus_ws(self, idx):
-        subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
-                         creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+    def refresh(self):
+        """Poll Windows VD state and update dots. Safe to call any time."""
+        if not _HAS_PYVDA:
+            self._tip_text = '<span style="color:#666666;">pyvda not available</span>'
+            return
+        try:
+            desktops, cur_idx = _vd_poll()
 
-    def _change_layout(self, layout):
-        subprocess.Popen(["komorebic", "change-layout", layout],
-                         creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+            # Ensure minimum desktop count exists
+            while len(desktops) < self.MIN_DESKTOPS:
+                _pyvda.VirtualDesktop.create()
+                desktops, cur_idx = _vd_poll()
 
-    def _toggle(self, arg):
-        subprocess.Popen(["komorebic", "toggle-" + arg],
-                         creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
+            if not desktops:
+                self._tip_text = '<span style="color:#666666;">no virtual desktops</span>'
+                return
 
-    def _show_layout_menu(self, pos):
+            self._desktops = desktops
+            self._cur_idx  = cur_idx
+
+            # Rebuild buttons only if count changed
+            if len(self._buttons) != len(desktops):
+                self._rebuild_buttons(len(desktops))
+
+            tip_lines = []
+            for i, (b, d) in enumerate(zip(self._buttons, desktops)):
+                active = (i == cur_idx)
+                name = d.name or f"Desktop {i + 1}"
+                color = "#00ff21" if active else "#1d6b2f"
+                b.setStyleSheet(self._dot_css(color))
+                b._tip_text = (
+                    f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(name)}</span>'
+                    f'<span style="color:#8f9bae;"> ({i + 1}/{len(desktops)})'
+                    f'{" · ACTIVE" if active else ""}</span>'
+                )
+                state = "ACTIVE" if active else "idle"
+                tip_lines.append(
+                    f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(name)}</span> '
+                    f'<span style="color:#8f9bae;">({i + 1}) {state}</span>'
+                )
+            self._tip_text = "<br/>".join(tip_lines)
+        except Exception as e:
+            logging.error(f"VirtualDesktopWidget.refresh error: {e}")
+
+    # ── slots ─────────────────────────────────────────────────────────────────
+    def _switch_to(self, idx):
+        try:
+            if 0 <= idx < len(self._desktops):
+                self._desktops[idx].go()
+                # Refresh quickly after switching so the dot updates immediately
+                QTimer.singleShot(150, self.refresh)
+                QTimer.singleShot(400, self.refresh)
+        except Exception as e:
+            logging.error(f"VirtualDesktopWidget switch error: {e}")
+
+    def _show_menu(self, pos):
         menu = QMenu(self)
         menu.setStyleSheet(DIALOG_QSS)
-        for layout in _KOMOREBI_LAYOUTS:
-            act = menu.addAction(layout.replace("-", " ").title())
-            act.triggered.connect(partial(self._change_layout, layout))
+
+        # Switch submenu
+        for i, d in enumerate(self._desktops):
+            name = d.name or f"Desktop {i + 1}"
+            active = (i == self._cur_idx)
+            act = menu.addAction(("✓ " if active else "    ") + name)
+            act.triggered.connect(partial(self._switch_to, i))
+
         menu.addSeparator()
-        a = menu.addAction("Flip Layout")
-        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _kick_komorebi_refresh()))
-        a = menu.addAction("Toggle Floating")
-        a.triggered.connect(lambda: self._toggle("float"))
-        a = menu.addAction("Toggle Monocle")
-        a.triggered.connect(lambda: self._toggle("monocle"))
-        a = menu.addAction("Toggle Pause")
-        a.triggered.connect(lambda: self._toggle("pause"))
+
+        act_new = menu.addAction("＋ New Desktop")
+        act_new.triggered.connect(self._new_desktop)
+
+        if self._desktops:
+            act_ren = menu.addAction("✎ Rename Current")
+            act_ren.triggered.connect(self._rename_current)
+
+        if len(self._desktops) > 1:
+            act_del = menu.addAction("✕ Remove Current")
+            act_del.triggered.connect(self._remove_current)
+
         menu.exec(self.mapToGlobal(pos))
 
-    def apply_state(self, item):
-        """Called on the GUI thread from _drain_komorebi_queue."""
-        if not item.get("ok"):
-            for b in self._buttons:
-                b.setStyleSheet(self._dot_css("#222222"))
-            self._layout_lbl.setText("—")
-            tip = '<span style="color:#666666;">komorebi not running</span>'
-            self._tip_text = tip
-            self._layout_lbl._tip_text = tip
-            return
-        workspaces = item.get("workspaces", [])
-        focused = item.get("focused", -1)
-        paused = item.get("paused", False)
-        tip = []
-        for i, b in enumerate(self._buttons):
-            if i < len(workspaces):
-                ws = workspaces[i]
-                active = (i == focused)
-                if ws.get("maximized"):
-                    color = "#FFD740" if active else "#6b5f28"
-                elif ws.get("monocle"):
-                    color = "#00F0FF" if active else "#2b5f66"
-                elif ws["windows"] > 0:
-                    color = "#00ff21" if active else "#1d6b2f"
-                else:
-                    color = "#00ff21" if active else "#333333"
-                b.setStyleSheet(self._dot_css(color))
-                name = _tip_esc(ws["name"])
-                layout = _tip_esc(ws["layout"])
-                win = ws["windows"]
-                state = "ACTIVE" if active else "idle"
-                tip.append(f'<span style="color:{color}; font-weight:bold;">● {name}</span> '
-                           f'({win} win) <span style="color:#8f9bae;">{layout} · {state}</span>')
-            else:
-                b.setStyleSheet(self._dot_css("#1a1a1a"))
-        if paused:
-            tip.insert(0, '<span style="color:#FFD740;">⏸ komorebi paused</span>')
-        elif not tip:
-            tip.append('<span style="color:#666666;">no workspaces</span>')
-        tip_html = "<br/>".join(tip)
-        self._tip_text = tip_html
-        self._layout_lbl._tip_text = tip_html
-        # Layout label: active workspace layout (even if focused is beyond the
-        # first 3 dots, we still know it from state), or paused
-        if paused:
-            self._layout_lbl.setText("⏸")
-        else:
-            self._layout_lbl.setText(_komorebi_layout_short(item.get("focused_layout", "")))
+    def _new_desktop(self):
+        try:
+            _pyvda.VirtualDesktop.create()
+            QTimer.singleShot(200, self.refresh)
+        except Exception as e:
+            logging.error(f"VD new desktop error: {e}")
 
+    def _rename_current(self):
+        try:
+            if 0 <= self._cur_idx < len(self._desktops):
+                d = self._desktops[self._cur_idx]
+                current_name = d.name or f"Desktop {self._cur_idx + 1}"
+                new_name, ok = QInputDialog.getText(
+                    self, "Rename Desktop", "New name:", text=current_name
+                )
+                if ok and new_name.strip():
+                    d.rename(new_name.strip())
+                    QTimer.singleShot(200, self.refresh)
+        except Exception as e:
+            logging.error(f"VD rename error: {e}")
 
-class KomorebiAppsWidget(QWidget):
-    """Shows the total number of open windows across ALL komorebi workspaces.
-
-    Left-click opens a menu listing every window grouped by workspace (with the
-    workspace's dot color); clicking an entry jumps to that workspace and
-    focuses the window. Hover shows the same list read-only. This solves the
-    'I can't tell Chrome is already open on another workspace' duplicate-launch
-    problem — every instance is visible here even though the taskbar only shows
-    the active workspace.
-    """
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._apps = []          # [{hwnd, title, exe, ws, ws_name}]
-        self._focused = -1
-        self._tip_text = ""
-        lay = QHBoxLayout(self)
-        lay.setContentsMargins(1, 0, 1, 0)
-        lay.setSpacing(3)
-        self._icon_lbl = QLabel("🖥")  # 🖥
-        self._icon_lbl.setStyleSheet("color: #00F0FF; background: transparent; font-size: 9pt;")
-        self._count_lbl = QLabel("0")
-        self._count_lbl.setStyleSheet("color: #8f9bae; background: transparent; font-family: 'JetBrainsMono NFP'; font-size: 8pt; font-weight: bold;")
-        lay.addWidget(self._icon_lbl)
-        lay.addWidget(self._count_lbl)
-        # clicks anywhere on the widget (including over the labels) must reach
-        # this widget's mousePressEvent handler
-        self._icon_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self._count_lbl.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
-        self.setCursor(Qt.CursorShape.PointingHandCursor)
-        self._install_self_tip()
-
-    def _install_self_tip(self):
-        _install_tip_filter(self)
-        _install_tip_filter(self._icon_lbl)
-        _install_tip_filter(self._count_lbl)
-
-    def mousePressEvent(self, event):
-        event.accept()
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._show_apps_menu()
-        elif event.button() == Qt.MouseButton.RightButton:
-            self._show_apps_menu()
-
-    def _show_apps_menu(self):
-        menu = QMenu(self)
-        menu.setStyleSheet(DIALOG_QSS)
-        if not self._apps:
-            act = menu.addAction("No apps running")
-            act.setEnabled(False)
-        else:
-            # group by workspace, preserving order (plain text — QMenu actions
-            # do not render HTML)
-            by_ws = {}
-            for ap in self._apps:
-                by_ws.setdefault(ap["ws"], []).append(ap)
-            for ws_idx in sorted(by_ws):
-                group = by_ws[ws_idx]
-                ws_name = group[0]["ws_name"]
-                active = (ws_idx == self._focused)
-                marker = "●" if active else "○"
-                header = menu.addAction(f"{marker} {ws_name}  ({len(group)})")
-                header.setEnabled(False)
-                for ap in group:
-                    title = ap["title"] or ap["exe"]
-                    if len(title) > 60:
-                        title = title[:57] + "..."
-                    act = menu.addAction(f"{ap['exe']} — {title}")
-                    act.triggered.connect(partial(self._jump_to_app, ap["hwnd"], ws_idx))
-                menu.addSeparator()
-        gpos = self.mapToGlobal(QPoint(0, self.height()))
-        menu.exec(QPoint(gpos.x(), gpos.y() + 2))
-
-    def _jump_to_app(self, hwnd, ws_idx):
-        # 1) switch komorebi to that workspace (async), 2) after komorebi has
-        # uncloaked the window, restore + focus it so SetForegroundWindow works
-        subprocess.Popen(["komorebic", "focus-workspace", str(ws_idx)],
-                         creationflags=subprocess.CREATE_NO_WINDOW)
-        _kick_komorebi_refresh()
-        if hwnd:
-            def _focus_later():
-                try:
-                    h = int(hwnd)
-                    user32 = ctypes.windll.user32
-                    user32.ShowWindow(h, 9)  # SW_RESTORE (de-minimize)
-                    user32.SetForegroundWindow(h)
-                except Exception as e:
-                    logging.error(f"komorebi apps focus error: {e}")
-            QTimer.singleShot(250, _focus_later)
-
-    def apply_state(self, item):
-        self._focused = item.get("focused", -1)
-        self._apps = item.get("apps", []) or []
-        if not item.get("ok"):
-            self._count_lbl.setText("—")
-            tip = '<span style="color:#666666;">komorebi not running</span>'
-            self._tip_text = tip
-            self._count_lbl._tip_text = tip
-            self._icon_lbl._tip_text = tip
-            return
-        self._count_lbl.setText(str(len(self._apps)))
-        tip = []
-        if not self._apps:
-            tip.append('<span style="color:#666666;">no windows open</span>')
-        else:
-            by_ws = {}
-            for ap in self._apps:
-                by_ws.setdefault(ap["ws"], []).append(ap)
-            for ws_idx in sorted(by_ws):
-                group = by_ws[ws_idx]
-                ws_name = group[0]["ws_name"]
-                active = (ws_idx == self._focused)
-                color = "#00ff21" if active else "#8f9bae"
-                tag = "ACTIVE" if active else "idle"
-                tip.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
-                           f'<span style="color:#8f9bae;">({len(group)}) {tag}</span>')
-                for ap in group:
-                    title = ap["title"] or ap["exe"]
-                    if len(title) > 60:
-                        title = title[:57] + "..."
-                    tip.append(f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(title)}</span>')
-            tip.append('<span style="color:#555555;">click to jump to an app</span>')
-        tip_html = "<br/>".join(tip)
-        self._tip_text = tip_html
-        self._count_lbl._tip_text = tip_html
-        self._icon_lbl._tip_text = tip_html
+    def _remove_current(self):
+        try:
+            if 0 <= self._cur_idx < len(self._desktops) and len(self._desktops) > 1:
+                self._desktops[self._cur_idx].remove()
+                QTimer.singleShot(200, self.refresh)
+        except Exception as e:
+            logging.error(f"VD remove error: {e}")
 
 
 _tip_label = None
@@ -3162,10 +3099,8 @@ class StatusBar(QMainWindow):
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
         
-        self.komorebi_widget = KomorebiWidget()
+        self.komorebi_widget = VirtualDesktopWidget()
         ll.addWidget(self.komorebi_widget)
-        self.komorebi_apps = KomorebiAppsWidget()
-        ll.addWidget(self.komorebi_apps)
         
         self._bl_page_size, self._bl_offset, self._bl_widgets = self._config.get("buttons_left_page_size", 10), 0, []
         prev_bt = IconLabel("«", {}); _apply_static_style(prev_bt, "pagination_prev"); prev_bt.mousePressEvent = lambda e: (_open_static_edit("pagination_prev") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else self._bl_prev()); ll.addWidget(prev_bt); self._bl_prev_bt = prev_bt
@@ -3789,8 +3724,6 @@ class StatusBar(QMainWindow):
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
-        self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(300)
-        threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
 
     def _update_uptime(self):
@@ -3827,17 +3760,6 @@ class StatusBar(QMainWindow):
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
-    def _drain_komorebi_queue(self):
-        try:
-            while True:
-                item = _komorebi_queue.get_nowait()
-                if hasattr(self, "komorebi_widget"):
-                    self.komorebi_widget.apply_state(item)
-                if hasattr(self, "komorebi_apps"):
-                    self.komorebi_apps.apply_state(item)
-        except Empty:
-            pass
-
     def _drain_git_queue(self):
         try:
             while True:

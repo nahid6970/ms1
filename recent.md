@@ -15,6 +15,8 @@ All in `mypygui_qt.py`:
 - Rich-text tooltip: status-colored files (A green, M yellow, D pink, ?? red, R/C cyan, U magenta) + `● branch` in its assigned color.
 
 ## 3. Critical Context
+- **TASKBAR / VIRTUAL DESKTOP DECISION (latest):** User wanted the Windows taskbar to show apps from ALL komorebi workspaces. Investigated: (a) Windows 11 VDs — komorebi does NOT support them (GitHub issue #505, closed by author LGUG2Z May 2024, 'nothing to be done'; no stable VD API in Win32; komorebi only tiles the CURRENT VD, other VDs have zero tiling). (b) Taskbar can't show inactive-workspace apps while Cloak hides them — that's by design (the clean GlazeWM-style taskbar). Only lever is `window_hiding_behaviour: Minimize` (all apps stay in taskbar as minimized; docs warn 'issues with frequent workspace switching'), toggleable live via `komorebic window-hiding-behaviour minimize|cloak` (no restart). **USER DECIDED: keep Cloak + the KomorebiAppsWidget** (widget is the window into all apps across workspaces).
+- **Komorebi live config:** `C:\Users\nahid\komorebi.json` is a symlink → `asset/komorebi/komorebi.json` (edit the asset file). Launched by `scripts/Autohtokey/Command/komorebi.ahk` via `komorebic.exe start`. `window_hiding_behaviour: 'Cloak'`; valid values: Cloak (default), Minimize, Hide (EOL/deprecated).
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused}.
 - `_GIT_SYNC_PS` = adjacent Python literals + `.replace("{path}", ...)` (not an f-string → braces literal).
 - Native Qt tooltips need window focus here → custom `_TipFilter` + always-on-top `_tip_label` (`Qt.ToolTip`, WA_ShowWithoutActivating); git labels + komorebi widget/labels/buttons carry `_tip_text`.
@@ -23,4 +25,4 @@ All in `mypygui_qt.py`:
 - File is CRLF; multi-line edits are safest via temp fix scripts.
 
 ## 4. Pending Task
-Run the GUI live and verify the komorebi widget (dots reflect workspaces, left-click switches, right-click changes layout); then consider making komorebi dot/label styling configurable via `static_bindings` like other widgets.
+User is keeping Cloak + the 🖥 apps widget. Next useful step: make the apps/workspace widgets even more discoverable — e.g. add a global hotkey (HotKeys.py) to pop the apps menu, and/or verify the widget live (jump-to-app actually focuses the right window).
