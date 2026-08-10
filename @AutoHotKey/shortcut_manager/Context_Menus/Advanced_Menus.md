@@ -22,6 +22,7 @@
 -[name:recent-changes][text:Create or update recent.md in the root of the project. This is a high-context, ultra-brief handoff for a fresh AI session. Use this exact structure. 1. Project DNA (Permanent): 1-2 sentences on the tech stack, core architecture (e.g., 'React/FastAPI, modular design'), and the primary goal of the app. 2. Latest Implementation: List only the files we modified this session and the specific logic added/fixed. 3. Critical Context: Any 'hidden' logic, key variables, or major decisions I must remember (e.g., 'We use X library instead of Y because of Z'). 4. Pending Task: The single most important thing to do next. Constraint: Keep it under 250 words total. If recent.md exists, read it first, keep the 'Project DNA' and 'Critical Context' updated, and overwrite the rest with current progress.]
 -[name:md-framework][text:make an md file about the framework in this directory C:\@delta\ms1\md so next time i can do this my self]
 -[name:script-folder][text:here modify the code so when it tries to open any folder it will open the folder in a new tab with existing folder explorer]
+-[name:Git-Commit][text:git commit and push]
 
 [name:Account]
 -[name:00][text:nahid6970@gmail.com]

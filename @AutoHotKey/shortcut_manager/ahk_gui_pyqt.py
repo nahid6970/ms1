@@ -3498,6 +3498,8 @@ class AHKShortcutEditor(QMainWindow):
         else: # text
             key = shortcut.get('trigger', '')
             key_width = 220
+
+        key_html = key  # non-favourite rows render the key as-is
         
         if is_favourite:
             # Uniform favourites rows: plain key for every type (no embedded
@@ -3515,6 +3517,15 @@ class AHKShortcutEditor(QMainWindow):
                 key = "🚫 Rule"
             key_width = 170
             key = self._truncate_to_width(key, key_width - 12)
+            # True-color emojis (🚀/🚫) have a taller line box than Consolas text,
+            # which pushes following text a few px below the name line. Rendering
+            # the emoji in its own narrow cell keeps the text on a normal line box
+            # so 'Startup'/'Rule' sit on the same baseline as the name.
+            key_html = key
+            if key and key[0] in ('🚀', '🚫') and len(key) > 1:
+                key_html = (f'<table cellpadding="0" cellspacing="0"><tr>'
+                            f'<td valign="top">{key[0]}</td>'
+                            f'<td valign="top">&nbsp;{key[1:]}</td></tr></table>')
 
         # Ensure icon column is stable
         icon_width = 60
@@ -3559,7 +3570,7 @@ class AHKShortcutEditor(QMainWindow):
                         <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit;">
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr {text_style}>
-                                    <td width="{key_width}" class="shortcut-key" valign="{left_valign}" style="white-space: nowrap;">{key}</td>
+                                    <td width="{key_width}" class="shortcut-key" valign="{left_valign}" style="white-space: nowrap;">{key_html}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="{left_valign}" align="center">󰌌</td>
                                     <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}{rules_html}</td>
                                 </tr>

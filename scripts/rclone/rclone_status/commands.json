@@ -53,8 +53,8 @@
     },
     "msBackups": {
         "label": "msBackups",
-        "src": "gu:/msBackups/",
-        "dst": "C:/@delta/msBackups/",
+        "src": "C:/@delta/msBackups/",
+        "dst": "gu:/msBackups/",
         "cmd": "rclone check src dst --size-only --fast-list",
         "index": 2,
         "enabled": true,
