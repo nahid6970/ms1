@@ -91,6 +91,16 @@ def render_svg_pixmap(svg, color, size, nudge_y=0):
 KEY_ICON_SRC = {'🚀': 'icon://rocket', '🚫': 'icon://ban'}
 KEY_ICON_SCALE = {'🚀': 1.5, '🚫': 1.25}
 
+
+def key_icon_size(emoji, app_font_size):
+    """Pixel size for a favourites key-cell icon (must match the <img> attrs)."""
+    return max(10, int(app_font_size * KEY_ICON_SCALE[emoji]))
+
+
+def rules_ban_size(app_font_size):
+    """Pixel size for the small ban icon in the dim rule sub-lines (0.82em text)."""
+    return max(8, int(app_font_size * 0.82))
+
 class CyberButton(QPushButton):
     """Modern button with SVG icon support and dynamic hover color-switching."""
     def __init__(self, text="", parent=None, color=CP_DIM, is_outlined=False, svg_data=None):
@@ -3412,17 +3422,19 @@ class AHKShortcutEditor(QMainWindow):
         setHtml so they are always present when the document parses.
         """
         doc = self.text_browser.document()
-        rocket_size = max(10, int(self.app_font_size * KEY_ICON_SCALE['🚀']))
+        rocket_size = key_icon_size('🚀', self.app_font_size)
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://rocket"),
                         render_svg_pixmap(SVGS["ROCKET"], CP_CYAN, rocket_size))
         # The ban is slightly smaller than the rocket and nudged up 1px so its
         # full-bleed circle both fits unclipped and centers on 'Rule' (whose
-        # mixed-case letters sit higher than the line-box middle).
-        ban_size = max(10, int(self.app_font_size * KEY_ICON_SCALE['🚫']))
+        # mixed-case letters sit higher than the line-box middle). Only nudge at
+        # larger sizes — on tiny icons the 1px shift would visibly clip the top.
+        ban_size = key_icon_size('🚫', self.app_font_size)
+        nudge = 1 if ban_size >= 16 else 0
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban"),
-                        render_svg_pixmap(SVGS["BAN"], CP_RED, ban_size, nudge_y=1))
+                        render_svg_pixmap(SVGS["BAN"], CP_RED, ban_size, nudge_y=nudge))
         # Small ban icon for the dim rule sub-lines (e.g. '▸ 🚫 Inactive in')
-        sm = max(8, int(self.app_font_size * 0.82))
+        sm = rules_ban_size(self.app_font_size)
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
                         render_svg_pixmap(SVGS["BAN"], CP_RED, sm))
 
@@ -3486,7 +3498,7 @@ class AHKShortcutEditor(QMainWindow):
                 else:
                     # SVG ban icon instead of the true-color emoji, sized for the
                     # dim rule lines (0.82em text)
-                    sm = max(8, int(self.app_font_size * 0.82))
+                    sm = rules_ban_size(self.app_font_size)
                     lines.insert(0, f'<img src="icon://ban-sm" width="{sm}" height="{sm}" align="middle"> Inactive in')
 
         if not lines:
@@ -3583,7 +3595,7 @@ class AHKShortcutEditor(QMainWindow):
             # 'Rule' sit on the same baseline as the name.
             key_html = key
             if key and key[0] in KEY_ICON_SRC and len(key) > 1:
-                icon_size = max(10, int(self.app_font_size * KEY_ICON_SCALE[key[0]]))
+                icon_size = key_icon_size(key[0], self.app_font_size)
                 key_html = (f'<img src="{KEY_ICON_SRC[key[0]]}" width="{icon_size}" '
                             f'height="{icon_size}" align="middle">&nbsp;{key[1:]}')
 
