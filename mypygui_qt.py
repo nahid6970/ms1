@@ -1665,7 +1665,7 @@ def check_git_status(repo, q):
     else:
         tip.append("Clean")
 
-    q.put({"name": repo["name"], "text": text, "color": color, "tooltip": "\n".join(tip)})
+    q.put({"name": repo["name"], "text": text, "color": color, "branch": branch, "tooltip": "\n".join(tip)})
 
 def _git_status_loop(repos, q):
     while True:
@@ -1688,6 +1688,136 @@ def apply_git_style(lbl, cfg):
     if bh > 0: lbl.setFixedHeight(bh)
     fw = font[2] if len(font) > 2 else "bold"
     lbl.setStyleSheet(f"color: {fg}; background: {bg}; font-family: '{font[0]}'; font-size: {font[1] if len(font)>1 else 15}pt; font-weight: {fw}; border: none; background: transparent;")
+
+# ─── Branch dot + hover tooltip for git labels ────────────────────────────────
+_BRANCH_FIXED_COLORS = {
+    "main":    "#FF003C",
+    "master":  "#FF934B",
+    "dev":     "#00ff21",
+    "develop": "#00ff21",
+    "staging": "#00F0FF",
+    "release": "#B388FF",
+    "hotfix":  "#FF4081",
+    "feature": "#FFD740",
+}
+
+def branch_color(name):
+    """Stable color per branch: fixed palette for common branches, deterministic
+    hue for anything else - the same branch always gets the same color."""
+    if not name:
+        return "#666666"
+    nl = name.lower()
+    for key, col in _BRANCH_FIXED_COLORS.items():
+        if nl == key or nl.startswith(key + "/") or nl.startswith(key + "-") or nl.startswith(key + "_"):
+            return col
+    h = 0
+    for ch in name:
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+    qc = QColor()
+    qc.setHslF((h % 360) / 360.0, 0.85, 0.62)
+    return qc.name()
+
+
+class GitIconLabel(IconLabel):
+    """IconLabel with a small branch-color dot pinned to the bottom-right corner."""
+    def __init__(self, text, btn_cfg, parent=None):
+        super().__init__(text, btn_cfg, parent)
+        self._branch_color = None
+
+    def set_branch_color(self, color):
+        self._branch_color = color
+        self.update()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if not self._branch_color:
+            return
+        try:
+            p = QPainter(self)
+            p.setRenderHint(QPainter.RenderHint.Antialiasing)
+            r = 3
+            cx = self.width() - r - 2
+            cy = self.height() - r - 2
+            p.setPen(QPen(QColor("#111111"), 1))
+            p.setBrush(QColor(self._branch_color))
+            p.drawEllipse(cx - r, cy - r, r * 2, r * 2)
+            p.end()
+        except Exception as e:
+            logging.error(f"GitIconLabel dot error: {e}")
+
+
+_tip_label = None
+
+def _get_tip_label():
+    global _tip_label
+    if _tip_label is None:
+        _tip_label = QLabel()
+        _tip_label.setWindowFlags(Qt.WindowType.ToolTip | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        _tip_label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        _tip_label.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        _tip_label.setStyleSheet(
+            f"QLabel {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};"
+            f" padding: 6px 8px; font-family: 'Consolas'; font-size: 9pt; }}"
+        )
+        _tip_label.hide()
+    return _tip_label
+
+
+class _TipFilter(QObject):
+    """Shows a custom always-on-top tooltip on hover, independent of window
+    focus (native tooltips require focus on this setup)."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._timer = QTimer(self)
+        self._timer.setSingleShot(True)
+        self._timer.setInterval(350)
+        self._timer.timeout.connect(self._show)
+        self._obj = None
+
+    def eventFilter(self, obj, event):
+        t = event.type()
+        if t == QEvent.Type.Enter:
+            self._obj = obj
+            self._timer.start()
+        elif t in (QEvent.Type.Leave, QEvent.Type.MouseButtonPress, QEvent.Type.MouseButtonRelease, QEvent.Type.ApplicationDeactivate):
+            self._timer.stop()
+            _get_tip_label().hide()
+        return False
+
+    def _show(self):
+        obj = self._obj
+        try:
+            if obj is None or not obj.isVisible():
+                return
+            text = getattr(obj, "_tip_text", "") or ""
+            if not text.strip():
+                return
+            lbl = _get_tip_label()
+            lbl.setText(text)
+            lbl.adjustSize()
+            pos = QCursor.pos() + QPoint(16, 20)
+            scr = QApplication.screenAt(QCursor.pos()) or QApplication.primaryScreen()
+            avail = scr.availableGeometry()
+            pos.setX(max(avail.left() + 4, min(pos.x(), avail.right() - lbl.width() - 4)))
+            pos.setY(max(avail.top() + 4, min(pos.y(), avail.bottom() - lbl.height() - 4)))
+            lbl.move(pos)
+            lbl.show()
+            lbl.raise_()
+        except RuntimeError:
+            pass  # hovered label was destroyed while the timer was pending
+        except Exception as e:
+            logging.error(f"Hover tooltip error: {e}")
+
+
+_tip_filter = None
+
+def _install_tip_filter(lbl):
+    global _tip_filter
+    lbl._tip_text = ""
+    if _tip_filter is None:
+        _tip_filter = _TipFilter()
+    lbl.installEventFilter(_tip_filter)
+
 
 
 _GIT_SYNC_PS = (
@@ -2802,7 +2932,7 @@ class StatusBar(QMainWindow):
         git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
         bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); git_row.addWidget(bkup)
         for idx, repo in enumerate(repos):
-            lbl = IconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); p = repo["path"]
+            lbl = GitIconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); _install_tip_filter(lbl); p = repo["path"]
             def _make_click(path, _cfg, _idx):
                 def click(event):
                     mods, btn = event.modifiers(), event.button()
@@ -3133,7 +3263,8 @@ class StatusBar(QMainWindow):
                 if name in self._git_labels:
                     lbl = self._git_labels[name]
                     lbl.setText(item.get("text", lbl.text()))
-                    lbl.setToolTip(item.get("tooltip", ""))
+                    lbl._tip_text = item.get("tooltip", "")
+                    lbl.set_branch_color(branch_color(item.get("branch", "")))
                     font = get_default_font()
                     lbl.setStyleSheet(f"color: {item.get('color')}; font-family: '{font[0]}'; font-size: {font[1]}pt; font-weight: {font[2]};")
         except Empty: pass

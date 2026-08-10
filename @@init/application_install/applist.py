@@ -515,23 +515,16 @@ class AppRowWidget(QWidget):
             """
         )
 
-        # Label formatting matching original: App Name [Source Tag]
+        # Label formatting: App Name
         app_name = self.app_data.get("name", "Unnamed")
         if scoop_installed:
-            source_tag = "[S]"
             text_color = TEXT_WHITE
-            tag_color = TEXT_WHITE
         elif winget_installed:
-            source_tag = "[W]"
             text_color = TEXT_BLUE
-            tag_color = TEXT_BLUE
         else:
-            source_tag = "[X]"
             text_color = TEXT_RED
-            tag_color = TEXT_RED
 
-        self.lbl_text = QLabel(f"{app_name}  <span style='color:{tag_color};'>{source_tag}</span>")
-        self.lbl_text.setTextFormat(Qt.TextFormat.RichText)
+        self.lbl_text = QLabel(app_name)
         self.lbl_text.setStyleSheet(
             f"font-family: 'JetBrainsMono NF', 'Consolas', monospace; font-size: 11pt; font-weight: bold; color: {text_color};"
         )
@@ -807,6 +800,9 @@ class MainWindow(QMainWindow):
         # Scroll Area for Application Rows
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.scroll_area.verticalScrollBar().setSingleStep(15)
         self.scroll_area.setStyleSheet(
             f"""
             QScrollArea {{
@@ -815,17 +811,25 @@ class MainWindow(QMainWindow):
             }}
             QScrollBar:vertical {{
                 background: {BG_MAIN};
-                width: 10px;
+                width: 8px;
                 margin: 0px;
+                border: none;
             }}
             QScrollBar::handle:vertical {{
                 background: #565a61;
-                min-height: 20px;
+                min-height: 25px;
                 border-radius: 4px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: #007bff;
             }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 height: 0px;
                 background: none;
+                border: none;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: transparent;
             }}
             """
         )
@@ -835,7 +839,7 @@ class MainWindow(QMainWindow):
         self.scroll_layout = QVBoxLayout(self.scroll_widget)
         self.scroll_layout.setContentsMargins(10, 0, 10, 0)
         self.scroll_layout.setSpacing(2)
-        self.scroll_layout.addStretch()
+        self.scroll_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.scroll_area.setWidget(self.scroll_widget)
         main_layout.addWidget(self.scroll_area)
@@ -858,7 +862,7 @@ class MainWindow(QMainWindow):
                 on_delete=self.delete_application,
                 parent=self.scroll_widget,
             )
-            self.scroll_layout.insertWidget(self.scroll_layout.count() - 1, row)
+            self.scroll_layout.addWidget(row)
             self.row_widgets.append(row)
 
         self.filter_apps()
