@@ -1724,10 +1724,25 @@ def check_komorebi_status(q):
         logging.error(f"check_komorebi_status error: {e}")
         q.put({"ok": False, "workspaces": [], "focused": -1, "paused": False})
 
+_komorebi_fast_until = 0.0  # when > now, the poll loop ticks every 0.3s
+
+def _kick_komorebi_refresh(seconds=8):
+    """Speed up the poll loop briefly after a user action (focus/change layout)
+    so the status bar reflects the new komorebi state almost instantly."""
+    global _komorebi_fast_until
+    _komorebi_fast_until = time.time() + seconds
+
 def _komorebi_status_loop(q):
     while True:
         check_komorebi_status(q)
-        time.sleep(2)
+        if time.time() < _komorebi_fast_until:
+            time.sleep(0.3)
+        else:
+            # sleep in short chunks so a kick mid-sleep is noticed promptly
+            for _ in range(4):
+                if time.time() >= _komorebi_fast_until:
+                    break
+                time.sleep(0.5)
 
 _KOMOREBI_LAYOUTS = ["bsp", "columns", "rows", "vertical-stack", "horizontal-stack",
                      "ultrawide-vertical-stack", "grid", "right-main-vertical-stack"]
@@ -1877,7 +1892,7 @@ class KomorebiWidget(QWidget):
         self._layout_lbl = None
         self._tip_text = ""
         lay = QHBoxLayout(self)
-        lay.setContentsMargins(2, 0, 2, 0)
+        lay.setContentsMargins(10, 0, 1, 0)  # match pagination arrows' padx
         lay.setSpacing(2)
         for i in range(3):
             b = QPushButton()
@@ -1909,14 +1924,17 @@ class KomorebiWidget(QWidget):
     def _focus_ws(self, idx):
         subprocess.Popen(["komorebic", "focus-workspace", str(idx)],
                          creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
 
     def _change_layout(self, layout):
         subprocess.Popen(["komorebic", "change-layout", layout],
                          creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
 
     def _toggle(self, arg):
         subprocess.Popen(["komorebic", "toggle-" + arg],
                          creationflags=subprocess.CREATE_NO_WINDOW)
+        _kick_komorebi_refresh()
 
     def _show_layout_menu(self, pos):
         menu = QMenu(self)
@@ -1926,7 +1944,7 @@ class KomorebiWidget(QWidget):
             act.triggered.connect(partial(self._change_layout, layout))
         menu.addSeparator()
         a = menu.addAction("Flip Layout")
-        a.triggered.connect(lambda: subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW))
+        a.triggered.connect(lambda: (subprocess.Popen(["komorebic", "flip-layout"], creationflags=subprocess.CREATE_NO_WINDOW), _kick_komorebi_refresh()))
         a = menu.addAction("Toggle Floating")
         a.triggered.connect(lambda: self._toggle("float"))
         a = menu.addAction("Toggle Monocle")
