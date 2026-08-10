@@ -65,13 +65,19 @@ SVGS = {
 }
 
 
-def render_svg_pixmap(svg, color, size):
-    """Render an SVG string to a transparent QPixmap, replacing 'currentColor'."""
+def render_svg_pixmap(svg, color, size, nudge_y=0):
+    """Render an SVG string to a transparent QPixmap, replacing 'currentColor'.
+
+    nudge_y shifts the drawing up by that many pixels so an icon's visual
+    center can be aligned with mixed-case text (which has no descenders).
+    """
     colored_svg = svg.replace('currentColor', color)
     renderer = QSvgRenderer(QByteArray(colored_svg.encode()))
     pix = QPixmap(size, size)
     pix.fill(Qt.GlobalColor.transparent)
     painter = QPainter(pix)
+    if nudge_y:
+        painter.translate(0, -nudge_y)
     renderer.render(painter)
     painter.end()
     return pix
@@ -3404,12 +3410,17 @@ class AHKShortcutEditor(QMainWindow):
         """
         doc = self.text_browser.document()
         # Slightly larger than the text height so the icons read clearly next to
-        # the bold key labels; verified to stay centered on the name line.
+        # the bold key labels. The ban icon is nudged up 2px: its symmetric circle
+        # otherwise looks low next to mixed-case text like 'Rule' (no descenders).
         size = max(12, int(self.app_font_size * 1.5))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban"),
-                        render_svg_pixmap(SVGS["BAN"], CP_RED, size))
+                        render_svg_pixmap(SVGS["BAN"], CP_RED, size, nudge_y=2))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://rocket"),
                         render_svg_pixmap(SVGS["ROCKET"], CP_CYAN, size))
+        # Small ban icon for the dim rule sub-lines (e.g. '▸ 🚫 Inactive in')
+        sm = max(10, int(self.app_font_size * 0.82 * 1.15))
+        doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
+                        render_svg_pixmap(SVGS["BAN"], CP_RED, sm, nudge_y=1))
 
     def _truncate_to_width(self, text, max_px):
         """Truncate text with an ellipsis so it fits the fixed key column.
@@ -3466,7 +3477,13 @@ class AHKShortcutEditor(QMainWindow):
         elif shortcut_type == "startup":
             mode = shortcut.get('context_mode', 'none')
             if mode in ('active', 'inactive') and lines:
-                lines.insert(0, "✅ Active in" if mode == 'active' else "🚫 Inactive in")
+                if mode == 'active':
+                    lines.insert(0, "✅ Active in")
+                else:
+                    # SVG ban icon instead of the true-color emoji, sized for the
+                    # dim rule lines (0.82em text)
+                    sm = max(10, int(self.app_font_size * 0.82 * 1.15))
+                    lines.insert(0, f'<img src="icon://ban-sm" width="{sm}" height="{sm}" align="middle"> Inactive in')
 
         if not lines:
             return ''
