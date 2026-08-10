@@ -2907,20 +2907,31 @@ class AHKShortcutEditor(QMainWindow):
     def _row_select_url_at(self, pos):
         """Return the select:// URL of the shortcut row under pos, or None.
 
+        pos is in viewport coordinates (as delivered by the event filter).
         QTextBrowser only treats clicks on anchor *text* as links, so the empty
         space inside a row (right of the name, below the rule sub-lines) has no
         anchor and clicks there currently do nothing. Each row is rendered as
         table cells whose blocks carry the select:// anchor (the name cell
         spans the full row width), so we scan the block under the cursor for
         that anchor and verify the click lands inside the block's layout rect
-        (which excludes the gaps between rows).
+        (which excludes the gaps between rows). The rect is in document
+        coordinates, so the scrollbar offsets are added to pos before the
+        containment check.
         """
         cursor = self.text_browser.cursorForPosition(pos)
         block = cursor.block()
         if not block.isValid():
             return None
         rect = self.text_browser.document().documentLayout().blockBoundingRect(block)
-        if not rect.contains(QPointF(pos)):
+        # The block rect is in document coordinates, but the click pos is in
+        # viewport coordinates — add the scrollbar offsets so the containment
+        # check still holds when the list is scrolled (e.g. any section below
+        # the Favourites section at the top).
+        doc_pos = QPointF(
+            pos.x() + self.text_browser.horizontalScrollBar().value(),
+            pos.y() + self.text_browser.verticalScrollBar().value(),
+        )
+        if not rect.contains(doc_pos):
             return None
         it = block.begin()
         while not it.atEnd():
