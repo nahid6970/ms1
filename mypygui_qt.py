@@ -2239,6 +2239,136 @@ class GitIconLabel(IconLabel):
             logging.error(f"GitIconLabel indicator error: {e}")
 
 
+# ─── app→workspace window capture (mirrors asset/komorebi/komorebi_gui_custom.py) ──
+def _komorebi_capture_timeout():
+    """Capture timeout (s) from komorebi.json gui_settings, default 3 — the
+    same setting the komorebi GUI tool uses."""
+    try:
+        with open(_komorebi_config_path(), encoding="utf-8") as f:
+            cfg = json.load(f)
+        return max(1, int(cfg.get("gui_settings", {}).get("capture_timeout") or 3))
+    except Exception:
+        return 3
+
+
+class _WindowCaptureDialog(QDialog):
+    """Wait for the user to target a window: CLICK mode polls for a fresh
+    mouse press on the target window; TIMEOUT mode counts down while the user
+    hovers it (capture happens at the cursor). Mirrors the komorebi GUI tool."""
+    def __init__(self, mode, seconds=3, parent=None):
+        super().__init__(parent)
+        self.mode = mode
+        self.remaining = seconds
+        self.captured = False
+        self.setWindowTitle("Capture Window")
+        self.setStyleSheet(DIALOG_QSS)
+        self.setFixedWidth(380)
+        v = QVBoxLayout(self)
+        self.lbl = QLabel("")
+        self.lbl.setWordWrap(True)
+        self.lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        v.addWidget(self.lbl)
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(self.reject)
+        v.addWidget(cancel)
+        try:  # bottom-right corner so it stays off the target window
+            scr = QApplication.primaryScreen()
+            g = scr.availableGeometry()
+            self.move(g.right() - self.width() - 60,
+                      g.bottom() - self.height() - 60)
+        except Exception:
+            pass
+        if mode == "click":
+            self.lbl.setText("Click the target window now.\nThe captured "
+                             "info will be used for this workspace's rule.")
+            self.waiting_for_release = True
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self._poll_click)
+            self.timer.start(50)
+        else:
+            self._update_timeout()
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self._tick_timeout)
+            self.timer.start(1000)
+
+    def _poll_click(self):
+        try:
+            import win32api, win32gui, win32process
+        except ImportError:
+            self.reject()
+            return
+        lb = win32api.GetAsyncKeyState(0x01)
+        if self.waiting_for_release:
+            if lb == 0:
+                self.waiting_for_release = False
+            return
+        if lb < 0:
+            # Ignore presses that land on our own dialog (e.g. the Cancel
+            # button) so a cancel click can't be mistaken for a target press.
+            try:
+                pos = win32api.GetCursorPos()
+                hwnd = win32gui.WindowFromPoint(pos)
+                _, pid = win32process.GetWindowThreadProcessId(hwnd)
+            except Exception:
+                pid = -1
+            if pid == os.getpid():
+                return
+            self.timer.stop()
+            self.captured = True
+            self.accept()
+
+    def _update_timeout(self):
+        self.lbl.setText("Position the cursor over the target window.\n"
+                         f"Capturing in {self.remaining} s…")
+
+    def _tick_timeout(self):
+        self.remaining -= 1
+        if self.remaining <= 0:
+            self.timer.stop()
+            self.captured = True
+            self.accept()
+        else:
+            self._update_timeout()
+
+
+class _WindowAttributePicker(QDialog):
+    """Pick which captured attribute (Exe/Title/Class/Path) becomes the
+    workspace-rule identifier — the same choice the komorebi GUI tool offers."""
+    def __init__(self, parent, info):
+        super().__init__(parent)
+        self.setWindowTitle("Window Captured")
+        self.setStyleSheet(DIALOG_QSS)
+        self.setFixedWidth(460)
+        self.choice = None
+        v = QVBoxLayout(self)
+        head = QLabel(f"Captured: <b>{_tip_esc(info.get('Title') or '?')}</b>\n"
+                      "Match this window to the workspace by:")
+        head.setWordWrap(True)
+        v.addWidget(head)
+        added = False
+        for kind in ("Exe", "Title", "Class", "Path"):
+            val = (info.get(kind) or "").strip()
+            if not val or val.lower() == "unknown":
+                continue
+            b = QPushButton(f"{kind.upper()}: {val}")
+            b.setStyleSheet("text-align: left; padding: 6px 10px;")
+            b.clicked.connect(lambda ch, k=kind, v=val: self._pick(k, v))
+            v.addWidget(b)
+            added = True
+        if not added:
+            warn = QLabel("No usable window info was captured.\n"
+                          "You can still add the rule manually.")
+            warn.setWordWrap(True)
+            v.addWidget(warn)
+        cancel = QPushButton("Cancel")
+        cancel.clicked.connect(self.reject)
+        v.addWidget(cancel)
+
+    def _pick(self, kind, val):
+        self.choice = (kind, val)
+        self.accept()
+
+
 class KomorebiWidget(QWidget):
     """Up to 3 clickable komorebi workspace dots + active layout label.
 
@@ -2324,7 +2454,11 @@ class KomorebiWidget(QWidget):
             disabled=True)
         _menu_rich_action(
             menu,
-            '<span style="color:#E0E0E0;">＋ Assign App to Workspace...</span>',
+            '<span style="color:#E0E0E0;">🎯 Pick App Window...</span>',
+            partial(self._pick_app_for_ws, name, menu))
+        _menu_rich_action(
+            menu,
+            '<span style="color:#8f9bae;">＋ Assign App Manually...</span>',
             partial(self._assign_app, name))
         rules = _komorebi_get_workspace_rules(name)
         if rules:
@@ -2338,7 +2472,91 @@ class KomorebiWidget(QWidget):
                             r.get("kind", ""), r.get("id", "")))
         menu.exec(_menu_gpos(self, menu, self.mapToGlobal(pos)))
 
-    def _assign_app(self, name):
+    # ── capture an app window to auto-fill the workspace rule ────────────────
+    def _pick_app_for_ws(self, name, menu=None):
+        """Capture flow like the komorebi GUI tool: choose CLICK or TIMEOUT,
+        target a window, pick which attribute to match, then pre-fill the
+        assign dialog (which saves the rule + reloads komorebi)."""
+        if menu is not None:
+            menu.close()  # hide the context menu so the target click lands
+        try:
+            import win32api  # noqa: F401
+        except ImportError:
+            QMessageBox.warning(
+                self, "Capture Window",
+                "pywin32 is not installed — cannot capture window info. "
+                "Use 'Assign App Manually' instead.")
+            return
+        timeout = _komorebi_capture_timeout()
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Capture App Window")
+        msg.setStyleSheet(DIALOG_QSS)
+        msg.setText(f"Assign a window's app info to workspace {name}.\n"
+                    "Choose how to capture it:")
+        click_btn = msg.addButton("CLICK MODE",
+                                  QMessageBox.ButtonRole.ActionRole)
+        time_btn = msg.addButton(f"TIMEOUT ({timeout}s)",
+                                 QMessageBox.ButtonRole.ActionRole)
+        msg.addButton("CANCEL", QMessageBox.ButtonRole.RejectRole)
+        msg.exec()
+        if msg.clickedButton() not in (click_btn, time_btn):
+            return
+        dlg = _WindowCaptureDialog(
+            "click" if msg.clickedButton() is click_btn else "timeout",
+            timeout, self)
+        if not dlg.exec() or not dlg.captured:
+            return
+        info = self._capture_window_info()
+        if not info:
+            QMessageBox.warning(
+                self, "Capture Window",
+                "Could not read the targeted window — it may have closed, or "
+                "you targeted the statusbar itself. Try again.")
+            return
+        pick = _WindowAttributePicker(self, info)
+        if not pick.exec() or not pick.choice:
+            return
+        kind, val = pick.choice
+        self._assign_app(name, preset_kind=kind, preset_id=val)
+
+    def _capture_window_info(self):
+        """Capture Exe/Title/Class/Path of the window under the cursor
+        (hover strategy), mirroring the komorebi GUI tool's capture."""
+        try:
+            import win32api, win32gui, win32process
+        except ImportError:
+            return None
+        try:
+            pos = win32api.GetCursorPos()
+            hwnd = win32gui.WindowFromPoint(pos)
+            if not hwnd:
+                return None
+            hwnd = win32gui.GetAncestor(hwnd, 2)  # GA_ROOT
+            title = win32gui.GetWindowText(hwnd)
+            cls = win32gui.GetClassName(hwnd)
+            try:
+                _, pid = win32process.GetWindowThreadProcessId(hwnd)
+            except Exception:
+                pid = 0
+            if pid == os.getpid():  # targeted our own dialog/statusbar
+                return None
+            try:
+                h = win32api.OpenProcess(0x0400 | 0x0010, False, pid)
+                try:
+                    path = win32process.GetModuleFileNameEx(h, 0)
+                finally:
+                    win32api.CloseHandle(h)
+                exe = os.path.basename(path)
+            except Exception:
+                path, exe = "Unknown", "Unknown"
+            if not title and not cls:
+                return None
+            return {"Exe": exe, "Title": title, "Class": cls, "Path": path}
+        except Exception as e:
+            logging.warning(f"window capture failed: {e}")
+            return None
+
+    def _assign_app(self, name, preset_kind=None, preset_id=None):
         dlg = QDialog(self)
         dlg.setWindowTitle(f"Assign App → Workspace {name}")
         dlg.setStyleSheet(DIALOG_QSS)
@@ -2359,6 +2577,10 @@ class KomorebiWidget(QWidget):
             elif strat_cb.currentText() == "Contains":
                 strat_cb.setCurrentText("Equals")
         kind_cb.currentTextChanged.connect(_on_kind_changed)
+        if preset_kind:
+            kind_cb.setCurrentText(preset_kind)  # triggers strategy auto-switch
+        if preset_id:
+            id_le.setText(preset_id)
         form.addRow("KIND", kind_cb)
         form.addRow("IDENTIFIER", id_le)
         form.addRow("MATCH", strat_cb)
