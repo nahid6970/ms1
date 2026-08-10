@@ -1675,12 +1675,18 @@ def _git_status_loop(repos, q):
         time.sleep(5)
 
 
-def delete_git_lock_files(repos):
-    for repo in repos:
-        lock_file = os.path.join(repo["path"], ".git", "index.lock")
-        try:
-            if os.path.exists(lock_file): os.remove(lock_file); print(f"Deleted: {lock_file}")
-        except Exception as e: print(f"Error deleting {lock_file}: {e}")
+def delete_git_lock_files(path):
+    """Remove .git/index.lock for the repo at `path` (a stuck lock causes
+    'Unable to create index.lock' errors when committing/pulling)."""
+    lock_file = os.path.join(path, ".git", "index.lock")
+    try:
+        if os.path.exists(lock_file):
+            os.remove(lock_file)
+            QMessageBox.information(None, "Git Lock", f"Deleted lock file:\n{lock_file}")
+        else:
+            QMessageBox.information(None, "Git Lock", "No lock file found - nothing to delete.")
+    except Exception as e:
+        QMessageBox.warning(None, "Git Lock", f"Error deleting lock file:\n{e}")
 
 def apply_git_style(lbl, cfg):
     fg, bg = cfg.get("fg", "") or "white", cfg.get("bg", "") or "transparent"
@@ -2011,6 +2017,7 @@ def _show_git_menu(path, lbl=None):
     menu.addAction("Stash (incl. untracked)").triggered.connect(lambda: open_git_cmd(path, "Git Stash", "git stash push -u"))
     menu.addAction("Pop Stash").triggered.connect(lambda: open_git_cmd(path, "Git Pop Stash", "git stash pop"))
     menu.addAction("Discard Changes").triggered.connect(lambda: open_git_cmd(path, "Git Restore", "git restore ."))
+    menu.addAction("Delete Lock Files").triggered.connect(lambda: delete_git_lock_files(path))
     menu.addSeparator()
     menu.addAction("Status & Diff").triggered.connect(lambda: open_git_cmd(path, "Git Status", "git status; Write-Host '----------------------------' -ForegroundColor DarkGray; git diff --stat"))
     menu.addAction("lazygit").triggered.connect(lambda: subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True))
@@ -3089,7 +3096,7 @@ class StatusBar(QMainWindow):
                         else: _show_git_menu(path, lbl)
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx, lbl); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
-        del_lbl = QLabel("\udb82\udde7"); del_lbl.setStyleSheet(f"color: white; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); del_lbl.setCursor(Qt.CursorShape.PointingHandCursor); del_lbl.mousePressEvent = lambda e: delete_git_lock_files(repos); git_row.addWidget(del_lbl)
+
         if repos: threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
 
     def _init_script_monitor(self, ll):
