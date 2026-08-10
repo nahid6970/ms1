@@ -3541,21 +3541,26 @@ class AHKShortcutEditor(QMainWindow):
 
         text_style = 'style="color: #888;"' if not enabled else ""
 
+        # Favourites rows may have multi-line rules below the name; top-align the
+        # status/key/icon cells so they line up with the first (name) line instead
+        # of floating in the vertical middle of the taller row.
+        left_valign = "top" if is_favourite else "middle"
+
         return f'''
         <div class="shortcut-item {indent_class}">
             <table width="100%" cellpadding="3" cellspacing="0" style="background-color: {bg_color}; border-radius: 0px; border-collapse: separate;">
                 <tr>
-                    <td width="40" valign="middle">
+                    <td width="40" valign="{left_valign}">
                         <a href="toggle://{shortcut_type}/{index}" style="text-decoration: none;">
                             <span class="{status_class}" style="font-size: 18px;">{status}</span>
                         </a>
                     </td>
-                    <td valign="middle">
+                    <td valign="{left_valign}">
                         <a href="select://{shortcut_type}/{index}" style="text-decoration: none; color: inherit;">
                             <table cellpadding="0" cellspacing="0" width="100%">
                                 <tr {text_style}>
-                                    <td width="{key_width}" class="shortcut-key" valign="middle" style="white-space: nowrap;">{key}</td>
-                                    <td width="{icon_width}" class="shortcut-separator" valign="middle" align="center">󰌌</td>
+                                    <td width="{key_width}" class="shortcut-key" valign="{left_valign}" style="white-space: nowrap;">{key}</td>
+                                    <td width="{icon_width}" class="shortcut-separator" valign="{left_valign}" align="center">󰌌</td>
                                     <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}{rules_html}</td>
                                 </tr>
                             </table>
