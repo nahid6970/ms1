@@ -1067,6 +1067,7 @@
     "remap_shortcuts": [],
     "app_font_family": "Consolas",
     "app_font_size": 16,
+    "toggle_accent_color": "#2196F3",
     "selection_menu_font_family": "JetBrainsMonoNL NFP ExtraBold",
     "selection_menu_font_size": 14,
     "selection_menu_submenu_indicator": "",

@@ -62,15 +62,27 @@ SVGS = {
     "RESTART": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>',
     "ROCKET": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>',
     "BAN": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>',
-    # Android-style toggle switches for the enable/disable column. Colours are
-    # hardcoded (no currentColor) because track and knob differ; they match the
-    # cyberpunk palette (cyan ON, dim gray OFF).
-    "TOGGLE_ON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#00F0FF"/><circle cx="33" cy="12" r="9" fill="#FFFFFF"/></svg>',
+    # Android-style toggle switches for the enable/disable column. The ON track
+    # uses currentColor so the accent is user-configurable (Settings window); the
+    # knob stays white. OFF stays dim gray regardless of accent.
+    "TOGGLE_ON": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="currentColor"/><circle cx="33" cy="12" r="9" fill="#FFFFFF"/></svg>',
     "TOGGLE_OFF": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24"><rect x="1" y="1" width="44" height="22" rx="11" fill="#242424" stroke="#3a3a3a" stroke-width="1"/><circle cx="13" cy="12" r="9" fill="#9a9a9a"/></svg>'
 }
 
 # Toggle switch dimensions (must match the SVG viewBox and the <img> attrs).
 TOGGLE_W, TOGGLE_H = 46, 24
+
+# Accent color choices for the enabled toggle switch (label, hex).
+TOGGLE_COLOR_OPTIONS = [
+    ("Green", "#00E676"),
+    ("Blue", "#2196F3"),
+    ("Cyan", "#00F0FF"),
+    ("Yellow", "#FCEE0A"),
+    ("Orange", "#FF9100"),
+    ("Red", "#FF003C"),
+    ("Purple", "#B388FF"),
+    ("Pink", "#FF80AB"),
+]
 
 
 def render_svg_pixmap(svg, color, size, nudge_y=0, height=None):
@@ -2184,7 +2196,7 @@ class SettingsDialog(QDialog):
         self.parent_window = parent
         self.setWindowTitle("Settings")
         self.setModal(True)
-        self.resize(500, 520)
+        self.resize(500, 560)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
@@ -2246,6 +2258,25 @@ class SettingsDialog(QDialog):
             
         theme_layout.addWidget(self.theme_combo)
         layout.addLayout(theme_layout)
+
+        # Toggle Switch Accent Color
+        toggle_layout = QHBoxLayout()
+        toggle_layout.addWidget(QLabel("Toggle Switch Color:"))
+        self.toggle_color_combo = QComboBox()
+        for label, hexc in TOGGLE_COLOR_OPTIONS:
+            swatch = QPixmap(16, 16)
+            swatch.fill(QColor(hexc))
+            self.toggle_color_combo.addItem(QIcon(swatch), label, hexc)
+        current = self.parent_window.toggle_accent_color or TOGGLE_COLOR_OPTIONS[0][1]
+        idx = self.toggle_color_combo.findData(current)
+        if idx == -1:
+            swatch = QPixmap(16, 16)
+            swatch.fill(QColor(current))
+            self.toggle_color_combo.addItem(QIcon(swatch), current, current)
+            idx = self.toggle_color_combo.count() - 1
+        self.toggle_color_combo.setCurrentIndex(idx)
+        toggle_layout.addWidget(self.toggle_color_combo)
+        layout.addLayout(toggle_layout)
 
         # Shortcut Preview Font Selection
         pfont_layout = QHBoxLayout()
@@ -2369,6 +2400,7 @@ class SettingsDialog(QDialog):
         self.parent_window.app_font_family = new_font
         self.parent_window.app_font_size = new_size
         
+        self.parent_window.toggle_accent_color = self.toggle_color_combo.currentData()
         self.parent_window.selection_menu_font_family = self.sm_font_combo.currentFont().family()
         self.parent_window.selection_menu_font_size = self.sm_size_spin.value()
         self.parent_window.use_native_menu = self.menu_style_checkbox.isChecked()
@@ -2414,6 +2446,7 @@ class AHKShortcutEditor(QMainWindow):
         self.remap_shortcuts = []
         self.app_font_family = "Consolas" # Default per theme guide
         self.app_font_size = 10
+        self.toggle_accent_color = TOGGLE_COLOR_OPTIONS[0][1]  # Green by default
         self.selection_menu_font_family = "Segoe UI"
         self.selection_menu_font_size = 12
         self.selection_menu_submenu_indicator = " >"
@@ -2893,6 +2926,7 @@ class AHKShortcutEditor(QMainWindow):
                     self.remap_shortcuts = data.get("remap_shortcuts", [])
                     self.app_font_family = data.get("app_font_family", "Consolas")
                     self.app_font_size = data.get("app_font_size", 10)
+                    self.toggle_accent_color = data.get("toggle_accent_color", TOGGLE_COLOR_OPTIONS[0][1])
                     self.selection_menu_font_family = data.get("selection_menu_font_family", "Segoe UI")
                     self.selection_menu_font_size = data.get("selection_menu_font_size", 12)
                     self.selection_menu_submenu_indicator = data.get("selection_menu_submenu_indicator", " >")
@@ -2960,6 +2994,7 @@ class AHKShortcutEditor(QMainWindow):
                 "remap_shortcuts": self.remap_shortcuts,
                 "app_font_family": self.app_font_family,
                 "app_font_size": self.app_font_size,
+                "toggle_accent_color": self.toggle_accent_color,
                 "selection_menu_font_family": self.selection_menu_font_family,
                 "selection_menu_font_size": self.selection_menu_font_size,
                 "selection_menu_submenu_indicator": self.selection_menu_submenu_indicator,
@@ -3445,9 +3480,10 @@ class AHKShortcutEditor(QMainWindow):
         sm = rules_ban_size(self.app_font_size)
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://ban-sm"),
                         render_svg_pixmap(SVGS["BAN"], CP_RED, sm))
-        # Android-style enable/disable toggles for the status column.
+        # Android-style enable/disable toggles for the status column. The ON
+        # track color is user-configurable (Settings -> Toggle Switch Color).
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://toggle-on"),
-                        render_svg_pixmap(SVGS["TOGGLE_ON"], CP_CYAN, TOGGLE_W, height=TOGGLE_H))
+                        render_svg_pixmap(SVGS["TOGGLE_ON"], self.toggle_accent_color, TOGGLE_W, height=TOGGLE_H))
         doc.addResource(QTextDocument.ResourceType.ImageResource, QUrl("icon://toggle-off"),
                         render_svg_pixmap(SVGS["TOGGLE_OFF"], CP_DIM, TOGGLE_W, height=TOGGLE_H))
 
