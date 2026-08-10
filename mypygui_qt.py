@@ -2249,6 +2249,21 @@ class KomorebiWidget(QWidget):
                           lambda: self._toggle("monocle"))
         _menu_rich_action(menu, '<span style="color:#8f9bae;">⏸ Toggle Pause</span>',
                           lambda: self._toggle("pause"))
+        menu.addSeparator()
+        # quick-save-resize / quick-load-resize snapshot the focused workspace's
+        # layout proportions so you can restore them later (whkd: Alt+F5 / Alt+F6)
+        _menu_rich_action(
+            menu, '<span style="color:#8f9bae;">💾 Save Layout Resize</span> '
+                  '<span style="color:#555555;">Alt+F5</span>',
+            lambda: (subprocess.Popen(["komorebic", "quick-save-resize"],
+                                      creationflags=subprocess.CREATE_NO_WINDOW),
+                     _komorebi_refresh_once()))
+        _menu_rich_action(
+            menu, '<span style="color:#8f9bae;">📂 Load Layout Resize</span> '
+                  '<span style="color:#555555;">Alt+F6</span>',
+            lambda: (subprocess.Popen(["komorebic", "quick-load-resize"],
+                                      creationflags=subprocess.CREATE_NO_WINDOW),
+                     _komorebi_refresh_once()))
         menu.exec(_menu_gpos(self, menu, cursor_pos))
 
     def apply_state(self, item):
