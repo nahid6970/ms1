@@ -164,7 +164,7 @@
     },
     {
       "name": "mklink",
-      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "path": "C:\\@delta\\ms1\\testing\\mklink",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -205,7 +205,7 @@
     },
     {
       "name": "Drop Down Files",
-      "path": "C:\\@delta\\ms1\\Testing\\MD_Launcher",
+      "path": "C:\\@delta\\ms1\\testing\\MD_Launcher",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -641,7 +641,7 @@
     },
     {
       "name": "Facebook img",
-      "path": "C:\\@delta\\ms1\\Testing\\facebook_img_download",
+      "path": "C:\\@delta\\ms1\\testing\\facebook_img_download",
       "category": "Tool",
       "pinned": false,
       "theme": {

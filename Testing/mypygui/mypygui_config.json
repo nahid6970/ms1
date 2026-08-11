@@ -850,7 +850,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\Testing\\facebook_img_download\\fb_img_downloader.py"
+                    "cmd": "C:\\@delta\\ms1\\testing\\facebook_img_download\\fb_img_downloader.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",

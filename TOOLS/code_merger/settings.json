@@ -253,22 +253,22 @@
       "pin_index": 0
     },
     {
-      "path": "C:\\@delta\\ms1\\Testing\\mklink",
+      "path": "C:\\@delta\\ms1\\testing\\mklink",
       "name": "",
       "category": "",
       "icon": "",
       "files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\mklink.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\README.md",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_projects.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
+        "C:\\@delta\\ms1\\testing\\mklink\\mklink.py",
+        "C:\\@delta\\ms1\\testing\\mklink\\README.md",
+        "C:\\@delta\\ms1\\testing\\mklink\\mirror-sync\\mirror_projects.json",
+        "C:\\@delta\\ms1\\testing\\mklink\\links.json",
+        "C:\\@delta\\ms1\\testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\testing\\mklink\\old\\old-mklink.py"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\Testing\\mklink\\links.json",
-        "C:\\@delta\\ms1\\Testing\\mklink\\mirror-sync\\mirror_sync.py",
-        "C:\\@delta\\ms1\\Testing\\mklink\\old\\old-mklink.py"
+        "C:\\@delta\\ms1\\testing\\mklink\\links.json",
+        "C:\\@delta\\ms1\\testing\\mklink\\mirror-sync\\mirror_sync.py",
+        "C:\\@delta\\ms1\\testing\\mklink\\old\\old-mklink.py"
       ],
       "extensions": [
         ".md",
@@ -454,19 +454,19 @@
       "pin_index": 0
     },
     {
-      "path": "C:\\@delta\\ms1\\Testing\\MD_Launcher",
+      "path": "C:\\@delta\\ms1\\testing\\MD_Launcher",
       "name": "Dropdown Launcher",
       "category": "Tools",
       "icon": "",
       "files": [
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher.py",
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\README.md",
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher_config.json",
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\run.bat"
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\md_launcher.py",
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\README.md",
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\md_launcher_config.json",
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\run.bat"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher_config.json",
-        "C:\\@delta\\ms1\\Testing\\MD_Launcher\\run.bat"
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\md_launcher_config.json",
+        "C:\\@delta\\ms1\\testing\\MD_Launcher\\run.bat"
       ],
       "extensions": [
         ".md",

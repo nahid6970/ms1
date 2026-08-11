@@ -195,7 +195,7 @@
             "name": "Quick Shortcut"
         },
         {
-            "action": "Run(\"C:\\@delta\\ms1\\Testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
+            "action": "Run(\"C:\\@delta\\ms1\\testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
             "category": "General",
             "description": "",
             "enabled": true,
@@ -298,7 +298,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!+d",
-            "target_path": "C:\\@delta\\ms1\\Testing\\MD_Launcher\\md_launcher.py",
+            "target_path": "C:\\@delta\\ms1\\testing\\MD_Launcher\\md_launcher.py",
             "hide_terminal": true,
             "enabled": true
         },
@@ -334,7 +334,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!m",
-            "target_path": "C:\\@delta\\ms1\\Testing\\screenshot\\file_mover.py",
+            "target_path": "C:\\@delta\\ms1\\testing\\screenshot\\file_mover.py",
             "hide_terminal": true,
             "enabled": true
         },
@@ -361,7 +361,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#f",
-            "target_path": "C:\\@delta\\ms1\\Testing\\screenshot\\folder_launcher\\launcher.py",
+            "target_path": "C:\\@delta\\ms1\\testing\\screenshot\\folder_launcher\\launcher.py",
             "hide_terminal": true,
             "enabled": true
         },
@@ -370,7 +370,7 @@
             "category": "General",
             "description": "",
             "hotkey": "#v",
-            "target_path": "C:\\@delta\\ms1\\Testing\\screenshot\\gallery\\gallery.py",
+            "target_path": "C:\\@delta\\ms1\\testing\\screenshot\\gallery\\gallery.py",
             "hide_terminal": true,
             "enabled": true
         },
