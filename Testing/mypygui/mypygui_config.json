@@ -165,13 +165,13 @@
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c start C:\\@delta\\ms1\\@@init\\windows.py"
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\init\\windows.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\@@init\\windows.py"
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\init\\windows.py"
                 }
             },
             "bg": "",
@@ -315,7 +315,7 @@
                     "hide": false,
                     "admin": true,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\@@init\\application_install\\applist.py"
+                    "cmd": "C:\\@delta\\ms1\\init\\application_install\\applist.py"
                 },
                 "Button-3": {
                     "type": "subprocess",

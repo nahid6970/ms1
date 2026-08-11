@@ -234,16 +234,16 @@
       "pin_index": 0
     },
     {
-      "path": "C:\\@delta\\ms1\\@@init\\application_install",
+      "path": "C:\\@delta\\ms1\\init\\application_install",
       "name": "Application Install",
       "category": "Tools",
       "icon": "",
       "files": [
-        "C:\\@delta\\ms1\\@@init\\application_install\\applist.py",
-        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
+        "C:\\@delta\\ms1\\init\\application_install\\applist.py",
+        "C:\\@delta\\ms1\\init\\application_install\\data.json"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\@@init\\application_install\\data.json"
+        "C:\\@delta\\ms1\\init\\application_install\\data.json"
       ],
       "extensions": [
         ".py",
