@@ -75,19 +75,25 @@
     "name": "save_memory",
     "category": "Memory & Context",
     "rating": "Best (Persistent)",
-    "description": "Save important notes, decisions, user preferences, or architecture details into persistent long-term memory."
+    "description": "Save basic facts to main memory or organize specific topic memories into dedicated sub-memory files/folders inside 'memory/' directory."
   },
   {
     "name": "read_memory",
     "category": "Memory & Context",
     "rating": "Best (Safe)",
-    "description": "Retrieve saved memories or notes by key, or list all saved memories if key is omitted."
+    "description": "Read main memory index or inspect deep topic sub-memory files/folders by path."
+  },
+  {
+    "name": "list_memories",
+    "category": "Memory & Context",
+    "rating": "Best (Safe)",
+    "description": "List the full directory structure of all saved memories and sub-memory files."
   },
   {
     "name": "delete_memory",
     "category": "Memory & Context",
     "rating": "Good (Cleanup)",
-    "description": "Delete a specific memory by key when it is no longer needed."
+    "description": "Delete a specific memory key or an entire sub-memory topic file/folder."
   },
 
 

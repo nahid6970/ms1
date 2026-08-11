@@ -127,9 +127,10 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 - `run_powershell` — run PowerShell commands (preferred on Windows)
 
 **Memory & Context**:
-- `save_memory` — store important notes, project decisions, or preferences persistently across sessions
-- `read_memory` — recall saved notes/memories by key or view all saved entries
-- `delete_memory` — delete obsolete memory entries
+- `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`
+- `read_memory` — view main memory summary index or inspect specific sub-memory topic files
+- `list_memories` — view directory tree of all saved sub-memories and folders
+- `delete_memory` — delete specific memory keys or entire sub-memory topic files/folders
 
 **Control Flow**:
 - `request_follow_up` — request another AI turn for multi-step work

@@ -38,7 +38,7 @@ DEFAULT_SYSTEM = (
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
-    "PROACTIVE MEMORY: Memory tools are active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, environment setups, or key project facts that should be retained for future sessions."
+    "HIERARCHICAL MEMORY: A structured memory directory is active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, or key project facts. Store core facts in main memory (path='main'), or organize specific topics into dedicated sub-memory files/folders (e.g. path='database/schema', path='deployment/docker'). Provide a short description when creating sub-memories so they are indexed in main memory."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -52,7 +52,8 @@ API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
 API_ACCOUNTS_MAGIC = b"GEMAPI1"
 NOTIFICATION_FILE = Path(r"C:\Users\nahid\notification.txt")
 TRANSCRIPTS_DIR = Path(__file__).parent / "transcripts"
-MEMORY_FILE = Path(__file__).with_name("memory.json")
+MEMORY_DIR = Path(__file__).parent / "memory"
+MAIN_MEMORY_FILE = MEMORY_DIR / "main.json"
 
 try:
     import msvcrt
@@ -96,93 +97,267 @@ def write_notification() -> None:
         pass
 
 
-def load_memories() -> Dict[str, Any]:
-    if not MEMORY_FILE.exists():
-        return {}
+def ensure_memory_dir() -> None:
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def load_main_memory() -> Dict[str, Any]:
+    ensure_memory_dir()
+    if not MAIN_MEMORY_FILE.exists():
+        default_main = {
+            "summary": "Main memory index and core basic memories",
+            "basic_memories": {},
+            "sub_memories": {},
+        }
+        try:
+            MAIN_MEMORY_FILE.write_text(json.dumps(default_main, indent=2, ensure_ascii=False), encoding="utf-8")
+        except Exception:
+            pass
+        return default_main
     try:
-        data = json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else {}
+        data = json.loads(MAIN_MEMORY_FILE.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {"summary": "Main memory index", "basic_memories": {}, "sub_memories": {}}
+        if "basic_memories" not in data or not isinstance(data.get("basic_memories"), dict):
+            data["basic_memories"] = {}
+        if "sub_memories" not in data or not isinstance(data.get("sub_memories"), dict):
+            data["sub_memories"] = {}
+        return data
     except Exception:
-        return {}
+        return {"summary": "Main memory index", "basic_memories": {}, "sub_memories": {}}
 
 
-def save_memories_data(data: Dict[str, Any]) -> None:
+def save_main_memory(data: Dict[str, Any]) -> None:
+    ensure_memory_dir()
     try:
-        MEMORY_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+        MAIN_MEMORY_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
         pass
 
 
-def save_memory(key: str, content: str) -> str:
+def resolve_memory_path(raw_path: str) -> Path:
+    ensure_memory_dir()
+    clean = raw_path.strip().replace("\\", "/").strip("/")
+    if not clean or clean in {"main", "main.json", "."}:
+        return MAIN_MEMORY_FILE
+    if not clean.endswith(".json"):
+        clean += ".json"
+    target = (MEMORY_DIR / clean).resolve()
+    if not str(target).startswith(str(MEMORY_DIR.resolve())):
+        return MAIN_MEMORY_FILE
+    return target
+
+
+def save_memory(key: str, content: str, path: str = "main", description: str = "") -> str:
     key = key.strip()
     if not key:
         return "Error: memory key is required."
     if not content.strip():
         return "Error: memory content is required."
-    memories = load_memories()
-    memories[key] = {
-        "content": content,
-        "updated_at": _now_stamp(),
-    }
-    save_memories_data(memories)
-    return f"Successfully saved memory under key '{key}'."
+
+    target_file = resolve_memory_path(path)
+
+    if target_file == MAIN_MEMORY_FILE.resolve():
+        main_data = load_main_memory()
+        main_data["basic_memories"][key] = {
+            "content": content,
+            "updated_at": _now_stamp(),
+        }
+        save_main_memory(main_data)
+        return f"Successfully saved basic memory '{key}' to main memory."
+
+    try:
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        sub_data = {}
+        if target_file.exists():
+            try:
+                sub_data = json.loads(target_file.read_text(encoding="utf-8"))
+            except Exception:
+                sub_data = {}
+        if not isinstance(sub_data, dict):
+            sub_data = {}
+
+        sub_data[key] = {
+            "content": content,
+            "updated_at": _now_stamp(),
+        }
+        target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+        rel_path = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+        main_data = load_main_memory()
+        sub_desc = description.strip() if description else f"Sub-memory topic for '{rel_path}'"
+        main_data["sub_memories"][rel_path] = {
+            "description": sub_desc,
+            "updated_at": _now_stamp(),
+            "items_count": len(sub_data),
+        }
+        save_main_memory(main_data)
+        return f"Successfully saved memory '{key}' to sub-memory file '{rel_path}' (Index updated in main memory)."
+    except Exception as exc:
+        return f"Error saving memory to {path}: {exc}"
 
 
-def read_memory(key: Optional[str] = None) -> str:
-    memories = load_memories()
-    if not memories:
-        return "No saved memories found."
-    if key and key.strip():
-        k = key.strip()
-        if k in memories:
-            item = memories[k]
-            if isinstance(item, dict):
-                content = item.get("content", "")
-                updated = item.get("updated_at", "unknown")
-                return f"Memory ['{k}'] (updated: {updated}):\n{content}"
-            return f"Memory ['{k}']:\n{item}"
-        matches = {mk: mv for mk, mv in memories.items() if k.lower() in mk.lower()}
-        if matches:
-            lines = [f"Found {len(matches)} matching memory key(s):"]
-            for mk, mv in matches.items():
-                content = mv.get("content", str(mv)) if isinstance(mv, dict) else str(mv)
-                lines.append(f"\n--- [{mk}] ---\n{content}")
-            return "\n".join(lines)
-        return f"Memory key '{k}' not found. Available keys: {', '.join(memories.keys())}"
+def read_memory(path: str = "main", key: Optional[str] = None) -> str:
+    target_file = resolve_memory_path(path)
 
-    lines = [f"Saved Memories ({len(memories)} items):"]
-    for mk, mv in sorted(memories.items()):
-        if isinstance(mv, dict):
-            content = mv.get("content", "")
-            updated = mv.get("updated_at", "")
-            lines.append(f"\nKey: {mk} (updated: {updated})\nContent: {content}")
+    if target_file == MAIN_MEMORY_FILE.resolve():
+        main_data = load_main_memory()
+        basic = main_data.get("basic_memories", {})
+        sub_files = main_data.get("sub_memories", {})
+
+        if key and key.strip():
+            k = key.strip()
+            if k in basic:
+                item = basic[k]
+                c = item.get("content", str(item)) if isinstance(item, dict) else str(item)
+                return f"Main Memory Basic Item ['{k}']:\n{c}"
+            for sub_p, sub_info in sub_files.items():
+                if k.lower() in sub_p.lower():
+                    desc = sub_info.get("description", "") if isinstance(sub_info, dict) else str(sub_info)
+                    return f"Sub-memory match ['{sub_p}']:\nDescription: {desc}\nUse read_memory(path='{sub_p}') to read full topic content."
+            return f"Key/Path '{k}' not found in main memory."
+
+        lines = ["=== MAIN MEMORY ==="]
+        if basic:
+            lines.append("\n[Basic Core Memories]:")
+            for bk, bv in sorted(basic.items()):
+                c = bv.get("content", str(bv)) if isinstance(bv, dict) else str(bv)
+                lines.append(f"  - {bk}: {c}")
         else:
-            lines.append(f"\nKey: {mk}\nContent: {mv}")
+            lines.append("\n[Basic Core Memories]: None saved yet.")
+
+        if sub_files:
+            lines.append("\n[Sub-Memory Index]:")
+            for sp, sinfo in sorted(sub_files.items()):
+                desc = sinfo.get("description", "") if isinstance(sinfo, dict) else str(sinfo)
+                cnt = sinfo.get("items_count", "?") if isinstance(sinfo, dict) else "?"
+                lines.append(f"  - {sp} ({cnt} items): {desc}")
+        else:
+            lines.append("\n[Sub-Memory Index]: None created yet.")
+
+        return "\n".join(lines)
+
+    if not target_file.exists():
+        rel_p = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+        return f"Sub-memory file '{rel_p}' does not exist."
+
+    try:
+        rel_p = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+        sub_data = json.loads(target_file.read_text(encoding="utf-8"))
+        if not isinstance(sub_data, dict) or not sub_data:
+            return f"Sub-memory file '{rel_p}' is empty."
+
+        if key and key.strip():
+            k = key.strip()
+            if k in sub_data:
+                item = sub_data[k]
+                c = item.get("content", str(item)) if isinstance(item, dict) else str(item)
+                return f"Sub-memory '{rel_p}' ['{k}']:\n{c}"
+            return f"Key '{k}' not found in sub-memory '{rel_p}'. Available keys: {', '.join(sub_data.keys())}"
+
+        lines = [f"=== SUB-MEMORY: {rel_p} ({len(sub_data)} items) ==="]
+        for sk, sv in sorted(sub_data.items()):
+            c = sv.get("content", str(sv)) if isinstance(sv, dict) else str(sv)
+            lines.append(f"\nKey: {sk}\nContent: {c}")
+        return "\n".join(lines)
+    except Exception as exc:
+        return f"Error reading sub-memory file: {exc}"
+
+
+def list_memories() -> str:
+    ensure_memory_dir()
+    main_data = load_main_memory()
+    sub_files = main_data.get("sub_memories", {})
+
+    lines = ["=== MEMORY DIRECTORY ===", f"Location: {MEMORY_DIR}"]
+    lines.append(f"Main Memory File: main.json ({len(main_data.get('basic_memories', {}))} basic items)")
+
+    if sub_files:
+        lines.append("\nSub-memory Files & Folders:")
+        for sp, sinfo in sorted(sub_files.items()):
+            desc = sinfo.get("description", "") if isinstance(sinfo, dict) else str(sinfo)
+            cnt = sinfo.get("items_count", "?") if isinstance(sinfo, dict) else "?"
+            lines.append(f"  • {sp} ({cnt} items) - {desc}")
+    else:
+        lines.append("\nNo sub-memory files created yet.")
+
     return "\n".join(lines)
 
 
-def delete_memory_item(key: str) -> str:
-    key = key.strip()
-    if not key:
-        return "Error: memory key is required."
-    memories = load_memories()
-    if key not in memories:
-        return f"Error: memory key '{key}' not found."
-    del memories[key]
-    save_memories_data(memories)
-    return f"Successfully deleted memory key '{key}'."
+def delete_memory_item(path: str = "main", key: Optional[str] = None) -> str:
+    target_file = resolve_memory_path(path)
+
+    if target_file == MAIN_MEMORY_FILE.resolve():
+        main_data = load_main_memory()
+        if key and key.strip():
+            k = key.strip()
+            if k in main_data.get("basic_memories", {}):
+                del main_data["basic_memories"][k]
+                save_main_memory(main_data)
+                return f"Deleted basic memory item '{k}' from main memory."
+            if k in main_data.get("sub_memories", {}):
+                del main_data["sub_memories"][k]
+                save_main_memory(main_data)
+                return f"Removed sub-memory index entry '{k}' from main memory."
+            return f"Key '{k}' not found in main memory."
+        return "Error: key is required when deleting from main memory."
+
+    if not target_file.exists():
+        return f"Error: memory file '{path}' not found."
+
+    rel_p = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+
+    if key and key.strip():
+        k = key.strip()
+        try:
+            sub_data = json.loads(target_file.read_text(encoding="utf-8"))
+            if isinstance(sub_data, dict) and k in sub_data:
+                del sub_data[k]
+                target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+                main_data = load_main_memory()
+                if rel_p in main_data.get("sub_memories", {}):
+                    main_data["sub_memories"][rel_p]["items_count"] = len(sub_data)
+                    save_main_memory(main_data)
+                return f"Deleted key '{k}' from sub-memory '{rel_p}'."
+            return f"Key '{k}' not found in sub-memory '{rel_p}'."
+        except Exception as exc:
+            return f"Error updating sub-memory file: {exc}"
+
+    try:
+        target_file.unlink()
+        main_data = load_main_memory()
+        if rel_p in main_data.get("sub_memories", {}):
+            del main_data["sub_memories"][rel_p]
+            save_main_memory(main_data)
+        return f"Deleted sub-memory file '{rel_p}' and removed it from main memory index."
+    except Exception as exc:
+        return f"Error deleting file '{rel_p}': {exc}"
 
 
 def get_effective_system_instruction(base_system: str, disabled_tools: Set[str]) -> str:
     if "read_memory" in disabled_tools:
         return base_system
-    memories = load_memories()
-    if not memories:
+    main_data = load_main_memory()
+    basic = main_data.get("basic_memories", {})
+    sub_files = main_data.get("sub_memories", {})
+
+    if not basic and not sub_files:
         return base_system
-    memory_lines = ["\n\n[Active Saved Memories]"]
-    for k, v in sorted(memories.items()):
-        content = v.get("content", str(v)) if isinstance(v, dict) else str(v)
-        memory_lines.append(f"- {k}: {content}")
+
+    memory_lines = ["\n\n[Active Main Memory & Index]"]
+    if basic:
+        memory_lines.append("Basic Core Memories:")
+        for k, v in sorted(basic.items()):
+            c = v.get("content", str(v)) if isinstance(v, dict) else str(v)
+            memory_lines.append(f"  - {k}: {c}")
+
+    if sub_files:
+        memory_lines.append("Sub-Memory Topics Index (use read_memory(path='<sub_path>') to view deep details):")
+        for sp, sinfo in sorted(sub_files.items()):
+            desc = sinfo.get("description", "") if isinstance(sinfo, dict) else str(sinfo)
+            memory_lines.append(f"  - {sp}: {desc}")
+
     return base_system + "\n".join(memory_lines)
 
 
@@ -1455,35 +1630,43 @@ FUNCTIONS = {
     },
     "save_memory": {
         "name": "save_memory",
-        "description": "Save important notes, user preferences, project context, or key details into persistent long-term memory.",
+        "description": "Save important notes or facts into memory. Can save basic items into main memory (path='main') or dedicated sub-memory files/folders (e.g. path='database/schema', path='frontend/styles').",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "key": {"type": "STRING", "description": "Unique key or topic label for the memory."},
-                "content": {"type": "STRING", "description": "The detailed memory or note content to persist."},
+                "key": {"type": "STRING", "description": "Unique key or label for the memory item."},
+                "content": {"type": "STRING", "description": "The memory content text to save."},
+                "path": {"type": "STRING", "description": "Memory path inside 'memory/' (default: 'main'). E.g., 'main', 'database/schema', 'deployment/docker'."},
+                "description": {"type": "STRING", "description": "Short summary of what this sub-memory file/folder contains (indexed in main memory)."},
             },
             "required": ["key", "content"],
         },
     },
     "read_memory": {
         "name": "read_memory",
-        "description": "Retrieve saved memories or notes. If key is provided, looks up or searches for specific memories. If key is omitted, lists all saved memories.",
+        "description": "Retrieve saved memories. Specify path='main' (or omit) to read main memory & sub-memory index, or specify a sub-memory path like 'database/schema' to read deep topic memory.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "key": {"type": "STRING", "description": "Optional memory key or search query to look up."},
+                "path": {"type": "STRING", "description": "Memory path inside 'memory/' (e.g., 'main', 'database/schema'). Defaults to 'main'."},
+                "key": {"type": "STRING", "description": "Optional specific key to query within that memory file."},
             },
         },
     },
+    "list_memories": {
+        "name": "list_memories",
+        "description": "List all memory files, subfolders, and items in the memory directory structure.",
+        "parameters": {"type": "OBJECT", "properties": {}},
+    },
     "delete_memory": {
         "name": "delete_memory",
-        "description": "Delete a saved memory by key when no longer relevant.",
+        "description": "Delete a specific memory key or an entire sub-memory file/folder.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "key": {"type": "STRING", "description": "The key of the memory item to delete."},
+                "path": {"type": "STRING", "description": "Memory path inside 'memory/' (e.g., 'main', 'database/schema'). Defaults to 'main'."},
+                "key": {"type": "STRING", "description": "Key to delete. If omitted for a sub-memory path, deletes the entire sub-memory file."},
             },
-            "required": ["key"],
         },
     },
 
@@ -1544,13 +1727,19 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
     if name == "save_memory":
         key = str(args.get("key", ""))
         content = str(args.get("content", ""))
-        return save_memory(key, content)
+        path = str(args.get("path", "main"))
+        description = str(args.get("description", ""))
+        return save_memory(key, content, path=path, description=description)
     if name == "read_memory":
+        path = str(args.get("path", "main"))
         key = args.get("key")
-        return read_memory(str(key) if key is not None else None)
+        return read_memory(path=path, key=str(key) if key is not None else None)
+    if name == "list_memories":
+        return list_memories()
     if name == "delete_memory":
-        key = str(args.get("key", ""))
-        return delete_memory_item(key)
+        path = str(args.get("path", "main"))
+        key = args.get("key")
+        return delete_memory_item(path=path, key=str(key) if key is not None else None)
 
 
     if name == "replace_lines":
