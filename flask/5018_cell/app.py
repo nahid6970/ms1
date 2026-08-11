@@ -30,10 +30,10 @@ def normalize_path(path):
             return path.replace('\\', '/')
     return path
 
-DATA_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\data.json')
+DATA_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\data.json')
 STATE_FILE = normalize_path(r'C:\@delta\output\5018_output\sheet_active.json')
-CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json')
-QUICK_TEXTS_FILE = normalize_path(r'C:\@delta\ms1\@Flask\5018_cell\quick_texts.json')
+CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\custom_syntaxes.json')
+QUICK_TEXTS_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\quick_texts.json')
 SETTINGS_FILE = normalize_path(r'C:\@delta\db\5018_cell\setting.json')
 
 def load_data():

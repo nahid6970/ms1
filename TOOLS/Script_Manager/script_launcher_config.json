@@ -1370,7 +1370,7 @@
             "scripts": [
                 {
                     "name": "5000 - myhome",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5000_myhome\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1410,7 +1410,7 @@
                 },
                 {
                     "name": "5001 - share text",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5001_share_text\\share_text.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5001_share_text\\share_text.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1450,7 +1450,7 @@
                 },
                 {
                     "name": "5002 - upload files",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1490,7 +1490,7 @@
                 },
                 {
                     "name": "5003 - Browse_PC_Files",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1530,7 +1530,7 @@
                 },
                 {
                     "name": "5004 - Paint",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5004 paint\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1570,7 +1570,7 @@
                 },
                 {
                     "name": "5005 - GameARR",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5005_GameARR\\GameARR.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1610,7 +1610,7 @@
                 },
                 {
                     "name": "5006 - Run Commands",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5006_Run_Commands\\Run_Commands.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5006_Run_Commands\\Run_Commands.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1650,7 +1650,7 @@
                 },
                 {
                     "name": "5007 - Android Controls PC",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1690,7 +1690,7 @@
                 },
                 {
                     "name": "5008 - Esports Match Schedule",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1730,7 +1730,7 @@
                 },
                 {
                     "name": "5009 - MCQ",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5009_MCQ\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5009_MCQ\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1770,7 +1770,7 @@
                 },
                 {
                     "name": "5010 - COC",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5010_coc\\Clash_of_Clans_android.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5010_coc\\Clash_of_Clans_android.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1810,7 +1810,7 @@
                 },
                 {
                     "name": "5011 - TV Shows",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5011_tv_show",
+                    "path": "C:\\@delta\\ms1\\flask\\5011_tv_show",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1850,7 +1850,7 @@
                 },
                 {
                     "name": "5012 - Share Imgaes",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5012_share_images\\share_images.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5012_share_images\\share_images.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1890,7 +1890,7 @@
                 },
                 {
                     "name": "5013 - Movies",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5013_movie_tracker\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1930,7 +1930,7 @@
                 },
                 {
                     "name": "5015 - Job Tracker",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5015_job\\job_tracker\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -1970,7 +1970,7 @@
                 },
                 {
                     "name": "5016 - Sync W Android",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2010,7 +2010,7 @@
                 },
                 {
                     "name": "5017 - Audio Stream",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5017_audio_stream\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5017_audio_stream\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2050,7 +2050,7 @@
                 },
                 {
                     "name": "5018 - mycell",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5018_cell\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2090,7 +2090,7 @@
                 },
                 {
                     "name": "5019 - Word",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5019_word\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5019_word\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2130,7 +2130,7 @@
                 },
                 {
                     "name": "5020 - Whiteboard",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5020_whiteboard\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5020_whiteboard\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2170,7 +2170,7 @@
                 },
                 {
                     "name": "5021 - Active Windows Killer",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5021_active_windows_kill\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5021_active_windows_kill\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2210,7 +2210,7 @@
                 },
                 {
                     "name": "5151 - Gallery",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5151_gallery\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5151_gallery\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2250,7 +2250,7 @@
                 },
                 {
                     "name": "5555 - myTerminal",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5555_terminal\\myterminal.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5555_terminal\\myterminal.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -2290,7 +2290,7 @@
                 },
                 {
                     "name": "4421 - Bangla MCQ",
-                    "path": "C:\\@delta\\ms1\\@Flask\\edu\\mcqBengla_Syn\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\edu\\mcqBengla_Syn\\app.py",
                     "type": "script",
                     "nf_char": "",
                     "icon_path": "",
@@ -5530,7 +5530,7 @@
                     "border_width": 0,
                     "col_span": 1,
                     "corner_radius": 0,
-                    "ctrl_left_cmd": "explorer C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
+                    "ctrl_left_cmd": "explorer C:\\@delta\\ms1\\flask\\5004 paint\\app.py",
                     "ctrl_right_cmd": "",
                     "font_family": "JetBrainsMono Nerd Font Propo",
                     "font_size": 14,
@@ -5550,7 +5550,7 @@
                     "name": "Paint <br> [5004]",
                     "new_terminal": false,
                     "nf_char": "",
-                    "path": "C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
+                    "path": "C:\\@delta\\ms1\\flask\\5004 paint\\app.py",
                     "row_span": 1,
                     "run_admin": false,
                     "type": "script",

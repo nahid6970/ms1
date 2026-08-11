@@ -162,7 +162,7 @@ Flat JSON, one key per project:
 - **Settings:** none
 
 ### Upload Files (Flask :5002)
-- **Script:** `C:\@delta\ms1\@Flask\5002_upload_files\upload_files.py`
+- **Script:** `C:\@delta\ms1\flask\5002_upload_files\upload_files.py`
 - **Detection:** `is_flask_running(5002)`
 - **Start:** launches `upload_files.py` as subprocess
 - **Stop:** kills PID owning port 5002

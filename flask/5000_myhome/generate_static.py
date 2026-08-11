@@ -14,7 +14,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = SCRIPT_DIR  # Assuming the script is in the project root
 
 # Path to the data files
-DATA_FILE = r'C:\@delta\ms1\@Flask\5000_myhome\data.json'
+DATA_FILE = r'C:\@delta\ms1\flask\5000_myhome\data.json'
 
 # Paths to source files
 TEMPLATES_DIR = os.path.join(PROJECT_ROOT, 'templates')

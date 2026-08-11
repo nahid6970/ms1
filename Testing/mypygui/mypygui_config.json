@@ -2880,9 +2880,9 @@
     },
     "script_monitor_items": [
         "C:\\@delta\\ms1\\asset\\gemini\\notification_daemon.py",
-        "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
-        "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
-        "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
+        "C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
+        "C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py",
+        "C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py",
         "C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py"
     ],
     "script_monitor_interval": 5,

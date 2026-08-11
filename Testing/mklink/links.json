@@ -5,7 +5,7 @@
             {
                 "type": "file",
                 "target": "C:\\@delta\\db\\5018_cell\\data.json",
-                "fake": "C:\\@delta\\ms1\\@Flask\\5018_cell\\data.json"
+                "fake": "C:\\@delta\\ms1\\flask\\5018_cell\\data.json"
             }
         ]
     },
@@ -15,7 +15,7 @@
             {
                 "type": "file",
                 "target": "C:\\@delta\\db\\5000_myhome\\data.json",
-                "fake": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\data.json"
+                "fake": "C:\\@delta\\ms1\\flask\\5000_myhome\\data.json"
             }
         ]
     },
@@ -25,7 +25,7 @@
             {
                 "type": "file",
                 "target": "C:\\@delta\\db\\5011_tv_show\\data.json",
-                "fake": "C:\\@delta\\ms1\\@Flask\\5011_tv_show\\data.json"
+                "fake": "C:\\@delta\\ms1\\flask\\5011_tv_show\\data.json"
             }
         ]
     },
@@ -35,7 +35,7 @@
             {
                 "type": "file",
                 "target": "C:\\@delta\\db\\5013_movie_tracker\\data.json",
-                "fake": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\data.json"
+                "fake": "C:\\@delta\\ms1\\flask\\5013_movie_tracker\\data.json"
             }
         ]
     },

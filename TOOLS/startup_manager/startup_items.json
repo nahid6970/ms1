@@ -28,7 +28,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5001_share_text\\share_text.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5001_share_text\\share_text.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5001 - Text",
@@ -43,8 +43,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5002_upload_files\\upload_files.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -57,8 +57,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5003_Browse_PC_Files\\Browse_PC_Files.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5003_Browse_PC_Files\\Browse_PC_Files.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -66,7 +66,7 @@
     "added_at": 1784124586.5457017
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5005_GameARR\\GameARR.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5005_GameARR\\GameARR.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5005 - GameARR",
@@ -76,7 +76,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5006_Run_Commands\\Run_Commands.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5006_Run_Commands\\Run_Commands.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5006 - Run Commands",
@@ -91,15 +91,15 @@
     "paths": [
       "python"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py",
-    "ps1_command": "Start-Process -FilePath \"python\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android\\Android_Control_PC.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
+    "ps1_command": "Start-Process -FilePath \"python\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
     "script_enabled": false
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5008_esports_scheduler\\Esports_Match_Schedule.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5008 - Valorant Match",
@@ -109,7 +109,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5009_MCQ\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5009_MCQ\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5009 - MCQ",
@@ -119,7 +119,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5010_coc\\Clash_of_Clans.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5010_coc\\Clash_of_Clans.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5010 - CoC",
@@ -390,7 +390,7 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5000_myhome\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5000_myhome\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5000 - myhome",
@@ -415,8 +415,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5011_tv_show\\app.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5011_tv_show\\app.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5011_tv_show\\app.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -424,7 +424,7 @@
     "added_at": 1784204330.5752656
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5015_job\\job_tracker\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5015_job\\job_tracker\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5015 - JOB",
@@ -439,8 +439,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5013_movie_tracker\\app.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5013_movie_tracker\\app.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5013_movie_tracker\\app.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -463,8 +463,8 @@
     "paths": [
       "pythonw"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5016_Sync_w_android\\sync_server.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
@@ -472,7 +472,7 @@
     "added_at": 1784170289.994019
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5012_share_images\\share_images.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5012_share_images\\share_images.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5012 - Gallery",
@@ -516,7 +516,7 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\4999_startup\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\4999_startup\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 4999 - Startup Setup",
@@ -526,7 +526,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\4998_Applist\\applist_app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\4998_Applist\\applist_app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 4998 - Applist",
@@ -536,7 +536,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5555_terminal\\myterminal.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5555_terminal\\myterminal.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5555 - Terminal",
@@ -577,7 +577,7 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5017_audio_stream\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5017_audio_stream\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5017 - Audio Stream",
@@ -622,8 +622,8 @@
     "paths": [
       "pythonw.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5018_cell\\app.py\"",
+    "Command": "C:\\@delta\\ms1\\flask\\5018_cell\\app.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5018_cell\\app.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -653,7 +653,7 @@
     "type": "Command"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5004 paint\\app.py",
+    "Command": "C:\\@delta\\ms1\\flask\\5004 paint\\app.py",
     "ExecutableType": "pythonw",
     "added_at": 1768273756.591541,
     "name": "Flask - 5004 - Paint",
@@ -886,14 +886,14 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\ms1\\@Flask\\5555_terminal\\xxxx\\start_terminal.ahk",
+    "Command": "C:\\@delta\\ms1\\flask\\5555_terminal\\xxxx\\start_terminal.ahk",
     "ExecutableType": "ahk_v2",
     "added_at": 1777489302.8413854,
     "name": "5556 xTerm nodejs Terminal",
     "paths": [
       "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe"
     ],
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\@Flask\\5555_terminal\\xxxx\\start_terminal.bat\"",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\flask\\5555_terminal\\xxxx\\start_terminal.bat\"",
     "run_as_admin": false,
     "script_enabled": false,
     "type": "Command"

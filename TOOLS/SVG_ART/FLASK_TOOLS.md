@@ -1,6 +1,6 @@
 # Flask Paint Project - Tool Audit
 
-This list contains all the tools and features identified in `C:\@delta\ms1\@Flask\5004 paint`. 
+This list contains all the tools and features identified in `C:\@delta\ms1\flask\5004 paint`. 
 
 ## 1. Brushes & Strokes
 - **Marker (Default):** Standard solid stroke.

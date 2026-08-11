@@ -84,7 +84,7 @@
             "name": "Script Manager"
         },
         {
-            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\@Flask\\4999_startup\\startup.py\"', , \"Hide\")",
+            "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\flask\\4999_startup\\startup.py\"', , \"Hide\")",
             "category": "Launch",
             "description": "",
             "hotkey": "#s",

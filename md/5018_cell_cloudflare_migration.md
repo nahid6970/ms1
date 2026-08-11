@@ -25,9 +25,9 @@
 
 ### Hardcoded Paths to Remove
 ```
-DATA_FILE = r'C:\@delta\ms1\@Flask\5018_cell\data.json'
+DATA_FILE = r'C:\@delta\ms1\flask\5018_cell\data.json'
 STATE_FILE = r'C:\@delta\output\5018_output\sheet_active.json'
-CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\@Flask\5018_cell\custom_syntaxes.json'
+CUSTOM_SYNTAXES_FILE = r'C:\@delta\ms1\flask\5018_cell\custom_syntaxes.json'
 SETTINGS_FILE = r'C:\@delta\db\5018_cell\setting.json'
 ```
 
@@ -99,5 +99,5 @@ Store each JSON blob as a single row. Simple, mirrors current file-based approac
 
 ## Notes
 - Assessed: 2026-06-07
-- Project: `C:\@delta\ms1\@Flask\5018_cell`
+- Project: `C:\@delta\ms1\flask\5018_cell`
 - Current stack: Flask + local JSON files + vanilla JS frontend

@@ -245,7 +245,7 @@
     },
     {
       "name": "mycell - 5018",
-      "path": "C:\\@delta\\ms1\\@Flask\\5018_cell",
+      "path": "C:\\@delta\\ms1\\flask\\5018_cell",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -266,7 +266,7 @@
     },
     {
       "name": "TV Show - 5011",
-      "path": "C:\\@delta\\ms1\\@Flask\\5011_tv_show",
+      "path": "C:\\@delta\\ms1\\flask\\5011_tv_show",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -287,7 +287,7 @@
     },
     {
       "name": "Movies - 5013",
-      "path": "C:\\@delta\\ms1\\@Flask\\5013_movie_tracker",
+      "path": "C:\\@delta\\ms1\\flask\\5013_movie_tracker",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -683,7 +683,7 @@
     },
     {
       "name": "Control PC by Android - 5007",
-      "path": "C:\\@delta\\ms1\\@Flask\\5007_Controlby_Android",
+      "path": "C:\\@delta\\ms1\\flask\\5007_Controlby_Android",
       "category": "Flask",
       "pinned": false,
       "theme": {
