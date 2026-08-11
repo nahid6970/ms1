@@ -6462,7 +6462,7 @@
             "name": "AHK B-GUI",
             "new_terminal": true,
             "nf_char": "",
-            "path": "C:/@delta/ms1/@AutoHotKey/Button_Generator/AHK_Button.py",
+            "path": "C:/@delta/ms1/autohotkey/Button_Generator/AHK_Button.py",
             "row_span": 1,
             "run_admin": false,
             "text_color": "#000000",

@@ -316,7 +316,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!a",
-            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\email_shortcut\\generate_Button_AHK.ahk",
+            "target_path": "C:\\@delta\\ms1\\autohotkey\\Button_Generator\\email_shortcut\\generate_Button_AHK.ahk",
             "hide_terminal": true,
             "enabled": true
         },
@@ -325,7 +325,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!b",
-            "target_path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator\\BIO\\generate_Button_AHK.ahk",
+            "target_path": "C:\\@delta\\ms1\\autohotkey\\Button_Generator\\BIO\\generate_Button_AHK.ahk",
             "hide_terminal": true,
             "enabled": true
         },
@@ -820,7 +820,7 @@
             "window_class_enabled": false,
             "enabled": true,
             "favourite": true,
-            "source_file": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager\\Context_Menus\\Advanced_Menus.md"
+            "source_file": "C:\\@delta\\ms1\\autohotkey\\shortcut_manager\\Context_Menus\\Advanced_Menus.md"
         },
         {
             "name": "Bangla alphabets",

@@ -392,7 +392,7 @@
     },
     {
       "name": "Shortcut Manager",
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\shortcut_manager",
+      "path": "C:\\@delta\\ms1\\autohotkey\\shortcut_manager",
       "category": "Tool - Autohotkey - AHK",
       "pinned": false,
       "theme": {
@@ -413,7 +413,7 @@
     },
     {
       "name": "Button Generator",
-      "path": "C:\\@delta\\ms1\\@AutoHotKey\\Button_Generator",
+      "path": "C:\\@delta\\ms1\\autohotkey\\Button_Generator",
       "category": "Tool - Autohotkey - AHK",
       "pinned": false,
       "theme": {

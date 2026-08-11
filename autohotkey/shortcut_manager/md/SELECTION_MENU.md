@@ -69,7 +69,7 @@ Below is a complete replacement configuration (as defined in `example.txt`):
 -[name:My first command][this is a first command]
 -[name:Open Folders]
 --[name:App Data Folder][folder:C:\Users\nahid\.gemini\antigravity-cli]
---[name:Workspace Folder][folder:C:\@delta\ms1\@AutoHotKey\shortcut_manager]
+--[name:Workspace Folder][folder:C:\@delta\ms1\autohotkey\shortcut_manager]
 -[name:Commands]
 --[name:Flush DNS][cmd:ipconfig /flushdns][show:visible]
 --[name:List Processes][cmd:Get-Process][shell:pwsh][show:visible]
@@ -87,7 +87,7 @@ For the example above, the compiler generates clean, nested Menu object initiali
     m := CustomMenu()
     m_1 := CustomMenu()
     m_1.Add("App Data Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\Users\nahid\.gemini\antigravity-cli"))
-    m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\@delta\ms1\@AutoHotKey\shortcut_manager"))
+    m_1.Add("Workspace Folder", (ItemName, ItemPos, MyMenu) => OpenFolderInTab("C:\@delta\ms1\autohotkey\shortcut_manager"))
     m_2 := CustomMenu()
     m_2.Add("Flush DNS", (ItemName, ItemPos, MyMenu) => RunCmdVisible("ipconfig /flushdns"))
     m_2.Add("List Processes", (ItemName, ItemPos, MyMenu) => RunPwshVisible("Get-Process"))

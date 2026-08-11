@@ -4,6 +4,6 @@
 -[name:KIRO][text:kiro-cli chat --trust-all-tools --resume]
 [name:Folders]
 -[name:ms1]
---[name:AutoHotKey][folder:C:\@delta\ms1\@AutoHotKey]
+--[name:AutoHotKey][folder:C:\@delta\ms1\autohotkey]
 --[name:asset][folder:C:\@delta\ms1\asset]
 --[name:md][folder:C:\@delta\ms1\md]
