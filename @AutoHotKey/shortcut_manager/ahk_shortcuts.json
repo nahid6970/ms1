@@ -47,7 +47,7 @@
         {
             "action": "KillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",
             "category": "Script",
-            "description": "Forcefully kills the process under mouse cursor",
+            "description": "",
             "enabled": true,
             "hotkey": "!q",
             "name": "Kill Foreground Process",

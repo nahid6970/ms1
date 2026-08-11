@@ -3670,13 +3670,11 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "exclude":
             hks = (shortcut.get('excluded_hotkeys', '') or '').strip()
             if hks:
-                # Each excluded hotkey gets its own dim sub-line so long rules
+                # Every excluded hotkey gets its own dim sub-line so long rules
                 # stay scannable instead of one comma-joined blob.
                 hk_list = [h.strip() for h in hks.splitlines() if h.strip()]
-                for hk in hk_list[:4]:
+                for hk in hk_list:
                     lines.append(f"Excludes: {html_escape(hk)}")
-                if len(hk_list) > 4:
-                    lines.append(f"... and {len(hk_list) - 4} more")
         elif shortcut_type == "startup":
             mode = shortcut.get('context_mode', 'none')
             if mode in ('active', 'inactive') and lines:
