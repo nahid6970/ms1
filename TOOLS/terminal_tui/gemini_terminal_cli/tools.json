@@ -71,6 +71,25 @@
     "rating": "Best for post-edit verification",
     "description": "Verify that a file contains expected_text and/or does not contain unexpected_text after making edits to confirm changes were successfully applied."
   },
+  {
+    "name": "save_memory",
+    "category": "Memory & Context",
+    "rating": "Best (Persistent)",
+    "description": "Save important notes, decisions, user preferences, or architecture details into persistent long-term memory."
+  },
+  {
+    "name": "read_memory",
+    "category": "Memory & Context",
+    "rating": "Best (Safe)",
+    "description": "Retrieve saved memories or notes by key, or list all saved memories if key is omitted."
+  },
+  {
+    "name": "delete_memory",
+    "category": "Memory & Context",
+    "rating": "Good (Cleanup)",
+    "description": "Delete a specific memory by key when it is no longer needed."
+  },
+
 
   {
     "name": "replace_lines",

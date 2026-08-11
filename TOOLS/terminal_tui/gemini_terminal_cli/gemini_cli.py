@@ -37,7 +37,8 @@ DEFAULT_SYSTEM = (
     "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
-    "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied."
+    "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
+    "PROACTIVE MEMORY: Memory tools are active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, environment setups, or key project facts that should be retained for future sessions."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -51,6 +52,7 @@ API_ACCOUNTS_LEGACY_FILE = Path(__file__).with_name("api_accounts.json")
 API_ACCOUNTS_MAGIC = b"GEMAPI1"
 NOTIFICATION_FILE = Path(r"C:\Users\nahid\notification.txt")
 TRANSCRIPTS_DIR = Path(__file__).parent / "transcripts"
+MEMORY_FILE = Path(__file__).with_name("memory.json")
 
 try:
     import msvcrt
@@ -92,6 +94,98 @@ def write_notification() -> None:
         NOTIFICATION_FILE.write_text(_now_stamp(), encoding="utf-8")
     except Exception:
         pass
+
+
+def load_memories() -> Dict[str, Any]:
+    if not MEMORY_FILE.exists():
+        return {}
+    try:
+        data = json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_memories_data(data: Dict[str, Any]) -> None:
+    try:
+        MEMORY_FILE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def save_memory(key: str, content: str) -> str:
+    key = key.strip()
+    if not key:
+        return "Error: memory key is required."
+    if not content.strip():
+        return "Error: memory content is required."
+    memories = load_memories()
+    memories[key] = {
+        "content": content,
+        "updated_at": _now_stamp(),
+    }
+    save_memories_data(memories)
+    return f"Successfully saved memory under key '{key}'."
+
+
+def read_memory(key: Optional[str] = None) -> str:
+    memories = load_memories()
+    if not memories:
+        return "No saved memories found."
+    if key and key.strip():
+        k = key.strip()
+        if k in memories:
+            item = memories[k]
+            if isinstance(item, dict):
+                content = item.get("content", "")
+                updated = item.get("updated_at", "unknown")
+                return f"Memory ['{k}'] (updated: {updated}):\n{content}"
+            return f"Memory ['{k}']:\n{item}"
+        matches = {mk: mv for mk, mv in memories.items() if k.lower() in mk.lower()}
+        if matches:
+            lines = [f"Found {len(matches)} matching memory key(s):"]
+            for mk, mv in matches.items():
+                content = mv.get("content", str(mv)) if isinstance(mv, dict) else str(mv)
+                lines.append(f"\n--- [{mk}] ---\n{content}")
+            return "\n".join(lines)
+        return f"Memory key '{k}' not found. Available keys: {', '.join(memories.keys())}"
+
+    lines = [f"Saved Memories ({len(memories)} items):"]
+    for mk, mv in sorted(memories.items()):
+        if isinstance(mv, dict):
+            content = mv.get("content", "")
+            updated = mv.get("updated_at", "")
+            lines.append(f"\nKey: {mk} (updated: {updated})\nContent: {content}")
+        else:
+            lines.append(f"\nKey: {mk}\nContent: {mv}")
+    return "\n".join(lines)
+
+
+def delete_memory_item(key: str) -> str:
+    key = key.strip()
+    if not key:
+        return "Error: memory key is required."
+    memories = load_memories()
+    if key not in memories:
+        return f"Error: memory key '{key}' not found."
+    del memories[key]
+    save_memories_data(memories)
+    return f"Successfully deleted memory key '{key}'."
+
+
+def get_effective_system_instruction(base_system: str, disabled_tools: Set[str]) -> str:
+    if "read_memory" in disabled_tools:
+        return base_system
+    memories = load_memories()
+    if not memories:
+        return base_system
+    memory_lines = ["\n\n[Active Saved Memories]"]
+    for k, v in sorted(memories.items()):
+        content = v.get("content", str(v)) if isinstance(v, dict) else str(v)
+        memory_lines.append(f"- {k}: {content}")
+    return base_system + "\n".join(memory_lines)
+
+
 
 
 def _ansi_wrap(text: str, code: str) -> str:
@@ -1359,6 +1453,40 @@ FUNCTIONS = {
             "required": ["filepath"],
         },
     },
+    "save_memory": {
+        "name": "save_memory",
+        "description": "Save important notes, user preferences, project context, or key details into persistent long-term memory.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "key": {"type": "STRING", "description": "Unique key or topic label for the memory."},
+                "content": {"type": "STRING", "description": "The detailed memory or note content to persist."},
+            },
+            "required": ["key", "content"],
+        },
+    },
+    "read_memory": {
+        "name": "read_memory",
+        "description": "Retrieve saved memories or notes. If key is provided, looks up or searches for specific memories. If key is omitted, lists all saved memories.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "key": {"type": "STRING", "description": "Optional memory key or search query to look up."},
+            },
+        },
+    },
+    "delete_memory": {
+        "name": "delete_memory",
+        "description": "Delete a saved memory by key when no longer relevant.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "key": {"type": "STRING", "description": "The key of the memory item to delete."},
+            },
+            "required": ["key"],
+        },
+    },
+
 }
 
 
@@ -1413,6 +1541,17 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         expected_text = args.get("expected_text")
         unexpected_text = args.get("unexpected_text")
         return verify_file_content(filepath, expected_text, unexpected_text)
+    if name == "save_memory":
+        key = str(args.get("key", ""))
+        content = str(args.get("content", ""))
+        return save_memory(key, content)
+    if name == "read_memory":
+        key = args.get("key")
+        return read_memory(str(key) if key is not None else None)
+    if name == "delete_memory":
+        key = str(args.get("key", ""))
+        return delete_memory_item(key)
+
 
     if name == "replace_lines":
         filepath = resolve_path(args.get("filepath", ""), cwd)
@@ -3970,10 +4109,11 @@ def main() -> int:
 
         try:
             for _ in range(tool_loop_limit):
+                eff_system = get_effective_system_instruction(system_instruction, disabled_tools)
                 try:
                     response = client.generate(
                         contents=contents,
-                        system_instruction=system_instruction,
+                        system_instruction=eff_system,
                         tool_names=enabled_tool_names(disabled_tools),
                         temperature=args.temperature,
                         max_output_tokens=args.max_output_tokens,
@@ -4316,7 +4456,8 @@ def main() -> int:
                     continue
                 if command == "/tokens":
                     # Calculate total character count including text, function calls, responses, and system instruction
-                    total_chars = len(system_instruction) if system_instruction else 0
+                    eff_sys = get_effective_system_instruction(system_instruction, disabled_tools)
+                    total_chars = len(eff_sys) if eff_sys else 0
                     for msg in contents:
                         for part in msg.get("parts", []):
                             if "text" in part:
@@ -4329,7 +4470,7 @@ def main() -> int:
                     actual_tokens = None
                     if contents and api_key:
                         try:
-                            actual_tokens = client.count_tokens(contents, system_instruction=system_instruction)
+                            actual_tokens = client.count_tokens(contents, system_instruction=eff_sys)
                         except Exception:
                             actual_tokens = None
 
