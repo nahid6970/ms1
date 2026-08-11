@@ -132,7 +132,7 @@ def open_with_editor(file_paths, editor):
         else:
             subprocess.run(f'start ms-photos:viewer?fileName="{file_paths}"', shell=True)
     elif editor == "cyber_editor":
-        cyber_path = r"C:\@delta\ms1\TOOLS\Editor\cyber_editor.py"
+        cyber_path = r"C:\@delta\ms1\tools\Editor\cyber_editor.py"
         if isinstance(file_paths, list):
             files_args = ' '.join([f'"{fp}"' for fp in file_paths])
         else:
@@ -643,4 +643,4 @@ if __name__ == "__main__":
     else:
         print("Usage: python editor_chooser.py <file_path> [<file_path2> ...]")
 
-
+

@@ -42,7 +42,7 @@
 
 ## [2026-06-19 16:00] — Duplicate Entries in Recent Projects List
 
-**Problem:** Same directory appeared twice in the recent projects popup (e.g. `C:/@delta/ms1/TOOLS/ENV` shown twice).
+**Problem:** Same directory appeared twice in the recent projects popup (e.g. `C:/@delta/ms1/tools/ENV` shown twice).
 
 **Root Cause:** Paths stored with different slash directions (`/` vs `\`) — string equality check treated them as different entries.
 

@@ -1,7 +1,7 @@
 {
   "name": "com.delta.yt_analyzer",
   "description": "YT Like/Dislike Analyzer native messaging host",
-  "path": "C:\\@delta\\ms1\\TOOLS\\yt_like_dislike\\host.py",
+  "path": "C:\\@delta\\ms1\\tools\\yt_like_dislike\\host.py",
   "type": "stdio",
   "allowed_origins": [
     "chrome-extension://ibcoohneopabolfjjmnjfhbeffgaenac/"

@@ -215,7 +215,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\TOOLS\\Script_Manager\\script_manager_gui_qt.py"
+                    "cmd": "C:\\@delta\\ms1\\tools\\Script_Manager\\script_manager_gui_qt.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
@@ -266,7 +266,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\TOOLS\\startup_manager\\startup.py"
+                    "cmd": "C:\\@delta\\ms1\\tools\\startup_manager\\startup.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
@@ -941,14 +941,14 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\TOOLS\\Voice\\voice_input.py"
+                    "cmd": "C:\\@delta\\ms1\\tools\\Voice\\voice_input.py"
                 },
                 "Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\TOOLS\\volume_mixer\\volume_mixer.py"
+                    "cmd": "C:\\@delta\\ms1\\tools\\volume_mixer\\volume_mixer.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
@@ -1225,7 +1225,7 @@
                 "type": "subprocess",
                 "hide": true,
                 "admin": true,
-                "cmd": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py"
+                "cmd": "C:\\@delta\\ms1\\tools\\net_speed_hooker\\net_speed_monitor_wd.py"
             }
         },
         "upload": {
@@ -2883,7 +2883,7 @@
         "C:\\@delta\\ms1\\flask\\5007_Controlby_Android\\Android_Control_PC.py",
         "C:\\@delta\\ms1\\flask\\5002_upload_files\\upload_files.py",
         "C:\\@delta\\ms1\\flask\\5016_Sync_w_android\\sync_server.py",
-        "C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py"
+        "C:\\@delta\\ms1\\tools\\komorebi_tray.py"
     ],
     "script_monitor_interval": 5,
     "script_monitor_svg": "<svg viewBox=\"-0.5 0 8 8\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <title>play [#1001]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id=\"Page-1\" stroke=\"none\" stroke-width=\"1\" fill=\"none\" fill-rule=\"evenodd\"> <g id=\"Dribbble-Light-Preview\" transform=\"translate(-427.000000, -3765.000000)\" fill=\"#000000\"> <g id=\"icons\" transform=\"translate(56.000000, 160.000000)\"> <polygon id=\"play-[#1001]\" points=\"371 3605 371 3613 378 3609\"> </polygon> </g> </g> </g> </g></svg>",

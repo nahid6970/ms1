@@ -4216,7 +4216,7 @@ class StatusBar(QMainWindow):
                 toggle_incognito()
                 update_helium_style()
             elif event.button() == Qt.MouseButton.RightButton:
-                script_path = r"C:\@delta\ms1\TOOLS\terminal_link\helium_incognito_setup.py"
+                script_path = r"C:\@delta\ms1\tools\terminal_link\helium_incognito_setup.py"
                 subprocess.Popen([sys.executable, script_path])
                 
         helium_toggle.mousePressEvent = helium_click
@@ -4763,7 +4763,7 @@ class VoiceApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.script_dir  = Path(r"C:\@delta\ms1\TOOLS\Voice")
+        self.script_dir  = Path(r"C:\@delta\ms1\tools\Voice")
         self.config_file = self.script_dir / "voice_config.json"
         self.voice_thread = None
         self._continuous_thread = None

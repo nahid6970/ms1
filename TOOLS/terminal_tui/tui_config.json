@@ -2,7 +2,7 @@
   "projects": [
     {
       "name": "Terminal TUI",
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_tui",
+      "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
       "pinned": false,
       "theme": {
         "background": "#12080d",
@@ -123,7 +123,7 @@
     },
     {
       "name": "Code Merger",
-      "path": "C:\\@delta\\ms1\\TOOLS\\code_merger",
+      "path": "C:\\@delta\\ms1\\tools\\code_merger",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -144,7 +144,7 @@
     },
     {
       "name": "Github Manager",
-      "path": "C:\\@delta\\ms1\\TOOLS\\Github\\gitManager",
+      "path": "C:\\@delta\\ms1\\tools\\Github\\gitManager",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -184,7 +184,7 @@
     },
     {
       "name": "Terminal Link",
-      "path": "C:\\@delta\\ms1\\TOOLS\\terminal_link",
+      "path": "C:\\@delta\\ms1\\tools\\terminal_link",
       "category": "Tool + Incognito Mode",
       "pinned": false,
       "theme": {
@@ -225,7 +225,7 @@
     },
     {
       "name": "Alarm Countdown Timer",
-      "path": "C:\\@delta\\ms1\\TOOLS\\alarm_timer",
+      "path": "C:\\@delta\\ms1\\tools\\alarm_timer",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -662,7 +662,7 @@
     },
     {
       "name": "Script Manager",
-      "path": "C:\\@delta\\ms1\\TOOLS\\Script_Manager",
+      "path": "C:\\@delta\\ms1\\tools\\Script_Manager",
       "category": "Tool",
       "pinned": false,
       "theme": {

@@ -155,7 +155,7 @@ Flat JSON, one key per project:
 ## Currently Integrated Projects
 
 ### Komorebi
-- **Script:** `C:\@delta\ms1\TOOLS\komorebi_tray.py` (logic absorbed directly)
+- **Script:** `C:\@delta\ms1\tools\komorebi_tray.py` (logic absorbed directly)
 - **Detection:** `is_process_running("komorebi.exe")`
 - **Start:** `komorebic start`
 - **Stop:** `komorebic stop`

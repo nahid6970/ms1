@@ -76,7 +76,7 @@
             "name": "Restart Glance"
         },
         {
-            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\ms1\\TOOLS\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
+            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\ms1\\tools\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
             "category": "Launch",
             "description": "",
             "enabled": true,
@@ -271,7 +271,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!t",
-            "action": "ToggleTerminalApp() {\n    targetPath := \"C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py\"\n    workingDir := \"C:\\@delta\\ms1\\TOOLS\\terminal_tui\"\n    processFound := false\n    \n    heliumPath := \"C:\\Users\\nahid\\AppData\\Local\\imput\\Helium\\Application\\chrome.exe\"\n    url := \"http://localhost:5577\"\n    windowTitle := \"localhost:5577\"\n\n    ; === Check if Python process is running ===\n    try {\n        wmi := ComObjGet(\"winmgmts:\")\n        query := \"SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name LIKE 'python%'\"\n        \n        for process in wmi.ExecQuery(query) {\n            if (process.CommandLine && InStr(process.CommandLine, targetPath)) {\n                processFound := true\n                break\n            }\n        }\n    } catch Error as err {\n        MsgBox(\"WMI Query failed: \" err.Message, \"Error\", 16)\n        return\n    }\n\n    if (processFound) {\n        ; === TURN OFF: Kill both ===\n        ; Close Python\n        try {\n            wmi := ComObjGet(\"winmgmts:\")\n            for process in wmi.ExecQuery(query) {\n                if (process.CommandLine && InStr(process.CommandLine, targetPath)) {\n                    ProcessClose(process.ProcessId)\n                }\n            }\n        }\n\n        ; Close Helium window\n        if (WinExist(windowTitle)) {\n            WinClose(windowTitle)\n        }\n        \n    } else {\n        ; === TURN ON: Start both ===\n        try {\n            Run('python \"' targetPath '\"', workingDir, \"Hide\")\n            Sleep 2000  ; Wait for server\n        } catch Error as err {\n            MsgBox(\"Failed to start python script: \" err.Message, \"Error\", 16)\n            return\n        }\n\n        ; Open Helium\n        if (FileExist(heliumPath)) {\n            Run('\"' heliumPath '\" --app=' url ' --window-size=1280,800')\n        } else {\n            MsgBox(\"Helium not found at the specified path.\", \"Error\", 16)\n        }\n    }\n}",
+            "action": "ToggleTerminalApp() {\n    targetPath := \"C:\\@delta\\ms1\\tools\\terminal_tui\\app.py\"\n    workingDir := \"C:\\@delta\\ms1\\tools\\terminal_tui\"\n    processFound := false\n    \n    heliumPath := \"C:\\Users\\nahid\\AppData\\Local\\imput\\Helium\\Application\\chrome.exe\"\n    url := \"http://localhost:5577\"\n    windowTitle := \"localhost:5577\"\n\n    ; === Check if Python process is running ===\n    try {\n        wmi := ComObjGet(\"winmgmts:\")\n        query := \"SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name LIKE 'python%'\"\n        \n        for process in wmi.ExecQuery(query) {\n            if (process.CommandLine && InStr(process.CommandLine, targetPath)) {\n                processFound := true\n                break\n            }\n        }\n    } catch Error as err {\n        MsgBox(\"WMI Query failed: \" err.Message, \"Error\", 16)\n        return\n    }\n\n    if (processFound) {\n        ; === TURN OFF: Kill both ===\n        ; Close Python\n        try {\n            wmi := ComObjGet(\"winmgmts:\")\n            for process in wmi.ExecQuery(query) {\n                if (process.CommandLine && InStr(process.CommandLine, targetPath)) {\n                    ProcessClose(process.ProcessId)\n                }\n            }\n        }\n\n        ; Close Helium window\n        if (WinExist(windowTitle)) {\n            WinClose(windowTitle)\n        }\n        \n    } else {\n        ; === TURN ON: Start both ===\n        try {\n            Run('python \"' targetPath '\"', workingDir, \"Hide\")\n            Sleep 2000  ; Wait for server\n        } catch Error as err {\n            MsgBox(\"Failed to start python script: \" err.Message, \"Error\", 16)\n            return\n        }\n\n        ; Open Helium\n        if (FileExist(heliumPath)) {\n            Run('\"' heliumPath '\" --app=' url ' --window-size=1280,800')\n        } else {\n            MsgBox(\"Helium not found at the specified path.\", \"Error\", 16)\n        }\n    }\n}",
             "enabled": true
         },
         {
@@ -289,7 +289,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!z",
-            "target_path": "C:\\@delta\\ms1\\TOOLS\\code_merger\\merge_gui.py",
+            "target_path": "C:\\@delta\\ms1\\tools\\code_merger\\merge_gui.py",
             "hide_terminal": true,
             "enabled": true
         },
@@ -352,7 +352,7 @@
             "category": "General",
             "description": "",
             "hotkey": "!u",
-            "target_path": "C:\\@delta\\ms1\\TOOLS\\Ultimate_Gui.py",
+            "target_path": "C:\\@delta\\ms1\\tools\\Ultimate_Gui.py",
             "hide_terminal": true,
             "enabled": false
         },
@@ -379,7 +379,7 @@
             "category": "General",
             "description": "",
             "hotkey": ">!m",
-            "target_path": "C:\\@delta\\ms1\\TOOLS\\mouse\\fix_cursor.py",
+            "target_path": "C:\\@delta\\ms1\\tools\\mouse\\fix_cursor.py",
             "hide_terminal": true,
             "enabled": true
         }

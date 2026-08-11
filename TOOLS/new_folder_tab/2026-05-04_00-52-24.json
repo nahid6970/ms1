@@ -2,7 +2,7 @@
   "format": "kiro-session-export-v1",
   "metadata": {
     "session_id": "378a52d1-29df-4a66-adba-4cbeff3fe312",
-    "cwd": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab",
+    "cwd": "C:\\@delta\\ms1\\tools\\new_folder_tab",
     "created_at": "2026-05-03T18:37:03.868348900Z",
     "updated_at": "2026-05-03T18:45:21.381190900Z",
     "title": "here can u make a python script for this issue i kepp opening windows explorer folders and even thoug i already have some folders opened they open ...",
@@ -185,7 +185,7 @@
       "permissions": {
         "filesystem": {
           "allowed_read_paths": [
-            "C:\\@delta\\ms1\\TOOLS\\new_folder_tab"
+            "C:\\@delta\\ms1\\tools\\new_folder_tab"
           ],
           "allowed_write_paths": [],
           "denied_read_paths": [],
@@ -235,7 +235,7 @@
                 "operations": [
                   {
                     "mode": "Directory",
-                    "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab"
+                    "path": "C:\\@delta\\ms1\\tools\\new_folder_tab"
                   }
                 ]
               }
@@ -274,7 +274,7 @@
                     "operations": [
                       {
                         "mode": "Directory",
-                        "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab",
+                        "path": "C:\\@delta\\ms1\\tools\\new_folder_tab",
                         "depth": null,
                         "exclude_patterns": null
                       }
@@ -1115,7 +1115,7 @@
                   "kind": "json",
                   "data": {
                     "exit_status": "exit code: 0",
-                    "stdout": "3279242 'file:///C:/Users/nahid' 'nahid'\n23987540 'file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample' 'WinUIExample'\n23987540 'file:///C:/@delta/ms1/TOOLS/new_folder_tab' 'new_folder_tab'\n",
+                    "stdout": "3279242 'file:///C:/Users/nahid' 'nahid'\n23987540 'file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample' 'WinUIExample'\n23987540 'file:///C:/@delta/ms1/tools/new_folder_tab' 'new_folder_tab'\n",
                     "stderr": ""
                   }
                 }
@@ -1143,7 +1143,7 @@
                   {
                     "Json": {
                       "exit_status": "exit code: 0",
-                      "stdout": "3279242 'file:///C:/Users/nahid' 'nahid'\n23987540 'file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample' 'WinUIExample'\n23987540 'file:///C:/@delta/ms1/TOOLS/new_folder_tab' 'new_folder_tab'\n",
+                      "stdout": "3279242 'file:///C:/Users/nahid' 'nahid'\n23987540 'file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample' 'WinUIExample'\n23987540 'file:///C:/@delta/ms1/tools/new_folder_tab' 'new_folder_tab'\n",
                       "stderr": ""
                     }
                   }
@@ -1172,7 +1172,7 @@
               "input": {
                 "__tool_use_purpose": "Create the Explorer tab merger background script",
                 "command": "create",
-                "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py",
+                "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py",
                 "content": "\"\"\"\nexplorer_tabs.py\nMonitors for new File Explorer windows and merges them as tabs\ninto an existing Explorer window instead of opening separately.\nRun in background: pythonw explorer_tabs.py\n\"\"\"\n\nimport time\nimport urllib.parse\nimport win32gui\nimport win32con\nimport win32api\nimport comtypes.client\n\nPOLL_INTERVAL = 0.4   # seconds between checks\nNEW_WIN_WAIT  = 0.6   # wait for new window to fully load\n\n\ndef get_explorer_windows():\n    \"\"\"Return {hwnd: set_of_paths} for all visible CabinetWClass windows.\"\"\"\n    result = {}\n    try:\n        shell = comtypes.client.CreateObject('Shell.Application')\n        for w in shell.Windows():\n            try:\n                hwnd = w.HWND\n                url  = w.LocationURL\n                if not url:\n                    continue\n                path = urllib.parse.unquote(url.replace('file:///', '').replace('/', '\\\\'))\n                result.setdefault(hwnd, set()).add(path)\n            except Exception:\n                pass\n    except Exception:\n        pass\n    return result\n\n\ndef get_cabinet_hwnds():\n    hwnds = set()\n    def cb(hwnd, _):\n        if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n            hwnds.add(hwnd)\n    win32gui.EnumWindows(cb, None)\n    return hwnds\n\n\ndef open_path_as_tab(target_hwnd, path):\n    \"\"\"\n    Focus target_hwnd, open a new tab with Ctrl+T,\n    then type the path into the address bar and navigate.\n    \"\"\"\n    # Bring window to front\n    win32gui.ShowWindow(target_hwnd, win32con.SW_RESTORE)\n    win32gui.SetForegroundWindow(target_hwnd)\n    time.sleep(0.15)\n\n    # Ctrl+T → new tab\n    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)\n    win32api.keybd_event(ord('T'), 0, 0, 0)\n    win32api.keybd_event(ord('T'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.3)\n\n    # Alt+D → focus address bar\n    win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)\n    win32api.keybd_event(ord('D'), 0, 0, 0)\n    win32api.keybd_event(ord('D'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.2)\n\n    # Type path and press Enter\n    import win32clipboard\n    win32clipboard.OpenClipboard()\n    win32clipboard.EmptyClipboard()\n    win32clipboard.SetClipboardText(path)\n    win32clipboard.CloseClipboard()\n\n    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)\n    win32api.keybd_event(ord('V'), 0, 0, 0)\n    win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.1)\n\n    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)\n    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.4)\n\n\ndef close_window(hwnd):\n    win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)\n\n\ndef main():\n    known_hwnds = get_cabinet_hwnds()\n    print(f\"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Press Ctrl+C to stop.\")\n\n    while True:\n        time.sleep(POLL_INTERVAL)\n        current = get_cabinet_hwnds()\n        new_hwnds = current - known_hwnds\n\n        for new_hwnd in new_hwnds:\n            # Wait for the window to finish loading\n            time.sleep(NEW_WIN_WAIT)\n\n            # Re-check it still exists\n            if not win32gui.IsWindow(new_hwnd):\n                continue\n\n            # Find an existing Explorer window to merge into\n            existing = current - new_hwnds - {new_hwnd}\n            # Also re-check known_hwnds for still-alive windows\n            for h in list(known_hwnds):\n                if win32gui.IsWindow(h):\n                    existing.add(h)\n\n            if not existing:\n                # No existing window — let this one become the main window\n                print(f\"[explorer_tabs] First window {new_hwnd}, keeping as-is.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            # Get the path of the new window\n            win_paths = get_explorer_windows()\n            paths = win_paths.get(new_hwnd, set())\n\n            if not paths:\n                print(f\"[explorer_tabs] Could not get path for {new_hwnd}, skipping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            path = next(iter(paths))\n            target = next(iter(existing))\n\n            print(f\"[explorer_tabs] Merging {new_hwnd} ({path!r}) into {target}\")\n            open_path_as_tab(target, path)\n            time.sleep(0.3)\n            close_window(new_hwnd)\n\n        # Update known set (remove closed windows, add new ones we decided to keep)\n        known_hwnds = {h for h in (known_hwnds | current) if win32gui.IsWindow(h)}\n\n\nif __name__ == '__main__':\n    main()\n"
               }
             }
@@ -1193,7 +1193,7 @@
               "content": [
                 {
                   "kind": "text",
-                  "data": "Successfully created C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py (146 lines)."
+                  "data": "Successfully created C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py (146 lines)."
                 }
               ],
               "status": "success"
@@ -1208,7 +1208,7 @@
                 "BuiltIn": {
                   "FileWrite": {
                     "command": "create",
-                    "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py",
+                    "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py",
                     "content": "\"\"\"\nexplorer_tabs.py\nMonitors for new File Explorer windows and merges them as tabs\ninto an existing Explorer window instead of opening separately.\nRun in background: pythonw explorer_tabs.py\n\"\"\"\n\nimport time\nimport urllib.parse\nimport win32gui\nimport win32con\nimport win32api\nimport comtypes.client\n\nPOLL_INTERVAL = 0.4   # seconds between checks\nNEW_WIN_WAIT  = 0.6   # wait for new window to fully load\n\n\ndef get_explorer_windows():\n    \"\"\"Return {hwnd: set_of_paths} for all visible CabinetWClass windows.\"\"\"\n    result = {}\n    try:\n        shell = comtypes.client.CreateObject('Shell.Application')\n        for w in shell.Windows():\n            try:\n                hwnd = w.HWND\n                url  = w.LocationURL\n                if not url:\n                    continue\n                path = urllib.parse.unquote(url.replace('file:///', '').replace('/', '\\\\'))\n                result.setdefault(hwnd, set()).add(path)\n            except Exception:\n                pass\n    except Exception:\n        pass\n    return result\n\n\ndef get_cabinet_hwnds():\n    hwnds = set()\n    def cb(hwnd, _):\n        if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n            hwnds.add(hwnd)\n    win32gui.EnumWindows(cb, None)\n    return hwnds\n\n\ndef open_path_as_tab(target_hwnd, path):\n    \"\"\"\n    Focus target_hwnd, open a new tab with Ctrl+T,\n    then type the path into the address bar and navigate.\n    \"\"\"\n    # Bring window to front\n    win32gui.ShowWindow(target_hwnd, win32con.SW_RESTORE)\n    win32gui.SetForegroundWindow(target_hwnd)\n    time.sleep(0.15)\n\n    # Ctrl+T → new tab\n    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)\n    win32api.keybd_event(ord('T'), 0, 0, 0)\n    win32api.keybd_event(ord('T'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.3)\n\n    # Alt+D → focus address bar\n    win32api.keybd_event(win32con.VK_MENU, 0, 0, 0)\n    win32api.keybd_event(ord('D'), 0, 0, 0)\n    win32api.keybd_event(ord('D'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_MENU, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.2)\n\n    # Type path and press Enter\n    import win32clipboard\n    win32clipboard.OpenClipboard()\n    win32clipboard.EmptyClipboard()\n    win32clipboard.SetClipboardText(path)\n    win32clipboard.CloseClipboard()\n\n    win32api.keybd_event(win32con.VK_CONTROL, 0, 0, 0)\n    win32api.keybd_event(ord('V'), 0, 0, 0)\n    win32api.keybd_event(ord('V'), 0, win32con.KEYEVENTF_KEYUP, 0)\n    win32api.keybd_event(win32con.VK_CONTROL, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.1)\n\n    win32api.keybd_event(win32con.VK_RETURN, 0, 0, 0)\n    win32api.keybd_event(win32con.VK_RETURN, 0, win32con.KEYEVENTF_KEYUP, 0)\n    time.sleep(0.4)\n\n\ndef close_window(hwnd):\n    win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)\n\n\ndef main():\n    known_hwnds = get_cabinet_hwnds()\n    print(f\"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Press Ctrl+C to stop.\")\n\n    while True:\n        time.sleep(POLL_INTERVAL)\n        current = get_cabinet_hwnds()\n        new_hwnds = current - known_hwnds\n\n        for new_hwnd in new_hwnds:\n            # Wait for the window to finish loading\n            time.sleep(NEW_WIN_WAIT)\n\n            # Re-check it still exists\n            if not win32gui.IsWindow(new_hwnd):\n                continue\n\n            # Find an existing Explorer window to merge into\n            existing = current - new_hwnds - {new_hwnd}\n            # Also re-check known_hwnds for still-alive windows\n            for h in list(known_hwnds):\n                if win32gui.IsWindow(h):\n                    existing.add(h)\n\n            if not existing:\n                # No existing window — let this one become the main window\n                print(f\"[explorer_tabs] First window {new_hwnd}, keeping as-is.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            # Get the path of the new window\n            win_paths = get_explorer_windows()\n            paths = win_paths.get(new_hwnd, set())\n\n            if not paths:\n                print(f\"[explorer_tabs] Could not get path for {new_hwnd}, skipping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            path = next(iter(paths))\n            target = next(iter(existing))\n\n            print(f\"[explorer_tabs] Merging {new_hwnd} ({path!r}) into {target}\")\n            open_path_as_tab(target, path)\n            time.sleep(0.3)\n            close_window(new_hwnd)\n\n        # Update known set (remove closed windows, add new ones we decided to keep)\n        known_hwnds = {h for h in (known_hwnds | current) if win32gui.IsWindow(h)}\n\n\nif __name__ == '__main__':\n    main()\n"
                   }
                 }
@@ -1218,7 +1218,7 @@
               "Success": {
                 "items": [
                   {
-                    "Text": "Successfully created C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py (146 lines)."
+                    "Text": "Successfully created C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py (146 lines)."
                   }
                 ]
               }
@@ -1244,7 +1244,7 @@
               "name": "shell",
               "input": {
                 "__tool_use_purpose": "Test the script imports and starts without errors",
-                "command": "python3 -c \"\nimport sys\nsys.path.insert(0, r'C:\\@delta\\ms1\\TOOLS\\new_folder_tab')\n# just test imports and the helper functions\nimport urllib.parse, win32gui, win32con, win32api, comtypes.client, win32clipboard\n\n# test get_cabinet_hwnds\nhwnds = set()\ndef cb(hwnd, _):\n    if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n        hwnds.add(hwnd)\nwin32gui.EnumWindows(cb, None)\nprint('Cabinet hwnds:', hwnds)\n\n# test get_explorer_windows\nshell = comtypes.client.CreateObject('Shell.Application')\nfor w in shell.Windows():\n    try:\n        url = w.LocationURL\n        if url:\n            path = urllib.parse.unquote(url.replace('file:///', '').replace('/', chr(92)))\n            print(f'  HWND={w.HWND} path={path!r}')\n    except: pass\n\nprint('All imports OK')\n\"\n"
+                "command": "python3 -c \"\nimport sys\nsys.path.insert(0, r'C:\\@delta\\ms1\\tools\\new_folder_tab')\n# just test imports and the helper functions\nimport urllib.parse, win32gui, win32con, win32api, comtypes.client, win32clipboard\n\n# test get_cabinet_hwnds\nhwnds = set()\ndef cb(hwnd, _):\n    if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n        hwnds.add(hwnd)\nwin32gui.EnumWindows(cb, None)\nprint('Cabinet hwnds:', hwnds)\n\n# test get_explorer_windows\nshell = comtypes.client.CreateObject('Shell.Application')\nfor w in shell.Windows():\n    try:\n        url = w.LocationURL\n        if url:\n            path = urllib.parse.unquote(url.replace('file:///', '').replace('/', chr(92)))\n            print(f'  HWND={w.HWND} path={path!r}')\n    except: pass\n\nprint('All imports OK')\n\"\n"
               }
             }
           }
@@ -1282,7 +1282,7 @@
               "kind": {
                 "BuiltIn": {
                   "ExecuteCmd": {
-                    "command": "python3 -c \"\nimport sys\nsys.path.insert(0, r'C:\\@delta\\ms1\\TOOLS\\new_folder_tab')\n# just test imports and the helper functions\nimport urllib.parse, win32gui, win32con, win32api, comtypes.client, win32clipboard\n\n# test get_cabinet_hwnds\nhwnds = set()\ndef cb(hwnd, _):\n    if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n        hwnds.add(hwnd)\nwin32gui.EnumWindows(cb, None)\nprint('Cabinet hwnds:', hwnds)\n\n# test get_explorer_windows\nshell = comtypes.client.CreateObject('Shell.Application')\nfor w in shell.Windows():\n    try:\n        url = w.LocationURL\n        if url:\n            path = urllib.parse.unquote(url.replace('file:///', '').replace('/', chr(92)))\n            print(f'  HWND={w.HWND} path={path!r}')\n    except: pass\n\nprint('All imports OK')\n\"\n",
+                    "command": "python3 -c \"\nimport sys\nsys.path.insert(0, r'C:\\@delta\\ms1\\tools\\new_folder_tab')\n# just test imports and the helper functions\nimport urllib.parse, win32gui, win32con, win32api, comtypes.client, win32clipboard\n\n# test get_cabinet_hwnds\nhwnds = set()\ndef cb(hwnd, _):\n    if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n        hwnds.add(hwnd)\nwin32gui.EnumWindows(cb, None)\nprint('Cabinet hwnds:', hwnds)\n\n# test get_explorer_windows\nshell = comtypes.client.CreateObject('Shell.Application')\nfor w in shell.Windows():\n    try:\n        url = w.LocationURL\n        if url:\n            path = urllib.parse.unquote(url.replace('file:///', '').replace('/', chr(92)))\n            print(f'  HWND={w.HWND} path={path!r}')\n    except: pass\n\nprint('All imports OK')\n\"\n",
                     "working_dir": null
                   }
                 }
@@ -1323,8 +1323,8 @@
               "input": {
                 "__tool_use_purpose": "Create a silent background launcher batch file",
                 "command": "create",
-                "content": "@echo off\nstart \"\" pythonw.exe \"C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py\"\n",
-                "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\start_explorer_tabs.bat"
+                "content": "@echo off\nstart \"\" pythonw.exe \"C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py\"\n",
+                "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\start_explorer_tabs.bat"
               }
             }
           }
@@ -1344,7 +1344,7 @@
               "content": [
                 {
                   "kind": "text",
-                  "data": "Successfully created C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\start_explorer_tabs.bat (2 lines)."
+                  "data": "Successfully created C:\\@delta\\ms1\\tools\\new_folder_tab\\start_explorer_tabs.bat (2 lines)."
                 }
               ],
               "status": "success"
@@ -1359,8 +1359,8 @@
                 "BuiltIn": {
                   "FileWrite": {
                     "command": "create",
-                    "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\start_explorer_tabs.bat",
-                    "content": "@echo off\nstart \"\" pythonw.exe \"C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py\"\n"
+                    "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\start_explorer_tabs.bat",
+                    "content": "@echo off\nstart \"\" pythonw.exe \"C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py\"\n"
                   }
                 }
               }
@@ -1369,7 +1369,7 @@
               "Success": {
                 "items": [
                   {
-                    "Text": "Successfully created C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\start_explorer_tabs.bat (2 lines)."
+                    "Text": "Successfully created C:\\@delta\\ms1\\tools\\new_folder_tab\\start_explorer_tabs.bat (2 lines)."
                   }
                 ]
               }
@@ -2077,7 +2077,7 @@
                   "kind": "json",
                   "data": {
                     "exit_status": "exit code: 0",
-                    "stdout": "Explorer windows: [23987540]\nTarget: 23987540 WinUIExample and 2 more tabs - File Explorer\nShellTabWindowClass hwnd: 11012366\nSendMessage result: 0\nShell windows after new tab:\n  HWND=23987540 url='file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample'\n  HWND=23987540 url='file:///C:/@delta/ms1/TOOLS/new_folder_tab'\n  HWND=23987540 url=''\n  HWND=23987540 url=''\n",
+                    "stdout": "Explorer windows: [23987540]\nTarget: 23987540 WinUIExample and 2 more tabs - File Explorer\nShellTabWindowClass hwnd: 11012366\nSendMessage result: 0\nShell windows after new tab:\n  HWND=23987540 url='file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample'\n  HWND=23987540 url='file:///C:/@delta/ms1/tools/new_folder_tab'\n  HWND=23987540 url=''\n  HWND=23987540 url=''\n",
                     "stderr": ""
                   }
                 }
@@ -2105,7 +2105,7 @@
                   {
                     "Json": {
                       "exit_status": "exit code: 0",
-                      "stdout": "Explorer windows: [23987540]\nTarget: 23987540 WinUIExample and 2 more tabs - File Explorer\nShellTabWindowClass hwnd: 11012366\nSendMessage result: 0\nShell windows after new tab:\n  HWND=23987540 url='file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample'\n  HWND=23987540 url='file:///C:/@delta/ms1/TOOLS/new_folder_tab'\n  HWND=23987540 url=''\n  HWND=23987540 url=''\n",
+                      "stdout": "Explorer windows: [23987540]\nTarget: 23987540 WinUIExample and 2 more tabs - File Explorer\nShellTabWindowClass hwnd: 11012366\nSendMessage result: 0\nShell windows after new tab:\n  HWND=23987540 url='file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample'\n  HWND=23987540 url='file:///C:/@delta/ms1/tools/new_folder_tab'\n  HWND=23987540 url=''\n  HWND=23987540 url=''\n",
                       "stderr": ""
                     }
                   }
@@ -2311,7 +2311,7 @@
                   "kind": "json",
                   "data": {
                     "exit_status": "exit code: 0",
-                    "stdout": "23987540 file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample\n23987540 file:///C:/@delta/ms1/TOOLS/new_folder_tab\n23987540 file:///C:/Users/nahid/Desktop\n",
+                    "stdout": "23987540 file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample\n23987540 file:///C:/@delta/ms1/tools/new_folder_tab\n23987540 file:///C:/Users/nahid/Desktop\n",
                     "stderr": ""
                   }
                 }
@@ -2339,7 +2339,7 @@
                   {
                     "Json": {
                       "exit_status": "exit code: 0",
-                      "stdout": "23987540 file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample\n23987540 file:///C:/@delta/ms1/TOOLS/new_folder_tab\n23987540 file:///C:/Users/nahid/Desktop\n",
+                      "stdout": "23987540 file:///C:/Users/nahid/Desktop/TEST/New%20folder%20(36)/WinUIExample\n23987540 file:///C:/@delta/ms1/tools/new_folder_tab\n23987540 file:///C:/Users/nahid/Desktop\n",
                       "stderr": ""
                     }
                   }
@@ -2447,7 +2447,7 @@
                 "__tool_use_purpose": "Rewrite explorer_tabs.py using WM_COMMAND + Navigate2 instead of keyboard simulation",
                 "command": "create",
                 "content": "\"\"\"\nexplorer_tabs.py\nMonitors for new File Explorer windows and merges them as tabs\ninto an existing Explorer window using Windows API (no keyboard simulation).\n\nUses:\n  - WM_COMMAND 0xA21B  → opens a new tab in an existing Explorer window\n  - IWebBrowser2.Navigate2 via Shell.Application COM → navigates the new tab\n  - IShellBrowser.BrowseObject (via Shell COM) → closes the new window\n\nRun silently: pythonw explorer_tabs.py\n\"\"\"\n\nimport time\nimport ctypes\nimport urllib.parse\nimport win32gui\nimport win32con\nimport comtypes.client\nimport comtypes.automation\n\nPOLL_INTERVAL = 0.4\nNEW_WIN_WAIT  = 0.7\n\nWM_COMMAND    = 0x0111\nNEW_TAB_CMD   = 0xA21B\n\n\ndef get_cabinet_hwnds():\n    hwnds = set()\n    def cb(hwnd, _):\n        if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n            hwnds.add(hwnd)\n    win32gui.EnumWindows(cb, None)\n    return hwnds\n\n\ndef get_shell_windows():\n    \"\"\"Return list of IWebBrowser2 dispatch objects from Shell.Application.\"\"\"\n    try:\n        shell = comtypes.client.CreateObject('Shell.Application')\n        return list(shell.Windows())\n    except Exception:\n        return []\n\n\ndef get_hwnd_paths(hwnd):\n    \"\"\"Return set of URL strings for all tabs in a given CabinetWClass hwnd.\"\"\"\n    paths = set()\n    for w in get_shell_windows():\n        try:\n            if w.HWND == hwnd and w.LocationURL:\n                paths.add(w.LocationURL)\n        except Exception:\n            pass\n    return paths\n\n\ndef get_first_tab_hwnd(cabinet_hwnd):\n    \"\"\"Return the first ShellTabWindowClass child of a CabinetWClass window.\"\"\"\n    result = []\n    def cb(hwnd, _):\n        if win32gui.GetClassName(hwnd) == 'ShellTabWindowClass':\n            result.append(hwnd)\n            return False\n    try:\n        win32gui.EnumChildWindows(cabinet_hwnd, cb, None)\n    except Exception:\n        pass\n    return result[0] if result else None\n\n\ndef open_as_tab(target_cabinet_hwnd, path):\n    \"\"\"\n    Open `path` as a new tab in `target_cabinet_hwnd`.\n    1. Send WM_COMMAND 0xA21B to ShellTabWindowClass → creates blank tab\n    2. Find the blank tab via Shell.Application\n    3. Navigate2 to path\n    \"\"\"\n    tab_hwnd = get_first_tab_hwnd(target_cabinet_hwnd)\n    if not tab_hwnd:\n        return False\n\n    # Snapshot existing shell window objects before opening new tab\n    before = {id(w) for w in get_shell_windows()}\n\n    ctypes.windll.user32.SendMessageW(tab_hwnd, WM_COMMAND, NEW_TAB_CMD, 0)\n    time.sleep(0.5)\n\n    # Find the new blank tab (LocationURL == '')\n    blank = None\n    for w in get_shell_windows():\n        try:\n            if w.HWND == target_cabinet_hwnd and w.LocationURL == '':\n                blank = w\n                break\n        except Exception:\n            pass\n\n    if not blank:\n        # Fallback: find any new entry not in before snapshot\n        for w in get_shell_windows():\n            try:\n                if id(w) not in before and w.HWND == target_cabinet_hwnd:\n                    blank = w\n                    break\n            except Exception:\n                pass\n\n    if not blank:\n        return False\n\n    v = comtypes.automation.VARIANT()\n    v.vt = comtypes.automation.VT_BSTR\n    v.value = path\n    try:\n        blank.Navigate2(v)\n    except Exception:\n        return False\n\n    return True\n\n\ndef close_shell_window(hwnd):\n    \"\"\"Close all shell windows (tabs) belonging to a CabinetWClass hwnd.\"\"\"\n    for w in get_shell_windows():\n        try:\n            if w.HWND == hwnd:\n                w.Quit()\n                return\n        except Exception:\n            pass\n    # Fallback: WM_CLOSE\n    win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)\n\n\ndef main():\n    known_hwnds = get_cabinet_hwnds()\n    print(f\"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Ctrl+C to stop.\")\n\n    while True:\n        time.sleep(POLL_INTERVAL)\n\n        current = get_cabinet_hwnds()\n        new_hwnds = current - known_hwnds\n\n        for new_hwnd in new_hwnds:\n            time.sleep(NEW_WIN_WAIT)\n\n            if not win32gui.IsWindow(new_hwnd):\n                continue\n\n            # Existing windows (excluding the new one)\n            existing = {h for h in (known_hwnds | current) - {new_hwnd} if win32gui.IsWindow(h)}\n\n            if not existing:\n                print(f\"[explorer_tabs] First window {new_hwnd}, keeping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            # Get path of new window\n            paths = get_hwnd_paths(new_hwnd)\n            if not paths:\n                print(f\"[explorer_tabs] No path for {new_hwnd}, skipping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            path = next(iter(paths))\n            # Decode file:/// URL to a plain path\n            plain_path = urllib.parse.unquote(path.replace('file:///', '').replace('/', '\\\\'))\n            target = next(iter(existing))\n\n            print(f\"[explorer_tabs] Merging {new_hwnd} ({plain_path!r}) → {target}\")\n\n            if open_as_tab(target, plain_path):\n                time.sleep(0.3)\n                close_shell_window(new_hwnd)\n            else:\n                print(f\"[explorer_tabs] Failed to open tab, leaving window as-is.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n        known_hwnds = {h for h in (known_hwnds | current) if win32gui.IsWindow(h)}\n\n\nif __name__ == '__main__':\n    main()\n",
-                "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py"
+                "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py"
               }
             }
           }
@@ -2467,7 +2467,7 @@
               "content": [
                 {
                   "kind": "text",
-                  "data": "Successfully created \\\\?\\C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py (187 lines)."
+                  "data": "Successfully created \\\\?\\C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py (187 lines)."
                 }
               ],
               "status": "success"
@@ -2482,7 +2482,7 @@
                 "BuiltIn": {
                   "FileWrite": {
                     "command": "create",
-                    "path": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py",
+                    "path": "C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py",
                     "content": "\"\"\"\nexplorer_tabs.py\nMonitors for new File Explorer windows and merges them as tabs\ninto an existing Explorer window using Windows API (no keyboard simulation).\n\nUses:\n  - WM_COMMAND 0xA21B  → opens a new tab in an existing Explorer window\n  - IWebBrowser2.Navigate2 via Shell.Application COM → navigates the new tab\n  - IShellBrowser.BrowseObject (via Shell COM) → closes the new window\n\nRun silently: pythonw explorer_tabs.py\n\"\"\"\n\nimport time\nimport ctypes\nimport urllib.parse\nimport win32gui\nimport win32con\nimport comtypes.client\nimport comtypes.automation\n\nPOLL_INTERVAL = 0.4\nNEW_WIN_WAIT  = 0.7\n\nWM_COMMAND    = 0x0111\nNEW_TAB_CMD   = 0xA21B\n\n\ndef get_cabinet_hwnds():\n    hwnds = set()\n    def cb(hwnd, _):\n        if win32gui.IsWindowVisible(hwnd) and win32gui.GetClassName(hwnd) == 'CabinetWClass':\n            hwnds.add(hwnd)\n    win32gui.EnumWindows(cb, None)\n    return hwnds\n\n\ndef get_shell_windows():\n    \"\"\"Return list of IWebBrowser2 dispatch objects from Shell.Application.\"\"\"\n    try:\n        shell = comtypes.client.CreateObject('Shell.Application')\n        return list(shell.Windows())\n    except Exception:\n        return []\n\n\ndef get_hwnd_paths(hwnd):\n    \"\"\"Return set of URL strings for all tabs in a given CabinetWClass hwnd.\"\"\"\n    paths = set()\n    for w in get_shell_windows():\n        try:\n            if w.HWND == hwnd and w.LocationURL:\n                paths.add(w.LocationURL)\n        except Exception:\n            pass\n    return paths\n\n\ndef get_first_tab_hwnd(cabinet_hwnd):\n    \"\"\"Return the first ShellTabWindowClass child of a CabinetWClass window.\"\"\"\n    result = []\n    def cb(hwnd, _):\n        if win32gui.GetClassName(hwnd) == 'ShellTabWindowClass':\n            result.append(hwnd)\n            return False\n    try:\n        win32gui.EnumChildWindows(cabinet_hwnd, cb, None)\n    except Exception:\n        pass\n    return result[0] if result else None\n\n\ndef open_as_tab(target_cabinet_hwnd, path):\n    \"\"\"\n    Open `path` as a new tab in `target_cabinet_hwnd`.\n    1. Send WM_COMMAND 0xA21B to ShellTabWindowClass → creates blank tab\n    2. Find the blank tab via Shell.Application\n    3. Navigate2 to path\n    \"\"\"\n    tab_hwnd = get_first_tab_hwnd(target_cabinet_hwnd)\n    if not tab_hwnd:\n        return False\n\n    # Snapshot existing shell window objects before opening new tab\n    before = {id(w) for w in get_shell_windows()}\n\n    ctypes.windll.user32.SendMessageW(tab_hwnd, WM_COMMAND, NEW_TAB_CMD, 0)\n    time.sleep(0.5)\n\n    # Find the new blank tab (LocationURL == '')\n    blank = None\n    for w in get_shell_windows():\n        try:\n            if w.HWND == target_cabinet_hwnd and w.LocationURL == '':\n                blank = w\n                break\n        except Exception:\n            pass\n\n    if not blank:\n        # Fallback: find any new entry not in before snapshot\n        for w in get_shell_windows():\n            try:\n                if id(w) not in before and w.HWND == target_cabinet_hwnd:\n                    blank = w\n                    break\n            except Exception:\n                pass\n\n    if not blank:\n        return False\n\n    v = comtypes.automation.VARIANT()\n    v.vt = comtypes.automation.VT_BSTR\n    v.value = path\n    try:\n        blank.Navigate2(v)\n    except Exception:\n        return False\n\n    return True\n\n\ndef close_shell_window(hwnd):\n    \"\"\"Close all shell windows (tabs) belonging to a CabinetWClass hwnd.\"\"\"\n    for w in get_shell_windows():\n        try:\n            if w.HWND == hwnd:\n                w.Quit()\n                return\n        except Exception:\n            pass\n    # Fallback: WM_CLOSE\n    win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)\n\n\ndef main():\n    known_hwnds = get_cabinet_hwnds()\n    print(f\"[explorer_tabs] Running. Tracking {len(known_hwnds)} window(s). Ctrl+C to stop.\")\n\n    while True:\n        time.sleep(POLL_INTERVAL)\n\n        current = get_cabinet_hwnds()\n        new_hwnds = current - known_hwnds\n\n        for new_hwnd in new_hwnds:\n            time.sleep(NEW_WIN_WAIT)\n\n            if not win32gui.IsWindow(new_hwnd):\n                continue\n\n            # Existing windows (excluding the new one)\n            existing = {h for h in (known_hwnds | current) - {new_hwnd} if win32gui.IsWindow(h)}\n\n            if not existing:\n                print(f\"[explorer_tabs] First window {new_hwnd}, keeping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            # Get path of new window\n            paths = get_hwnd_paths(new_hwnd)\n            if not paths:\n                print(f\"[explorer_tabs] No path for {new_hwnd}, skipping.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n            path = next(iter(paths))\n            # Decode file:/// URL to a plain path\n            plain_path = urllib.parse.unquote(path.replace('file:///', '').replace('/', '\\\\'))\n            target = next(iter(existing))\n\n            print(f\"[explorer_tabs] Merging {new_hwnd} ({plain_path!r}) → {target}\")\n\n            if open_as_tab(target, plain_path):\n                time.sleep(0.3)\n                close_shell_window(new_hwnd)\n            else:\n                print(f\"[explorer_tabs] Failed to open tab, leaving window as-is.\")\n                known_hwnds.add(new_hwnd)\n                continue\n\n        known_hwnds = {h for h in (known_hwnds | current) if win32gui.IsWindow(h)}\n\n\nif __name__ == '__main__':\n    main()\n"
                   }
                 }
@@ -2492,7 +2492,7 @@
               "Success": {
                 "items": [
                   {
-                    "Text": "Successfully created \\\\?\\C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py (187 lines)."
+                    "Text": "Successfully created \\\\?\\C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py (187 lines)."
                   }
                 ]
               }
@@ -2518,7 +2518,7 @@
               "name": "shell",
               "input": {
                 "__tool_use_purpose": "Quick syntax/import check on the new script",
-                "command": "python3 -c \"\nimport ast, pathlib\nsrc = pathlib.Path(r'C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py').read_text()\nast.parse(src)\nprint('Syntax OK')\n\n# test imports\nimport ctypes, urllib.parse, win32gui, win32con, comtypes.client, comtypes.automation\nprint('Imports OK')\n\"\n"
+                "command": "python3 -c \"\nimport ast, pathlib\nsrc = pathlib.Path(r'C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py').read_text()\nast.parse(src)\nprint('Syntax OK')\n\n# test imports\nimport ctypes, urllib.parse, win32gui, win32con, comtypes.client, comtypes.automation\nprint('Imports OK')\n\"\n"
               }
             }
           }
@@ -2556,7 +2556,7 @@
               "kind": {
                 "BuiltIn": {
                   "ExecuteCmd": {
-                    "command": "python3 -c \"\nimport ast, pathlib\nsrc = pathlib.Path(r'C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\explorer_tabs.py').read_text()\nast.parse(src)\nprint('Syntax OK')\n\n# test imports\nimport ctypes, urllib.parse, win32gui, win32con, comtypes.client, comtypes.automation\nprint('Imports OK')\n\"\n",
+                    "command": "python3 -c \"\nimport ast, pathlib\nsrc = pathlib.Path(r'C:\\@delta\\ms1\\tools\\new_folder_tab\\explorer_tabs.py').read_text()\nast.parse(src)\nprint('Syntax OK')\n\n# test imports\nimport ctypes, urllib.parse, win32gui, win32con, comtypes.client, comtypes.automation\nprint('Imports OK')\n\"\n",
                     "working_dir": null
                   }
                 }

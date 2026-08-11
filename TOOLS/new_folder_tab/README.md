@@ -40,7 +40,7 @@ pip install pywin32==311 comtypes==1.4.8 uiautomation==2.0.29
 ### 5. Build the C# project
 
 ```powershell
-cd C:\@delta\ms1\TOOLS\new_folder_tab\csharp
+cd C:\@delta\ms1\tools\new_folder_tab\csharp
 dotnet build -c Release
 ```
 

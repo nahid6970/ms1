@@ -17,7 +17,7 @@ It is designed for these user workflows:
 
 ## Main File
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py)
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py)
 
 There is no multi-file package structure yet. Most logic lives in this single script.
 
@@ -28,15 +28,15 @@ There is no multi-file package structure yet. Most logic lives in this single sc
 
 Defined in:
 
-- [requirements.txt](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/requirements.txt)
+- [requirements.txt](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/requirements.txt)
 
 ## Current Project Files
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py): main app
-- [duplicate_image_finder_settings.json](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder_settings.json): persisted user state
-- [duplicate_image_finder_icon.svg](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder_icon.svg): generated app icon source
-- [duplicate_image_finder_icon.ico](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder_icon.ico): generated Windows icon
-- [duplicate_image_finder_check.svg](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder_check.svg): generated yellow checkbox checkmark
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py): main app
+- [duplicate_image_finder_settings.json](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder_settings.json): persisted user state
+- [duplicate_image_finder_icon.svg](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder_icon.svg): generated app icon source
+- [duplicate_image_finder_icon.ico](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder_icon.ico): generated Windows icon
+- [duplicate_image_finder_check.svg](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder_check.svg): generated yellow checkbox checkmark
 
 ## UI Layout
 
@@ -75,7 +75,7 @@ The UI is split into two panels:
 
 Core scan worker:
 
-- `ScanWorker` in [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:386)
+- `ScanWorker` in [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:386)
 
 Implementation details:
 
@@ -97,7 +97,7 @@ Important behavior:
 
 Saved state is defined through:
 
-- `default_settings()` in [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:301)
+- `default_settings()` in [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:301)
 
 Current JSON shape:
 
@@ -220,17 +220,17 @@ This is intentional because the earlier in-process restart path was unreliable o
 
 If you are changing scanning behavior, start at:
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:386)
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:386)
 
 If you are changing result tile UI, start at:
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:518)
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:518)
 
 If you are changing main window layout or controls, start at:
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:672)
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:672)
 
 If you are changing persistence or saved settings, start at:
 
-- [duplicate_image_finder.py](C:/@delta/ms1/TOOLS/Duplicate%20Image%20Finder/duplicate_image_finder.py:301)
+- [duplicate_image_finder.py](C:/@delta/ms1/tools/Duplicate%20Image%20Finder/duplicate_image_finder.py:301)
 

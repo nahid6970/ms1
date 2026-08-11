@@ -113,7 +113,7 @@ Shows for active workspace:
 ## File Structure
 
 ```
-C:\@delta\ms1\TOOLS\terminal_tui\
+C:\@delta\ms1\tools\terminal_tui\
 ├── app.py                          # Flask server
 ├── templates/
 │   └── index.html                  # Single-page frontend

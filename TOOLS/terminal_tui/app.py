@@ -43,7 +43,7 @@ app.config['SECRET_KEY'] = 'terminal-tui-secret-key'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 PORT = 5577
-BASE_DIR = r"C:\@delta\ms1\TOOLS"
+BASE_DIR = r"C:\@delta\ms1\tools"
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json')
 
 _CONFIG_CACHE = None
@@ -3832,7 +3832,7 @@ def api_ai_command():
         except Exception as e:
             print("Error finding project path:", e)
     if not project_path:
-        project_path = r"C:\@delta\ms1\TOOLS\terminal_tui"
+        project_path = r"C:\@delta\ms1\tools\terminal_tui"
         
     provider = req.get('provider', 'gemini')
     model = req.get('model', '')

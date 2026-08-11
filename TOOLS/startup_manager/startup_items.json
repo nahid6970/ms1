@@ -771,8 +771,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\komorebi_tray.py\"",
+    "Command": "C:\\@delta\\ms1\\tools\\komorebi_tray.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\tools\\komorebi_tray.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -797,8 +797,8 @@
     "paths": [
       "python"
     ],
-    "Command": "C:\\@delta\\ms1\\TOOLS\\CPU.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\CPU.py\"",
+    "Command": "C:\\@delta\\ms1\\tools\\CPU.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\tools\\CPU.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
@@ -811,8 +811,8 @@
     "paths": [
       "python"
     ],
-    "Command": "C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\net_speed_hooker\\net_speed_monitor_wd.py\"",
+    "Command": "C:\\@delta\\ms1\\tools\\net_speed_hooker\\net_speed_monitor_wd.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\ms1\\tools\\net_speed_hooker\\net_speed_monitor_wd.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": true,
     "hide_terminal": true,
@@ -904,8 +904,8 @@
     "paths": [
       "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\csharp\\start_explorer_tabs.bat",
-    "ps1_command": "Start-Process -FilePath \"C:\\Windows\\System32\\cmd.exe\" -ArgumentList \"C:\\@delta\\ms1\\TOOLS\\new_folder_tab\\csharp\\start_explorer_tabs.bat\"",
+    "Command": "C:\\@delta\\ms1\\tools\\new_folder_tab\\csharp\\start_explorer_tabs.bat",
+    "ps1_command": "Start-Process -FilePath \"C:\\Windows\\System32\\cmd.exe\" -ArgumentList \"C:\\@delta\\ms1\\tools\\new_folder_tab\\csharp\\start_explorer_tabs.bat\"",
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
@@ -966,10 +966,10 @@
     "name": "Flask - 5577 - Terminal-TUI",
     "type": "Command",
     "paths": [
-      "C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py"
+      "C:\\@delta\\ms1\\tools\\terminal_tui\\app.py"
     ],
     "Command": "",
-    "ps1_command": "Start-Process -FilePath \"C:\\@delta\\ms1\\TOOLS\\terminal_tui\\app.py\"",
+    "ps1_command": "Start-Process -FilePath \"C:\\@delta\\ms1\\tools\\terminal_tui\\app.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,

@@ -37,7 +37,7 @@ YouTube page (F9 pressed)
 
 ## Adding a New Python GUI Tool
 
-1. **Create the tool** in its own folder under `C:\@delta\ms1\TOOLS\`
+1. **Create the tool** in its own folder under `C:\@delta\ms1\tools\`
 2. Accept a `--url` or similar CLI arg via `argparse` so the extension can pass data to it
 3. **Create a `host.py`** (copy from `yt_like_dislike/host.py`, change the `app.py` path)
 4. **Create a native messaging manifest** (copy `com.delta.yt_analyzer.json`, change `name` and `path`)
