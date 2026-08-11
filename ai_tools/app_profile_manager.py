@@ -31,7 +31,7 @@ CP_DIM     = "#3A3A3A"  # Dimmed/Borders/Inactive
 CP_TEXT    = "#E0E0E0"  # Primary Text
 CP_SUBTEXT = "#808080"  # Secondary Text
 
-FONT_MAIN  = "Consolas"
+FONT_MAIN  = "JetBrainsMono NFP"
 
 # ── RELATIVE PATH INITIALIZATION ─────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -1228,6 +1228,11 @@ class DetailPanel(QFrame):
         self.footer_lbl.setText("")
         self.sync_btns_widget.setVisible(False)
 
+    @staticmethod
+    def _dirs_first(path, entries):
+        """Sort directory listings so folders appear before files (both A→Z)."""
+        return sorted(entries, key=lambda e: (not os.path.isdir(os.path.join(path, e)), e.lower()))
+
     def set_app_context(self, app_name, app_cfg, profile_count):
         self.header_lbl.setText(f"// APP // {app_name.upper()}")
         target = app_cfg.get("target_path", "")
@@ -1295,7 +1300,7 @@ class DetailPanel(QFrame):
         self.tree.clear()
 
         try:
-            entries = sorted(os.listdir(target))
+            entries = self._dirs_first(target, os.listdir(target))
         except Exception:
             note = QTreeWidgetItem(["// unavailable or missing"])
             note.setForeground(0, QColor(CP_RED))
@@ -1343,7 +1348,7 @@ class DetailPanel(QFrame):
         if depth > 6:
             return
         try:
-            entries = sorted(os.listdir(path))
+            entries = self._dirs_first(path, os.listdir(path))
         except Exception:
             return
         for entry in entries:
@@ -1447,7 +1452,7 @@ class DetailPanel(QFrame):
             truncated[0] = True
             return
         try:
-            entries = sorted(os.listdir(path))
+            entries = self._dirs_first(path, os.listdir(path))
         except Exception:
             note = QTreeWidgetItem(["// unavailable or missing"])
             note.setForeground(0, QColor(CP_RED))
