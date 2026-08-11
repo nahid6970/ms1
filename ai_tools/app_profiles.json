@@ -84,8 +84,16 @@
             "timer_enabled": false,
             "target_time": null,
             "app_name": "Codex",
-            "active": false,
+            "active": true,
             "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\Codex\\00"
+        },
+        {
+            "name": "01",
+            "timer_enabled": false,
+            "target_time": null,
+            "app_name": "Codex",
+            "active": false,
+            "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\Codex\\01"
         }
     ]
 }
