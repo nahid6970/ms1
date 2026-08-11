@@ -662,7 +662,7 @@
     },
     {
       "name": "Script Manager",
-      "path": "C:\\@delta\\db\\@run_from_db\\Script_Manager",
+      "path": "C:\\@delta\\ms1\\TOOLS\\Script_Manager",
       "category": "Tool",
       "pinned": false,
       "theme": {

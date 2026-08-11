@@ -76,7 +76,7 @@
             "name": "Restart Glance"
         },
         {
-            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\db\\@run_from_db\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
+            "action": "RestartScriptManager()\nRestartScriptManager() {\n    ; Check if the window exists\n    if WinExist(\"SCRIPT // MANAGER\") {\n        ; Get the process ID of the window\n        ProcessID := WinGetPID(\"SCRIPT // MANAGER\")\n        ; Kill the process\n        Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n        ; Wait a moment for the process to close\n        Sleep(500)\n    }\n    ; Launch the script\n    Run('pythonw \"C:\\@delta\\ms1\\TOOLS\\Script_Manager\\script_manager_gui_qt.py\"')\n    WinWait(\"SCRIPT // MANAGER\")\n    WinActivate(\"SCRIPT // MANAGER\")\n}",
             "category": "Launch",
             "description": "",
             "enabled": true,
