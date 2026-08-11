@@ -358,6 +358,16 @@
             "kind": "Exe",
             "id": "Freebuff.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "ApplicationFrameHost.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Sound Recorder",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -469,6 +479,16 @@
         {
             "kind": "Exe",
             "id": "Freebuff.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "ApplicationFrameHost.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Title",
+            "id": "Sound Recorder",
             "matching_strategy": "Equals"
         }
     ],
