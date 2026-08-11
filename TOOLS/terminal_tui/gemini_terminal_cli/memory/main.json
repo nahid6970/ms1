@@ -16,6 +16,22 @@
     "bitwarden_port_conflict": {
       "content": "Bitwarden was previously using port 1455, which caused conflicts with other login platforms and development tools. If login issues occur, check for port 1455 conflicts.",
       "updated_at": "2026-08-11-13:19:11.563770"
+    },
+    "user_email": {
+      "content": "nahid6970@gmail.com",
+      "updated_at": "2026-08-12-02:18:00.704297"
+    },
+    "syncoria_training": {
+      "content": "Trainee at Syncoria. Learning Odoo 19 for functional/ERP training. Trainer: Sadeka (sadeka@syncoria.com), contact/coordinator: Sheikh Faiyaz.",
+      "updated_at": "2026-08-12-02:18:02.416838"
+    },
+    "github_repo_ms1": {
+      "content": "nahid6970/ms1",
+      "updated_at": "2026-08-12-02:18:03.968943"
+    },
+    "user_designation": {
+      "content": "Business Analyst",
+      "updated_at": "2026-08-12-02:18:45.283155"
     }
   },
   "sub_memories": {}
