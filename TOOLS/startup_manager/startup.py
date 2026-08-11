@@ -1,5 +1,18 @@
+import sys, os
+import PyQt6
+
+# Fix for Qt platform plugin issue
+qt_plugin_path = os.path.join(os.path.dirname(PyQt6.__file__), "Qt6", "plugins")
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = qt_plugin_path
+
+UTILITY_PATH = r"C:\@delta\ms1"
+if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
+import install_deps
+install_deps.bootstrap(__file__)
+import install_deps
+install_deps.bootstrap(__file__)
+
 import ctypes
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('nahid6970.mySTARTUP.subproduct.version')
 import sys
 import os
 import json
