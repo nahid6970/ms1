@@ -742,7 +742,7 @@
     "type": "App"
   },
   {
-    "Command": "C:\\@delta\\db\\@run_from_db\\chrome_ext_manager\\extension_manager.py",
+    "Command": "C:\\@delta\\ms1\\tools\\chrome_ext_manager\\extension_manager.py",
     "ExecutableType": "pythonw",
     "added_at": 1769513702.432895,
     "name": "Chrome Extension Manager Listener",
