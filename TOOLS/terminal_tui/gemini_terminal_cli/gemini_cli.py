@@ -38,7 +38,12 @@ DEFAULT_SYSTEM = (
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
-    "AUTOSAVE MEMORY: Memory tools are active. You MUST immediately call `save_memory` whenever the user introduces themselves (e.g., name, role, handle), states personal/coding preferences, gives project rules, or shares any info worth remembering across sessions. Example: if the user says 'My name is Alex', immediately call save_memory(key='user_name', content='Alex', path='main'). Do not wait to be asked."
+    "AUTOSAVE MEMORY & USER BEHAVIOR: Memory tools are active. You MUST immediately call `save_memory` whenever the user: "
+    "1. Introduces themselves (e.g., name, role, handle). "
+    "2. Expresses likes, dislikes, or preferences (e.g., preferred languages, frameworks, tab width). "
+    "3. Gives instructions on what to DO or NOT DO (e.g., 'don't use comments', 'always use type hints', 'never overwrite whole files'). "
+    "4. Shares project guidelines or setup steps. "
+    "Save user behavior rules, constraints, and 'don'ts' under path='main' (key='user_behavior' or 'coding_rules') so you strictly adhere to them in all future turns and sessions. Do not wait to be asked."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -158,7 +163,13 @@ def save_memory(key: str = "", content: str = "", path: str = "main", descriptio
     if not key and not content:
         return "Error: memory content or key is required."
     if not key:
-        key = "user_name" if any(w in content.lower() for w in ("name", "my name")) else "user_info"
+        lower_c = content.lower()
+        if any(w in lower_c for w in ("name", "my name")):
+            key = "user_name"
+        elif any(w in lower_c for w in ("don't", "do not", "never", "always", "prefer", "dislike", "like", "style", "behavior")):
+            key = "user_behavior"
+        else:
+            key = "user_info"
     if not content:
         content = key
 
