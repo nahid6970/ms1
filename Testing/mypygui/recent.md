@@ -20,6 +20,7 @@ All in `mypygui_qt.py`:
 - Repo labels: no ⇡/⇣ arrows (they flashed mid-push); info still in hover tooltip.
 - Right-click power menu `_show_git_menu`: Commit&Push, Pull, Push, Stash, Pop, Discard, Force Push (overwrite remote), Force Pull (overwrite local), Force Checkout (lazygit-F style, discards edits keeps commits), Delete Lock Files, Status&Diff, lazygit, GitHub, Switch Branch, Set/Reset Branch Dot Color.
 - Branch indicator `GitIconLabel`: dot (bottom-right) or underline (Settings → BRANCH INDICATOR), colored via `branch_color` (config override → fixed palette → hash).
+- **NEW Git right-click mode** (Settings → GIT STATUS COLORS → RIGHT CLICK): `Context Menu` (code default) or `Lazygit`. Config key `git_right_click`; when `lazygit`, right-clicking a repo label opens lazygit directly instead of the power menu (Ctrl+Right-click still = git restore).
 - Rich-text tooltip: status-colored files (A green, M yellow, D pink, ?? red, R/C cyan, U magenta) + `● branch` in its assigned color.
 
 ## 3. Critical Context

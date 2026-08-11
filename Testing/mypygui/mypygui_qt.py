@@ -4038,6 +4038,11 @@ class StatusBar(QMainWindow):
         form_git.addRow("RULES", git_rules_le)
         git_rules_le.setToolTip("Format: .ext:color, .ext2:color (e.g. .json:#ff55ff, .md:#00ffff)")
         form_git.addRow("BRANCH INDICATOR", git_ind_cb)
+        git_rc_cb = QComboBox()
+        git_rc_cb.addItems(["Context Menu", "Lazygit"])
+        git_rc_cb.setCurrentText("Lazygit" if str(self._config.get("git_right_click", "menu")).lower() == "lazygit" else "Context Menu")
+        git_rc_cb.setToolTip("Right-click a repo label:\nContext Menu = full git power menu\nLazygit = open lazygit directly")
+        form_git.addRow("RIGHT CLICK", git_rc_cb)
         left_col.addWidget(grp_git)
         
         left_col.addStretch()
@@ -4133,6 +4138,8 @@ class StatusBar(QMainWindow):
                     "default": self._temp_git_def
                 }
                 cfg["git_indicator_style"] = git_ind_cb.currentText().lower()
+                cfg["git_right_click"] = "lazygit" if git_rc_cb.currentText().lower() == "lazygit" else "menu"
+
                 
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
                 for _lbl in getattr(self, "_git_labels", {}).values():
@@ -4242,6 +4249,8 @@ class StatusBar(QMainWindow):
                         else: git_sync(path)
                     elif btn == Qt.MouseButton.RightButton:
                         if mods & Qt.KeyboardModifier.ControlModifier: subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", f"& {{$host.UI.RawUI.WindowTitle='Git Restore' ; cd '{path}' ; git restore . }}"], shell=True)
+                        elif load_config().get("git_right_click", "menu") == "lazygit":
+                            subprocess.Popen('start pwsh -NoExit -Command "lazygit"', cwd=path, shell=True)
                         else: _show_git_menu(path, lbl)
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx, lbl); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl

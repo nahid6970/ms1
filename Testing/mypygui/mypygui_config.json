@@ -2894,5 +2894,6 @@
         "vlr-cloudflare+convex": "#FF5500",
         "main": "#00FF00"
     },
-    "git_indicator_style": "underline"
+    "git_indicator_style": "underline",
+    "git_right_click": "lazygit"
 }
