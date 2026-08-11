@@ -38,7 +38,7 @@ DEFAULT_SYSTEM = (
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
-    "HIERARCHICAL MEMORY: A structured memory directory is active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, or key project facts. Store core facts in main memory (path='main'), or organize specific topics into dedicated sub-memory files/folders (e.g. path='database/schema', path='deployment/docker'). Provide a short description when creating sub-memories so they are indexed in main memory."
+    "HIERARCHICAL MEMORY: A structured memory directory is active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, or key project facts. Store core facts in main memory (path='main'), or organize specific topics into dedicated sub-memory files/folders in JSON or Markdown format (e.g., path='database/schema.json', path='notes/guide.md'). Provide a short description when creating sub-memories so they are indexed in main memory."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -135,31 +135,35 @@ def save_main_memory(data: Dict[str, Any]) -> None:
         pass
 
 
-def resolve_memory_path(raw_path: str) -> Path:
+def resolve_memory_path(raw_path: str) -> tuple[Path, str]:
+    """Returns (target_file_path, format_type ['json' or 'md'])."""
     ensure_memory_dir()
     clean = raw_path.strip().replace("\\", "/").strip("/")
     if not clean or clean in {"main", "main.json", "."}:
-        return MAIN_MEMORY_FILE
-    if not clean.endswith(".json"):
+        return MAIN_MEMORY_FILE, "json"
+
+    fmt = "md" if clean.lower().endswith(".md") else "json"
+    if not (clean.lower().endswith(".json") or clean.lower().endswith(".md")):
         clean += ".json"
+
     target = (MEMORY_DIR / clean).resolve()
     if not str(target).startswith(str(MEMORY_DIR.resolve())):
-        return MAIN_MEMORY_FILE
-    return target
+        return MAIN_MEMORY_FILE, "json"
+    return target, fmt
 
 
 def save_memory(key: str, content: str, path: str = "main", description: str = "") -> str:
     key = key.strip()
-    if not key:
+    if not key and not path.lower().endswith(".md"):
         return "Error: memory key is required."
     if not content.strip():
         return "Error: memory content is required."
 
-    target_file = resolve_memory_path(path)
+    target_file, fmt = resolve_memory_path(path)
 
     if target_file == MAIN_MEMORY_FILE.resolve():
         main_data = load_main_memory()
-        main_data["basic_memories"][key] = {
+        main_data["basic_memories"][key or "general"] = {
             "content": content,
             "updated_at": _now_stamp(),
         }
@@ -168,37 +172,59 @@ def save_memory(key: str, content: str, path: str = "main", description: str = "
 
     try:
         target_file.parent.mkdir(parents=True, exist_ok=True)
-        sub_data = {}
-        if target_file.exists():
-            try:
-                sub_data = json.loads(target_file.read_text(encoding="utf-8"))
-            except Exception:
-                sub_data = {}
-        if not isinstance(sub_data, dict):
-            sub_data = {}
-
-        sub_data[key] = {
-            "content": content,
-            "updated_at": _now_stamp(),
-        }
-        target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
-
         rel_path = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+
+        if fmt == "md":
+            existing_text = target_file.read_text(encoding="utf-8", errors="replace") if target_file.exists() else ""
+            heading = f"## {key}\n" if key else ""
+            entry_text = f"{heading}{content.strip()}\n"
+
+            if existing_text and heading and heading in existing_text:
+                parts = existing_text.split(heading)
+                before = parts[0]
+                after_parts = parts[1].split("\n## ", 1)
+                after = f"\n## {after_parts[1]}" if len(after_parts) > 1 else ""
+                new_text = f"{before}{heading}{content.strip()}\n{after}"
+            elif existing_text:
+                new_text = f"{existing_text.rstrip()}\n\n{entry_text}"
+            else:
+                new_text = f"# Memory Topic: {rel_path}\n\n{entry_text}"
+
+            target_file.write_text(new_text, encoding="utf-8")
+            item_count = new_text.count("\n## ") or 1
+        else:
+            sub_data = {}
+            if target_file.exists():
+                try:
+                    sub_data = json.loads(target_file.read_text(encoding="utf-8"))
+                except Exception:
+                    sub_data = {}
+            if not isinstance(sub_data, dict):
+                sub_data = {}
+
+            sub_data[key or "general"] = {
+                "content": content,
+                "updated_at": _now_stamp(),
+            }
+            target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
+            item_count = len(sub_data)
+
         main_data = load_main_memory()
-        sub_desc = description.strip() if description else f"Sub-memory topic for '{rel_path}'"
+        sub_desc = description.strip() if description else f"Sub-memory topic ({fmt.upper()}) for '{rel_path}'"
         main_data["sub_memories"][rel_path] = {
             "description": sub_desc,
             "updated_at": _now_stamp(),
-            "items_count": len(sub_data),
+            "items_count": item_count,
+            "format": fmt,
         }
         save_main_memory(main_data)
-        return f"Successfully saved memory '{key}' to sub-memory file '{rel_path}' (Index updated in main memory)."
+        return f"Successfully saved memory to '{rel_path}' ({fmt.upper()}) and updated main memory index."
     except Exception as exc:
         return f"Error saving memory to {path}: {exc}"
 
 
 def read_memory(path: str = "main", key: Optional[str] = None) -> str:
-    target_file = resolve_memory_path(path)
+    target_file, fmt = resolve_memory_path(path)
 
     if target_file == MAIN_MEMORY_FILE.resolve():
         main_data = load_main_memory()
@@ -214,7 +240,7 @@ def read_memory(path: str = "main", key: Optional[str] = None) -> str:
             for sub_p, sub_info in sub_files.items():
                 if k.lower() in sub_p.lower():
                     desc = sub_info.get("description", "") if isinstance(sub_info, dict) else str(sub_info)
-                    return f"Sub-memory match ['{sub_p}']:\nDescription: {desc}\nUse read_memory(path='{sub_p}') to read full topic content."
+                    return f"Sub-memory match ['{sub_p}']:\nDescription: {desc}\nUse read_memory(path='{sub_p}') to read full memory file."
             return f"Key/Path '{k}' not found in main memory."
 
         lines = ["=== MAIN MEMORY ==="]
@@ -243,6 +269,10 @@ def read_memory(path: str = "main", key: Optional[str] = None) -> str:
 
     try:
         rel_p = str(target_file.relative_to(MEMORY_DIR)).replace("\\", "/")
+        if fmt == "md":
+            content = target_file.read_text(encoding="utf-8", errors="replace")
+            return f"=== SUB-MEMORY ({fmt.upper()}): {rel_p} ===\n\n{content}"
+
         sub_data = json.loads(target_file.read_text(encoding="utf-8"))
         if not isinstance(sub_data, dict) or not sub_data:
             return f"Sub-memory file '{rel_p}' is empty."
@@ -255,7 +285,7 @@ def read_memory(path: str = "main", key: Optional[str] = None) -> str:
                 return f"Sub-memory '{rel_p}' ['{k}']:\n{c}"
             return f"Key '{k}' not found in sub-memory '{rel_p}'. Available keys: {', '.join(sub_data.keys())}"
 
-        lines = [f"=== SUB-MEMORY: {rel_p} ({len(sub_data)} items) ==="]
+        lines = [f"=== SUB-MEMORY ({fmt.upper()}): {rel_p} ({len(sub_data)} items) ==="]
         for sk, sv in sorted(sub_data.items()):
             c = sv.get("content", str(sv)) if isinstance(sv, dict) else str(sv)
             lines.append(f"\nKey: {sk}\nContent: {c}")
@@ -272,12 +302,19 @@ def list_memories() -> str:
     lines = ["=== MEMORY DIRECTORY ===", f"Location: {MEMORY_DIR}"]
     lines.append(f"Main Memory File: main.json ({len(main_data.get('basic_memories', {}))} basic items)")
 
-    if sub_files:
+    physical_files = []
+    for p in sorted(MEMORY_DIR.rglob("*")):
+        if p.is_file() and p.name != "main.json" and p.suffix in {".json", ".md"}:
+            rel_p = str(p.relative_to(MEMORY_DIR)).replace("\\", "/")
+            physical_files.append(rel_p)
+
+    if physical_files:
         lines.append("\nSub-memory Files & Folders:")
-        for sp, sinfo in sorted(sub_files.items()):
-            desc = sinfo.get("description", "") if isinstance(sinfo, dict) else str(sinfo)
-            cnt = sinfo.get("items_count", "?") if isinstance(sinfo, dict) else "?"
-            lines.append(f"  • {sp} ({cnt} items) - {desc}")
+        for sp in physical_files:
+            sinfo = sub_files.get(sp, {})
+            desc = sinfo.get("description", "Unindexed memory file") if isinstance(sinfo, dict) else str(sinfo)
+            fmt_str = "MD" if sp.endswith(".md") else "JSON"
+            lines.append(f"  • {sp} [{fmt_str}] - {desc}")
     else:
         lines.append("\nNo sub-memory files created yet.")
 
