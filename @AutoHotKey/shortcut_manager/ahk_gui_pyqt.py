@@ -136,6 +136,95 @@ def name_icon_size(app_font_size):
     """Pixel size for the inline star/file icons in the name column (~text size)."""
     return max(12, int(app_font_size))
 
+# True GDI glyph coverage per font family, cached. Qt's QFontMetrics.inFontUcs4
+# performs font-linking fallback (reports True for glyphs GDI can't draw), which
+# is why it disagreed with reality here; AHK's GUI renders with raw GDI, so a
+# glyph missing from the menu font draws as an empty square box.
+_gdi_font_coverage_cache = {}
+
+
+def _gdi_font_covers(family, codepoint):
+    """Return True if GDI can actually render `codepoint` in `family`.
+
+    Uses GetFontUnicodeRanges on a created font (no font-linking fallback), so
+    it reports the ground truth for AHK's raw-GDI text controls. Falls back to
+    True on any error so we never break generation over a font query.
+    """
+    if codepoint < 0x20:
+        return True
+    if family in _gdi_font_coverage_cache:
+        return codepoint in _gdi_font_coverage_cache[family]
+    import ctypes
+    from ctypes import wintypes
+    covered = set()
+    try:
+        gdi32 = ctypes.windll.gdi32
+
+        class LOGFONTW(ctypes.Structure):
+            _fields_ = [('lfHeight', ctypes.c_long), ('lfWidth', ctypes.c_long),
+                        ('lfEscapement', ctypes.c_long), ('lfOrientation', ctypes.c_long),
+                        ('lfWeight', ctypes.c_long), ('lfItalic', ctypes.c_byte),
+                        ('lfUnderline', ctypes.c_byte), ('lfStrikeOut', ctypes.c_byte),
+                        ('lfCharSet', ctypes.c_byte), ('lfOutPrecision', ctypes.c_byte),
+                        ('lfClipPrecision', ctypes.c_byte), ('lfQuality', ctypes.c_byte),
+                        ('lfPitchAndFamily', ctypes.c_byte),
+                        ('lfFaceName', wintypes.WCHAR * 32)]
+
+        hdc = gdi32.CreateDCW("DISPLAY", None, None, None)
+        if not hdc:
+            return True
+        lf = LOGFONTW()
+        lf.lfHeight = -16
+        lf.lfWeight = 400
+        lf.lfFaceName = family
+        hfont = gdi32.CreateFontIndirectW(ctypes.byref(lf))
+        if not hfont:
+            gdi32.DeleteDC(hdc)
+            return True
+        old = gdi32.SelectObject(hdc, hfont)
+        size = gdi32.GetFontUnicodeRanges(hdc, None)
+        if size:
+            buf = (ctypes.c_byte * size)()
+            gdi32.GetFontUnicodeRanges(hdc, buf)
+            import struct
+            data = bytes(buf)
+            c_ranges = struct.unpack_from('<I', data, 12)[0]
+            off = 16
+            for _ in range(c_ranges):
+                low, count = struct.unpack_from('<HH', data, off)
+                covered.update(range(low, low + count))
+                off += 4
+        gdi32.SelectObject(hdc, old)
+        gdi32.DeleteObject(hfont)
+        gdi32.DeleteDC(hdc)
+    except Exception:
+        return True
+    _gdi_font_coverage_cache[family] = covered
+    return codepoint in covered
+
+
+def resolve_submenu_indicator(indicator, font_family):
+    """Return an indicator the menu font can actually draw.
+
+    The user may configure a Nerd-Font-only glyph (e.g. U+F0DA) as the submenu
+    arrow while the menu font is a plain one like Arial. Raw-GDI rendering then
+    draws an empty square instead of the arrow. This resolves the indicator at
+    generate time: if the configured font lacks any character of the indicator,
+    the whole indicator is replaced by the first widely-supported arrow glyph
+    the font does have (preferring single characters over multi-char strings).
+    An empty indicator stays empty, and a font query failure keeps the user's
+    original indicator untouched.
+    """
+    if not indicator:
+        return indicator
+    if all(_gdi_font_covers(font_family, ord(c)) for c in indicator):
+        return indicator
+    # Universally available in Arial / Segoe UI / Consolas on Windows.
+    for fallback in ("\u203a", "\u2192", "\u00bb", ">"):  # › → » >
+        if _gdi_font_covers(font_family, ord(fallback)):
+            return fallback
+    return ">"
+
 class CyberButton(QPushButton):
     """Modern button with SVG icon support and dynamic hover color-switching."""
     def __init__(self, text="", parent=None, color=CP_DIM, is_outlined=False, svg_data=None):
@@ -2347,6 +2436,8 @@ class SettingsDialog(QDialog):
         self.sm_indicator_edit = QLineEdit()
         self.sm_indicator_edit.setText(self.parent_window.selection_menu_submenu_indicator)
         self.sm_indicator_edit.setPlaceholderText(" >")
+        self.sm_indicator_edit.setToolTip("Submenu arrow glyph. If the Selection Menu Font can't render your glyph, "
+                                          "a supported arrow (\u203a \u2192 \u00bb >) is used automatically at generate time.")
         sm_indicator_layout.addWidget(self.sm_indicator_edit)
         layout.addLayout(sm_indicator_layout)
 
@@ -4330,6 +4421,12 @@ class AHKShortcutEditor(QMainWindow):
             ])
 
             if not self.use_native_menu:
+                # Resolve at generate time so a Nerd-Font-only indicator glyph
+                # never renders as an empty square in a font that lacks it
+                # (raw GDI, no font-linking fallback).
+                _safe_indicator = resolve_submenu_indicator(
+                    self.selection_menu_submenu_indicator,
+                    self.selection_menu_font_family)
                 output_lines.extend([
                     "Class CustomMenuGUI {",
                     "    static guiObj := \"\"",
@@ -4347,7 +4444,7 @@ class AHKShortcutEditor(QMainWindow):
                     "    static hoverTargetCtrl := \"\"",
                     "    static hoverTimerActive := false",
                     "    static isTransitioning := false",
-                    f"    static submenuIndicator := \"{self.selection_menu_submenu_indicator}\"",
+                    f"    static submenuIndicator := \"{escape_ahk_string(_safe_indicator)}\"",
                     f"    static rightAlignIndicator := {'true' if self.selection_menu_submenu_indicator_right_align else 'false'}",
                     "",
                     "    static CancelHoverTimer() {",

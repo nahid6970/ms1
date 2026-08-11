@@ -1070,7 +1070,7 @@
     "app_font_size": 16,
     "toggle_accent_color": "#2196F3",
     "key_icon_width": 60,
-    "selection_menu_font_family": "Arial",
+    "selection_menu_font_family": "JetBrainsMono Nerd Font Propo",
     "selection_menu_font_size": 14,
     "selection_menu_submenu_indicator": "",
     "selection_menu_submenu_indicator_right_align": true,
