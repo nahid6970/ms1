@@ -79,13 +79,13 @@
       "pin_index": 1
     },
     {
-      "path": "C:\\@delta\\ms1\\@AI-Tool",
+      "path": "C:\\@delta\\ms1\\ai_tools",
       "name": "",
       "category": "",
       "icon": "",
       "files": [
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profiles.json",
-        "C:\\@delta\\ms1\\@AI-Tool\\app_profile_manager.py"
+        "C:\\@delta\\ms1\\ai_tools\\app_profiles.json",
+        "C:\\@delta\\ms1\\ai_tools\\app_profile_manager.py"
       ],
       "disabled_files": [],
       "extensions": [

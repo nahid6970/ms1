@@ -29,7 +29,7 @@
             "target_time": null,
             "app_name": "freebuff",
             "active": false,
-            "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\00"
+            "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\freebuff\\00"
         },
         {
             "name": "01",
@@ -37,7 +37,7 @@
             "target_time": null,
             "app_name": "freebuff",
             "active": true,
-            "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\freebuff\\01"
+            "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\freebuff\\01"
         },
         {
             "name": "rclone config",
@@ -45,7 +45,7 @@
             "target_time": null,
             "app_name": "Rclone Config",
             "active": false,
-            "storage_path": "C:\\@delta\\ms1\\@AI-Tool\\profile_data\\Rclone Config\\rclone config"
+            "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\Rclone Config\\rclone config"
         }
     ]
 }
