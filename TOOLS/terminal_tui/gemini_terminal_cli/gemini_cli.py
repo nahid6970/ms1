@@ -325,7 +325,7 @@ def list_memories() -> str:
 
 
 def delete_memory_item(path: str = "main", key: Optional[str] = None) -> str:
-    target_file = resolve_memory_path(path)
+    target_file, fmt = resolve_memory_path(path)
 
     if target_file == MAIN_MEMORY_FILE.resolve():
         main_data = load_main_memory()
@@ -350,17 +350,36 @@ def delete_memory_item(path: str = "main", key: Optional[str] = None) -> str:
     if key and key.strip():
         k = key.strip()
         try:
-            sub_data = json.loads(target_file.read_text(encoding="utf-8"))
-            if isinstance(sub_data, dict) and k in sub_data:
-                del sub_data[k]
-                target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
+            if fmt == "md":
+                existing_text = target_file.read_text(encoding="utf-8", errors="replace")
+                heading = f"## {k}\n"
+                if heading in existing_text:
+                    parts = existing_text.split(heading)
+                    before = parts[0]
+                    after_parts = parts[1].split("\n## ", 1)
+                    after = f"\n## {after_parts[1]}" if len(after_parts) > 1 else ""
+                    new_text = f"{before.strip()}\n{after.strip()}\n"
+                    target_file.write_text(new_text.strip() + "\n", encoding="utf-8")
+                    item_count = new_text.count("\n## ") or (1 if new_text.strip() else 0)
+                else:
+                    return f"Key/Heading '{k}' not found in sub-memory '{rel_p}'."
+            else:
+                sub_data = json.loads(target_file.read_text(encoding="utf-8"))
+                if isinstance(sub_data, dict) and k in sub_data:
+                    del sub_data[k]
+                    target_file.write_text(json.dumps(sub_data, indent=2, ensure_ascii=False), encoding="utf-8")
+                    item_count = len(sub_data)
+                else:
+                    return f"Key '{k}' not found in sub-memory '{rel_p}'."
 
-                main_data = load_main_memory()
-                if rel_p in main_data.get("sub_memories", {}):
-                    main_data["sub_memories"][rel_p]["items_count"] = len(sub_data)
-                    save_main_memory(main_data)
-                return f"Deleted key '{k}' from sub-memory '{rel_p}'."
-            return f"Key '{k}' not found in sub-memory '{rel_p}'."
+            main_data = load_main_memory()
+            if rel_p in main_data.get("sub_memories", {}):
+                if item_count <= 0:
+                    del main_data["sub_memories"][rel_p]
+                else:
+                    main_data["sub_memories"][rel_p]["items_count"] = item_count
+                save_main_memory(main_data)
+            return f"Deleted key '{k}' from sub-memory '{rel_p}'."
         except Exception as exc:
             return f"Error updating sub-memory file: {exc}"
 

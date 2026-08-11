@@ -1,10 +1,6 @@
 {
   "summary": "Main memory index and core basic memories",
   "basic_memories": {
-    "user_name": {
-      "content": "Nahid Ahmed",
-      "updated_at": "2026-08-11-06:31:56.452292"
-    },
     "location": {
       "content": "Dhaka, Bangladesh",
       "updated_at": "2026-08-11-06:32:37.141226"
@@ -12,14 +8,11 @@
     "hobby": {
       "content": "Coding with AI",
       "updated_at": "2026-08-11-06:33:14.705327"
+    },
+    "user_name": {
+      "content": "Nahid Ahmed",
+      "updated_at": "2026-08-11-06:38:08.777146"
     }
   },
-  "sub_memories": {
-    "database/schema.json": {
-      "description": "PostgreSQL database schema for the project.",
-      "updated_at": "2026-08-11-06:35:10.525154",
-      "items_count": 1,
-      "format": "json"
-    }
-  }
+  "sub_memories": {}
 }
