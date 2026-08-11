@@ -2494,6 +2494,7 @@ class AHKShortcutEditor(QMainWindow):
             "exclude": True,
             "startup": True,
             "text": True,
+            "menu": True,
             "file": True,
             "remap": True
         }
@@ -3478,7 +3479,41 @@ class AHKShortcutEditor(QMainWindow):
                 </div>
                 <div class="column">
         """
-        if text_shortcuts:
+        # Text shortcuts with the 'selection menu' flag behave differently from
+        # plain paste triggers, so they get their own collapsible section.
+        menu_shortcuts = [s for s in text_shortcuts if s.get('show_as_menu')]
+        plain_shortcuts = [s for s in text_shortcuts if not s.get('show_as_menu')]
+
+        if menu_shortcuts:
+            html += f"""
+                    <div class="section-title"><a href="toggle-section://menu">{get_toggle_icon('menu')} Selection Menus</a></div>
+            """
+
+        if self.section_states.get("menu", True):
+            if group_by_category:
+                # Group selection-menu shortcuts by category
+                menu_categories = {}
+                for shortcut in menu_shortcuts:
+                    category = shortcut.get('category', 'General')
+                    if category not in menu_categories:
+                        menu_categories[category] = []
+                    menu_categories[category].append(shortcut)
+
+                for i, category in enumerate(sorted(menu_categories.keys())):
+                    color = self.get_category_color(category)
+                    first_class = " first-in-section" if i == 0 else ""
+                    html += f'<div class="category-header{first_class}" style="color: {color};">📁 {category}</div>'
+
+                    for shortcut in sorted(menu_categories[category], key=lambda x: x.get('trigger', '').lower()):
+                        original_index = self.text_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "text", original_index, True)
+            else:
+                # Flat list
+                for shortcut in sorted(menu_shortcuts, key=lambda x: x.get('trigger', '').lower()):
+                    original_index = self.text_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "text", original_index, False)
+
+        if plain_shortcuts:
             html += f"""
                     <div class="section-title"><a href="toggle-section://text">{get_toggle_icon('text')} Text Shortcuts</a></div>
             """
@@ -3487,7 +3522,7 @@ class AHKShortcutEditor(QMainWindow):
             if group_by_category:
                 # Group text shortcuts by category
                 text_categories = {}
-                for shortcut in text_shortcuts:
+                for shortcut in plain_shortcuts:
                     category = shortcut.get('category', 'General')
                     if category not in text_categories:
                         text_categories[category] = []
@@ -3503,7 +3538,7 @@ class AHKShortcutEditor(QMainWindow):
                         html += self.generate_shortcut_html(shortcut, "text", original_index, True)
             else:
                 # Flat list
-                for shortcut in sorted(text_shortcuts, key=lambda x: x.get('trigger', '').lower()):
+                for shortcut in sorted(plain_shortcuts, key=lambda x: x.get('trigger', '').lower()):
                     original_index = self.text_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "text", original_index, False)
 
