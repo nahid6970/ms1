@@ -153,8 +153,8 @@
     "paths": [
       "python.exe"
     ],
-    "Command": "C:\\@delta\\ms1\\mypygui_qt.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\mypygui_qt.py\"",
+    "Command": "C:\\@delta\\ms1\\Testing\\mypygui\\mypygui_qt.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\Testing\\mypygui\\mypygui_qt.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
