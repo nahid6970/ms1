@@ -38,7 +38,7 @@ DEFAULT_SYSTEM = (
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
-    "HIERARCHICAL MEMORY: A structured memory directory is active. Automatically call `save_memory` whenever the user provides important preferences, architectural rules, or key project facts. Store core facts in main memory (path='main'), or organize specific topics into dedicated sub-memory files/folders in JSON or Markdown format (e.g., path='database/schema.json', path='notes/guide.md'). Provide a short description when creating sub-memories so they are indexed in main memory."
+    "AUTOSAVE MEMORY: Memory tools are active. You MUST immediately call `save_memory` whenever the user introduces themselves (e.g., name, role, handle), states personal/coding preferences, gives project rules, or shares any info worth remembering across sessions. Example: if the user says 'My name is Alex', immediately call save_memory(key='user_name', content='Alex', path='main'). Do not wait to be asked."
 )
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
@@ -152,23 +152,26 @@ def resolve_memory_path(raw_path: str) -> tuple[Path, str]:
     return target, fmt
 
 
-def save_memory(key: str, content: str, path: str = "main", description: str = "") -> str:
-    key = key.strip()
-    if not key and not path.lower().endswith(".md"):
-        return "Error: memory key is required."
-    if not content.strip():
-        return "Error: memory content is required."
+def save_memory(key: str = "", content: str = "", path: str = "main", description: str = "") -> str:
+    key = str(key or "").strip()
+    content = str(content or "").strip()
+    if not key and not content:
+        return "Error: memory content or key is required."
+    if not key:
+        key = "user_name" if any(w in content.lower() for w in ("name", "my name")) else "user_info"
+    if not content:
+        content = key
 
     target_file, fmt = resolve_memory_path(path)
 
     if target_file == MAIN_MEMORY_FILE.resolve():
         main_data = load_main_memory()
-        main_data["basic_memories"][key or "general"] = {
+        main_data["basic_memories"][key] = {
             "content": content,
             "updated_at": _now_stamp(),
         }
         save_main_memory(main_data)
-        return f"Successfully saved basic memory '{key}' to main memory."
+        return f"Successfully saved memory '{key}': '{content}' to main memory."
 
     try:
         target_file.parent.mkdir(parents=True, exist_ok=True)
@@ -202,7 +205,7 @@ def save_memory(key: str, content: str, path: str = "main", description: str = "
             if not isinstance(sub_data, dict):
                 sub_data = {}
 
-            sub_data[key or "general"] = {
+            sub_data[key] = {
                 "content": content,
                 "updated_at": _now_stamp(),
             }
@@ -218,7 +221,7 @@ def save_memory(key: str, content: str, path: str = "main", description: str = "
             "format": fmt,
         }
         save_main_memory(main_data)
-        return f"Successfully saved memory to '{rel_path}' ({fmt.upper()}) and updated main memory index."
+        return f"Successfully saved memory '{key}' to '{rel_path}' ({fmt.upper()}) and updated main memory index."
     except Exception as exc:
         return f"Error saving memory to {path}: {exc}"
 
@@ -1667,14 +1670,14 @@ FUNCTIONS = {
     },
     "save_memory": {
         "name": "save_memory",
-        "description": "Save important notes or facts into memory. Can save basic items into main memory (path='main') or dedicated sub-memory files/folders (e.g. path='database/schema', path='frontend/styles').",
+        "description": "Save important notes, user profile details (e.g. name, preferences), or project facts into memory. You MUST call this immediately when the user shares personal details (like name) or preferences. Default path='main'.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "key": {"type": "STRING", "description": "Unique key or label for the memory item."},
-                "content": {"type": "STRING", "description": "The memory content text to save."},
-                "path": {"type": "STRING", "description": "Memory path inside 'memory/' (default: 'main'). E.g., 'main', 'database/schema', 'deployment/docker'."},
-                "description": {"type": "STRING", "description": "Short summary of what this sub-memory file/folder contains (indexed in main memory)."},
+                "key": {"type": "STRING", "description": "Unique key/label for the memory item (e.g., 'user_name', 'preferred_language', 'coding_style')."},
+                "content": {"type": "STRING", "description": "The memory content or fact text to save."},
+                "path": {"type": "STRING", "description": "Memory path inside 'memory/' (default: 'main'). E.g., 'main', 'user/profile.md', 'database/schema.json'."},
+                "description": {"type": "STRING", "description": "Short summary of what this sub-memory file/folder contains."},
             },
             "required": ["key", "content"],
         },

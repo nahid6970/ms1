@@ -1,0 +1,6 @@
+{
+  "db_schema": {
+    "content": "Users table: id, email, password_hash, created_at\nPosts table: id, user_id, title, content, published_at",
+    "updated_at": "2026-08-11-06:35:10.523249"
+  }
+}
