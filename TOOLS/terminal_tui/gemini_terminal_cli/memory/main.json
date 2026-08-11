@@ -12,6 +12,10 @@
     "user_name": {
       "content": "Nahid Ahmed",
       "updated_at": "2026-08-11-06:38:08.777146"
+    },
+    "bitwarden_port_conflict": {
+      "content": "Bitwarden was previously using port 1455, which caused conflicts with other login platforms and development tools. If login issues occur, check for port 1455 conflicts.",
+      "updated_at": "2026-08-11-13:19:11.563770"
     }
   },
   "sub_memories": {}
