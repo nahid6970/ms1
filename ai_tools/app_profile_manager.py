@@ -9,7 +9,8 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QScrollArea, QFrame, QLineEdit, QFileDialog,
     QMessageBox, QDialog, QCheckBox, QDateTimeEdit, QRadioButton, QButtonGroup,
-    QListWidget, QListWidgetItem, QAbstractItemView, QGroupBox, QFormLayout
+    QGroupBox, QFormLayout,
+    QTreeWidget, QTreeWidgetItem
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QDateTime, QDate, QTime, QSize, QByteArray
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon
@@ -547,8 +548,6 @@ class AppDialog(QDialog):
             "icon_svg": ""
         }
         self.init_ui()
-        if self.app_config.get("target_path"):
-            self.populate_target_items()
 
     def init_ui(self):
         title = f"APP SETTINGS ({self.app_name_orig})" if self.app_name_orig else "NEW APPLICATION"
@@ -585,7 +584,6 @@ class AppDialog(QDialog):
         tgt_row.setSpacing(8)
         self.target_input = QLineEdit(self.app_config.get("target_path", ""))
         self.target_input.setPlaceholderText("Select main App target directory path...")
-        self.target_input.editingFinished.connect(self.populate_target_items)
 
         tgt_browse = make_secondary_btn("Browse", min_width=80)
         tgt_browse.setFixedHeight(34)
@@ -615,31 +613,6 @@ class AppDialog(QDialog):
 
         layout.addWidget(make_label("Custom App Icon SVG Code (Optional)", size=10, color=CP_CYAN))
         layout.addLayout(svg_row)
-
-        layout.addWidget(make_divider())
-
-        # Auto-Scanned Files/Folders Checklist
-        layout.addWidget(make_label("Check Files & Folders to Sync / Swap with Profile:", size=10, color=CP_YELLOW))
-        self.items_list = QListWidget()
-        self.items_list.setFixedHeight(120)
-
-        items_btn_row = QHBoxLayout()
-        items_btn_row.setSpacing(8)
-        
-        select_all_btn = make_secondary_btn("Select All", min_width=85)
-        deselect_all_btn = make_secondary_btn("Deselect All", min_width=85)
-        rescan_btn = make_secondary_btn("Rescan Path", min_width=95)
-
-        select_all_btn.clicked.connect(self.select_all_items)
-        deselect_all_btn.clicked.connect(self.deselect_all_items)
-        rescan_btn.clicked.connect(self.populate_target_items)
-
-        items_btn_row.addWidget(select_all_btn)
-        items_btn_row.addWidget(deselect_all_btn)
-        items_btn_row.addWidget(rescan_btn)
-
-        layout.addWidget(self.items_list)
-        layout.addLayout(items_btn_row)
 
         layout.addWidget(make_divider())
 
@@ -696,46 +669,6 @@ class AppDialog(QDialog):
         if path:
             norm_path = os.path.normpath(path)
             self.target_input.setText(norm_path)
-            self.populate_target_items()
-
-    def populate_target_items(self):
-        target_dir = self.target_input.text().strip()
-        if not target_dir or not os.path.exists(target_dir) or not os.path.isdir(target_dir):
-            return
-
-        saved_sync = set(self.app_config.get("sync_items", []))
-        is_default_check = len(saved_sync) == 0 or "*" in saved_sync
-
-        self.items_list.clear()
-
-        try:
-            entries = sorted(os.listdir(target_dir))
-        except Exception:
-            return
-
-        for entry in entries:
-            full_path = os.path.join(target_dir, entry)
-            is_dir = os.path.isdir(full_path)
-            display_name = entry + ("/" if is_dir else "")
-            clean_name = entry
-
-            item = QListWidgetItem(display_name)
-            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-
-            if is_default_check or clean_name in saved_sync or display_name in saved_sync:
-                item.setCheckState(Qt.CheckState.Checked)
-            else:
-                item.setCheckState(Qt.CheckState.Unchecked)
-
-            self.items_list.addItem(item)
-
-    def select_all_items(self):
-        for i in range(self.items_list.count()):
-            self.items_list.item(i).setCheckState(Qt.CheckState.Checked)
-
-    def deselect_all_items(self):
-        for i in range(self.items_list.count()):
-            self.items_list.item(i).setCheckState(Qt.CheckState.Unchecked)
 
     def save(self):
         app_name = self.app_input.text().strip()
@@ -744,13 +677,7 @@ class AppDialog(QDialog):
             QMessageBox.warning(self, "Validation Error", "Application Name and Target Path are required.")
             return
 
-        sync_items = []
-        for i in range(self.items_list.count()):
-            item = self.items_list.item(i)
-            if item.checkState() == Qt.CheckState.Checked:
-                clean_text = item.text().rstrip('/')
-                sync_items.append(clean_text)
-
+        sync_items = self.app_config.get("sync_items", ["*"])
         if not sync_items:
             sync_items = ["*"]
 
@@ -1018,11 +945,13 @@ class ProfileCard(QFrame):
     update_click   = pyqtSignal(dict)
     edit_clicked   = pyqtSignal(dict)
     delete_clicked = pyqtSignal(dict)
+    select_clicked = pyqtSignal(dict)
 
     def __init__(self, profile, app_config):
         super().__init__()
         self.profile = profile
         self.app_config = app_config
+        self._selected = False
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_countdown)
         self.init_ui()
@@ -1136,7 +1065,9 @@ class ProfileCard(QFrame):
 
     def _apply_style(self, expired=False):
         is_active = self.profile.get("active", False)
-        if is_active:
+        if self._selected:
+            border = CP_CYAN
+        elif is_active:
             border = CP_GREEN
         elif expired:
             border = CP_RED
@@ -1188,6 +1119,364 @@ class ProfileCard(QFrame):
             self._apply_style(expired=True)
             self.timer.stop()
 
+    def set_card_selected(self, selected):
+        self._selected = selected
+        self._apply_style()
+
+    def mousePressEvent(self, event):
+        child = self.childAt(event.position().toPoint())
+        if isinstance(child, QPushButton):
+            return
+        self.select_clicked.emit(self.profile)
+
+
+# ── DETAIL / FILE EXPLORER PANEL ──────────────────────────────────────────────
+class DetailPanel(QFrame):
+    sync_changed = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("detailPanel")
+        self.setFixedWidth(330)
+        self._syncing = False
+        self.setStyleSheet(f"""
+            #detailPanel {{
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+            }}
+        """)
+
+        root = QVBoxLayout(self)
+        root.setContentsMargins(14, 14, 14, 14)
+        root.setSpacing(10)
+
+        self.header_lbl = make_label("// FILE EXPLORER", size=10, color=CP_YELLOW, bold=True)
+        root.addWidget(self.header_lbl)
+
+        self.context_lbl = QLabel()
+        self.context_lbl.setWordWrap(True)
+        self.context_lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.context_lbl.setStyleSheet(
+            f"color: {CP_SUBTEXT}; font-family: '{FONT_MAIN}', monospace; font-size: 8pt; background: transparent;"
+        )
+        root.addWidget(self.context_lbl)
+
+        self.tree = QTreeWidget()
+        self.tree.setHeaderHidden(True)
+        self.tree.setIndentation(16)
+        self.tree.setStyleSheet(f"""
+            QTreeWidget {{
+                background-color: {CP_BG};
+                color: {CP_CYAN};
+                border: 1px solid {CP_DIM};
+            }}
+            QTreeWidget::item {{
+                padding: 2px 4px;
+                color: {CP_TEXT};
+            }}
+            QTreeWidget::item:selected {{
+                background-color: #1A1A1A;
+                color: {CP_CYAN};
+            }}
+            QTreeWidget::indicator {{
+                width: 14px; height: 14px;
+                border: 1px solid {CP_DIM};
+                background: {CP_PANEL};
+            }}
+            QTreeWidget::indicator:checked {{
+                background: {CP_YELLOW};
+                border-color: {CP_YELLOW};
+            }}
+            QTreeWidget::indicator:indeterminate {{
+                background: {CP_CYAN};
+                border-color: {CP_CYAN};
+            }}
+        """)
+        self.tree.itemChanged.connect(self._on_item_changed)
+        root.addWidget(self.tree, 1)
+
+        # Sync quick actions (shown only in the app sync view)
+        self.sync_btns_widget = QWidget()
+        btns = QHBoxLayout(self.sync_btns_widget)
+        btns.setContentsMargins(0, 0, 0, 0)
+        btns.setSpacing(6)
+
+        select_all_btn = make_secondary_btn("Select All", min_width=62)
+        deselect_all_btn = make_secondary_btn("Deselect All", min_width=72)
+        rescan_btn = make_secondary_btn("Rescan", min_width=56)
+        for b in (select_all_btn, deselect_all_btn, rescan_btn):
+            b.setFixedHeight(26)
+        select_all_btn.setToolTip("Check every file & folder for syncing")
+        deselect_all_btn.setToolTip("Uncheck every file & folder (syncs everything)")
+        rescan_btn.setToolTip("Re-scan the target directory for new files")
+        select_all_btn.clicked.connect(self._select_all_sync)
+        deselect_all_btn.clicked.connect(self._deselect_all_sync)
+        rescan_btn.clicked.connect(self._rescan_sync)
+        btns.addWidget(select_all_btn)
+        btns.addWidget(deselect_all_btn)
+        btns.addWidget(rescan_btn)
+        self.sync_btns_widget.setVisible(False)
+        root.addWidget(self.sync_btns_widget)
+
+        self.footer_lbl = make_label("", size=8, color=CP_SUBTEXT)
+        root.addWidget(self.footer_lbl)
+
+    def clear_context(self, message=""):
+        self.header_lbl.setText("// FILE EXPLORER")
+        self.context_lbl.setText(message or "Select an account to inspect its backed-up files.")
+        self.tree.clear()
+        self.footer_lbl.setText("")
+        self.sync_btns_widget.setVisible(False)
+
+    def set_app_context(self, app_name, app_cfg, profile_count):
+        self.header_lbl.setText(f"// APP // {app_name.upper()}")
+        target = app_cfg.get("target_path", "")
+        self.context_lbl.setText(
+            f"Target: {target}\n"
+            f"Accounts: {profile_count}\n"
+            f"Encryption: {'ON (.enc)' if app_cfg.get('is_locked', True) else 'OFF'}\n"
+            "\n"
+            "Click the checkboxes to enable / disable which files & folders get synced."
+        )
+        self.populate_sync_tree(target, app_cfg.get("sync_items", ["*"]))
+
+    def set_profile_context(self, profile, app_cfg):
+        self.header_lbl.setText(f"// ACCOUNT // {profile.get('name', '').upper()}")
+        storage = profile.get("storage_path", "")
+        is_active = profile.get("active", False)
+        timer = "Enabled" if profile.get("timer_enabled") else "Disabled"
+        self.context_lbl.setText(
+            f"Storage: {storage}\n"
+            f"Status: {'ACTIVE' if is_active else 'IDLE'}\n"
+            f"Timer: {timer}\n"
+            f"Encryption: {'ON (.enc)' if app_cfg.get('is_locked', True) else 'OFF'}"
+        )
+        self.populate_tree(storage, root_label="backup", strip_enc=app_cfg.get("is_locked", True))
+
+    def populate_tree(self, root_path, root_label, strip_enc=False):
+        self.sync_btns_widget.setVisible(False)
+        self.tree.clear()
+        self.tree.setUpdatesEnabled(False)
+        try:
+            root_item = QTreeWidgetItem([root_label + "/"])
+            root_item.setForeground(0, QColor(CP_YELLOW))
+            root_item.setFont(0, QFont(FONT_MAIN, 8))
+            root_item.setFlags(root_item.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+            self.tree.addTopLevelItem(root_item)
+
+            file_count = [0]
+            folder_count = [0]
+            truncated = [False]
+            self._build_tree(root_item, root_path, 0, 6, strip_enc, file_count, folder_count, truncated)
+
+            if file_count[0] == 0 and folder_count[0] == 0:
+                note = QTreeWidgetItem(["// empty directory"])
+                note.setForeground(0, QColor(CP_SUBTEXT))
+                root_item.addChild(note)
+                self.footer_lbl.setText("0 files")
+            else:
+                extra = "  (tree truncated at depth 6)" if truncated[0] else ""
+                self.footer_lbl.setText(f"{file_count[0]} file(s) • {folder_count[0]} folder(s){extra}")
+        except Exception as e:
+            self.tree.clear()
+            note = QTreeWidgetItem([f"// error: {e}"])
+            note.setForeground(0, QColor(CP_RED))
+            self.tree.addTopLevelItem(note)
+            self.footer_lbl.setText("")
+        finally:
+            self.tree.setUpdatesEnabled(True)
+            root_item.setExpanded(True)
+
+    def populate_sync_tree(self, target, sync_items):
+        self._syncing = True
+        self.sync_target = target
+        self._last_sync_items = list(sync_items)
+        self.sync_btns_widget.setVisible(True)
+        self.tree.clear()
+
+        try:
+            entries = sorted(os.listdir(target))
+        except Exception:
+            note = QTreeWidgetItem(["// unavailable or missing"])
+            note.setForeground(0, QColor(CP_RED))
+            self.tree.addTopLevelItem(note)
+            self.footer_lbl.setText("")
+            self._syncing = False
+            return
+
+        all_items = not sync_items or "*" in sync_items
+        saved = set(sync_items)
+
+        root_item = QTreeWidgetItem([(os.path.basename(target) or target) + "/"])
+        root_item.setForeground(0, QColor(CP_YELLOW))
+        root_item.setFont(0, QFont(FONT_MAIN, 8))
+        root_item.setFlags(root_item.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+        self.tree.addTopLevelItem(root_item)
+
+        for entry in entries:
+            full = os.path.join(target, entry)
+            try:
+                is_dir = os.path.isdir(full)
+            except Exception:
+                continue
+            child = QTreeWidgetItem([entry + ("/" if is_dir else "")])
+            child.setForeground(0, QColor(CP_YELLOW if is_dir else CP_TEXT))
+            child.setFont(0, QFont(FONT_MAIN, 8))
+            child.setData(0, Qt.ItemDataRole.UserRole, entry)
+            child.setFlags(child.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            if is_dir:
+                child.setFlags(child.flags() | Qt.ItemFlag.ItemIsAutoTristate)
+            root_item.addChild(child)
+
+            if is_dir:
+                dir_checked = all_items or entry in saved
+                child.setCheckState(0, Qt.CheckState.Checked if dir_checked else Qt.CheckState.Unchecked)
+                self._build_sync_children(child, full, entry, all_items, saved, 0, dir_checked)
+            else:
+                child.setCheckState(0, Qt.CheckState.Checked if (all_items or entry in saved) else Qt.CheckState.Unchecked)
+
+        root_item.setExpanded(True)
+        self._syncing = False
+        self._update_sync_footer(self._collect_sync_items())
+
+    def _build_sync_children(self, parent_item, path, parent_rel, all_items, saved, depth, parent_checked=False):
+        if depth > 6:
+            return
+        try:
+            entries = sorted(os.listdir(path))
+        except Exception:
+            return
+        for entry in entries:
+            full = os.path.join(path, entry)
+            try:
+                is_dir = os.path.isdir(full)
+            except Exception:
+                continue
+            rel = parent_rel + "/" + entry
+            checked = parent_checked or all_items or rel in saved
+            child = QTreeWidgetItem([entry + ("/" if is_dir else "")])
+            child.setForeground(0, QColor(CP_YELLOW if is_dir else CP_TEXT))
+            child.setFont(0, QFont(FONT_MAIN, 8))
+            child.setData(0, Qt.ItemDataRole.UserRole, rel)
+            child.setFlags(child.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            if is_dir:
+                child.setFlags(child.flags() | Qt.ItemFlag.ItemIsAutoTristate)
+            parent_item.addChild(child)
+
+            if is_dir:
+                child.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+                self._build_sync_children(child, full, rel, all_items, saved, depth + 1, checked)
+            else:
+                child.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+
+    def _update_sync_footer(self, items):
+        if items == ["*"]:
+            self.footer_lbl.setText("all files synced • click checkboxes to customize")
+        else:
+            self.footer_lbl.setText(f"{len(items)} sync item(s) • click checkboxes to enable/disable")
+
+    def _on_item_changed(self, item, column):
+        if self._syncing:
+            return
+        items = self._collect_sync_items()
+        self._last_sync_items = items
+        self._update_sync_footer(items)
+        self.sync_changed.emit(items)
+
+    def _select_all_sync(self):
+        self._syncing = True
+        self._set_all_check_states(Qt.CheckState.Checked)
+        self._syncing = False
+        items = self._collect_sync_items()
+        self._last_sync_items = items
+        self._update_sync_footer(items)
+        self.sync_changed.emit(items)
+
+    def _deselect_all_sync(self):
+        self._syncing = True
+        self._set_all_check_states(Qt.CheckState.Unchecked)
+        self._syncing = False
+        items = self._collect_sync_items()
+        self._last_sync_items = items
+        self._update_sync_footer(items)
+        self.sync_changed.emit(items)
+
+    def _rescan_sync(self):
+        target = getattr(self, "sync_target", None)
+        if target:
+            self.populate_sync_tree(target, getattr(self, "_last_sync_items", ["*"]))
+
+    def _set_all_check_states(self, state):
+        def walk(item):
+            if item.data(0, Qt.ItemDataRole.UserRole) is not None:
+                if item.flags() & Qt.ItemFlag.ItemIsUserCheckable:
+                    item.setCheckState(0, state)
+                return
+            for i in range(item.childCount()):
+                walk(item.child(i))
+        for i in range(self.tree.topLevelItemCount()):
+            walk(self.tree.topLevelItem(i))
+
+    def _collect_sync_items(self):
+        items = []
+        for i in range(self.tree.topLevelItemCount()):
+            self._collect_item(self.tree.topLevelItem(i), items)
+        return items if items else ["*"]
+
+    def _collect_item(self, item, items):
+        rel = item.data(0, Qt.ItemDataRole.UserRole)
+        if rel is not None:
+            if item.childCount() == 0:
+                if item.checkState(0) == Qt.CheckState.Checked:
+                    items.append(rel)
+                return
+            state = item.checkState(0)
+            if state == Qt.CheckState.Checked:
+                items.append(rel)
+                return
+            if state == Qt.CheckState.PartiallyChecked:
+                for i in range(item.childCount()):
+                    self._collect_item(item.child(i), items)
+                return
+        # Virtual root (no path data): walk its children
+        for i in range(item.childCount()):
+            self._collect_item(item.child(i), items)
+
+    def _build_tree(self, parent_item, path, depth, max_depth, strip_enc, file_count, folder_count, truncated):
+        if depth > max_depth:
+            truncated[0] = True
+            return
+        try:
+            entries = sorted(os.listdir(path))
+        except Exception:
+            note = QTreeWidgetItem(["// unavailable or missing"])
+            note.setForeground(0, QColor(CP_RED))
+            parent_item.addChild(note)
+            return
+
+        for entry in entries:
+            full = os.path.join(path, entry)
+            try:
+                is_dir = os.path.isdir(full)
+            except Exception:
+                continue
+            if is_dir:
+                child = QTreeWidgetItem([entry + "/"])
+                child.setForeground(0, QColor(CP_YELLOW))
+                child.setFont(0, QFont(FONT_MAIN, 8))
+                child.setFlags(child.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+                parent_item.addChild(child)
+                folder_count[0] += 1
+                self._build_tree(child, full, depth + 1, max_depth, strip_enc, file_count, folder_count, truncated)
+            else:
+                display = entry[:-4] if strip_enc and entry.lower().endswith(".enc") else entry
+                child = QTreeWidgetItem([display])
+                child.setForeground(0, QColor(CP_TEXT))
+                child.setFont(0, QFont(FONT_MAIN, 8))
+                child.setFlags(child.flags() & ~Qt.ItemFlag.ItemIsUserCheckable)
+                parent_item.addChild(child)
+                file_count[0] += 1
+
 
 # ── MAIN APPLICATION CONTROLLER ───────────────────────────────────────────────
 class AppProfileManager(QMainWindow):
@@ -1198,6 +1487,7 @@ class AppProfileManager(QMainWindow):
         self.master_password = ""
         self.auto_capture = True
         self.current_app = None
+        self.selected_profile = None
         self.load_data()
         self.init_ui()
         QTimer.singleShot(100, self.ensure_master_password)
@@ -1270,7 +1560,7 @@ class AppProfileManager(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("CYBERPUNK APP PROFILE MANAGER")
-        self.setMinimumSize(820, 680)
+        self.setMinimumSize(1024, 680)
 
         central = QWidget()
         central.setObjectName("central")
@@ -1320,8 +1610,9 @@ class AppProfileManager(QMainWindow):
         # Content
         content = QWidget()
         content.setStyleSheet(f"background: {CP_BG};")
-        content_layout = QVBoxLayout(content)
+        content_layout = QHBoxLayout(content)
         content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(14)
 
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
@@ -1334,7 +1625,11 @@ class AppProfileManager(QMainWindow):
         self.scroll_layout.setSpacing(10)
         self.scroll_layout.setContentsMargins(0, 0, 0, 0)
         self.scroll.setWidget(self.scroll_widget)
-        content_layout.addWidget(self.scroll)
+        content_layout.addWidget(self.scroll, 1)
+
+        self.detail_panel = DetailPanel()
+        self.detail_panel.sync_changed.connect(self.on_sync_items_changed)
+        content_layout.addWidget(self.detail_panel)
 
         root.addWidget(content, 1)
         self.show_apps()
@@ -1347,11 +1642,16 @@ class AppProfileManager(QMainWindow):
 
     def show_apps(self):
         self.current_app = None
+        self.selected_profile = None
         self.header_label.setText("APPLICATIONS")
         self.back_btn.setVisible(False)
         self.app_settings_btn.setVisible(False)
         self.action_btn.setText("+ ADD APP")
         self._clear_scroll()
+        self.detail_panel.clear_context(
+            f"{len(self.apps)} application(s) configured.\n\n"
+            "Select an application, then click an account to inspect its backed-up files here."
+        )
 
         if not self.apps:
             empty = make_label("SYSTEM READY... No applications added. Click '+ ADD APP' to configure.",
@@ -1380,6 +1680,8 @@ class AppProfileManager(QMainWindow):
 
         filtered = [p for p in self.profiles if p.get("app_name") == app_name]
         app_cfg = self.apps.get(app_name, {})
+        self.selected_profile = None
+        self.detail_panel.set_app_context(app_name, app_cfg, len(filtered))
 
         if not filtered:
             empty = make_label("NO ACCOUNTS STORED FOR THIS APPLICATION.", size=10, color=CP_SUBTEXT)
@@ -1394,7 +1696,34 @@ class AppProfileManager(QMainWindow):
             card.update_click.connect(self.update_account_session)
             card.edit_clicked.connect(self.edit_account)
             card.delete_clicked.connect(self.delete_account)
+            card.select_clicked.connect(self.select_profile)
             self.scroll_layout.addWidget(card)
+
+    def select_profile(self, profile):
+        if self.selected_profile == profile:
+            # Clicking the selected card again: back to app overview / sync view
+            self.selected_profile = None
+            app_cfg = self.apps.get(self.current_app, {})
+            filtered = [p for p in self.profiles if p.get("app_name") == self.current_app]
+            self.detail_panel.set_app_context(self.current_app, app_cfg, len(filtered))
+            for i in range(self.scroll_layout.count()):
+                w = self.scroll_layout.itemAt(i).widget()
+                if isinstance(w, ProfileCard):
+                    w.set_card_selected(False)
+            return
+
+        self.selected_profile = profile
+        app_cfg = self.apps.get(self.current_app, {})
+        self.detail_panel.set_profile_context(profile, app_cfg)
+        for i in range(self.scroll_layout.count()):
+            w = self.scroll_layout.itemAt(i).widget()
+            if isinstance(w, ProfileCard):
+                w.set_card_selected(w.profile == profile)
+
+    def on_sync_items_changed(self, items):
+        if self.current_app and self.current_app in self.apps:
+            self.apps[self.current_app]["sync_items"] = items
+            self.save_data()
 
     def on_action_clicked(self):
         if self.current_app:
