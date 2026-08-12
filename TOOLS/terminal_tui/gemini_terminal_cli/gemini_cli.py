@@ -559,7 +559,6 @@ if Completer is not None:
             ("/mm", "Open model picker / switch model"),
             ("/test", "Test all models and hide failures"),
             ("/api", "Open API account picker"),
-            ("/setting", "Open interactive CLI settings"),
             ("/settings", "Open interactive CLI settings"),
             ("/loops", "Set max tool-call loops"),
             ("/failover", "Open auto-failover picker"),
