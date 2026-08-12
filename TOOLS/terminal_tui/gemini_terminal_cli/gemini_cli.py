@@ -2791,7 +2791,8 @@ def save_api_accounts(
 
 def clear_screen() -> None:
     if sys.stdout.isatty():
-        os.system("cls")
+        sys.stdout.write("\033[2J\033[H")
+        sys.stdout.flush()
 
 
 def read_key() -> str:
@@ -2802,6 +2803,13 @@ def read_key() -> str:
         ch2 = msvcrt.getwch()
         return ch + ch2
     return ch
+
+
+def _get_term_height() -> int:
+    try:
+        return os.get_terminal_size().lines
+    except Exception:
+        return 24
 
 
 def interactive_select(
@@ -2818,30 +2826,62 @@ def interactive_select(
     if not items:
         return None
     index = 0
+    top_index = 0
     footer_lines = footer_lines or []
 
     while True:
         if not items:
             return None
         index = max(0, min(index, len(items) - 1))
+
+        term_h = _get_term_height()
+        header_count = len(header_lines) if header_lines else 0
+        sample_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
+        footer_count = len(sample_footer) if sample_footer else 0
+
+        overhead = 6 + header_count + footer_count
+        max_visible = max(3, term_h - overhead)
+
+        if index < top_index:
+            top_index = index
+        elif index >= top_index + max_visible:
+            top_index = index - max_visible + 1
+
+        top_index = max(0, min(top_index, max(0, len(items) - max_visible)))
+        visible_slice = items[top_index : top_index + max_visible]
+
         clear_screen()
         title(title_text)
         print(instructions)
         print()
+
         if header_lines:
             for line in header_lines:
                 print(line)
             print()
-        for i, item in enumerate(items):
-            line = render_item(item, i, i == index)
+
+        for relative_i, item in enumerate(visible_slice):
+            actual_i = top_index + relative_i
+            line = render_item(item, actual_i, actual_i == index)
             print(line)
-        if dynamic_footer is not None:
+
+        if len(items) > max_visible:
+            more_above = top_index
+            more_below = len(items) - (top_index + len(visible_slice))
+            scroll_info = []
+            if more_above > 0:
+                scroll_info.append(f"▲ {more_above} above")
+            if more_below > 0:
+                scroll_info.append(f"▼ {more_below} below")
+            scroll_str = f"  [{index + 1}/{len(items)}]"
+            if scroll_info:
+                scroll_str += "  (" + ", ".join(scroll_info) + ")"
+            print(_ansi_wrap(scroll_str, "90"))
+
+        current_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
+        if current_footer:
             print()
-            for line in dynamic_footer(items[index]):
-                print(line)
-        elif footer_lines:
-            print()
-            for line in footer_lines:
+            for line in current_footer:
                 print(line)
 
         key = read_key()
@@ -2853,10 +2893,18 @@ def interactive_select(
             index = (index - 1) % len(items)
         elif key in ("\xe0P", "\x00P"):
             index = (index + 1) % len(items)
+        elif key in ("\xe0I", "\x00I"):
+            index = max(0, index - max_visible)
+        elif key in ("\xe0Q", "\x00Q"):
+            index = min(len(items) - 1, index + max_visible)
         elif key == " " and on_space is not None:
             on_space(items[index], index)
-        elif on_key is not None and on_key(key, items, index) is not None:
-            pass
+        elif on_key is not None:
+            res = on_key(key, items, index)
+            if res == "deleted":
+                if not items:
+                    return None
+                index = max(0, min(index, len(items) - 1))
         elif key.lower() == "q":
             return None
 
@@ -3578,7 +3626,14 @@ def print_help() -> None:
     )
 
 
-def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
+def _get_term_width() -> int:
+    try:
+        return os.get_terminal_size().columns
+    except Exception:
+        return 90
+
+
+def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
     """Scan transcripts directory and return a list of metadata for recent sessions."""
     if not TRANSCRIPTS_DIR.exists():
         return []
@@ -3600,7 +3655,8 @@ def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
                     parts = msg.get("parts", [])
                     for p in parts:
                         if "text" in p:
-                            first_prompt = str(p["text"]).strip().replace("\n", " ")
+                            raw = str(p["text"]).strip()
+                            first_prompt = re.sub(r"\s+", " ", raw)
                             break
                     if first_prompt:
                         break
@@ -3619,7 +3675,7 @@ def list_recent_transcripts(limit: int = 20) -> List[Dict[str, Any]]:
                 "model": model,
                 "project_root": project_root,
                 "msg_count": msg_count,
-                "first_prompt": first_prompt[:60],
+                "first_prompt": first_prompt[:150],
                 "data": data,
             })
         except Exception:
@@ -3642,17 +3698,28 @@ def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str
         msg_s = str(item["msg_count"])
         msg_width = max(msg_width, len(msg_s))
     return {
-        "folder": min(max(folder_width, 8), 20),
-        "model": min(max(model_width, 8), 24),
-        "msg": min(max(msg_width, 4), 8),
+        "folder": min(max(folder_width, 6), 18),
+        "model": min(max(model_width, 6), 20),
+        "msg": min(max(msg_width, 3), 6),
     }
 
 
 def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
-    return [
-        f"  {'Id':>2}  {'Date/Time':<16}  {'Folder':<{widths['folder']}}  {'Model':<{widths['model']}}  {'Msgs':>{widths['msg']}}  First Prompt",
-        f"  {'--':>2}  {'-' * 16}  {'-' * widths['folder']}  {'-' * widths['model']}  {'-' * widths['msg']}  ------------",
-    ]
+    header = (
+        f"   {'#':>2}.  {'Date/Time':<16}  "
+        f"{'Folder':<{widths['folder']}}  "
+        f"{'Model':<{widths['model']}}  "
+        f"{'Msgs':>{widths['msg']}}  "
+        f"First Prompt"
+    )
+    sep = (
+        f"   {'--':>2}.  {'-' * 16}  "
+        f"{'-' * widths['folder']}  "
+        f"{'-' * widths['model']}  "
+        f"{'-' * widths['msg']}  "
+        f"--------------------"
+    )
+    return [header, sep]
 
 
 def format_transcript_entry(
@@ -3669,6 +3736,21 @@ def format_transcript_entry(
     prompt_s = item["first_prompt"]
 
     marker = ">" if selected else " "
+
+    # Dynamically truncate prompt_s to prevent line wrapping and broken selection table layouts
+    term_w = _get_term_width()
+    prefix_len = 6 + 16 + 2 + widths["folder"] + 2 + widths["model"] + 2 + widths["msg"] + 2
+    avail_prompt_len = term_w - prefix_len - 1
+
+    if avail_prompt_len < 10:
+        avail_prompt_len = 10
+
+    if len(prompt_s) > avail_prompt_len:
+        if avail_prompt_len > 3:
+            prompt_s = prompt_s[:avail_prompt_len - 3] + "..."
+        else:
+            prompt_s = prompt_s[:avail_prompt_len]
+
     row = (
         f"{marker} {index:>2}. "
         f"{date_s:<16}  "
@@ -3676,7 +3758,8 @@ def format_transcript_entry(
         f"{model_s:<{widths['model']}}  "
         f"{msg_s:>{widths['msg']}}  "
         f"{prompt_s}"
-    ).rstrip()
+    )
+
     if selected:
         return _ansi_wrap(row, "48;5;24;97")
     return row
@@ -3695,13 +3778,15 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
 
     def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
         p_root = current_item.get("project_root") or "Not set"
+        term_w = _get_term_width()
+        divider = "─" * min(term_w - 2, 72)
         return [
-            "----------------------------------------------------------------",
-            f"File: {current_item['path'].name}",
-            f"Project Root: {p_root}",
-            f"Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
-            f"First Prompt: {current_item['first_prompt']}",
-            "Press Enter to resume & cd | Press 'd' to delete transcript | Esc/Q to cancel"
+            divider,
+            f"  File: {current_item['path'].name}",
+            f"  Project Root: {p_root}",
+            f"  Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
+            f"  First Prompt: {current_item['first_prompt']}",
+            _ansi_wrap("  [Enter] Resume & cd  |  [d] Delete transcript  |  [Esc/Q] Cancel", "36"),
         ]
 
     def handle_key(key: str, items_list: List[Dict[str, Any]], idx: int) -> Optional[str]:
