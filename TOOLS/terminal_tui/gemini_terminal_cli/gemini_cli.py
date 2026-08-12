@@ -4049,30 +4049,41 @@ def pick_transcript_interactive(client: Optional[GeminiClient] = None) -> Option
             if 0 <= idx < len(items_list):
                 item = items_list[idx]
                 target_client = client
+
                 if target_client is None:
                     m_prefs = load_model_prefs()
                     cur_m = str(item.get("model") or m_prefs.get("last_model") or DEFAULT_MODEL)
-                    k = os.environ.get("GEMINI_API_KEY", "")
+                    
+                    # Use active in-memory API key without triggering file decryption password prompt
+                    k = globals().get("api_key", "") or os.environ.get("GEMINI_API_KEY", "")
                     if k:
                         target_client = GeminiClient(k, cur_m)
 
-                if target_client is None:
-                    error("Cannot generate AI title: No active Gemini client or API key found.")
-                    return None
+                if target_client is None or not target_client.api_key:
+                    print(_ansi_wrap("\n  [Error] No active API key found in memory.", "31"))
+                    time.sleep(2)
+                    return "error"
 
-                info(f"Generating AI title for {item['path'].name} using {target_client.model}...")
+                print(_ansi_wrap(f"\n  [AI Title] Generating summary using {target_client.model}...", "36"))
+
                 conv_text = []
                 for msg in item.get("data", {}).get("contents", []):
                     role = msg.get("role", "user")
                     parts = msg.get("parts", [])
                     txt_parts = [p["text"] for p in parts if isinstance(p, dict) and "text" in p]
                     if txt_parts:
-                        conv_text.append(f"{role}: {' '.join(txt_parts)[:200]}")
-                
-                full_conv_summary = "\n".join(conv_text[:10])
+                        text_str = ' '.join(txt_parts).strip()
+                        if text_str:
+                            conv_text.append(f"{role}: {text_str}")
+
+                full_conv_summary = "\n".join(conv_text)
                 if not full_conv_summary.strip():
-                    warn("No text content found in conversation to summarize.")
-                    return None
+                    print(_ansi_wrap("\n  [Warning] Conversation transcript has no text content.", "33"))
+                    time.sleep(1.5)
+                    return "empty"
+
+                if len(full_conv_summary) > 12000:
+                    full_conv_summary = full_conv_summary[:6000] + "\n... [middle omitted] ...\n" + full_conv_summary[-6000:]
 
                 try:
                     title_gen_client = GeminiClient(target_client.api_key, target_client.model)
@@ -4081,7 +4092,7 @@ def pick_transcript_interactive(client: Optional[GeminiClient] = None) -> Option
                         system_instruction="Reply with ONLY a concise title (3 to 6 words). No quotes, no markdown, no punctuation.",
                         tool_names=[],
                         temperature=0.2,
-                        max_output_tokens=20,
+                        max_output_tokens=25,
                     )
                     cands = res.get("candidates", [])
                     if cands:
@@ -4091,9 +4102,14 @@ def pick_transcript_interactive(client: Optional[GeminiClient] = None) -> Option
                             item["data"]["custom_title"] = raw_title
                             item["first_prompt"] = raw_title
                             save_transcript(item["path"], item["data"])
-                            info(f"AI Title Generated: '{raw_title}'")
+                            print(_ansi_wrap(f"\n  [Success] AI Title generated: '{raw_title}'", "32"))
+                            time.sleep(1)
+                    else:
+                        print(_ansi_wrap("\n  [Warning] Gemini API returned no title candidate.", "33"))
+                        time.sleep(2)
                 except Exception as exc:
-                    error(f"Failed to generate AI title: {exc}")
+                    print(_ansi_wrap(f"\n  [API Error] Could not generate title: {exc}", "31"))
+                    time.sleep(2.5)
                 return "generated"
 
         return None
@@ -4378,6 +4394,7 @@ def main() -> int:
         snapshot_active_account_model_prefs()
         active_api_account = account_name
         api_key = key
+        globals()["api_key"] = key
         load_account_model_prefs(account_name)
 
     def current_project_key() -> str:
