@@ -3851,7 +3851,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         title_text="",
         items=items,
         render_item=render_item,
-        header_lines=build_transcript_table_header(widths),
+        header_lines=None,
         dynamic_footer=render_footer_info,
         instructions="",
         on_key=handle_key,
