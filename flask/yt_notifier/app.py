@@ -106,8 +106,32 @@ def refresh_channel_videos(channel_id):
     conn.close()
     return new_videos_count
 
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if request.method == 'POST':
+        # Simple settings storage in a file or session
+        # For now, let's use a simple file
+        show_seen = 'show_seen' in request.form
+        with open('settings.txt', 'w') as f:
+            f.write(str(show_seen))
+        flash('Settings updated!', 'success')
+        return redirect(url_for('settings'))
+    
+    show_seen = False
+    if os.path.exists('settings.txt'):
+        with open('settings.txt', 'r') as f:
+            show_seen = f.read() == 'True'
+    return render_template('settings.html', show_seen=show_seen)
+
 @app.route('/')
 def index():
+    show_seen = False
+    if os.path.exists('settings.txt'):
+        with open('settings.txt', 'r') as f:
+            show_seen = f.read() == 'True'
+            
+    category = request.args.get('category', 'all')
+    
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -115,14 +139,23 @@ def index():
     cursor.execute('SELECT * FROM channels')
     channels = cursor.fetchall()
 
-    cursor.execute('SELECT v.*, c.channel_name FROM videos v JOIN channels c ON v.channel_id = c.channel_id ORDER BY v.published DESC LIMIT 30')
+    query = 'SELECT v.*, c.channel_name FROM videos v JOIN channels c ON v.channel_id = c.channel_id'
+    if not show_seen:
+        query += ' WHERE v.is_new = 1'
+    elif category == 'unseen':
+        query += ' WHERE v.is_new = 1'
+    elif category == 'seen':
+        query += ' WHERE v.is_new = 0'
+        
+    query += ' ORDER BY v.published DESC LIMIT 30'
+    cursor.execute(query)
     videos = cursor.fetchall()
     
     cursor.execute('SELECT COUNT(*) as cnt FROM videos WHERE is_new = 1')
     unread_count = cursor.fetchone()['cnt']
     
     conn.close()
-    return render_template('index.html', channels=channels, videos=videos, unread_count=unread_count)
+    return render_template('index.html', channels=channels, videos=videos, unread_count=unread_count, show_seen=show_seen, category=category)
 
 @app.route('/channels', methods=['GET', 'POST'])
 def manage_channels():
