@@ -13,6 +13,7 @@
 *.sqlite3
 .freebuff/
 testing/output/
+flask/5011_tv_show/*.log
 yasb.log
 .aider*
 TOOLS/.freeform_crop_state.json
