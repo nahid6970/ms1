@@ -745,6 +745,14 @@ def read_dynamic_prompt(
         user_style = Style.from_dict({
             'custom-user-text': text_style_spec,
             '': fg_str,
+            # Sleek dark-mode completion popup theme
+            'completion-menu': 'bg:#181825 #cdd6f4',
+            'completion-menu.completion': 'bg:#181825 #89dceb',
+            'completion-menu.completion.current': 'bg:#005f87 #ffffff bold',
+            'completion-menu.meta.completion': 'bg:#181825 #9399b2',
+            'completion-menu.meta.completion.current': 'bg:#005f87 #e0e0e0',
+            'scrollbar.background': 'bg:#11111b',
+            'scrollbar.button': 'bg:#313244',
         })
 
         lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
