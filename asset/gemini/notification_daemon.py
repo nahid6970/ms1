@@ -1,6 +1,17 @@
 import os
+import sys
 import time
 import tkinter as tk
+
+# Windows: mark the toast window as "no-activate" so it never steals
+# keyboard focus from whatever app the user is currently typing in.
+if sys.platform == "win32":
+    import ctypes
+    WS_EX_NOACTIVATE = 0x08000000
+    GWL_EXSTYLE = -20
+else:
+    WS_EX_NOACTIVATE = None
+    GWL_EXSTYLE = None
 
 FILE_PATH = r"C:\Users\nahid\notification.txt"
 
@@ -130,9 +141,19 @@ def show_notification(title, message):
     y_start = screen_height - height - 5 # Start slightly low
     
     toast.geometry(f"{width}x{height}+{x}+{y_start}")
+
+    # Flag the window so Windows never activates it (no focus stealing)
+    # while it is being shown. Must be set before the toast is mapped.
+    if WS_EX_NOACTIVATE is not None:
+        try:
+            hwnd = ctypes.windll.user32.GetParent(toast.winfo_id())
+            style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style | WS_EX_NOACTIVATE)
+        except Exception:
+            pass
+
     toast.deiconify()
     toast.lift()
-    toast.focus_force()
     root.update_idletasks()
     
     # Slide up & Fade in animation
