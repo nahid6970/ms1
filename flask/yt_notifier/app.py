@@ -199,15 +199,22 @@ def toggle_read(video_id):
     conn.close()
     return '', 204
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @app.route('/stats')
 def stats():
+    period = request.args.get('period', 'month') # default to month
+    days = 30
+    if period == 'week': days = 7
+    elif period == 'year': days = 365
+    
+    cutoff = datetime.now() - timedelta(days=days)
+    
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # Get all videos with their publish dates
+    # Get videos within the selected period
     cursor.execute('''
         SELECT c.channel_name, v.published
         FROM videos v
@@ -216,25 +223,24 @@ def stats():
     ''')
     rows = cursor.fetchall()
     
-    # Process data to find time differences between consecutive uploads per channel
     channel_stats = {}
     for row in rows:
-        name = row['channel_name']
-        # RSS published format is usually 'YYYY-MM-DDTHH:MM:SS+00:00'
-        # We'll simplify parsing for this demo
         try:
-            pub_date = datetime.fromisoformat(row['published'].replace('Z', '+00:00'))
+            pub_date = datetime.fromisoformat(row['published'].replace('Z', '+00:00').replace('T', ' '))
+            # Remove timezone info for comparison if present
+            if pub_date.tzinfo: pub_date = pub_date.replace(tzinfo=None)
         except:
             continue
             
-        if name not in channel_stats:
-            channel_stats[name] = []
+        if pub_date < cutoff: continue
+            
+        name = row['channel_name']
+        if name not in channel_stats: channel_stats[name] = []
         channel_stats[name].append(pub_date)
     
     processed_stats = []
     for name, dates in channel_stats.items():
         if len(dates) > 1:
-            # Calculate average gap in hours
             gaps = []
             for i in range(len(dates) - 1):
                 diff = dates[i] - dates[i+1]
@@ -245,7 +251,7 @@ def stats():
             processed_stats.append({'name': name, 'avg_gap': 0})
             
     conn.close()
-    return render_template('stats.html', stats=processed_stats)
+    return render_template('stats.html', stats=processed_stats, period=period)
 
 if __name__ == '__main__':
     init_db()

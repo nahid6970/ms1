@@ -2,8 +2,17 @@
 {% block title %}Stats | YouTube Notifier{% endblock %}
 {% block content %}
 <div class="max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold text-white mb-8">Upload Frequency Analysis</h1>
-    <p class="text-slate-400 mb-6 text-sm">Average time gap between consecutive video uploads (in hours).</p>
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-white">Upload Frequency</h1>
+        <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+            {% for p in ['week', 'month', 'year'] %}
+            <a href="{{ url_for('stats', period=p) }}" class="px-4 py-1 text-xs rounded-md transition {% if period == p %}bg-red-600 text-white{% else %}text-slate-400 hover:text-white{% endif %} capitalize">
+                {{ p }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    <p class="text-slate-400 mb-6 text-sm">Average time gap between consecutive video uploads (in hours) for the selected {{ period }}.</p>
     
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
         <div class="space-y-6">
