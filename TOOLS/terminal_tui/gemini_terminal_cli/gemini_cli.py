@@ -2840,7 +2840,7 @@ def interactive_select(
         term_h = _get_term_height()
         title_count = 1 if title_text else 0
         inst_count = 2 if instructions else 0
-        header_count = (len(header_lines) + 1) if header_lines else 0
+        header_count = len(header_lines) if header_lines else 0
         sample_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
         footer_count = (len(sample_footer) + 1) if sample_footer else 0
 
@@ -2865,7 +2865,6 @@ def interactive_select(
         if header_lines:
             for line in header_lines:
                 print(line)
-            print()
 
         for relative_i, item in enumerate(visible_slice):
             actual_i = top_index + relative_i
@@ -3729,32 +3728,37 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
 def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str, int]:
     folder_width = 0
     msg_width = 0
+    tool_width = 0
     for item in transcripts:
         p_root = item.get("project_root", "")
         folder_s = Path(p_root).name if p_root else ""
         folder_width = max(folder_width, len(folder_s))
         msg_s = str(item["msg_count"])
         msg_width = max(msg_width, len(msg_s))
+        tool_s = str(item.get("tool_count", 0))
+        tool_width = max(tool_width, len(tool_s))
     return {
         "folder": min(max(folder_width, 6), 16),
         "msg": min(max(msg_width, 3), 5),
+        "tool": min(max(tool_width, 3), 5),
     }
 
 
 def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
-    header = (
-        f"   {'#':>2}.  {'Age':<10}  "
-        f"{'Folder':<{widths['folder']}}  "
-        f"{'Msgs':>{widths['msg']}}  "
-        f"First Prompt"
-    )
-    sep = (
-        f"   {'--':>2}.  {'-' * 10}  "
-        f"{'-' * widths['folder']}  "
-        f"{'-' * widths['msg']}  "
-        f"--------------------"
-    )
-    return [header, sep]
+    w_folder = widths.get("folder", 12)
+    w_msg = widths.get("msg", 4)
+    w_tool = widths.get("tool", 4)
+
+    h_idx = _ansi_wrap(f"{'#':>2}.", "1;36")
+    h_age = _ansi_wrap(f"{'Age':<10}", "1;36")
+    h_folder = _ansi_wrap(f"{'Folder':<{w_folder}}", "1;36")
+    h_msg = _ansi_wrap(f"{'Msgs':>{w_msg}}", "1;36")
+    h_tool = _ansi_wrap(f"{'Tools':>{w_tool}}", "1;36")
+    h_prompt = _ansi_wrap("First Prompt", "1;36")
+
+    header_str = f"   {h_idx}  {h_age}  {h_folder}  {h_msg}  {h_tool}  {h_prompt}"
+
+    return [header_str]
 
 
 def format_transcript_entry(
@@ -3767,19 +3771,21 @@ def format_transcript_entry(
     p_root = item.get("project_root", "")
     folder_s = Path(p_root).name if p_root else ""
     msg_s = str(item["msg_count"])
+    tools_s = str(item.get("tool_count", 0))
     prompt_s = item["first_prompt"]
 
     w_folder = widths["folder"]
     w_msg = widths["msg"]
+    w_tool = widths.get("tool", 4)
 
     folder_s = folder_s[:w_folder]
     msg_s = msg_s[:w_msg]
+    tools_s = tools_s[:w_tool]
 
     marker = ">" if selected else " "
 
-    # Calculate available space for prompt_s without model column
     term_w = _get_term_width()
-    prefix_len = 6 + 10 + 2 + w_folder + 2 + w_msg + 2
+    prefix_len = 6 + 10 + 2 + w_folder + 2 + w_msg + 2 + w_tool + 2
     avail_prompt_len = term_w - prefix_len - 1
 
     if avail_prompt_len < 10:
@@ -3796,6 +3802,7 @@ def format_transcript_entry(
         f"{date_s:<10}  "
         f"{folder_s:<{w_folder}}  "
         f"{msg_s:>{w_msg}}  "
+        f"{tools_s:>{w_tool}}  "
         f"{prompt_s}"
     )
 
@@ -3886,7 +3893,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         title_text="",
         items=items,
         render_item=render_item,
-        header_lines=None,
+        header_lines=build_transcript_table_header(widths),
         dynamic_footer=render_footer_info,
         instructions="",
         on_key=handle_key,
