@@ -4866,14 +4866,55 @@ def main() -> int:
                                 except ValueError:
                                     warn("Invalid number.")
                         elif sk == "failover":
-                            chosen_f = pick_failover_interactive(
-                                current_project_auto_failover_state(),
-                                auto_failover_session_override,
-                                auto_failover_default,
+                            f_items = [
+                                {
+                                    "key": "global",
+                                    "title": "Global Default (All New Projects)",
+                                    "desc": f"Current: {'ON' if auto_failover_default else 'OFF'} (Applies to all new projects)",
+                                },
+                                {
+                                    "key": "project",
+                                    "title": "Current Project Setting",
+                                    "desc": f"Current: {'INHERIT' if current_project_auto_failover_state() is None else ('ON' if current_project_auto_failover_state() else 'OFF')}",
+                                },
+                                {
+                                    "key": "picker",
+                                    "title": "Full Failover Scope Manager",
+                                    "desc": "Manage Project, Session, and Global scopes together",
+                                },
+                            ]
+                            c_f = interactive_select(
+                                title_text="",
+                                items=f_items,
+                                render_item=render_settings_item,
+                                header_lines=None,
+                                dynamic_footer=None,
+                                footer_lines=["  Use Up/Down to navigate, Enter to select, Esc to return."],
+                                instructions="",
                             )
-                            if chosen_f is not None:
-                                apply_failover_picker_state(chosen_f)
-                                info(failover_status_line())
+                            if c_f:
+                                if c_f["key"] == "global":
+                                    auto_failover_default = not auto_failover_default
+                                    persist_selection()
+                                    info(f"Global failover default set to {'ON' if auto_failover_default else 'OFF'} for all new projects.")
+                                elif c_f["key"] == "project":
+                                    curr = current_project_auto_failover_state()
+                                    if curr is None:
+                                        set_project_auto_failover(True)
+                                    elif curr is True:
+                                        set_project_auto_failover(False)
+                                    else:
+                                        clear_project_auto_failover()
+                                    info(failover_status_line())
+                                elif c_f["key"] == "picker":
+                                    chosen_f = pick_failover_interactive(
+                                        current_project_auto_failover_state(),
+                                        auto_failover_session_override,
+                                        auto_failover_default,
+                                    )
+                                    if chosen_f is not None:
+                                        apply_failover_picker_state(chosen_f)
+                                        info(failover_status_line())
                     continue
                 if command == "/reset":
                     contents = []
