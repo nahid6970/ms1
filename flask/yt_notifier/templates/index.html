@@ -34,8 +34,9 @@
             <div class="flex items-center justify-between text-slate-500 text-xs mt-4">
                 <span>{{ video.published[:10] }}</span>
                 <div class="flex items-center space-x-3">
-                    <button onclick="toggleRead({{ video.id }})" class="hover:text-red-400 transition {% if not video.is_new %}text-slate-700{% endif %}" title="Toggle read status">
-                        <i class="fa-solid {% if video.is_new %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
+                    <button onclick="toggleRead({{ video.id }})" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
+                        <input type="checkbox" class="sr-only peer" {% if not video.is_new %}checked{% endif %}>
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
                     </button>
                     <a href="{{ video.link }}" target="_blank" class="text-slate-400 hover:text-white transition">
                         <i class="fa-solid fa-external-link"></i>
