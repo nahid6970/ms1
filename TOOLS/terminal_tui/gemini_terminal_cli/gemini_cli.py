@@ -2791,7 +2791,8 @@ def save_api_accounts(
 
 def clear_screen() -> None:
     if sys.stdout.isatty():
-        sys.stdout.write("\033[2J\033[H")
+        # Clear visible screen, clear scrollback buffer, and reset cursor to top-left
+        sys.stdout.write("\033[3J\033[2J\033[H")
         sys.stdout.flush()
 
 
@@ -2819,7 +2820,7 @@ def interactive_select(
     header_lines: Optional[List[str]] = None,
     footer_lines: Optional[List[str]] = None,
     dynamic_footer: Optional[Callable[[Dict[str, Any]], List[str]]] = None,
-    instructions: str = "Use Up/Down, Enter to choose, Esc to cancel.",
+    instructions: str = "Use Up/Down to choose, Enter to select, Esc to cancel.",
     on_space: Optional[Callable[[Dict[str, Any], int], None]] = None,
     on_key: Optional[Callable[[str, List[Dict[str, Any]], int], Optional[str]]] = None,
 ) -> Optional[Dict[str, Any]]:
@@ -2839,7 +2840,8 @@ def interactive_select(
         sample_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
         footer_count = len(sample_footer) if sample_footer else 0
 
-        overhead = 6 + header_count + footer_count
+        # Safety margin (9 lines) ensures total printed height never exceeds terminal height or triggers scrolling
+        overhead = 9 + header_count + footer_count
         max_visible = max(3, term_h - overhead)
 
         if index < top_index:
@@ -3780,12 +3782,15 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         p_root = current_item.get("project_root") or "Not set"
         term_w = _get_term_width()
         divider = "─" * min(term_w - 2, 72)
+        prompt = current_item["first_prompt"]
+        max_p_len = max(10, term_w - 14)
+        if len(prompt) > max_p_len:
+            prompt = prompt[:max_p_len - 3] + "..."
         return [
             divider,
-            f"  File: {current_item['path'].name}",
-            f"  Project Root: {p_root}",
+            f"  File: {current_item['path'].name}  |  Root: {p_root}",
             f"  Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
-            f"  First Prompt: {current_item['first_prompt']}",
+            f"  Prompt: {prompt}",
             _ansi_wrap("  [Enter] Resume & cd  |  [d] Delete transcript  |  [Esc/Q] Cancel", "36"),
         ]
 
