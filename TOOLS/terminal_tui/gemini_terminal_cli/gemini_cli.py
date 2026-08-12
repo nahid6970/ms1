@@ -3822,25 +3822,25 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         msgs_str = str(current_item["msg_count"])[:4]
         p_root_fixed = p_root[:35]
 
-        lbl_file = _ansi_wrap("File:", "1;36")
+        lbl_file = _ansi_wrap("📁 File:", "1;36")
         val_file = _ansi_wrap(f"{file_name:<28}", "97")
 
-        lbl_root = _ansi_wrap("Root:", "1;36")
+        lbl_root = _ansi_wrap("📍 Root:", "1;36")
         val_root = _ansi_wrap(f"{p_root_fixed:<35}", "90")
 
-        lbl_model = _ansi_wrap("Model:", "1;35")
+        lbl_model = _ansi_wrap("🤖 Model:", "1;35")
         val_model = _ansi_wrap(f"{model_s:<18}", "1;37")
 
-        lbl_msgs = _ansi_wrap("Msgs:", "1;33")
+        lbl_msgs = _ansi_wrap("💬 Msgs:", "1;33")
         val_msgs = _ansi_wrap(f"{msgs_str:>4}", "97")
 
-        lbl_saved = _ansi_wrap("Saved:", "1;34")
+        lbl_saved = _ansi_wrap("🕒 Saved:", "1;34")
         val_saved = _ansi_wrap(f"{saved_date:<16}", "90")
 
-        lbl_prompt = _ansi_wrap("Prompt:", "1;36")
+        lbl_prompt = _ansi_wrap("💡 Prompt:", "1;36")
         val_prompt = _ansi_wrap(prompt, "38;5;214")
 
-        sep = _ansi_wrap("│", "90")
+        sep = _ansi_wrap("•", "36")
 
         b_enter = f"\033[48;5;24;97m [Enter] \033[0m {_ansi_wrap('Resume & cd', '1;36')}"
         b_del = f"\033[48;5;52;97m [d] \033[0m {_ansi_wrap('Delete', '1;31')}"
