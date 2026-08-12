@@ -580,6 +580,8 @@ if Completer is not None:
             ("/skill", "Browse and apply saved skill instructions"),
             ("/resume", "Resume a recent conversation session"),
             ("/r", "Resume a recent conversation session"),
+            ("/revert", "Revert conversation and code changes to a previous turn"),
+            ("/undo", "Revert conversation and code changes to a previous turn"),
             ("/save", "Save transcript JSON"),
             ("/load", "Load transcript JSON"),
             ("/tokens", "Show estimated conversation token usage"),
@@ -1833,7 +1835,38 @@ FUNCTIONS = {
 }
 
 
-def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None) -> str:
+FILE_UNDO_HISTORY: List[Dict[str, Any]] = []
+
+
+def record_file_snapshot(filepath: Path, current_turn_idx: int = 0) -> None:
+    try:
+        rel_p = str(filepath.resolve())
+        if not any(snap["turn"] == current_turn_idx and snap["path"] == rel_p for snap in FILE_UNDO_HISTORY):
+            existed = filepath.exists()
+            content = filepath.read_text(encoding="utf-8", errors="replace") if existed else None
+            FILE_UNDO_HISTORY.append({
+                "turn": current_turn_idx,
+                "path": rel_p,
+                "existed": existed,
+                "content": content,
+            })
+    except Exception:
+        pass
+
+
+def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None, current_turn_idx: int = 0) -> str:
+    if name in {"write_file", "replace_file", "smart_replace_block", "replace_block", "replace_lines", "insert_after", "delete_block", "delete_file"}:
+        fp_raw = args.get("filepath") or args.get("path")
+        if fp_raw:
+            record_file_snapshot(resolve_path(str(fp_raw), cwd), current_turn_idx)
+    elif name in {"apply_patch", "fuzzy_apply_patch"}:
+        patch_str = str(args.get("patch", ""))
+        for line in patch_str.splitlines():
+            if line.startswith("+++ "):
+                target_p = _patch_path(line[4:].strip(), cwd)
+                if target_p:
+                    record_file_snapshot(target_p, current_turn_idx)
+
     if name == "read_file":
         filepath = args.get("filepath", "")
         return read_file(resolve_path(filepath, cwd))
@@ -4877,7 +4910,7 @@ def main() -> int:
                     name = function_call.get("name", "")
                     call_args = function_call.get("args", {}) or {}
                     info(format_tool_call(name, call_args))
-                    result = execute_tool(name, call_args, cwd, ensure_tavily_accounts_loaded())
+                    result = execute_tool(name, call_args, cwd, ensure_tavily_accounts_loaded(), current_turn_idx=len(contents))
                     responses.append(
                         {
                             "functionResponse": {
@@ -5325,6 +5358,115 @@ def main() -> int:
                             contents.append(make_user_content(f"Skill instructions loaded:\n\n{chosen_skill}"))
                             info("Skill instructions loaded.")
                     continue
+                if command in {"/revert", "/undo"}:
+                    if not contents:
+                        warn("No conversation history to revert.")
+                        continue
+
+                    user_turn_positions: List[tuple[int, str]] = []
+                    for i, msg in enumerate(contents):
+                        if msg.get("role") == "user":
+                            parts = msg.get("parts", [])
+                            txts = [p["text"] for p in parts if isinstance(p, dict) and "text" in p]
+                            if txts:
+                                prompt_summary = re.sub(r"\s+", " ", txts[0].strip())[:60]
+                                user_turn_positions.append((i, prompt_summary))
+
+                    if not user_turn_positions:
+                        warn("No user turns found to revert.")
+                        continue
+
+                    target_pos = None
+                    if remainder:
+                        try:
+                            n_turns = int(remainder)
+                            if 1 <= n_turns <= len(user_turn_positions):
+                                target_pos = user_turn_positions[-n_turns][0]
+                            else:
+                                warn(f"Invalid turn count. Max turns available: {len(user_turn_positions)}")
+                                continue
+                        except ValueError:
+                            warn("Usage: /revert [number of turns] or /revert without args for interactive picker.")
+                            continue
+                    else:
+                        items = []
+                        for idx_num, (pos, p_text) in enumerate(reversed(user_turn_positions), start=1):
+                            items.append({
+                                "pos": pos,
+                                "prompt": p_text,
+                                "turn_num": len(user_turn_positions) - idx_num + 1,
+                            })
+
+                        def render_revert_item(r_item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                            marker = ">" if sel else " "
+                            row = f"{marker} {idx + 1:>2}. Turn {r_item['turn_num']:>2}: {r_item['prompt']}"
+                            if sel:
+                                return _ansi_wrap(row, "48;5;24;97")
+                            return row
+
+                        chosen_revert = interactive_select(
+                            title_text="",
+                            items=items,
+                            render_item=render_revert_item,
+                            header_lines=None,
+                            dynamic_footer=None,
+                            footer_lines=["  Press Enter to revert conversation & file changes to this turn, Esc to cancel."],
+                            instructions="",
+                        )
+                        if not chosen_revert:
+                            continue
+                        target_pos = chosen_revert["pos"]
+
+                    if target_pos is not None:
+                        reverted_files = set()
+                        affected_snaps = [s for s in FILE_UNDO_HISTORY if s["turn"] >= target_pos]
+                        for snap in reversed(affected_snaps):
+                            f_path = Path(snap["path"])
+                            try:
+                                if snap["existed"]:
+                                    if snap["content"] is not None:
+                                        f_path.parent.mkdir(parents=True, exist_ok=True)
+                                        f_path.write_text(snap["content"], encoding="utf-8")
+                                        reverted_files.add(f_path.name)
+                                else:
+                                    if f_path.exists():
+                                        f_path.unlink()
+                                        reverted_files.add(f_path.name)
+                            except Exception as exc:
+                                warn(f"Could not restore {f_path.name}: {exc}")
+
+                        git_restored = False
+                        try:
+                            git_res = subprocess.run(
+                                ["git", "status", "--porcelain"],
+                                cwd=str(cwd),
+                                capture_output=True,
+                                text=True,
+                            )
+                            if git_res.returncode == 0 and git_res.stdout.strip():
+                                sub_res = subprocess.run(
+                                    ["git", "restore", "."],
+                                    cwd=str(cwd),
+                                    capture_output=True,
+                                    text=True,
+                                )
+                                if sub_res.returncode == 0:
+                                    git_restored = True
+                        except Exception:
+                            pass
+
+                        contents = contents[:target_pos]
+                        FILE_UNDO_HISTORY[:] = [s for s in FILE_UNDO_HISTORY if s["turn"] < target_pos]
+                        last_turn_tokens = None
+
+                        info("Reverted successfully!")
+                        if reverted_files:
+                            info(f"Undone file changes ({len(reverted_files)} file(s)): {', '.join(sorted(reverted_files))}")
+                        elif git_restored:
+                            info("Restored file changes via git repository checkout.")
+                        info(f"Conversation rolled back. Remaining history: {len(contents)} messages.")
+                    continue
+
                 if command in {"/resume", "/r"}:
                     chosen_transcript = None
                     if remainder:
