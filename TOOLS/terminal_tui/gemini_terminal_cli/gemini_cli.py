@@ -2939,11 +2939,13 @@ def pick_model_interactive(
         )
 
     chosen = interactive_select(
-        title_text=title_text,
+        title_text="",
         items=decorated_models,
         render_item=render_item,
         header_lines=build_model_table_header(widths),
-        footer_lines=["Press Q or Esc to cancel."],
+        dynamic_footer=None,
+        footer_lines=["  Use Up/Down to choose, Enter to select, Esc/Q to cancel."],
+        instructions="",
     )
     if not chosen:
         return None
@@ -3463,15 +3465,35 @@ def build_model_table_widths(models: List[Dict[str, Any]]) -> Dict[str, int]:
         "short": min(max(short_width, 12), 28),
         "name": min(max(name_width, 18), 42),
         "tag": min(max(tag_width, 4), 12),
-        "state": min(max(state_width, 6), 16),
+        "state": min(max(state_width, 5), 16),
     }
 
 
 def build_model_table_header(widths: Dict[str, int]) -> List[str]:
-    return [
-        f"  {'Id':>2}  {'Model':<{widths['short']}}  {'Full Name':<{widths['name']}}  {'Uses':>4}  {'Tag':<{widths['tag']}}  Cur  {'State':<{widths['state']}}",
-        f"  {'--':>2}  {'-' * widths['short']}  {'-' * widths['name']}  {'-' * 4}  {'-' * widths['tag']}  ---  {'-' * widths['state']}",
-    ]
+    w_short = widths.get("short", 12)
+    w_name = widths.get("name", 18)
+    w_tag = widths.get("tag", 4)
+    w_state = widths.get("state", 5)
+
+    h_idx = _ansi_wrap(f"{'#':>2}", "1;36")
+    h_short = _ansi_wrap(f"{'Model':<{w_short}}", "1;36")
+    h_name = _ansi_wrap(f"{'Full Name':<{w_name}}", "1;36")
+    h_uses = _ansi_wrap(f"{'Uses':>4}", "1;36")
+    h_tag = _ansi_wrap(f"{'Tag':<{w_tag}}", "1;36")
+    h_cur = _ansi_wrap("Cur", "1;36")
+    h_state = _ansi_wrap(f"{'State':<{w_state}}", "1;36")
+
+    header_str = (
+        f"  {h_idx}  "
+        f"{h_short}  "
+        f"{h_name}  "
+        f"{h_uses}  "
+        f"{h_tag}  "
+        f"{h_cur}  "
+        f"{h_state}"
+    )
+
+    return [header_str]
 
 
 def format_model_entry(
