@@ -72,6 +72,7 @@ try:
     from prompt_toolkit.formatted_text import ANSI
     from prompt_toolkit.history import FileHistory
     from prompt_toolkit.history import InMemoryHistory
+    from prompt_toolkit.lexers import Lexer
     from prompt_toolkit.shortcuts import CompleteStyle
     from prompt_toolkit.styles import Style
 except Exception:
@@ -82,8 +83,19 @@ except Exception:
     ANSI = None
     FileHistory = None
     InMemoryHistory = None
+    Lexer = None
     CompleteStyle = None
     Style = None
+
+
+if Lexer is not None:
+    class CustomUserTextLexer(Lexer):
+        def lex_document(self, document):
+            def get_line(lineno):
+                return [("class:custom-user-text", document.lines[lineno])]
+            return get_line
+else:
+    CustomUserTextLexer = None
 
 
 def _now_stamp() -> str:
@@ -726,19 +738,23 @@ def read_dynamic_prompt(
         if bg_str and bg_str != "none":
             if not bg_str.startswith("bg:"):
                 bg_str = f"bg:{bg_str}"
-            style_spec = f"{bg_str} {fg_str}"
+            text_style_spec = f"{bg_str} {fg_str}"
         else:
-            style_spec = fg_str
+            text_style_spec = fg_str
 
         user_style = Style.from_dict({
-            '': style_spec, 
+            'custom-user-text': text_style_spec,
+            '': fg_str,
         })
+
+        lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
         
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
             history=prompt_history,
             auto_suggest=AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
             completer=completer,
+            lexer=lexer,
             complete_while_typing=True,
             complete_style=CompleteStyle.COLUMN,
             mouse_support=False,
