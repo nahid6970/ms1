@@ -3718,19 +3718,15 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
 
 def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str, int]:
     folder_width = 0
-    model_width = 0
     msg_width = 0
     for item in transcripts:
         p_root = item.get("project_root", "")
         folder_s = Path(p_root).name if p_root else ""
         folder_width = max(folder_width, len(folder_s))
-        model_s = short_model_label(item["model"])
-        model_width = max(model_width, len(model_s))
         msg_s = str(item["msg_count"])
         msg_width = max(msg_width, len(msg_s))
     return {
         "folder": min(max(folder_width, 6), 16),
-        "model": min(max(model_width, 6), 22),
         "msg": min(max(msg_width, 3), 5),
     }
 
@@ -3739,14 +3735,12 @@ def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
     header = (
         f"   {'#':>2}.  {'Age':<10}  "
         f"{'Folder':<{widths['folder']}}  "
-        f"{'Model':<{widths['model']}}  "
         f"{'Msgs':>{widths['msg']}}  "
         f"First Prompt"
     )
     sep = (
         f"   {'--':>2}.  {'-' * 10}  "
         f"{'-' * widths['folder']}  "
-        f"{'-' * widths['model']}  "
         f"{'-' * widths['msg']}  "
         f"--------------------"
     )
@@ -3762,24 +3756,20 @@ def format_transcript_entry(
     date_s = item["date_str"][:10]
     p_root = item.get("project_root", "")
     folder_s = Path(p_root).name if p_root else ""
-    model_s = short_model_label(item["model"])
     msg_s = str(item["msg_count"])
     prompt_s = item["first_prompt"]
 
     w_folder = widths["folder"]
-    w_model = widths["model"]
     w_msg = widths["msg"]
 
-    # Strictly truncate string variables to their allocated column width so they never spill over into next column
     folder_s = folder_s[:w_folder]
-    model_s = model_s[:w_model]
     msg_s = msg_s[:w_msg]
 
     marker = ">" if selected else " "
 
-    # Dynamically truncate prompt_s to prevent line wrapping and broken selection table layouts
+    # Calculate available space for prompt_s without model column
     term_w = _get_term_width()
-    prefix_len = 6 + 10 + 2 + w_folder + 2 + w_model + 2 + w_msg + 2
+    prefix_len = 6 + 10 + 2 + w_folder + 2 + w_msg + 2
     avail_prompt_len = term_w - prefix_len - 1
 
     if avail_prompt_len < 10:
@@ -3795,7 +3785,6 @@ def format_transcript_entry(
         f"{marker} {index:>2}. "
         f"{date_s:<10}  "
         f"{folder_s:<{w_folder}}  "
-        f"{model_s:<{w_model}}  "
         f"{msg_s:>{w_msg}}  "
         f"{prompt_s}"
     )
