@@ -3808,18 +3808,36 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
     def render_footer_info(current_item: Dict[str, Any]) -> List[str]:
         p_root = current_item.get("project_root") or "Not set"
         term_w = _get_term_width()
-        divider = "─" * min(term_w - 2, 72)
+        divider_len = min(term_w - 2, 80)
+        divider = _ansi_wrap("─" * divider_len, "90")
         prompt = current_item["first_prompt"]
         max_p_len = max(10, term_w - 14)
         if len(prompt) > max_p_len:
             prompt = prompt[:max_p_len - 3] + "..."
+
         saved_date = current_item.get("full_date", current_item["date_str"])
+        model_s = short_model_label(current_item["model"])
+        file_name = current_item["path"].name
+
+        l_file = f"{_ansi_wrap('File:', '1;36')} {_ansi_wrap(file_name, '97')}"
+        l_root = f"{_ansi_wrap('Root:', '1;36')} {_ansi_wrap(p_root, '90')}"
+        l_model = f"{_ansi_wrap('Model:', '1;35')} {_ansi_wrap(model_s, '1;37')}"
+        l_msgs = f"{_ansi_wrap('Msgs:', '1;33')} {_ansi_wrap(str(current_item['msg_count']), '97')}"
+        l_saved = f"{_ansi_wrap('Saved:', '1;34')} {_ansi_wrap(saved_date, '90')}"
+        l_prompt = f"{_ansi_wrap('Prompt:', '1;36')} {_ansi_wrap(prompt, '38;5;214')}"
+
+        sep = _ansi_wrap("│", "90")
+
+        b_enter = f"\033[48;5;24;97m [Enter] \033[0m {_ansi_wrap('Resume & cd', '1;36')}"
+        b_del = f"\033[48;5;52;97m [d] \033[0m {_ansi_wrap('Delete', '1;31')}"
+        b_esc = f"\033[48;5;238;97m [Esc/Q] \033[0m {_ansi_wrap('Cancel', '90')}"
+
         return [
             divider,
-            f"  File: {current_item['path'].name}  |  Root: {p_root}",
-            f"  Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {saved_date}",
-            f"  Prompt: {prompt}",
-            _ansi_wrap("  [Enter] Resume & cd  |  [d] Delete transcript  |  [Esc/Q] Cancel", "36"),
+            f"  {l_file}   {sep}   {l_root}",
+            f"  {l_model}   {sep}   {l_msgs}   {sep}   {l_saved}",
+            f"  {l_prompt}",
+            f"  {b_enter}   {sep}   {b_del}   {sep}   {b_esc}",
         ]
 
     def handle_key(key: str, items_list: List[Dict[str, Any]], idx: int) -> Optional[str]:
