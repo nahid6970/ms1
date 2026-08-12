@@ -2791,9 +2791,11 @@ def save_api_accounts(
 
 def clear_screen() -> None:
     if sys.stdout.isatty():
-        # Clear visible screen, clear scrollback buffer, and reset cursor to top-left
-        sys.stdout.write("\033[3J\033[2J\033[H")
-        sys.stdout.flush()
+        if os.name == "nt":
+            os.system("cls")
+        else:
+            sys.stdout.write("\033[3J\033[2J\033[H")
+            sys.stdout.flush()
 
 
 def read_key() -> str:
@@ -2836,13 +2838,14 @@ def interactive_select(
         index = max(0, min(index, len(items) - 1))
 
         term_h = _get_term_height()
-        header_count = len(header_lines) if header_lines else 0
+        title_count = 1 if title_text else 0
+        inst_count = 2 if instructions else 0
+        header_count = (len(header_lines) + 1) if header_lines else 0
         sample_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
-        footer_count = len(sample_footer) if sample_footer else 0
+        footer_count = (len(sample_footer) + 1) if sample_footer else 0
 
-        # Title (1) + Inst (1) + Blank (1) + Header (header_count) + Blank (1) + Scroll (1) + Blank (1) + Footer (footer_count)
-        fixed_overhead = 6 + header_count + footer_count
-        max_visible = max(3, term_h - fixed_overhead - 1)
+        fixed_overhead = title_count + inst_count + header_count + footer_count + 2
+        max_visible = max(3, term_h - fixed_overhead)
 
         if index < top_index:
             top_index = index
@@ -2853,9 +2856,11 @@ def interactive_select(
         visible_slice = items[top_index : top_index + max_visible]
 
         clear_screen()
-        title(title_text)
-        print(instructions)
-        print()
+        if title_text:
+            title(title_text)
+        if instructions:
+            print(instructions)
+            print()
 
         if header_lines:
             for line in header_lines:
@@ -3843,12 +3848,12 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         return None
 
     chosen = interactive_select(
-        title_text="Resume Recent Conversation",
+        title_text="",
         items=items,
         render_item=render_item,
         header_lines=build_transcript_table_header(widths),
         dynamic_footer=render_footer_info,
-        instructions="Use Up/Down to navigate, Enter to resume & cd, 'd' to delete, Esc/Q to cancel.",
+        instructions="",
         on_key=handle_key,
     )
     if not chosen:
