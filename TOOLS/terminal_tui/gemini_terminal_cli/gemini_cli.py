@@ -3635,6 +3635,28 @@ def _get_term_width() -> int:
         return 90
 
 
+def format_relative_time(mtime: float) -> str:
+    diff = max(0, int(time.time() - mtime))
+    if diff < 60:
+        return f"{diff}s ago"
+    minutes = diff // 60
+    if minutes < 60:
+        return f"{minutes}m ago"
+    hours = minutes // 60
+    rem_m = minutes % 60
+    if hours < 24:
+        return f"{hours}h {rem_m}m" if rem_m > 0 else f"{hours}h ago"
+    days = hours // 24
+    rem_h = hours % 24
+    if days < 30:
+        return f"{days}d {rem_h}h" if rem_h > 0 else f"{days}d ago"
+    months = days // 30
+    if months < 12:
+        return f"{months}mo ago"
+    years = days // 365
+    return f"{years}y ago"
+
+
 def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
     """Scan transcripts directory and return a list of metadata for recent sessions."""
     if not TRANSCRIPTS_DIR.exists():
@@ -3668,12 +3690,14 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
             model = str(data.get("model", "unknown"))
             project_root = str(data.get("project_root", ""))
             msg_count = len(contents)
-            dt_str = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+            rel_time = format_relative_time(mtime)
+            full_dt = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
 
             transcripts.append({
                 "path": path,
                 "mtime": mtime,
-                "date_str": dt_str,
+                "date_str": rel_time,
+                "full_date": full_dt,
                 "model": model,
                 "project_root": project_root,
                 "msg_count": msg_count,
@@ -3708,14 +3732,14 @@ def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str
 
 def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
     header = (
-        f"   {'#':>2}.  {'Date/Time':<16}  "
+        f"   {'#':>2}.  {'Age':<10}  "
         f"{'Folder':<{widths['folder']}}  "
         f"{'Model':<{widths['model']}}  "
         f"{'Msgs':>{widths['msg']}}  "
         f"First Prompt"
     )
     sep = (
-        f"   {'--':>2}.  {'-' * 16}  "
+        f"   {'--':>2}.  {'-' * 10}  "
         f"{'-' * widths['folder']}  "
         f"{'-' * widths['model']}  "
         f"{'-' * widths['msg']}  "
@@ -3730,7 +3754,7 @@ def format_transcript_entry(
     widths: Dict[str, int],
     selected: bool = False,
 ) -> str:
-    date_s = item["date_str"]
+    date_s = item["date_str"][:10]
     p_root = item.get("project_root", "")
     folder_s = Path(p_root).name if p_root else ""
     model_s = short_model_label(item["model"])
@@ -3750,7 +3774,7 @@ def format_transcript_entry(
 
     # Dynamically truncate prompt_s to prevent line wrapping and broken selection table layouts
     term_w = _get_term_width()
-    prefix_len = 6 + 16 + 2 + w_folder + 2 + w_model + 2 + w_msg + 2
+    prefix_len = 6 + 10 + 2 + w_folder + 2 + w_model + 2 + w_msg + 2
     avail_prompt_len = term_w - prefix_len - 1
 
     if avail_prompt_len < 10:
@@ -3764,7 +3788,7 @@ def format_transcript_entry(
 
     row = (
         f"{marker} {index:>2}. "
-        f"{date_s:<16}  "
+        f"{date_s:<10}  "
         f"{folder_s:<{w_folder}}  "
         f"{model_s:<{w_model}}  "
         f"{msg_s:>{w_msg}}  "
@@ -3795,10 +3819,11 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         max_p_len = max(10, term_w - 14)
         if len(prompt) > max_p_len:
             prompt = prompt[:max_p_len - 3] + "..."
+        saved_date = current_item.get("full_date", current_item["date_str"])
         return [
             divider,
             f"  File: {current_item['path'].name}  |  Root: {p_root}",
-            f"  Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {current_item['date_str']}",
+            f"  Model: {current_item['model']} | Messages: {current_item['msg_count']} | Saved: {saved_date}",
             f"  Prompt: {prompt}",
             _ansi_wrap("  [Enter] Resume & cd  |  [d] Delete transcript  |  [Esc/Q] Cancel", "36"),
         ]
