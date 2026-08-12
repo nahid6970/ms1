@@ -3810,21 +3810,35 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         term_w = _get_term_width()
         divider_len = min(term_w - 2, 80)
         divider = _ansi_wrap("─" * divider_len, "90")
+
         prompt = current_item["first_prompt"]
         max_p_len = max(10, term_w - 14)
         if len(prompt) > max_p_len:
             prompt = prompt[:max_p_len - 3] + "..."
 
         saved_date = current_item.get("full_date", current_item["date_str"])
-        model_s = short_model_label(current_item["model"])
-        file_name = current_item["path"].name
+        model_s = short_model_label(current_item["model"])[:18]
+        file_name = current_item["path"].name[:28]
+        msgs_str = str(current_item["msg_count"])[:4]
+        p_root_fixed = p_root[:35]
 
-        l_file = f"{_ansi_wrap('File:', '1;36')} {_ansi_wrap(file_name, '97')}"
-        l_root = f"{_ansi_wrap('Root:', '1;36')} {_ansi_wrap(p_root, '90')}"
-        l_model = f"{_ansi_wrap('Model:', '1;35')} {_ansi_wrap(model_s, '1;37')}"
-        l_msgs = f"{_ansi_wrap('Msgs:', '1;33')} {_ansi_wrap(str(current_item['msg_count']), '97')}"
-        l_saved = f"{_ansi_wrap('Saved:', '1;34')} {_ansi_wrap(saved_date, '90')}"
-        l_prompt = f"{_ansi_wrap('Prompt:', '1;36')} {_ansi_wrap(prompt, '38;5;214')}"
+        lbl_file = _ansi_wrap("File:", "1;36")
+        val_file = _ansi_wrap(f"{file_name:<28}", "97")
+
+        lbl_root = _ansi_wrap("Root:", "1;36")
+        val_root = _ansi_wrap(f"{p_root_fixed:<35}", "90")
+
+        lbl_model = _ansi_wrap("Model:", "1;35")
+        val_model = _ansi_wrap(f"{model_s:<18}", "1;37")
+
+        lbl_msgs = _ansi_wrap("Msgs:", "1;33")
+        val_msgs = _ansi_wrap(f"{msgs_str:>4}", "97")
+
+        lbl_saved = _ansi_wrap("Saved:", "1;34")
+        val_saved = _ansi_wrap(f"{saved_date:<16}", "90")
+
+        lbl_prompt = _ansi_wrap("Prompt:", "1;36")
+        val_prompt = _ansi_wrap(prompt, "38;5;214")
 
         sep = _ansi_wrap("│", "90")
 
@@ -3834,9 +3848,9 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
 
         return [
             divider,
-            f"  {l_file}   {sep}   {l_root}",
-            f"  {l_model}   {sep}   {l_msgs}   {sep}   {l_saved}",
-            f"  {l_prompt}",
+            f"  {lbl_file} {val_file}  {sep}  {lbl_root} {val_root}",
+            f"  {lbl_model} {val_model}  {sep}  {lbl_msgs} {val_msgs}  {sep}  {lbl_saved} {val_saved}",
+            f"  {lbl_prompt} {val_prompt}",
             f"  {b_enter}   {sep}   {b_del}   {sep}   {b_esc}",
         ]
 
