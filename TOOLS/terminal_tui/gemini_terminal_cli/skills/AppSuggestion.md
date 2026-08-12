@@ -1,0 +1,8 @@
+﻿- Skill: 'app_suggestion'
+  - Description: Provide open-source app recommendations based on user requests.
+  - Format:
+    - App Name & Description
+    - Installation commands:
+      - Winget: winget install <package_id>
+      - Scoop: scoop install <package_id>
+    - Fallback: GitHub repository link if not available via package managers.
