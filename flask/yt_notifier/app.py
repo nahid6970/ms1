@@ -190,11 +190,11 @@ def refresh_all():
     flash(f'Refreshed all channels! Found {total_new} new video(s).', 'success')
     return redirect(url_for('index'))
 
-@app.route('/mark-read', methods=['POST'])
-def mark_read():
+@app.route('/toggle-read/<int:video_id>', methods=['POST'])
+def toggle_read(video_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute('UPDATE videos SET is_new = 0')
+    cursor.execute('UPDATE videos SET is_new = NOT is_new WHERE id = ?', (video_id,))
     conn.commit()
     conn.close()
     return '', 204
