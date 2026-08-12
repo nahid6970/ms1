@@ -897,6 +897,50 @@ def search_web(query: str, max_results: int = 5) -> str:
     return "\n".join(results) if results else "No web results found."
 
 
+def inspect_image_file(filepath: Path) -> tuple[str, Optional[Dict[str, Any]]]:
+    """Inspects an image file and returns metadata and inlineData dict for Gemini multimodal vision."""
+    if not filepath.exists():
+        return f"Error: file not found: {filepath}", None
+    if filepath.is_dir():
+        return f"Error: {filepath} is a directory.", None
+
+    ext = filepath.suffix.lower()
+    mime_types = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".webp": "image/webp",
+        ".gif": "image/gif",
+        ".bmp": "image/bmp",
+    }
+    mime_type = mime_types.get(ext, "image/png")
+
+    try:
+        data = filepath.read_bytes()
+        import base64
+        b64_str = base64.b64encode(data).decode("utf-8")
+        
+        info_str = f"Loaded image '{filepath.name}' ({len(data) / 1024:.1f} KB, {mime_type})."
+        
+        try:
+            from PIL import Image
+            import io
+            with Image.open(io.BytesIO(data)) as img:
+                info_str += f" Resolution: {img.width}x{img.height}, Mode: {img.mode}."
+        except Exception:
+            pass
+
+        inline_part = {
+            "inlineData": {
+                "mimeType": mime_type,
+                "data": b64_str
+            }
+        }
+        return info_str, inline_part
+    except Exception as exc:
+        return f"Error inspecting image: {exc}", None
+
+
 def search_tavily(query: str, tavily_accounts: Dict[str, str], max_results: int = 5) -> str:
     if not query.strip():
         return "Error: query is required."
@@ -1594,6 +1638,17 @@ FUNCTIONS = {
             "required": ["query"],
         },
     },
+    "inspect_image": {
+        "name": "inspect_image",
+        "description": "Inspect and load a local image file (PNG, JPG, WEBP, GIF, BMP) so Gemini can see and analyze its visual content in full resolution.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "filepath": {"type": "STRING", "description": "Local file path to the image file."}
+            },
+            "required": ["filepath"],
+        },
+    },
     "replace_block": {
         "name": "replace_block",
         "description": "Replace an exact block of text in a file.",
@@ -1812,6 +1867,10 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
             tavily_accounts or {},
             max_results=int(args.get("max_results", 5) or 5),
         )
+    if name == "inspect_image":
+        filepath = resolve_path(args.get("filepath", ""), cwd)
+        info_str, _ = inspect_image_file(filepath)
+        return info_str
     if name == "replace_block":
         filepath = resolve_path(args.get("filepath", ""), cwd)
         old_text = str(args.get("old_text", ""))
@@ -4070,6 +4129,54 @@ def make_user_content(text: str) -> Dict[str, Any]:
     return {"role": "user", "parts": [{"text": text}]}
 
 
+def make_user_content_from_input(user_text: str, cwd: Path) -> Dict[str, Any]:
+    stripped = user_text.strip()
+    img_exts = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif"}
+
+    if stripped.startswith("@"):
+        head, _, tail = stripped[1:].partition(" ")
+        file_path = resolve_path(head, cwd)
+        if file_path.exists() and file_path.is_file() and file_path.suffix.lower() in img_exts:
+            info_msg, inline_part = inspect_image_file(file_path)
+            if inline_part:
+                req_text = tail.strip() or "Please describe and analyze this image."
+                return {
+                    "role": "user",
+                    "parts": [
+                        inline_part,
+                        {"text": f"Image: {file_path}\n{info_msg}\n\nUser request: {req_text}"}
+                    ]
+                }
+
+    # Detect image path anywhere in prompt (e.g. "C:\path\image.png what is this?")
+    tokens = stripped.split()
+    found_img_path = None
+    remaining_tokens = []
+    for token in tokens:
+        clean_tok = token.strip("\"'")
+        if any(clean_tok.lower().endswith(ext) for ext in img_exts):
+            cand = resolve_path(clean_tok, cwd)
+            if cand.exists() and cand.is_file() and cand.suffix.lower() in img_exts:
+                found_img_path = cand
+                continue
+        remaining_tokens.append(token)
+
+    if found_img_path:
+        info_msg, inline_part = inspect_image_file(found_img_path)
+        if inline_part:
+            req_text = " ".join(remaining_tokens).strip() or "Please describe and analyze this image in detail."
+            return {
+                "role": "user",
+                "parts": [
+                    inline_part,
+                    {"text": f"Image: {found_img_path}\n{info_msg}\n\nUser request: {req_text}"}
+                ]
+            }
+
+    expanded = expand_at_file_prompt(user_text, cwd)
+    return {"role": "user", "parts": [{"text": expanded}]}
+
+
 def expand_at_file_prompt(user_text: str, cwd: Path) -> str:
     stripped = user_text.strip()
     if not stripped.startswith("@"):
@@ -4622,7 +4729,7 @@ def main() -> int:
 
     def run_turn(user_text: str) -> None:
         nonlocal contents
-        contents.append(make_user_content(user_text))
+        contents.append(make_user_content_from_input(user_text, cwd))
         failed_accounts: Set[str] = set()
 
         try:
@@ -5293,7 +5400,7 @@ def main() -> int:
                 warn(f"Unknown command: {command}")
                 continue
 
-            run_turn(expand_at_file_prompt(user_input, cwd))
+            run_turn(user_input)
 
     if args.save_transcript:
         transcript_path = resolve_path(args.save_transcript, Path.cwd())

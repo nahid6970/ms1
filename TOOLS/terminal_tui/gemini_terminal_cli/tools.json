@@ -54,6 +54,12 @@
     "description": "Web search using Tavily API. Requires saved API keys in api_accounts.lock. Tries multiple accounts with failover. Higher quality results than search_web."
   },
   {
+    "name": "inspect_image",
+    "category": "Inspection & File System",
+    "rating": "Best (Multimodal Vision)",
+    "description": "Inspect and load a local image file (PNG, JPG, WEBP, GIF, BMP) so Gemini can see and analyze its visual content in full resolution."
+  },
+  {
     "name": "fuzzy_apply_patch",
     "category": "Code Modifications",
     "rating": "Best for multi-file changes (Resilient)",

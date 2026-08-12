@@ -368,6 +368,11 @@
             "kind": "Title",
             "id": "Sound Recorder",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "open-webui.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -489,6 +494,11 @@
         {
             "kind": "Title",
             "id": "Sound Recorder",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "open-webui.exe",
             "matching_strategy": "Equals"
         }
     ],
