@@ -3835,6 +3835,9 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
             rel_time = format_relative_time(mtime)
             full_dt = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
 
+            custom_title = data.get("custom_title")
+            display_title = str(custom_title).strip() if custom_title else first_prompt
+
             transcripts.append({
                 "path": path,
                 "mtime": mtime,
@@ -3844,7 +3847,7 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
                 "project_root": project_root,
                 "msg_count": max(1, user_msg_count),
                 "tool_count": tool_call_count,
-                "first_prompt": first_prompt[:150],
+                "first_prompt": display_title[:150],
                 "data": data,
             })
         except Exception:
@@ -3947,7 +3950,7 @@ def format_transcript_entry(
     return row
 
 
-def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
+def pick_transcript_interactive(client: Optional[GeminiClient] = None) -> Optional[Dict[str, Any]]:
     items = list_recent_transcripts()
     if not items:
         warn("No recent transcripts found in 'transcripts/' directory.")
@@ -4001,6 +4004,8 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
 
         b_enter = f"\033[48;5;24;97m [Enter] \033[0m {_ansi_wrap('Resume & cd', '1;36')}"
         b_del = f"\033[48;5;52;97m [d] \033[0m {_ansi_wrap('Delete', '1;31')}"
+        b_ren = f"\033[48;5;240;97m [r] \033[0m {_ansi_wrap('Rename', '1;33')}"
+        b_gen = f"\033[48;5;28;97m [g] \033[0m {_ansi_wrap('AI Title', '1;32')}"
         b_esc = f"\033[48;5;238;97m [Esc/Q] \033[0m {_ansi_wrap('Cancel', '90')}"
 
         return [
@@ -4008,7 +4013,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
             f"  {lbl_file} {val_file}  {sep}  {lbl_root} {val_root}",
             f"  {lbl_model} {val_model}  {sep}  {lbl_turns} {val_turns}  {sep}  {lbl_tools} {val_tools}  {sep}  {lbl_saved} {val_saved}",
             f"  {lbl_prompt} {val_prompt}",
-            f"  {b_enter}   {sep}   {b_del}   {sep}   {b_esc}",
+            f"  {b_enter}  {sep}  {b_del}  {sep}  {b_ren}  {sep}  {b_gen}  {sep}  {b_esc}",
         ]
 
     def handle_key(key: str, items_list: List[Dict[str, Any]], idx: int) -> Optional[str]:
@@ -4023,6 +4028,74 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
                     pass
                 items_list.pop(idx)
                 return "deleted"
+
+        if key.lower() == "r":
+            if 0 <= idx < len(items_list):
+                item = items_list[idx]
+                print()
+                curr_t = item.get("data", {}).get("custom_title") or item["first_prompt"]
+                new_t = input(f"Enter custom title for {item['path'].name} (current: '{curr_t}'): ").strip()
+                if new_t:
+                    item["data"]["custom_title"] = new_t
+                    item["first_prompt"] = new_t
+                    try:
+                        save_transcript(item["path"], item["data"])
+                        info(f"Updated title to: '{new_t}'")
+                    except Exception as exc:
+                        error(f"Error saving title: {exc}")
+                return "renamed"
+
+        if key.lower() == "g":
+            if 0 <= idx < len(items_list):
+                item = items_list[idx]
+                target_client = client
+                if target_client is None:
+                    m_prefs = load_model_prefs()
+                    cur_m = str(item.get("model") or m_prefs.get("last_model") or DEFAULT_MODEL)
+                    k = os.environ.get("GEMINI_API_KEY", "")
+                    if k:
+                        target_client = GeminiClient(k, cur_m)
+
+                if target_client is None:
+                    error("Cannot generate AI title: No active Gemini client or API key found.")
+                    return None
+
+                info(f"Generating AI title for {item['path'].name} using {target_client.model}...")
+                conv_text = []
+                for msg in item.get("data", {}).get("contents", []):
+                    role = msg.get("role", "user")
+                    parts = msg.get("parts", [])
+                    txt_parts = [p["text"] for p in parts if isinstance(p, dict) and "text" in p]
+                    if txt_parts:
+                        conv_text.append(f"{role}: {' '.join(txt_parts)[:200]}")
+                
+                full_conv_summary = "\n".join(conv_text[:10])
+                if not full_conv_summary.strip():
+                    warn("No text content found in conversation to summarize.")
+                    return None
+
+                try:
+                    title_gen_client = GeminiClient(target_client.api_key, target_client.model)
+                    res = title_gen_client.generate(
+                        contents=[make_user_content(f"Summarize this conversation into a short title (3 to 6 words). Return ONLY the title text:\n\n{full_conv_summary}")],
+                        system_instruction="Reply with ONLY a concise title (3 to 6 words). No quotes, no markdown, no punctuation.",
+                        tool_names=[],
+                        temperature=0.2,
+                        max_output_tokens=20,
+                    )
+                    cands = res.get("candidates", [])
+                    if cands:
+                        raw_title = render_model_parts(cands[0].get("content", {}).get("parts", [])).strip()
+                        raw_title = re.sub(r'["\'`\.]', '', raw_title).strip()
+                        if raw_title:
+                            item["data"]["custom_title"] = raw_title
+                            item["first_prompt"] = raw_title
+                            save_transcript(item["path"], item["data"])
+                            info(f"AI Title Generated: '{raw_title}'")
+                except Exception as exc:
+                    error(f"Failed to generate AI title: {exc}")
+                return "generated"
+
         return None
 
     chosen = interactive_select(
@@ -5252,7 +5325,7 @@ def main() -> int:
                         else:
                             warn(f"Transcript file not found: {remainder}")
                     else:
-                        chosen_transcript = pick_transcript_interactive()
+                        chosen_transcript = pick_transcript_interactive(client=client)
 
                     if chosen_transcript:
                         t_data = chosen_transcript["data"]
