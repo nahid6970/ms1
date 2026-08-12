@@ -75,7 +75,7 @@
     "name": "save_memory",
     "category": "Memory & Context",
     "rating": "Best (Persistent)",
-    "description": "Save basic facts to main memory or organize specific topic memories into dedicated sub-memory files/folders inside 'memory/' directory."
+    "description": "Save basic facts to main memory or organize specific topic memories into dedicated sub-memory files/folders inside 'memory/' directory. DO NOT use save_memory for skills; skills must be saved using write_file into the CLI skills directory 'C:/@delta/ms1/tools/terminal_tui/gemini_terminal_cli/skills/<skill_name>.md'."
   },
   {
     "name": "read_memory",

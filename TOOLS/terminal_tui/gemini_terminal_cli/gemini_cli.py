@@ -31,20 +31,6 @@ except Exception:
 
 
 DEFAULT_MODEL = "gemini-2.5-flash"
-DEFAULT_SYSTEM = (
-    "You are a terminal coding assistant. "
-    "Be concise, practical, and ask before making destructive changes. "
-    "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
-    "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
-    "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
-    "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
-    "AUTOSAVE MEMORY & USER BEHAVIOR: Memory tools are active. You MUST immediately call `save_memory` whenever the user: "
-    "1. Introduces themselves (e.g., name, role, handle). "
-    "2. Expresses likes, dislikes, or preferences (e.g., preferred languages, frameworks, tab width). "
-    "3. Gives instructions on what to DO or NOT DO (e.g., 'don't use comments', 'always use type hints', 'never overwrite whole files'). "
-    "4. Shares project guidelines or setup steps. "
-    "Save user behavior rules, constraints, and 'don'ts' under path='main' (key='user_behavior' or 'coding_rules') so you strictly adhere to them in all future turns and sessions. Do not wait to be asked."
-)
 DEFAULT_TOOL_LOOPS = 8
 MAX_TEXT_CHARS = 12000
 DEFAULT_MODEL_LIST_LIMIT = 12
@@ -59,6 +45,18 @@ NOTIFICATION_FILE = Path(r"C:\Users\nahid\notification.txt")
 TRANSCRIPTS_DIR = Path(__file__).parent / "transcripts"
 MEMORY_DIR = Path(__file__).parent / "memory"
 MAIN_MEMORY_FILE = MEMORY_DIR / "main.json"
+SKILLS_DIR = Path(__file__).parent / "skills"
+
+DEFAULT_SYSTEM = (
+    "You are a terminal coding assistant. "
+    "Be concise, practical, and ask before making destructive changes. "
+    "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
+    "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
+    "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
+    "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
+    "AUTOSAVE MEMORY & USER BEHAVIOR: Memory tools are active. You MUST immediately call `save_memory` whenever the user shares personal facts or preferences. "
+    f"CREATING SKILLS: When the user asks to create or add a skill, ALWAYS use write_file to save a markdown file into `{SKILLS_DIR.as_posix()}/<skill_name>.md` so it is loaded by /skill. DO NOT call save_memory for skills!"
+)
 
 try:
     import msvcrt
@@ -172,6 +170,9 @@ def resolve_memory_path(raw_path: str) -> tuple[Path, str]:
 def save_memory(key: str = "", content: str = "", path: str = "main", description: str = "") -> str:
     key = str(key or "").strip()
     content = str(content or "").strip()
+    path_clean = str(path or "").strip().replace("\\", "/").lower()
+    if path_clean.startswith("skills/") or path_clean == "skills" or key.lower().startswith("skill_") or key.lower() == "skill":
+        return f"Error: Do NOT use save_memory for skills. Use `write_file` to write a Markdown file directly into `{SKILLS_DIR.as_posix()}/<skill_name>.md` so it is loaded by /skill."
     if not key and not content:
         return "Error: memory content or key is required."
     if not key:
@@ -588,7 +589,7 @@ if Completer is not None:
 
 
         def _get_skill_completions(self, search_part: str) -> List[tuple[str, str, str]]:
-            skills = list_skills()
+            skills = list_skills(cwd=self.cwd)
             results = []
             for title_str, desc_str, path in skills:
                 name = path.stem
@@ -1734,7 +1735,7 @@ FUNCTIONS = {
     },
     "save_memory": {
         "name": "save_memory",
-        "description": "Save important notes, user profile details (e.g. name, preferences), or project facts into memory. You MUST call this immediately when the user shares personal details (like name) or preferences. Default path='main'.",
+        "description": f"Save important notes, user profile details (e.g. name, preferences), or project facts into memory. You MUST call this immediately when the user shares personal details (like name) or preferences. Default path='main'. DO NOT use save_memory for creating/saving skills; skills MUST be saved using write_file into '{SKILLS_DIR.as_posix()}/<skill_name>.md'.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
@@ -3977,40 +3978,46 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
     if not chosen:
         return None
     return chosen
-def list_skills() -> List[tuple[str, str, Path]]:
-    """Scan skills directory and return a list of (title, description, path)."""
-    skills_dir = Path(__file__).parent / "skills"
-    if not skills_dir.exists() or not skills_dir.is_dir():
-        return []
-    
+def list_skills(cwd: Optional[Path] = None) -> List[tuple[str, str, Path]]:
+    """Scan CLI skills directory and optional cwd skills directory, returning a list of (title, description, path)."""
+    skills_dirs = [SKILLS_DIR]
+    if cwd and (cwd / "skills").exists() and (cwd / "skills").resolve() != SKILLS_DIR.resolve():
+        skills_dirs.append(cwd / "skills")
+
     found_skills = []
-    for path in sorted(skills_dir.glob("*.md")):
-        try:
-            content = path.read_text(encoding="utf-8", errors="replace")
-            lines = content.splitlines()
-            title = path.stem.replace("_", " ").title()
-            desc = "Custom skill instruction file."
-            
-            for line in lines:
-                if line.startswith("# "):
-                    title = line[2:].strip()
-                    break
-            
-            for line in lines:
-                if line.startswith("## Goal") or line.startswith("## Description") or line.startswith("Description:"):
-                    # grab the next non-empty line or summary
-                    idx = lines.index(line)
-                    if idx + 1 < len(lines):
-                        desc = lines[idx + 1].strip()
-                    break
-            found_skills.append((title, desc, path))
-        except Exception:
+    seen_names = set()
+    for s_dir in skills_dirs:
+        if not s_dir.exists() or not s_dir.is_dir():
             continue
+        for path in sorted(s_dir.glob("*.md")):
+            if path.stem in seen_names:
+                continue
+            seen_names.add(path.stem)
+            try:
+                content = path.read_text(encoding="utf-8", errors="replace")
+                lines = content.splitlines()
+                title = path.stem.replace("_", " ").title()
+                desc = "Custom skill instruction file."
+                
+                for line in lines:
+                    if line.startswith("# "):
+                        title = line[2:].strip()
+                        break
+                
+                for line in lines:
+                    if line.startswith("## Goal") or line.startswith("## Description") or line.startswith("Description:"):
+                        idx = lines.index(line)
+                        if idx + 1 < len(lines):
+                            desc = lines[idx + 1].strip()
+                        break
+                found_skills.append((title, desc, path))
+            except Exception:
+                continue
     return found_skills
 
 
-def pick_skill_interactive() -> Optional[str]:
-    skills = list_skills()
+def pick_skill_interactive(cwd: Optional[Path] = None) -> Optional[str]:
+    skills = list_skills(cwd=cwd)
     if not skills:
         warn("No skills found in 'skills/' directory.")
         return None
@@ -5093,7 +5100,7 @@ def main() -> int:
                         print("Usage: /system <text|file> to update.")
                     continue
                 if command == "/skill":
-                    skills = list_skills()
+                    skills = list_skills(cwd=cwd)
                     if not skills:
                         warn("No skills found in 'skills/' directory.")
                         continue
@@ -5118,10 +5125,10 @@ def main() -> int:
                         else:
                             warn(f"Skill not found: {remainder}. Available skills: {', '.join(p.stem for _, _, p in skills)}")
                     else:
-                        info("Available skills:")
-                        for title_str, _, path in skills:
-                            print(f"  - {path.stem} : {title_str}")
-                        info("Usage: /skill <name>")
+                        chosen_skill = pick_skill_interactive(cwd=cwd)
+                        if chosen_skill:
+                            contents.append(make_user_content(f"Skill instructions loaded:\n\n{chosen_skill}"))
+                            info("Skill instructions loaded.")
                     continue
                 if command in {"/resume", "/r"}:
                     chosen_transcript = None
