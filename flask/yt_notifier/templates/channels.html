@@ -4,10 +4,10 @@
 <div class="max-w-2xl mx-auto">
     <h1 class="text-3xl font-bold text-white mb-8">Manage Channels</h1>
     
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8">
+    <div class="bg-slate-900 border border-slate-800 rounded-none p-6 mb-8">
         <form action="{{ url_for('manage_channels') }}" method="POST" class="flex flex-col sm:flex-row gap-4">
-            <input type="text" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
-            <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl text-sm font-semibold transition">
+            <input type="text" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-none px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-none text-sm font-semibold transition">
                 Add Channel
             </button>
         </form>
@@ -15,7 +15,7 @@
 
     <div class="space-y-3">
         {% for channel in channels %}
-        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-xl hover:border-slate-700 transition">
+        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-none hover:border-slate-700 transition">
             <div class="flex items-center space-x-4">
                 <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
                     <i class="fa-solid fa-user"></i>

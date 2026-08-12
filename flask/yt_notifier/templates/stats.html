@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-x-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-none p-6 overflow-x-auto">
         <div class="min-w-[600px]">
             {% for stat in stats %}
             <div class="mb-6">
@@ -24,7 +24,7 @@
                 <div class="flex gap-1 overflow-x-auto pb-2">
                     {% for i in range(days|length) %}
                     {% set date_obj = days[i] | to_datetime %}
-                    <div class="w-3 h-3 flex-shrink-0 rounded-sm {% if stat.daily_counts[i] == 0 %}bg-slate-800{% elif stat.daily_counts[i] == 1 %}bg-red-900{% elif stat.daily_counts[i] == 2 %}bg-red-700{% else %}bg-red-500{% endif %}" 
+                    <div class="w-3 h-3 flex-shrink-0 rounded-none {% if stat.daily_counts[i] == 0 %}bg-slate-800{% elif stat.daily_counts[i] == 1 %}bg-red-900{% elif stat.daily_counts[i] == 2 %}bg-red-700{% else %}bg-red-500{% endif %}" 
                          title="{{ date_obj.strftime('%A, %b %d') }}: {{ stat.daily_counts[i] }} uploads"></div>
                     {% endfor %}
                 </div>

@@ -12,7 +12,7 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for video in videos %}
-    <div class="group bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/10 {% if video.is_new %}ring-1 ring-red-500/30{% else %}opacity-60 grayscale-[0.5]{% endif %}">
+    <div class="group bg-slate-900 border border-slate-800 rounded-none overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/10 {% if video.is_new %}ring-1 ring-red-500/30{% else %}opacity-60 grayscale-[0.5]{% endif %}">
         <a href="{{ video.link }}" target="_blank" class="block relative aspect-video bg-slate-950 overflow-hidden">
             <img src="https://img.youtube.com/vi/{{ video.video_id }}/mqdefault.jpg" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
