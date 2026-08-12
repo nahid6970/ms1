@@ -3000,7 +3000,7 @@ def interactive_select(
         key = read_key()
         if key in ("\r", "\n"):
             return items[index]
-        if key == "\x1b":
+        if key == "\x1b" or key.lower() == "q":
             return None
         if key in ("\xe0H", "\x00H"):
             index = (index - 1) % len(items)
@@ -3018,8 +3018,6 @@ def interactive_select(
                 if not items:
                     return None
                 index = max(0, min(index, len(items) - 1))
-        elif key.lower() == "q":
-            return None
 
 
 def pick_model_interactive(
