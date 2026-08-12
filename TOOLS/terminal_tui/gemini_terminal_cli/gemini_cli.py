@@ -3679,22 +3679,25 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
                 continue
 
             first_prompt = ""
+            user_msg_count = 0
             for msg in contents:
                 if msg.get("role") == "user":
                     parts = msg.get("parts", [])
+                    is_user_text = False
                     for p in parts:
                         if "text" in p:
-                            raw = str(p["text"]).strip()
-                            first_prompt = re.sub(r"\s+", " ", raw)
-                            break
-                    if first_prompt:
-                        break
+                            is_user_text = True
+                            if not first_prompt:
+                                raw = str(p["text"]).strip()
+                                first_prompt = re.sub(r"\s+", " ", raw)
+                    if is_user_text:
+                        user_msg_count += 1
+
             if not first_prompt:
                 first_prompt = "<No user text>"
 
             model = str(data.get("model", "unknown"))
             project_root = str(data.get("project_root", ""))
-            msg_count = len(contents)
             rel_time = format_relative_time(mtime)
             full_dt = dt.datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
 
@@ -3705,7 +3708,7 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
                 "full_date": full_dt,
                 "model": model,
                 "project_root": project_root,
-                "msg_count": msg_count,
+                "msg_count": max(1, user_msg_count),
                 "first_prompt": first_prompt[:150],
                 "data": data,
             })
