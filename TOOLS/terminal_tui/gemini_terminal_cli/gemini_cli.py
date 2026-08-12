@@ -3696,6 +3696,12 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
             if not first_prompt:
                 first_prompt = "<No user text>"
 
+            tool_call_count = 0
+            for msg in contents:
+                for p in msg.get("parts", []):
+                    if isinstance(p, dict) and "functionCall" in p:
+                        tool_call_count += 1
+
             model = str(data.get("model", "unknown"))
             project_root = str(data.get("project_root", ""))
             rel_time = format_relative_time(mtime)
@@ -3709,6 +3715,7 @@ def list_recent_transcripts(limit: int = 100) -> List[Dict[str, Any]]:
                 "model": model,
                 "project_root": project_root,
                 "msg_count": max(1, user_msg_count),
+                "tool_count": tool_call_count,
                 "first_prompt": first_prompt[:150],
                 "data": data,
             })
@@ -3822,7 +3829,8 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         saved_date = current_item.get("full_date", current_item["date_str"])
         model_s = short_model_label(current_item["model"])[:18]
         file_name = current_item["path"].name[:28]
-        msgs_str = str(current_item["msg_count"])[:4]
+        msgs_str = str(current_item["msg_count"])[:3]
+        tools_str = str(current_item.get("tool_count", 0))[:3]
         p_root_fixed = p_root[:35]
 
         lbl_file = _ansi_wrap("📁 File:", "1;36")
@@ -3834,8 +3842,11 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         lbl_model = _ansi_wrap("🤖 Model:", "1;35")
         val_model = _ansi_wrap(f"{model_s:<18}", "1;37")
 
-        lbl_msgs = _ansi_wrap("💬 Msgs:", "1;33")
-        val_msgs = _ansi_wrap(f"{msgs_str:>4}", "97")
+        lbl_turns = _ansi_wrap("💬 Turns:", "1;33")
+        val_turns = _ansi_wrap(f"{msgs_str:>3}", "97")
+
+        lbl_tools = _ansi_wrap("🛠️ Tools:", "1;32")
+        val_tools = _ansi_wrap(f"{tools_str:>3}", "97")
 
         lbl_saved = _ansi_wrap("🕒 Saved:", "1;34")
         val_saved = _ansi_wrap(f"{saved_date:<16}", "90")
@@ -3852,7 +3863,7 @@ def pick_transcript_interactive() -> Optional[Dict[str, Any]]:
         return [
             divider,
             f"  {lbl_file} {val_file}  {sep}  {lbl_root} {val_root}",
-            f"  {lbl_model} {val_model}  {sep}  {lbl_msgs} {val_msgs}  {sep}  {lbl_saved} {val_saved}",
+            f"  {lbl_model} {val_model}  {sep}  {lbl_turns} {val_turns}  {sep}  {lbl_tools} {val_tools}  {sep}  {lbl_saved} {val_saved}",
             f"  {lbl_prompt} {val_prompt}",
             f"  {b_enter}   {sep}   {b_del}   {sep}   {b_esc}",
         ]
