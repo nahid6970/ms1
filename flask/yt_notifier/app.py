@@ -200,13 +200,15 @@ def toggle_read(video_id):
     return '', 204
 
 from datetime import datetime, timedelta
+from collections import defaultdict
+
+app.jinja_env.filters['to_datetime'] = lambda d: datetime.strptime(d, '%Y-%m-%d')
 
 @app.route('/stats')
 def stats():
-    period = request.args.get('period', 'month') # default to month
+    period = request.args.get('period', 'month')
     days = 30
     if period == 'week': days = 7
-    elif period == 'year': days = 365
     
     cutoff = datetime.now() - timedelta(days=days)
     
@@ -214,7 +216,6 @@ def stats():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # Get videos within the selected period
     cursor.execute('''
         SELECT c.channel_name, v.published
         FROM videos v
@@ -223,35 +224,33 @@ def stats():
     ''')
     rows = cursor.fetchall()
     
-    channel_stats = {}
+    # Group by channel and day
+    channel_activity = defaultdict(lambda: defaultdict(int))
     for row in rows:
         try:
             pub_date = datetime.fromisoformat(row['published'].replace('Z', '+00:00').replace('T', ' '))
-            # Remove timezone info for comparison if present
             if pub_date.tzinfo: pub_date = pub_date.replace(tzinfo=None)
-        except:
-            continue
+        except: continue
             
         if pub_date < cutoff: continue
-            
-        name = row['channel_name']
-        if name not in channel_stats: channel_stats[name] = []
-        channel_stats[name].append(pub_date)
+        
+        day_str = pub_date.strftime('%Y-%m-%d')
+        channel_activity[row['channel_name']][day_str] += 1
     
-    processed_stats = []
-    for name, dates in channel_stats.items():
-        if len(dates) > 1:
-            gaps = []
-            for i in range(len(dates) - 1):
-                diff = dates[i] - dates[i+1]
-                gaps.append(diff.total_seconds() / 3600)
-            avg_gap = sum(gaps) / len(gaps)
-            processed_stats.append({'name': name, 'avg_gap': round(avg_gap, 1)})
-        else:
-            processed_stats.append({'name': name, 'avg_gap': 0})
+    # Prepare data for template
+    stats_data = []
+    all_days = [(datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(days)][::-1]
+    
+    for channel, activity in channel_activity.items():
+        daily_counts = [activity.get(day, 0) for day in all_days]
+        stats_data.append({
+            'name': channel,
+            'daily_counts': daily_counts,
+            'total': sum(daily_counts)
+        })
             
     conn.close()
-    return render_template('stats.html', stats=processed_stats, period=period)
+    return render_template('stats.html', stats=stats_data, period=period, days=all_days)
 
 if __name__ == '__main__':
     init_db()
