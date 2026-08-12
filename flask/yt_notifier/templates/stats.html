@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Stats | YouTube Notifier{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold text-white mb-8">Upload Frequency Analysis</h1>
+    <p class="text-slate-400 mb-6 text-sm">Average time gap between consecutive video uploads (in hours).</p>
+    
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <div class="space-y-6">
+            {% for stat in stats %}
+            <div>
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-slate-300 font-medium">{{ stat.name }}</span>
+                    <span class="text-red-400 font-bold">{{ stat.avg_gap }} hours</span>
+                </div>
+                <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden">
+                    <!-- Scale: 0 to 168 hours (1 week) -->
+                    {% set width = (stat.avg_gap / 168 * 100) %}
+                    {% if width > 100 %}{% set width = 100 %}{% endif %}
+                    <div class="bg-gradient-to-r from-emerald-500 to-red-500 h-3 rounded-full" 
+                         style="width: {{ width }}%">
+                    </div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-600 mt-1">
+                    <span>Frequent</span>
+                    <span>1 Week</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

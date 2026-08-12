@@ -47,6 +47,9 @@
                     <a href="{{ url_for('manage_channels') }}" class="px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 {% if request.endpoint == 'manage_channels' %}bg-slate-800 text-red-400{% else %}text-slate-300{% endif %}">
                         <i class="fa-solid fa-tv mr-1.5"></i> Channels
                     </a>
+                    <a href="{{ url_for('stats') }}" class="px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 {% if request.endpoint == 'stats' %}bg-slate-800 text-red-400{% else %}text-slate-300{% endif %}">
+                        <i class="fa-solid fa-chart-pie mr-1.5"></i> Stats
+                    </a>
                     <a href="{{ url_for('refresh_all') }}" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/30 transition transform active:scale-95 flex items-center space-x-1.5">
                         <i class="fa-solid fa-rotate"></i>
                         <span>Check Updates</span>
