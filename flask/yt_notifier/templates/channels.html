@@ -17,8 +17,12 @@
         {% for channel in channels %}
         <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-none hover:border-slate-700 transition">
             <div class="flex items-center space-x-4">
-                <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500">
+                <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden">
+                    {% if channel.thumbnail %}
+                    <img src="{{ channel.thumbnail }}" class="w-full h-full object-cover">
+                    {% else %}
                     <i class="fa-solid fa-user"></i>
+                    {% endif %}
                 </div>
                 <div>
                     <div class="text-sm font-medium text-white">{{ channel.channel_name }}</div>

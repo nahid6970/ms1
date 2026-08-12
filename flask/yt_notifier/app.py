@@ -35,7 +35,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-def extract_channel_id(url):
+def extract_channel_info(url):
     url = url.strip()
     if not url.startswith('http'):
         if url.startswith('@'):
@@ -44,35 +44,32 @@ def extract_channel_id(url):
             url = f"https://www.youtube.com/@{url}"
 
     try:
-        if 'channel/' in url:
-            parts = url.split('channel/')
-            channel_id = parts[1].split('/')[0].split('?')[0]
-            return channel_id
-        
-        # Scrape page for RSS feed link or meta tag
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
         resp = requests.get(url, headers=headers, timeout=10)
         if resp.status_code == 200:
             soup = BeautifulSoup(resp.text, 'html.parser')
-            # Look for channel_id link rel="canonical" or RSS link
+            
+            # Extract Channel ID
+            channel_id = None
             rss_link = soup.find('link', rel='alternate', type='application/rss+xml')
             if rss_link and 'channel_id=' in rss_link.get('href', ''):
-                return rss_link['href'].split('channel_id=')[1].split('&')[0]
+                channel_id = rss_link['href'].split('channel_id=')[1].split('&')[0]
+            else:
+                meta_cid = soup.find('meta', {'itemprop': 'channelId'})
+                if meta_cid: channel_id = meta_cid.get('content')
             
-            meta_cid = soup.find('meta', {'itemprop': 'channelId'})
-            if meta_cid:
-                return meta_cid.get('content')
-
-            # Search in text for channelId
-            for line in resp.text.splitlines():
-                if '"channelId":"' in line:
-                    start = line.find('"channelId":"') + 13
-                    end = line.find('"', start)
-                    if end > start:
-                        return line[start:end]
+            # Extract Thumbnail
+            thumbnail = None
+            img_tag = soup.find('link', rel='image_src')
+            if img_tag: thumbnail = img_tag.get('href')
+            else:
+                meta_img = soup.find('meta', property='og:image')
+                if meta_img: thumbnail = meta_img.get('content')
+                
+            return channel_id, thumbnail
     except Exception as e:
-        print("Error extracting channel ID:", e)
-    return None
+        print("Error extracting channel info:", e)
+    return None, None
 
 def refresh_channel_videos(channel_id):
     rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
@@ -165,7 +162,7 @@ def manage_channels():
             flash('Please enter a valid YouTube channel URL or handle.', 'danger')
             return redirect(url_for('manage_channels'))
         
-        channel_id = extract_channel_id(url)
+        channel_id, thumbnail = extract_channel_info(url)
         if not channel_id:
             flash('Could not resolve YouTube Channel ID. Please check the URL.', 'danger')
             return redirect(url_for('manage_channels'))
@@ -173,8 +170,8 @@ def manage_channels():
         conn = sqlite3.connect(DB_FILE)
         cursor = conn.cursor()
         try:
-            cursor.execute('INSERT INTO channels (url, channel_id, channel_name) VALUES (?, ?, ?)', 
-                           (url, channel_id, 'Fetching...'))
+            cursor.execute('INSERT INTO channels (url, channel_id, channel_name, thumbnail) VALUES (?, ?, ?, ?)', 
+                           (url, channel_id, 'Fetching...', thumbnail))
             conn.commit()
             refresh_channel_videos(channel_id)
             flash('Channel added and synced successfully!', 'success')
