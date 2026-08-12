@@ -3739,15 +3739,15 @@ def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str
         tool_width = max(tool_width, len(tool_s))
     return {
         "folder": min(max(folder_width, 6), 16),
-        "msg": min(max(msg_width, 3), 5),
-        "tool": min(max(tool_width, 3), 5),
+        "msg": min(max(msg_width, 4), 6),
+        "tool": min(max(tool_width, 5), 6),
     }
 
 
 def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
     w_folder = widths.get("folder", 12)
     w_msg = widths.get("msg", 4)
-    w_tool = widths.get("tool", 4)
+    w_tool = widths.get("tool", 5)
 
     h_idx = _ansi_wrap(f"{'#':>2}.", "1;36")
     h_age = _ansi_wrap(f"{'Age':<10}", "1;36")
@@ -3756,7 +3756,14 @@ def build_transcript_table_header(widths: Dict[str, int]) -> List[str]:
     h_tool = _ansi_wrap(f"{'Tools':>{w_tool}}", "1;36")
     h_prompt = _ansi_wrap("First Prompt", "1;36")
 
-    header_str = f"   {h_idx}  {h_age}  {h_folder}  {h_msg}  {h_tool}  {h_prompt}"
+    header_str = (
+        f"  {h_idx} "
+        f"{h_age}  "
+        f"{h_folder}  "
+        f"{h_msg}  "
+        f"{h_tool}  "
+        f"{h_prompt}"
+    )
 
     return [header_str]
 
@@ -3776,7 +3783,7 @@ def format_transcript_entry(
 
     w_folder = widths["folder"]
     w_msg = widths["msg"]
-    w_tool = widths.get("tool", 4)
+    w_tool = widths["tool"]
 
     folder_s = folder_s[:w_folder]
     msg_s = msg_s[:w_msg]
