@@ -17,9 +17,9 @@
         <div class="min-w-[600px]">
             {% for stat in stats %}
             <div class="mb-6">
-                <div class="flex justify-between items-center mb-3">
+                <div class="mb-3">
                     <span class="text-slate-300 font-medium text-sm">{{ stat.name }}</span>
-                    <span class="text-slate-500 text-xs">{{ stat.total }} uploads</span>
+                    <span class="text-red-500 font-bold text-xs ml-2">({{ stat.total }})</span>
                 </div>
                 <div class="flex gap-1 overflow-x-auto pb-2">
                     {% for i in range(days|length) %}
