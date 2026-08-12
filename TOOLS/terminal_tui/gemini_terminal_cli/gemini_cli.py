@@ -559,6 +559,8 @@ if Completer is not None:
             ("/mm", "Open model picker / switch model"),
             ("/test", "Test all models and hide failures"),
             ("/api", "Open API account picker"),
+            ("/setting", "Open interactive CLI settings"),
+            ("/settings", "Open interactive CLI settings"),
             ("/loops", "Set max tool-call loops"),
             ("/failover", "Open auto-failover picker"),
             ("/tool", "Open tool manager"),
@@ -712,16 +714,25 @@ def read_dynamic_prompt(
     prompt_provider: Callable[[], str],
     history: Optional[List[str]] = None,
     cwd: Optional[Path] = None,
+    prompt_fg: str = "ansired",
+    prompt_bg: str = "",
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
-        # Use InMemoryHistory with our managed deduplicated list for strict control
         prompt_history = InMemoryHistory(history or [])
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
         
-        # Style to make user input text red
+        bg_str = prompt_bg.strip()
+        fg_str = prompt_fg.strip() or "ansired"
+        if bg_str and bg_str != "none":
+            if not bg_str.startswith("bg:"):
+                bg_str = f"bg:{bg_str}"
+            style_spec = f"{bg_str} {fg_str}"
+        else:
+            style_spec = fg_str
+
         user_style = Style.from_dict({
-            '': 'ansired', 
+            '': style_spec, 
         })
         
         return pt_prompt(
@@ -2603,9 +2614,13 @@ def default_model_prefs() -> Dict[str, Any]:
         "aliases": {},
         "last_model": DEFAULT_MODEL,
         "last_api_account": "",
+        "system_instruction": DEFAULT_SYSTEM,
         "tool_loop_limit": DEFAULT_TOOL_LOOPS,
         "auto_failover_default": False,
         "auto_failover_projects": {},
+        "prompt_fg": "ansired",
+        "prompt_bg": "",
+        "prompt_prefix_color": "1;32",
     }
 
 
@@ -2667,6 +2682,9 @@ def load_model_prefs() -> Dict[str, Any]:
                 str(project_root): normalize_bool(enabled)
                 for project_root, enabled in auto_failover_projects.items()
             },
+            "prompt_fg": str(data.get("prompt_fg") or "ansired"),
+            "prompt_bg": str(data.get("prompt_bg") or ""),
+            "prompt_prefix_color": str(data.get("prompt_prefix_color") or "1;32"),
         })
         return prefs
     except Exception:
@@ -2701,6 +2719,9 @@ def save_model_prefs(
     auto_failover_default: bool = False,
     auto_failover_projects: Optional[Dict[str, bool]] = None,
     api_account_model_prefs: Optional[Dict[str, Dict[str, Any]]] = None,
+    prompt_fg: str = "ansired",
+    prompt_bg: str = "",
+    prompt_prefix_color: str = "1;32",
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
@@ -2720,6 +2741,9 @@ def save_model_prefs(
         "tool_loop_limit": int(tool_loop_limit),
         "auto_failover_default": bool(auto_failover_default),
         "auto_failover_projects": dict(sorted((str(k), bool(v)) for k, v in (auto_failover_projects or {}).items())),
+        "prompt_fg": prompt_fg,
+        "prompt_bg": prompt_bg,
+        "prompt_prefix_color": prompt_prefix_color,
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -4080,6 +4104,9 @@ def main() -> int:
     model_usage_counts: Dict[str, int] = dict(model_prefs.get("model_usage_counts", {}))
     disabled_tools: Set[str] = set(str(item) for item in model_prefs.get("disabled_tools", []))
     aliases: Dict[str, str] = dict(model_prefs.get("aliases", {}))
+    prompt_fg = str(model_prefs.get("prompt_fg") or "ansired")
+    prompt_bg = str(model_prefs.get("prompt_bg") or "")
+    prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
     last_assistant_response_text = ""
     last_turn_tokens: Optional[int] = None
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
@@ -4441,12 +4468,11 @@ def main() -> int:
         if cooldown_text:
             prefix += f" [{cooldown_text}]"
         
-        # Only display token count once conversation history exists
         tok_count = last_turn_tokens if last_turn_tokens is not None else (get_token_estimate() if contents else 0)
         if tok_count > 0:
             prefix += f" [{_format_token_count(tok_count)}]"
 
-        return _ansi_wrap(f"{prefix}> ", "1;32")
+        return _ansi_wrap(f"{prefix}> ", prompt_prefix_color)
 
     def persist_selection() -> None:
         account_name = active_api_account or saved_last_api_account
@@ -4466,6 +4492,9 @@ def main() -> int:
             auto_failover_default,
             auto_failover_projects,
             api_account_model_prefs,
+            prompt_fg,
+            prompt_bg,
+            prompt_prefix_color,
         )
 
     def add_api_account_interactive(provider: str = "gemini") -> None:
@@ -4654,7 +4683,13 @@ def main() -> int:
         command_history: List[str] = load_prompt_history()
         while True:
             try:
-                user_input = read_dynamic_prompt(prompt_text, command_history, cwd=cwd).strip()
+                user_input = read_dynamic_prompt(
+                    prompt_text,
+                    command_history,
+                    cwd=cwd,
+                    prompt_fg=prompt_fg,
+                    prompt_bg=prompt_bg,
+                ).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
                 break
@@ -4672,6 +4707,158 @@ def main() -> int:
                     break
                 if command == "/help":
                     print_help()
+                    continue
+                if command in {"/setting", "/settings"}:
+                    presets = [
+                        {"name": "Classic Red", "fg": "ansired", "bg": ""},
+                        {"name": "Matrix Green", "fg": "ansibrightgreen", "bg": ""},
+                        {"name": "Cyber Cyan", "fg": "ansibrightcyan", "bg": ""},
+                        {"name": "Solar Yellow", "fg": "ansibrightyellow", "bg": ""},
+                        {"name": "Royal Purple", "fg": "ansimagenta", "bg": ""},
+                        {"name": "Ocean Bar", "fg": "#ffffff", "bg": "#005f87"},
+                        {"name": "Fire Bar", "fg": "#ffffff", "bg": "#870000"},
+                        {"name": "Neon Dark Bar", "fg": "#00ffaf", "bg": "#262626"},
+                    ]
+                    fg_colors = [
+                        {"name": "Red", "value": "ansired"},
+                        {"name": "Bright Red", "value": "ansibrightred"},
+                        {"name": "Green", "value": "ansigreen"},
+                        {"name": "Bright Green", "value": "ansibrightgreen"},
+                        {"name": "Cyan", "value": "ansibrightcyan"},
+                        {"name": "Yellow", "value": "ansibrightyellow"},
+                        {"name": "Magenta", "value": "ansimagenta"},
+                        {"name": "White", "value": "ansiwhite"},
+                        {"name": "Custom Hex / Name", "value": "custom"},
+                    ]
+                    bg_colors = [
+                        {"name": "None (Transparent)", "value": ""},
+                        {"name": "Dark Gray Bar", "value": "#262626"},
+                        {"name": "Navy Blue Bar", "value": "#005f87"},
+                        {"name": "Dark Red Bar", "value": "#5f0000"},
+                        {"name": "Dark Green Bar", "value": "#005f00"},
+                        {"name": "Dark Purple Bar", "value": "#3a005f"},
+                        {"name": "Custom Hex / Name", "value": "custom"},
+                    ]
+                    while True:
+                        s_items = [
+                            {"key": "preset", "title": "Preset Color Themes", "desc": "1-click ready-made themes"},
+                            {"key": "fg", "title": "Prompt Foreground Color (FG)", "desc": f"Current: {prompt_fg}"},
+                            {"key": "bg", "title": "Prompt Background Color (BG)", "desc": f"Current: {prompt_bg or 'none'}"},
+                            {"key": "loops", "title": "Tool Loop Limit", "desc": f"Current: {tool_loop_limit}"},
+                            {"key": "failover", "title": "Auto Failover Settings", "desc": f"Current: {format_auto_failover_status()}"},
+                        ]
+                        def render_settings_item(item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                            marker = ">" if sel else " "
+                            row = f"{marker} {idx + 1:>2}. {item['title']:<32}  {item['desc']}"
+                            if sel:
+                                return _ansi_wrap(row, "48;5;24;97")
+                            return row
+
+                        c_setting = interactive_select(
+                            title_text="",
+                            items=s_items,
+                            render_item=render_settings_item,
+                            header_lines=None,
+                            dynamic_footer=None,
+                            footer_lines=["  Use Up/Down to navigate, Enter to select, Esc/Q to exit."],
+                            instructions="",
+                        )
+                        if not c_setting:
+                            break
+                        sk = c_setting["key"]
+                        if sk == "preset":
+                            def render_preset(p_item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                                marker = ">" if sel else " "
+                                bg_d = f"bg:{p_item['bg']}" if p_item['bg'] else "transparent"
+                                row = f"{marker} {idx + 1:>2}. {p_item['name']:<20}  (FG: {p_item['fg']}, BG: {bg_d})"
+                                if sel:
+                                    return _ansi_wrap(row, "48;5;24;97")
+                                return row
+                            c_p = interactive_select(
+                                title_text="",
+                                items=presets,
+                                render_item=render_preset,
+                                header_lines=None,
+                                footer_lines=["  Press Enter to apply preset theme, Esc to cancel."],
+                                instructions="",
+                            )
+                            if c_p:
+                                prompt_fg = c_p["fg"]
+                                prompt_bg = c_p["bg"]
+                                persist_selection()
+                                info(f"Applied theme '{c_p['name']}' (FG: {prompt_fg}, BG: {prompt_bg or 'none'})")
+                        elif sk == "fg":
+                            def render_fg(f_item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                                marker = ">" if sel else " "
+                                row = f"{marker} {idx + 1:>2}. {f_item['name']:<20}  ({f_item['value']})"
+                                if sel:
+                                    return _ansi_wrap(row, "48;5;24;97")
+                                return row
+                            c_f = interactive_select(
+                                title_text="",
+                                items=fg_colors,
+                                render_item=render_fg,
+                                header_lines=None,
+                                footer_lines=["  Press Enter to select color, Esc to cancel."],
+                                instructions="",
+                            )
+                            if c_f:
+                                if c_f["value"] == "custom":
+                                    val = input("Enter custom color (e.g. #ff0055, ansigreen, ansicyan): ").strip()
+                                    if val:
+                                        prompt_fg = val
+                                        persist_selection()
+                                        info(f"Set prompt text color to '{val}'")
+                                else:
+                                    prompt_fg = c_f["value"]
+                                    persist_selection()
+                                    info(f"Set prompt text color to '{prompt_fg}'")
+                        elif sk == "bg":
+                            def render_bg(b_item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                                marker = ">" if sel else " "
+                                val_s = b_item['value'] or "none"
+                                row = f"{marker} {idx + 1:>2}. {b_item['name']:<22}  ({val_s})"
+                                if sel:
+                                    return _ansi_wrap(row, "48;5;24;97")
+                                return row
+                            c_b = interactive_select(
+                                title_text="",
+                                items=bg_colors,
+                                render_item=render_bg,
+                                header_lines=None,
+                                footer_lines=["  Press Enter to select background color, Esc to cancel."],
+                                instructions="",
+                            )
+                            if c_b:
+                                if c_b["value"] == "custom":
+                                    val = input("Enter custom background (e.g. #262626, ansiblue): ").strip()
+                                    prompt_bg = val
+                                    persist_selection()
+                                    info(f"Set prompt background color to '{val or 'none'}'")
+                                else:
+                                    prompt_bg = c_b["value"]
+                                    persist_selection()
+                                    info(f"Set prompt background color to '{prompt_bg or 'none'}'")
+                        elif sk == "loops":
+                            val = input(f"Enter tool loop limit (current: {tool_loop_limit}): ").strip()
+                            if val:
+                                try:
+                                    n = int(val)
+                                    if n > 0:
+                                        tool_loop_limit = n
+                                        persist_selection()
+                                        info(f"Tool loop limit updated to {tool_loop_limit}")
+                                except ValueError:
+                                    warn("Invalid number.")
+                        elif sk == "failover":
+                            chosen_f = pick_failover_interactive(
+                                current_project_auto_failover_state(),
+                                auto_failover_session_override,
+                                auto_failover_default,
+                            )
+                            if chosen_f is not None:
+                                apply_failover_picker_state(chosen_f)
+                                info(failover_status_line())
                     continue
                 if command == "/reset":
                     contents = []
