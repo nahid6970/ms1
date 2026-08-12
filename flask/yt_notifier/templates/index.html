@@ -35,10 +35,10 @@
                 {% endfor %}
                 <div class="text-[10px] uppercase tracking-wider text-red-500 font-bold">{{ video.channel_name }}</div>
             </div>
-            <h3 class="text-base font-semibold text-slate-100 leading-snug mb-3 line-clamp-2 group-hover:text-red-400 transition h-12">
+            <h3 class="text-base font-semibold text-slate-100 leading-snug mb-auto line-clamp-2 group-hover:text-red-400 transition h-12">
                 {{ video.title }}
             </h3>
-            <div class="flex items-center justify-between text-slate-500 text-xs mt-auto pt-4">
+            <div class="flex items-center justify-between text-slate-500 text-xs mt-4">
                 <span>{{ video.published[:10] }}</span>
                 <div class="flex items-center space-x-3">
                     <button onclick="toggleRead({{ video.id }})" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
