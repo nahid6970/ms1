@@ -72,11 +72,18 @@ def extract_channel_info(url):
     return None, None
 
 def refresh_channel_videos(channel_id):
+    # Fetch channel info again to update thumbnail if missing
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT url, thumbnail FROM channels WHERE channel_id = ?", (channel_id,))
+    row = cursor.fetchone()
+    if row and (not row['thumbnail'] or row['thumbnail'] == 'None'):
+        _, thumbnail = extract_channel_info(row['url'])
+        cursor.execute("UPDATE channels SET thumbnail = ? WHERE channel_id = ?", (thumbnail, channel_id))
+    
     rss_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
     feed = feedparser.parse(rss_url)
-    
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
     
     channel_title = feed.feed.get('title', 'Unknown Channel')
     cursor.execute("UPDATE channels SET channel_name = ? WHERE channel_id = ?", (channel_title, channel_id))
