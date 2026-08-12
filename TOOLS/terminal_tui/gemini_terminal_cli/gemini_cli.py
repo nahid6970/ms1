@@ -2840,9 +2840,9 @@ def interactive_select(
         sample_footer = dynamic_footer(items[index]) if dynamic_footer else footer_lines
         footer_count = len(sample_footer) if sample_footer else 0
 
-        # Safety margin (9 lines) ensures total printed height never exceeds terminal height or triggers scrolling
-        overhead = 9 + header_count + footer_count
-        max_visible = max(3, term_h - overhead)
+        # Title (1) + Inst (1) + Blank (1) + Header (header_count) + Blank (1) + Scroll (1) + Blank (1) + Footer (footer_count)
+        fixed_overhead = 6 + header_count + footer_count
+        max_visible = max(3, term_h - fixed_overhead - 1)
 
         if index < top_index:
             top_index = index
@@ -3700,9 +3700,9 @@ def build_transcript_table_widths(transcripts: List[Dict[str, Any]]) -> Dict[str
         msg_s = str(item["msg_count"])
         msg_width = max(msg_width, len(msg_s))
     return {
-        "folder": min(max(folder_width, 6), 18),
-        "model": min(max(model_width, 6), 20),
-        "msg": min(max(msg_width, 3), 6),
+        "folder": min(max(folder_width, 6), 16),
+        "model": min(max(model_width, 6), 22),
+        "msg": min(max(msg_width, 3), 5),
     }
 
 
@@ -3737,11 +3737,20 @@ def format_transcript_entry(
     msg_s = str(item["msg_count"])
     prompt_s = item["first_prompt"]
 
+    w_folder = widths["folder"]
+    w_model = widths["model"]
+    w_msg = widths["msg"]
+
+    # Strictly truncate string variables to their allocated column width so they never spill over into next column
+    folder_s = folder_s[:w_folder]
+    model_s = model_s[:w_model]
+    msg_s = msg_s[:w_msg]
+
     marker = ">" if selected else " "
 
     # Dynamically truncate prompt_s to prevent line wrapping and broken selection table layouts
     term_w = _get_term_width()
-    prefix_len = 6 + 16 + 2 + widths["folder"] + 2 + widths["model"] + 2 + widths["msg"] + 2
+    prefix_len = 6 + 16 + 2 + w_folder + 2 + w_model + 2 + w_msg + 2
     avail_prompt_len = term_w - prefix_len - 1
 
     if avail_prompt_len < 10:
@@ -3749,16 +3758,16 @@ def format_transcript_entry(
 
     if len(prompt_s) > avail_prompt_len:
         if avail_prompt_len > 3:
-            prompt_s = prompt_s[:avail_prompt_len - 3] + "..."
+            prompt_s = prompt_s[:avail_prompt_len - 3] + ".."
         else:
             prompt_s = prompt_s[:avail_prompt_len]
 
     row = (
         f"{marker} {index:>2}. "
         f"{date_s:<16}  "
-        f"{folder_s:<{widths['folder']}}  "
-        f"{model_s:<{widths['model']}}  "
-        f"{msg_s:>{widths['msg']}}  "
+        f"{folder_s:<{w_folder}}  "
+        f"{model_s:<{w_model}}  "
+        f"{msg_s:>{w_msg}}  "
         f"{prompt_s}"
     )
 
