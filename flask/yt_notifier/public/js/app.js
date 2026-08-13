@@ -552,12 +552,18 @@ function inactivityBadge(lastUpload) {
   return "";
 }
 
-function channelRow(channel) {
+function channelRow(channel, categories = []) {
   const disabled = Boolean(channel.disabled);
   const filters = Array.isArray(channel.titleFilters) ? channel.titleFilters : [];
   const filterCount = filters.length;
   const filterText = filters.join("\n");
   const category = channel.category ?? "";
+
+  const optionsHtml = categories.map((cat) => `
+    <option value="${esc(cat)}" ${cat.toLowerCase() === category.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>
+  `).join("");
+
+  const isCustomInput = category && !categories.some((c) => c.toLowerCase() === category.toLowerCase());
 
   return `
   <div class="motion-card bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
@@ -592,9 +598,13 @@ function channelRow(channel) {
         </button>
       </div>
     </div>
-    <form id="folder-${esc(channel.channelId)}" onsubmit="saveChannelFolder(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex items-center gap-3">
-      <input type="text" value="${esc(category)}" class="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-red-500" placeholder="e.g. Tech, Gaming, Music, Podcasts">
-      <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-500">Save Folder</button>
+    <form id="folder-${esc(channel.channelId)}" onsubmit="saveChannelFolder(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex flex-col sm:flex-row items-center gap-2">
+      <input id="input-folder-${esc(channel.channelId)}" type="text" value="${esc(category)}" class="flex-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-red-500" placeholder="Folder name (e.g. Tech, Gaming)">
+      <select onchange="applyFolderDropdownSelection(this, '${esc(channel.channelId)}')" class="w-full sm:w-auto rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-300 outline-none focus:border-red-500">
+        <option value="">Existing Folders...</option>
+        ${optionsHtml}
+      </select>
+      <button type="submit" class="w-full sm:w-auto rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-500">Save Folder</button>
     </form>
     <form id="filters-${esc(channel.channelId)}" onsubmit="saveChannelFilters(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
       <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Title filters</label>
@@ -607,6 +617,13 @@ function channelRow(channel) {
   </div>`;
 }
 
+window.applyFolderDropdownSelection = function applyFolderDropdownSelection(selectEl, channelId) {
+  const input = document.getElementById(`input-folder-${channelId}`);
+  if (input && selectEl.value) {
+    input.value = selectEl.value;
+  }
+};
+
 window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
   const form = document.getElementById(`folder-${channelId}`);
   if (form) form.classList.toggle("hidden");
@@ -614,12 +631,13 @@ window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
 
 window.saveChannelFolder = async function saveChannelFolder(event, channelId) {
   event.preventDefault();
-  const form = event.currentTarget;
-  const input = form.querySelector("input");
+  const input = document.getElementById(`input-folder-${channelId}`);
+  const categoryValue = input ? input.value.trim() : "";
+
   try {
     await callConvex("mutation", "channels:updateCategory", {
       channelId,
-      category: input.value,
+      category: categoryValue,
     });
     await renderChannels({ refreshNav: !isPopupOpen() });
     if (PAGE === "feed") await renderFeed();
@@ -682,8 +700,9 @@ window.deleteChannel = async function deleteChannel(channelId) {
 };
 
 async function renderChannels({ refreshNav = true } = {}) {
-  const [channels, settings, unread] = await Promise.all([
+  const [channels, categories, settings, unread] = await Promise.all([
     callConvex("query", "channels:list"),
+    callConvex("query", "channels:categories"),
     callConvex("query", "settings:get"),
     callConvex("query", "videos:unreadCount"),
   ]);
@@ -692,7 +711,7 @@ async function renderChannels({ refreshNav = true } = {}) {
   const list = document.getElementById("channelList");
   if (!list) return;
   list.innerHTML = channels.length
-    ? channels.map(channelRow).join("")
+    ? channels.map((channel) => channelRow(channel, categories)).join("")
     : '<p class="text-slate-600 text-sm">No channels yet. Add your first one above!</p>';
 }
 
