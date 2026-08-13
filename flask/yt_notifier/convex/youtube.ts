@@ -12,6 +12,7 @@ export interface FeedEntry {
   videoId: string;
   title: string;
   link: string;
+  duration?: string;
   published: string;
 }
 
@@ -137,6 +138,12 @@ async function fetchFeedViaApi(channelId: string, apiKey: string): Promise<Chann
       }>;
     };
     const items = data.items ?? [];
+    const durationsById = await fetchVideoDurations(
+      items
+        .map((item) => item.snippet?.resourceId?.videoId)
+        .filter((id): id is string => Boolean(id)),
+      apiKey,
+    );
     const entries: FeedEntry[] = items.map((item) => {
       const s = item.snippet ?? {};
       const videoId = s.resourceId?.videoId ?? "";
@@ -144,6 +151,7 @@ async function fetchFeedViaApi(channelId: string, apiKey: string): Promise<Chann
         videoId,
         title: s.title ?? "",
         link: `https://www.youtube.com/watch?v=${videoId}`,
+        duration: durationsById.get(videoId),
         published: s.publishedAt ?? "",
       };
     });
@@ -155,6 +163,54 @@ async function fetchFeedViaApi(channelId: string, apiKey: string): Promise<Chann
     console.error("YouTube Data API feed error:", err);
     return null;
   }
+}
+
+async function fetchVideoDurations(
+  videoIds: string[],
+  apiKey: string,
+): Promise<Map<string, string>> {
+  const durations = new Map<string, string>();
+  if (videoIds.length === 0) return durations;
+
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos` +
+        `?part=contentDetails&id=${videoIds.join(",")}&key=${apiKey}`,
+    );
+    if (!res.ok) {
+      console.error(
+        `YouTube Data API videos error (${res.status}):`,
+        (await res.text()).slice(0, 300),
+      );
+      return durations;
+    }
+    const data = (await res.json()) as {
+      items?: Array<{
+        id?: string;
+        contentDetails?: { duration?: string };
+      }>;
+    };
+    for (const item of data.items ?? []) {
+      if (!item.id || !item.contentDetails?.duration) continue;
+      durations.set(item.id, formatIsoDuration(item.contentDetails.duration));
+    }
+  } catch (err) {
+    console.error("YouTube Data API duration error:", err);
+  }
+
+  return durations;
+}
+
+function formatIsoDuration(value: string): string {
+  const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!match) return "";
+  const hours = Number(match[1] ?? 0);
+  const minutes = Number(match[2] ?? 0);
+  const seconds = Number(match[3] ?? 0);
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 /* ------------------------------- Scraping -------------------------------- */

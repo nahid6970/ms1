@@ -25,6 +25,7 @@ export const list = query({
       videoId: video.videoId,
       title: video.title,
       link: video.link,
+      duration: video.duration,
       published: video.published,
       isNew: video.isNew,
       channelId: video.channelId,
@@ -63,6 +64,7 @@ export const addFromFeed = internalMutation({
         videoId: v.string(),
         title: v.string(),
         link: v.string(),
+        duration: v.optional(v.string()),
         published: v.string(),
       }),
     ),
@@ -81,10 +83,13 @@ export const addFromFeed = internalMutation({
           videoId: entry.videoId,
           title: entry.title,
           link: entry.link,
+          duration: entry.duration || undefined,
           published: entry.published,
           isNew: true,
         });
         newVideos += 1;
+      } else if (!existing.duration && entry.duration) {
+        await ctx.db.patch(existing._id, { duration: entry.duration });
       }
     }
     return { newVideos };

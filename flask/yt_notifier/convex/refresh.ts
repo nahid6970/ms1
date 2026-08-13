@@ -21,6 +21,7 @@ export const refreshChannel = action({
       videoId: e.videoId,
       title: e.title,
       link: e.link,
+      duration: e.duration,
       published: e.published ? new Date(e.published).toISOString() : "",
     }));
 

@@ -25,6 +25,20 @@ function isoDate(dateStr) {
   return isNaN(d.getTime()) ? String(dateStr).slice(0, 10) : d.toISOString().slice(0, 10);
 }
 
+function timeLabel(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr || "Unknown date");
+  const diffMs = Date.now() - d.getTime();
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  if (diffMs < minute) return "Just now";
+  if (diffMs < hour) return `${Math.floor(diffMs / minute)}m ago`;
+  if (diffMs < day) return `${Math.floor(diffMs / hour)}h ago`;
+  if (diffMs < day * 7) return `${Math.floor(diffMs / day)}d ago`;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 function dayLabel(dateStr) {
   const d = new Date(dateStr);
   return isNaN(d.getTime())
@@ -100,15 +114,15 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16">
+      <div class="flex flex-col gap-3 py-3 lg:min-h-16 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-center space-x-3">
           <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-xl tracking-tight">
             <i class="fa-brands fa-youtube text-3xl animate-pulse"></i>
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
           </a>
         </div>
-        <div class="flex items-center space-x-4">
-          <a href="index.html" class="px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}">
+        <div class="flex flex-wrap items-center gap-2 lg:gap-4">
+          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}">
             <i class="fa-solid fa-bell mr-1.5"></i> Feed
             ${unreadCount > 0 ? `<span class="ml-1.5 px-2 py-0.5 text-xs bg-red-600 text-white rounded-full font-bold animate-bounce">${unreadCount}</span>` : ""}
           </a>
@@ -126,10 +140,10 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
             </div>
           </div>` : ""}
           ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
-          <a href="${l.href}" class="px-3 py-2 rounded-none text-sm font-medium transition hover:bg-slate-800 ${PAGE === l.page ? "bg-slate-800 text-red-400" : "text-slate-300"}">
+          <a href="${l.href}" class="nav-link ${PAGE === l.page ? "is-active" : ""} px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === l.page ? "bg-slate-800 text-red-400" : "text-slate-300"}">
             <i class="fa-solid ${l.icon} mr-1.5"></i> ${l.label}
           </a>`).join("")}
-          <button id="refreshButton" onclick="checkUpdates()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-4 py-2 rounded-none text-sm font-semibold shadow-lg shadow-red-900/30 transition transform active:scale-95 flex items-center space-x-1.5">
+          <button id="refreshButton" onclick="checkUpdates()" class="bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center space-x-1.5">
             <i class="fa-solid fa-rotate"></i>
             <span>Check Updates</span>
           </button>
@@ -175,20 +189,31 @@ async function refreshNavOnly() {
 function videoCard(video) {
   const isNew = video.isNew;
   return `
-  <div class="group bg-slate-900 border border-slate-800 rounded-none overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-red-900/10 ${isNew ? "ring-1 ring-red-500/30" : "opacity-60 grayscale-[0.5]"}">
+  <article class="motion-card group soft-panel bg-slate-900/90 border border-slate-800 rounded-lg overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-900/20 ${isNew ? "ring-1 ring-red-500/30" : "opacity-70 grayscale-[0.35]"}">
     <a href="${esc(video.link)}" target="_blank" class="block relative aspect-video bg-slate-950 overflow-hidden">
-      <img src="https://img.youtube.com/vi/${esc(video.videoId)}/mqdefault.jpg" alt="${esc(video.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
-      <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition"></div>
-      ${isNew ? `<div class="absolute bottom-2 right-2 bg-red-600 backdrop-blur px-2 py-1 rounded text-[10px] font-bold text-white">NEW</div>` : ""}
-    </a>
-    <div class="p-5 flex flex-col flex-grow">
-      <div class="flex items-center space-x-2 mb-2">
-        ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-6 h-6 rounded-full" alt="">` : ""}
-        <div class="text-[10px] uppercase tracking-wider text-red-500 font-bold">${esc(video.channelName)}</div>
+      <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
+      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
+      <div class="absolute left-3 top-3 flex items-center gap-2">
+        ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
       </div>
-      <h3 class="text-base font-semibold text-slate-100 leading-snug mb-auto line-clamp-2 group-hover:text-red-400 transition h-12">${esc(video.title)}</h3>
-      <div class="flex items-center justify-between text-slate-500 text-xs mt-4">
-        <span>${isoDate(video.published)}</span>
+      ${video.duration ? `<span class="absolute bottom-3 right-3 rounded-md bg-black/80 px-2 py-1 text-xs font-semibold text-white shadow-lg">${esc(video.duration)}</span>` : ""}
+    </a>
+    <div class="p-5 flex min-h-48 flex-col">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden text-slate-500 ring-1 ring-slate-700">
+          ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user text-sm"></i>`}
+        </div>
+        <div class="min-w-0">
+          <div class="truncate text-sm font-semibold text-slate-200 group-hover:text-white transition">${esc(video.channelName)}</div>
+          <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
+        </div>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-100 leading-snug mb-auto line-clamp-2 group-hover:text-red-400 transition">${esc(video.title)}</h3>
+      <div class="flex items-center justify-between border-t border-slate-800/80 text-slate-500 text-xs mt-5 pt-4">
+        <span class="inline-flex items-center gap-1.5">
+          <i class="fa-regular fa-clock"></i>
+          ${esc(isoDate(video.published))}
+        </span>
         <div class="flex items-center space-x-3">
           <button onclick="toggleRead('${esc(video._id)}')" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
             <input type="checkbox" class="sr-only peer" ${isNew ? "" : "checked"}>
@@ -200,7 +225,7 @@ function videoCard(video) {
         </div>
       </div>
     </div>
-  </div>`;
+  </article>`;
 }
 
 window.toggleRead = async function toggleRead(id) {
@@ -241,7 +266,7 @@ async function renderFeed() {
 
 function channelRow(channel) {
   return `
-  <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-4 rounded-none hover:border-slate-700 transition">
+  <div class="motion-card flex items-center justify-between bg-slate-900/90 border border-slate-800 p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
     <div class="flex items-center space-x-4">
       <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden">
         ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user"></i>`}

@@ -16,6 +16,7 @@ export default defineSchema({
     videoId: v.string(),
     title: v.string(),
     link: v.string(),
+    duration: v.optional(v.string()),
     // ISO-8601 UTC string so lexicographic ordering is chronological
     published: v.string(),
     isNew: v.boolean(),
