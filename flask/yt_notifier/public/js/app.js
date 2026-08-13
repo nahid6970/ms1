@@ -152,7 +152,7 @@ const POPUP_PAGES = {
       </div>`,
   },
   stats: {
-    title: "Upload Heatmap",
+    title: "Stats",
     icon: "fa-chart-pie",
     body: `
       <div class="space-y-5">
@@ -161,6 +161,8 @@ const POPUP_PAGES = {
           <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
         </div>
         <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
+          <div id="statsSummary" class="mb-5"></div>
+          <div id="channelStats" class="mb-6"></div>
           <div class="min-w-[600px]" id="heatmap">
             <p class="text-slate-600 text-sm">Loading...</p>
           </div>
@@ -581,7 +583,7 @@ function renderHeatmap(data, days) {
   const container = document.getElementById("heatmap");
   if (!container) return;
   if (!data.length) {
-    container.innerHTML = '<p class="text-slate-600 text-sm">No uploads in this period yet.</p>';
+    container.innerHTML = '<div class="border-t border-slate-800 pt-5"><p class="text-slate-600 text-sm">No uploads in this period yet.</p></div>';
     return;
   }
   container.innerHTML = data.map((stat) => {
@@ -592,7 +594,7 @@ function renderHeatmap(data, days) {
       })
       .join("");
     return `
-    <div class="mb-6">
+    <div class="mb-5">
       <div class="mb-3">
         <span class="text-slate-300 font-medium text-sm">${esc(stat.name)}</span>
         <span class="text-red-500 font-bold text-xs ml-2">(${stat.total})</span>
@@ -602,6 +604,72 @@ function renderHeatmap(data, days) {
       </div>
     </div>`;
   }).join("");
+}
+
+function renderStatsSummary(data) {
+  const container = document.getElementById("statsSummary");
+  if (!container) return;
+  const summary = data.summary || {};
+  const cards = [
+    ["Uploads", summary.uploadsInPeriod ?? 0, "fa-video"],
+    ["Unseen", summary.unseenVisible ?? 0, "fa-bell"],
+    ["Active", summary.activeChannels ?? 0, "fa-signal"],
+    ["Filtered", summary.hiddenByFilters ?? 0, "fa-filter"],
+  ];
+  container.innerHTML = `
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+      ${cards.map(([label, value, icon]) => `
+        <div class="rounded-lg border border-slate-800 bg-slate-950/70 p-4">
+          <div class="flex items-center justify-between text-slate-500">
+            <span class="text-xs font-semibold uppercase tracking-wide">${esc(label)}</span>
+            <i class="fa-solid ${icon}"></i>
+          </div>
+          <div class="mt-2 text-2xl font-bold text-white">${esc(value)}</div>
+        </div>`).join("")}
+    </div>
+    <div class="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
+      <span>${esc(summary.enabledChannels ?? 0)} enabled channels</span>
+      <span>&bull;</span>
+      <span>${esc(summary.disabledChannels ?? 0)} disabled channels</span>
+      <span>&bull;</span>
+      <span>${esc(summary.filteredChannels ?? 0)} channels with filters</span>
+    </div>`;
+}
+
+function renderChannelStats(channels) {
+  const container = document.getElementById("channelStats");
+  if (!container) return;
+  if (!channels.length) {
+    container.innerHTML = '<p class="text-slate-600 text-sm">No channel activity to show.</p>';
+    return;
+  }
+  container.innerHTML = `
+    <div class="overflow-hidden rounded-lg border border-slate-800">
+      ${channels.map((channel) => `
+        <div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-slate-800 bg-slate-950/45 p-3 last:border-b-0">
+          <div class="flex min-w-0 items-center gap-3">
+            <div class="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-800">
+              ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="h-full w-full object-cover" alt="">` : ""}
+            </div>
+            <div class="min-w-0">
+              <div class="truncate text-sm font-semibold text-slate-200">${esc(channel.name)}</div>
+              <div class="text-xs text-slate-500">${channel.lastUpload ? esc(timeLabel(channel.lastUpload)) : "No uploads"}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm font-bold text-white">${esc(channel.periodCount)}</div>
+            <div class="text-[10px] uppercase text-slate-500">uploads</div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm font-bold text-red-300">${esc(channel.unseenCount)}</div>
+            <div class="text-[10px] uppercase text-slate-500">unseen</div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm font-bold ${channel.filterCount ? "text-sky-300" : "text-slate-500"}">${esc(channel.filterCount)}</div>
+            <div class="text-[10px] uppercase text-slate-500">filters</div>
+          </div>
+        </div>`).join("")}
+    </div>`;
 }
 
 async function renderStats({ refreshNav = true, periodOverride = null } = {}) {
@@ -624,6 +692,8 @@ async function renderStats({ refreshNav = true, periodOverride = null } = {}) {
     callConvex("query", "videos:unreadCount"),
   ]);
   if (refreshNav) renderNav({ unreadCount: unread, showSeen: settings });
+  renderStatsSummary(data);
+  renderChannelStats(data.channelSummaries || []);
   renderHeatmap(data.channels, data.days);
 }
 

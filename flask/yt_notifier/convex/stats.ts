@@ -22,8 +22,21 @@ export const heatmap = query({
       .query("videos")
       .withIndex("by_published", (q) => q.gte("published", cutoffIso))
       .collect();
+    const allVideos = await ctx.db.query("videos").collect();
     const channels = await ctx.db.query("channels").collect();
-    const nameById = new Map(channels.map((c) => [c.channelId, c.channelName]));
+    const enabledChannels = channels.filter((channel) => !channel.disabled);
+    const enabledChannelIds = new Set(
+      enabledChannels.map((channel) => channel.channelId),
+    );
+    const nameById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.channelName]),
+    );
+    const thumbById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.thumbnail ?? null]),
+    );
+    const filtersById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.titleFilters ?? []]),
+    );
 
     const dayStrs: string[] = [];
     for (let i = 0; i < days; i++) {
@@ -34,6 +47,10 @@ export const heatmap = query({
 
     const counts = new Map<string, Map<string, number>>();
     for (const video of videos) {
+      if (!enabledChannelIds.has(video.channelId)) continue;
+      if (!titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? [])) {
+        continue;
+      }
       const date = new Date(video.published);
       if (isNaN(date.getTime())) continue;
       const day = toDayStr(date);
@@ -55,6 +72,74 @@ export const heatmap = query({
     // Most active first
     result.sort((a, b) => b.total - a.total);
 
-    return { days: dayStrs, channels: result };
+    const visibleVideos = allVideos.filter(
+      (video) =>
+        enabledChannelIds.has(video.channelId) &&
+        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+    );
+    const visiblePeriodVideos = videos.filter(
+      (video) =>
+        enabledChannelIds.has(video.channelId) &&
+        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+    );
+    const unseenVisible = visibleVideos.filter((video) => video.isNew).length;
+    const hiddenByFilters = allVideos.filter((video) => {
+      if (!enabledChannelIds.has(video.channelId)) return false;
+      return !titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []);
+    }).length;
+    const filteredChannels = enabledChannels.filter(
+      (channel) => (channel.titleFilters ?? []).length > 0,
+    ).length;
+
+    const channelSummaries = enabledChannels.map((channel) => {
+      const channelVideos = visibleVideos.filter(
+        (video) => video.channelId === channel.channelId,
+      );
+      const periodVideos = visiblePeriodVideos.filter(
+        (video) => video.channelId === channel.channelId,
+      );
+      const lastVideo = channelVideos
+        .slice()
+        .sort((a, b) => b.published.localeCompare(a.published))[0];
+      return {
+        channelId: channel.channelId,
+        name: channel.channelName,
+        thumbnail: thumbById.get(channel.channelId),
+        periodCount: periodVideos.length,
+        unseenCount: channelVideos.filter((video) => video.isNew).length,
+        totalShown: channelVideos.length,
+        filterCount: (channel.titleFilters ?? []).length,
+        lastUpload: lastVideo?.published ?? null,
+      };
+    });
+    channelSummaries.sort((a, b) => {
+      if (b.periodCount !== a.periodCount) return b.periodCount - a.periodCount;
+      return String(b.lastUpload ?? "").localeCompare(String(a.lastUpload ?? ""));
+    });
+
+    return {
+      days: dayStrs,
+      channels: result,
+      summary: {
+        period,
+        activeChannels: result.length,
+        enabledChannels: enabledChannels.length,
+        disabledChannels: channels.length - enabledChannels.length,
+        uploadsInPeriod: visiblePeriodVideos.length,
+        unseenVisible,
+        hiddenByFilters,
+        filteredChannels,
+      },
+      channelSummaries,
+    };
   },
 });
+
+function titleMatchesFilters(title: string, filters: string[]) {
+  const activeFilters = filters
+    .map((filter) => filter.trim().toLocaleLowerCase())
+    .filter(Boolean);
+  if (activeFilters.length === 0) return true;
+  const normalizedTitle = title.toLocaleLowerCase();
+  return activeFilters.some((filter) => normalizedTitle.includes(filter));
+}
