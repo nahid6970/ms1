@@ -156,10 +156,6 @@ const POPUP_PAGES = {
     icon: "fa-chart-pie",
     body: `
       <div class="space-y-5">
-        <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800 w-max">
-          <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
-          <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
-        </div>
         <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
           <div id="statsSummary" class="mb-5"></div>
           <div id="channelStats" class="mb-6"></div>
@@ -181,15 +177,15 @@ const POPUP_PAGES = {
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="showSeenToggle" name="show_seen" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+            <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
           </label>
         </div>
         <div class="border-t border-slate-800 pt-6">
           <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
           <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
           <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-            <input type="password" id="youtubeDataApiKey" autocomplete="off" placeholder="Paste API key" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
-            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-400">
+            <input type="text" id="youtubeDataApiKey" name="youtube_data_api_key" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste API key" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <label class="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs font-medium text-slate-400 transition hover:border-slate-700 hover:text-slate-200">
               <input type="checkbox" id="clearYoutubeDataApiKey" class="h-4 w-4 rounded border-slate-700 bg-slate-950 accent-red-600">
               Clear saved key
             </label>
@@ -267,8 +263,11 @@ function ensurePopup() {
   popup.innerHTML = `
     <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closePopup()"></div>
     <section class="popup-panel absolute left-1/2 top-1/2 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
-      <header class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-        <h2 id="popupTitle" class="text-lg font-semibold text-white"></h2>
+      <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 px-5 py-4">
+        <div class="flex flex-wrap items-center gap-4">
+          <h2 id="popupTitle" class="text-lg font-semibold text-white"></h2>
+          <div id="popupHeaderActions"></div>
+        </div>
         <button type="button" onclick="closePopup()" class="rounded-lg px-3 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -284,6 +283,12 @@ window.openPopup = async function openPopup(page) {
   if (!config) return;
   const popup = ensurePopup();
   document.getElementById("popupTitle").innerHTML = `<i class="fa-solid ${config.icon} mr-2 text-red-400"></i>${esc(config.title)}`;
+  document.getElementById("popupHeaderActions").innerHTML = page === "stats"
+    ? `<div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+        <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
+        <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
+      </div>`
+    : "";
   document.getElementById("popupBody").innerHTML = config.body;
   popup.classList.remove("hidden");
   document.body.classList.add("overflow-hidden");
