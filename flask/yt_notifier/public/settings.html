@@ -49,6 +49,16 @@
                         <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
                     </label>
                 </div>
+                <div class="flex items-center justify-between gap-6 border-t border-slate-800 pt-6">
+                    <div>
+                        <h2 class="text-white font-medium">Hide YouTube Shorts</h2>
+                        <p class="text-slate-500 text-xs">Automatically hide Shorts (videos under 60 seconds or with #shorts in title) from your feed.</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="hideShortsToggle" name="hide_shorts" class="sr-only peer">
+                        <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
                 <div class="border-t border-slate-800 pt-6">
                     <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
                     <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>

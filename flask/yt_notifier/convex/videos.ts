@@ -6,6 +6,12 @@ export const list = query({
     category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen")),
   },
   handler: async (ctx, { category }) => {
+    const hideShortsSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
+      .first();
+    const hideShorts = Boolean(hideShortsSetting?.value);
+
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
     const enabledChannelIds = new Set(
@@ -27,13 +33,15 @@ export const list = query({
     } else if (category === "seen") {
       q = q.filter((f) => f.eq(f.field("isNew"), false));
     }
-    const videos = await q.take(30);
+    const videos = await q.take(60);
 
     return videos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )
+      .filter((video) => !hideShorts || !isShortVideo(video))
+      .slice(0, 30)
       .map((video) => ({
         _id: video._id,
         videoId: video.videoId,
@@ -52,6 +60,12 @@ export const list = query({
 export const unreadCount = query({
   args: {},
   handler: async (ctx) => {
+    const hideShortsSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
+      .first();
+    const hideShorts = Boolean(hideShortsSetting?.value);
+
     const unseen = await ctx.db
       .query("videos")
       .filter((f) => f.eq(f.field("isNew"), true))
@@ -69,9 +83,23 @@ export const unreadCount = query({
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
-      ).length;
+      )
+      .filter((video) => !hideShorts || !isShortVideo(video)).length;
   },
 });
+
+function isShortVideo(video: { title: string; link: string; duration?: string }) {
+  if (video.link.includes("/shorts/")) return true;
+  if (/#shorts?\b/i.test(video.title)) return true;
+  if (video.duration) {
+    const parts = video.duration.split(":").map(Number);
+    if (parts.length === 2) {
+      const [minutes, seconds] = parts;
+      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
+    }
+  }
+  return false;
+}
 
 export const toggleRead = mutation({
   args: { id: v.id("videos") },

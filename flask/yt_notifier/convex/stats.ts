@@ -18,11 +18,21 @@ export const heatmap = query({
     cutoff.setDate(cutoff.getDate() - days);
     const cutoffIso = cutoff.toISOString();
 
-    const videos = await ctx.db
+    const hideShortsSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
+      .first();
+    const hideShorts = Boolean(hideShortsSetting?.value);
+
+    const rawVideos = await ctx.db
       .query("videos")
       .withIndex("by_published", (q) => q.gte("published", cutoffIso))
       .collect();
-    const allVideos = await ctx.db.query("videos").collect();
+    const rawAllVideos = await ctx.db.query("videos").collect();
+
+    const videos = hideShorts ? rawVideos.filter((v) => !isShortVideo(v)) : rawVideos;
+    const allVideos = hideShorts ? rawAllVideos.filter((v) => !isShortVideo(v)) : rawAllVideos;
+
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
     const enabledChannelIds = new Set(
@@ -143,3 +153,17 @@ function titleMatchesFilters(title: string, filters: string[]) {
   const normalizedTitle = title.toLocaleLowerCase();
   return activeFilters.some((filter) => normalizedTitle.includes(filter));
 }
+
+function isShortVideo(video: { title: string; link: string; duration?: string }) {
+  if (video.link.includes("/shorts/")) return true;
+  if (/#shorts?\b/i.test(video.title)) return true;
+  if (video.duration) {
+    const parts = video.duration.split(":").map(Number);
+    if (parts.length === 2) {
+      const [minutes, seconds] = parts;
+      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
+    }
+  }
+  return false;
+}
+

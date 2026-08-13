@@ -197,6 +197,16 @@ const POPUP_PAGES = {
             <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
           </label>
         </div>
+        <div class="flex items-center justify-between gap-6 border-t border-slate-800 pt-6">
+          <div>
+            <h2 class="text-white font-medium">Hide YouTube Shorts</h2>
+            <p class="text-slate-500 text-xs">Automatically hide Shorts (videos under 60 seconds or with #shorts in title) from your feed.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="hideShortsToggle" name="hide_shorts" class="sr-only peer">
+            <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
+          </label>
+        </div>
         <div class="border-t border-slate-800 pt-6">
           <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
           <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
@@ -773,7 +783,8 @@ function initSettingsPage() {
   if (!form) return;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const checked = document.getElementById("showSeenToggle").checked;
+    const checked = document.getElementById("showSeenToggle")?.checked ?? false;
+    const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
     const apiKeyInput = document.getElementById("youtubeDataApiKey");
     const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
     const btn = form.querySelector("button[type=submit]");
@@ -781,6 +792,7 @@ function initSettingsPage() {
     try {
       await callConvex("mutation", "settings:updateConfig", {
         showSeen: checked,
+        hideShorts: hideShortsChecked,
         youtubeDataApiKey: apiKeyInput.value,
         clearYoutubeDataApiKey: clearApiKey,
       });
@@ -789,6 +801,7 @@ function initSettingsPage() {
       const config = await callConvex("query", "settings:config");
       renderSettingsConfig(config);
       flash("Settings updated!", "success");
+      if (PAGE === "feed") await renderFeed();
     } catch (err) {
       flash(err.message, "danger");
     } finally {
@@ -799,8 +812,10 @@ function initSettingsPage() {
 
 function renderSettingsConfig(config) {
   const toggle = document.getElementById("showSeenToggle");
+  const shortsToggle = document.getElementById("hideShortsToggle");
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
+  if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
       ? "A key is saved. Leave blank to keep it, paste a new key to replace it, or check Clear saved key."
