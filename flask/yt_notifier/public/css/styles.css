@@ -21,17 +21,50 @@ body {
 }
 
 #flashMessages {
-  left: 0;
-  margin-top: 0 !important;
+  bottom: 1.5rem;
+  right: 1.5rem;
   pointer-events: none;
   position: fixed;
-  right: 0;
-  top: calc(var(--navbar-height, 0px) + 1rem);
-  z-index: 90;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 26rem;
+  width: calc(100vw - 3rem);
 }
 
 #flashMessages > * {
   pointer-events: auto;
+}
+
+.toast-enter {
+  animation: toast-in 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-exit {
+  animation: toast-out 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.95);
+  }
 }
 
 #refreshButton.is-syncing {

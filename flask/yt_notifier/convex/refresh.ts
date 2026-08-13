@@ -73,16 +73,21 @@ export const refreshAll = action({
     const channels = await ctx.runQuery(internal.channels.listRows);
     let totalNew = 0;
     let durationsUpdated = 0;
-    for (const channel of channels) {
-      try {
-        const result = await ctx.runAction(api.refresh.refreshChannel, {
-          channelId: channel.channelId,
-        });
-        totalNew += result.newVideos;
-        durationsUpdated += result.durationsUpdated;
-      } catch (err) {
-        console.error(`Failed to refresh channel ${channel.channelId}:`, err);
-      }
+    const results = await Promise.all(
+      channels.map(async (channel) => {
+        try {
+          return await ctx.runAction(api.refresh.refreshChannel, {
+            channelId: channel.channelId,
+          });
+        } catch (err) {
+          console.error(`Failed to refresh channel ${channel.channelId}:`, err);
+          return { channelId: channel.channelId, channelName: null, newVideos: 0, durationsUpdated: 0 };
+        }
+      }),
+    );
+    for (const result of results) {
+      totalNew += result.newVideos;
+      durationsUpdated += result.durationsUpdated;
     }
     return { totalNew, durationsUpdated };
   },

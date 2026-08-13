@@ -93,13 +93,13 @@ async function callConvex(endpoint, path, args = {}) {
   return data.value;
 }
 
-function flash(message, type = "info") {
+function flash(message, type = "info", duration = 3000) {
   const container = document.getElementById("flashMessages");
   if (!container) return;
   const styles = {
-    success: "bg-emerald-950/40 border-emerald-800/50 text-emerald-300",
-    danger: "bg-rose-950/40 border-rose-800/50 text-rose-300",
-    info: "bg-amber-950/40 border-amber-800/50 text-amber-300",
+    success: "bg-slate-900/95 border-emerald-500/40 text-emerald-300 shadow-emerald-950/30",
+    danger: "bg-slate-900/95 border-rose-500/40 text-rose-300 shadow-rose-950/30",
+    info: "bg-slate-900/95 border-amber-500/40 text-amber-300 shadow-amber-950/30",
   };
   const icons = {
     success: "fa-circle-check text-emerald-400",
@@ -107,17 +107,33 @@ function flash(message, type = "info") {
     info: "fa-circle-info text-amber-400",
   };
   const el = document.createElement("div");
-  el.className = `p-4 rounded-xl border mb-3 flex items-center justify-between shadow-md transition ${styles[type] || styles.info}`;
+  el.className = `toast-enter p-3.5 px-4 rounded-xl border backdrop-blur-md flex items-center justify-between gap-3 shadow-2xl transition ${styles[type] || styles.info}`;
   el.innerHTML = `
-    <div class="flex items-center space-x-3">
-      <i class="fa-solid ${icons[type] || icons.info} text-lg"></i>
-      <span class="text-sm font-medium">${esc(message)}</span>
+    <div class="flex items-center space-x-3 min-w-0">
+      <i class="fa-solid ${icons[type] || icons.info} text-base flex-shrink-0"></i>
+      <span class="text-xs font-medium leading-relaxed text-slate-200">${esc(message)}</span>
     </div>
-    <button class="text-slate-400 hover:text-slate-200" onclick="this.parentElement.remove()">
-      <i class="fa-solid fa-xmark"></i>
+    <button type="button" class="text-slate-400 hover:text-white flex-shrink-0 ml-2 transition" onclick="dismissToast(this.parentElement)">
+      <i class="fa-solid fa-xmark text-sm"></i>
     </button>`;
   container.appendChild(el);
+
+  if (duration > 0) {
+    setTimeout(() => {
+      dismissToast(el);
+    }, duration);
+  }
 }
+
+window.dismissToast = function dismissToast(el) {
+  if (!el || el.classList.contains("toast-exit")) return;
+  el.classList.remove("toast-enter");
+  el.classList.add("toast-exit");
+  el.addEventListener("animationend", () => el.remove(), { once: true });
+  setTimeout(() => {
+    if (el.parentNode) el.remove();
+  }, 350);
+};
 
 function configBanner() {
   const container = document.getElementById("flashMessages");
@@ -325,14 +341,24 @@ window.toggleDropdown = function toggleDropdown() {
   if (menu) menu.classList.toggle("hidden");
 };
 
-window.checkUpdates = async function checkUpdates() {
+function updateSyncBtnUI(syncing) {
   const btn = document.getElementById("refreshButton");
   if (!btn) return;
+  btn.disabled = syncing;
+  btn.title = syncing ? "Updating..." : "Check updates";
+  btn.setAttribute("aria-label", syncing ? "Updating..." : "Check updates");
+  if (syncing) {
+    btn.classList.add("is-syncing");
+  } else {
+    btn.classList.remove("is-syncing");
+  }
+}
+
+window.checkUpdates = async function checkUpdates() {
+  if (isCheckingUpdates) return;
   isCheckingUpdates = true;
-  btn.disabled = true;
-  btn.title = "Updating...";
-  btn.setAttribute("aria-label", "Updating...");
-  btn.classList.add("is-syncing");
+  updateSyncBtnUI(true);
+
   try {
     const [res, backfill] = await Promise.all([
       callConvex("action", "refresh:refreshAll"),
@@ -344,16 +370,18 @@ window.checkUpdates = async function checkUpdates() {
       `Refreshed all channels! Found ${res.totalNew} new video(s), updated ${durationsUpdated} duration(s).${backfillNote}`,
       "success",
     );
-    if (PAGE === "feed") await renderFeed();
-    else await refreshNavOnly();
   } catch (err) {
     flash(err.message, "danger");
   } finally {
     isCheckingUpdates = false;
-    btn.disabled = false;
-    btn.title = "Check updates";
-    btn.setAttribute("aria-label", "Check updates");
-    btn.classList.remove("is-syncing");
+    updateSyncBtnUI(false);
+  }
+
+  try {
+    if (PAGE === "feed") await renderFeed();
+    else await refreshNavOnly();
+  } catch (err) {
+    flash(err.message, "danger");
   }
 };
 

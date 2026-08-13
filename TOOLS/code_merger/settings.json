@@ -25,6 +25,7 @@
         "C:\\@delta\\ms1\\flask\\yt_notifier\\.gitignore",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\package-lock.json",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\package.json",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\README.md",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\wrangler.toml",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\channels.ts",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\crons.ts",
@@ -35,18 +36,6 @@
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\tsconfig.json",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\videos.ts",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\youtube.ts",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.js",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\dataModel.d.ts",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.d.ts",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.js",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\app.py",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\requirements.txt",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\settings.txt",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\templates\\base.html",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\templates\\channels.html",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\templates\\index.html",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\templates\\settings.html",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\legacy_flask\\templates\\stats.html",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\public\\channels.html",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\public\\favicon.svg",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\public\\index.html",
@@ -56,19 +45,24 @@
         "C:\\@delta\\ms1\\flask\\yt_notifier\\public\\js\\app.js",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\public\\js\\config.js",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\scripts\\run-after-changes.js",
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\README.md",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.js",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\dataModel.d.ts",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.js",
         "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.d.ts"
       ],
       "disabled_files": [
-        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.d.ts"
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.d.ts",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\api.js",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\dataModel.d.ts",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.d.ts",
+        "C:\\@delta\\ms1\\flask\\yt_notifier\\convex\\_generated\\server.js"
       ],
       "extensions": [
         "",
-        ".ts",
         ".md",
-        ".txt",
+        ".ts",
         ".css",
-        ".py",
         ".svg",
         ".js",
         ".local",
@@ -76,8 +70,8 @@
         ".html",
         ".toml"
       ],
-      "pinned": false,
-      "pin_index": 0
+      "pinned": true,
+      "pin_index": 7
     },
     {
       "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\SideBar",
