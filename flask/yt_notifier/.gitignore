@@ -1,5 +1,26 @@
-__pycache__/
-instance/
-.venv/
-*.db
+# Node
+node_modules/
+
+# Environment / secrets
 .env
+.env.local
+.env.*.local
+.dev.vars
+
+# Convex
+convex/*.js
+.convex-data/
+
+# Cloudflare / Wrangler
+.wrangler/
+dist/
+
+# Legacy Flask app (kept in legacy_flask/)
+legacy_flask/__pycache__/
+legacy_flask/instance/
+legacy_flask/.venv/
+legacy_flask/channels.db
+
+# OS / editor
+.DS_Store
+Thumbs.db

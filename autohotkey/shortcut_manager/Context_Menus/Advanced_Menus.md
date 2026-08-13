@@ -23,6 +23,8 @@
 -[name:md-framework][text:make an md file about the framework in this directory C:\@delta\ms1\md so next time i can do this my self]
 -[name:script-folder][text:here modify the code so when it tries to open any folder it will open the folder in a new tab with existing folder explorer]
 -[name:Git-Commit][text:git commit and push]
+-[name:Steps][text:so what should i do from my end now step by step]
+
 
 [name:Account]
 -[name:00][text:nahid6970@gmail.com]

@@ -1,0 +1,22 @@
+{
+  "name": "yt-notifier",
+  "version": "2.0.0",
+  "description": "YouTube channel RSS notifier built on Cloudflare Pages + Convex",
+  "private": true,
+  "scripts": {
+    "dev": "convex dev",
+    "dev:pages": "wrangler pages dev public",
+    "typecheck": "tsc --noEmit -p convex",
+    "deploy:convex": "convex deploy",
+    "deploy:pages": "wrangler pages deploy public --project-name yt-notifier"
+  },
+  "dependencies": {
+    "convex": "^1.17.0",
+    "fast-xml-parser": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "wrangler": "^4.0.0"
+  }
+}
