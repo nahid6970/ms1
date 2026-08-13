@@ -224,11 +224,7 @@ function videoCard(video) {
         </div>
       </div>
       <h3 class="text-lg font-semibold text-slate-100 leading-snug mb-auto line-clamp-2 group-hover:text-red-400 transition">${esc(video.title)}</h3>
-      <div class="flex items-center justify-between border-t border-slate-800/80 text-slate-500 text-xs mt-5 pt-4">
-        <span class="inline-flex items-center gap-1.5">
-          <i class="fa-regular fa-clock"></i>
-          ${esc(isoDate(video.published))}
-        </span>
+      <div class="flex items-center justify-end border-t border-slate-800/80 text-slate-500 text-xs mt-5 pt-4">
         <div class="flex items-center space-x-3">
           <button onclick="toggleRead('${esc(video._id)}')" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
             <input type="checkbox" class="sr-only peer" ${isNew ? "" : "checked"}>
