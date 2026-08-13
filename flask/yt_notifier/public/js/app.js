@@ -247,7 +247,7 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
           <button type="button" onclick="openPopup('${l.page}')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="${l.label}" aria-label="${l.label}">
             <i class="fa-solid ${l.icon}"></i>
           </button>`).join("")}
-          <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:cursor-wait disabled:opacity-90 ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
+          <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
             <i class="fa-solid fa-rotate"></i>
             <span class="sr-only">Check Updates</span>
           </button>
