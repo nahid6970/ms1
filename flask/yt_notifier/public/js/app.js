@@ -181,7 +181,7 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
   const el = document.getElementById("navbar");
   if (!el) return;
   el.innerHTML = `
-  <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+  <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-3 py-3 lg:min-h-16 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-center space-x-3">
@@ -323,13 +323,26 @@ async function refreshNavOnly() {
 
 function videoCard(video) {
   const isNew = video.isNew;
+  const cardTone = isNew
+    ? "bg-slate-900/90 border-slate-800 hover:border-red-500/50 ring-1 ring-red-500/30 hover:shadow-red-900/20"
+    : "bg-slate-900/55 border-slate-800/60 hover:border-slate-700 opacity-85";
+  const imageTone = isNew
+    ? "grayscale-0 opacity-100"
+    : "grayscale opacity-60";
+  const titleTone = isNew
+    ? "text-slate-100 group-hover:text-red-400"
+    : "text-slate-500 group-hover:text-slate-300";
+  const channelTone = isNew
+    ? "text-slate-200 group-hover:text-white"
+    : "text-slate-500 group-hover:text-slate-300";
   return `
-  <article class="motion-card group soft-panel bg-slate-900/90 border border-slate-800 rounded-lg overflow-hidden hover:border-red-500/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-red-900/20 ${isNew ? "ring-1 ring-red-500/30" : "opacity-70 grayscale-[0.35]"}">
+  <article class="motion-card group soft-panel ${cardTone} border rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
     <a href="${esc(video.link)}" target="_blank" class="block relative aspect-video bg-slate-950 overflow-hidden">
-      <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
+      <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
+        ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
       </div>
       ${durationBadge(video)}
     </a>
@@ -339,11 +352,11 @@ function videoCard(video) {
           ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user text-sm"></i>`}
         </div>
         <div class="min-w-0">
-          <div class="truncate text-sm font-semibold text-slate-200 group-hover:text-white transition">${esc(video.channelName)}</div>
+          <div class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</div>
           <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
         </div>
       </div>
-      <h3 class="text-lg font-semibold text-slate-100 leading-snug mb-auto line-clamp-2 group-hover:text-red-400 transition">${esc(video.title)}</h3>
+      <h3 class="text-lg font-semibold ${titleTone} leading-snug mb-auto line-clamp-2 transition">${esc(video.title)}</h3>
       <div class="flex items-center justify-end border-t border-slate-800/80 text-slate-500 text-xs mt-5 pt-4">
         <div class="flex items-center space-x-3">
           <button onclick="toggleRead('${esc(video._id)}')" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
