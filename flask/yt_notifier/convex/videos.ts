@@ -17,6 +17,9 @@ export const list = query({
     const thumbById = new Map(
       enabledChannels.map((c) => [c.channelId, c.thumbnail ?? null]),
     );
+    const filtersById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.titleFilters ?? []]),
+    );
 
     let q = ctx.db.query("videos").withIndex("by_published").order("desc");
     if (category === "unseen") {
@@ -28,6 +31,9 @@ export const list = query({
 
     return videos
       .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) =>
+        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+      )
       .map((video) => ({
         _id: video._id,
         videoId: video.videoId,
@@ -52,11 +58,18 @@ export const unreadCount = query({
       .collect();
     const channels = await ctx.db.query("channels").collect();
     const enabledChannelIds = new Set(
+      channels.filter((channel) => !channel.disabled).map((channel) => channel.channelId),
+    );
+    const filtersById = new Map(
       channels
         .filter((channel) => !channel.disabled)
-        .map((channel) => channel.channelId),
+        .map((channel) => [channel.channelId, channel.titleFilters ?? []]),
     );
-    return unseen.filter((video) => enabledChannelIds.has(video.channelId)).length;
+    return unseen
+      .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) =>
+        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+      ).length;
   },
 });
 
@@ -123,10 +136,16 @@ export const addFromFeed = internalMutation({
     ),
   },
   handler: async (ctx, { channelId, entries }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    const titleFilters = channel?.titleFilters ?? [];
     let newVideos = 0;
     let durationsUpdated = 0;
     for (const entry of entries) {
       if (!entry.videoId) continue;
+      if (!titleMatchesFilters(entry.title, titleFilters)) continue;
       const existing = await ctx.db
         .query("videos")
         .withIndex("by_videoId", (q) => q.eq("videoId", entry.videoId))
@@ -150,3 +169,12 @@ export const addFromFeed = internalMutation({
     return { newVideos, durationsUpdated };
   },
 });
+
+function titleMatchesFilters(title: string, filters: string[]) {
+  const activeFilters = filters
+    .map((filter) => filter.trim().toLocaleLowerCase())
+    .filter(Boolean);
+  if (activeFilters.length === 0) return true;
+  const normalizedTitle = title.toLocaleLowerCase();
+  return activeFilters.some((filter) => normalizedTitle.includes(filter));
+}

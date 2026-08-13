@@ -12,6 +12,7 @@ export const list = query({
     return channels.map((channel) => ({
       ...channel,
       disabled: channel.disabled ?? false,
+      titleFilters: channel.titleFilters ?? [],
     }));
   },
 });
@@ -48,6 +49,7 @@ export const insertRow = internalMutation({
       channelId,
       thumbnail,
       disabled: false,
+      titleFilters: [],
     });
   },
 });
@@ -138,5 +140,28 @@ export const toggleDisabled = mutation({
       .first();
     if (!channel) return;
     await ctx.db.patch(channel._id, { disabled: !(channel.disabled ?? false) });
+  },
+});
+
+export const updateTitleFilters = mutation({
+  args: {
+    channelId: v.string(),
+    filters: v.array(v.string()),
+  },
+  handler: async (ctx, { channelId, filters }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    const normalized = Array.from(
+      new Set(
+        filters
+          .map((filter) => filter.trim())
+          .filter(Boolean)
+          .map((filter) => filter.slice(0, 120)),
+      ),
+    );
+    await ctx.db.patch(channel._id, { titleFilters: normalized });
   },
 });

@@ -442,30 +442,73 @@ async function renderFeed() {
 
 function channelRow(channel) {
   const disabled = Boolean(channel.disabled);
+  const filters = Array.isArray(channel.titleFilters) ? channel.titleFilters : [];
+  const filterCount = filters.length;
+  const filterText = filters.join("\n");
   return `
-  <div class="motion-card flex items-center justify-between bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
-    <div class="flex items-center space-x-4">
-      <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden ${disabled ? "grayscale" : ""}">
-        ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user"></i>`}
-      </div>
-      <div>
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
-          ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
+  <div class="motion-card bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex min-w-0 items-center space-x-4">
+        <div class="w-10 h-10 flex-shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden ${disabled ? "grayscale" : ""}">
+          ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user"></i>`}
         </div>
-        <div class="text-[10px] text-slate-500 truncate max-w-[200px]">${esc(channel.url)}</div>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
+            ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
+            ${filterCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${filterCount} filter${filterCount === 1 ? "" : "s"}</span>` : ""}
+          </div>
+          <div class="text-[10px] text-slate-500 truncate max-w-[260px]">${esc(channel.url)}</div>
+        </div>
+      </div>
+      <div class="flex flex-shrink-0 items-center gap-2">
+        <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${disabled ? "text-slate-500 hover:bg-slate-800 hover:text-white" : "text-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-300"}" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
+          <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"} text-lg"></i>
+        </button>
+        <button onclick="toggleChannelFilterBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${filterCount ? "text-sky-300 hover:bg-sky-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="Title filters" aria-label="Title filters">
+          <i class="fa-solid fa-filter"></i>
+        </button>
+        <button onclick="deleteChannel('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-800 hover:text-red-400 transition" title="Delete channel">
+          <i class="fa-solid fa-trash"></i>
+        </button>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-white" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
-        <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"}"></i>
-      </button>
-      <button onclick="deleteChannel('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-800 hover:text-red-400 transition" title="Delete channel">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    </div>
+    <form id="filters-${esc(channel.channelId)}" onsubmit="saveChannelFilters(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Title filters</label>
+      <textarea rows="5" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500" placeholder="One title match per line">${esc(filterText)}</textarea>
+      <div class="mt-3 flex items-center justify-between gap-3">
+        <p class="text-xs text-slate-500">If filters are set, only matching video titles are fetched and shown.</p>
+        <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Filters</button>
+      </div>
+    </form>
   </div>`;
 }
+
+window.toggleChannelFilterBox = function toggleChannelFilterBox(channelId) {
+  const form = document.getElementById(`filters-${channelId}`);
+  if (form) form.classList.toggle("hidden");
+};
+
+window.saveChannelFilters = async function saveChannelFilters(event, channelId) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const textarea = form.querySelector("textarea");
+  const filters = textarea.value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  try {
+    await callConvex("mutation", "channels:updateTitleFilters", {
+      channelId,
+      filters,
+    });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+    flash("Channel filters updated.", "success");
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
 
 window.toggleChannelDisabled = async function toggleChannelDisabled(channelId) {
   try {

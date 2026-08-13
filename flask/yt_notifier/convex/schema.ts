@@ -8,6 +8,7 @@ export default defineSchema({
     channelId: v.string(),
     thumbnail: v.optional(v.string()),
     disabled: v.optional(v.boolean()),
+    titleFilters: v.optional(v.array(v.string())),
   })
     .index("by_channelId", ["channelId"])
     .index("by_url", ["url"]),
