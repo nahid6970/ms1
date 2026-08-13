@@ -220,6 +220,18 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
       </div>
     </div>
   </nav>`;
+  updateNavbarOffset();
+}
+
+function updateNavbarOffset() {
+  const navbar = document.getElementById("navbar");
+  if (!navbar) return;
+  requestAnimationFrame(() => {
+    document.documentElement.style.setProperty(
+      "--navbar-height",
+      `${navbar.offsetHeight}px`,
+    );
+  });
 }
 
 function ensurePopup() {
@@ -605,6 +617,8 @@ window.addEventListener("click", (event) => {
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closePopup();
 });
+
+window.addEventListener("resize", updateNavbarOffset);
 
 document.addEventListener("DOMContentLoaded", () => {
   if (PAGE === "channels") initChannelsPage();
