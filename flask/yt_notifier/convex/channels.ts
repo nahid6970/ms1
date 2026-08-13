@@ -8,7 +8,11 @@ import type { RefreshChannelResult } from "./refresh";
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("channels").collect();
+    const channels = await ctx.db.query("channels").collect();
+    return channels.map((channel) => ({
+      ...channel,
+      disabled: channel.disabled ?? false,
+    }));
   },
 });
 
@@ -25,7 +29,8 @@ export const getByChannelId = internalQuery({
 export const listRows = internalQuery({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("channels").collect();
+    const channels = await ctx.db.query("channels").collect();
+    return channels.filter((channel) => !channel.disabled);
   },
 });
 
@@ -42,6 +47,7 @@ export const insertRow = internalMutation({
       channelName,
       channelId,
       thumbnail,
+      disabled: false,
     });
   },
 });
@@ -120,5 +126,17 @@ export const remove = mutation({
     for (const video of videos) {
       await ctx.db.delete(video._id);
     }
+  },
+});
+
+export const toggleDisabled = mutation({
+  args: { channelId: v.string() },
+  handler: async (ctx, { channelId }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    await ctx.db.patch(channel._id, { disabled: !(channel.disabled ?? false) });
   },
 });

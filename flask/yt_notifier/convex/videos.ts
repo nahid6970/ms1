@@ -7,9 +7,15 @@ export const list = query({
   },
   handler: async (ctx, { category }) => {
     const channels = await ctx.db.query("channels").collect();
-    const nameById = new Map(channels.map((c) => [c.channelId, c.channelName]));
+    const enabledChannels = channels.filter((channel) => !channel.disabled);
+    const enabledChannelIds = new Set(
+      enabledChannels.map((channel) => channel.channelId),
+    );
+    const nameById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.channelName]),
+    );
     const thumbById = new Map(
-      channels.map((c) => [c.channelId, c.thumbnail ?? null]),
+      enabledChannels.map((c) => [c.channelId, c.thumbnail ?? null]),
     );
 
     let q = ctx.db.query("videos").withIndex("by_published").order("desc");
@@ -20,18 +26,20 @@ export const list = query({
     }
     const videos = await q.take(30);
 
-    return videos.map((video) => ({
-      _id: video._id,
-      videoId: video.videoId,
-      title: video.title,
-      link: video.link,
-      duration: video.duration,
-      published: video.published,
-      isNew: video.isNew,
-      channelId: video.channelId,
-      channelName: nameById.get(video.channelId) ?? "Unknown Channel",
-      channelThumbnail: thumbById.get(video.channelId) ?? null,
-    }));
+    return videos
+      .filter((video) => enabledChannelIds.has(video.channelId))
+      .map((video) => ({
+        _id: video._id,
+        videoId: video.videoId,
+        title: video.title,
+        link: video.link,
+        duration: video.duration,
+        published: video.published,
+        isNew: video.isNew,
+        channelId: video.channelId,
+        channelName: nameById.get(video.channelId) ?? "Unknown Channel",
+        channelThumbnail: thumbById.get(video.channelId) ?? null,
+      }));
   },
 });
 
@@ -42,7 +50,13 @@ export const unreadCount = query({
       .query("videos")
       .filter((f) => f.eq(f.field("isNew"), true))
       .collect();
-    return unseen.length;
+    const channels = await ctx.db.query("channels").collect();
+    const enabledChannelIds = new Set(
+      channels
+        .filter((channel) => !channel.disabled)
+        .map((channel) => channel.channelId),
+    );
+    return unseen.filter((video) => enabledChannelIds.has(video.channelId)).length;
   },
 });
 

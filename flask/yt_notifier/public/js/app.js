@@ -441,28 +441,53 @@ async function renderFeed() {
 /* ------------------------------- channels page ----------------------------- */
 
 function channelRow(channel) {
+  const disabled = Boolean(channel.disabled);
   return `
-  <div class="motion-card flex items-center justify-between bg-slate-900/90 border border-slate-800 p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
+  <div class="motion-card flex items-center justify-between bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
     <div class="flex items-center space-x-4">
-      <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden">
+      <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden ${disabled ? "grayscale" : ""}">
         ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user"></i>`}
       </div>
       <div>
-        <div class="text-sm font-medium text-white">${esc(channel.channelName)}</div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
+          ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
+        </div>
         <div class="text-[10px] text-slate-500 truncate max-w-[200px]">${esc(channel.url)}</div>
       </div>
     </div>
-    <button onclick="deleteChannel('${esc(channel.channelId)}')" class="text-slate-500 hover:text-red-400 transition p-2" title="Delete channel">
-      <i class="fa-solid fa-trash"></i>
-    </button>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-800 hover:text-white" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
+        <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"}"></i>
+      </button>
+      <button onclick="deleteChannel('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-800 hover:text-red-400 transition" title="Delete channel">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
   </div>`;
+}
+
+window.toggleChannelDisabled = async function toggleChannelDisabled(channelId) {
+  try {
+    await callConvex("mutation", "channels:toggleDisabled", { channelId });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+function isPopupOpen() {
+  const popup = document.getElementById("appPopup");
+  return Boolean(popup && !popup.classList.contains("hidden"));
 }
 
 window.deleteChannel = async function deleteChannel(channelId) {
   if (!confirm("Remove this channel and all its videos?")) return;
   try {
     await callConvex("mutation", "channels:remove", { channelId });
-    await renderChannels({ refreshNav: !document.getElementById("appPopup") || document.getElementById("appPopup").classList.contains("hidden") });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
   }
@@ -496,7 +521,8 @@ function initChannelsPage() {
       const res = await callConvex("action", "channels:add", { url: input.value });
       flash(`Channel added and synced successfully! Found ${res.newVideos} new video(s).`, "success");
       input.value = "";
-      await renderChannels({ refreshNav: !document.getElementById("appPopup") || document.getElementById("appPopup").classList.contains("hidden") });
+      await renderChannels({ refreshNav: !isPopupOpen() });
+      if (PAGE === "feed") await renderFeed();
     } catch (err) {
       flash(err.message, "danger");
     } finally {

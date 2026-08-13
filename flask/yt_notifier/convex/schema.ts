@@ -7,6 +7,7 @@ export default defineSchema({
     channelName: v.string(),
     channelId: v.string(),
     thumbnail: v.optional(v.string()),
+    disabled: v.optional(v.boolean()),
   })
     .index("by_channelId", ["channelId"])
     .index("by_url", ["url"]),
