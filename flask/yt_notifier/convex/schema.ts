@@ -9,6 +9,7 @@ export default defineSchema({
     thumbnail: v.optional(v.string()),
     disabled: v.optional(v.boolean()),
     titleFilters: v.optional(v.array(v.string())),
+    category: v.optional(v.string()),
   })
     .index("by_channelId", ["channelId"])
     .index("by_url", ["url"]),
@@ -22,6 +23,7 @@ export default defineSchema({
     // ISO-8601 UTC string so lexicographic ordering is chronological
     published: v.string(),
     isNew: v.boolean(),
+    isFavorite: v.optional(v.boolean()),
   })
     .index("by_channelId", ["channelId"])
     .index("by_videoId", ["videoId"])

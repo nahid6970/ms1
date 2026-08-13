@@ -3,9 +3,10 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 export const list = query({
   args: {
-    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen")),
+    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites")),
+    folder: v.optional(v.string()),
   },
-  handler: async (ctx, { category }) => {
+  handler: async (ctx, { category, folder }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -14,8 +15,14 @@ export const list = query({
 
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
+    
+    const targetFolder = folder?.trim();
+    const filteredChannels = targetFolder
+      ? enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
+      : enabledChannels;
+
     const enabledChannelIds = new Set(
-      enabledChannels.map((channel) => channel.channelId),
+      filteredChannels.map((channel) => channel.channelId),
     );
     const nameById = new Map(
       enabledChannels.map((c) => [c.channelId, c.channelName]),
@@ -26,14 +33,19 @@ export const list = query({
     const filtersById = new Map(
       enabledChannels.map((c) => [c.channelId, c.titleFilters ?? []]),
     );
+    const channelCategoryMap = new Map(
+      enabledChannels.map((c) => [c.channelId, c.category ?? ""]),
+    );
 
     let q = ctx.db.query("videos").withIndex("by_published").order("desc");
     if (category === "unseen") {
       q = q.filter((f) => f.eq(f.field("isNew"), true));
     } else if (category === "seen") {
       q = q.filter((f) => f.eq(f.field("isNew"), false));
+    } else if (category === "favorites") {
+      q = q.filter((f) => f.eq(f.field("isFavorite"), true));
     }
-    const videos = await q.take(60);
+    const videos = await q.take(80);
 
     return videos
       .filter((video) => enabledChannelIds.has(video.channelId))
@@ -41,7 +53,7 @@ export const list = query({
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )
       .filter((video) => !hideShorts || !isShortVideo(video))
-      .slice(0, 30)
+      .slice(0, 40)
       .map((video) => ({
         _id: video._id,
         videoId: video.videoId,
@@ -50,10 +62,21 @@ export const list = query({
         duration: video.duration,
         published: video.published,
         isNew: video.isNew,
+        isFavorite: video.isFavorite ?? false,
         channelId: video.channelId,
         channelName: nameById.get(video.channelId) ?? "Unknown Channel",
         channelThumbnail: thumbById.get(video.channelId) ?? null,
+        channelCategory: channelCategoryMap.get(video.channelId) ?? "",
       }));
+  },
+});
+
+export const toggleFavorite = mutation({
+  args: { id: v.id("videos") },
+  handler: async (ctx, { id }) => {
+    const video = await ctx.db.get(id);
+    if (!video) return;
+    await ctx.db.patch(id, { isFavorite: !(video.isFavorite ?? false) });
   },
 });
 

@@ -9,11 +9,51 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const channels = await ctx.db.query("channels").collect();
-    return channels.map((channel) => ({
-      ...channel,
-      disabled: channel.disabled ?? false,
-      titleFilters: channel.titleFilters ?? [],
-    }));
+    const result = [];
+    for (const channel of channels) {
+      const latestVideo = await ctx.db
+        .query("videos")
+        .withIndex("by_channelId", (q) => q.eq("channelId", channel.channelId))
+        .order("desc")
+        .first();
+      result.push({
+        ...channel,
+        disabled: channel.disabled ?? false,
+        titleFilters: channel.titleFilters ?? [],
+        category: channel.category ?? "",
+        lastUpload: latestVideo?.published ?? null,
+      });
+    }
+    return result;
+  },
+});
+
+export const updateCategory = mutation({
+  args: {
+    channelId: v.string(),
+    category: v.optional(v.string()),
+  },
+  handler: async (ctx, { channelId, category }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    const cleanCategory = category?.trim() ?? "";
+    await ctx.db.patch(channel._id, { category: cleanCategory });
+  },
+});
+
+export const categories = query({
+  args: {},
+  handler: async (ctx) => {
+    const channels = await ctx.db.query("channels").collect();
+    const set = new Set<string>();
+    for (const channel of channels) {
+      const cat = channel.category?.trim();
+      if (cat) set.add(cat);
+    }
+    return Array.from(set).sort();
   },
 });
 

@@ -241,15 +241,15 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
             <i class="fa-solid fa-bell"></i>
             ${unreadCount > 0 ? `<span class="absolute -right-1.5 -top-1 min-w-4 sm:min-w-5 rounded-full bg-red-600 px-1 py-0.5 text-center text-[9px] sm:text-[10px] font-bold text-white">${unreadCount}</span>` : ""}
           </a>
-          ${showSeen && PAGE === "feed" ? `
+          ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
             <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
               <i class="fa-solid fa-filter"></i>
             </button>
-            <div id="dropdownMenu" class="hidden absolute right-0 sm:left-0 mt-1 w-24 bg-slate-900 border border-slate-800 z-50">
-              ${["all", "unseen", "seen"].map((c) => `
+            <div id="dropdownMenu" class="hidden absolute right-0 sm:left-0 mt-1 w-28 rounded-lg bg-slate-900 border border-slate-800 shadow-xl z-50 py-1">
+              ${(showSeen ? ["all", "unseen", "seen", "favorites"] : ["unseen", "favorites"]).map((c) => `
                 <a href="?category=${c}" class="block px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition ${c === category ? "text-red-400" : ""}">
-                  ${c}
+                  ${c === "favorites" ? "★ Saved" : c}
                 </a>`).join("")}
             </div>
           </div>` : ""}
@@ -407,6 +407,7 @@ async function refreshNavOnly() {
 
 function videoCard(video) {
   const isNew = video.isNew;
+  const isFavorite = Boolean(video.isFavorite);
   const cardTone = isNew
     ? "bg-slate-900/90 border-slate-800 hover:border-red-500/50 ring-1 ring-red-500/30 hover:shadow-red-900/20"
     : "bg-slate-900/55 border-slate-800/60 hover:border-slate-700 opacity-85";
@@ -429,8 +430,12 @@ function videoCard(video) {
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
         ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
+        ${video.channelCategory ? `<span class="bg-slate-900/90 border border-slate-700/60 backdrop-blur px-2 py-0.5 rounded text-[10px] font-semibold text-slate-300">${esc(video.channelCategory)}</span>` : ""}
       </div>
-      <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+      <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 ${isFavorite ? "opacity-100" : "opacity-0"} transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <button onclick="toggleFavorite('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 ${isFavorite ? "text-amber-400 hover:text-amber-300" : "text-slate-300 hover:text-amber-400"} shadow-lg backdrop-blur transition hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
+          <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
+        </button>
         <button onclick="toggleRead('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
@@ -455,6 +460,15 @@ function videoCard(video) {
   </article>`;
 }
 
+window.toggleFavorite = async function toggleFavorite(id) {
+  try {
+    await callConvex("mutation", "videos:toggleFavorite", { id });
+    await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 window.toggleRead = async function toggleRead(id) {
   try {
     await callConvex("mutation", "videos:toggleRead", { id });
@@ -467,14 +481,17 @@ window.toggleRead = async function toggleRead(id) {
 async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
   const settings = await callConvex("query", "settings:get");
-  const urlCategory = urlParams.get("category") || "all";
-  const category = settings ? urlCategory : "unseen";
+  const urlCategory = urlParams.get("category") || (settings ? "all" : "unseen");
+  const folder = urlParams.get("folder") || "";
 
-  const [videos, unread] = await Promise.all([
-    callConvex("query", "videos:list", { category }),
+  const [videos, unread, categories] = await Promise.all([
+    callConvex("query", "videos:list", { category: urlCategory, folder: folder || undefined }),
     callConvex("query", "videos:unreadCount"),
+    callConvex("query", "channels:categories"),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings, category });
+  renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory });
+
+  renderFolderPills(categories, folder, urlCategory);
 
   const grid = document.getElementById("videoGrid");
   if (!grid) return;
@@ -482,20 +499,61 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. Add some channels to get started!</p>
+      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = videos.map(videoCard).join("");
   }
 }
 
+function renderFolderPills(categories, currentFolder, currentCategory) {
+  let bar = document.getElementById("folderPillsBar");
+  if (!categories || !categories.length) {
+    if (bar) bar.remove();
+    return;
+  }
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "folderPillsBar";
+    bar.className = "mb-6 flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-4";
+    const main = document.querySelector("main");
+    if (main) main.insertBefore(bar, main.firstChild);
+  }
+  
+  const allUrl = `?category=${currentCategory}`;
+  bar.innerHTML = `
+    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mr-2"><i class="fa-solid fa-folder-open mr-1"></i>Folders:</span>
+    <a href="${allUrl}" class="px-3 py-1 rounded-full text-xs font-semibold transition ${!currentFolder ? "bg-red-600 text-white shadow" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"}">All</a>
+    ${categories.map((cat) => {
+      const active = currentFolder.toLowerCase() === cat.toLowerCase();
+      const catUrl = `?category=${currentCategory}&folder=${encodeURIComponent(cat)}`;
+      return `<a href="${catUrl}" class="px-3 py-1 rounded-full text-xs font-semibold transition ${active ? "bg-red-600 text-white shadow" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"}">${esc(cat)}</a>`;
+    }).join("")}`;
+}
+
 /* ------------------------------- channels page ----------------------------- */
+
+function inactivityBadge(lastUpload) {
+  if (!lastUpload) return `<span class="rounded bg-slate-800/80 px-2 py-0.5 text-[10px] font-bold text-slate-400" title="No uploads fetched yet">No Uploads</span>`;
+  const date = new Date(lastUpload);
+  if (isNaN(date.getTime())) return "";
+  const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  if (daysAgo >= 365) {
+    return `<span class="rounded bg-rose-950/90 border border-rose-800/60 px-2 py-0.5 text-[10px] font-bold text-rose-300 shadow" title="Last upload was ${daysAgo} days ago (${isoDate(lastUpload)})"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Inactive (> 1 yr)</span>`;
+  }
+  if (daysAgo >= 180) {
+    return `<span class="rounded bg-amber-950/90 border border-amber-800/60 px-2 py-0.5 text-[10px] font-bold text-amber-300 shadow" title="Last upload was ${daysAgo} days ago (${isoDate(lastUpload)})"><i class="fa-solid fa-clock-rotate-left mr-1"></i>Inactive (> 6 mo)</span>`;
+  }
+  return "";
+}
 
 function channelRow(channel) {
   const disabled = Boolean(channel.disabled);
   const filters = Array.isArray(channel.titleFilters) ? channel.titleFilters : [];
   const filterCount = filters.length;
   const filterText = filters.join("\n");
+  const category = channel.category ?? "";
+
   return `
   <div class="motion-card bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
     <div class="flex items-center justify-between gap-4">
@@ -507,12 +565,16 @@ function channelRow(channel) {
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
+            ${inactivityBadge(channel.lastUpload)}
             ${filterCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${filterCount} filter${filterCount === 1 ? "" : "s"}</span>` : ""}
           </div>
           <div class="text-[10px] text-slate-500 truncate max-w-[260px]">${esc(channel.url)}</div>
         </div>
       </div>
       <div class="flex flex-shrink-0 items-center gap-2">
+        <button onclick="toggleChannelFolderBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${category ? "text-red-400 hover:bg-red-950/40" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="${category ? "Folder: " + esc(category) : "Assign Folder/Category"}" aria-label="Assign Folder">
+          <i class="fa-solid fa-folder-plus"></i>
+        </button>
         <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${disabled ? "text-slate-500 hover:bg-slate-800 hover:text-white" : "text-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-300"}" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
           <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"} text-lg"></i>
         </button>
@@ -524,9 +586,13 @@ function channelRow(channel) {
         </button>
       </div>
     </div>
+    <form id="folder-${esc(channel.channelId)}" onsubmit="saveChannelFolder(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex items-center gap-3">
+      <input type="text" value="${esc(category)}" class="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-red-500" placeholder="e.g. Tech, Gaming, Music, Podcasts">
+      <button type="submit" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-500">Save Folder</button>
+    </form>
     <form id="filters-${esc(channel.channelId)}" onsubmit="saveChannelFilters(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
       <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Title filters</label>
-      <textarea rows="5" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500" placeholder="One title match per line">${esc(filterText)}</textarea>
+      <textarea rows="4" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500" placeholder="One title match per line">${esc(filterText)}</textarea>
       <div class="mt-3 flex items-center justify-between gap-3">
         <p class="text-xs text-slate-500">If filters are set, only matching video titles are fetched and shown.</p>
         <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Filters</button>
@@ -534,6 +600,28 @@ function channelRow(channel) {
     </form>
   </div>`;
 }
+
+window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
+  const form = document.getElementById(`folder-${channelId}`);
+  if (form) form.classList.toggle("hidden");
+};
+
+window.saveChannelFolder = async function saveChannelFolder(event, channelId) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const input = form.querySelector("input");
+  try {
+    await callConvex("mutation", "channels:updateCategory", {
+      channelId,
+      category: input.value,
+    });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+    flash("Channel folder updated.", "success");
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
 
 window.toggleChannelFilterBox = function toggleChannelFilterBox(channelId) {
   const form = document.getElementById(`filters-${channelId}`);
