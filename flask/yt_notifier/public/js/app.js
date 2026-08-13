@@ -7,6 +7,7 @@ const CONFIGURED =
   window.CONVEX_URL &&
   !window.CONVEX_URL.includes("YOUR-DEPLOYMENT");
 const API_BASE = CONFIGURED ? window.CONVEX_URL.replace(/\/+$/, "") : "";
+let isCheckingUpdates = false;
 
 /* ---------------------------------- utils --------------------------------- */
 
@@ -210,15 +211,14 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
           </a>
         </div>
         <div class="flex flex-wrap items-center gap-2 lg:gap-4">
-          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}">
-            <i class="fa-solid fa-bell mr-1.5"></i> Feed
-            ${unreadCount > 0 ? `<span class="ml-1.5 px-2 py-0.5 text-xs bg-red-600 text-white rounded-full font-bold animate-bounce">${unreadCount}</span>` : ""}
+          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed" aria-label="Feed">
+            <i class="fa-solid fa-bell"></i>
+            ${unreadCount > 0 ? `<span class="absolute -right-2 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">${unreadCount}</span>` : ""}
           </a>
           ${showSeen && PAGE === "feed" ? `
           <div class="relative inline-block text-left">
-            <button id="dropdownButton" onclick="toggleDropdown()" class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 text-[10px] uppercase font-bold text-slate-300 hover:text-white transition">
-              <span>${esc(category)}</span>
-              <i class="fa-solid fa-chevron-down text-[8px]"></i>
+            <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
+              <i class="fa-solid fa-filter"></i>
             </button>
             <div id="dropdownMenu" class="hidden absolute left-0 mt-1 w-24 bg-slate-900 border border-slate-800 z-50">
               ${["all", "unseen", "seen"].map((c) => `
@@ -228,12 +228,12 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
             </div>
           </div>` : ""}
           ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
-          <button type="button" onclick="openPopup('${l.page}')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300">
-            <i class="fa-solid ${l.icon} mr-1.5"></i> ${l.label}
+          <button type="button" onclick="openPopup('${l.page}')" class="nav-link inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="${l.label}" aria-label="${l.label}">
+            <i class="fa-solid ${l.icon}"></i>
           </button>`).join("")}
-          <button id="refreshButton" onclick="checkUpdates()" class="bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center space-x-1.5">
+          <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:cursor-wait disabled:opacity-90 ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
             <i class="fa-solid fa-rotate"></i>
-            <span>Check Updates</span>
+            <span class="sr-only">Check Updates</span>
           </button>
         </div>
       </div>
@@ -328,8 +328,11 @@ window.toggleDropdown = function toggleDropdown() {
 window.checkUpdates = async function checkUpdates() {
   const btn = document.getElementById("refreshButton");
   if (!btn) return;
+  isCheckingUpdates = true;
   btn.disabled = true;
-  btn.querySelector("span").textContent = "Updating...";
+  btn.title = "Updating...";
+  btn.setAttribute("aria-label", "Updating...");
+  btn.classList.add("is-syncing");
   try {
     const [res, backfill] = await Promise.all([
       callConvex("action", "refresh:refreshAll"),
@@ -346,8 +349,11 @@ window.checkUpdates = async function checkUpdates() {
   } catch (err) {
     flash(err.message, "danger");
   } finally {
+    isCheckingUpdates = false;
     btn.disabled = false;
-    btn.querySelector("span").textContent = "Check Updates";
+    btn.title = "Check updates";
+    btn.setAttribute("aria-label", "Check updates");
+    btn.classList.remove("is-syncing");
   }
 };
 
