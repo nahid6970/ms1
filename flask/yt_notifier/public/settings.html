@@ -37,8 +37,8 @@
     <main class="page-shell flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="max-w-2xl mx-auto">
             <h1 class="text-3xl font-bold text-white mb-8">Settings</h1>
-            <form id="settingsForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-6">
-                <div class="flex items-center justify-between">
+            <form id="settingsForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-6 space-y-6">
+                <div class="flex items-center justify-between gap-6">
                     <div>
                         <h2 class="text-white font-medium">Enable Category ALL/SEEN/UNSEEN</h2>
                         <p class="text-slate-500 text-xs">If enabled, you can categorize videos into All/Unseen/Seen.</p>
@@ -48,7 +48,18 @@
                         <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                     </label>
                 </div>
-                <button type="submit" class="mt-6 bg-red-600 text-white px-6 py-2 text-sm font-semibold hover:bg-red-500 transition">Save Settings</button>
+                <div class="border-t border-slate-800 pt-6">
+                    <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
+                    <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
+                    <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                        <input type="password" id="youtubeDataApiKey" autocomplete="off" placeholder="Paste API key" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+                        <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-400">
+                            <input type="checkbox" id="clearYoutubeDataApiKey" class="h-4 w-4 rounded border-slate-700 bg-slate-950 accent-red-600">
+                            Clear saved key
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="bg-red-600 text-white px-6 py-2 text-sm font-semibold hover:bg-red-500 transition">Save Settings</button>
             </form>
         </div>
     </main>

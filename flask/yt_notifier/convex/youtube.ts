@@ -38,8 +38,14 @@ export function normalizeUrl(input: string): string {
  * Fallback: scrape the channel page (no key needed).
  */
 export async function resolveChannelInfo(input: string): Promise<ChannelInfo> {
+  return resolveChannelInfoWithApiKey(input, process.env.YT_DATA_API_KEY ?? null);
+}
+
+export async function resolveChannelInfoWithApiKey(
+  input: string,
+  apiKey: string | null,
+): Promise<ChannelInfo> {
   const url = normalizeUrl(input);
-  const apiKey = process.env.YT_DATA_API_KEY;
 
   if (apiKey) {
     const lookup = await resolveViaApi(url, apiKey);
@@ -56,7 +62,13 @@ export async function resolveChannelInfo(input: string): Promise<ChannelInfo> {
  * late 2025 / 2026, but kept in case it returns).
  */
 export async function fetchChannelFeed(channelId: string): Promise<ChannelFeed | null> {
-  const apiKey = process.env.YT_DATA_API_KEY;
+  return fetchChannelFeedWithApiKey(channelId, process.env.YT_DATA_API_KEY ?? null);
+}
+
+export async function fetchChannelFeedWithApiKey(
+  channelId: string,
+  apiKey: string | null,
+): Promise<ChannelFeed | null> {
   if (apiKey) {
     const viaApi = await fetchFeedViaApi(channelId, apiKey);
     if (viaApi) return viaApi;
@@ -165,7 +177,7 @@ async function fetchFeedViaApi(channelId: string, apiKey: string): Promise<Chann
   }
 }
 
-async function fetchVideoDurations(
+export async function fetchVideoDurations(
   videoIds: string[],
   apiKey: string,
 ): Promise<Map<string, string>> {

@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { ConvexError } from "convex/values";
 import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { api, internal } from "./_generated/api";
-import { normalizeUrl, resolveChannelInfo } from "./youtube";
+import { normalizeUrl, resolveChannelInfoWithApiKey } from "./youtube";
 import type { RefreshChannelResult } from "./refresh";
 
 export const list = query({
@@ -72,7 +72,11 @@ export const updateRow = internalMutation({
 export const add = action({
   args: { url: v.string() },
   handler: async (ctx, { url }): Promise<RefreshChannelResult> => {
-    const info = await resolveChannelInfo(url);
+    const apiKey =
+      (await ctx.runQuery(internal.settings.youtubeDataApiKey)) ??
+      process.env.YT_DATA_API_KEY ??
+      null;
+    const info = await resolveChannelInfoWithApiKey(url, apiKey);
     if (!info.channelId) {
       throw new ConvexError(
         "Could not resolve YouTube Channel ID. Please check the URL.",

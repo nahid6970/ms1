@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 
 export const list = query({
   args: {
@@ -55,6 +55,45 @@ export const toggleRead = mutation({
   },
 });
 
+export const missingDurations = internalQuery({
+  args: { limit: v.number() },
+  handler: async (ctx, { limit }) => {
+    const videos = await ctx.db
+      .query("videos")
+      .withIndex("by_published")
+      .order("desc")
+      .take(limit);
+
+    return videos
+      .filter((video) => !video.duration)
+      .map((video) => ({
+        _id: video._id,
+        videoId: video.videoId,
+      }));
+  },
+});
+
+export const updateDurations = internalMutation({
+  args: {
+    updates: v.array(
+      v.object({
+        id: v.id("videos"),
+        duration: v.string(),
+      }),
+    ),
+  },
+  handler: async (ctx, { updates }) => {
+    let updated = 0;
+    for (const update of updates) {
+      const video = await ctx.db.get(update.id);
+      if (!video || video.duration) continue;
+      await ctx.db.patch(update.id, { duration: update.duration });
+      updated += 1;
+    }
+    return { updated };
+  },
+});
+
 /** Insert videos from a channel's feed that we haven't seen yet. */
 export const addFromFeed = internalMutation({
   args: {
@@ -71,6 +110,7 @@ export const addFromFeed = internalMutation({
   },
   handler: async (ctx, { channelId, entries }) => {
     let newVideos = 0;
+    let durationsUpdated = 0;
     for (const entry of entries) {
       if (!entry.videoId) continue;
       const existing = await ctx.db
@@ -90,8 +130,9 @@ export const addFromFeed = internalMutation({
         newVideos += 1;
       } else if (!existing.duration && entry.duration) {
         await ctx.db.patch(existing._id, { duration: entry.duration });
+        durationsUpdated += 1;
       }
     }
-    return { newVideos };
+    return { newVideos, durationsUpdated };
   },
 });

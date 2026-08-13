@@ -39,6 +39,13 @@ function timeLabel(dateStr) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+function durationBadge(video) {
+  if (video.duration) {
+    return `<span class="absolute bottom-3 right-3 rounded-md bg-black/85 px-2 py-1 text-xs font-semibold text-white shadow-lg">${esc(video.duration)}</span>`;
+  }
+  return `<span class="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-300 shadow-lg" title="Run Check Updates after deploying the latest Convex functions to backfill this video duration">Duration pending</span>`;
+}
+
 function dayLabel(dateStr) {
   const d = new Date(dateStr);
   return isNaN(d.getTime())
@@ -164,8 +171,16 @@ window.checkUpdates = async function checkUpdates() {
   btn.disabled = true;
   btn.querySelector("span").textContent = "Updating...";
   try {
-    const res = await callConvex("action", "refresh:refreshAll");
-    flash(`Refreshed all channels! Found ${res.totalNew} new video(s).`, "success");
+    const [res, backfill] = await Promise.all([
+      callConvex("action", "refresh:refreshAll"),
+      callConvex("action", "refresh:backfillDurations", { limit: 50 }),
+    ]);
+    const durationsUpdated = (res.durationsUpdated ?? 0) + (backfill.updated ?? 0);
+    const backfillNote = backfill.reason ? ` ${backfill.reason}` : "";
+    flash(
+      `Refreshed all channels! Found ${res.totalNew} new video(s), updated ${durationsUpdated} duration(s).${backfillNote}`,
+      "success",
+    );
     if (PAGE === "feed") await renderFeed();
     else await refreshNavOnly();
   } catch (err) {
@@ -196,7 +211,7 @@ function videoCard(video) {
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
       </div>
-      ${video.duration ? `<span class="absolute bottom-3 right-3 rounded-md bg-black/80 px-2 py-1 text-xs font-semibold text-white shadow-lg">${esc(video.duration)}</span>` : ""}
+      ${durationBadge(video)}
     </a>
     <div class="p-5 flex min-h-48 flex-col">
       <div class="flex items-center gap-3 mb-3">
@@ -386,10 +401,20 @@ function initSettingsPage() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const checked = document.getElementById("showSeenToggle").checked;
+    const apiKeyInput = document.getElementById("youtubeDataApiKey");
+    const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
     const btn = form.querySelector("button[type=submit]");
     btn.disabled = true;
     try {
-      await callConvex("mutation", "settings:updateShowSeen", { showSeen: checked });
+      await callConvex("mutation", "settings:updateConfig", {
+        showSeen: checked,
+        youtubeDataApiKey: apiKeyInput.value,
+        clearYoutubeDataApiKey: clearApiKey,
+      });
+      apiKeyInput.value = "";
+      document.getElementById("clearYoutubeDataApiKey").checked = false;
+      const config = await callConvex("query", "settings:config");
+      renderSettingsConfig(config);
       flash("Settings updated!", "success");
     } catch (err) {
       flash(err.message, "danger");
@@ -397,6 +422,17 @@ function initSettingsPage() {
       btn.disabled = false;
     }
   });
+}
+
+function renderSettingsConfig(config) {
+  const toggle = document.getElementById("showSeenToggle");
+  const status = document.getElementById("youtubeApiKeyStatus");
+  if (toggle) toggle.checked = config.showSeen;
+  if (status) {
+    status.textContent = config.hasYoutubeDataApiKey
+      ? "A key is saved. Leave blank to keep it, paste a new key to replace it, or check Clear saved key."
+      : "No key saved. Paste a YouTube Data API v3 key to fetch video durations.";
+  }
 }
 
 /* ----------------------------------- init ---------------------------------- */
@@ -412,12 +448,12 @@ async function refreshNavAndDispatch() {
     else if (PAGE === "channels") await renderChannels();
     else if (PAGE === "stats") await renderStats();
     else if (PAGE === "settings") {
-      const [settings, unread] = await Promise.all([
-        callConvex("query", "settings:get"),
+      const [config, unread] = await Promise.all([
+        callConvex("query", "settings:config"),
         callConvex("query", "videos:unreadCount"),
       ]);
-      renderNav({ unreadCount: unread, showSeen: settings });
-      document.getElementById("showSeenToggle").checked = settings;
+      renderNav({ unreadCount: unread, showSeen: config.showSeen });
+      renderSettingsConfig(config);
       initSettingsPage();
     }
   } catch (err) {
