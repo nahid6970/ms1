@@ -583,27 +583,57 @@ function renderHeatmap(data, days) {
   const container = document.getElementById("heatmap");
   if (!container) return;
   if (!data.length) {
-    container.innerHTML = '<div class="border-t border-slate-800 pt-5"><p class="text-slate-600 text-sm">No uploads in this period yet.</p></div>';
+    container.innerHTML = '<section class="border-t border-slate-800 pt-6"><p class="text-slate-600 text-sm">No uploads in this period yet.</p></section>';
     return;
   }
-  container.innerHTML = data.map((stat) => {
+  const monthLabels = days.map((day) => {
+    const d = new Date(day);
+    return isNaN(d.getTime()) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  });
+  const rows = data.map((stat) => {
     const cells = stat.dailyCounts
       .map((count, i) => {
-        const cls = count === 0 ? "bg-slate-800" : count === 1 ? "bg-red-900" : count === 2 ? "bg-red-700" : "bg-red-500";
-        return `<div class="w-3 h-3 flex-shrink-0 rounded-none ${cls}" title="${dayLabel(days[i])}: ${count} uploads"></div>`;
+        const cls = count === 0
+          ? "bg-slate-800/80"
+          : count === 1
+            ? "bg-red-900"
+            : count === 2
+              ? "bg-red-700"
+              : "bg-red-500";
+        return `<div class="h-4 min-w-4 rounded-sm ${cls} ring-1 ring-slate-950/40" title="${dayLabel(days[i])}: ${count} uploads"></div>`;
       })
       .join("");
     return `
-    <div class="mb-5">
-      <div class="mb-3">
-        <span class="text-slate-300 font-medium text-sm">${esc(stat.name)}</span>
-        <span class="text-red-500 font-bold text-xs ml-2">(${stat.total})</span>
+    <div class="grid grid-cols-[140px_1fr] items-center gap-4 border-b border-slate-800/70 py-3 last:border-b-0">
+      <div class="min-w-0">
+        <div class="truncate text-sm font-semibold text-slate-300">${esc(stat.name)}</div>
+        <div class="text-xs text-red-400">${esc(stat.total)} uploads</div>
       </div>
-      <div class="flex gap-1 overflow-x-auto pb-2">
+      <div class="grid gap-1" style="grid-template-columns: repeat(${days.length}, minmax(1rem, 1fr));">
         ${cells}
       </div>
     </div>`;
   }).join("");
+  container.innerHTML = `
+    <section class="border-t border-slate-800 pt-6">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm font-semibold text-white">Upload Activity</h3>
+          <p class="text-xs text-slate-500">${esc(monthLabels[0])} to ${esc(monthLabels[monthLabels.length - 1])}</p>
+        </div>
+        <div class="flex items-center gap-2 text-[10px] uppercase tracking-wide text-slate-500">
+          <span>Less</span>
+          <span class="h-3 w-3 rounded-sm bg-slate-800"></span>
+          <span class="h-3 w-3 rounded-sm bg-red-900"></span>
+          <span class="h-3 w-3 rounded-sm bg-red-700"></span>
+          <span class="h-3 w-3 rounded-sm bg-red-500"></span>
+          <span>More</span>
+        </div>
+      </div>
+      <div class="rounded-lg border border-slate-800 bg-slate-950/45 px-4 py-2">
+        ${rows}
+      </div>
+    </section>`;
 }
 
 function renderStatsSummary(data) {
@@ -614,7 +644,7 @@ function renderStatsSummary(data) {
     ["Uploads", summary.uploadsInPeriod ?? 0, "fa-video"],
     ["Unseen", summary.unseenVisible ?? 0, "fa-bell"],
     ["Active", summary.activeChannels ?? 0, "fa-signal"],
-    ["Filtered", summary.hiddenByFilters ?? 0, "fa-filter"],
+    ["Hidden", summary.hiddenByFilters ?? 0, "fa-filter"],
   ];
   container.innerHTML = `
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -666,7 +696,7 @@ function renderChannelStats(channels) {
           </div>
           <div class="text-right">
             <div class="text-sm font-bold ${channel.filterCount ? "text-sky-300" : "text-slate-500"}">${esc(channel.filterCount)}</div>
-            <div class="text-[10px] uppercase text-slate-500">filters</div>
+            <div class="text-[10px] uppercase text-slate-500">rules</div>
           </div>
         </div>`).join("")}
     </div>`;
