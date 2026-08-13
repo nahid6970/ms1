@@ -219,24 +219,24 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col gap-3 py-3 lg:min-h-16 lg:flex-row lg:items-center lg:justify-between">
-        <div class="flex items-center space-x-3">
-          <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-xl tracking-tight">
-            <i class="fa-brands fa-youtube text-3xl animate-pulse"></i>
+      <div class="flex h-16 items-center justify-between gap-2 sm:gap-4">
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight">
+            <i class="fa-brands fa-youtube text-2xl sm:text-3xl"></i>
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
           </a>
         </div>
-        <div class="flex flex-wrap items-center gap-2 lg:gap-4">
-          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed" aria-label="Feed">
+        <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed" aria-label="Feed">
             <i class="fa-solid fa-bell"></i>
-            ${unreadCount > 0 ? `<span class="absolute -right-2 -top-1 min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white">${unreadCount}</span>` : ""}
+            ${unreadCount > 0 ? `<span class="absolute -right-1.5 -top-1 min-w-4 sm:min-w-5 rounded-full bg-red-600 px-1 py-0.5 text-center text-[9px] sm:text-[10px] font-bold text-white">${unreadCount}</span>` : ""}
           </a>
           ${showSeen && PAGE === "feed" ? `
           <div class="relative inline-block text-left">
-            <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
+            <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
               <i class="fa-solid fa-filter"></i>
             </button>
-            <div id="dropdownMenu" class="hidden absolute left-0 mt-1 w-24 bg-slate-900 border border-slate-800 z-50">
+            <div id="dropdownMenu" class="hidden absolute right-0 sm:left-0 mt-1 w-24 bg-slate-900 border border-slate-800 z-50">
               ${["all", "unseen", "seen"].map((c) => `
                 <a href="?category=${c}" class="block px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition ${c === category ? "text-red-400" : ""}">
                   ${c}
@@ -244,10 +244,10 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
             </div>
           </div>` : ""}
           ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
-          <button type="button" onclick="openPopup('${l.page}')" class="nav-link inline-flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="${l.label}" aria-label="${l.label}">
+          <button type="button" onclick="openPopup('${l.page}')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="${l.label}" aria-label="${l.label}">
             <i class="fa-solid ${l.icon}"></i>
           </button>`).join("")}
-          <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:cursor-wait disabled:opacity-90 ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
+          <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:cursor-wait disabled:opacity-90 ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
             <i class="fa-solid fa-rotate"></i>
             <span class="sr-only">Check Updates</span>
           </button>
