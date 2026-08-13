@@ -115,6 +115,68 @@ const NAV_LINKS = [
   { page: "settings", href: "settings.html", label: "Settings", icon: "fa-gear" },
 ];
 
+const POPUP_PAGES = {
+  channels: {
+    title: "Manage Channels",
+    icon: "fa-tv",
+    body: `
+      <div class="space-y-6">
+        <form id="addChannelForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row gap-3">
+          <input type="text" id="channelUrl" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+          <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-3 rounded-lg text-sm font-semibold transition">Add Channel</button>
+        </form>
+        <div id="channelList" class="space-y-3">
+          <p class="text-slate-600 text-sm">Loading...</p>
+        </div>
+      </div>`,
+  },
+  stats: {
+    title: "Upload Heatmap",
+    icon: "fa-chart-pie",
+    body: `
+      <div class="space-y-5">
+        <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800 w-max">
+          <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
+          <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
+        </div>
+        <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
+          <div class="min-w-[600px]" id="heatmap">
+            <p class="text-slate-600 text-sm">Loading...</p>
+          </div>
+        </div>
+      </div>`,
+  },
+  settings: {
+    title: "Settings",
+    icon: "fa-gear",
+    body: `
+      <form id="settingsForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 space-y-6">
+        <div class="flex items-center justify-between gap-6">
+          <div>
+            <h2 class="text-white font-medium">Enable Category ALL/SEEN/UNSEEN</h2>
+            <p class="text-slate-500 text-xs">If enabled, you can categorize videos into All/Unseen/Seen.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="showSeenToggle" name="show_seen" class="sr-only peer">
+            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-none peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-none after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+          </label>
+        </div>
+        <div class="border-t border-slate-800 pt-6">
+          <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
+          <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
+          <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+            <input type="password" id="youtubeDataApiKey" autocomplete="off" placeholder="Paste API key" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <label class="inline-flex items-center gap-2 text-xs font-medium text-slate-400">
+              <input type="checkbox" id="clearYoutubeDataApiKey" class="h-4 w-4 rounded border-slate-700 bg-slate-950 accent-red-600">
+              Clear saved key
+            </label>
+          </div>
+        </div>
+        <button type="submit" class="bg-red-600 text-white px-6 py-2 text-sm font-semibold hover:bg-red-500 transition">Save Settings</button>
+      </form>`,
+  },
+};
+
 function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
@@ -147,9 +209,9 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
             </div>
           </div>` : ""}
           ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
-          <a href="${l.href}" class="nav-link ${PAGE === l.page ? "is-active" : ""} px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === l.page ? "bg-slate-800 text-red-400" : "text-slate-300"}">
+          <button type="button" onclick="openPopup('${l.page}')" class="nav-link px-3 py-2 rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300">
             <i class="fa-solid ${l.icon} mr-1.5"></i> ${l.label}
-          </a>`).join("")}
+          </button>`).join("")}
           <button id="refreshButton" onclick="checkUpdates()" class="bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-500 hover:to-amber-400 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center space-x-1.5">
             <i class="fa-solid fa-rotate"></i>
             <span>Check Updates</span>
@@ -159,6 +221,64 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {})
     </div>
   </nav>`;
 }
+
+function ensurePopup() {
+  let popup = document.getElementById("appPopup");
+  if (popup) return popup;
+
+  popup = document.createElement("div");
+  popup.id = "appPopup";
+  popup.className = "fixed inset-0 z-[80] hidden";
+  popup.innerHTML = `
+    <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closePopup()"></div>
+    <section class="popup-panel absolute left-1/2 top-6 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
+      <header class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
+        <h2 id="popupTitle" class="text-lg font-semibold text-white"></h2>
+        <button type="button" onclick="closePopup()" class="rounded-lg px-3 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </header>
+      <div id="popupBody" class="max-h-[calc(100vh-8rem)] overflow-y-auto p-5"></div>
+    </section>`;
+  document.body.appendChild(popup);
+  return popup;
+}
+
+window.openPopup = async function openPopup(page) {
+  const config = POPUP_PAGES[page];
+  if (!config) return;
+  const popup = ensurePopup();
+  document.getElementById("popupTitle").innerHTML = `<i class="fa-solid ${config.icon} mr-2 text-red-400"></i>${esc(config.title)}`;
+  document.getElementById("popupBody").innerHTML = config.body;
+  popup.classList.remove("hidden");
+  document.body.classList.add("overflow-hidden");
+
+  if (!CONFIGURED) {
+    configBanner();
+    return;
+  }
+  try {
+    if (page === "channels") {
+      initChannelsPage();
+      await renderChannels({ refreshNav: false });
+    } else if (page === "stats") {
+      await renderStats({ refreshNav: false });
+    } else if (page === "settings") {
+      const configData = await callConvex("query", "settings:config");
+      renderSettingsConfig(configData);
+      initSettingsPage();
+    }
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+window.closePopup = function closePopup() {
+  const popup = document.getElementById("appPopup");
+  if (!popup) return;
+  popup.classList.add("hidden");
+  document.body.classList.remove("overflow-hidden");
+};
 
 window.toggleDropdown = function toggleDropdown() {
   const menu = document.getElementById("dropdownMenu");
@@ -297,19 +417,19 @@ window.deleteChannel = async function deleteChannel(channelId) {
   if (!confirm("Remove this channel and all its videos?")) return;
   try {
     await callConvex("mutation", "channels:remove", { channelId });
-    await renderChannels();
+    await renderChannels({ refreshNav: !document.getElementById("appPopup") || document.getElementById("appPopup").classList.contains("hidden") });
   } catch (err) {
     flash(err.message, "danger");
   }
 };
 
-async function renderChannels() {
+async function renderChannels({ refreshNav = true } = {}) {
   const [channels, settings, unread] = await Promise.all([
     callConvex("query", "channels:list"),
     callConvex("query", "settings:get"),
     callConvex("query", "videos:unreadCount"),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings });
+  if (refreshNav) renderNav({ unreadCount: unread, showSeen: settings });
 
   const list = document.getElementById("channelList");
   if (!list) return;
@@ -331,7 +451,7 @@ function initChannelsPage() {
       const res = await callConvex("action", "channels:add", { url: input.value });
       flash(`Channel added and synced successfully! Found ${res.newVideos} new video(s).`, "success");
       input.value = "";
-      await renderChannels();
+      await renderChannels({ refreshNav: !document.getElementById("appPopup") || document.getElementById("appPopup").classList.contains("hidden") });
     } catch (err) {
       flash(err.message, "danger");
     } finally {
@@ -370,14 +490,18 @@ function renderHeatmap(data, days) {
   }).join("");
 }
 
-async function renderStats() {
+async function renderStats({ refreshNav = true, periodOverride = null } = {}) {
   const urlParams = new URLSearchParams(location.search);
-  const period = urlParams.get("period") === "week" ? "week" : "month";
+  const period = periodOverride || (urlParams.get("period") === "week" ? "week" : "month");
 
   // Highlight the active period toggle
   document.querySelectorAll('a[href^="?period="]').forEach((a) => {
     const active = a.getAttribute("href").includes(`period=${period}`);
     a.className = `px-4 py-1 text-xs rounded-md transition capitalize ${active ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`;
+  });
+  document.querySelectorAll("[data-period]").forEach((button) => {
+    const active = button.dataset.period === period;
+    button.className = `px-4 py-1 text-xs rounded-md transition capitalize ${active ? "bg-red-600 text-white" : "text-slate-400 hover:text-white"}`;
   });
 
   const [data, settings, unread] = await Promise.all([
@@ -385,7 +509,7 @@ async function renderStats() {
     callConvex("query", "settings:get"),
     callConvex("query", "videos:unreadCount"),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings });
+  if (refreshNav) renderNav({ unreadCount: unread, showSeen: settings });
   renderHeatmap(data.channels, data.days);
 }
 
@@ -463,6 +587,10 @@ window.addEventListener("click", (event) => {
     const menu = document.getElementById("dropdownMenu");
     if (menu && !menu.classList.contains("hidden")) menu.classList.add("hidden");
   }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closePopup();
 });
 
 document.addEventListener("DOMContentLoaded", () => {
