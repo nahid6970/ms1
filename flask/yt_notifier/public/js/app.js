@@ -46,6 +46,27 @@ function durationBadge(video) {
   return `<span class="absolute bottom-3 right-3 rounded-md bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-300 shadow-lg" title="Run Check Updates after deploying the latest Convex functions to backfill this video duration">Duration pending</span>`;
 }
 
+function eyeIcon(isNew) {
+  return isNew
+    ? `<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`
+    : `<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+        <path d="m3 3 18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M10.7 5.2A10.5 10.5 0 0 1 12 5c6 0 9.5 7 9.5 7a17.7 17.7 0 0 1-2.3 3.3M6.1 6.7C3.8 8.2 2.5 12 2.5 12s3.5 7 9.5 7c1.7 0 3.2-.5 4.4-1.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.9 9.9A3 3 0 0 0 14.1 14.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>`;
+}
+
+function externalIcon() {
+  return `<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" aria-hidden="true">
+    <path d="M14 4h6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10 14 20 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
 function dayLabel(dateStr) {
   const d = new Date(dateStr);
   return isNaN(d.getTime())
@@ -349,16 +370,26 @@ function videoCard(video) {
     : "text-slate-500 group-hover:text-slate-300";
   return `
   <article class="motion-card group soft-panel ${cardTone} border rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-    <a href="${esc(video.link)}" target="_blank" class="block relative aspect-video bg-slate-950 overflow-hidden">
+    <div class="relative aspect-video bg-slate-950 overflow-hidden">
+      <a href="${esc(video.link)}" target="_blank" class="absolute inset-0">
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
+      </a>
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
         ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
       </div>
+      <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 opacity-0 transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <button onclick="toggleRead('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
+          ${eyeIcon(isNew)}
+        </button>
+        <a href="${esc(video.link)}" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-slate-800 hover:text-white" title="Open video" aria-label="Open video">
+          ${externalIcon()}
+        </a>
+      </div>
       ${durationBadge(video)}
-    </a>
-    <div class="p-5 flex min-h-48 flex-col">
+    </div>
+    <div class="p-5 flex flex-col">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden text-slate-500 ring-1 ring-slate-700">
           ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user text-sm"></i>`}
@@ -368,18 +399,7 @@ function videoCard(video) {
           <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
         </div>
       </div>
-      <h3 class="text-lg font-semibold ${titleTone} leading-snug mb-auto line-clamp-2 transition">${esc(video.title)}</h3>
-      <div class="flex items-center justify-end border-t border-slate-800/80 text-slate-500 text-xs mt-5 pt-4">
-        <div class="flex items-center space-x-3">
-          <button onclick="toggleRead('${esc(video._id)}')" class="relative inline-flex items-center cursor-pointer" title="Toggle read status">
-            <input type="checkbox" class="sr-only peer" ${isNew ? "" : "checked"}>
-            <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-          </button>
-          <a href="${esc(video.link)}" target="_blank" class="text-slate-400 hover:text-white transition">
-            <i class="fa-solid fa-external-link"></i>
-          </a>
-        </div>
-      </div>
+      <h3 class="text-lg font-semibold ${titleTone} leading-snug line-clamp-2 transition">${esc(video.title)}</h3>
     </div>
   </article>`;
 }
