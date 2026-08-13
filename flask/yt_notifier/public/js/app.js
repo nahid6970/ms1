@@ -231,7 +231,7 @@ function ensurePopup() {
   popup.className = "fixed inset-0 z-[80] hidden";
   popup.innerHTML = `
     <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closePopup()"></div>
-    <section class="popup-panel absolute left-1/2 top-6 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
+    <section class="popup-panel absolute left-1/2 top-1/2 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
       <header class="flex items-center justify-between border-b border-slate-800 px-5 py-4">
         <h2 id="popupTitle" class="text-lg font-semibold text-white"></h2>
         <button type="button" onclick="closePopup()" class="rounded-lg px-3 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
