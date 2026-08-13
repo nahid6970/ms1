@@ -450,8 +450,11 @@ function videoCard(video) {
         <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden text-slate-500 ring-1 ring-slate-700">
           ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user text-sm"></i>`}
         </div>
-        <div class="min-w-0">
-          <div class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</span>
+            ${video.channelCategory ? `<span class="flex-shrink-0 rounded bg-red-950/70 border border-red-800/50 px-1.5 py-0.5 text-[10px] font-semibold text-red-300"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(video.channelCategory)}</span>` : ""}
+          </div>
           <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
         </div>
       </div>
@@ -566,6 +569,7 @@ function channelRow(channel) {
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
+            ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
             ${filterCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${filterCount} filter${filterCount === 1 ? "" : "s"}</span>` : ""}
