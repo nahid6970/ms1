@@ -537,7 +537,9 @@ function inactivityBadge(lastUpload) {
   if (!lastUpload) return `<span class="rounded bg-slate-800/80 px-2 py-0.5 text-[10px] font-bold text-slate-400" title="No uploads fetched yet">No Uploads</span>`;
   const date = new Date(lastUpload);
   if (isNaN(date.getTime())) return "";
-  const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return "";
+  const daysAgo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (daysAgo >= 365) {
     return `<span class="rounded bg-rose-950/90 border border-rose-800/60 px-2 py-0.5 text-[10px] font-bold text-rose-300 shadow" title="Last upload was ${daysAgo} days ago (${isoDate(lastUpload)})"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Inactive (> 1 yr)</span>`;
   }

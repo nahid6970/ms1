@@ -26,6 +26,7 @@ export default defineSchema({
     isFavorite: v.optional(v.boolean()),
   })
     .index("by_channelId", ["channelId"])
+    .index("by_channelId_published", ["channelId", "published"])
     .index("by_videoId", ["videoId"])
     .index("by_published", ["published"]),
 

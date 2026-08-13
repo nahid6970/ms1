@@ -13,7 +13,7 @@ export const list = query({
     for (const channel of channels) {
       const latestVideo = await ctx.db
         .query("videos")
-        .withIndex("by_channelId", (q) => q.eq("channelId", channel.channelId))
+        .withIndex("by_channelId_published", (q) => q.eq("channelId", channel.channelId))
         .order("desc")
         .first();
       result.push({
