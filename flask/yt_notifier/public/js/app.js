@@ -479,10 +479,6 @@ function videoCard(video) {
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
       </a>
-      <div class="absolute left-3 top-3 flex items-center gap-2">
-        ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
-        ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
-      </div>
       <div class="absolute right-3 top-3 z-10 flex items-center gap-2">
         <button onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
