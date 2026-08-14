@@ -450,14 +450,19 @@ function videoCard(video) {
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
         ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
+        ${video.isShort ? `<span class="bg-amber-950/90 border border-amber-800/60 backdrop-blur px-2 py-1 rounded-sm text-[10px] font-bold text-amber-300 shadow-lg"><i class="fa-solid fa-bolt text-[9px] mr-1"></i>SHORT</span>` : ""}
       </div>
-      <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 ${isFavorite ? "opacity-100" : "opacity-0"} transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+      <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 ${isFavorite || video.isShort ? "opacity-100" : "opacity-0"} transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
         <button onclick="toggleFavorite('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 ${isFavorite ? "text-amber-400 hover:text-amber-300" : "text-slate-300 hover:text-amber-400"} shadow-lg backdrop-blur transition hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
         </button>
         <button onclick="toggleRead('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
+        ${video.isShort ? `
+        <span class="inline-flex h-9 px-2 items-center justify-center rounded-lg bg-amber-950/90 border border-amber-800/70 text-[10px] font-extrabold text-amber-300 shadow-lg backdrop-blur" title="YouTube Short (≤ 60s)">
+          <i class="fa-solid fa-bolt mr-1 text-amber-400"></i>SHORT
+        </span>` : ""}
         <a href="${esc(video.link)}" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-slate-800 hover:text-white" title="Open video" aria-label="Open video">
           ${externalIcon()}
         </a>

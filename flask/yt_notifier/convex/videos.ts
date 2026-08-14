@@ -67,6 +67,7 @@ export const list = query({
         published: video.published,
         isNew: video.isNew,
         isFavorite: video.isFavorite ?? false,
+        isShort: isShortVideo(video),
         channelId: video.channelId,
         channelName: nameById.get(video.channelId) ?? "Unknown Channel",
         channelThumbnail: thumbById.get(video.channelId) ?? null,
