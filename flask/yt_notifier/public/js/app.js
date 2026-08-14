@@ -159,10 +159,12 @@ const POPUP_PAGES = {
     icon: "fa-tv",
     body: `
       <div class="space-y-6">
-        <form id="addChannelForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row gap-3">
-          <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
-          <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-3 rounded-lg text-sm font-semibold transition">Add Channel</button>
-        </form>
+        <div class="sticky -top-5 z-20 bg-slate-950/95 backdrop-blur-md pb-4 pt-1">
+          <form id="addChannelForm" class="soft-panel bg-slate-900/90 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row gap-3 shadow-xl">
+            <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-3 rounded-lg text-sm font-semibold transition">Add Channel</button>
+          </form>
+        </div>
         <div id="channelList" class="space-y-3">
           <p class="text-slate-600 text-sm">Loading...</p>
         </div>
@@ -621,7 +623,7 @@ function channelRow(channel, categories = []) {
   const isCustomInput = category && !categories.some((c) => c.toLowerCase() === category.toLowerCase());
 
   return `
-  <div class="motion-card bg-slate-900/90 border ${disabled ? "border-slate-800/60 opacity-60" : "border-slate-800"} p-4 rounded-lg hover:border-red-500/40 hover:-translate-y-0.5 transition">
+  <div class="motion-card border p-4 rounded-lg hover:-translate-y-0.5 transition ${disabled ? "bg-rose-950/30 border-rose-900/50 opacity-80 hover:border-rose-700/60" : "bg-slate-900/90 border-slate-800 hover:border-red-500/40"}">
     <div class="flex items-center justify-between gap-4">
       <div class="flex min-w-0 items-center space-x-4">
         <div class="w-10 h-10 flex-shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden ${disabled ? "grayscale" : ""}">
