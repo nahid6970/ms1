@@ -5217,7 +5217,7 @@ class MainWindow(QMainWindow):
         self.hdr_open_btn.setFixedWidth(34)
         self.hdr_open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.hdr_open_btn.setToolTip("Open active project root in File Manager")
-        _FOLDER_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>"""
+        _FOLDER_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#00F0FF"><path d="M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/></svg>"""
         self.hdr_open_btn.setIcon(_svg_icon(_FOLDER_SVG, 18))
         self.hdr_open_btn.setIconSize(QSize(18, 18))
         self.hdr_open_btn.setStyleSheet(f"""
