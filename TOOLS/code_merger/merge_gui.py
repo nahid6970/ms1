@@ -5254,7 +5254,9 @@ class MainWindow(QMainWindow):
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
                 padding: 4px 10px;
-                font-size: 12pt;
+                font-family: 'JetBrainsMono NFP';
+                font-size: 13pt;
+                qproperty-alignment: AlignCenter;
             }}
             QPushButton:hover {{
                 color: {CP_CYAN};
@@ -5264,7 +5266,7 @@ class MainWindow(QMainWindow):
         """)
         btn_settings.clicked.connect(self._open_settings)
 
-        btn_restart = QPushButton("⟳")
+        btn_restart = QPushButton("󰑓")
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_restart.setToolTip("Restart")
         btn_restart.setStyleSheet(f"""
@@ -5273,7 +5275,9 @@ class MainWindow(QMainWindow):
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
                 padding: 4px 10px;
-                font-size: 12pt;
+                font-family: 'JetBrainsMono NFP';
+                font-size: 13pt;
+                qproperty-alignment: AlignCenter;
             }}
             QPushButton:hover {{
                 color: {CP_YELLOW};
