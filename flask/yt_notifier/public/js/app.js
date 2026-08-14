@@ -223,23 +223,24 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ unreadCount = 0, showSeen = false, category = "all" } = {}) {
+function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between gap-2 sm:gap-4">
-        <div class="flex items-center space-x-2 flex-shrink-0">
-          <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight">
+        <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+          <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight flex-shrink-0">
             <i class="fa-brands fa-youtube text-2xl sm:text-3xl"></i>
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
           </a>
+          <div id="headerFolderPills" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed" aria-label="Feed">
+          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} inline-flex h-9 sm:h-10 px-2.5 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
             <i class="fa-solid fa-bell"></i>
-            ${unreadCount > 0 ? `<span class="absolute -right-1.5 -top-1 min-w-4 sm:min-w-5 rounded-full bg-red-600 px-1 py-0.5 text-center text-[9px] sm:text-[10px] font-bold text-white">${unreadCount}</span>` : ""}
+            ${unreadCount > 0 ? `<span class="text-xs font-bold text-red-400">${unreadCount}</span>` : ""}
           </a>
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
@@ -492,7 +493,7 @@ async function renderFeed() {
     callConvex("query", "videos:unreadCount"),
     callConvex("query", "channels:categories"),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory });
+  renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory, folder });
 
   renderFolderPills(categories, folder, urlCategory);
 
@@ -510,28 +511,26 @@ async function renderFeed() {
 }
 
 function renderFolderPills(categories, currentFolder, currentCategory) {
-  let bar = document.getElementById("folderPillsBar");
-  if (!categories || !categories.length) {
-    if (bar) bar.remove();
-    return;
-  }
-  if (!bar) {
-    bar = document.createElement("div");
-    bar.id = "folderPillsBar";
-    bar.className = "mb-6 flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-4";
-    const main = document.querySelector("main");
-    if (main) main.insertBefore(bar, main.firstChild);
-  }
-  
+  const oldBar = document.getElementById("folderPillsBar");
+  if (oldBar) oldBar.remove();
+
+  const container = document.getElementById("headerFolderPills");
+  if (!container) return;
+
   const allUrl = `?category=${currentCategory}`;
-  bar.innerHTML = `
-    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 mr-2"><i class="fa-solid fa-folder-open mr-1"></i>Folders:</span>
-    <a href="${allUrl}" class="px-3 py-1 rounded-full text-xs font-semibold transition ${!currentFolder ? "bg-red-600 text-white shadow" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"}">All</a>
-    ${categories.map((cat) => {
-      const active = currentFolder.toLowerCase() === cat.toLowerCase();
-      const catUrl = `?category=${currentCategory}&folder=${encodeURIComponent(cat)}`;
-      return `<a href="${catUrl}" class="px-3 py-1 rounded-full text-xs font-semibold transition ${active ? "bg-red-600 text-white shadow" : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"}">${esc(cat)}</a>`;
-    }).join("")}`;
+  const naActive = currentFolder.toUpperCase() === "N/A" || currentFolder.toLowerCase() === "uncategorized";
+  const naUrl = `?category=${currentCategory}&folder=N%2FA`;
+
+  const categoryPillsHtml = (categories || []).map((cat) => {
+    const active = currentFolder.toLowerCase() === cat.toLowerCase();
+    const catUrl = `?category=${currentCategory}&folder=${encodeURIComponent(cat)}`;
+    return `<a href="${catUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${active ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}">${esc(cat)}</a>`;
+  }).join("");
+
+  container.innerHTML = `
+    <a href="${allUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${!currentFolder ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}">All</a>
+    ${categoryPillsHtml}
+    <a href="${naUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${naActive ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}" title="Uncategorized channels">N/A</a>`;
 }
 
 /* ------------------------------- channels page ----------------------------- */

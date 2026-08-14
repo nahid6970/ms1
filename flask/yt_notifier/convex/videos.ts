@@ -17,8 +17,12 @@ export const list = query({
     const enabledChannels = channels.filter((channel) => !channel.disabled);
     
     const targetFolder = folder?.trim();
+    const isUncategorized = targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+
     const filteredChannels = targetFolder
-      ? enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
+      ? isUncategorized
+        ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
+        : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
       : enabledChannels;
 
     const enabledChannelIds = new Set(
