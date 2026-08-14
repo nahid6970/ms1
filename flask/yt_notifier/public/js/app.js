@@ -559,7 +559,7 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : "Add channels or adjust filters to see videos."}</p>
+      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = videos.map(videoCard).join("");
