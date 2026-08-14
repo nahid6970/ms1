@@ -652,7 +652,7 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
   const naActive = currentFolder.toUpperCase() === "N/A" || currentFolder.toLowerCase() === "uncategorized";
   const naUrl = `?category=${currentCategory}${subParam}&folder=N%2FA`;
 
-  const displayLabel = currentFolder ? (naActive ? "N/A" : currentFolder) : "All Folders";
+  const displayLabel = currentFolder ? (naActive ? "N/A" : currentFolder) : "All";
 
   const categoryOptionsHtml = (categories || []).map((cat) => {
     const active = currentFolder.toLowerCase() === cat.toLowerCase();
@@ -670,10 +670,10 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
         <span class="whitespace-nowrap">${esc(displayLabel)}</span>
         <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5"></i>
       </button>
-      <div id="folderDropdownMenu" class="hidden absolute left-0 top-full mt-1.5 w-36 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+      <div id="folderDropdownMenu" class="hidden absolute left-0 top-full mt-1.5 w-32 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
         <a href="${allUrl}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${!currentFolder ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
           <i class="fa-solid fa-folder text-xs ${!currentFolder ? "text-red-400" : "text-slate-400"}"></i>
-          <span>All Folders</span>
+          <span>All</span>
         </a>
         ${categoryOptionsHtml}
         <a href="${naUrl}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${naActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}" title="N/A">
