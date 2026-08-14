@@ -1,8 +1,10 @@
 import { v } from "convex/values";
+import { ConvexError } from "convex/values";
 import { action, internalAction, internalMutation, internalQuery } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import {
   fetchChannelFeedWithApiKey,
+  fetchFeedViaApiPaginated,
   fetchVideoDurations,
   resolveChannelInfoWithApiKey,
 } from "./youtube";
@@ -12,6 +14,12 @@ export interface RefreshChannelResult {
   channelName: string | null;
   newVideos: number;
   durationsUpdated: number;
+}
+
+export interface FetchMoreResult {
+  channelId: string;
+  channelName: string;
+  newVideos: number;
 }
 
 export const refreshChannel = action({
@@ -38,7 +46,6 @@ export const refreshChannel = action({
       channelId,
     });
 
-    // Backfill the channel thumbnail if it was missing at add time.
     if (channel && !channel.thumbnail) {
       const info = await resolveChannelInfoWithApiKey(channel.url, apiKey);
       if (info.thumbnail) {
@@ -74,7 +81,7 @@ export const refreshAll = action({
     let totalNew = 0;
     let durationsUpdated = 0;
     const results = await Promise.all(
-      channels.map(async (channel) => {
+      channels.map(async (channel: { channelId: string }) => {
         try {
           return await ctx.runAction(api.refresh.refreshChannel, {
             channelId: channel.channelId,
@@ -90,6 +97,59 @@ export const refreshAll = action({
       durationsUpdated += result.durationsUpdated;
     }
     return { totalNew, durationsUpdated };
+  },
+});
+
+export const fetchMoreChannelVideos = action({
+  args: { channelId: v.string() },
+  handler: async (ctx, { channelId }): Promise<FetchMoreResult> => {
+    const apiKey =
+      (await ctx.runQuery(internal.settings.youtubeDataApiKey)) ??
+      process.env.YT_DATA_API_KEY ??
+      null;
+
+    if (!apiKey) {
+      throw new ConvexError(
+        "A YouTube Data API v3 Key is required in Settings to fetch older past videos.",
+      );
+    }
+
+    const channel = await ctx.runQuery(internal.channels.getByChannelId, {
+      channelId,
+    });
+    if (!channel) throw new ConvexError("Channel not found.");
+
+    const pageToken = channel.nextPageToken ?? undefined;
+    const result = await fetchFeedViaApiPaginated(channelId, apiKey, pageToken);
+    if (!result.feed || result.feed.entries.length === 0) {
+      return { channelId, channelName: channel.channelName, newVideos: 0 };
+    }
+
+    if (result.nextPageToken) {
+      await ctx.runMutation(internal.channels.updateNextPageToken, {
+        channelId,
+        nextPageToken: result.nextPageToken,
+      });
+    }
+
+    const entries = result.feed.entries.map((e) => ({
+      videoId: e.videoId,
+      title: e.title,
+      link: e.link,
+      duration: e.duration,
+      published: e.published ? new Date(e.published).toISOString() : "",
+    }));
+
+    const addResult: { newVideos: number; durationsUpdated: number } = await ctx.runMutation(internal.videos.addFromFeed, {
+      channelId,
+      entries,
+    });
+
+    return {
+      channelId,
+      channelName: channel.channelName,
+      newVideos: addResult.newVideos,
+    };
   },
 });
 
@@ -116,15 +176,15 @@ export const backfillDurations = action({
     for (let i = 0; i < videos.length; i += 50) {
       const batch = videos.slice(i, i + 50);
       const durationsById = await fetchVideoDurations(
-        batch.map((video) => video.videoId),
+        batch.map((video: { videoId: string }) => video.videoId),
         apiKey,
       );
       const updates = batch
-        .map((video) => {
+        .map((video: { _id: any; videoId: string }) => {
           const duration = durationsById.get(video.videoId);
           return duration ? { id: video._id, duration } : null;
         })
-        .filter((update): update is { id: typeof batch[number]["_id"]; duration: string } => Boolean(update));
+        .filter((update: { id: any; duration: string } | null): update is { id: any; duration: string } => Boolean(update));
       if (updates.length === 0) continue;
       const result = await ctx.runMutation(internal.videos.updateDurations, {
         updates,

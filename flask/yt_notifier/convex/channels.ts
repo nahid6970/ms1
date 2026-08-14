@@ -44,6 +44,23 @@ export const updateCategory = mutation({
   },
 });
 
+export const updateNextPageToken = internalMutation({
+  args: {
+    channelId: v.string(),
+    nextPageToken: v.string(),
+  },
+  handler: async (ctx, { channelId, nextPageToken }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (channel) {
+      await ctx.db.patch(channel._id, { nextPageToken });
+    }
+  },
+});
+
+
 export const categories = query({
   args: {},
   handler: async (ctx) => {

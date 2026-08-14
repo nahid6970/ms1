@@ -206,6 +206,18 @@ export const markAllSeen = mutation({
   },
 });
 
+export const getChannelVideoCount = internalQuery({
+  args: { channelId: v.string() },
+  handler: async (ctx, { channelId }) => {
+    const videos = await ctx.db
+      .query("videos")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .collect();
+    return videos.length;
+  },
+});
+
+
 export const missingDurations = internalQuery({
   args: { limit: v.number() },
   handler: async (ctx, { limit }) => {

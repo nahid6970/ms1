@@ -667,6 +667,9 @@ function channelRow(channel, categories = []) {
         </div>
       </div>
       <div class="flex flex-shrink-0 items-center gap-2">
+        <button onclick="fetchMoreChannelVideos('${esc(channel.channelId)}', this)" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition" title="Fetch 10 older past videos from YouTube" aria-label="Fetch older videos">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+        </button>
         <button onclick="toggleChannelFolderBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${category ? "text-red-400 hover:bg-red-950/40" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="${category ? "Folder: " + esc(category) : "Assign Folder/Category"}" aria-label="Assign Folder">
           <i class="fa-solid fa-folder-plus"></i>
         </button>
@@ -711,6 +714,27 @@ window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
   const form = document.getElementById(`folder-${channelId}`);
   if (form) form.classList.toggle("hidden");
 };
+
+window.fetchMoreChannelVideos = async function fetchMoreChannelVideos(channelId, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs text-red-400"></i>';
+  }
+  try {
+    const res = await callConvex("action", "refresh:fetchMoreChannelVideos", { channelId });
+    flash(`Fetched older videos for ${res.channelName || "channel"}! Found ${res.newVideos} new video(s).`, "success");
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i>';
+    }
+  }
+};
+
 
 window.saveChannelFolder = async function saveChannelFolder(event, channelId) {
   event.preventDefault();

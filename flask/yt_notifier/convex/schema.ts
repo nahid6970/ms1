@@ -10,6 +10,7 @@ export default defineSchema({
     disabled: v.optional(v.boolean()),
     titleFilters: v.optional(v.array(v.string())),
     category: v.optional(v.string()),
+    nextPageToken: v.optional(v.string()),
   })
     .index("by_channelId", ["channelId"])
     .index("by_url", ["url"]),

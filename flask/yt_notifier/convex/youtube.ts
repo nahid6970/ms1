@@ -177,6 +177,69 @@ async function fetchFeedViaApi(channelId: string, apiKey: string): Promise<Chann
   }
 }
 
+export async function fetchFeedViaApiPaginated(
+  channelId: string,
+  apiKey: string,
+  pageToken?: string,
+): Promise<{ feed: ChannelFeed | null; nextPageToken?: string }> {
+  try {
+    const playlistId = channelId.startsWith("UC")
+      ? "UU" + channelId.slice(2)
+      : channelId;
+    let url =
+      `https://www.googleapis.com/youtube/v3/playlistItems` +
+      `?part=snippet&playlistId=${playlistId}&maxResults=10&key=${apiKey}`;
+    if (pageToken) url += `&pageToken=${pageToken}`;
+
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error(
+        `YouTube Data API playlistItems error (${res.status}) for ${channelId}:`,
+        (await res.text()).slice(0, 300),
+      );
+      return { feed: null };
+    }
+    const data = (await res.json()) as {
+      nextPageToken?: string;
+      items?: Array<{
+        snippet?: {
+          title?: string;
+          channelTitle?: string;
+          publishedAt?: string;
+          resourceId?: { videoId?: string };
+        };
+      }>;
+    };
+    const items = data.items ?? [];
+    const videoIds = items
+      .map((item) => item.snippet?.resourceId?.videoId)
+      .filter((id): id is string => Boolean(id));
+
+    const durationsById = await fetchVideoDurations(videoIds, apiKey);
+    const entries: FeedEntry[] = items.map((item) => {
+      const s = item.snippet ?? {};
+      const videoId = s.resourceId?.videoId ?? "";
+      return {
+        videoId,
+        title: s.title ?? "",
+        link: `https://www.youtube.com/watch?v=${videoId}`,
+        duration: durationsById.get(videoId),
+        published: s.publishedAt ?? "",
+      };
+    });
+    return {
+      feed: {
+        title: items[0]?.snippet?.channelTitle ?? "Unknown Channel",
+        entries,
+      },
+      nextPageToken: data.nextPageToken,
+    };
+  } catch (err) {
+    console.error("YouTube Data API feed error:", err);
+    return { feed: null };
+  }
+}
+
 export async function fetchVideoDurations(
   videoIds: string[],
   apiKey: string,
