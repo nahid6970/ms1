@@ -6,34 +6,37 @@ Single-file PyQt6 desktop app (`merge_gui.py`) with a Cyberpunk theme. Core purp
 ## 2. Latest Implementation
 **File modified: `merge_gui.py`**
 
-### Quick-Run Dropdown Button in Merge Tab
-- Added a **▶ RUN** `QToolButton` (purple `#B060FF`) to the Merge tab button row, right after PUSH.
-- Uses `MenuButtonPopup` mode: clicking either the main area or the dropdown arrow opens a `QMenu`.
-- The menu lists all saved commands for the current project (from `settings.json['project_commands']`).
-- Shows a disabled placeholder `"(no commands — add them in COMMANDER tab)"` when none exist.
-- Wired `_run_menu.aboutToShow` → `_refresh_run_menu()` so the list always reflects latest saves.
-- `_launch_command()` added to `MergeTab` — same wt.exe / cmd /k / osascript logic as COMMANDER tab.
-- `set_root()` also calls `_refresh_run_menu()` when project switches.
-- New imports: `QToolButton` (QtWidgets), `QAction` (QtGui).
+### Merge Tab Button Row — Final State
+Button row order (left → right):
+```
+[ 🔍 PARSE CHANGES ]  [ ✔ APPLY CHANGES ]  [ ⊕ COMMIT ]  [ ↑ PUSH ]  <stretch>  [ RUN ▾ ]
+```
 
-### Push Button Polish
-- Replaced plain up-arrow push icon with **upload-to-cloud SVG** (arrow + cloud path, Lucide-style) in yellow.
-- Added busy-state icon variant (`_PUSH_BUSY_SVG`) shown while push is in-progress.
-- `btn_commit` and `btn_push` now have `setFixedHeight(32)` + `setMinimumWidth(130)` — matched pair.
-- `_git_push()` swaps to busy icon on start, restores idle icon when done.
+- **PARSE / APPLY** — cyan / green styled QPushButtons (existing, unchanged).
+- **COMMIT** — cyan border/text, SVG git-commit icon, `setFixedHeight(32)`, `setMinimumWidth(130)`, disabled state `color: #666 / border: #555`.
+- **PUSH** — yellow border/text, upload-to-cloud SVG icon (idle + busy variants stored as `self._push_icon_idle` / `self._push_icon_busy`), same sizing as COMMIT. Icon swaps to busy during `_git_push()` and restores on finish.
+- **RUN ▾** — plain unstyled default `QPushButton("RUN ▾")`, no custom stylesheet, floats right via `addStretch()` before it. Opens `self._run_menu` (QMenu) anchored below the button via `_open_run_menu()`.
 
-### Disabled Button Visibility Fix
-- `btn_commit` and `btn_push` disabled state changed from `color: CP_DIM (#3a3a3a)` → `color: #666; border: 1.5px solid #555` so text is readable when inactive.
+### Quick-Run Dropdown
+- `self._run_menu` is a `QMenu` with no custom styling (inherits app defaults).
+- `_run_menu.aboutToShow` → `_refresh_run_menu()` — always re-reads `settings.json` on open.
+- `_refresh_run_menu()` — loads commands via `load_project_commands(root)`, adds a `QAction` per entry (`▶  <label>`), or a disabled placeholder if none exist.
+- `_open_run_menu()` — positions menu at `btn_run_menu.rect().bottomLeft()` mapped to global coords.
+- `_launch_command(cmd, label)` — launches in terminal: wt.exe → `cmd /k` fallback on Windows, osascript on macOS, gnome-terminal/xterm on Linux.
+- `set_root()` also calls `_refresh_run_menu()` on project switch.
+
+### Imports added
+- `QAction` added to `from PyQt6.QtGui import ...`
 
 ### Previous: COMMANDER tab
-- Per-project saved command manager (`ProjectCommandsTab`). Each row has ▶ RUN / ✎ EDIT / ✖ DEL buttons.
+- Per-project saved command manager (`ProjectCommandsTab`). Each row has ▶ RUN / ✎ EDIT / ✖ DEL.
 - Commands stored in `settings.json['project_commands'][<normalized_path>]`.
 - Terminal: tries `wt.exe` first, falls back to `start cmd /k`.
 
 ## 3. Critical Context
-- `load_project_commands(root)` reads from `settings.json` — used by both COMMANDER tab and the new RUN dropdown.
-- `_run_menu.aboutToShow` re-reads disk on every open — always fresh.
-- `_combined_set_root` in MainWindow chains: `merge_tab.set_root` → `project_commands_tab.set_project_root` → header update.
+- `load_project_commands(root)` is the shared reader used by both COMMANDER tab and the RUN dropdown.
+- `_combined_set_root` in `MainWindow` chains: `merge_tab.set_root` → `project_commands_tab.set_project_root` → header update.
+- `_BTN_H = 32`, `_BTN_W = 130` are local constants inside `_build_merge_tab` used for COMMIT and PUSH sizing only (RUN uses default sizing).
 
 ## 4. Pending Task
-Test COMMANDER tab end-to-end: add a command, verify it appears in the RUN dropdown on the Merge tab without switching projects.
+Test end-to-end: add a command in COMMANDER tab, open Merge tab, click RUN ▾ — verify the command appears and launches correctly.
