@@ -251,11 +251,24 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
             <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
               <i class="fa-solid fa-filter"></i>
             </button>
-            <div id="dropdownMenu" class="hidden absolute right-0 sm:left-0 mt-1 w-28 rounded-lg bg-slate-900 border border-slate-800 shadow-xl z-50 py-1">
-              ${(showSeen ? ["all", "unseen", "seen", "favorites"] : ["unseen", "favorites"]).map((c) => `
-                <a href="?category=${c}" class="block px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition ${c === category ? "text-red-400" : ""}">
-                  ${c === "favorites" ? "★ Saved" : c}
-                </a>`).join("")}
+            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-36 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+              <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">Filter Feed</div>
+              ${(showSeen ? [
+                { id: "all", label: "All Videos", icon: "fa-border-all" },
+                { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
+                { id: "seen", label: "Seen", icon: "fa-eye" },
+                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" }
+              ] : [
+                { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
+                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" }
+              ]).map((item) => {
+                const isActive = item.id === category;
+                return `
+                <a href="?category=${item.id}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${isActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+                  <i class="fa-solid ${item.icon} w-3.5 text-center text-xs"></i>
+                  <span>${esc(item.label)}</span>
+                </a>`;
+              }).join("")}
             </div>
           </div>` : ""}
           ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
