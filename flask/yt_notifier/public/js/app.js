@@ -157,43 +157,41 @@ const POPUP_PAGES = {
   channels: {
     title: "Manage Channels",
     icon: "fa-tv",
+    header: `
+      <form id="addChannelForm" class="soft-panel bg-slate-900 border border-slate-800 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
+        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
+        <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">Add Channel</button>
+      </form>`,
     body: `
-      <div class="space-y-6">
-        <div class="sticky -top-5 z-20 bg-slate-950/95 backdrop-blur-md pb-4 pt-1">
-          <form id="addChannelForm" class="soft-panel bg-slate-900/90 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row gap-3 shadow-xl">
-            <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
-            <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-3 rounded-lg text-sm font-semibold transition">Add Channel</button>
-          </form>
-        </div>
-        <div id="channelList" class="space-y-3">
-          <p class="text-slate-600 text-sm">Loading...</p>
-        </div>
+      <div id="channelList" class="space-y-3">
+        <p class="text-slate-600 text-sm">Loading...</p>
       </div>`,
   },
   stats: {
     title: "Stats",
     icon: "fa-chart-pie",
-    body: `
-      <div class="space-y-5">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-red-400 mr-2"></i>Stats</h2>
-          <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800 mr-8">
-            <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
-            <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
-          </div>
+    header: `
+      <div class="flex items-center justify-between gap-4">
+        <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-red-400 mr-2"></i>Stats</h2>
+        <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
+          <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
+          <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
         </div>
-        <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
-          <div id="statsSummary" class="mb-5"></div>
-          <div id="channelStats" class="mb-6"></div>
-          <div class="min-w-[600px]" id="heatmap">
-            <p class="text-slate-600 text-sm">Loading...</p>
-          </div>
+      </div>`,
+    body: `
+      <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
+        <div id="statsSummary" class="mb-5"></div>
+        <div id="channelStats" class="mb-6"></div>
+        <div class="min-w-[600px]" id="heatmap">
+          <p class="text-slate-600 text-sm">Loading...</p>
         </div>
       </div>`,
   },
   settings: {
     title: "Settings",
     icon: "fa-gear",
+    header: `
+      <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-gear text-red-400 mr-2"></i>Settings</h2>`,
     body: `
       <form id="settingsForm" class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 space-y-6">
         <div class="flex items-center justify-between gap-6">
@@ -325,11 +323,14 @@ function ensurePopup() {
   popup.className = "fixed inset-0 z-[80] hidden";
   popup.innerHTML = `
     <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closePopup()"></div>
-    <section class="popup-panel absolute left-1/2 top-1/2 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
-      <button type="button" onclick="closePopup()" class="absolute right-4 top-4 z-30 rounded-lg p-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-      <div id="popupBody" class="max-h-[calc(100vh-4rem)] overflow-y-auto p-5 pt-8"></div>
+    <section class="popup-panel absolute left-1/2 top-1/2 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/80">
+      <header id="popupHeader" class="flex-shrink-0 flex items-center justify-between border-b border-slate-800/80 bg-slate-950 px-5 py-4 z-20">
+        <div id="popupHeaderContent" class="flex-1 min-w-0 mr-3"></div>
+        <button type="button" onclick="closePopup()" class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-900 hover:text-white flex-shrink-0" title="Close">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </header>
+      <div id="popupBody" class="flex-1 overflow-y-auto p-5"></div>
     </section>`;
   document.body.appendChild(popup);
   return popup;
@@ -339,7 +340,8 @@ window.openPopup = async function openPopup(page) {
   const config = POPUP_PAGES[page];
   if (!config) return;
   const popup = ensurePopup();
-  document.getElementById("popupBody").innerHTML = config.body;
+  document.getElementById("popupHeaderContent").innerHTML = config.header || "";
+  document.getElementById("popupBody").innerHTML = config.body || "";
   popup.classList.remove("hidden");
   document.body.classList.add("overflow-hidden");
 
