@@ -237,6 +237,15 @@ const POPUP_PAGES = {
             <option value="0">All Videos</option>
           </select>
         </div>
+        <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-white font-medium">Mark All Unseen Videos as Seen</h2>
+            <p class="text-slate-500 text-xs">Clear all unseen notification badges by marking current videos as seen.</p>
+          </div>
+          <button type="button" onclick="markAllSeen()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">
+            <i class="fa-solid fa-check-double mr-1.5 text-emerald-400"></i>Mark All Seen
+          </button>
+        </div>
         <div class="border-t border-slate-800 pt-6">
           <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
           <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
@@ -269,14 +278,10 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
           <div id="headerFolderPills" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} inline-flex h-9 sm:h-10 px-2.5 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
+          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
             <i class="fa-solid fa-bell"></i>
-            ${unreadCount > 0 ? `<span class="text-xs font-bold text-red-400">${unreadCount}</span>` : ""}
+            ${unreadCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${unreadCount}</span>` : ""}
           </a>
-          ${unreadCount > 0 ? `
-          <button type="button" onclick="markAllSeen()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 transition" title="Mark all ${unreadCount} unseen videos as seen" aria-label="Mark all as seen">
-            <i class="fa-solid fa-check-double text-sm"></i>
-          </button>` : ""}
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
             <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
