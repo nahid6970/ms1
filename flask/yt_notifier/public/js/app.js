@@ -450,7 +450,7 @@ function videoCard(video) {
       <div class="absolute left-3 top-3 flex items-center gap-2">
         ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
         ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
-        ${video.isShort ? `<span class="bg-amber-950/90 border border-amber-800/60 backdrop-blur px-2 py-1 rounded-sm text-[10px] font-bold text-amber-300 shadow-lg"><i class="fa-solid fa-bolt text-[9px] mr-1"></i>SHORT</span>` : ""}
+        ${video.isShort ? `<span class="bg-amber-950/90 border border-amber-800/60 backdrop-blur px-2 py-1 rounded-sm text-[10px] font-bold text-amber-300 shadow-lg" title="YouTube Short"><i class="fa-solid fa-mobile-screen-button"></i></span>` : ""}
       </div>
       <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 ${isFavorite || video.isShort ? "opacity-100" : "opacity-0"} transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
         <button onclick="toggleFavorite('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 ${isFavorite ? "text-amber-400 hover:text-amber-300" : "text-slate-300 hover:text-amber-400"} shadow-lg backdrop-blur transition hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
@@ -459,8 +459,8 @@ function videoCard(video) {
         <button onclick="toggleRead('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
-        <button onclick="toggleShort('${esc(video._id)}')" class="inline-flex h-9 px-2 items-center justify-center rounded-lg bg-slate-950/80 ${video.isShort ? "text-amber-300 border border-amber-500/50 bg-amber-950/70" : "text-slate-300 hover:text-amber-300"} shadow-lg backdrop-blur transition hover:bg-slate-900 text-[10px] font-bold" title="${video.isShort ? "Marked as Short (click to unmark)" : "Click to mark as Short"}">
-          <i class="fa-solid fa-bolt mr-1 text-amber-400 text-xs"></i>${video.isShort ? "SHORT" : "Short?"}
+        <button onclick="toggleShort('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 ${video.isShort ? "text-amber-300 border border-amber-500/50 bg-amber-950/70" : "text-slate-300 hover:text-amber-300"} shadow-lg backdrop-blur transition hover:bg-slate-900" title="${video.isShort ? "Marked as Short (click to unmark)" : "Click to mark as Short"}">
+          <i class="fa-solid fa-mobile-screen-button text-sm"></i>
         </button>
         <a href="${esc(video.link)}" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-slate-800 hover:text-white" title="Open video" aria-label="Open video">
           ${externalIcon()}
