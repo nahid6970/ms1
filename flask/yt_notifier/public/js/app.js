@@ -242,6 +242,10 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
             <i class="fa-solid fa-bell"></i>
             ${unreadCount > 0 ? `<span class="text-xs font-bold text-red-400">${unreadCount}</span>` : ""}
           </a>
+          ${unreadCount > 0 ? `
+          <button type="button" onclick="markAllSeen()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 transition" title="Mark all ${unreadCount} unseen videos as seen" aria-label="Mark all as seen">
+            <i class="fa-solid fa-check-double text-sm"></i>
+          </button>` : ""}
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
             <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
@@ -397,11 +401,13 @@ window.checkUpdates = async function checkUpdates() {
 };
 
 async function refreshNavOnly() {
+  const urlParams = new URLSearchParams(location.search);
+  const folder = urlParams.get("folder") || "";
   const [settings, unread] = await Promise.all([
     callConvex("query", "settings:get"),
-    callConvex("query", "videos:unreadCount"),
+    callConvex("query", "videos:unreadCount", { folder: folder || undefined }),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings });
+  renderNav({ unreadCount: unread, showSeen: settings, folder });
 }
 
 /* --------------------------------- feed page ------------------------------- */
@@ -422,16 +428,15 @@ function videoCard(video) {
     ? "text-slate-200 group-hover:text-white"
     : "text-slate-500 group-hover:text-slate-300";
   return `
-  <article class="motion-card group soft-panel ${cardTone} border rounded-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+  <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
     <div class="relative aspect-video bg-slate-950 overflow-hidden">
       <a href="${esc(video.link)}" target="_blank" class="absolute inset-0">
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
       </a>
       <div class="absolute left-3 top-3 flex items-center gap-2">
-        ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
-        ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-md text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
-        ${video.channelCategory ? `<span class="bg-slate-900/90 border border-slate-700/60 backdrop-blur px-2 py-0.5 rounded text-[10px] font-semibold text-slate-300">${esc(video.channelCategory)}</span>` : ""}
+        ${isNew ? `<span class="bg-red-600/95 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-white shadow-lg shadow-red-950/30">NEW</span>` : ""}
+        ${!isNew ? `<span class="bg-slate-800/90 backdrop-blur px-2.5 py-1 rounded-sm text-[10px] font-bold text-slate-400 shadow-lg">SEEN</span>` : ""}
       </div>
       <div class="absolute right-3 top-3 z-10 flex translate-y-1 items-center gap-2 ${isFavorite ? "opacity-100" : "opacity-0"} transition duration-200 group-hover:translate-y-0 group-hover:opacity-100">
         <button onclick="toggleFavorite('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 ${isFavorite ? "text-amber-400 hover:text-amber-300" : "text-slate-300 hover:text-amber-400"} shadow-lg backdrop-blur transition hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
@@ -482,6 +487,20 @@ window.toggleRead = async function toggleRead(id) {
   }
 };
 
+window.markAllSeen = async function markAllSeen() {
+  const urlParams = new URLSearchParams(location.search);
+  const folder = urlParams.get("folder") || "";
+  try {
+    const res = await callConvex("mutation", "videos:markAllSeen", { folder: folder || undefined });
+    flash(`Marked ${res.marked} video(s) as seen!`, "success");
+    if (PAGE === "feed") await renderFeed();
+    else await refreshNavOnly();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+
 async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
   const settings = await callConvex("query", "settings:get");
@@ -490,7 +509,7 @@ async function renderFeed() {
 
   const [videos, unread, categories] = await Promise.all([
     callConvex("query", "videos:list", { category: urlCategory, folder: folder || undefined }),
-    callConvex("query", "videos:unreadCount"),
+    callConvex("query", "videos:unreadCount", { folder: folder || undefined }),
     callConvex("query", "channels:categories"),
   ]);
   renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory, folder });

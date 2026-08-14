@@ -49,7 +49,7 @@ export const list = query({
     } else if (category === "favorites") {
       q = q.filter((f) => f.eq(f.field("isFavorite"), true));
     }
-    const videos = await q.take(80);
+    const videos = await q.take(300);
 
     return videos
       .filter((video) => enabledChannelIds.has(video.channelId))
@@ -57,7 +57,7 @@ export const list = query({
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )
       .filter((video) => !hideShorts || !isShortVideo(video))
-      .slice(0, 40)
+      .slice(0, 50)
       .map((video) => ({
         _id: video._id,
         videoId: video.videoId,
@@ -85,27 +85,43 @@ export const toggleFavorite = mutation({
 });
 
 export const unreadCount = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    folder: v.optional(v.string()),
+  },
+  handler: async (ctx, { folder }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const channels = await ctx.db.query("channels").collect();
+    const enabledChannels = channels.filter((channel) => !channel.disabled);
+
+    const targetFolder = folder?.trim();
+    const isUncategorized =
+      targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+
+    const filteredChannels = targetFolder
+      ? isUncategorized
+        ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
+        : enabledChannels.filter(
+            (c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase(),
+          )
+      : enabledChannels;
+
+    const enabledChannelIds = new Set(
+      filteredChannels.map((channel) => channel.channelId),
+    );
+    const filtersById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.titleFilters ?? []]),
+    );
+
     const unseen = await ctx.db
       .query("videos")
       .filter((f) => f.eq(f.field("isNew"), true))
       .collect();
-    const channels = await ctx.db.query("channels").collect();
-    const enabledChannelIds = new Set(
-      channels.filter((channel) => !channel.disabled).map((channel) => channel.channelId),
-    );
-    const filtersById = new Map(
-      channels
-        .filter((channel) => !channel.disabled)
-        .map((channel) => [channel.channelId, channel.titleFilters ?? []]),
-    );
+
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
@@ -115,25 +131,52 @@ export const unreadCount = query({
   },
 });
 
-function isShortVideo(video: { title: string; link: string; duration?: string }) {
-  if (video.link.includes("/shorts/")) return true;
-  if (/#shorts?\b/i.test(video.title)) return true;
-  if (video.duration) {
-    const parts = video.duration.split(":").map(Number);
-    if (parts.length === 2) {
-      const [minutes, seconds] = parts;
-      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
-    }
-  }
-  return false;
-}
-
 export const toggleRead = mutation({
   args: { id: v.id("videos") },
   handler: async (ctx, { id }) => {
     const video = await ctx.db.get(id);
     if (!video) return;
     await ctx.db.patch(id, { isNew: !video.isNew });
+  },
+});
+
+export const markAllSeen = mutation({
+  args: {
+    folder: v.optional(v.string()),
+  },
+  handler: async (ctx, { folder }) => {
+    const channels = await ctx.db.query("channels").collect();
+    const enabledChannels = channels.filter((channel) => !channel.disabled);
+
+    const targetFolder = folder?.trim();
+    const isUncategorized =
+      targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+
+    const filteredChannels = targetFolder
+      ? isUncategorized
+        ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
+        : enabledChannels.filter(
+            (c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase(),
+          )
+      : enabledChannels;
+
+    const enabledChannelIds = new Set(
+      filteredChannels.map((channel) => channel.channelId),
+    );
+
+    const unseen = await ctx.db
+      .query("videos")
+      .filter((f) => f.eq(f.field("isNew"), true))
+      .collect();
+
+    let marked = 0;
+    for (const video of unseen) {
+      if (enabledChannelIds.has(video.channelId)) {
+        await ctx.db.patch(video._id, { isNew: false });
+        marked++;
+      }
+    }
+    return { marked };
   },
 });
 
@@ -232,4 +275,17 @@ function titleMatchesFilters(title: string, filters: string[]) {
   if (activeFilters.length === 0) return true;
   const normalizedTitle = title.toLocaleLowerCase();
   return activeFilters.some((filter) => normalizedTitle.includes(filter));
+}
+
+function isShortVideo(video: { title: string; link: string; duration?: string }) {
+  if (video.link.includes("/shorts/")) return true;
+  if (/#shorts?\b/i.test(video.title)) return true;
+  if (video.duration) {
+    const parts = video.duration.split(":").map(Number);
+    if (parts.length === 2) {
+      const [minutes, seconds] = parts;
+      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
+    }
+  }
+  return false;
 }
