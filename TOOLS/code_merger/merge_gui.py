@@ -4307,16 +4307,14 @@ class DiffPreviewDialog(QDialog):
         if hasattr(self.parent(), 'result_out'):
             self.parent().result_out.setPlainText("\n".join(results))
 
-        # Run git add + commit for successfully merged files if auto-git is enabled
-        if (successful_indices and
-                hasattr(self.parent(), 'chk_git') and
-                self.parent().chk_git.isChecked() and
-                hasattr(self.parent(), '_run_git_commit_dialog')):
-            changed_files = [self.changes[i]["file"] for i in successful_indices]
-            commit_msg = getattr(self.parent(), '_parsed_commit_msg', '') or "update files"
-            git_ok = self.parent()._run_git_commit_dialog(self.root, changed_files, commit_msg)
-            if git_ok and hasattr(self.parent(), 'btn_push'):
-                self.parent().btn_push.setEnabled(True)
+        # Store successfully merged files and enable COMMIT button on parent
+        if successful_indices and hasattr(self.parent(), 'btn_commit'):
+            merged = [self.changes[i]["file"] for i in successful_indices]
+            # Accumulate across multiple apply rounds
+            existing = getattr(self.parent(), '_merged_files', [])
+            self.parent()._merged_files = existing + merged
+            self.parent().btn_commit.setEnabled(True)
+            self.parent().btn_push.setEnabled(False)
 
         # Remove UI cards for successful merges
         for orig_idx in sorted(successful_indices, reverse=True):
@@ -4379,9 +4377,8 @@ class MergeTab(QWidget):
                     data = {}
         except Exception:
             data = {}
-        data['backup']   = self.chk_backup.isChecked()
-        data['preview']  = self.chk_preview.isChecked()
-        data['auto_git'] = self.chk_git.isChecked()
+        data['backup']  = self.chk_backup.isChecked()
+        data['preview'] = self.chk_preview.isChecked()
         _write_json_if_changed(SETTINGS_PATH, data)
 
     def _load_prefs(self):
@@ -4393,13 +4390,10 @@ class MergeTab(QWidget):
                 if isinstance(data, dict):
                     self.chk_backup.blockSignals(True)
                     self.chk_preview.blockSignals(True)
-                    self.chk_git.blockSignals(True)
-                    if 'backup'   in data: self.chk_backup.setChecked(data['backup'])
-                    if 'preview'  in data: self.chk_preview.setChecked(data['preview'])
-                    if 'auto_git' in data: self.chk_git.setChecked(data['auto_git'])
+                    if 'backup'  in data: self.chk_backup.setChecked(data['backup'])
+                    if 'preview' in data: self.chk_preview.setChecked(data['preview'])
                     self.chk_backup.blockSignals(False)
                     self.chk_preview.blockSignals(False)
-                    self.chk_git.blockSignals(False)
         except Exception as e:
             print(f"Error loading prefs: {e}", file=sys.stderr)
 
@@ -4424,19 +4418,10 @@ class MergeTab(QWidget):
         self.chk_backup.setChecked(True)
         self.chk_preview = QCheckBox("Preview changes before applying")
         self.chk_preview.setChecked(True)
-        self.chk_git = QCheckBox("Auto git add + commit after merge")
-        self.chk_git.setChecked(False)
-        self.chk_git.setToolTip(
-            "After a successful merge, stage only the changed files (git add)\n"
-            "and create a commit inside the project root.\n"
-            "The full repo is NOT touched — only files within this root."
-        )
         self.chk_backup.toggled.connect(self._save_prefs)
         self.chk_preview.toggled.connect(self._save_prefs)
-        self.chk_git.toggled.connect(self._save_prefs)
         opt_row.addWidget(self.chk_backup)
         opt_row.addWidget(self.chk_preview)
-        opt_row.addWidget(self.chk_git)
         opt_row.addStretch()
         layout.addLayout(opt_row)
 
@@ -4445,25 +4430,56 @@ class MergeTab(QWidget):
         btn_parse  = QPushButton("🔍 PARSE CHANGES")
         btn_apply  = QPushButton("✔ APPLY CHANGES")
 
+        _COMMIT_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="#00F0FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <line x1="1.05" y1="12" x2="7" y2="12"/>
+          <line x1="17.01" y1="12" x2="22.96" y2="12"/>
+        </svg>"""
         _PUSH_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
              stroke="#FCEE0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="19" x2="12" y2="5"/>
           <polyline points="5 12 12 5 19 12"/>
           <line x1="5" y1="21" x2="19" y2="21"/>
         </svg>"""
+
+        self.btn_commit = QPushButton("  COMMIT")
+        self.btn_commit.setIcon(_svg_icon(_COMMIT_SVG, 18))
+        self.btn_commit.setIconSize(QSize(18, 18))
+        self.btn_commit.setEnabled(False)
+        self.btn_commit.setToolTip("Stage and commit the successfully merged files.\nEnabled after a successful apply.")
+
         self.btn_push = QPushButton("  PUSH")
         self.btn_push.setIcon(_svg_icon(_PUSH_SVG, 18))
         self.btn_push.setIconSize(QSize(18, 18))
+        self.btn_push.setEnabled(False)
+        self.btn_push.setToolTip("Push committed changes to the remote.\nEnabled after a successful commit.")
 
         btn_parse.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_apply.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_commit.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_push.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_push.setEnabled(False)
-        self.btn_push.setToolTip("Push committed changes to the remote.\nOnly enabled after a successful auto-commit.")
-        btn_parse.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
-                                f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
-        btn_apply.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
-                                f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+
+        btn_parse.setStyleSheet(
+            f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
+            f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}"
+        )
+        btn_apply.setStyleSheet(
+            f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+            f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}"
+        )
+        self.btn_commit.setStyleSheet(
+            f"QPushButton {{"
+            f"  border: 1.5px solid {CP_CYAN}; color: {CP_CYAN};"
+            f"  font-weight: bold; letter-spacing: 1px; padding: 4px 14px;"
+            f"}}"
+            f"QPushButton:hover {{"
+            f"  background: {CP_CYAN}; color: #000; border-color: {CP_CYAN};"
+            f"}}"
+            f"QPushButton:disabled {{"
+            f"  border-color: {CP_DIM}; color: {CP_DIM};"
+            f"}}"
+        )
         self.btn_push.setStyleSheet(
             f"QPushButton {{"
             f"  border: 1.5px solid {CP_YELLOW}; color: {CP_YELLOW};"
@@ -4476,11 +4492,14 @@ class MergeTab(QWidget):
             f"  border-color: {CP_DIM}; color: {CP_DIM};"
             f"}}"
         )
+
         btn_parse.clicked.connect(self._parse)
         btn_apply.clicked.connect(self._apply)
+        self.btn_commit.clicked.connect(self._git_commit)
         self.btn_push.clicked.connect(self._git_push)
         btn_row.addWidget(btn_parse)
         btn_row.addWidget(btn_apply)
+        btn_row.addWidget(self.btn_commit)
         btn_row.addWidget(self.btn_push)
         layout.addLayout(btn_row)
 
@@ -4494,6 +4513,7 @@ class MergeTab(QWidget):
         layout.addWidget(grp_res)
 
         self._pending_changes: list[dict] = []
+        self._merged_files:    list[str]  = []
 
     def set_root(self, path: str):
         self.root_input.setText(path)
@@ -4541,31 +4561,42 @@ class MergeTab(QWidget):
             err = len(results) - ok
 
             if ok > 0:
-                commit_msg = self._parsed_commit_msg or "update files"
-                if self.chk_git.isChecked():
-                    changed_files = [
-                        ch["file"] for ch, r in zip(self._pending_changes, results)
-                        if r.startswith("✔")
-                    ]
-                    git_ok = self._run_git_commit_dialog(root, changed_files, commit_msg)
-                    if git_ok:
-                        self.btn_push.setEnabled(True)
-                else:
-                    results.append("\nSuggested Git Commit Command:")
-                    results.append(f'git commit -m "{commit_msg}"')
+                self._merged_files = [
+                    ch["file"] for ch, r in zip(self._pending_changes, results)
+                    if r.startswith("✔")
+                ]
+                self.btn_commit.setEnabled(True)
+                self.btn_push.setEnabled(False)
 
             self.result_out.setPlainText('\n'.join(results))
             self.status_cb(f"Done — {ok} applied, {err} failed")
             self._pending_changes = []
-            self._parsed_commit_msg = ""
 
     def _clear(self):
         self.response_input.clear()
         self.result_out.clear()
         self._pending_changes = []
         self._parsed_commit_msg = ""
+        self._merged_files = []
+        self.btn_commit.setEnabled(False)
         self.btn_push.setEnabled(False)
         self.status_cb("Cleared")
+
+    def _git_commit(self):
+        root = self.root_input.text().strip()
+        if not root or not os.path.isdir(root):
+            self.status_cb("⚠ No project root set")
+            return
+        if not self._merged_files:
+            self.status_cb("⚠ No merged files to commit")
+            return
+        commit_msg = self._parsed_commit_msg or "update files"
+        git_ok = self._run_git_commit_dialog(root, self._merged_files, commit_msg)
+        if git_ok:
+            self.btn_commit.setEnabled(False)
+            self.btn_push.setEnabled(True)
+            self._merged_files = []
+            self._parsed_commit_msg = ""
 
     def _run_git_commit_dialog(self, root: str, file_paths: list[str], commit_msg: str) -> bool:
         """
