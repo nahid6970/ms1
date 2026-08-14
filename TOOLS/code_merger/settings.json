@@ -1425,6 +1425,11 @@
         "label": "npm run deploy:pages",
         "cmd": "npm run deploy:pages",
         "group": "Cloudflare"
+      },
+      {
+        "label": "npm run dev:pages",
+        "cmd": "npm run dev:pages",
+        "group": "Cloudflare"
       }
     ]
   }

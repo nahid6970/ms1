@@ -159,7 +159,11 @@ const POPUP_PAGES = {
     icon: "fa-tv",
     header: `
       <form id="addChannelForm" class="soft-panel bg-slate-900 border border-slate-800 rounded-lg p-2.5 sm:p-3 flex flex-wrap items-center gap-2 sm:gap-3">
-        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[200px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
+        <div class="flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-xs font-bold text-slate-300 shadow flex items-center gap-1.5" title="Subscribed Channels">
+          <i class="fa-solid fa-tv text-red-500 text-xs"></i>
+          <span id="channelCountNumber">0</span>
+        </div>
+        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[180px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
         <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">Add Channel</button>
         <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 outline-none focus:border-red-500 transition flex-shrink-0" title="Sort channels">
           <option value="recent">Sort: Recent</option>
@@ -806,8 +810,8 @@ async function renderChannels({ refreshNav = true } = {}) {
   const sortSelect = document.getElementById("channelSortSelect");
   if (sortSelect) sortSelect.value = currentChannelSort;
 
-  const countLabel = document.getElementById("channelCountLabel");
-  if (countLabel) countLabel.textContent = `${channels.length} Subscribed Channel${channels.length === 1 ? "" : "s"}`;
+  const countNum = document.getElementById("channelCountNumber");
+  if (countNum) countNum.textContent = `${channels.length}`;
 
   list.innerHTML = sortedChannels.length
     ? sortedChannels.map((channel) => channelRow(channel, categories)).join("")
