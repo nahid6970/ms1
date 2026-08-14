@@ -5254,7 +5254,6 @@ class MainWindow(QMainWindow):
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
                 padding: 4px 10px;
-                font-family: 'Consolas';
                 font-size: 12pt;
             }}
             QPushButton:hover {{
@@ -5265,7 +5264,7 @@ class MainWindow(QMainWindow):
         """)
         btn_settings.clicked.connect(self._open_settings)
 
-        btn_restart = QPushButton("↺")
+        btn_restart = QPushButton("⟳")
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_restart.setToolTip("Restart")
         btn_restart.setStyleSheet(f"""
@@ -5274,7 +5273,6 @@ class MainWindow(QMainWindow):
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
                 padding: 4px 10px;
-                font-family: 'Consolas';
                 font-size: 12pt;
             }}
             QPushButton:hover {{
