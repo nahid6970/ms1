@@ -24,6 +24,7 @@ export default defineSchema({
     published: v.string(),
     isNew: v.boolean(),
     isFavorite: v.optional(v.boolean()),
+    isShort: v.optional(v.boolean()),
   })
     .index("by_channelId", ["channelId"])
     .index("by_channelId_published", ["channelId", "published"])

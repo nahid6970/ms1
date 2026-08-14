@@ -154,7 +154,8 @@ function titleMatchesFilters(title: string, filters: string[]) {
   return activeFilters.some((filter) => normalizedTitle.includes(filter));
 }
 
-function isShortVideo(video: { title: string; link: string; duration?: string }) {
+function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
+  if (video.isShort !== undefined) return video.isShort;
   if (video.link.includes("/shorts/")) return true;
   if (/#shorts?\b/i.test(video.title)) return true;
   if (video.duration) {

@@ -459,10 +459,9 @@ function videoCard(video) {
         <button onclick="toggleRead('${esc(video._id)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
-        ${video.isShort ? `
-        <span class="inline-flex h-9 px-2 items-center justify-center rounded-lg bg-amber-950/90 border border-amber-800/70 text-[10px] font-extrabold text-amber-300 shadow-lg backdrop-blur" title="YouTube Short (≤ 60s)">
-          <i class="fa-solid fa-bolt mr-1 text-amber-400"></i>SHORT
-        </span>` : ""}
+        <button onclick="toggleShort('${esc(video._id)}')" class="inline-flex h-9 px-2 items-center justify-center rounded-lg bg-slate-950/80 ${video.isShort ? "text-amber-300 border border-amber-500/50 bg-amber-950/70" : "text-slate-300 hover:text-amber-300"} shadow-lg backdrop-blur transition hover:bg-slate-900 text-[10px] font-bold" title="${video.isShort ? "Marked as Short (click to unmark)" : "Click to mark as Short"}">
+          <i class="fa-solid fa-bolt mr-1 text-amber-400 text-xs"></i>${video.isShort ? "SHORT" : "Short?"}
+        </button>
         <a href="${esc(video.link)}" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition hover:bg-slate-800 hover:text-white" title="Open video" aria-label="Open video">
           ${externalIcon()}
         </a>
@@ -504,6 +503,16 @@ window.toggleRead = async function toggleRead(id) {
     flash(err.message, "danger");
   }
 };
+
+window.toggleShort = async function toggleShort(id) {
+  try {
+    await callConvex("mutation", "videos:toggleShort", { id });
+    await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 
 window.markAllSeen = async function markAllSeen() {
   const urlParams = new URLSearchParams(location.search);

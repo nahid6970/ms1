@@ -85,6 +85,16 @@ export const toggleFavorite = mutation({
   },
 });
 
+export const toggleShort = mutation({
+  args: { id: v.id("videos") },
+  handler: async (ctx, { id }) => {
+    const video = await ctx.db.get(id);
+    if (!video) return;
+    const currentIsShort = video.isShort ?? isShortVideo(video);
+    await ctx.db.patch(id, { isShort: !currentIsShort });
+  },
+});
+
 export const unreadCount = query({
   args: {
     folder: v.optional(v.string()),
@@ -278,7 +288,8 @@ function titleMatchesFilters(title: string, filters: string[]) {
   return activeFilters.some((filter) => normalizedTitle.includes(filter));
 }
 
-function isShortVideo(video: { title: string; link: string; duration?: string }) {
+function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
+  if (video.isShort !== undefined) return video.isShort;
   if (video.link.includes("/shorts/")) return true;
   if (/#shorts?\b/i.test(video.title)) return true;
   if (video.duration) {
