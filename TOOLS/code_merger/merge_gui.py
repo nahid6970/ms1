@@ -5245,17 +5245,17 @@ class MainWindow(QMainWindow):
         corner_layout.setContentsMargins(0, 2, 8, 2)
         corner_layout.setSpacing(6)
 
-        btn_settings = QPushButton("⚙ SETTINGS")
+        btn_settings = QPushButton("⚙")
         btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_settings.setToolTip("Settings")
         btn_settings.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_PANEL};
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
-                padding: 4px 12px;
+                padding: 4px 10px;
                 font-family: 'Consolas';
-                font-size: 9pt;
-                font-weight: bold;
+                font-size: 12pt;
             }}
             QPushButton:hover {{
                 color: {CP_CYAN};
@@ -5265,17 +5265,17 @@ class MainWindow(QMainWindow):
         """)
         btn_settings.clicked.connect(self._open_settings)
 
-        btn_restart = QPushButton("↺ RESTART")
+        btn_restart = QPushButton("↺")
         btn_restart.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_restart.setToolTip("Restart")
         btn_restart.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_PANEL};
                 color: {CP_SUB};
                 border: 1px solid {CP_DIM};
-                padding: 4px 12px;
+                padding: 4px 10px;
                 font-family: 'Consolas';
-                font-size: 9pt;
-                font-weight: bold;
+                font-size: 12pt;
             }}
             QPushButton:hover {{
                 color: {CP_YELLOW};
