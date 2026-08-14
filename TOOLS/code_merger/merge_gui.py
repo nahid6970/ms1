@@ -5224,13 +5224,42 @@ class MainWindow(QMainWindow):
         root_layout.setContentsMargins(8, 8, 8, 4)
         root_layout.setSpacing(6)
 
-        # Header
-        self.hdr_lbl = QLabel(f"// {APP_NAME.upper()}")
-        self.hdr_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;")
-        sub = QLabel("Prep files for AI  ·  Merge AI responses back to disk")
-        sub.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt;")
-        root_layout.addWidget(self.hdr_lbl)
-        root_layout.addWidget(sub)
+        # Header — project path + explorer button
+        hdr_row = QHBoxLayout()
+        hdr_row.setContentsMargins(0, 0, 0, 0)
+        hdr_row.setSpacing(8)
+
+        self.hdr_path_lbl = QLabel("// NO PROJECT OPEN")
+        self.hdr_path_lbl.setStyleSheet(
+            f"color: {CP_YELLOW}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;"
+        )
+        self.hdr_path_lbl.setToolTip("Active project root path")
+        self.hdr_path_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+
+        self.hdr_open_btn = QPushButton("📂")
+        self.hdr_open_btn.setFixedHeight(28)
+        self.hdr_open_btn.setFixedWidth(34)
+        self.hdr_open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.hdr_open_btn.setToolTip("Open active project root in File Manager")
+        self.hdr_open_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+                color: {CP_YELLOW};
+                font-size: 11pt;
+                padding: 2px;
+                qproperty-alignment: AlignCenter;
+            }}
+            QPushButton:hover {{
+                border-color: {CP_YELLOW};
+                background-color: #2a2a2a;
+            }}
+        """)
+        self.hdr_open_btn.clicked.connect(self._open_active_project_folder)
+
+        hdr_row.addWidget(self.hdr_path_lbl, 1)
+        hdr_row.addWidget(self.hdr_open_btn, 0)
+        root_layout.addLayout(hdr_row)
 
         # Tabs
         self.tabs = QTabWidget()
@@ -5331,24 +5360,52 @@ class MainWindow(QMainWindow):
         def _combined_set_root(path: str):
             _orig_merge_set_root(path)
             self.project_commands_tab.set_project_root(path)
+            # Update the top header path label
+            if path:
+                self.hdr_path_lbl.setText(f"// {path.upper()}")
+                self.hdr_path_lbl.setToolTip(path)
+            else:
+                self.hdr_path_lbl.setText("// NO PROJECT OPEN")
+                self.hdr_path_lbl.setToolTip("Active project root path")
         self.prep_tab.root_cb = _combined_set_root
+
+        # Sync header + Commander with whatever project was already restored from session
+        _startup_root = self.prep_tab.project_root
+        if _startup_root:
+            self.hdr_path_lbl.setText(f"// {_startup_root.upper()}")
+            self.hdr_path_lbl.setToolTip(_startup_root)
+            self.project_commands_tab.set_project_root(_startup_root)
 
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
-        self.tabs.addTab(self.command_tab, "💻  RUNNER")
-        self.tabs.addTab(self.project_commands_tab, "📋  COMMANDER")
+        self.tabs.addTab(self.command_tab, "📋  COMMANDER")
+        self.tabs.addTab(self.project_commands_tab, "💻  RUNNER")
         root_layout.addWidget(self.tabs)
 
     def _open_settings(self):
         dialog = SettingsDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self.setWindowTitle(APP_NAME)
-            self.hdr_lbl.setText(f"// {APP_NAME.upper()}")
             self.prep_tab._refresh_file_items()
             self.prep_tab._populate_projects()
             self.prep_tab.file_mode_bar.setVisible(SHOW_FILE_MODE_CONTROLS)
             self.prep_tab.apply_panel_sizes()
             self._set_status(f"Settings saved. Updated GUI title to '{APP_NAME}'.")
+
+    def _open_active_project_folder(self):
+        root = self.merge_tab.root_input.text().strip()
+        if root and os.path.exists(root):
+            if sys.platform == "win32":
+                os.startfile(root)
+            elif sys.platform == "darwin":
+                import subprocess
+                subprocess.Popen(["open", root])
+            else:
+                import subprocess
+                subprocess.Popen(["xdg-open", root])
+            self._set_status(f"Opened: {root}")
+        else:
+            self._set_status("⚠ No active project root to open")
 
     def get_match_mode(self) -> str:
         return self.combo_match_mode.currentText()
