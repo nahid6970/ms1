@@ -175,6 +175,13 @@ const POPUP_PAGES = {
     icon: "fa-chart-pie",
     body: `
       <div class="space-y-5">
+        <div class="flex items-center justify-between gap-4 mb-2">
+          <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-chart-pie text-red-400 mr-2"></i>Stats</h2>
+          <div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800 mr-8">
+            <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
+            <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
+          </div>
+        </div>
         <div class="soft-panel bg-slate-900/85 border border-slate-800 rounded-lg p-5 overflow-x-auto">
           <div id="statsSummary" class="mb-5"></div>
           <div id="channelStats" class="mb-6"></div>
@@ -319,16 +326,10 @@ function ensurePopup() {
   popup.innerHTML = `
     <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-sm" onclick="closePopup()"></div>
     <section class="popup-panel absolute left-1/2 top-1/2 max-h-[calc(100vh-3rem)] w-[min(940px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl shadow-black/50">
-      <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 px-5 py-4">
-        <div class="flex flex-wrap items-center gap-4">
-          <h2 id="popupTitle" class="text-lg font-semibold text-white"></h2>
-          <div id="popupHeaderActions"></div>
-        </div>
-        <button type="button" onclick="closePopup()" class="rounded-lg px-3 py-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </header>
-      <div id="popupBody" class="max-h-[calc(100vh-8rem)] overflow-y-auto p-5"></div>
+      <button type="button" onclick="closePopup()" class="absolute right-4 top-4 z-30 rounded-lg p-2 text-slate-400 transition hover:bg-slate-900 hover:text-white" title="Close">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div id="popupBody" class="max-h-[calc(100vh-4rem)] overflow-y-auto p-5 pt-8"></div>
     </section>`;
   document.body.appendChild(popup);
   return popup;
@@ -338,13 +339,6 @@ window.openPopup = async function openPopup(page) {
   const config = POPUP_PAGES[page];
   if (!config) return;
   const popup = ensurePopup();
-  document.getElementById("popupTitle").innerHTML = `<i class="fa-solid ${config.icon} mr-2 text-red-400"></i>${esc(config.title)}`;
-  document.getElementById("popupHeaderActions").innerHTML = page === "stats"
-    ? `<div class="flex bg-slate-900 rounded-lg p-1 border border-slate-800">
-        <button type="button" data-period="week" onclick="renderStats({ refreshNav: false, periodOverride: 'week' })" class="px-4 py-1 text-xs rounded-md transition capitalize">week</button>
-        <button type="button" data-period="month" onclick="renderStats({ refreshNav: false, periodOverride: 'month' })" class="px-4 py-1 text-xs rounded-md transition capitalize">month</button>
-      </div>`
-    : "";
   document.getElementById("popupBody").innerHTML = config.body;
   popup.classList.remove("hidden");
   document.body.classList.add("overflow-hidden");
