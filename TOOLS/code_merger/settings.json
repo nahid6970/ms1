@@ -1413,5 +1413,17 @@
   },
   "backup": false,
   "preview": true,
-  "auto_git": true
+  "auto_git": true,
+  "project_commands": {
+    "C:\\@delta\\ms1\\flask\\yt_notifier": [
+      {
+        "label": "npx convex dev",
+        "cmd": "npx convex dev"
+      },
+      {
+        "label": "npm run deploy:pages",
+        "cmd": "npm run deploy:pages"
+      }
+    ]
+  }
 }

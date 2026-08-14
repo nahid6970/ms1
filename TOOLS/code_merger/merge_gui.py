@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+import shlex
 import shutil
 import json
 import subprocess
@@ -471,6 +472,44 @@ def remove_recent(path: str):
     current = load_recent_details()
     current = [item for item in current if os.path.normpath(item["path"]).lower() != target]
     save_recent(current)
+
+def load_project_commands(project_root: str) -> list[dict]:
+    """Return the saved commands list for the given project root.
+    Each entry is {"label": str, "cmd": str}.
+    """
+    if not project_root:
+        return []
+    try:
+        if not os.path.exists(SETTINGS_PATH):
+            return []
+        with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        if not isinstance(data, dict):
+            return []
+        key = os.path.normpath(project_root)
+        cmds = data.get('project_commands', {}).get(key, [])
+        return [c for c in cmds if isinstance(c, dict) and 'cmd' in c]
+    except Exception:
+        return []
+
+def save_project_commands(project_root: str, commands: list[dict]):
+    """Persist the commands list for the given project root into settings.json."""
+    if not project_root:
+        return
+    key = os.path.normpath(project_root)
+    try:
+        data = {}
+        if os.path.exists(SETTINGS_PATH):
+            with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if not isinstance(data, dict):
+                data = {}
+        if 'project_commands' not in data or not isinstance(data['project_commands'], dict):
+            data['project_commands'] = {}
+        data['project_commands'][key] = commands
+        _write_json_if_changed(SETTINGS_PATH, data)
+    except Exception as e:
+        print(f"Error saving project commands: {e}", file=sys.stderr)
 
 def resequence_pinned_projects(items: list[dict], target_path: str = None, set_pinned: bool = None, target_index: int = None) -> list[dict]:
     """
@@ -4862,6 +4901,373 @@ class CommandTab(QWidget):
             self.status_cb("⚠ Nothing to copy")
 
 
+# ── PROJECT COMMANDS TAB ─────────────────────────────────────────────────────
+class AddEditCommandDialog(QDialog):
+    """Small dialog to add or edit a saved command entry."""
+    def __init__(self, parent=None, label: str = "", cmd: str = ""):
+        super().__init__(parent)
+        self.setWindowTitle("Command")
+        self.setModal(True)
+        self.setMinimumWidth(480)
+        self.setStyleSheet(THEME)
+
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+
+        layout.addWidget(QLabel("Label (display name):"))
+        self.label_edit = QLineEdit(label)
+        self.label_edit.setPlaceholderText("e.g. Dev Server")
+        layout.addWidget(self.label_edit)
+
+        layout.addWidget(QLabel("Command:"))
+        self.cmd_edit = QLineEdit(cmd)
+        self.cmd_edit.setPlaceholderText("e.g. npx convex dev")
+        layout.addWidget(self.cmd_edit)
+
+        btn_row = QHBoxLayout()
+        btn_ok = QPushButton("✔ SAVE")
+        btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                             f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; }}")
+        btn_ok.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_ok.clicked.connect(self.accept)
+        btn_cancel = QPushButton("✖ CANCEL")
+        btn_cancel.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(btn_ok)
+        btn_row.addWidget(btn_cancel)
+        layout.addLayout(btn_row)
+
+        # Allow Enter to confirm
+        self.cmd_edit.returnPressed.connect(self.accept)
+        self.label_edit.returnPressed.connect(self.cmd_edit.setFocus)
+
+    def get_values(self):
+        return self.label_edit.text().strip(), self.cmd_edit.text().strip()
+
+
+class ProjectCommandsTab(QWidget):
+    """Per-project saved command manager.
+
+    Left panel: list of saved (label, command) pairs with Add / Edit / Delete.
+    Right panel: live output from the last in-process run (optional quick-run).
+    Each "▶ RUN IN TERMINAL" button spawns a real, interactive terminal window
+    (Windows Terminal → wt.exe → cmd /k as fallback) in the project directory.
+    """
+
+    def __init__(self, status_cb):
+        super().__init__()
+        self.status_cb = status_cb
+        self._project_root: str = ""
+        self._commands: list[dict] = []   # [{"label": str, "cmd": str}, ...]
+        self._build()
+
+    # ── UI ────────────────────────────────────────────────────────────────────
+    def _build(self):
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(8, 8, 8, 8)
+        main_layout.setSpacing(10)
+
+        # ── LEFT: command list ────────────────────────────────────────────────
+        left = QWidget()
+        left_layout = QVBoxLayout(left)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(6)
+
+        # project indicator
+        self.project_lbl = QLabel("No project loaded")
+        self.project_lbl.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt;")
+        self.project_lbl.setWordWrap(True)
+        left_layout.addWidget(self.project_lbl)
+
+        grp_cmds = QGroupBox("SAVED COMMANDS")
+        grp_layout = QVBoxLayout(grp_cmds)
+        grp_layout.setSpacing(4)
+
+        # toolbar: add / edit / delete / move
+        toolbar = QHBoxLayout()
+        toolbar.setSpacing(4)
+
+        btn_add = QPushButton("＋ ADD")
+        btn_add.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_add.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
+                              f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; }}")
+        btn_add.clicked.connect(self._add_command)
+
+        btn_edit = QPushButton("✎ EDIT")
+        btn_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_edit.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
+                               f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; }}")
+        btn_edit.clicked.connect(self._edit_command)
+
+        btn_del = QPushButton("✖ DEL")
+        btn_del.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_del.setStyleSheet(f"QPushButton {{ border-color: {CP_RED}; color: {CP_RED}; }}"
+                              f"QPushButton:hover {{ background: {CP_RED}; color: #000; }}")
+        btn_del.clicked.connect(self._delete_command)
+
+        btn_up = QPushButton("▲")
+        btn_up.setFixedWidth(32)
+        btn_up.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_up.clicked.connect(self._move_up)
+
+        btn_down = QPushButton("▼")
+        btn_down.setFixedWidth(32)
+        btn_down.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_down.clicked.connect(self._move_down)
+
+        toolbar.addWidget(btn_add)
+        toolbar.addWidget(btn_edit)
+        toolbar.addWidget(btn_del)
+        toolbar.addStretch()
+        toolbar.addWidget(btn_up)
+        toolbar.addWidget(btn_down)
+        grp_layout.addLayout(toolbar)
+
+        # The list widget
+        self.list_widget = QListWidget()
+        self.list_widget.setAlternatingRowColors(True)
+        self.list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.list_widget.customContextMenuRequested.connect(self._ctx_menu)
+        self.list_widget.itemDoubleClicked.connect(self._edit_command)
+        grp_layout.addWidget(self.list_widget, 1)
+
+        left_layout.addWidget(grp_cmds, 1)
+
+        # ── RIGHT: run panel ──────────────────────────────────────────────────
+        right = QWidget()
+        right_layout = QVBoxLayout(right)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(6)
+
+        grp_run = QGroupBox("RUN COMMAND")
+        run_layout = QVBoxLayout(grp_run)
+        run_layout.setSpacing(6)
+
+        # big RUN IN TERMINAL button (acts on selected command)
+        self.btn_run_terminal = QPushButton("▶  RUN SELECTED IN NEW TERMINAL")
+        self.btn_run_terminal.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_run_terminal.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {CP_PANEL};
+                border: 2px solid {CP_GREEN};
+                color: {CP_GREEN};
+                font-size: 11pt;
+                font-weight: bold;
+                padding: 8px;
+            }}
+            QPushButton:hover {{ background-color: {CP_GREEN}; color: #000; }}
+            QPushButton:pressed {{ background-color: #008f12; color: #000; }}
+            QPushButton:disabled {{ border-color: {CP_DIM}; color: {CP_DIM}; }}
+        """)
+        self.btn_run_terminal.clicked.connect(self._run_selected_in_terminal)
+        run_layout.addWidget(self.btn_run_terminal)
+
+        # preview of selected command
+        preview_row = QHBoxLayout()
+        preview_row.addWidget(QLabel("Selected:"))
+        self.preview_lbl = QLabel("—")
+        self.preview_lbl.setStyleSheet(f"color: {CP_CYAN}; font-family: Consolas;")
+        self.preview_lbl.setWordWrap(True)
+        preview_row.addWidget(self.preview_lbl, 1)
+        run_layout.addLayout(preview_row)
+
+        right_layout.addWidget(grp_run)
+        right_layout.addStretch(1)
+
+        # ── splitter ──────────────────────────────────────────────────────────
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.addWidget(left)
+        splitter.addWidget(right)
+        splitter.setSizes([340, 560])
+        main_layout.addWidget(splitter)
+
+        # keep preview in sync with selection
+        self.list_widget.currentRowChanged.connect(self._on_selection_changed)
+
+    # ── DATA ──────────────────────────────────────────────────────────────────
+    def set_project_root(self, path: str):
+        """Called whenever the active project changes."""
+        self._project_root = os.path.normpath(path) if path else ""
+        if self._project_root:
+            self.project_lbl.setText(f"Project: {self._project_root}")
+            self.project_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-size: 9pt;")
+        else:
+            self.project_lbl.setText("No project loaded")
+            self.project_lbl.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt;")
+        self._load_commands()
+
+    def _load_commands(self):
+        self._commands = load_project_commands(self._project_root)
+        self._refresh_list()
+
+    def _save_commands(self):
+        save_project_commands(self._project_root, self._commands)
+
+    def _refresh_list(self):
+        self.list_widget.clear()
+        for entry in self._commands:
+            label = entry.get("label") or entry.get("cmd", "")
+            cmd   = entry.get("cmd", "")
+            display = f"  {label}  —  {cmd}" if label != cmd else f"  {cmd}"
+            item = QListWidgetItem(display)
+            item.setToolTip(cmd)
+            self.list_widget.addItem(item)
+        self._on_selection_changed(self.list_widget.currentRow())
+
+    def _on_selection_changed(self, row: int):
+        if 0 <= row < len(self._commands):
+            self.preview_lbl.setText(self._commands[row].get("cmd", ""))
+        else:
+            self.preview_lbl.setText("—")
+
+    # ── ADD / EDIT / DELETE / REORDER ─────────────────────────────────────────
+    def _add_command(self):
+        dlg = AddEditCommandDialog(self)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            label, cmd = dlg.get_values()
+            if not cmd:
+                self.status_cb("⚠ Command cannot be empty")
+                return
+            entry = {"label": label or cmd, "cmd": cmd}
+            self._commands.append(entry)
+            self._save_commands()
+            self._refresh_list()
+            self.list_widget.setCurrentRow(len(self._commands) - 1)
+            self.status_cb(f"✔ Added command: {label or cmd}")
+
+    def _edit_command(self):
+        row = self.list_widget.currentRow()
+        if row < 0 or row >= len(self._commands):
+            self.status_cb("⚠ Select a command to edit")
+            return
+        entry = self._commands[row]
+        dlg = AddEditCommandDialog(self, label=entry.get("label", ""), cmd=entry.get("cmd", ""))
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            label, cmd = dlg.get_values()
+            if not cmd:
+                self.status_cb("⚠ Command cannot be empty")
+                return
+            self._commands[row] = {"label": label or cmd, "cmd": cmd}
+            self._save_commands()
+            self._refresh_list()
+            self.list_widget.setCurrentRow(row)
+            self.status_cb(f"✔ Updated command: {label or cmd}")
+
+    def _delete_command(self):
+        row = self.list_widget.currentRow()
+        if row < 0 or row >= len(self._commands):
+            self.status_cb("⚠ Select a command to delete")
+            return
+        entry = self._commands[row]
+        label = entry.get("label") or entry.get("cmd", "command")
+        reply = QMessageBox.question(
+            self, "Delete Command",
+            f"Delete \"{label}\"?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            self._commands.pop(row)
+            self._save_commands()
+            self._refresh_list()
+            self.status_cb(f"✔ Deleted command: {label}")
+
+    def _move_up(self):
+        row = self.list_widget.currentRow()
+        if row > 0:
+            self._commands[row - 1], self._commands[row] = self._commands[row], self._commands[row - 1]
+            self._save_commands()
+            self._refresh_list()
+            self.list_widget.setCurrentRow(row - 1)
+
+    def _move_down(self):
+        row = self.list_widget.currentRow()
+        if 0 <= row < len(self._commands) - 1:
+            self._commands[row], self._commands[row + 1] = self._commands[row + 1], self._commands[row]
+            self._save_commands()
+            self._refresh_list()
+            self.list_widget.setCurrentRow(row + 1)
+
+    def _ctx_menu(self, pos: QPoint):
+        row = self.list_widget.currentRow()
+        if row < 0:
+            return
+        menu = QMenu(self)
+        menu.setStyleSheet(f"QMenu {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; }}"
+                           f"QMenu::item:selected {{ background: {CP_DIM}; color: {CP_YELLOW}; }}")
+        menu.addAction("▶ Run in Terminal", self._run_selected_in_terminal)
+        menu.addSeparator()
+        menu.addAction("✎ Edit", self._edit_command)
+        menu.addAction("✖ Delete", self._delete_command)
+        menu.exec(self.list_widget.mapToGlobal(pos))
+
+    # ── RUNNING ───────────────────────────────────────────────────────────────
+    def _selected_entry(self):
+        row = self.list_widget.currentRow()
+        if row < 0 or row >= len(self._commands):
+            return None
+        return self._commands[row]
+
+    def _run_selected_in_terminal(self):
+        entry = self._selected_entry()
+        if not entry:
+            self.status_cb("⚠ Select a command first")
+            return
+        if not self._project_root or not os.path.isdir(self._project_root):
+            self.status_cb("⚠ No valid project root — load a project in the PREP tab")
+            return
+
+        cmd = entry.get("cmd", "").strip()
+        label = entry.get("label") or cmd
+        if not cmd:
+            self.status_cb("⚠ Command is empty")
+            return
+
+        try:
+            if sys.platform == "win32":
+                self._run_in_terminal_windows(cmd)
+            elif sys.platform == "darwin":
+                self._run_in_terminal_macos(cmd)
+            else:
+                self._run_in_terminal_linux(cmd)
+            self.status_cb(f"✔ Launched terminal: {label}")
+        except Exception as e:
+            self.status_cb(f"⚠ Failed to open terminal: {e}")
+
+    def _run_in_terminal_windows(self, cmd: str):
+        cwd = self._project_root
+        # Try Windows Terminal (wt.exe) first, then fall back to cmd /k
+        wt = shutil.which("wt")
+        if wt:
+            # wt.exe -d <dir> cmd /k <command>
+            subprocess.Popen(
+                [wt, "-d", cwd, "cmd", "/k", cmd],
+                creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+            )
+        else:
+            # plain cmd.exe /k keeps the window open after the command finishes
+            subprocess.Popen(
+                f'start cmd /k "cd /d "{cwd}" && {cmd}"',
+                shell=True,
+                creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+            )
+
+    def _run_in_terminal_macos(self, cmd: str):
+        cwd = self._project_root
+        script = f'tell application "Terminal" to do script "cd {shlex.quote(cwd)} && {cmd}"'
+        subprocess.Popen(["osascript", "-e", script])
+
+    def _run_in_terminal_linux(self, cmd: str):
+        cwd = self._project_root
+        for term in ("gnome-terminal", "xterm", "konsole", "xfce4-terminal"):
+            if shutil.which(term):
+                if term == "gnome-terminal":
+                    subprocess.Popen([term, "--working-directory", cwd, "--", "bash", "-c", f"{cmd}; exec bash"])
+                else:
+                    subprocess.Popen([term, "-e", f"bash -c '{cmd}; exec bash'"], cwd=cwd)
+                return
+        raise RuntimeError("No supported terminal emulator found")
+
+
 # ── MAIN WINDOW ───────────────────────────────────────────────────────────────
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -4977,9 +5383,19 @@ class MainWindow(QMainWindow):
         self.merge_tab = MergeTab(self._set_status, self.get_match_mode)
         self.prep_tab  = PrepTab(self._set_status, self.merge_tab.set_root)
         self.command_tab = CommandTab(self._set_status, lambda: self.merge_tab.root_input.text().strip())
+        self.project_commands_tab = ProjectCommandsTab(self._set_status)
+
+        # Hook project root changes → update ProjectCommandsTab
+        _orig_merge_set_root = self.merge_tab.set_root
+        def _combined_set_root(path: str):
+            _orig_merge_set_root(path)
+            self.project_commands_tab.set_project_root(path)
+        self.prep_tab.root_cb = _combined_set_root
+
         self.tabs.addTab(self.prep_tab,  "⚙  PREP  ( local → AI )")
         self.tabs.addTab(self.merge_tab, "⚡  MERGE  ( AI → local )")
         self.tabs.addTab(self.command_tab, "💻  COMMAND ( runner )")
+        self.tabs.addTab(self.project_commands_tab, "📋  COMMANDS ( per-project )")
         root_layout.addWidget(self.tabs)
 
     def _open_settings(self):
