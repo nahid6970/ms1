@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtWidgets import QSizePolicy
-from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon
+from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon, QAction
 
 # ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
 _original_normpath = os.path.normpath
@@ -4530,10 +4530,24 @@ class MergeTab(QWidget):
         btn_apply.clicked.connect(self._apply)
         self.btn_commit.clicked.connect(self._git_commit)
         self.btn_push.clicked.connect(self._git_push)
+
+        # Quick-run dropdown — plain QPushButton that opens a QMenu on click.
+        # Lists saved project commands so user can launch without switching tabs.
+        self._run_menu = QMenu(self)
+        self._run_menu.aboutToShow.connect(self._refresh_run_menu)
+
+        self.btn_run_menu = QPushButton("RUN ▾")
+        self.btn_run_menu.setFixedHeight(_BTN_H)
+        self.btn_run_menu.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_run_menu.setToolTip("Run a saved project command in a terminal.\nCommands are managed in the COMMANDER tab.")
+        self.btn_run_menu.clicked.connect(self._open_run_menu)
+
         btn_row.addWidget(btn_parse)
         btn_row.addWidget(btn_apply)
         btn_row.addWidget(self.btn_commit)
         btn_row.addWidget(self.btn_push)
+        btn_row.addStretch()
+        btn_row.addWidget(self.btn_run_menu)
         layout.addLayout(btn_row)
 
         # Results
@@ -4551,6 +4565,68 @@ class MergeTab(QWidget):
     def set_root(self, path: str):
         self.root_input.setText(path)
         add_recent(path)
+        self._refresh_run_menu()
+
+    def _refresh_run_menu(self):
+        """Rebuild the quick-run dropdown with the current project's saved commands."""
+        self._run_menu.clear()
+        root = self.root_input.text().strip()
+        cmds = load_project_commands(root) if root else []
+        if cmds:
+            for entry in cmds:
+                label = entry.get("label") or entry.get("cmd", "")
+                cmd   = entry.get("cmd", "")
+                if not cmd:
+                    continue
+                act = QAction(f"▶  {label}", self)
+                act.setToolTip(cmd)
+                act.triggered.connect(lambda checked=False, c=cmd, l=label: self._launch_command(c, l))
+                self._run_menu.addAction(act)
+        else:
+            placeholder = QAction("(no commands — add them in COMMANDER tab)", self)
+            placeholder.setEnabled(False)
+            self._run_menu.addAction(placeholder)
+
+    def _open_run_menu(self):
+        """Pop the run menu directly below the RUN button."""
+        btn = self.btn_run_menu
+        pos = btn.mapToGlobal(btn.rect().bottomLeft())
+        self._run_menu.exec(pos)
+
+    def _launch_command(self, cmd: str, label: str = ""):
+        """Launch a shell command in a new terminal window at the project root."""
+        root = self.root_input.text().strip()
+        if not root or not os.path.isdir(root):
+            self.status_cb("⚠ No project root set")
+            return
+        try:
+            if sys.platform == "win32":
+                wt = shutil.which("wt")
+                if wt:
+                    subprocess.Popen(
+                        [wt, "-d", root, "cmd", "/k", cmd],
+                        creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+                    )
+                else:
+                    subprocess.Popen(
+                        f'start cmd /k "cd /d "{root}" && {cmd}"',
+                        shell=True,
+                        creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+                    )
+            elif sys.platform == "darwin":
+                script = f'tell application "Terminal" to do script "cd {shlex.quote(root)} && {cmd}"'
+                subprocess.Popen(["osascript", "-e", script])
+            else:
+                for term in ("gnome-terminal", "xterm", "konsole", "xfce4-terminal"):
+                    if shutil.which(term):
+                        if term == "gnome-terminal":
+                            subprocess.Popen([term, "--working-directory", root, "--", "bash", "-c", f"{cmd}; exec bash"])
+                        else:
+                            subprocess.Popen([term, "-e", f"bash -c '{cmd}; exec bash'"])
+                        break
+            self.status_cb(f"✔ Launched: {label or cmd}")
+        except Exception as e:
+            self.status_cb(f"⚠ Failed to launch terminal: {e}")
 
     def _parse(self):
         text = self.response_input.toPlainText().strip()
