@@ -55,11 +55,13 @@ export const list = query({
     } else if (category === "favorites") {
       q = q.filter((f) => f.eq(f.field("isFavorite"), true));
     }
-    const videos = await q.take(300);
+
+    const takeAmount = feedLimit === 0 ? 2000 : Math.max(300, feedLimit * 2);
+    const videos = await q.take(takeAmount);
 
     const isShortsView = category === "shorts";
 
-    return videos
+    const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
@@ -67,23 +69,25 @@ export const list = query({
       .filter((video) => {
         if (isShortsView) return isShortVideo(video);
         return !hideShorts || !isShortVideo(video);
-      })
-      .slice(0, feedLimit)
-      .map((video) => ({
-        _id: video._id,
-        videoId: video.videoId,
-        title: video.title,
-        link: video.link,
-        duration: video.duration,
-        published: video.published,
-        isNew: video.isNew,
-        isFavorite: video.isFavorite ?? false,
-        isShort: isShortVideo(video),
-        channelId: video.channelId,
-        channelName: nameById.get(video.channelId) ?? "Unknown Channel",
-        channelThumbnail: thumbById.get(video.channelId) ?? null,
-        channelCategory: channelCategoryMap.get(video.channelId) ?? "",
-      }));
+      });
+
+    const finalVideos = feedLimit === 0 ? filtered : filtered.slice(0, feedLimit);
+
+    return finalVideos.map((video) => ({
+      _id: video._id,
+      videoId: video.videoId,
+      title: video.title,
+      link: video.link,
+      duration: video.duration,
+      published: video.published,
+      isNew: video.isNew,
+      isFavorite: video.isFavorite ?? false,
+      isShort: isShortVideo(video),
+      channelId: video.channelId,
+      channelName: nameById.get(video.channelId) ?? "Unknown Channel",
+      channelThumbnail: thumbById.get(video.channelId) ?? null,
+      channelCategory: channelCategoryMap.get(video.channelId) ?? "",
+    }));
   },
 });
 

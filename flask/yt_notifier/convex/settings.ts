@@ -68,7 +68,7 @@ export const updateConfig = mutation({
     if (hideShorts !== undefined) {
       await upsertSetting(ctx, HIDE_SHORTS_KEY, hideShorts);
     }
-    if (feedLimit !== undefined && feedLimit >= 10 && feedLimit <= 200) {
+    if (feedLimit !== undefined && feedLimit >= 0 && feedLimit <= 5000) {
       await upsertSetting(ctx, FEED_LIMIT_KEY, feedLimit);
     }
 
