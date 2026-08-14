@@ -4451,22 +4451,40 @@ class MergeTab(QWidget):
           <line x1="1.05" y1="12" x2="7" y2="12"/>
           <line x1="17.01" y1="12" x2="22.96" y2="12"/>
         </svg>"""
+        # Upload-to-cloud push icon: cloud shape + up-arrow shaft + arrowhead
         _PUSH_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
              stroke="#FCEE0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="19" x2="12" y2="5"/>
-          <polyline points="5 12 12 5 19 12"/>
-          <line x1="5" y1="21" x2="19" y2="21"/>
+          <polyline points="16 16 12 12 8 16"/>
+          <line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
         </svg>"""
+        # Icon used while push is in-progress (yellow spinner placeholder — same arrow dims)
+        _PUSH_BUSY_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="#FCEE0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 16 12 12 8 16"/>
+          <line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          <circle cx="20" cy="4" r="2" fill="#FCEE0A" stroke="none"/>
+        </svg>"""
+        self._push_icon_idle = _svg_icon(_PUSH_SVG, 18)
+        self._push_icon_busy = _svg_icon(_PUSH_BUSY_SVG, 18)
+
+        _BTN_H = 32          # uniform height for commit + push
+        _BTN_W = 130         # uniform minimum width
 
         self.btn_commit = QPushButton("  COMMIT")
         self.btn_commit.setIcon(_svg_icon(_COMMIT_SVG, 18))
         self.btn_commit.setIconSize(QSize(18, 18))
+        self.btn_commit.setFixedHeight(_BTN_H)
+        self.btn_commit.setMinimumWidth(_BTN_W)
         self.btn_commit.setEnabled(False)
         self.btn_commit.setToolTip("Stage and commit the successfully merged files.\nEnabled after a successful apply.")
 
         self.btn_push = QPushButton("  PUSH")
-        self.btn_push.setIcon(_svg_icon(_PUSH_SVG, 18))
+        self.btn_push.setIcon(self._push_icon_idle)
         self.btn_push.setIconSize(QSize(18, 18))
+        self.btn_push.setFixedHeight(_BTN_H)
+        self.btn_push.setMinimumWidth(_BTN_W)
         self.btn_push.setEnabled(False)
         self.btn_push.setToolTip("Push committed changes to the remote.\nEnabled after a successful commit.")
 
@@ -4492,7 +4510,7 @@ class MergeTab(QWidget):
             f"  background: {CP_CYAN}; color: #000; border-color: {CP_CYAN};"
             f"}}"
             f"QPushButton:disabled {{"
-            f"  border-color: {CP_DIM}; color: {CP_DIM};"
+            f"  border: 1.5px solid #555; color: #666;"
             f"}}"
         )
         self.btn_push.setStyleSheet(
@@ -4504,7 +4522,7 @@ class MergeTab(QWidget):
             f"  background: {CP_YELLOW}; color: #000; border-color: {CP_YELLOW};"
             f"}}"
             f"QPushButton:disabled {{"
-            f"  border-color: {CP_DIM}; color: {CP_DIM};"
+            f"  border: 1.5px solid #555; color: #666;"
             f"}}"
         )
 
@@ -4714,6 +4732,7 @@ class MergeTab(QWidget):
 
         self.btn_push.setEnabled(False)
         self.btn_push.setText("  PUSHING…")
+        self.btn_push.setIcon(self._push_icon_busy)
         QApplication.processEvents()
 
         _no_win = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
@@ -4770,6 +4789,7 @@ class MergeTab(QWidget):
         dlg.finish(success)
         dlg.exec()
         self.btn_push.setText("  PUSH")
+        self.btn_push.setIcon(self._push_icon_idle)
 
     def _preview_diff(self):
         if not self._pending_changes:
