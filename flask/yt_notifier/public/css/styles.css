@@ -1,6 +1,7 @@
 html {
   min-height: 100%;
   scroll-behavior: smooth;
+  background-color: #0f172a;
 }
 
 body {
@@ -8,6 +9,7 @@ body {
     radial-gradient(circle at top left, rgba(239, 68, 68, 0.14), transparent 28rem),
     linear-gradient(135deg, #090d16 0%, #111827 48%, #0f172a 100%);
   background-attachment: fixed;
+  background-color: #0f172a;
   min-height: 100vh;
   padding-top: var(--navbar-height, 0px);
 }
