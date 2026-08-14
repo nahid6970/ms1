@@ -225,6 +225,16 @@ const POPUP_PAGES = {
           </label>
         </div>
         <div class="border-t border-slate-800 pt-6">
+          <label for="feedLimitSelect" class="block text-white font-medium">Videos Per Feed Page</label>
+          <p class="mt-1 text-xs text-slate-500">Choose how many videos to display on your feed page.</p>
+          <select id="feedLimitSelect" name="feed_limit" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <option value="20">20 Videos</option>
+            <option value="50" selected>50 Videos</option>
+            <option value="100">100 Videos</option>
+            <option value="200">200 Videos</option>
+          </select>
+        </div>
+        <div class="border-t border-slate-800 pt-6">
           <label for="youtubeDataApiKey" class="block text-white font-medium">YouTube Data API v3 Key</label>
           <p id="youtubeApiKeyStatus" class="mt-1 text-xs text-slate-500">Leave blank to keep the saved key.</p>
           <div class="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -251,6 +261,7 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
           <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight flex-shrink-0">
             <i class="fa-brands fa-youtube text-2xl sm:text-3xl"></i>
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
+            <span id="headerCardCount" class="ml-1 px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
           </a>
           <div id="headerFolderPills" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
         </div>
@@ -560,6 +571,12 @@ async function renderFeed() {
   renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory, folder });
 
   renderFolderPills(categories, folder, urlCategory);
+
+  const countBadge = document.getElementById("headerCardCount");
+  if (countBadge) {
+    countBadge.textContent = `${videos.length}`;
+    countBadge.title = `${videos.length} video card${videos.length === 1 ? "" : "s"} showing on current page`;
+  }
 
   const grid = document.getElementById("videoGrid");
   if (!grid) return;
@@ -1001,6 +1018,7 @@ function initSettingsPage() {
     e.preventDefault();
     const checked = document.getElementById("showSeenToggle")?.checked ?? false;
     const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
+    const feedLimitVal = Number(document.getElementById("feedLimitSelect")?.value ?? 50);
     const apiKeyInput = document.getElementById("youtubeDataApiKey");
     const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
     const btn = form.querySelector("button[type=submit]");
@@ -1009,6 +1027,7 @@ function initSettingsPage() {
       await callConvex("mutation", "settings:updateConfig", {
         showSeen: checked,
         hideShorts: hideShortsChecked,
+        feedLimit: feedLimitVal,
         youtubeDataApiKey: apiKeyInput.value,
         clearYoutubeDataApiKey: clearApiKey,
       });
@@ -1029,9 +1048,11 @@ function initSettingsPage() {
 function renderSettingsConfig(config) {
   const toggle = document.getElementById("showSeenToggle");
   const shortsToggle = document.getElementById("hideShortsToggle");
+  const feedLimitSelect = document.getElementById("feedLimitSelect");
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
+  if (feedLimitSelect && config.feedLimit) feedLimitSelect.value = String(config.feedLimit);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
       ? "A key is saved. Leave blank to keep it, paste a new key to replace it, or check Clear saved key."

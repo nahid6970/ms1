@@ -13,6 +13,12 @@ export const list = query({
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const feedLimitSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "feed_limit"))
+      .first();
+    const feedLimit = feedLimitSetting ? Number(feedLimitSetting.value) : 50;
+
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
     
@@ -62,7 +68,7 @@ export const list = query({
         if (isShortsView) return isShortVideo(video);
         return !hideShorts || !isShortVideo(video);
       })
-      .slice(0, 50)
+      .slice(0, feedLimit)
       .map((video) => ({
         _id: video._id,
         videoId: video.videoId,

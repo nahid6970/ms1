@@ -3,6 +3,7 @@ import { internalQuery, mutation, query } from "./_generated/server";
 
 const SHOW_SEEN_KEY = "show_seen";
 const HIDE_SHORTS_KEY = "hide_shorts";
+const FEED_LIMIT_KEY = "feed_limit";
 const YOUTUBE_DATA_API_KEY = "youtube_data_api_key";
 
 async function getSetting(ctx: { db: any }, key: string) {
@@ -34,12 +35,14 @@ export const config = query({
   handler: async (ctx) => {
     const showSeenRow = await getSetting(ctx, SHOW_SEEN_KEY);
     const hideShortsRow = await getSetting(ctx, HIDE_SHORTS_KEY);
+    const feedLimitRow = await getSetting(ctx, FEED_LIMIT_KEY);
     const apiKeyRow = await getSetting(ctx, YOUTUBE_DATA_API_KEY);
     const apiKey =
       typeof apiKeyRow?.value === "string" ? apiKeyRow.value.trim() : "";
     return {
       showSeen: showSeenRow ? (showSeenRow.value as boolean) : false,
       hideShorts: hideShortsRow ? (hideShortsRow.value as boolean) : false,
+      feedLimit: feedLimitRow ? Number(feedLimitRow.value) : 50,
       hasYoutubeDataApiKey: apiKey.length > 0,
     };
   },
@@ -56,13 +59,17 @@ export const updateConfig = mutation({
   args: {
     showSeen: v.boolean(),
     hideShorts: v.optional(v.boolean()),
+    feedLimit: v.optional(v.number()),
     youtubeDataApiKey: v.optional(v.string()),
     clearYoutubeDataApiKey: v.optional(v.boolean()),
   },
-  handler: async (ctx, { showSeen, hideShorts, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
+  handler: async (ctx, { showSeen, hideShorts, feedLimit, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
     await upsertSetting(ctx, SHOW_SEEN_KEY, showSeen);
     if (hideShorts !== undefined) {
       await upsertSetting(ctx, HIDE_SHORTS_KEY, hideShorts);
+    }
+    if (feedLimit !== undefined && feedLimit >= 10 && feedLimit <= 200) {
+      await upsertSetting(ctx, FEED_LIMIT_KEY, feedLimit);
     }
 
     if (clearYoutubeDataApiKey) {
