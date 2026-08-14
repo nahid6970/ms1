@@ -4880,7 +4880,7 @@ class CommandTab(QWidget):
 # ── PROJECT COMMANDS TAB ─────────────────────────────────────────────────────
 class AddEditCommandDialog(QDialog):
     """Small dialog to add or edit a saved command entry."""
-    def __init__(self, parent=None, label: str = "", cmd: str = ""):
+    def __init__(self, parent=None, label: str = "", cmd: str = "", group: str = ""):
         super().__init__(parent)
         self.setWindowTitle("Command")
         self.setModal(True)
@@ -4900,6 +4900,11 @@ class AddEditCommandDialog(QDialog):
         self.cmd_edit.setPlaceholderText("e.g. npx convex dev")
         layout.addWidget(self.cmd_edit)
 
+        layout.addWidget(QLabel("Group (optional — used as section header):"))
+        self.group_edit = QLineEdit(group)
+        self.group_edit.setPlaceholderText("e.g. NPX  /  Cloudflare  /  Git")
+        layout.addWidget(self.group_edit)
+
         btn_row = QHBoxLayout()
         btn_ok = QPushButton("✔ SAVE")
         btn_ok.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
@@ -4916,9 +4921,10 @@ class AddEditCommandDialog(QDialog):
         # Allow Enter to confirm
         self.cmd_edit.returnPressed.connect(self.accept)
         self.label_edit.returnPressed.connect(self.cmd_edit.setFocus)
+        self.group_edit.returnPressed.connect(self.accept)
 
     def get_values(self):
-        return self.label_edit.text().strip(), self.cmd_edit.text().strip()
+        return self.label_edit.text().strip(), self.cmd_edit.text().strip(), self.group_edit.text().strip()
 
 
 class ProjectCommandsTab(QWidget):
@@ -5008,9 +5014,48 @@ class ProjectCommandsTab(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
+        # Group commands by their "group" field, preserving order of first appearance
+        seen_groups: list[str] = []
+        grouped: dict[str, list[tuple[int, dict]]] = {}
         for idx, entry in enumerate(self._commands):
-            row_widget = self._make_row(idx, entry)
-            self._list_layout.insertWidget(idx, row_widget)
+            g = entry.get("group", "").strip() or ""
+            if g not in grouped:
+                grouped[g] = []
+                seen_groups.append(g)
+            grouped[g].append((idx, entry))
+
+        insert_pos = 0
+        for g in seen_groups:
+            # Render group header if group name is set
+            if g:
+                hdr_widget = self._make_group_header(g)
+                self._list_layout.insertWidget(insert_pos, hdr_widget)
+                insert_pos += 1
+            for idx, entry in grouped[g]:
+                row_widget = self._make_row(idx, entry)
+                self._list_layout.insertWidget(insert_pos, row_widget)
+                insert_pos += 1
+
+    def _make_group_header(self, title: str) -> QWidget:
+        w = QWidget()
+        w.setStyleSheet("background: transparent;")
+        hl = QHBoxLayout(w)
+        hl.setContentsMargins(4, 8, 4, 2)
+        hl.setSpacing(8)
+
+        lbl = QLabel(title.upper())
+        lbl.setStyleSheet(
+            f"color: {CP_CYAN}; font-family: 'Consolas'; font-size: 8pt; "
+            f"font-weight: bold; letter-spacing: 2px; background: transparent;"
+        )
+
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setStyleSheet(f"color: {CP_DIM};")
+
+        hl.addWidget(lbl, 0)
+        hl.addWidget(line, 1)
+        return w
 
     def _make_row(self, idx: int, entry: dict) -> QWidget:
         label = entry.get("label") or entry.get("cmd", "")
@@ -5089,11 +5134,14 @@ class ProjectCommandsTab(QWidget):
     def _add_command(self):
         dlg = AddEditCommandDialog(self)
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            label, cmd = dlg.get_values()
+            label, cmd, group = dlg.get_values()
             if not cmd:
                 self.status_cb("⚠ Command cannot be empty")
                 return
-            self._commands.append({"label": label or cmd, "cmd": cmd})
+            entry = {"label": label or cmd, "cmd": cmd}
+            if group:
+                entry["group"] = group
+            self._commands.append(entry)
             self._save_commands()
             self._refresh_rows()
             self.status_cb(f"✔ Added: {label or cmd}")
@@ -5102,13 +5150,16 @@ class ProjectCommandsTab(QWidget):
         if idx < 0 or idx >= len(self._commands):
             return
         entry = self._commands[idx]
-        dlg = AddEditCommandDialog(self, label=entry.get("label", ""), cmd=entry.get("cmd", ""))
+        dlg = AddEditCommandDialog(self, label=entry.get("label", ""), cmd=entry.get("cmd", ""), group=entry.get("group", ""))
         if dlg.exec() == QDialog.DialogCode.Accepted:
-            label, cmd = dlg.get_values()
+            label, cmd, group = dlg.get_values()
             if not cmd:
                 self.status_cb("⚠ Command cannot be empty")
                 return
-            self._commands[idx] = {"label": label or cmd, "cmd": cmd}
+            updated = {"label": label or cmd, "cmd": cmd}
+            if group:
+                updated["group"] = group
+            self._commands[idx] = updated
             self._save_commands()
             self._refresh_rows()
             self.status_cb(f"✔ Updated: {label or cmd}")
