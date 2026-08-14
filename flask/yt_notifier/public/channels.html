@@ -39,26 +39,19 @@
         <div class="max-w-2xl mx-auto">
             <h1 class="text-3xl font-bold text-white mb-8">Manage Channels</h1>
 
-            <div class="sticky top-[calc(var(--navbar-height,0px)+1rem)] z-20 soft-panel bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-lg p-6 mb-8 shadow-2xl">
-                <form id="addChannelForm" class="flex flex-col sm:flex-row gap-4">
-                    <input type="text" id="channelUrl" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-none px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500 transition">
-                    <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-none text-sm font-semibold transition">
+            <div class="sticky top-[calc(var(--navbar-height,0px)+1rem)] z-20 soft-panel bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-lg p-3 sm:p-4 mb-6 shadow-2xl">
+                <form id="addChannelForm" class="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <input type="text" id="channelUrl" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[200px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
+                    <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">
                         Add Channel
                     </button>
-                </form>
-            </div>
-
-            <div class="flex items-center justify-between gap-3 mb-4 pb-2 border-b border-slate-800/70">
-                <span id="channelCountLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Subscribed Channels</span>
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-slate-400 font-medium hidden sm:inline"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>Sort by:</span>
-                    <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-red-500 transition">
-                        <option value="recent">Recent Uploads</option>
-                        <option value="name">Channel Name (A-Z)</option>
-                        <option value="category">Folder / Category</option>
-                        <option value="inactive">Most Inactive</option>
+                    <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 outline-none focus:border-red-500 transition flex-shrink-0" title="Sort channels">
+                        <option value="recent">Sort: Recent</option>
+                        <option value="name">Sort: Name (A-Z)</option>
+                        <option value="category">Sort: Folder</option>
+                        <option value="inactive">Sort: Inactive</option>
                     </select>
-                </div>
+                </form>
             </div>
             <div id="channelList" class="space-y-3">
                 <p class="text-slate-600 text-sm">Loading...</p>

@@ -158,27 +158,19 @@ const POPUP_PAGES = {
     title: "Manage Channels",
     icon: "fa-tv",
     header: `
-      <form id="addChannelForm" class="soft-panel bg-slate-900 border border-slate-800 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
-        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
-        <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">Add Channel</button>
+      <form id="addChannelForm" class="soft-panel bg-slate-900 border border-slate-800 rounded-lg p-2.5 sm:p-3 flex flex-wrap items-center gap-2 sm:gap-3">
+        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[200px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
+        <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">Add Channel</button>
+        <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 outline-none focus:border-red-500 transition flex-shrink-0" title="Sort channels">
+          <option value="recent">Sort: Recent</option>
+          <option value="name">Sort: Name (A-Z)</option>
+          <option value="category">Sort: Folder</option>
+          <option value="inactive">Sort: Inactive</option>
+        </select>
       </form>`,
     body: `
-      <div class="space-y-4">
-        <div class="flex items-center justify-between gap-3 pb-2 border-b border-slate-800/70">
-          <span id="channelCountLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Subscribed Channels</span>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-400 font-medium hidden sm:inline"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>Sort by:</span>
-            <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-red-500 transition">
-              <option value="recent">Recent Uploads</option>
-              <option value="name">Channel Name (A-Z)</option>
-              <option value="category">Folder / Category</option>
-              <option value="inactive">Most Inactive</option>
-            </select>
-          </div>
-        </div>
-        <div id="channelList" class="space-y-3">
-          <p class="text-slate-600 text-sm">Loading...</p>
-        </div>
+      <div id="channelList" class="space-y-3">
+        <p class="text-slate-600 text-sm">Loading...</p>
       </div>`,
   },
   stats: {
