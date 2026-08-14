@@ -5234,31 +5234,32 @@ class MainWindow(QMainWindow):
             f"color: {CP_YELLOW}; font-size: 14pt; font-weight: bold; letter-spacing: 2px;"
         )
         self.hdr_path_lbl.setToolTip("Active project root path")
-        self.hdr_path_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        self.hdr_path_lbl.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
-        self.hdr_open_btn = QPushButton("📂")
+        self.hdr_open_btn = QPushButton()
         self.hdr_open_btn.setFixedHeight(28)
         self.hdr_open_btn.setFixedWidth(34)
         self.hdr_open_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.hdr_open_btn.setToolTip("Open active project root in File Manager")
+        _FOLDER_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>"""
+        self.hdr_open_btn.setIcon(_svg_icon(_FOLDER_SVG, 18))
+        self.hdr_open_btn.setIconSize(QSize(18, 18))
         self.hdr_open_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {CP_PANEL};
                 border: 1px solid {CP_DIM};
-                color: {CP_YELLOW};
-                font-size: 11pt;
                 padding: 2px;
-                qproperty-alignment: AlignCenter;
             }}
             QPushButton:hover {{
-                border-color: {CP_YELLOW};
+                border-color: {CP_CYAN};
                 background-color: #2a2a2a;
             }}
         """)
         self.hdr_open_btn.clicked.connect(self._open_active_project_folder)
 
-        hdr_row.addWidget(self.hdr_path_lbl, 1)
+        hdr_row.addWidget(self.hdr_path_lbl, 0)
         hdr_row.addWidget(self.hdr_open_btn, 0)
+        hdr_row.addStretch(1)
         root_layout.addLayout(hdr_row)
 
         # Tabs
