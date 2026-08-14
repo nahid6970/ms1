@@ -292,7 +292,7 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCat
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
             <span id="headerCardCount" class="ml-1 px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
           </a>
-          <div id="headerFolderPills" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
+          <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <a href="index.html" class="nav-link ${PAGE === "feed" && !isShorts ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" && !isShorts ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
@@ -473,9 +473,10 @@ async function refreshNavOnly() {
 
 /* --------------------------------- feed page ------------------------------- */
 
-function videoCard(video) {
+function videoCard(video, categories = []) {
   const isNew = video.isNew;
   const isFavorite = Boolean(video.isFavorite);
+  const currentCat = video.channelCategory || "";
   const cardTone = isNew
     ? "bg-slate-900/90 border-slate-800 hover:border-red-500/50 ring-1 ring-red-500/30 hover:shadow-red-900/20"
     : "bg-slate-900/55 border-slate-800/60 hover:border-slate-700 opacity-85";
@@ -488,6 +489,11 @@ function videoCard(video) {
   const channelTone = isNew
     ? "text-slate-200 group-hover:text-white"
     : "text-slate-500 group-hover:text-slate-300";
+
+  const optionsHtml = (categories || []).map((cat) => `
+    <option value="${esc(cat)}" ${cat.toLowerCase() === currentCat.toLowerCase() ? "selected" : ""}>📁 ${esc(cat)}</option>
+  `).join("");
+
   return `
   <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
     <div class="relative aspect-video bg-slate-950 overflow-hidden">
@@ -519,7 +525,10 @@ function videoCard(video) {
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 min-w-0">
             <span class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</span>
-            ${video.channelCategory ? `<span class="flex-shrink-0 rounded bg-red-950/70 border border-red-800/50 px-1.5 py-0.5 text-[10px] font-semibold text-red-300"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(video.channelCategory)}</span>` : ""}
+            <select onchange="changeChannelFolderFromCard(this.value, '${esc(video.channelId)}')" class="flex-shrink-0 rounded bg-red-950/80 border border-red-800/60 px-1.5 py-0.5 text-[10px] font-bold text-red-300 outline-none transition cursor-pointer hover:bg-red-900/90" title="Change folder for ${esc(video.channelName)}">
+              <option value="" ${!currentCat ? "selected" : ""}>+ Folder</option>
+              ${optionsHtml}
+            </select>
           </div>
           <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
         </div>
@@ -528,6 +537,19 @@ function videoCard(video) {
     </div>
   </article>`;
 }
+
+window.changeChannelFolderFromCard = async function changeChannelFolderFromCard(newCategory, channelId) {
+  try {
+    await callConvex("mutation", "channels:updateCategory", {
+      channelId,
+      category: newCategory,
+    });
+    flash("Channel folder updated!", "success");
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
 
 window.toggleFavorite = async function toggleFavorite(id) {
   try {
@@ -613,7 +635,7 @@ async function renderFeed() {
       <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
-    grid.innerHTML = videos.map(videoCard).join("");
+    grid.innerHTML = videos.map((v) => videoCard(v, categories)).join("");
   }
 }
 
@@ -630,17 +652,40 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
   const naActive = currentFolder.toUpperCase() === "N/A" || currentFolder.toLowerCase() === "uncategorized";
   const naUrl = `?category=${currentCategory}${subParam}&folder=N%2FA`;
 
-  const categoryPillsHtml = (categories || []).map((cat) => {
+  const displayLabel = currentFolder ? (naActive ? "N/A" : currentFolder) : "All Folders";
+
+  const categoryOptionsHtml = (categories || []).map((cat) => {
     const active = currentFolder.toLowerCase() === cat.toLowerCase();
     const catUrl = `?category=${currentCategory}${subParam}&folder=${encodeURIComponent(cat)}`;
-    return `<a href="${catUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${active ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}">${esc(cat)}</a>`;
+    return `<a href="${catUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${active ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+      <span>📁 ${esc(cat)}</span>
+    </a>`;
   }).join("");
 
   container.innerHTML = `
-    <a href="${allUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${!currentFolder ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}">All</a>
-    ${categoryPillsHtml}
-    <a href="${naUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${naActive ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}" title="Uncategorized channels">N/A</a>`;
+    <div class="relative inline-block text-left">
+      <button id="folderDropdownBtn" onclick="toggleFolderDropdown()" class="flex items-center gap-1.5 rounded-full bg-slate-800/90 border border-slate-700/60 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:bg-slate-700 hover:text-white shadow" title="Active Folder: ${esc(displayLabel)}">
+        <i class="fa-solid fa-folder-open text-red-400 text-[11px]"></i>
+        <span class="whitespace-nowrap">${esc(displayLabel)}</span>
+        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5"></i>
+      </button>
+      <div id="folderDropdownMenu" class="hidden absolute left-0 top-full mt-1.5 w-40 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+        <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">Folders</div>
+        <a href="${allUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${!currentFolder ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+          <span>All Folders</span>
+        </a>
+        ${categoryOptionsHtml}
+        <a href="${naUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${naActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}" title="Uncategorized channels">
+          <span>N/A (Uncategorized)</span>
+        </a>
+      </div>
+    </div>`;
 }
+
+window.toggleFolderDropdown = function toggleFolderDropdown() {
+  const menu = document.getElementById("folderDropdownMenu");
+  if (menu) menu.classList.toggle("hidden");
+};
 
 /* ------------------------------- channels page ----------------------------- */
 
@@ -1133,11 +1178,15 @@ async function refreshNavAndDispatch() {
   }
 }
 
-// Close dropdown when clicking outside.
+// Close dropdowns when clicking outside.
 window.addEventListener("click", (event) => {
   if (!event.target.closest("#dropdownButton")) {
     const menu = document.getElementById("dropdownMenu");
     if (menu && !menu.classList.contains("hidden")) menu.classList.add("hidden");
+  }
+  if (!event.target.closest("#folderDropdownBtn")) {
+    const folderMenu = document.getElementById("folderDropdownMenu");
+    if (folderMenu && !folderMenu.classList.contains("hidden")) folderMenu.classList.add("hidden");
   }
 });
 
