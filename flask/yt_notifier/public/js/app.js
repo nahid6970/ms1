@@ -879,13 +879,13 @@ function renderHeatmap(data, days) {
     const cells = stat.dailyCounts
       .map((count, i) => {
         const cls = count === 0
-          ? "bg-slate-900/60 border border-slate-800/60 text-slate-600"
+          ? "bg-slate-900/60 border border-slate-800/80 text-slate-600"
           : count === 1
             ? "bg-slate-800 border border-slate-700 text-red-400 font-bold"
             : count === 2
-              ? "bg-red-950/80 border border-red-800 text-red-300 font-bold"
+              ? "bg-red-950/80 border border-red-800/90 text-red-300 font-bold"
               : "bg-red-900/90 border border-red-700 text-red-200 font-extrabold";
-        return `<div class="h-6 min-w-6 rounded flex items-center justify-center text-[10px] ${cls}" title="${dayLabel(days[i])}: ${count} uploads">${count > 0 ? count : "-"}</div>`;
+        return `<div class="aspect-square h-6.5 w-full rounded flex items-center justify-center text-[10px] box-border ${cls}" title="${dayLabel(days[i])}: ${count} uploads">${count > 0 ? count : "-"}</div>`;
       })
       .join("");
     return `
@@ -894,7 +894,7 @@ function renderHeatmap(data, days) {
         <div class="truncate text-sm font-semibold text-slate-300">${esc(stat.name)}</div>
         <div class="text-xs text-red-400">${esc(stat.total)} uploads</div>
       </div>
-      <div class="grid gap-1" style="grid-template-columns: repeat(${days.length}, minmax(1rem, 1fr));">
+      <div class="grid gap-1.5" style="grid-template-columns: repeat(${days.length}, minmax(0, 1fr));">
         ${cells}
       </div>
     </div>`;
