@@ -5124,7 +5124,18 @@ class ProjectCommandsTab(QWidget):
         )
         btn_del.clicked.connect(lambda _, i=idx: self._delete_at(i))
 
+        btn_dup = QPushButton("⧉ DUP")
+        btn_dup.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_dup.setFixedWidth(72)
+        btn_dup.setToolTip("Duplicate this command")
+        btn_dup.setStyleSheet(
+            f"QPushButton {{ border: 1px solid {CP_SUB}; color: {CP_SUB}; padding: 4px 6px; }}"
+            f"QPushButton:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}"
+        )
+        btn_dup.clicked.connect(lambda _, i=idx: self._duplicate_at(i))
+
         hl.addWidget(btn_run)
+        hl.addWidget(btn_dup)
         hl.addWidget(btn_edit)
         hl.addWidget(btn_del)
 
@@ -5177,6 +5188,17 @@ class ProjectCommandsTab(QWidget):
             self._save_commands()
             self._refresh_rows()
             self.status_cb(f"✔ Deleted: {label}")
+
+    def _duplicate_at(self, idx: int):
+        if idx < 0 or idx >= len(self._commands):
+            return
+        import copy
+        dupe = copy.deepcopy(self._commands[idx])
+        dupe["label"] = dupe.get("label", "") + " (copy)"
+        self._commands.insert(idx + 1, dupe)
+        self._save_commands()
+        self._refresh_rows()
+        self.status_cb(f"✔ Duplicated: {dupe['label']}")
 
     # ── RUNNING ───────────────────────────────────────────────────────────────
     def _run_at(self, idx: int):
