@@ -923,12 +923,14 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
     Never touches any parent git repository — operates strictly within `root`.
     Returns (success, log_text).
     """
+    # Suppress Windows console flash for all subprocess calls
+    _no_win = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
     log = []
     try:
         # Verify git is available
         git_check = subprocess.run(
             ["git", "--version"],
-            capture_output=True, text=True
+            capture_output=True, text=True, **_no_win
         )
         if git_check.returncode != 0:
             return False, "✘ git not found on PATH"
@@ -936,7 +938,7 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
         # Check that root itself is (or is inside) a git repo
         top_level = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
-            cwd=root, capture_output=True, text=True
+            cwd=root, capture_output=True, text=True, **_no_win
         )
         if top_level.returncode != 0:
             return False, f"✘ Not a git repository: {root}"
@@ -957,7 +959,7 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
             git_rel = os.path.relpath(abs_path, repo_root)
             add_result = subprocess.run(
                 ["git", "add", git_rel],
-                cwd=repo_root, capture_output=True, text=True
+                cwd=repo_root, capture_output=True, text=True, **_no_win
             )
             if add_result.returncode == 0:
                 log.append(f"  ✔ git add: {rel_path}")
@@ -971,7 +973,7 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
         # Commit
         commit_result = subprocess.run(
             ["git", "commit", "-m", commit_msg or "update files"],
-            cwd=repo_root, capture_output=True, text=True
+            cwd=repo_root, capture_output=True, text=True, **_no_win
         )
         if commit_result.returncode == 0:
             log.append(f'  ✔ git commit -m "{commit_msg}"')
@@ -4006,6 +4008,111 @@ def extract_commit_message(text: str) -> str:
     return ""
 
 
+# ── GIT PROGRESS DIALOG ───────────────────────────────────────────────────────
+class GitProgressDialog(QDialog):
+    """
+    Styled dialog that shows git add / commit / push progress line-by-line.
+    Call .append_line(text, style) to stream output in, then .finish(success)
+    to show the final status and unlock the close button.
+    Styles: 'ok', 'err', 'warn', 'cmd', 'info', 'section'
+    """
+
+    _COLORS = {
+        "ok":      ("#00ff21", "#002e07"),   # green text, dark-green bg
+        "err":     ("#FF003C", "#3b000d"),   # red
+        "warn":    ("#FCEE0A", "#2a2200"),   # yellow
+        "cmd":     ("#00F0FF", "#0a1a1e"),   # cyan  — the command being run
+        "section": ("#FCEE0A", "#111111"),   # yellow bold header
+        "info":    ("#E0E0E0", "#111111"),   # plain
+    }
+
+    def __init__(self, title="Git", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(title)
+        self.setModal(True)
+        self.resize(620, 420)
+        self.setStyleSheet(THEME)
+        self._build()
+
+    def _build(self):
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(16, 16, 16, 16)
+        lay.setSpacing(10)
+
+        # Header
+        self._lbl_title = QLabel("● Running…")
+        self._lbl_title.setStyleSheet(
+            f"color: {CP_CYAN}; font-size: 11pt; font-weight: bold; letter-spacing: 1px;"
+        )
+        lay.addWidget(self._lbl_title)
+
+        # Log area
+        self._log = QTextEdit()
+        self._log.setReadOnly(True)
+        self._log.setFont(QFont("Consolas", 10))
+        self._log.setStyleSheet(
+            f"background: #060606; border: 1px solid {CP_DIM}; padding: 8px;"
+        )
+        lay.addWidget(self._log, 1)
+
+        # Status bar line
+        self._lbl_status = QLabel("")
+        self._lbl_status.setStyleSheet(f"color: {CP_SUB}; font-size: 9pt;")
+        lay.addWidget(self._lbl_status)
+
+        # Bottom button row
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        self._btn_close = QPushButton("✕  CLOSE")
+        self._btn_close.setEnabled(False)
+        self._btn_close.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._btn_close.setStyleSheet(
+            f"QPushButton {{ border: 1.5px solid {CP_DIM}; color: {CP_DIM}; "
+            f"font-weight: bold; padding: 5px 22px; }}"
+            f"QPushButton:enabled {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
+            f"QPushButton:enabled:hover {{ background: {CP_CYAN}; color: #000; }}"
+        )
+        self._btn_close.clicked.connect(self.accept)
+        btn_row.addWidget(self._btn_close)
+        lay.addLayout(btn_row)
+
+    def append_line(self, text: str, style: str = "info"):
+        fg, bg = self._COLORS.get(style, self._COLORS["info"])
+        bold = "font-weight:bold;" if style in ("section", "cmd", "ok", "err") else ""
+        margin = "margin-top:6px;" if style == "section" else ""
+        escaped = (text.replace("&", "&amp;")
+                       .replace("<", "&lt;")
+                       .replace(">", "&gt;"))
+        html = (
+            f'<div style="color:{fg}; background:{bg}; {bold} {margin}'
+            f'padding:2px 6px; white-space:pre-wrap; font-family:Consolas;">'
+            f'{escaped}</div>'
+        )
+        self._log.append(html)
+        # Scroll to bottom
+        sb = self._log.verticalScrollBar()
+        sb.setValue(sb.maximum())
+        QApplication.processEvents()
+
+    def set_status(self, text: str):
+        self._lbl_status.setText(text)
+        QApplication.processEvents()
+
+    def finish(self, success: bool):
+        if success:
+            self._lbl_title.setText("✔  Done")
+            self._lbl_title.setStyleSheet(
+                f"color: {CP_GREEN}; font-size: 11pt; font-weight: bold; letter-spacing: 1px;"
+            )
+        else:
+            self._lbl_title.setText("✘  Errors occurred")
+            self._lbl_title.setStyleSheet(
+                f"color: {CP_RED}; font-size: 11pt; font-weight: bold; letter-spacing: 1px;"
+            )
+        self._btn_close.setEnabled(True)
+        QApplication.processEvents()
+
+
 # ── DIFF PREVIEW DIALOG ───────────────────────────────────────────────────────
 class DiffPreviewDialog(QDialog):
     """Interactive visual diff preview dialog allowing selective block merge."""
@@ -4203,22 +4310,13 @@ class DiffPreviewDialog(QDialog):
         # Run git add + commit for successfully merged files if auto-git is enabled
         if (successful_indices and
                 hasattr(self.parent(), 'chk_git') and
-                self.parent().chk_git.isChecked()):
+                self.parent().chk_git.isChecked() and
+                hasattr(self.parent(), '_run_git_commit_dialog')):
             changed_files = [self.changes[i]["file"] for i in successful_indices]
-            # Collect commit message from parent's parsed commit msg
             commit_msg = getattr(self.parent(), '_parsed_commit_msg', '') or "update files"
-            git_ok, git_log = _git_add_and_commit(self.root, changed_files, commit_msg)
-            extra = ["\n── Git ──", git_log]
-            if git_ok:
-                extra.append("✔ Committed. Click  ⬆ GIT PUSH  when ready.")
-                if hasattr(self.parent(), 'btn_push'):
-                    self.parent().btn_push.setEnabled(True)
-            else:
-                extra.append("⚠ Git step failed — files are saved, commit manually.")
-            if hasattr(self.parent(), 'result_out'):
-                self.parent().result_out.setPlainText(
-                    "\n".join(results) + "\n" + "\n".join(extra)
-                )
+            git_ok = self.parent()._run_git_commit_dialog(self.root, changed_files, commit_msg)
+            if git_ok and hasattr(self.parent(), 'btn_push'):
+                self.parent().btn_push.setEnabled(True)
 
         # Remove UI cards for successful merges
         for orig_idx in sorted(successful_indices, reverse=True):
@@ -4449,14 +4547,9 @@ class MergeTab(QWidget):
                         ch["file"] for ch, r in zip(self._pending_changes, results)
                         if r.startswith("✔")
                     ]
-                    git_ok, git_log = _git_add_and_commit(root, changed_files, commit_msg)
-                    results.append("\n── Git ──")
-                    results.append(git_log)
+                    git_ok = self._run_git_commit_dialog(root, changed_files, commit_msg)
                     if git_ok:
-                        results.append("✔ Committed. Click  ⬆ GIT PUSH  when ready.")
                         self.btn_push.setEnabled(True)
-                    else:
-                        results.append("⚠ Git step failed — files are saved, commit manually.")
                 else:
                     results.append("\nSuggested Git Commit Command:")
                     results.append(f'git commit -m "{commit_msg}"')
@@ -4474,44 +4567,163 @@ class MergeTab(QWidget):
         self.btn_push.setEnabled(False)
         self.status_cb("Cleared")
 
+    def _run_git_commit_dialog(self, root: str, file_paths: list[str], commit_msg: str) -> bool:
+        """
+        Run git add + commit for the given files inside a GitProgressDialog.
+        Returns True if the commit succeeded.
+        """
+        _no_win = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+        dlg = GitProgressDialog("Git — Add & Commit", parent=self)
+        dlg.show()
+        QApplication.processEvents()
+
+        success = False
+        try:
+            # Step 1: verify git
+            dlg.append_line("▶  git --version", "cmd")
+            r = subprocess.run(["git", "--version"], capture_output=True, text=True, **_no_win)
+            if r.returncode != 0:
+                dlg.append_line("✘ git not found on PATH", "err")
+                dlg.set_status("git not found")
+                dlg.finish(False)
+                dlg.exec()
+                return False
+            dlg.append_line(f"   {r.stdout.strip()}", "info")
+
+            # Step 2: find repo root
+            dlg.append_line("\n▶  Locating git repository…", "section")
+            r = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=root, capture_output=True, text=True, **_no_win
+            )
+            if r.returncode != 0:
+                dlg.append_line(f"✘ Not a git repository: {root}", "err")
+                dlg.finish(False)
+                dlg.exec()
+                return False
+            repo_root = os.path.normpath(r.stdout.strip())
+            working_root = os.path.normpath(root)
+            dlg.append_line(f"   Repo root: {repo_root}", "info")
+            dlg.append_line(f"   Work root: {working_root}", "info")
+
+            # Step 3: git add each file
+            dlg.append_line("\n▶  Staging files", "section")
+            staged = []
+            for rel_path in file_paths:
+                abs_path = os.path.normpath(os.path.join(root, rel_path.lstrip("/\\")))
+                if not abs_path.startswith(working_root + os.sep) and abs_path != working_root:
+                    dlg.append_line(f"   ⚠ Skipped (outside root): {rel_path}", "warn")
+                    continue
+                git_rel = os.path.relpath(abs_path, repo_root)
+                dlg.append_line(f"   git add  {git_rel}", "cmd")
+                r = subprocess.run(
+                    ["git", "add", git_rel],
+                    cwd=repo_root, capture_output=True, text=True, **_no_win
+                )
+                if r.returncode == 0:
+                    dlg.append_line(f"   ✔ staged: {rel_path}", "ok")
+                    staged.append(git_rel)
+                else:
+                    dlg.append_line(f"   ✘ {r.stderr.strip()}", "err")
+
+            if not staged:
+                dlg.append_line("\n✘ No files staged — commit skipped.", "err")
+                dlg.set_status("Nothing staged")
+                dlg.finish(False)
+                dlg.exec()
+                return False
+
+            # Step 4: git commit
+            dlg.append_line(f'\n▶  git commit -m "{commit_msg}"', "section")
+            r = subprocess.run(
+                ["git", "commit", "-m", commit_msg or "update files"],
+                cwd=repo_root, capture_output=True, text=True, **_no_win
+            )
+            out = (r.stdout + r.stderr).strip()
+            if r.returncode == 0:
+                for line in out.splitlines():
+                    dlg.append_line(f"   {line}", "ok")
+                dlg.append_line("\n✔  Commit complete. Click PUSH when ready.", "ok")
+                dlg.set_status("Committed successfully")
+                success = True
+            else:
+                for line in out.splitlines():
+                    dlg.append_line(f"   {line}", "err")
+                dlg.set_status("Commit failed")
+
+        except FileNotFoundError:
+            dlg.append_line("✘ git executable not found", "err")
+        except Exception as ex:
+            dlg.append_line(f"✘ Unexpected error: {ex}", "err")
+
+        dlg.finish(success)
+        dlg.exec()
+        return success
+
     def _git_push(self):
         root = self.root_input.text().strip()
         if not root or not os.path.isdir(root):
             self.status_cb("⚠ No project root set")
             return
+
         self.btn_push.setEnabled(False)
         self.btn_push.setText("  PUSHING…")
         QApplication.processEvents()
+
+        _no_win = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+        dlg = GitProgressDialog("Git — Push", parent=self)
+        dlg.show()
+        QApplication.processEvents()
+
+        success = False
         try:
-            top_level = subprocess.run(
+            dlg.append_line("▶  Locating git repository…", "section")
+            r = subprocess.run(
                 ["git", "rev-parse", "--show-toplevel"],
-                cwd=root, capture_output=True, text=True
+                cwd=root, capture_output=True, text=True, **_no_win
             )
-            if top_level.returncode != 0:
-                self.result_out.append("\n✘ git push failed — not a git repository.")
+            if r.returncode != 0:
+                dlg.append_line(f"✘ Not a git repository: {root}", "err")
+                dlg.set_status("Not a git repo")
+                dlg.finish(False)
+                dlg.exec()
                 self.status_cb("✘ git push failed")
                 return
-            repo_root = top_level.stdout.strip()
-            result = subprocess.run(
+
+            repo_root = r.stdout.strip()
+            dlg.append_line(f"   Repo: {repo_root}", "info")
+            dlg.append_line("\n▶  git push", "section")
+
+            r = subprocess.run(
                 ["git", "push"],
-                cwd=repo_root, capture_output=True, text=True
+                cwd=repo_root, capture_output=True, text=True, **_no_win
             )
-            output = (result.stdout + result.stderr).strip()
-            if result.returncode == 0:
-                self.result_out.append(f"\n── Git Push ──\n  ✔ {output or 'Push successful.'}")
+            output = (r.stdout + r.stderr).strip()
+            if r.returncode == 0:
+                for line in (output or "Push successful.").splitlines():
+                    dlg.append_line(f"   {line}", "ok")
+                dlg.append_line("\n✔  Push complete.", "ok")
+                dlg.set_status("Pushed successfully")
                 self.status_cb("✔ git push successful")
+                success = True
             else:
-                self.result_out.append(f"\n── Git Push ──\n  ✘ {output}")
-                self.status_cb("✘ git push failed — see results")
+                for line in output.splitlines():
+                    dlg.append_line(f"   {line}", "err")
+                dlg.set_status("Push failed")
+                self.status_cb("✘ git push failed")
                 self.btn_push.setEnabled(True)  # allow retry
+
         except FileNotFoundError:
-            self.result_out.append("\n✘ git not found on PATH.")
+            dlg.append_line("✘ git not found on PATH", "err")
             self.status_cb("✘ git not found")
         except Exception as ex:
-            self.result_out.append(f"\n✘ git push error: {ex}")
+            dlg.append_line(f"✘ Unexpected error: {ex}", "err")
             self.status_cb("✘ git push error")
-        finally:
-            self.btn_push.setText("  PUSH")
+            self.btn_push.setEnabled(True)
+
+        dlg.finish(success)
+        dlg.exec()
+        self.btn_push.setText("  PUSH")
 
     def _preview_diff(self):
         if not self._pending_changes:
@@ -4588,8 +4800,9 @@ class CommandTab(QWidget):
             return
 
         import subprocess
+        _no_win = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
         try:
-            result = subprocess.run(cmd, cwd=d, shell=True, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, cwd=d, shell=True, capture_output=True, text=True, timeout=60, **_no_win)
             output = ""
             if result.stdout:
                 output += result.stdout
