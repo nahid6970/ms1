@@ -16,7 +16,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
 from PyQt6.QtWidgets import QSizePolicy
-from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap
+from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon
 
 # ── PATH MIGRATION FOR LINUX/MACOS ───────────────────────────────────────────
 _original_normpath = os.path.normpath
@@ -188,6 +188,22 @@ def render_extension_icon(icon_data: str, size: int = 16) -> QPixmap:
         painter.end()
         
     return pixmap
+
+
+def _svg_icon(svg: str, size: int = 20) -> QIcon:
+    """Render an SVG string into a QIcon at the given size."""
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    if HAS_SVG:
+        try:
+            renderer = QSvgRenderer(QByteArray(svg.encode('utf-8')))
+            painter = QPainter(pixmap)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            renderer.render(painter)
+            painter.end()
+        except Exception:
+            pass
+    return QIcon(pixmap)
 
 def _write_json_if_changed(filepath: str, data: dict):
     """Write data as formatted JSON to filepath only if the content actually changed."""
@@ -4194,7 +4210,9 @@ class DiffPreviewDialog(QDialog):
             git_ok, git_log = _git_add_and_commit(self.root, changed_files, commit_msg)
             extra = ["\n── Git ──", git_log]
             if git_ok:
-                extra.append("✔ Committed. Run  git push  when ready.")
+                extra.append("✔ Committed. Click  ⬆ GIT PUSH  when ready.")
+                if hasattr(self.parent(), 'btn_push'):
+                    self.parent().btn_push.setEnabled(True)
             else:
                 extra.append("⚠ Git step failed — files are saved, commit manually.")
             if hasattr(self.parent(), 'result_out'):
@@ -4328,20 +4346,44 @@ class MergeTab(QWidget):
         btn_row = QHBoxLayout()
         btn_parse  = QPushButton("🔍 PARSE CHANGES")
         btn_apply  = QPushButton("✔ APPLY CHANGES")
-        btn_clear  = QPushButton("✕ CLEAR")
+
+        _PUSH_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="#FCEE0A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"/>
+          <polyline points="5 12 12 5 19 12"/>
+          <line x1="5" y1="21" x2="19" y2="21"/>
+        </svg>"""
+        self.btn_push = QPushButton("  PUSH")
+        self.btn_push.setIcon(_svg_icon(_PUSH_SVG, 18))
+        self.btn_push.setIconSize(QSize(18, 18))
+
         btn_parse.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_apply.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_push.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_push.setEnabled(False)
+        self.btn_push.setToolTip("Push committed changes to the remote.\nOnly enabled after a successful auto-commit.")
         btn_parse.setStyleSheet(f"QPushButton {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}"
                                 f"QPushButton:hover {{ background: {CP_CYAN}; color: #000; border-color: {CP_CYAN}; }}")
         btn_apply.setStyleSheet(f"QPushButton {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}"
                                 f"QPushButton:hover {{ background: {CP_GREEN}; color: #000; border-color: {CP_GREEN}; }}")
+        self.btn_push.setStyleSheet(
+            f"QPushButton {{"
+            f"  border: 1.5px solid {CP_YELLOW}; color: {CP_YELLOW};"
+            f"  font-weight: bold; letter-spacing: 1px; padding: 4px 14px;"
+            f"}}"
+            f"QPushButton:hover {{"
+            f"  background: {CP_YELLOW}; color: #000; border-color: {CP_YELLOW};"
+            f"}}"
+            f"QPushButton:disabled {{"
+            f"  border-color: {CP_DIM}; color: {CP_DIM};"
+            f"}}"
+        )
         btn_parse.clicked.connect(self._parse)
         btn_apply.clicked.connect(self._apply)
-        btn_clear.clicked.connect(self._clear)
+        self.btn_push.clicked.connect(self._git_push)
         btn_row.addWidget(btn_parse)
         btn_row.addWidget(btn_apply)
-        btn_row.addWidget(btn_clear)
+        btn_row.addWidget(self.btn_push)
         layout.addLayout(btn_row)
 
         # Results
@@ -4411,7 +4453,8 @@ class MergeTab(QWidget):
                     results.append("\n── Git ──")
                     results.append(git_log)
                     if git_ok:
-                        results.append("✔ Committed. Run  git push  when ready.")
+                        results.append("✔ Committed. Click  ⬆ GIT PUSH  when ready.")
+                        self.btn_push.setEnabled(True)
                     else:
                         results.append("⚠ Git step failed — files are saved, commit manually.")
                 else:
@@ -4428,7 +4471,47 @@ class MergeTab(QWidget):
         self.result_out.clear()
         self._pending_changes = []
         self._parsed_commit_msg = ""
+        self.btn_push.setEnabled(False)
         self.status_cb("Cleared")
+
+    def _git_push(self):
+        root = self.root_input.text().strip()
+        if not root or not os.path.isdir(root):
+            self.status_cb("⚠ No project root set")
+            return
+        self.btn_push.setEnabled(False)
+        self.btn_push.setText("  PUSHING…")
+        QApplication.processEvents()
+        try:
+            top_level = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                cwd=root, capture_output=True, text=True
+            )
+            if top_level.returncode != 0:
+                self.result_out.append("\n✘ git push failed — not a git repository.")
+                self.status_cb("✘ git push failed")
+                return
+            repo_root = top_level.stdout.strip()
+            result = subprocess.run(
+                ["git", "push"],
+                cwd=repo_root, capture_output=True, text=True
+            )
+            output = (result.stdout + result.stderr).strip()
+            if result.returncode == 0:
+                self.result_out.append(f"\n── Git Push ──\n  ✔ {output or 'Push successful.'}")
+                self.status_cb("✔ git push successful")
+            else:
+                self.result_out.append(f"\n── Git Push ──\n  ✘ {output}")
+                self.status_cb("✘ git push failed — see results")
+                self.btn_push.setEnabled(True)  # allow retry
+        except FileNotFoundError:
+            self.result_out.append("\n✘ git not found on PATH.")
+            self.status_cb("✘ git not found")
+        except Exception as ex:
+            self.result_out.append(f"\n✘ git push error: {ex}")
+            self.status_cb("✘ git push error")
+        finally:
+            self.btn_push.setText("  PUSH")
 
     def _preview_diff(self):
         if not self._pending_changes:

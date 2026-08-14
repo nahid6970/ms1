@@ -1412,5 +1412,6 @@
     ]
   },
   "backup": false,
-  "preview": true
+  "preview": true,
+  "auto_git": true
 }
