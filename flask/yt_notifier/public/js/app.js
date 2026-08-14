@@ -257,10 +257,12 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
                 { id: "all", label: "All Videos", icon: "fa-border-all" },
                 { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
                 { id: "seen", label: "Seen", icon: "fa-eye" },
-                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" }
+                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
+                { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" }
               ] : [
                 { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
-                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" }
+                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
+                { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" }
               ]).map((item) => {
                 const isActive = item.id === category;
                 return `
@@ -271,10 +273,18 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
               }).join("")}
             </div>
           </div>` : ""}
-          ${NAV_LINKS.filter((l) => l.page !== "feed").map((l) => `
-          <button type="button" onclick="openPopup('${l.page}')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="${l.label}" aria-label="${l.label}">
-            <i class="fa-solid ${l.icon}"></i>
-          </button>`).join("")}
+          <button type="button" onclick="openPopup('channels')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Channels" aria-label="Channels">
+            <i class="fa-solid fa-tv"></i>
+          </button>
+          <button type="button" onclick="openPopup('stats')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Stats" aria-label="Stats">
+            <i class="fa-solid fa-chart-pie"></i>
+          </button>
+          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed" aria-label="Shorts Feed">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+          </a>
+          <button type="button" onclick="openPopup('settings')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Settings" aria-label="Settings">
+            <i class="fa-solid fa-gear"></i>
+          </button>
           <button id="refreshButton" onclick="checkUpdates()" ${isCheckingUpdates ? "disabled" : ""} class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-r from-red-600 to-amber-500 text-sm font-semibold text-white shadow-lg shadow-red-900/30 transition transform hover:-translate-y-0.5 hover:from-red-500 hover:to-amber-400 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed ${isCheckingUpdates ? "is-syncing" : ""}" title="${isCheckingUpdates ? "Updating..." : "Check updates"}" aria-label="${isCheckingUpdates ? "Updating..." : "Check updates"}">
             <i class="fa-solid fa-rotate"></i>
             <span class="sr-only">Check Updates</span>

@@ -3,7 +3,7 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 export const list = query({
   args: {
-    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites")),
+    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts")),
     folder: v.optional(v.string()),
   },
   handler: async (ctx, { category, folder }) => {
@@ -51,12 +51,17 @@ export const list = query({
     }
     const videos = await q.take(300);
 
+    const isShortsView = category === "shorts";
+
     return videos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )
-      .filter((video) => !hideShorts || !isShortVideo(video))
+      .filter((video) => {
+        if (isShortsView) return isShortVideo(video);
+        return !hideShorts || !isShortVideo(video);
+      })
       .slice(0, 50)
       .map((video) => ({
         _id: video._id,
