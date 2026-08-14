@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import json
+import subprocess
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -898,6 +899,77 @@ def _backup(fpath: str):
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     bak = fpath + f".bak_{ts}"
     shutil.copy2(fpath, bak)
+
+
+def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tuple[bool, str]:
+    """
+    Stage only the given files (relative to root) and commit inside `root`.
+    Never touches any parent git repository — operates strictly within `root`.
+    Returns (success, log_text).
+    """
+    log = []
+    try:
+        # Verify git is available
+        git_check = subprocess.run(
+            ["git", "--version"],
+            capture_output=True, text=True
+        )
+        if git_check.returncode != 0:
+            return False, "✘ git not found on PATH"
+
+        # Check that root itself is (or is inside) a git repo
+        top_level = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=root, capture_output=True, text=True
+        )
+        if top_level.returncode != 0:
+            return False, f"✘ Not a git repository: {root}"
+
+        repo_root = os.path.normpath(top_level.stdout.strip())
+        working_root = os.path.normpath(root)
+
+        # Stage each file by its path relative to the repo root
+        # so we never accidentally stage files outside `root`
+        staged = []
+        for rel_path in file_paths:
+            abs_path = os.path.normpath(os.path.join(root, rel_path.lstrip("/\\")))
+            # Safety: must be inside working_root
+            if not abs_path.startswith(working_root + os.sep) and abs_path != working_root:
+                log.append(f"  ⚠ Skipped (outside root): {rel_path}")
+                continue
+            # Path relative to repo root for git add
+            git_rel = os.path.relpath(abs_path, repo_root)
+            add_result = subprocess.run(
+                ["git", "add", git_rel],
+                cwd=repo_root, capture_output=True, text=True
+            )
+            if add_result.returncode == 0:
+                log.append(f"  ✔ git add: {rel_path}")
+                staged.append(git_rel)
+            else:
+                log.append(f"  ✘ git add failed for {rel_path}: {add_result.stderr.strip()}")
+
+        if not staged:
+            return False, "\n".join(log) + "\n✘ No files staged — commit skipped."
+
+        # Commit
+        commit_result = subprocess.run(
+            ["git", "commit", "-m", commit_msg or "update files"],
+            cwd=repo_root, capture_output=True, text=True
+        )
+        if commit_result.returncode == 0:
+            log.append(f'  ✔ git commit -m "{commit_msg}"')
+            log.append(f"  {commit_result.stdout.strip()}")
+            return True, "\n".join(log)
+        else:
+            err = (commit_result.stderr or commit_result.stdout).strip()
+            log.append(f"  ✘ git commit failed: {err}")
+            return False, "\n".join(log)
+
+    except FileNotFoundError:
+        return False, "✘ git executable not found. Is git installed and on PATH?"
+    except Exception as ex:
+        return False, f"✘ Git error: {ex}"
 
 
 # ── TOKEN OPTIMIZATION LOGIC ──────────────────────────────────────────────────
@@ -4112,6 +4184,24 @@ class DiffPreviewDialog(QDialog):
         if hasattr(self.parent(), 'result_out'):
             self.parent().result_out.setPlainText("\n".join(results))
 
+        # Run git add + commit for successfully merged files if auto-git is enabled
+        if (successful_indices and
+                hasattr(self.parent(), 'chk_git') and
+                self.parent().chk_git.isChecked()):
+            changed_files = [self.changes[i]["file"] for i in successful_indices]
+            # Collect commit message from parent's parsed commit msg
+            commit_msg = getattr(self.parent(), '_parsed_commit_msg', '') or "update files"
+            git_ok, git_log = _git_add_and_commit(self.root, changed_files, commit_msg)
+            extra = ["\n── Git ──", git_log]
+            if git_ok:
+                extra.append("✔ Committed. Run  git push  when ready.")
+            else:
+                extra.append("⚠ Git step failed — files are saved, commit manually.")
+            if hasattr(self.parent(), 'result_out'):
+                self.parent().result_out.setPlainText(
+                    "\n".join(results) + "\n" + "\n".join(extra)
+                )
+
         # Remove UI cards for successful merges
         for orig_idx in sorted(successful_indices, reverse=True):
             group_widget = self.groups[orig_idx]
@@ -4173,8 +4263,9 @@ class MergeTab(QWidget):
                     data = {}
         except Exception:
             data = {}
-        data['backup']  = self.chk_backup.isChecked()
-        data['preview'] = self.chk_preview.isChecked()
+        data['backup']   = self.chk_backup.isChecked()
+        data['preview']  = self.chk_preview.isChecked()
+        data['auto_git'] = self.chk_git.isChecked()
         _write_json_if_changed(SETTINGS_PATH, data)
 
     def _load_prefs(self):
@@ -4186,10 +4277,13 @@ class MergeTab(QWidget):
                 if isinstance(data, dict):
                     self.chk_backup.blockSignals(True)
                     self.chk_preview.blockSignals(True)
-                    if 'backup'  in data: self.chk_backup.setChecked(data['backup'])
-                    if 'preview' in data: self.chk_preview.setChecked(data['preview'])
+                    self.chk_git.blockSignals(True)
+                    if 'backup'   in data: self.chk_backup.setChecked(data['backup'])
+                    if 'preview'  in data: self.chk_preview.setChecked(data['preview'])
+                    if 'auto_git' in data: self.chk_git.setChecked(data['auto_git'])
                     self.chk_backup.blockSignals(False)
                     self.chk_preview.blockSignals(False)
+                    self.chk_git.blockSignals(False)
         except Exception as e:
             print(f"Error loading prefs: {e}", file=sys.stderr)
 
@@ -4214,10 +4308,19 @@ class MergeTab(QWidget):
         self.chk_backup.setChecked(True)
         self.chk_preview = QCheckBox("Preview changes before applying")
         self.chk_preview.setChecked(True)
+        self.chk_git = QCheckBox("Auto git add + commit after merge")
+        self.chk_git.setChecked(False)
+        self.chk_git.setToolTip(
+            "After a successful merge, stage only the changed files (git add)\n"
+            "and create a commit inside the project root.\n"
+            "The full repo is NOT touched — only files within this root."
+        )
         self.chk_backup.toggled.connect(self._save_prefs)
         self.chk_preview.toggled.connect(self._save_prefs)
+        self.chk_git.toggled.connect(self._save_prefs)
         opt_row.addWidget(self.chk_backup)
         opt_row.addWidget(self.chk_preview)
+        opt_row.addWidget(self.chk_git)
         opt_row.addStretch()
         layout.addLayout(opt_row)
 
@@ -4299,8 +4402,21 @@ class MergeTab(QWidget):
 
             if ok > 0:
                 commit_msg = self._parsed_commit_msg or "update files"
-                results.append("\nSuggested Git Commit Command:")
-                results.append(f'git commit -m "{commit_msg}"')
+                if self.chk_git.isChecked():
+                    changed_files = [
+                        ch["file"] for ch, r in zip(self._pending_changes, results)
+                        if r.startswith("✔")
+                    ]
+                    git_ok, git_log = _git_add_and_commit(root, changed_files, commit_msg)
+                    results.append("\n── Git ──")
+                    results.append(git_log)
+                    if git_ok:
+                        results.append("✔ Committed. Run  git push  when ready.")
+                    else:
+                        results.append("⚠ Git step failed — files are saved, commit manually.")
+                else:
+                    results.append("\nSuggested Git Commit Command:")
+                    results.append(f'git commit -m "{commit_msg}"')
 
             self.result_out.setPlainText('\n'.join(results))
             self.status_cb(f"Done — {ok} applied, {err} failed")
