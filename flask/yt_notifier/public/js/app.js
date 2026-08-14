@@ -163,8 +163,22 @@ const POPUP_PAGES = {
         <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">Add Channel</button>
       </form>`,
     body: `
-      <div id="channelList" class="space-y-3">
-        <p class="text-slate-600 text-sm">Loading...</p>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between gap-3 pb-2 border-b border-slate-800/70">
+          <span id="channelCountLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-400">Subscribed Channels</span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium hidden sm:inline"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>Sort by:</span>
+            <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-xs text-slate-200 outline-none focus:border-red-500 transition">
+              <option value="recent">Recent Uploads</option>
+              <option value="name">Channel Name (A-Z)</option>
+              <option value="category">Folder / Category</option>
+              <option value="inactive">Most Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div id="channelList" class="space-y-3">
+          <p class="text-slate-600 text-sm">Loading...</p>
+        </div>
       </div>`,
   },
   stats: {
@@ -752,6 +766,37 @@ window.deleteChannel = async function deleteChannel(channelId) {
   }
 };
 
+let currentChannelSort = localStorage.getItem("channelSort") || "recent";
+
+window.changeChannelSort = async function changeChannelSort(sortMethod) {
+  currentChannelSort = sortMethod;
+  localStorage.setItem("channelSort", sortMethod);
+  await renderChannels({ refreshNav: false });
+};
+
+function sortChannelsList(channels, sortMethod) {
+  const list = [...channels];
+  if (sortMethod === "name") {
+    list.sort((a, b) => a.channelName.localeCompare(b.channelName));
+  } else if (sortMethod === "category") {
+    list.sort((a, b) => (a.category || "zzz").localeCompare(b.category || "zzz") || a.channelName.localeCompare(b.channelName));
+  } else if (sortMethod === "inactive") {
+    list.sort((a, b) => {
+      if (!a.lastUpload) return -1;
+      if (!b.lastUpload) return 1;
+      return a.lastUpload.localeCompare(b.lastUpload);
+    });
+  } else {
+    // "recent" (default)
+    list.sort((a, b) => {
+      if (!a.lastUpload) return 1;
+      if (!b.lastUpload) return -1;
+      return b.lastUpload.localeCompare(a.lastUpload);
+    });
+  }
+  return list;
+}
+
 async function renderChannels({ refreshNav = true } = {}) {
   const [channels, categories, settings, unread] = await Promise.all([
     callConvex("query", "channels:list"),
@@ -763,8 +808,17 @@ async function renderChannels({ refreshNav = true } = {}) {
 
   const list = document.getElementById("channelList");
   if (!list) return;
-  list.innerHTML = channels.length
-    ? channels.map((channel) => channelRow(channel, categories)).join("")
+
+  const sortedChannels = sortChannelsList(channels, currentChannelSort);
+
+  const sortSelect = document.getElementById("channelSortSelect");
+  if (sortSelect) sortSelect.value = currentChannelSort;
+
+  const countLabel = document.getElementById("channelCountLabel");
+  if (countLabel) countLabel.textContent = `${channels.length} Subscribed Channel${channels.length === 1 ? "" : "s"}`;
+
+  list.innerHTML = sortedChannels.length
+    ? sortedChannels.map((channel) => channelRow(channel, categories)).join("")
     : '<p class="text-slate-600 text-sm">No channels yet. Add your first one above!</p>';
 }
 
