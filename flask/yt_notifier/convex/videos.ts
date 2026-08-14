@@ -4,9 +4,10 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 export const list = query({
   args: {
     category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts")),
+    subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"))),
     folder: v.optional(v.string()),
   },
-  handler: async (ctx, { category, folder }) => {
+  handler: async (ctx, { category, subCategory, folder }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -48,11 +49,14 @@ export const list = query({
     );
 
     let q = ctx.db.query("videos").withIndex("by_published").order("desc");
-    if (category === "unseen") {
+
+    const effectiveCategory = category === "shorts" ? (subCategory || "all") : category;
+
+    if (effectiveCategory === "unseen") {
       q = q.filter((f) => f.eq(f.field("isNew"), true));
-    } else if (category === "seen") {
+    } else if (effectiveCategory === "seen") {
       q = q.filter((f) => f.eq(f.field("isNew"), false));
-    } else if (category === "favorites") {
+    } else if (effectiveCategory === "favorites") {
       q = q.filter((f) => f.eq(f.field("isFavorite"), true));
     }
 

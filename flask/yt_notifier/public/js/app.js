@@ -262,9 +262,26 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder = "" } = {}) {
+function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
+
+  const isShorts = category === "shorts";
+  const activeFilterId = isShorts ? subCategory : category;
+
+  const filterItems = isShorts ? [
+    { id: "all", label: "All Shorts", icon: "fa-border-all" },
+    { id: "unseen", label: "Unseen Shorts", icon: "fa-eye-slash" },
+    { id: "seen", label: "Seen Shorts", icon: "fa-eye" },
+    { id: "favorites", label: "Saved Shorts", icon: "fa-star text-amber-400" },
+  ] : [
+    { id: "all", label: "All Videos", icon: "fa-border-all" },
+    { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
+    { id: "seen", label: "Seen", icon: "fa-eye" },
+    { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
+    { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" },
+  ];
+
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -278,31 +295,25 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", folder
           <div id="headerFolderPills" class="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <a href="index.html" class="nav-link ${PAGE === "feed" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
+          <a href="index.html" class="nav-link ${PAGE === "feed" && !isShorts ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" && !isShorts ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
             <i class="fa-solid fa-bell"></i>
             ${unreadCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${unreadCount}</span>` : ""}
           </a>
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
-            <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(category)}" aria-label="Filter: ${esc(category)}">
+            <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(activeFilterId)}" aria-label="Filter: ${esc(activeFilterId)}">
               <i class="fa-solid fa-filter"></i>
             </button>
-            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-36 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
-              <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">Filter Feed</div>
-              ${(showSeen ? [
-                { id: "all", label: "All Videos", icon: "fa-border-all" },
-                { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
-                { id: "seen", label: "Seen", icon: "fa-eye" },
-                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
-                { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" }
-              ] : [
-                { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
-                { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
-                { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" }
-              ]).map((item) => {
-                const isActive = item.id === category;
+            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-40 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+              <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">${isShorts ? "Filter Shorts" : "Filter Feed"}</div>
+              ${filterItems.map((item) => {
+                const isActive = item.id === activeFilterId;
+                const folderParam = folder ? `&folder=${encodeURIComponent(folder)}` : "";
+                const linkHref = isShorts
+                  ? `?category=shorts&subCategory=${item.id}${folderParam}`
+                  : `?category=${item.id}${folderParam}`;
                 return `
-                <a href="?category=${item.id}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${isActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+                <a href="${linkHref}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${isActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
                   <i class="fa-solid ${item.icon} w-3.5 text-center text-xs"></i>
                   <span>${esc(item.label)}</span>
                 </a>`;
@@ -563,17 +574,29 @@ window.markAllSeen = async function markAllSeen() {
 async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
   const settings = await callConvex("query", "settings:get");
-  const urlCategory = urlParams.get("category") || (settings ? "all" : "unseen");
+  const urlCategory = urlParams.get("category") || "all";
+  const urlSubCategory = urlParams.get("subCategory") || "all";
   const folder = urlParams.get("folder") || "";
 
   const [videos, unread, categories] = await Promise.all([
-    callConvex("query", "videos:list", { category: urlCategory, folder: folder || undefined }),
+    callConvex("query", "videos:list", {
+      category: urlCategory,
+      subCategory: urlSubCategory || undefined,
+      folder: folder || undefined,
+    }),
     callConvex("query", "videos:unreadCount", { folder: folder || undefined }),
     callConvex("query", "channels:categories"),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings, category: urlCategory, folder });
 
-  renderFolderPills(categories, folder, urlCategory);
+  renderNav({
+    unreadCount: unread,
+    showSeen: settings,
+    category: urlCategory,
+    subCategory: urlSubCategory,
+    folder,
+  });
+
+  renderFolderPills(categories, folder, urlCategory, urlSubCategory);
 
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
@@ -594,20 +617,22 @@ async function renderFeed() {
   }
 }
 
-function renderFolderPills(categories, currentFolder, currentCategory) {
+function renderFolderPills(categories, currentFolder, currentCategory, currentSubCategory = "all") {
   const oldBar = document.getElementById("folderPillsBar");
   if (oldBar) oldBar.remove();
 
   const container = document.getElementById("headerFolderPills");
   if (!container) return;
 
-  const allUrl = `?category=${currentCategory}`;
+  const subParam = currentCategory === "shorts" && currentSubCategory ? `&subCategory=${currentSubCategory}` : "";
+
+  const allUrl = `?category=${currentCategory}${subParam}`;
   const naActive = currentFolder.toUpperCase() === "N/A" || currentFolder.toLowerCase() === "uncategorized";
-  const naUrl = `?category=${currentCategory}&folder=N%2FA`;
+  const naUrl = `?category=${currentCategory}${subParam}&folder=N%2FA`;
 
   const categoryPillsHtml = (categories || []).map((cat) => {
     const active = currentFolder.toLowerCase() === cat.toLowerCase();
-    const catUrl = `?category=${currentCategory}&folder=${encodeURIComponent(cat)}`;
+    const catUrl = `?category=${currentCategory}${subParam}&folder=${encodeURIComponent(cat)}`;
     return `<a href="${catUrl}" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition ${active ? "bg-red-600 text-white shadow" : "bg-slate-800/90 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700"}">${esc(cat)}</a>`;
   }).join("");
 
