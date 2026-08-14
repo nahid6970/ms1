@@ -879,13 +879,13 @@ function renderHeatmap(data, days) {
     const cells = stat.dailyCounts
       .map((count, i) => {
         const cls = count === 0
-          ? "bg-slate-800/80"
+          ? "bg-slate-900/60 border border-slate-800/60 text-slate-600"
           : count === 1
-            ? "bg-red-900"
+            ? "bg-slate-800 border border-slate-700 text-red-400 font-bold"
             : count === 2
-              ? "bg-red-700"
-              : "bg-red-500";
-        return `<div class="h-4 min-w-4 rounded-sm ${cls} ring-1 ring-slate-950/40" title="${dayLabel(days[i])}: ${count} uploads"></div>`;
+              ? "bg-red-950/80 border border-red-800 text-red-300 font-bold"
+              : "bg-red-900/90 border border-red-700 text-red-200 font-extrabold";
+        return `<div class="h-6 min-w-6 rounded flex items-center justify-center text-[10px] ${cls}" title="${dayLabel(days[i])}: ${count} uploads">${count > 0 ? count : "-"}</div>`;
       })
       .join("");
     return `
@@ -903,16 +903,11 @@ function renderHeatmap(data, days) {
     <section class="border-t border-slate-800 pt-6">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 class="text-sm font-semibold text-white">Upload Activity</h3>
+          <h3 class="text-sm font-semibold text-white">Daily Upload Activity</h3>
           <p class="text-xs text-slate-500">${esc(monthLabels[0])} to ${esc(monthLabels[monthLabels.length - 1])}</p>
         </div>
-        <div class="flex items-center gap-2 text-[10px] uppercase tracking-wide text-slate-500">
-          <span>Less</span>
-          <span class="h-3 w-3 rounded-sm bg-slate-800"></span>
-          <span class="h-3 w-3 rounded-sm bg-red-900"></span>
-          <span class="h-3 w-3 rounded-sm bg-red-700"></span>
-          <span class="h-3 w-3 rounded-sm bg-red-500"></span>
-          <span>More</span>
+        <div class="text-xs text-slate-400 font-medium">
+          <span>Numbers show daily upload count per day</span>
         </div>
       </div>
       <div class="rounded-lg border border-slate-800 bg-slate-950/45 px-4 py-2">
