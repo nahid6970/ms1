@@ -3278,32 +3278,10 @@ class PrepTab(QWidget):
         grp_files = QGroupBox("SOURCE FILES")
         vf = QVBoxLayout(grp_files)
 
-        # Path Label + Top Action Buttons Row (Clear & Toggle All)
+        # Top Action Buttons Row
         top_bar = QHBoxLayout()
         top_bar.setContentsMargins(0, 0, 0, 0)
         top_bar.setSpacing(4)
-
-        self.project_path_lbl = QLabel("<not set>")
-        self.project_path_lbl.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
-        self.project_path_lbl.setStyleSheet(
-            "color: lightgreen; font-size: 9pt; font-family: 'Consolas';"
-        )
-        self.project_path_lbl.setWordWrap(False)
-        self.project_path_lbl.setToolTip("Choose a directory to use as the project root")
-
-        btn_open_folder = QPushButton("📂")
-        btn_open_folder.setFixedHeight(22)
-        btn_open_folder.setFixedWidth(28)
-        btn_open_folder.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_open_folder.setToolTip("Open active project root folder in File Manager")
-        btn_open_folder.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; color: {CP_YELLOW};
-                font-size: 9pt; padding: 2px;
-            }}
-            QPushButton:hover {{ border-color: {CP_YELLOW}; background-color: #2a2a2a; }}
-        """)
-        btn_open_folder.clicked.connect(self._open_project_folder)
 
         self.btn_ext_filter = QPushButton("🏷️ EXTS ▾")
         self.btn_ext_filter.setFixedHeight(22)
@@ -3343,8 +3321,6 @@ class PrepTab(QWidget):
         """)
         btn_all_en.clicked.connect(self._toggle_all)
 
-        top_bar.addWidget(self.project_path_lbl, 1)
-        top_bar.addWidget(btn_open_folder, 0)
         top_bar.addWidget(self.btn_ext_filter, 0)
         top_bar.addWidget(btn_clear, 0)
         top_bar.addWidget(btn_all_en, 0)
