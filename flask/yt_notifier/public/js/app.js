@@ -657,8 +657,9 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
   const categoryOptionsHtml = (categories || []).map((cat) => {
     const active = currentFolder.toLowerCase() === cat.toLowerCase();
     const catUrl = `?category=${currentCategory}${subParam}&folder=${encodeURIComponent(cat)}`;
-    return `<a href="${catUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${active ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
-      <span>📁 ${esc(cat)}</span>
+    return `<a href="${catUrl}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${active ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+      <i class="fa-solid fa-folder text-xs ${active ? "text-red-400" : "text-slate-400"}"></i>
+      <span>${esc(cat)}</span>
     </a>`;
   }).join("");
 
@@ -669,14 +670,15 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
         <span class="whitespace-nowrap">${esc(displayLabel)}</span>
         <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 ml-0.5"></i>
       </button>
-      <div id="folderDropdownMenu" class="hidden absolute left-0 top-full mt-1.5 w-40 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
-        <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">Folders</div>
-        <a href="${allUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${!currentFolder ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+      <div id="folderDropdownMenu" class="hidden absolute left-0 top-full mt-1.5 w-36 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+        <a href="${allUrl}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${!currentFolder ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+          <i class="fa-solid fa-folder text-xs ${!currentFolder ? "text-red-400" : "text-slate-400"}"></i>
           <span>All Folders</span>
         </a>
         ${categoryOptionsHtml}
-        <a href="${naUrl}" class="flex items-center gap-2 px-3 py-2 text-xs font-medium transition ${naActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}" title="Uncategorized channels">
-          <span>N/A (Uncategorized)</span>
+        <a href="${naUrl}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${naActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}" title="N/A">
+          <i class="fa-solid fa-folder text-xs ${naActive ? "text-red-400" : "text-slate-400"}"></i>
+          <span>N/A</span>
         </a>
       </div>
     </div>`;
