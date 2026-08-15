@@ -129,6 +129,14 @@ export const heatmap = query({
 
     const filteredVideos = rawVideos.length - visiblePeriodVideos.length;
 
+    const totalVideosInDb = rawAllVideos.length;
+    const unseenVideosInDb = rawAllVideos.filter((v) => v.isNew).length;
+    const seenVideosInDb = totalVideosInDb - unseenVideosInDb;
+    const favoriteVideosInDb = rawAllVideos.filter((v) => v.isFavorite).length;
+
+    const estimatedDbBytes = totalVideosInDb * 1200 + channels.length * 800;
+    const estimatedDbMb = Math.round((estimatedDbBytes / (1024 * 1024)) * 100) / 100;
+
     const todayStr = new Date().toISOString().slice(0, 10);
     const todayQuotaRow = await ctx.db
       .query("apiQuota")
@@ -155,6 +163,17 @@ export const heatmap = query({
         unseenVisible,
         filteredVideos,
         filteredChannels,
+      },
+      convexDb: {
+        totalVideosInDb,
+        unseenVideosInDb,
+        seenVideosInDb,
+        favoriteVideosInDb,
+        totalChannels: channels.length,
+        enabledChannels: enabledChannels.length,
+        estimatedDbMb,
+        freeTierMbLimit: 1000,
+        percentStorageUsed: Math.min(100, Math.round((estimatedDbMb / 1000) * 10000) / 100),
       },
       quota: {
         todayUnits: todayQuotaUnits,

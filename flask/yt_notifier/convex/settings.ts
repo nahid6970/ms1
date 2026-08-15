@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalQuery, mutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 
 const SHOW_SEEN_KEY = "show_seen";
 const HIDE_SHORTS_KEY = "hide_shorts";
@@ -102,7 +102,7 @@ export const recordQuotaUsage = internalMutation({
     const today = new Date().toISOString().slice(0, 10);
     const existing = await ctx.db
       .query("apiQuota")
-      .withIndex("by_day", (q) => q.eq("key", today))
+      .withIndex("by_day", (q: any) => q.eq("day", today))
       .first();
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -118,4 +118,3 @@ export const recordQuotaUsage = internalMutation({
     }
   },
 });
-
