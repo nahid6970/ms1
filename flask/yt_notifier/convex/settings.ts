@@ -93,3 +93,29 @@ export const youtubeDataApiKey = internalQuery({
       : null;
   },
 });
+
+export const recordQuotaUsage = internalMutation({
+  args: {
+    units: v.number(),
+  },
+  handler: async (ctx, { units }) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const existing = await ctx.db
+      .query("apiQuota")
+      .withIndex("by_day", (q) => q.eq("key", today))
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        units: existing.units + units,
+        requests: existing.requests + 1,
+      });
+    } else {
+      await ctx.db.insert("apiQuota", {
+        day: today,
+        units,
+        requests: 1,
+      });
+    }
+  },
+});
+

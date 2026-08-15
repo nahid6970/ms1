@@ -36,4 +36,10 @@ export default defineSchema({
     key: v.string(),
     value: v.any(),
   }).index("by_key", ["key"]),
+
+  apiQuota: defineTable({
+    day: v.string(),
+    units: v.number(),
+    requests: v.number(),
+  }).index("by_day", ["day"]),
 });

@@ -127,6 +127,22 @@ export const heatmap = query({
       return String(b.lastUpload ?? "").localeCompare(String(a.lastUpload ?? ""));
     });
 
+    const filteredVideos = rawVideos.length - visiblePeriodVideos.length;
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayQuotaRow = await ctx.db
+      .query("apiQuota")
+      .withIndex("by_day", (q) => q.eq("day", todayStr))
+      .first();
+
+    const allQuotaRows = await ctx.db.query("apiQuota").collect();
+    const totalQuotaUnits = allQuotaRows.reduce((acc, row) => acc + (row.units ?? 0), 0);
+    const totalQuotaRequests = allQuotaRows.reduce((acc, row) => acc + (row.requests ?? 0), 0);
+
+    const todayQuotaUnits = todayQuotaRow?.units ?? 0;
+    const todayQuotaRequests = todayQuotaRow?.requests ?? 0;
+    const dailyQuotaLimit = 10000;
+
     return {
       days: dayStrs,
       channels: result,
@@ -137,8 +153,17 @@ export const heatmap = query({
         disabledChannels: channels.length - enabledChannels.length,
         uploadsInPeriod: visiblePeriodVideos.length,
         unseenVisible,
-        hiddenByFilters,
+        filteredVideos,
         filteredChannels,
+      },
+      quota: {
+        todayUnits: todayQuotaUnits,
+        todayRequests: todayQuotaRequests,
+        todayPercent: Math.min(100, Math.round((todayQuotaUnits / dailyQuotaLimit) * 10000) / 100),
+        remainingToday: Math.max(0, dailyQuotaLimit - todayQuotaUnits),
+        limit: dailyQuotaLimit,
+        totalUnits: totalQuotaUnits,
+        totalRequests: totalQuotaRequests,
       },
       channelSummaries,
     };

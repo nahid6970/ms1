@@ -1016,11 +1016,12 @@ function renderStatsSummary(data) {
   const container = document.getElementById("statsSummary");
   if (!container) return;
   const summary = data.summary || {};
+  const quota = data.quota || { todayUnits: 0, limit: 10000, todayPercent: 0, remainingToday: 10000, totalUnits: 0, totalRequests: 0 };
   const cards = [
     ["Uploads", summary.uploadsInPeriod ?? 0, "fa-video"],
     ["Unseen", summary.unseenVisible ?? 0, "fa-bell"],
     ["Active", summary.activeChannels ?? 0, "fa-signal"],
-    ["Hidden", summary.hiddenByFilters ?? 0, "fa-filter"],
+    ["Filtered", summary.filteredVideos ?? summary.hiddenByFilters ?? 0, "fa-filter"],
   ];
   container.innerHTML = `
     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -1039,6 +1040,19 @@ function renderStatsSummary(data) {
       <span>${esc(summary.disabledChannels ?? 0)} disabled channels</span>
       <span>&bull;</span>
       <span>${esc(summary.filteredChannels ?? 0)} channels with filters</span>
+    </div>
+    <div class="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+      <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+        <span><i class="fa-brands fa-youtube text-red-500 mr-1.5"></i>YouTube Data API v3 Quota Tracker</span>
+        <span class="text-slate-300 font-bold">${quota.todayUnits.toLocaleString()} / ${quota.limit.toLocaleString()} Units Today (${quota.todayPercent}%)</span>
+      </div>
+      <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
+        <div class="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-500" style="width: ${Math.max(1, quota.todayPercent)}%;"></div>
+      </div>
+      <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+        <span>Remaining Today: <strong class="text-emerald-400">${quota.remainingToday.toLocaleString()} Units</strong></span>
+        <span>Total All-Time Quota Used: <strong class="text-white">${quota.totalUnits.toLocaleString()} Units</strong> (${quota.totalRequests.toLocaleString()} requests)</span>
+      </div>
     </div>`;
 }
 

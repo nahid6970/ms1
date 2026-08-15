@@ -65,6 +65,9 @@ export const refreshChannel = action({
       channelId,
       entries,
     });
+    if (apiKey) {
+      await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });
+    }
     return {
       channelId,
       channelName: feed.title,
@@ -144,6 +147,8 @@ export const fetchMoreChannelVideos = action({
       channelId,
       entries,
     });
+
+    await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });
 
     return {
       channelId,
