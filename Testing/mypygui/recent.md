@@ -22,14 +22,20 @@ All in `mypygui_qt.py`:
 - Right-click power menu `_show_git_menu`: Commit&Push, Pull, Push, Stash, Pop, Discard, Force Push (overwrite remote), Force Pull (overwrite local), Force Checkout (lazygit-F style, discards edits keeps commits), Delete Lock Files, Status&Diff, lazygit, GitHub, Switch Branch, Set/Reset Branch Dot Color.
 - Branch indicator `GitIconLabel`: dot (bottom-right) or underline (Settings → BRANCH INDICATOR), colored via `branch_color` (config override → fixed palette → hash).
 - **NEW Git right-click mode** (Settings → GIT STATUS COLORS → RIGHT CLICK): `Context Menu` (code default) or `Lazygit`. Config key `git_right_click`; when `lazygit`, right-clicking a repo label opens lazygit directly instead of the power menu (Ctrl+Right-click still = git restore).
-- Rich-text tooltip: status-colored files (A green, M yellow, D pink, ?? red, R/C cyan, U magenta) + `● branch` in its assigned color.
+- **FIX: Komorebi tasklist font & Bangla text layout alignment**:
+  - `_menu_rich_action()`: set `lbl.setFixedHeight(22)` and `Qt.AlignmentFlag.AlignVCenter` to guarantee uniform 22px row height and centered baseline regardless of script fallbacks.
+  - Set font family stack to `'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif` across `_menu_rich_action` and `_tip_label`.
+  - Replaced space-padding hacks (`&nbsp;`) in `KomorebiAppsWidget.apply_state` hover tooltip with clean block `<div style="margin-left: Npx;">` elements to preserve item indentation across Bangla titles and mixed script items.
+- **NEW Configurable Komorebi Item Indent**:
+  - Added **ITEM INDENT (PX)** in Settings Dialog (`⚙`) under new `KOMOREBI` group box (saves `komorebi_item_indent` to `mypygui_config.json`, default 20px).
+  - Dynamically configures left padding in `_menu_rich_action` and `margin-left` in `KomorebiAppsWidget` hover tooltips.
 
 ## 3. Critical Context
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).
 - `_GIT_SYNC_PS` = adjacent Python literals + `.replace("{path}", ...)` (not an f-string → braces literal).
 - Native Qt tooltips need window focus here → custom `_TipFilter` + always-on-top `_tip_label` (`Qt.ToolTip`, WA_ShowWithoutActivating); git labels + komorebi widget/labels/buttons carry `_tip_text`.
 - Komorebi layout label maps names via `_komorebi_layout_short` (BSP/COL/ROW/VSTK/HSTK/ULTW/GRID/RMAIN); shows ⏸ when paused; `focused_layout` reported separately so layout shows even when focused workspace is beyond the 3 visible dots.
-- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`.
+- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`.
 - Komorebi config write path: `~/komorebi.json` (0.1.41, pretty-printed 4-space CRLF, NO trailing newline). `workspace_rules` per workspace = array of {kind, id, matching_strategy} — same shape as `ignore_rules`. Rules apply to apps started AFTER the rule is saved (komorebi applies at window-manage time).
 - File is CRLF; multi-line edits are safest via temp fix scripts.
 
