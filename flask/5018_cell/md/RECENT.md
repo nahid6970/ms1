@@ -1,5 +1,46 @@
 # Recent Development Log
 
+## [2026-08-15 20:15] - Fixed Paste Newline Collapse Issue
+
+**Session Duration:** 0.5 hours
+
+**What We Accomplished:**
+
+### ✅ Paste Multi-Line Content Fix
+- Fixed critical issue where pasting multi-line text into cells collapsed all newlines into a single line
+- Root cause: Cells without markdown were rendered as `<input>` elements (single-line only) instead of `<textarea>`
+- When multi-line text was pasted into `<input>`, browsers automatically converted `\n` to spaces
+
+### 🎯 Input Element Paste Handler
+- Added `input.onpaste` event handler in `renderTable()` function
+- Detects when pasted content contains newlines
+- Prevents default paste behavior
+- Updates cell value with multi-line text
+- Triggers re-render to convert `<input>` → `<textarea>`
+- Refocuses the new textarea with cursor positioned after pasted content
+
+### 🎯 ContentEditable Paste Handler
+- Added `preview.addEventListener('paste')` in `applyMarkdownFormatting()` function
+- Handles paste in markdown edit mode (contentEditable)
+- Manually splits pasted text by newlines and inserts as text nodes with `<br>` elements
+- Preserves newlines consistently across all browsers
+- Uses zero-width space for empty lines to maintain line structure
+
+**Files Modified:**
+- `static/script.js` — added paste handlers for both input and contentEditable elements
+- `md/PROBLEMS_AND_FIXES.md` — documented the issue, root cause, and solution
+
+**Current Status:**
+- ✅ Multi-line paste works in simple cells (input → textarea conversion)
+- ✅ Multi-line paste works in markdown edit mode (contentEditable)
+- ✅ Newlines preserved from any paste source (clipboard, text editor, etc.)
+- ✅ Cursor positioning after paste works correctly
+
+**Known Issues:**
+- None
+
+---
+
 ## [2026-07-09 20:49] - F10 Hover Formatter Selection Highlight
 
 **Session Duration:** 0.5 hours
