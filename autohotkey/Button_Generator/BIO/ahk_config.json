@@ -133,6 +133,15 @@
                     "text_color": "000000",
                     "action": "send_text",
                     "trigger": "click"
+                },
+                {
+                    "label": "PA Bangla",
+                    "text": "\u0997\u09cd\u09b0\u09be\u09ae: \u09ae\u09c1\u09a8\u09cd\u09b8\u09c0\u09ac\u09be\u09a1\u09bc\u09c0, \u09a1\u09be\u0995\u0998\u09b0: \u09b0\u09be\u09a7\u09be\u09aa\u09c1\u09b0, \u09ef \u09a8\u0982 \u0993\u09af\u09bc\u09be\u09b0\u09cd\u09a1, \u099c\u09c7\u09b2\u09be: \u09b2\u0995\u09cd\u09b7\u09cd\u09ae\u09c0\u09aa\u09c1\u09b0, \u09aa\u09cb\u09b8\u09cd\u099f \u0995\u09cb\u09a1: \u09e9\u09ed\u09e6\u09ec",
+                    "svg_code": "",
+                    "color": "00CCFF",
+                    "text_color": "000000",
+                    "action": "send_text",
+                    "trigger": "click"
                 }
             ]
         },
