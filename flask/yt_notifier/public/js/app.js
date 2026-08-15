@@ -661,7 +661,7 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, channelId, urlCategory, folder, urlSubCategory);
+  renderChannelAvatarsBar(channels, videos, channelId, urlCategory, folder, urlSubCategory);
 
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
@@ -727,7 +727,7 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
     </div>`;
 }
 
-function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all") {
+function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all") {
   let bar = document.getElementById("channelAvatarsBar");
   if (!channels || !channels.length) {
     if (bar) bar.remove();
@@ -741,13 +741,23 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
     if (main) main.insertBefore(bar, main.firstChild);
   }
 
-  const enabledChannels = channels.filter((c) => !c.disabled);
+  const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
+  if (activeChannelId) channelIdsWithVideos.add(activeChannelId);
+
+  const activeChannels = channels.filter((c) => !c.disabled && channelIdsWithVideos.has(c.channelId));
+
+  if (!activeChannels.length) {
+    bar.style.display = "none";
+    return;
+  } else {
+    bar.style.display = "flex";
+  }
 
   const folderParam = currentFolder ? `&folder=${encodeURIComponent(currentFolder)}` : "";
   const subParam = currentCategory === "shorts" && currentSubCategory ? `&subCategory=${currentSubCategory}` : "";
   const baseUrl = `?category=${currentCategory}${subParam}${folderParam}`;
 
-  const avatarsHtml = enabledChannels.map((c) => {
+  const avatarsHtml = activeChannels.map((c) => {
     const isActive = activeChannelId === c.channelId;
     const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
