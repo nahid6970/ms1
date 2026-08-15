@@ -640,17 +640,18 @@ async function renderFeed() {
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
 
-  const [videos, unread, categories, channels] = await Promise.all([
+  const [allVideos, unread, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
       folder: folder || undefined,
-      channelId: channelId || undefined,
     }),
     callConvex("query", "videos:unreadCount", { folder: folder || undefined, channelId: channelId || undefined }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
   ]);
+
+  const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
 
   renderNav({
     unreadCount: unread,
@@ -661,7 +662,7 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, videos, channelId, urlCategory, folder, urlSubCategory);
+  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory);
 
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
@@ -742,14 +743,10 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
   bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900/95 border border-slate-800/80 rounded-2xl p-2 px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
 
   const enabledChannels = (channels || []).filter((c) => !c.disabled);
-  const targetFolder = currentFolder?.trim().toLowerCase();
-  const isUncategorized = targetFolder === "n/a" || targetFolder === "uncategorized";
+  const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
+  if (activeChannelId) channelIdsWithVideos.add(activeChannelId);
 
-  const activeChannels = targetFolder
-    ? isUncategorized
-      ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
-      : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder)
-    : enabledChannels;
+  const activeChannels = enabledChannels.filter((c) => channelIdsWithVideos.has(c.channelId));
 
   if (!activeChannels.length) {
     bar.style.display = "none";
