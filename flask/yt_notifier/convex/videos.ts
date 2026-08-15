@@ -6,8 +6,9 @@ export const list = query({
     category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts")),
     subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"))),
     folder: v.optional(v.string()),
+    channelId: v.optional(v.string()),
   },
-  handler: async (ctx, { category, subCategory, folder }) => {
+  handler: async (ctx, { category, subCategory, folder, channelId }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -26,11 +27,15 @@ export const list = query({
     const targetFolder = folder?.trim();
     const isUncategorized = targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
 
-    const filteredChannels = targetFolder
+    let filteredChannels = targetFolder
       ? isUncategorized
         ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
         : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
       : enabledChannels;
+
+    if (channelId) {
+      filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);
+    }
 
     const enabledChannelIds = new Set(
       filteredChannels.map((channel) => channel.channelId),
@@ -117,8 +122,9 @@ export const toggleShort = mutation({
 export const unreadCount = query({
   args: {
     folder: v.optional(v.string()),
+    channelId: v.optional(v.string()),
   },
-  handler: async (ctx, { folder }) => {
+  handler: async (ctx, { folder, channelId }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -132,13 +138,17 @@ export const unreadCount = query({
     const isUncategorized =
       targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
 
-    const filteredChannels = targetFolder
+    let filteredChannels = targetFolder
       ? isUncategorized
         ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
         : enabledChannels.filter(
             (c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase(),
           )
       : enabledChannels;
+
+    if (channelId) {
+      filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);
+    }
 
     const enabledChannelIds = new Set(
       filteredChannels.map((channel) => channel.channelId),

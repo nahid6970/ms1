@@ -638,15 +638,18 @@ async function renderFeed() {
   const urlCategory = urlParams.get("category") || "all";
   const urlSubCategory = urlParams.get("subCategory") || "all";
   const folder = urlParams.get("folder") || "";
+  const channelId = urlParams.get("channelId") || "";
 
-  const [videos, unread, categories] = await Promise.all([
+  const [videos, unread, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
       folder: folder || undefined,
+      channelId: channelId || undefined,
     }),
-    callConvex("query", "videos:unreadCount", { folder: folder || undefined }),
+    callConvex("query", "videos:unreadCount", { folder: folder || undefined, channelId: channelId || undefined }),
     callConvex("query", "channels:categories"),
+    callConvex("query", "channels:list"),
   ]);
 
   renderNav({
@@ -658,6 +661,7 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
+  renderChannelAvatarsBar(channels, channelId, urlCategory, folder, urlSubCategory);
 
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
@@ -722,6 +726,53 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
       </div>
     </div>`;
 }
+
+function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all") {
+  let bar = document.getElementById("channelAvatarsBar");
+  if (!channels || !channels.length) {
+    if (bar) bar.remove();
+    return;
+  }
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "channelAvatarsBar";
+    bar.className = "mb-5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2.5 px-4 backdrop-blur-md";
+    const main = document.querySelector("main");
+    if (main) main.insertBefore(bar, main.firstChild);
+  }
+
+  const enabledChannels = channels.filter((c) => !c.disabled);
+
+  const folderParam = currentFolder ? `&folder=${encodeURIComponent(currentFolder)}` : "";
+  const subParam = currentCategory === "shorts" && currentSubCategory ? `&subCategory=${currentSubCategory}` : "";
+  const baseUrl = `?category=${currentCategory}${subParam}${folderParam}`;
+
+  const avatarsHtml = enabledChannels.map((c) => {
+    const isActive = activeChannelId === c.channelId;
+    const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
+    return `
+      <a href="${catUrl}" class="relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-110 z-30 shadow-lg shadow-red-950/50" : "ring-slate-900 hover:ring-slate-600 hover:scale-105 z-10"} overflow-hidden bg-slate-800 transition-all duration-200 flex-shrink-0" title="${esc(c.channelName)}">
+        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
+      </a>`;
+  }).join("");
+
+  bar.innerHTML = `
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex-shrink-0 mr-1"><i class="fa-solid fa-users text-red-500 mr-1.5"></i>Channels:</span>
+      <div class="flex items-center -space-x-2 hover:space-x-1 overflow-x-auto no-scrollbar py-1 transition-all duration-300">
+        <a href="${baseUrl}" class="relative w-8 h-8 rounded-full ring-2 ${!activeChannelId ? "ring-red-500 bg-red-600 text-white z-30 shadow" : "ring-slate-900 bg-slate-800 text-slate-300 hover:bg-slate-700 z-10"} flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all duration-200" title="All Channels">
+          ALL
+        </a>
+        ${avatarsHtml}
+      </div>
+    </div>
+    ${activeChannelId ? `
+      <a href="${baseUrl}" class="text-xs font-semibold text-slate-400 hover:text-red-400 transition flex-shrink-0 flex items-center gap-1">
+        <i class="fa-solid fa-xmark text-xs"></i> Reset Filter
+      </a>` : ""}
+  `;
+}
+
 
 window.toggleFolderDropdown = function toggleFolderDropdown() {
   const menu = document.getElementById("folderDropdownMenu");
