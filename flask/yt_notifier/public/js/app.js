@@ -751,17 +751,17 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
     const isActive = activeChannelId === c.channelId;
     const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${catUrl}" class="relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-110 z-30 shadow-lg shadow-red-950/60" : "ring-slate-900 hover:ring-slate-600 hover:scale-105 z-10"} overflow-hidden bg-slate-800 transition-all duration-200 flex-shrink-0" title="${esc(c.channelName)}">
-        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
+      <a href="${catUrl}" class="group/avatar relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30 shadow-xl shadow-red-950/80" : "ring-slate-900/90 z-10 hover:z-30 hover:scale-125 hover:-translate-y-1 hover:ring-red-500 hover:shadow-xl hover:shadow-red-950/60"} overflow-hidden bg-slate-800 transition-all duration-300 ease-out flex-shrink-0" title="${esc(c.channelName)}">
+        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-110" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");
 
   bar.innerHTML = `
-    <div class="flex items-center -space-x-2 hover:space-x-1 overflow-x-auto no-scrollbar py-1 transition-all duration-300 min-w-0">
+    <div class="flex items-center -space-x-2.5 py-1.5 min-w-0 transition-all">
       ${avatarsHtml}
     </div>
     ${activeChannelId ? `
-      <a href="${baseUrl}" class="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/90 border border-slate-700/80 text-slate-400 hover:text-white hover:bg-slate-700 transition shadow" title="Clear channel filter">
+      <a href="${baseUrl}" class="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/90 border border-slate-700/80 text-slate-400 hover:text-white hover:bg-slate-700 transition shadow-md" title="Clear channel filter">
         <i class="fa-solid fa-xmark text-xs"></i>
       </a>` : ""}
   `;
