@@ -751,13 +751,13 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
     const isActive = activeChannelId === c.channelId;
     const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${catUrl}" class="group/avatar relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30 shadow-xl shadow-red-950/80" : "ring-slate-900/90 z-10 hover:z-30 hover:scale-125 hover:-translate-y-1 hover:ring-red-500 hover:shadow-xl hover:shadow-red-950/60"} overflow-hidden bg-slate-800 transition-all duration-300 ease-out flex-shrink-0" title="${esc(c.channelName)}">
-        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-110" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
+      <a href="${catUrl}" class="avatar-item overflow-hidden bg-slate-800 ring-2 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30 shadow-xl shadow-red-950/80" : "ring-slate-900/90"}" title="${esc(c.channelName)}">
+        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");
 
   bar.innerHTML = `
-    <div class="flex items-center -space-x-2.5 py-1.5 min-w-0 transition-all">
+    <div class="avatar-stack min-w-0">
       ${avatarsHtml}
     </div>
     ${activeChannelId ? `
