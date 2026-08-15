@@ -2115,7 +2115,7 @@ def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     pad_left = "20px" if indent else "6px"
     lbl.setStyleSheet(
         f"background: transparent; padding: 0px 8px 0px {pad_left};"
-        " font-family: 'Segoe UI', 'Consolas', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt;")
+        " font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt;")
     lbl.setCursor(Qt.CursorShape.PointingHandCursor if not disabled
                    else Qt.CursorShape.ArrowCursor)
     act.setDefaultWidget(lbl)
@@ -2879,7 +2879,7 @@ def _get_tip_label():
         _tip_label.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         _tip_label.setStyleSheet(
             f"QLabel {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};"
-            f" padding: 6px 8px; font-family: 'Segoe UI', 'Consolas', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt; }}"
+            f" padding: 6px 8px; font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt; }}"
         )
         _tip_label.setTextFormat(Qt.TextFormat.RichText)
         _tip_label.hide()
