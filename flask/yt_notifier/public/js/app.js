@@ -75,7 +75,46 @@ function dayLabel(dateStr) {
     : d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
+function trackConvexExecution(endpoint) {
+  try {
+    const raw = localStorage.getItem("convexExecutions") || '{"queries":0,"mutations":0,"actions":0}';
+    const data = JSON.parse(raw);
+    if (endpoint === "query") data.queries = (data.queries || 0) + 1;
+    else if (endpoint === "mutation") data.mutations = (data.mutations || 0) + 1;
+    else if (endpoint === "action") data.actions = (data.actions || 0) + 1;
+    localStorage.setItem("convexExecutions", JSON.stringify(data));
+  } catch (err) {
+    console.error("Exec track error:", err);
+  }
+}
+
+function getConvexExecutions() {
+  try {
+    const raw = localStorage.getItem("convexExecutions") || '{"queries":0,"mutations":0,"actions":0}';
+    const data = JSON.parse(raw);
+    const total = (data.queries || 0) + (data.mutations || 0) + (data.actions || 0);
+    return {
+      queries: data.queries || 0,
+      mutations: data.mutations || 0,
+      actions: data.actions || 0,
+      total,
+      limit: 1000000,
+      percentUsed: Math.min(100, Math.round((total / 1000000) * 10000) / 100),
+    };
+  } catch {
+    return { queries: 0, mutations: 0, actions: 0, total: 0, limit: 1000000, percentUsed: 0 };
+  }
+}
+
+window.resetConvexExecutions = function resetConvexExecutions() {
+  if (confirm("Reset Convex function execution counters?")) {
+    localStorage.removeItem("convexExecutions");
+    if (PAGE === "stats" || isPopupOpen()) renderStats({ refreshNav: false });
+  }
+};
+
 async function callConvex(endpoint, path, args = {}) {
+  trackConvexExecution(endpoint);
   const res = await fetch(`${API_BASE}/api/${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1018,6 +1057,7 @@ function renderStatsSummary(data) {
   const summary = data.summary || {};
   const quota = data.quota || { todayUnits: 0, limit: 10000, todayPercent: 0, remainingToday: 10000, totalUnits: 0, totalRequests: 0 };
   const convexDb = data.convexDb || { totalVideosInDb: 0, unseenVideosInDb: 0, seenVideosInDb: 0, favoriteVideosInDb: 0, estimatedDbMb: 0, percentStorageUsed: 0 };
+  const exec = getConvexExecutions();
   const cards = [
     ["Uploads", summary.uploadsInPeriod ?? 0, "fa-video"],
     ["Unseen", summary.unseenVisible ?? 0, "fa-bell"],
@@ -1042,7 +1082,7 @@ function renderStatsSummary(data) {
       <span>&bull;</span>
       <span>${esc(summary.filteredChannels ?? 0)} channels with filters</span>
     </div>
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
       <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
         <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
           <span><i class="fa-brands fa-youtube text-red-500 mr-1.5"></i>YouTube Data API v3 Quota</span>
@@ -1052,7 +1092,7 @@ function renderStatsSummary(data) {
           <div class="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-500" style="width: ${Math.max(1, quota.todayPercent)}%;"></div>
         </div>
         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          <span>Remaining Today: <strong class="text-emerald-400">${quota.remainingToday.toLocaleString()} Units</strong></span>
+          <span>Remaining: <strong class="text-emerald-400">${quota.remainingToday.toLocaleString()} Units</strong></span>
           <span>All-Time: <strong class="text-white">${quota.totalUnits.toLocaleString()} Units</strong></span>
         </div>
       </div>
@@ -1065,8 +1105,21 @@ function renderStatsSummary(data) {
           <div class="h-full bg-sky-500 transition-all duration-500" style="width: ${Math.max(1, convexDb.percentStorageUsed)}%;"></div>
         </div>
         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          <span>Est. Storage: <strong class="text-sky-300">${convexDb.estimatedDbMb} MB / 1,000 MB</strong></span>
-          <span><strong class="text-red-400">${convexDb.unseenVideosInDb} Unseen</strong> • <strong class="text-slate-300">${convexDb.seenVideosInDb} Seen</strong> • <strong class="text-amber-400">${convexDb.favoriteVideosInDb} Saved</strong></span>
+          <span>Est. Size: <strong class="text-sky-300">${convexDb.estimatedDbMb} MB / 1,000 MB</strong></span>
+          <span><strong class="text-red-400">${convexDb.unseenVideosInDb} Unseen</strong> • <strong class="text-slate-300">${convexDb.seenVideosInDb} Seen</strong></span>
+        </div>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+          <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i>Convex Executions (1M Free/mo)</span>
+          <span class="text-slate-300 font-bold">${exec.total.toLocaleString()} / 1M Calls</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
+          <div class="h-full bg-amber-500 transition-all duration-500" style="width: ${Math.max(1, exec.percentUsed)}%;"></div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
+          <span>Calls: <strong class="text-sky-400">${exec.queries} Q</strong> • <strong class="text-emerald-400">${exec.mutations} M</strong> • <strong class="text-amber-400">${exec.actions} A</strong></span>
+          <button type="button" onclick="resetConvexExecutions()" class="text-[10px] text-slate-500 hover:text-red-400 underline">Reset</button>
         </div>
       </div>
     </div>`;

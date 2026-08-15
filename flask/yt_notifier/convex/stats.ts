@@ -27,8 +27,13 @@ export const heatmap = query({
     const rawVideos = await ctx.db
       .query("videos")
       .withIndex("by_published", (q) => q.gte("published", cutoffIso))
-      .collect();
-    const rawAllVideos = await ctx.db.query("videos").collect();
+      .take(1000);
+
+    const rawAllVideos = await ctx.db
+      .query("videos")
+      .withIndex("by_published")
+      .order("desc")
+      .take(1500);
 
     const videos = hideShorts ? rawVideos.filter((v) => !isShortVideo(v)) : rawVideos;
     const allVideos = hideShorts ? rawAllVideos.filter((v) => !isShortVideo(v)) : rawAllVideos;
@@ -79,7 +84,6 @@ export const heatmap = query({
         total: dailyCounts.reduce((a, b) => a + b, 0),
       });
     }
-    // Most active first
     result.sort((a, b) => b.total - a.total);
 
     const visibleVideos = allVideos.filter(
@@ -92,11 +96,9 @@ export const heatmap = query({
         enabledChannelIds.has(video.channelId) &&
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
     );
-    const unseenVisible = visibleVideos.filter((video) => video.isNew).length;
-    const hiddenByFilters = allVideos.filter((video) => {
-      if (!enabledChannelIds.has(video.channelId)) return false;
-      return !titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []);
-    }).length;
+
+    const unseenVisible = visiblePeriodVideos.filter((video) => video.isNew).length;
+    const filteredVideos = rawVideos.length - visiblePeriodVideos.length;
     const filteredChannels = enabledChannels.filter(
       (channel) => (channel.titleFilters ?? []).length > 0,
     ).length;
@@ -126,8 +128,6 @@ export const heatmap = query({
       if (b.periodCount !== a.periodCount) return b.periodCount - a.periodCount;
       return String(b.lastUpload ?? "").localeCompare(String(a.lastUpload ?? ""));
     });
-
-    const filteredVideos = rawVideos.length - visiblePeriodVideos.length;
 
     const totalVideosInDb = rawAllVideos.length;
     const unseenVideosInDb = rawAllVideos.filter((v) => v.isNew).length;
@@ -211,4 +211,3 @@ function isShortVideo(video: { title: string; link: string; duration?: string; i
   }
   return false;
 }
-
