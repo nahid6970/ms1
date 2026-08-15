@@ -5,6 +5,7 @@ PyQt6 status bar desktop app (`mypygui_qt.py`) for system automation, script mon
 
 ## 2. Latest Implementation
 All in `mypygui_qt.py`:
+- **FIX: komorebi event pipe crash (error 230 "pipe state is invalid")** — pipe was created with `FILE_FLAG_OVERLAPPED` (async mode), but `PeekNamedPipe` only works on synchronous pipes; calling it on an overlapped pipe immediately returns Windows error 230 (`ERROR_BAD_PIPE`), causing connect → instant crash → 5s retry → connect loop. Fix: removed `FILE_FLAG_OVERLAPPED` from `CreateNamedPipe` (now synchronous). The overlapped `ConnectNamedPipe` timeout trick was replaced with a background thread + `join(timeout=5.0)`. `win32event` import removed. Event pipe now stays connected and drives instant workspace updates as intended.
 - **Reverted to komorebi workspace widget** (GlazeWM code removed, commit aedde00f7).
 - KomorebiWidget layout label: left-click opens layout menu; right-click on label suppressed (PreventContextMenu); hover shows layout-only tooltip (e.g. "Layout: BSP") instead of the workspace list; widget/dots hover still shows workspace list.
 - **Menus & tooltips positioned above/below statusbar**: `_menu_gpos(anchor, menu, cursor)` — docked: y = bar_bottom+2 (below), undocked: y = bar_top - menu_height - 2 (above, like popup windows). Used by komorebi layout/apps menus, git menu, and hover tooltips.
@@ -34,3 +35,5 @@ All in `mypygui_qt.py`:
 
 ## 4. Pending Task
 Live-test workspace app rules: right-click a dot → assign an exe → launch it → confirm it opens on that workspace; remove the rule afterwards.
+
+Verify event pipe stays stable after the FILE_FLAG_OVERLAPPED fix (no more error 230 loop in log).

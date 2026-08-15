@@ -1861,7 +1861,7 @@ def _komorebi_event_listener():
     every event. Retries forever in the background; never touches the GUI."""
     global _komorebi_events_ok, _komorebi_listener_warned
     try:
-        import win32pipe, win32file, win32event, pywintypes
+        import win32pipe, win32file, pywintypes
         import uuid
     except ImportError:
         if not _komorebi_listener_warned:
@@ -1873,34 +1873,36 @@ def _komorebi_event_listener():
         proc = None
         try:
             pipe_name = "mypygui-komorebi-" + uuid.uuid4().hex[:8]
+            # No FILE_FLAG_OVERLAPPED — PeekNamedPipe requires a synchronous pipe.
+            # The overlapped flag caused error 230 ("pipe state is invalid") on every
+            # PeekNamedPipe call, causing the listener to immediately crash and retry.
             handle = win32pipe.CreateNamedPipe(
                 "\\\\.\\pipe\\" + pipe_name,
-                win32pipe.PIPE_ACCESS_DUPLEX | win32file.FILE_FLAG_OVERLAPPED,
+                win32pipe.PIPE_ACCESS_DUPLEX,
                 win32pipe.PIPE_TYPE_BYTE | win32pipe.PIPE_READMODE_BYTE | win32pipe.PIPE_WAIT,
                 1, 1024 * 1024, 1024 * 1024, 0, None)
             proc = subprocess.Popen(
                 ["komorebic", "subscribe", pipe_name],
                 creationflags=subprocess.CREATE_NO_WINDOW,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            # Overlapped connect with a hard timeout, so a missing or dying
-            # komorebi can never block this thread forever (works regardless
-            # of whether komorebic subscribe exits after registering).
-            ov = win32file.OVERLAPPED()
-            ov.hEvent = win32event.CreateEvent(None, True, False, None)
-            try:
+            # ConnectNamedPipe blocks until a client connects. Run it in a
+            # thread so we can apply a hard timeout without overlapped I/O.
+            connect_result = [None]
+            def _do_connect():
                 try:
-                    win32pipe.ConnectNamedPipe(handle, ov)
-                except pywintypes.error as e:
-                    if e.winerror == 997:  # ERROR_IO_PENDING → wait for client
-                        if win32event.WaitForSingleObject(ov.hEvent, 5000) != win32event.WAIT_OBJECT_0:
-                            raise RuntimeError("komorebi never connected to the event pipe")
-                    elif e.winerror != 535:  # ERROR_PIPE_CONNECTED → already connected
-                        raise
-            finally:
-                try:
-                    win32event.CloseHandle(ov.hEvent)
-                except Exception:
-                    pass
+                    win32pipe.ConnectNamedPipe(handle, None)
+                    connect_result[0] = True
+                except pywintypes.error as ce:
+                    connect_result[0] = ce
+            ct = threading.Thread(target=_do_connect, daemon=True)
+            ct.start()
+            ct.join(timeout=5.0)
+            if ct.is_alive():
+                raise RuntimeError("komorebi never connected to the event pipe")
+            if isinstance(connect_result[0], pywintypes.error):
+                err = connect_result[0]
+                if err.winerror != 535:  # ERROR_PIPE_CONNECTED → already connected, OK
+                    raise err
             if not _komorebi_events_ok:
                 _komorebi_events_ok = True
                 _komorebi_listener_warned = False
