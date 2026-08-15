@@ -3619,6 +3619,67 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             }
         });
 
+        // Handle paste to preserve newlines
+        preview.addEventListener('paste', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Get plain text from clipboard
+            const text = e.clipboardData.getData('text/plain');
+            
+            if (!text) return;
+            
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            
+            // Split by newlines and insert as text nodes with BR elements
+            const lines = text.split(/\r?\n/);
+            let lastNode = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (i > 0) {
+                    // Insert BR for newline
+                    const br = document.createElement('br');
+                    range.insertNode(br);
+                    range.setStartAfter(br);
+                    range.collapse(true);
+                    lastNode = br;
+                }
+                
+                // Insert text content (even empty lines need representation)
+                const textNode = document.createTextNode(lines[i] || '\u200B'); // Use zero-width space for empty lines
+                range.insertNode(textNode);
+                range.setStartAfter(textNode);
+                range.collapse(true);
+                lastNode = textNode;
+            }
+            
+            // Place cursor at the end of pasted content
+            if (lastNode) {
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            
+            // Update the underlying input value
+            inputElement.value = extractRawText(preview);
+            
+            // Save data
+            const sheet = tableData.sheets[currentSheet];
+            sheet.rows[rowIndex][colIndex] = inputElement.value;
+            clearTimeout(window.autoSaveTimeout);
+            window.autoSaveTimeout = setTimeout(() => saveData(), 1000);
+            
+            // Adjust cell height
+            requestAnimationFrame(() => {
+                adjustCellHeightForMarkdown(cell);
+            });
+        });
+
         // NEW: Standardize line breaks and handle ZWS
         preview.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -10484,6 +10545,38 @@ function renderTable(preserveScroll = true) {
                 };
                 input.onfocus = () => {
                     lastFocusedCell = { row: rowIndex, col: colIndex };
+                };
+                
+                // Handle paste to preserve multi-line content
+                input.onpaste = (e) => {
+                    const pastedText = e.clipboardData.getData('text/plain');
+                    if (pastedText && pastedText.includes('\n')) {
+                        e.preventDefault();
+                        
+                        // Get current value and cursor position
+                        const cursorPos = input.selectionStart;
+                        const beforeCursor = input.value.substring(0, cursorPos);
+                        const afterCursor = input.value.substring(input.selectionEnd);
+                        
+                        // Combine with pasted text
+                        const newValue = beforeCursor + pastedText + afterCursor;
+                        
+                        // Update the cell value
+                        updateCell(rowIndex, colIndex, newValue);
+                        
+                        // Force re-render to convert input to textarea
+                        requestAnimationFrame(() => {
+                            renderTable();
+                            // Try to refocus the cell
+                            const newCell = document.querySelector(`tr:nth-child(${rowIndex + 1}) td:nth-child(${colIndex + 2}) textarea`);
+                            if (newCell) {
+                                newCell.focus();
+                                // Set cursor position after pasted content
+                                const newCursorPos = beforeCursor.length + pastedText.length;
+                                newCell.setSelectionRange(newCursorPos, newCursorPos);
+                            }
+                        });
+                    }
                 };
             }
 

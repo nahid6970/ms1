@@ -1,5 +1,37 @@
 # Problems & Fixes Log
 
+## [2026-08-15 20:00] - Pasted Multi-Line Content Becomes Single Line
+
+**Problem:** When pasting multi-line text content into a cell, all newlines were being collapsed into a single line with spaces. This forced users to manually re-enter newlines after pasting.
+
+**Root Cause:** Cells without markdown or with wrap disabled were rendered as `<input>` elements instead of `<textarea>` elements. HTML `<input>` elements are single-line by design and cannot contain newlines — when multi-line text is pasted, browsers automatically convert `\n` characters to spaces.
+
+The cell creation logic was:
+```javascript
+if ((wrapEnabled || hasMarkdown) && isTextType) {
+    // Create textarea (supports multi-line)
+} else {
+    // Create input (single-line only) ← PROBLEM
+}
+```
+
+**Solution:** Added a `paste` event handler to `<input>` elements that:
+1. Detects when pasted content contains newlines (`\n`)
+2. Prevents the default single-line paste behavior
+3. Updates the cell value with the multi-line text via `updateCell()`
+4. Triggers `renderTable()` to re-render the cell
+5. The re-render detects newlines and creates a `<textarea>` instead
+6. Refocuses the new textarea with cursor positioned after the pasted content
+
+Also added a paste handler to contentEditable preview elements for markdown edit mode to ensure consistent newline preservation across all editing contexts.
+
+**Files Modified:**
+- `static/script.js` — added `input.onpaste` handler in `renderTable()` and `preview.addEventListener('paste')` in `applyMarkdownFormatting()`
+
+**Related Issues:** This is separate from the contentEditable paste issue — both needed fixes.
+
+---
+
 ## [2026-07-04 12:00] - Cell Overlap/Bleed When Entering Edit Mode
 
 **Problem:** When clicking a cell to enter edit mode in Visual Mode, the cell would occasionally (1-in-10) shrink to a size smaller than its content, causing the `.markdown-preview` div (which is `position: absolute`) to overflow and visually bleed into adjacent rows — making it look like two cells were merged.
