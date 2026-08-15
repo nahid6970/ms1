@@ -15,6 +15,12 @@ export const list = query({
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const unseenFirstSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "unseen_first"))
+      .first();
+    const unseenFirst = Boolean(unseenFirstSetting?.value);
+
     const feedLimitSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "feed_limit"))
@@ -79,6 +85,15 @@ export const list = query({
         if (isShortsView) return isShortVideo(video);
         return !hideShorts || !isShortVideo(video);
       });
+
+    if (unseenFirst) {
+      filtered.sort((a, b) => {
+        const aNew = a.isNew ? 1 : 0;
+        const bNew = b.isNew ? 1 : 0;
+        if (aNew !== bNew) return bNew - aNew;
+        return b.published.localeCompare(a.published);
+      });
+    }
 
     const finalVideos = feedLimit === 0 ? filtered : filtered.slice(0, feedLimit);
 

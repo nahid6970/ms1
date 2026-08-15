@@ -263,6 +263,16 @@ const POPUP_PAGES = {
             <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
           </label>
         </div>
+        <div class="flex items-center justify-between gap-6 border-t border-slate-800 pt-6">
+          <div>
+            <h2 class="text-white font-medium">Show Unseen Videos First</h2>
+            <p class="text-slate-500 text-xs">Automatically display unseen videos at the top of your main feed and Shorts feed before seen videos.</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="unseenFirstToggle" name="unseen_first" class="sr-only peer">
+            <div class="relative h-7 w-12 rounded-full bg-slate-700 transition peer-checked:bg-red-600 peer-focus-visible:ring-2 peer-focus-visible:ring-red-400 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"></div>
+          </label>
+        </div>
         <div class="border-t border-slate-800 pt-6">
           <label for="feedLimitSelect" class="block text-white font-medium">Videos Per Feed Page</label>
           <p class="mt-1 text-xs text-slate-500">Choose how many videos to display on your feed page.</p>
@@ -1247,6 +1257,7 @@ function initSettingsPage() {
     e.preventDefault();
     const checked = document.getElementById("showSeenToggle")?.checked ?? false;
     const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
+    const unseenFirstChecked = document.getElementById("unseenFirstToggle")?.checked ?? false;
     const feedLimitVal = Number(document.getElementById("feedLimitSelect")?.value ?? 50);
     const apiKeyInput = document.getElementById("youtubeDataApiKey");
     const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
@@ -1256,6 +1267,7 @@ function initSettingsPage() {
       await callConvex("mutation", "settings:updateConfig", {
         showSeen: checked,
         hideShorts: hideShortsChecked,
+        unseenFirst: unseenFirstChecked,
         feedLimit: feedLimitVal,
         youtubeDataApiKey: apiKeyInput.value,
         clearYoutubeDataApiKey: clearApiKey,
@@ -1277,10 +1289,12 @@ function initSettingsPage() {
 function renderSettingsConfig(config) {
   const toggle = document.getElementById("showSeenToggle");
   const shortsToggle = document.getElementById("hideShortsToggle");
+  const unseenFirstToggle = document.getElementById("unseenFirstToggle");
   const feedLimitSelect = document.getElementById("feedLimitSelect");
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
+  if (unseenFirstToggle) unseenFirstToggle.checked = Boolean(config.unseenFirst);
   if (feedLimitSelect && config.feedLimit) feedLimitSelect.value = String(config.feedLimit);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
