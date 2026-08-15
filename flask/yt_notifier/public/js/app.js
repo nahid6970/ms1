@@ -1152,27 +1152,21 @@ function renderStatsSummary(data) {
         </div>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-3">
           <span><i class="fa-solid fa-database text-sky-400 mr-1.5"></i>Convex DB Storage</span>
           <span class="text-slate-300 font-bold">${convexDb.totalVideosInDb.toLocaleString()} Videos in DB</span>
         </div>
-        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
-          <div class="h-full bg-sky-500 transition-all duration-500" style="width: ${Math.max(1, convexDb.percentStorageUsed)}%;"></div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
+        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 mt-2">
           <span>Est. Size: <strong class="text-sky-300">${convexDb.estimatedDbMb} MB</strong></span>
           <span><strong class="text-red-400">${convexDb.unseenVideosInDb} Unseen</strong> • <strong class="text-slate-300">${convexDb.seenVideosInDb} Seen</strong></span>
         </div>
       </div>
       <div class="sm:col-span-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
+        <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-3">
           <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i>Convex Executions</span>
           <span class="text-slate-300 font-bold">${exec.total.toLocaleString()} Calls</span>
         </div>
-        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
-          <div class="h-full bg-amber-500 transition-all duration-500" style="width: ${Math.max(1, exec.percentUsed)}%;"></div>
-        </div>
-        <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
+        <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2 mt-2">
           <span>Calls Breakdown: <strong class="text-sky-400">${exec.queries} Queries</strong> • <strong class="text-emerald-400">${exec.mutations} Mutations</strong> • <strong class="text-amber-400">${exec.actions} Actions</strong></span>
           <button type="button" onclick="resetConvexExecutions()" class="text-[10px] text-slate-500 hover:text-red-400 underline">Reset Counter</button>
         </div>
