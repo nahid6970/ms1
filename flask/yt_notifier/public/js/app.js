@@ -517,8 +517,8 @@ function videoCard(video, categories = []) {
   const isFavorite = Boolean(video.isFavorite);
   const currentCat = video.channelCategory || "";
   const cardTone = isNew
-    ? "bg-slate-900/90 border-slate-800 hover:border-red-500/50 ring-1 ring-red-500/30 hover:shadow-red-900/20"
-    : "bg-slate-900/55 border-slate-800/60 hover:border-slate-700 opacity-85";
+    ? "bg-slate-900/90 border-slate-800 ring-1 ring-red-500/20"
+    : "bg-slate-900/55 border-slate-800/60 opacity-85";
   const imageTone = isNew
     ? "grayscale-0 opacity-100"
     : "grayscale opacity-60";
@@ -534,7 +534,7 @@ function videoCard(video, categories = []) {
   `).join("");
 
   return `
-  <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+  <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1">
     <div class="relative aspect-video bg-slate-950 overflow-hidden">
       <a href="${esc(video.link)}" target="_blank" class="absolute inset-0">
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
@@ -751,7 +751,7 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
     const isActive = activeChannelId === c.channelId;
     const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${catUrl}" class="avatar-item overflow-hidden bg-slate-800 ring-2 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30 shadow-xl shadow-red-950/80" : "ring-slate-900/90"}" title="${esc(c.channelName)}">
+      <a href="${catUrl}" class="avatar-item overflow-hidden bg-slate-800 ring-1 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30" : "ring-slate-800/80"}" title="${esc(c.channelName)}">
         ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");

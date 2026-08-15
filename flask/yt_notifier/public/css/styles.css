@@ -106,7 +106,7 @@ body {
 .avatar-item:hover {
   transform: scale(1.28) translateY(-4px);
   z-index: 40 !important;
-  box-shadow: 0 10px 25px -3px rgba(220, 38, 38, 0.5);
+  box-shadow: none;
 }
 
 .avatar-item:hover + .avatar-item {
