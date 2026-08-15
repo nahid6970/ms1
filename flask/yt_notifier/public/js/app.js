@@ -278,7 +278,7 @@ const POPUP_PAGES = {
           <p class="mt-1 text-xs text-slate-500">Choose how many videos to display on your feed page.</p>
           <select id="feedLimitSelect" name="feed_limit" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
             <option value="20">20 Videos</option>
-            <option value="50" selected>50 Videos</option>
+            <option value="50">50 Videos</option>
             <option value="100">100 Videos</option>
             <option value="200">200 Videos</option>
             <option value="500">500 Videos</option>
@@ -1295,7 +1295,7 @@ function renderSettingsConfig(config) {
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
   if (unseenFirstToggle) unseenFirstToggle.checked = Boolean(config.unseenFirst);
-  if (feedLimitSelect && config.feedLimit) feedLimitSelect.value = String(config.feedLimit);
+  if (feedLimitSelect && config.feedLimit != null) feedLimitSelect.value = String(config.feedLimit);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
       ? "A key is saved. Leave blank to keep it, paste a new key to replace it, or check Clear saved key."
