@@ -740,7 +740,7 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
     const main = document.querySelector("main");
     if (main) main.insertBefore(bar, main.firstChild);
   }
-  bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900/95 border border-slate-800/80 rounded-2xl p-2 px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
+  bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900/95 border border-slate-800/80 rounded-2xl px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
 
   const enabledChannels = (channels || []).filter((c) => !c.disabled);
   const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
@@ -763,7 +763,7 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
     const isActive = activeChannelId === c.channelId;
     const targetUrl = isActive ? baseUrl : `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ring-2 ${isActive ? "ring-red-500 ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-slate-700/60 hover:ring-slate-400"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
+      <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ${isActive ? "ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-1 ring-slate-800/80 hover:ring-2 hover:ring-red-500/50"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
         ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover rounded-full" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 rounded-full">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");
