@@ -2101,7 +2101,7 @@ def _menu_gpos(anchor_widget, menu, cursor_pos=None):
     return QPoint(x, y)
 
 
-def _menu_rich_action(menu, html, callback=None, disabled=False):
+def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     """Add a menu item rendered as rich colored HTML (matches tooltip style).
     QMenu actions cannot render HTML, so each item is a QWidgetAction hosting
     a transparent rich-text QLabel; the menu's hover highlight shows through.
@@ -2110,9 +2110,12 @@ def _menu_rich_action(menu, html, callback=None, disabled=False):
     lbl = QLabel(html)
     lbl.setTextFormat(Qt.TextFormat.RichText)
     lbl.setWordWrap(False)
+    lbl.setFixedHeight(22)
+    lbl.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+    pad_left = "20px" if indent else "6px"
     lbl.setStyleSheet(
-        "background: transparent; padding: 2px 8px 2px 4px;"
-        " font-family: 'Consolas'; font-size: 9pt;")
+        f"background: transparent; padding: 0px 8px 0px {pad_left};"
+        " font-family: 'Segoe UI', 'Consolas', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt;")
     lbl.setCursor(Qt.CursorShape.PointingHandCursor if not disabled
                    else Qt.CursorShape.ArrowCursor)
     act.setDefaultWidget(lbl)
@@ -2802,8 +2805,9 @@ class KomorebiAppsWidget(QWidget):
                         title = title[:57] + "..."
                     _menu_rich_action(
                         menu,
-                        f'&nbsp;&nbsp;<span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>',
-                        partial(self._jump_to_app, ap["hwnd"], ws_idx))
+                        f'<span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>',
+                        partial(self._jump_to_app, ap["hwnd"], ws_idx),
+                        indent=True)
                 menu.addSeparator()
         menu.exec(_menu_gpos(self, menu))
 
@@ -2855,7 +2859,7 @@ class KomorebiAppsWidget(QWidget):
                     if len(title) > 60:
                         title = title[:57] + "..."
                     tip.append(
-                        f'&nbsp;&nbsp;<span style="color:#E0E0E0;">'
+                        f'<span style="display:inline-block; margin-left:16px; color:#E0E0E0;">'
                         f'{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>')
             tip.append('<span style="color:#555555;">click to jump to an app</span>')
         tip_html = "<br/>".join(tip)
@@ -2875,7 +2879,7 @@ def _get_tip_label():
         _tip_label.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         _tip_label.setStyleSheet(
             f"QLabel {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_CYAN};"
-            f" padding: 6px 8px; font-family: 'Consolas'; font-size: 9pt; }}"
+            f" padding: 6px 8px; font-family: 'Segoe UI', 'Consolas', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt; }}"
         )
         _tip_label.setTextFormat(Qt.TextFormat.RichText)
         _tip_label.hide()
