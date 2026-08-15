@@ -1082,44 +1082,44 @@ function renderStatsSummary(data) {
       <span>&bull;</span>
       <span>${esc(summary.filteredChannels ?? 0)} channels with filters</span>
     </div>
-    <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
         <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
           <span><i class="fa-brands fa-youtube text-red-500 mr-1.5"></i>YouTube Data API v3 Quota</span>
-          <span class="text-slate-300 font-bold">${quota.todayUnits.toLocaleString()} / ${quota.limit.toLocaleString()} Today (${quota.todayPercent}%)</span>
+          <span class="text-slate-300 font-bold">${quota.todayUnits.toLocaleString()} / ${quota.limit.toLocaleString()} Today</span>
         </div>
         <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
           <div class="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-500" style="width: ${Math.max(1, quota.todayPercent)}%;"></div>
         </div>
         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          <span>Remaining: <strong class="text-emerald-400">${quota.remainingToday.toLocaleString()} Units</strong></span>
+          <span>Remaining Today: <strong class="text-emerald-400">${quota.remainingToday.toLocaleString()} Units</strong></span>
           <span>All-Time: <strong class="text-white">${quota.totalUnits.toLocaleString()} Units</strong></span>
         </div>
       </div>
       <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
         <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
-          <span><i class="fa-solid fa-database text-sky-400 mr-1.5"></i>Convex DB Storage (1 GB Free)</span>
+          <span><i class="fa-solid fa-database text-sky-400 mr-1.5"></i>Convex DB Storage</span>
           <span class="text-slate-300 font-bold">${convexDb.totalVideosInDb.toLocaleString()} Videos in DB</span>
         </div>
         <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
           <div class="h-full bg-sky-500 transition-all duration-500" style="width: ${Math.max(1, convexDb.percentStorageUsed)}%;"></div>
         </div>
         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          <span>Est. Size: <strong class="text-sky-300">${convexDb.estimatedDbMb} MB / 1,000 MB</strong></span>
+          <span>Est. Size: <strong class="text-sky-300">${convexDb.estimatedDbMb} MB</strong></span>
           <span><strong class="text-red-400">${convexDb.unseenVideosInDb} Unseen</strong> • <strong class="text-slate-300">${convexDb.seenVideosInDb} Seen</strong></span>
         </div>
       </div>
-      <div class="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+      <div class="sm:col-span-2 rounded-xl border border-slate-800 bg-slate-950/70 p-4">
         <div class="flex items-center justify-between text-slate-400 text-xs font-semibold mb-2">
-          <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i>Convex Executions (1M Free/mo)</span>
-          <span class="text-slate-300 font-bold">${exec.total.toLocaleString()} / 1M Calls</span>
+          <span><i class="fa-solid fa-bolt text-amber-400 mr-1.5"></i>Convex Executions</span>
+          <span class="text-slate-300 font-bold">${exec.total.toLocaleString()} Calls</span>
         </div>
         <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2.5">
           <div class="h-full bg-amber-500 transition-all duration-500" style="width: ${Math.max(1, exec.percentUsed)}%;"></div>
         </div>
         <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          <span>Calls: <strong class="text-sky-400">${exec.queries} Q</strong> • <strong class="text-emerald-400">${exec.mutations} M</strong> • <strong class="text-amber-400">${exec.actions} A</strong></span>
-          <button type="button" onclick="resetConvexExecutions()" class="text-[10px] text-slate-500 hover:text-red-400 underline">Reset</button>
+          <span>Calls Breakdown: <strong class="text-sky-400">${exec.queries} Queries</strong> • <strong class="text-emerald-400">${exec.mutations} Mutations</strong> • <strong class="text-amber-400">${exec.actions} Actions</strong></span>
+          <button type="button" onclick="resetConvexExecutions()" class="text-[10px] text-slate-500 hover:text-red-400 underline">Reset Counter</button>
         </div>
       </div>
     </div>`;
