@@ -736,15 +736,20 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
   if (!bar) {
     bar = document.createElement("div");
     bar.id = "channelAvatarsBar";
-    bar.className = "mb-3.5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 px-3 backdrop-blur-md";
     const main = document.querySelector("main");
     if (main) main.insertBefore(bar, main.firstChild);
   }
+  bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900/95 border border-slate-800/80 rounded-2xl p-2 px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
 
-  const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
-  if (activeChannelId) channelIdsWithVideos.add(activeChannelId);
+  const enabledChannels = (channels || []).filter((c) => !c.disabled);
+  const targetFolder = currentFolder?.trim().toLowerCase();
+  const isUncategorized = targetFolder === "n/a" || targetFolder === "uncategorized";
 
-  const activeChannels = channels.filter((c) => !c.disabled && channelIdsWithVideos.has(c.channelId));
+  const activeChannels = targetFolder
+    ? isUncategorized
+      ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
+      : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder)
+    : enabledChannels;
 
   if (!activeChannels.length) {
     bar.style.display = "none";
@@ -759,20 +764,21 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
 
   const avatarsHtml = activeChannels.map((c) => {
     const isActive = activeChannelId === c.channelId;
-    const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
+    const targetUrl = isActive ? baseUrl : `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${catUrl}" class="avatar-item overflow-hidden bg-slate-800 ring-1 ${isActive ? "ring-red-500 scale-125 -translate-y-1 z-30" : "ring-slate-800/80"}" title="${esc(c.channelName)}">
-        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
+      <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ring-2 ${isActive ? "ring-red-500 ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-slate-700/60 hover:ring-slate-400"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
+        ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover rounded-full" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 rounded-full">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");
 
   bar.innerHTML = `
-    <div class="avatar-stack min-w-0">
+    <div class="avatar-stack min-w-0 flex-1 overflow-x-auto scrollbar-none">
       ${avatarsHtml}
     </div>
     ${activeChannelId ? `
-      <a href="${baseUrl}" class="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/90 border border-slate-700/80 text-slate-400 hover:text-white hover:bg-slate-700 transition shadow-md" title="Clear channel filter">
-        <i class="fa-solid fa-xmark text-xs"></i>
+      <a href="${baseUrl}" class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-md ml-2" title="Show all channels">
+        <i class="fa-solid fa-xmark text-xs text-red-400"></i>
+        <span>All</span>
       </a>` : ""}
   `;
 }
