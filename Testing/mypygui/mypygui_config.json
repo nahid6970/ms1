@@ -2895,5 +2895,6 @@
         "main": "#00FF00"
     },
     "git_indicator_style": "underline",
-    "git_right_click": "lazygit"
+    "git_right_click": "lazygit",
+    "komorebi_item_indent": 50
 }

@@ -39,6 +39,17 @@
                 {
                     "name": "II",
                     "layout": "BSP"
+                },
+                {
+                    "name": "III",
+                    "layout": "BSP",
+                    "workspace_rules": [
+                        {
+                            "kind": "Exe",
+                            "id": "PotPlayerMini64.exe",
+                            "matching_strategy": "Equals"
+                        }
+                    ]
                 }
             ]
         }
@@ -358,21 +369,6 @@
             "kind": "Exe",
             "id": "Freebuff.exe",
             "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
-            "id": "ApplicationFrameHost.exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Title",
-            "id": "Sound Recorder",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
-            "id": "open-webui.exe",
-            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -484,21 +480,6 @@
         {
             "kind": "Exe",
             "id": "Freebuff.exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
-            "id": "ApplicationFrameHost.exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Title",
-            "id": "Sound Recorder",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
-            "id": "open-webui.exe",
             "matching_strategy": "Equals"
         }
     ],

@@ -2112,7 +2112,11 @@ def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     lbl.setWordWrap(False)
     lbl.setFixedHeight(22)
     lbl.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-    pad_left = "20px" if indent else "6px"
+    try:
+        indent_px = int(load_config().get("komorebi_item_indent", 20))
+    except Exception:
+        indent_px = 20
+    pad_left = f"{indent_px}px" if indent else "6px"
     lbl.setStyleSheet(
         f"background: transparent; padding: 0px 8px 0px {pad_left};"
         " font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif; font-size: 9pt;")
@@ -2843,32 +2847,34 @@ class KomorebiAppsWidget(QWidget):
         if not self._apps:
             tip.append('<span style="color:#666666;">no windows open</span>')
         else:
-            rows = []
+            lines = []
             by_ws = {}
             for ap in self._apps:
                 by_ws.setdefault(ap["ws"], []).append(ap)
+            try:
+                indent_px = int(load_config().get("komorebi_item_indent", 20))
+            except Exception:
+                indent_px = 20
             for ws_idx in sorted(by_ws):
                 group = by_ws[ws_idx]
                 ws_name = group[0]["ws_name"]
                 active = (ws_idx == self._focused)
                 color = "#00ff21" if active else "#8f9bae"
                 tag = "ACTIVE" if active else "idle"
-                rows.append(
-                    f'<tr><td colspan="2"><span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
-                    f'<span style="color:#8f9bae;">({len(group)}) {tag}</span></td></tr>'
+                lines.append(
+                    f'<div><span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
+                    f'<span style="color:#8f9bae;">({len(group)}) {tag}</span></div>'
                 )
                 for ap in group:
                     title = ap["title"] or ap["exe"]
                     if len(title) > 60:
                         title = title[:57] + "..."
-                    rows.append(
-                        f'<tr><td style="width:12px; min-width:12px; max-width:12px;">&nbsp;</td>'
-                        f'<td><span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span></td></tr>'
+                    lines.append(
+                        f'<div style="margin-left: {indent_px}px;"><span style="color:#E0E0E0;">'
+                        f'{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span></div>'
                     )
-            rows.append(
-                '<tr><td colspan="2"><span style="color:#555555;">click to jump to an app</span></td></tr>'
-            )
-            tip_html = f'<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">{"".join(rows)}</table>'
+            lines.append('<div><span style="color:#555555;">click to jump to an app</span></div>')
+            tip_html = "".join(lines)
         self._tip_text = tip_html
         self._count_lbl._tip_text = tip_html
         self._icon_lbl._tip_text = tip_html
@@ -4056,6 +4062,13 @@ class StatusBar(QMainWindow):
         git_rc_cb.setToolTip("Right-click a repo label:\nContext Menu = full git power menu\nLazygit = open lazygit directly")
         form_git.addRow("RIGHT CLICK", git_rc_cb)
         left_col.addWidget(grp_git)
+
+        grp_kom = QGroupBox("KOMOREBI"); form_kom = QFormLayout(); grp_kom.setLayout(form_kom)
+        komorebi_indent_le = QLineEdit(str(self._config.get("komorebi_item_indent", 20)))
+        komorebi_indent_le.setFixedWidth(60)
+        komorebi_indent_le.setToolTip("Indentation in pixels for workspace app items in menus and hover tooltips")
+        form_kom.addRow("ITEM INDENT (PX)", komorebi_indent_le)
+        left_col.addWidget(grp_kom)
         
         left_col.addStretch()
 
@@ -4151,6 +4164,7 @@ class StatusBar(QMainWindow):
                 }
                 cfg["git_indicator_style"] = git_ind_cb.currentText().lower()
                 cfg["git_right_click"] = "lazygit" if git_rc_cb.currentText().lower() == "lazygit" else "menu"
+                cfg["komorebi_item_indent"] = int(komorebi_indent_le.text())
 
                 
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
