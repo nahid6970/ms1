@@ -96,12 +96,32 @@ function Show-PythonCandidates($Candidates) {
         return
     }
 
-    $current = (Get-Command python.exe -CommandType Application).Source
+    # Resolve what 'python' currently resolves to on PATH (take the first hit only)
+    $currentCmd = Get-Command python.exe -CommandType Application -ErrorAction SilentlyContinue |
+                  Where-Object { $_.Source -notlike "*WindowsApps*" } |
+                  Select-Object -First 1
+    $current = $null
+    if ($currentCmd) {
+        try { $current = [IO.Path]::GetFullPath($currentCmd.Source) } catch {}
+    }
+
     Write-Host "`nInstalled Python versions:`n" -ForegroundColor Cyan
     for ($i = 0; $i -lt $Candidates.Count; $i++) {
-        $marker = if ($Candidates[$i].Path -ieq $current) { ' (current python)' } else { '' }
-        Write-Host ("[{0}] Python {1}{2}" -f ($i + 1), $Candidates[$i].Version, $marker)
-        Write-Host ("    {0} [{1}]" -f $Candidates[$i].Path, $Candidates[$i].Source) -ForegroundColor DarkGray
+        $candidatePath = $null
+        try { $candidatePath = [IO.Path]::GetFullPath($Candidates[$i].Path) } catch { $candidatePath = $Candidates[$i].Path }
+
+        $isDefault = $current -and ($candidatePath -ieq $current)
+        if ($isDefault) {
+            Write-Host ("[{0}] Python {1}  << DEFAULT >>" -f ($i + 1), $Candidates[$i].Version) -ForegroundColor Green
+            Write-Host ("    {0} [{1}]" -f $Candidates[$i].Path, $Candidates[$i].Source) -ForegroundColor DarkGreen
+        } else {
+            Write-Host ("[{0}] Python {1}" -f ($i + 1), $Candidates[$i].Version)
+            Write-Host ("    {0} [{1}]" -f $Candidates[$i].Path, $Candidates[$i].Source) -ForegroundColor DarkGray
+        }
+    }
+
+    if (-not $current) {
+        Write-Host "`n  (No 'python.exe' found on PATH - no default is set)" -ForegroundColor Yellow
     }
 }
 
