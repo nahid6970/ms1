@@ -2843,6 +2843,7 @@ class KomorebiAppsWidget(QWidget):
         if not self._apps:
             tip.append('<span style="color:#666666;">no windows open</span>')
         else:
+            rows = []
             by_ws = {}
             for ap in self._apps:
                 by_ws.setdefault(ap["ws"], []).append(ap)
@@ -2852,17 +2853,22 @@ class KomorebiAppsWidget(QWidget):
                 active = (ws_idx == self._focused)
                 color = "#00ff21" if active else "#8f9bae"
                 tag = "ACTIVE" if active else "idle"
-                tip.append(f'<span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
-                           f'<span style="color:#8f9bae;">({len(group)}) {tag}</span>')
+                rows.append(
+                    f'<tr><td colspan="2"><span style="color:{color}; font-weight:bold;">● {_tip_esc(ws_name)}</span> '
+                    f'<span style="color:#8f9bae;">({len(group)}) {tag}</span></td></tr>'
+                )
                 for ap in group:
                     title = ap["title"] or ap["exe"]
                     if len(title) > 60:
                         title = title[:57] + "..."
-                    tip.append(
-                        f'<span style="display:inline-block; margin-left:16px; color:#E0E0E0;">'
-                        f'{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span>')
-            tip.append('<span style="color:#555555;">click to jump to an app</span>')
-        tip_html = "<br/>".join(tip)
+                    rows.append(
+                        f'<tr><td style="width:12px; min-width:12px; max-width:12px;">&nbsp;</td>'
+                        f'<td><span style="color:#E0E0E0;">{_tip_esc(ap["exe"])} — {_tip_esc(title)}</span></td></tr>'
+                    )
+            rows.append(
+                '<tr><td colspan="2"><span style="color:#555555;">click to jump to an app</span></td></tr>'
+            )
+            tip_html = f'<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;">{"".join(rows)}</table>'
         self._tip_text = tip_html
         self._count_lbl._tip_text = tip_html
         self._icon_lbl._tip_text = tip_html
