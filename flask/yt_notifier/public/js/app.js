@@ -736,7 +736,7 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
   if (!bar) {
     bar = document.createElement("div");
     bar.id = "channelAvatarsBar";
-    bar.className = "mb-5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2.5 px-4 backdrop-blur-md";
+    bar.className = "mb-5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2 px-3.5 backdrop-blur-md";
     const main = document.querySelector("main");
     if (main) main.insertBefore(bar, main.firstChild);
   }
@@ -751,24 +751,18 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
     const isActive = activeChannelId === c.channelId;
     const catUrl = `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
     return `
-      <a href="${catUrl}" class="relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-110 z-30 shadow-lg shadow-red-950/50" : "ring-slate-900 hover:ring-slate-600 hover:scale-105 z-10"} overflow-hidden bg-slate-800 transition-all duration-200 flex-shrink-0" title="${esc(c.channelName)}">
+      <a href="${catUrl}" class="relative w-8 h-8 rounded-full ring-2 ${isActive ? "ring-red-500 scale-110 z-30 shadow-lg shadow-red-950/60" : "ring-slate-900 hover:ring-slate-600 hover:scale-105 z-10"} overflow-hidden bg-slate-800 transition-all duration-200 flex-shrink-0" title="${esc(c.channelName)}">
         ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");
 
   bar.innerHTML = `
-    <div class="flex items-center gap-2 min-w-0">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex-shrink-0 mr-1"><i class="fa-solid fa-users text-red-500 mr-1.5"></i>Channels:</span>
-      <div class="flex items-center -space-x-2 hover:space-x-1 overflow-x-auto no-scrollbar py-1 transition-all duration-300">
-        <a href="${baseUrl}" class="relative w-8 h-8 rounded-full ring-2 ${!activeChannelId ? "ring-red-500 bg-red-600 text-white z-30 shadow" : "ring-slate-900 bg-slate-800 text-slate-300 hover:bg-slate-700 z-10"} flex items-center justify-center text-[10px] font-bold flex-shrink-0 transition-all duration-200" title="All Channels">
-          ALL
-        </a>
-        ${avatarsHtml}
-      </div>
+    <div class="flex items-center -space-x-2 hover:space-x-1 overflow-x-auto no-scrollbar py-1 transition-all duration-300 min-w-0">
+      ${avatarsHtml}
     </div>
     ${activeChannelId ? `
-      <a href="${baseUrl}" class="text-xs font-semibold text-slate-400 hover:text-red-400 transition flex-shrink-0 flex items-center gap-1">
-        <i class="fa-solid fa-xmark text-xs"></i> Reset Filter
+      <a href="${baseUrl}" class="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-800/90 border border-slate-700/80 text-slate-400 hover:text-white hover:bg-slate-700 transition shadow" title="Clear channel filter">
+        <i class="fa-solid fa-xmark text-xs"></i>
       </a>` : ""}
   `;
 }
