@@ -736,7 +736,7 @@ function renderChannelAvatarsBar(channels, activeChannelId, currentCategory, cur
   if (!bar) {
     bar = document.createElement("div");
     bar.id = "channelAvatarsBar";
-    bar.className = "mb-5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2 px-3.5 backdrop-blur-md";
+    bar.className = "mb-3.5 flex items-center justify-between gap-3 bg-slate-900/60 border border-slate-800/80 rounded-xl p-1 px-3 backdrop-blur-md";
     const main = document.querySelector("main");
     if (main) main.insertBefore(bar, main.firstChild);
   }
