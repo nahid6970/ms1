@@ -4801,14 +4801,24 @@ class LanguageChoiceDialog(QDialog):
                 padding: 8px 16px;
                 min-width: 90px;
             }}
-            QPushButton#btn_en:hover, QPushButton#btn_en:focus {{
+            QPushButton#btn_en {{
                 background-color: {CP_RED};
                 border: 1px solid {CP_RED};
                 color: white;
             }}
-            QPushButton#btn_bn:hover, QPushButton#btn_bn:focus {{
+            QPushButton#btn_en:hover, QPushButton#btn_en:focus {{
+                background-color: #ff5555;
+                border: 1px solid #ff5555;
+                color: white;
+            }}
+            QPushButton#btn_bn {{
                 background-color: {CP_GREEN};
                 border: 1px solid {CP_GREEN};
+                color: black;
+            }}
+            QPushButton#btn_bn:hover, QPushButton#btn_bn:focus {{
+                background-color: #55ff55;
+                border: 1px solid #55ff55;
                 color: black;
             }}
             QPushButton#btn_cancel:hover, QPushButton#btn_cancel:focus {{
