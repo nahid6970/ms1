@@ -5271,14 +5271,83 @@ class VoiceApp(QMainWindow):
     def eventFilter(self, obj, event):
         if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.RightButton:
-                self._toggle_output_mode()
+                self._show_voice_popup_menu()
                 return True
         return super().eventFilter(obj, event)
+
+    def _show_voice_popup_menu(self):
+        menu = QMenu(self)
+        menu.setStyleSheet(_KOMOREBI_MENU_QSS)
+
+        _menu_rich_action(
+            menu,
+            f'<span style="color:{CP_CYAN}; font-weight:bold;">🎙️ VOICE INPUT</span> '
+            f'<span style="color:#8f9bae;">mode & options</span>',
+            disabled=True)
+        menu.addSeparator()
+
+        current_mode = self.config.get("output_mode", "search")
+
+        modes = [
+            ("search", "🔍 Google Search", "#FF8C00"),
+            ("clipboard", "📋 Clipboard / Paste", "#00BFFF"),
+            ("gg", "⚡ GG (AI / Terminal)", "#39FF14"),
+        ]
+
+        for m_key, m_label, m_color in modes:
+            is_active = (current_mode == m_key)
+            if is_active:
+                html = f'<span style="color:{m_color}; font-weight:bold;">● {_tip_esc(m_label)}</span>'
+            else:
+                html = f'<span style="color:#8f9bae;">○ {_tip_esc(m_label)}</span>'
+            _menu_rich_action(menu, html, partial(self._set_output_mode, m_key))
+
+        menu.addSeparator()
+
+        spc_active = self.config.get("stop_mode", "auto") == "space"
+        spc_html = (
+            f'<span style="color:{"#00ff21" if spc_active else "#8f9bae"};">'
+            f'{"✓" if spc_active else " "} Stop on Space (SPC)</span>'
+        )
+        _menu_rich_action(menu, spc_html, self._toggle_stop_on_space)
+
+        live_active = self.config.get("engine", "local") == "browser"
+        live_html = (
+            f'<span style="color:{"#00ff21" if live_active else "#8f9bae"};">'
+            f'{"✓" if live_active else " "} Continuous Live Mode</span>'
+        )
+        _menu_rich_action(menu, live_html, self._toggle_continuous_engine)
+
+        menu.addSeparator()
+        _menu_rich_action(menu, '<span style="color:#8f9bae;">⚙ Voice Settings...</span>', self.show_settings)
+
+        menu.exec(_menu_gpos(self.status_btn, menu))
+
+    def _set_output_mode(self, mode):
+        self.config["output_mode"] = mode
+        self.config["open_google"] = (mode == "search")
+        self.config["copy_to_clipboard"] = (mode == "clipboard")
+        self.save_config()
+        self._update_status_icon_mode()
+        self._update_status_tooltip()
+        if hasattr(self, 'lang_btn'): self._update_lang_btn()
+        if hasattr(self, 'google_btn'): self._update_google_btn()
+        if hasattr(self, 'copy_btn'): self._update_copy_btn()
+
+    def _toggle_stop_on_space(self):
+        curr = self.config.get("stop_mode", "auto")
+        self.config["stop_mode"] = "auto" if curr == "space" else "space"
+        self.save_config()
+
+    def _toggle_continuous_engine(self):
+        curr = self.config.get("engine", "local")
+        self.config["engine"] = "local" if curr == "browser" else "browser"
+        self.save_config()
 
     def _update_status_tooltip(self):
         mode = self.config.get("output_mode", "search")
         labels = {"search": "🔍 Search", "clipboard": "📋 Clipboard", "gg": "⚡ GG"}
-        self.status_btn.setToolTip(f"Voice Input\nLeft Click: Record\nRight Click: Toggle Mode\nCurrent: {labels.get(mode, mode)}")
+        self.status_btn.setToolTip(f"Voice Input\nLeft Click: Record\nRight Click: Mode Menu\nCurrent: {labels.get(mode, mode)}")
 
     def show_help(self):
         hotkey = self.config.get("hotkey", "RightAlt+Space")

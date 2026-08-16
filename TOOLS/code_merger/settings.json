@@ -16,6 +16,25 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\testing\\mypygui",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\testing\\mypygui\\mypygui_config.json",
+        "C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py",
+        "C:\\@delta\\ms1\\testing\\mypygui\\recent.md"
+      ],
+      "disabled_files": [],
+      "extensions": [
+        ".json",
+        ".md",
+        ".py"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
       "path": "C:\\@delta\\ms1\\flask\\yt_notifier",
       "name": "",
       "category": "",

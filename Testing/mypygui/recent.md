@@ -39,9 +39,9 @@ All in `mypygui_qt.py`:
   - Keyboard shortcuts: <kbd>E</kbd> for English, <kbd>B</kbd> for Bengali, <kbd>Esc</kbd> to cancel.
   - Spawns transcription in a background worker thread (`_run_transcription_worker`) using `transcription_ready` / `transcription_error` Qt signals (not `QTimer.singleShot`) for reliable cross-thread dispatch to `on_result`.
   - Dispatches to the active mode (`search` ➔ Google search, `gg` ➔ `gg -gui "<text>"`, `clipboard` ➔ `paste_text` via <kbd>Ctrl+V</kbd>).
-- **REFACTOR Voice Widget — lang button removed**:
+- **REFACTOR Voice Widget — right-click popup menu added**:
   - The `BN/EN` language toggle button has been removed from the status bar entirely.
-  - **Right-click on the mic icon** now cycles through the 3 output modes: `search` → `clipboard` → `gg`.
+  - **Right-click on the mic icon** now opens a rich popup menu (`_show_voice_popup_menu` positioned via `_menu_gpos`) to directly select action mode (`🔍 Google Search`, `📋 Clipboard / Paste`, `⚡ GG`), toggle `Stop on Space (SPC)` or `Continuous Live Mode`, and open `Voice Settings...`.
   - The **mic icon color** reflects the active mode: 🟠 orange = search, 🔵 cyan = clipboard, 🟢 green = gg.
   - `_update_status_icon_mode()` recolors the SVG mic fill; `_update_status_tooltip()` updates the hover tooltip with the current mode name.
   - Mode color persists across all state transitions (after successful transcription, after cancel, after error flash) — `_update_status_icon_mode()` is called in `on_result`, `on_error`, `_on_continuous_finished`, and the dialog cancel branch.
