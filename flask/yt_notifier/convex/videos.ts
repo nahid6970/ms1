@@ -73,10 +73,10 @@ export const list = query({
       q = q.filter((f) => f.eq(f.field("isWatchLater"), true));
     }
 
-    const takeAmount = feedLimit === 0 ? 2000 : Math.max(300, feedLimit * 2);
-    const videos = await q.take(takeAmount);
-
     const isShortsView = category === "shorts";
+
+    const takeAmount = isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4);
+    const videos = await q.take(takeAmount);
 
     const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
@@ -205,6 +205,67 @@ export const unreadCount = query({
       .filter((video) => !hideShorts || !isShortVideo(video)).length;
   },
 });
+
+export const counts = query({
+  args: {
+    folder: v.optional(v.string()),
+    channelId: v.optional(v.string()),
+  },
+  handler: async (ctx, { folder, channelId }) => {
+    const hideShortsSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
+      .first();
+    const hideShorts = Boolean(hideShortsSetting?.value);
+
+    const channels = await ctx.db.query("channels").collect();
+    const enabledChannels = channels.filter((channel) => !channel.disabled);
+
+    const targetFolder = folder?.trim();
+    const isUncategorized =
+      targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+
+    let filteredChannels = targetFolder
+      ? isUncategorized
+        ? enabledChannels.filter((c) => !c.category || c.category.trim() === "")
+        : enabledChannels.filter(
+            (c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase(),
+          )
+      : enabledChannels;
+
+    if (channelId) {
+      filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);
+    }
+
+    const enabledChannelIds = new Set(
+      filteredChannels.map((channel) => channel.channelId),
+    );
+    const filtersById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.titleFilters ?? []]),
+    );
+
+    const allVideos = await ctx.db.query("videos").collect();
+
+    const validVideos = allVideos
+      .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) =>
+        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+      );
+
+    const main = validVideos.filter(
+      (video) => video.isNew && !video.isWatchLater && (!hideShorts || !isShortVideo(video)),
+    ).length;
+
+    const shorts = validVideos.filter(
+      (video) => video.isNew && !video.isWatchLater && isShortVideo(video),
+    ).length;
+
+    const watchLater = validVideos.filter((video) => video.isWatchLater).length;
+
+    return { main, shorts, watchLater };
+  },
+});
+
 
 export const toggleRead = mutation({
   args: { id: v.id("videos") },

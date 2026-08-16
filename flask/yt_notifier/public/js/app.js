@@ -336,11 +336,12 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0 }, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
   const isShorts = category === "shorts";
+  const isMainActive = PAGE === "feed" && category !== "shorts" && category !== "watchlater";
   const activeFilterId = isShorts ? subCategory : category;
 
   const filterItems = isShorts ? [
@@ -358,22 +359,33 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCat
     { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" },
   ];
 
+  const mainCount = typeof counts === "object" ? counts.main ?? 0 : counts ?? 0;
+  const shortsCount = typeof counts === "object" ? counts.shorts ?? 0 : 0;
+  const watchLaterCount = typeof counts === "object" ? counts.watchLater ?? 0 : 0;
+
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between gap-2 sm:gap-4">
         <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
           <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight flex-shrink-0">
-            <i class="fa-brands fa-youtube text-2xl sm:text-3xl"></i>
             <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
             <span id="headerCardCount" class="ml-1 px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
           </a>
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-          <a href="index.html" class="nav-link ${PAGE === "feed" && !isShorts ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${PAGE === "feed" && !isShorts ? "bg-slate-800 text-red-400" : "text-slate-300"}" title="Feed (${unreadCount} unseen)" aria-label="Feed (${unreadCount} unseen)">
-            <i class="fa-solid fa-bell"></i>
-            ${unreadCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${unreadCount}</span>` : ""}
+          <a href="index.html" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${mainCount} unseen)" aria-label="Main Feed (${mainCount} unseen)">
+            <i class="fa-brands fa-youtube text-lg"></i>
+            ${mainCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${mainCount}</span>` : ""}
+          </a>
+          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed (${shortsCount} unseen)" aria-label="Shorts Feed (${shortsCount} unseen)">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            ${shortsCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-amber-400 leading-none tracking-tight">${shortsCount}</span>` : ""}
+          </a>
+          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${watchLaterCount} saved)" aria-label="Watch Later Feed (${watchLaterCount} saved)">
+            <i class="fa-solid fa-clock"></i>
+            ${watchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${watchLaterCount}</span>` : ""}
           </a>
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
@@ -402,12 +414,6 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCat
           <button type="button" onclick="openPopup('stats')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Stats" aria-label="Stats">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
-          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed" aria-label="Shorts Feed">
-            <i class="fa-solid fa-mobile-screen-button"></i>
-          </a>
-          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed" aria-label="Watch Later Feed">
-            <i class="fa-solid fa-clock"></i>
-          </a>
           <button type="button" onclick="openPopup('settings')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Settings" aria-label="Settings">
             <i class="fa-solid fa-gear"></i>
           </button>
@@ -543,11 +549,14 @@ window.checkUpdates = async function checkUpdates() {
 async function refreshNavOnly() {
   const urlParams = new URLSearchParams(location.search);
   const folder = urlParams.get("folder") || "";
-  const [settings, unread] = await Promise.all([
-    callConvex("query", "settings:get"),
-    callConvex("query", "videos:unreadCount", { folder: folder || undefined }),
+  const channelId = urlParams.get("channelId") || "";
+  const [config, counts] = await Promise.all([
+    callConvex("query", "settings:config"),
+    callConvex("query", "videos:counts", { folder: folder || undefined, channelId: channelId || undefined }),
   ]);
-  renderNav({ unreadCount: unread, showSeen: settings, folder });
+  const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
+  const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
+  renderNav({ counts, showSeen: config.showSeen, category: urlCategory, subCategory: urlSubCategory, folder });
 }
 
 /* --------------------------------- feed page ------------------------------- */
@@ -694,13 +703,13 @@ async function renderFeed() {
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
 
-  const [allVideos, unread, categories, channels] = await Promise.all([
+  const [allVideos, counts, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
       folder: folder || undefined,
     }),
-    callConvex("query", "videos:unreadCount", { folder: folder || undefined, channelId: channelId || undefined }),
+    callConvex("query", "videos:counts", { folder: folder || undefined, channelId: channelId || undefined }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
   ]);
@@ -708,7 +717,7 @@ async function renderFeed() {
   const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
 
   renderNav({
-    unreadCount: unread,
+    counts,
     showSeen: config.showSeen,
     category: urlCategory,
     subCategory: urlSubCategory,
