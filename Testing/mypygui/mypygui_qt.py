@@ -5671,7 +5671,7 @@ class VoiceApp(QMainWindow):
                 webbrowser.open(f"https://www.google.com/search?q={text}")
             elif self.config.get("output_mode") == "gg":
                 subprocess.Popen(
-                    ["pwsh", "-NoExit", "-Command", f'gg "{text.strip()}"'],
+                    ["pwsh", "-NoExit", "-Command", f'gg -gui "{text.strip()}"'],
                     creationflags=subprocess.CREATE_NEW_CONSOLE,
                     cwd=os.path.expanduser("~")
                 )
