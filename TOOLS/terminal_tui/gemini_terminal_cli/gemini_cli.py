@@ -5409,23 +5409,25 @@ def main() -> int:
                             })
 
                         def render_revert_item(r_item: Dict[str, Any], idx: int, sel: bool = False, current_idx: int = 0) -> str:
-                            marker = ">" if sel else " "
                             will_delete = (idx <= current_idx)
-                            status_tag = _ansi_wrap("🗑️ [del]", "1;31") if will_delete else _ansi_wrap("  [keep]", "90")
-                            
                             term_w = _get_term_width()
-                            prefix = f"{marker} {idx + 1:>2}. Turn {r_item['turn_num']:>2}: "
-                            avail_prompt = max(10, term_w - len(prefix) - 14)
+                            prefix_header = f"Turn {r_item['turn_num']:>2}: "
+                            prefix_vis_len = 2 + 8 + 2 + len(prefix_header)
+                            avail_prompt = max(10, term_w - prefix_vis_len - 2)
+                            
                             prompt = r_item['prompt']
                             if len(prompt) > avail_prompt:
                                 prompt = prompt[:avail_prompt - 3] + "..."
                             
-                            row = f"{prefix}{prompt:<{avail_prompt}}  {status_tag}"
                             if sel:
-                                return _ansi_wrap(row, "48;5;24;97")
-                            if will_delete:
-                                return row
-                            return _ansi_wrap(row, "90")
+                                # Preserve selection background across the entire row without reset cutoffs
+                                tag = "\033[1;91m🗑️ [del]\033[0;48;5;24;97m" if will_delete else "\033[92m  [keep]\033[0;48;5;24;97m"
+                                return f"\033[48;5;24;97m> {tag}  {prefix_header}{prompt}\033[0m"
+                            
+                            tag = _ansi_wrap("🗑️ [del]", "1;31") if will_delete else _ansi_wrap("  [keep]", "90")
+                            if not will_delete:
+                                return _ansi_wrap(f"    [keep]  {prefix_header}{prompt}", "90")
+                            return f"  {tag}  {prefix_header}{prompt}"
 
                         def render_revert_footer(current_item: Dict[str, Any]) -> List[str]:
                             turn_num = current_item["turn_num"]
