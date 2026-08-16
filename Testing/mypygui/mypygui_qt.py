@@ -4828,17 +4828,17 @@ class LanguageChoiceDialog(QDialog):
         btn_row = QHBoxLayout()
         btn_row.setSpacing(10)
 
-        self.btn_en = QPushButton("🇺🇸 EN [E]", self)
+        self.btn_en = QPushButton("ENGLISH", self)
         self.btn_en.setObjectName("btn_en")
         self.btn_en.clicked.connect(lambda: self._choose("en-US"))
         btn_row.addWidget(self.btn_en)
 
-        self.btn_bn = QPushButton("🇧🇩 BD [B]", self)
+        self.btn_bn = QPushButton("বাংলা", self)
         self.btn_bn.setObjectName("btn_bn")
         self.btn_bn.clicked.connect(lambda: self._choose("bn-BD"))
         btn_row.addWidget(self.btn_bn)
 
-        self.btn_cancel = QPushButton("✕ Cancel [Esc]", self)
+        self.btn_cancel = QPushButton("✕ Cancel", self)
         self.btn_cancel.setObjectName("btn_cancel")
         self.btn_cancel.clicked.connect(self.reject)
         btn_row.addWidget(self.btn_cancel)
