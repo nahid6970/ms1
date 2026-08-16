@@ -4782,7 +4782,7 @@ class LanguageChoiceDialog(QDialog):
             QDialog {{
                 background-color: {CP_BG};
                 border: 2px solid {CP_CYAN};
-                border-radius: 8px;
+                border-radius: 0px;
             }}
             QLabel {{
                 color: {CP_TEXT};
@@ -4793,7 +4793,7 @@ class LanguageChoiceDialog(QDialog):
             QPushButton {{
                 background-color: {CP_PANEL};
                 border: 1px solid {CP_DIM};
-                border-radius: 4px;
+                border-radius: 0px;
                 color: white;
                 font-family: 'JetBrainsMono NFP', 'Consolas', sans-serif;
                 font-size: 10pt;
