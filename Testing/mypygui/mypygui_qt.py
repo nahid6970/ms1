@@ -5702,7 +5702,7 @@ class VoiceApp(QMainWindow):
         is_en = self.config["language"] == "en-US"
         self.lang_btn.setText("EN" if is_en else "BN")
         mode = self.config.get("output_mode", "search")
-        border_color = "#FF8C00" if mode == "search" else "#00BFFF"
+        border_color = {"search": "#FF8C00", "clipboard": "#00BFFF", "gg": "#39FF14"}.get(mode, "#FF8C00")
         text_color = CP_RED if is_en else CP_GREEN
         self.lang_btn.setStyleSheet(f"""
             QPushButton#lang {{
@@ -5725,8 +5725,9 @@ class VoiceApp(QMainWindow):
         """)
 
     def _toggle_output_mode(self):
+        cycle = {"search": "clipboard", "clipboard": "gg", "gg": "search"}
         current = self.config.get("output_mode", "search")
-        self.config["output_mode"] = "clipboard" if current == "search" else "search"
+        self.config["output_mode"] = cycle.get(current, "clipboard")
         self.config["open_google"] = self.config["output_mode"] == "search"
         self.config["copy_to_clipboard"] = self.config["output_mode"] == "clipboard"
         self.save_config()
@@ -5916,6 +5917,11 @@ class VoiceApp(QMainWindow):
             self._recording_active = False
             if self.config.get("open_google"):
                 webbrowser.open(f"https://www.google.com/search?q={text}")
+            elif self.config.get("output_mode") == "gg":
+                subprocess.Popen(
+                    ["pwsh", "-NoExit", "-Command", f'gg "{text.strip()}"'],
+                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                )
 
     def on_error(self, session_id, error):
         if session_id != self._session_id:
