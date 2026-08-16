@@ -4819,6 +4819,10 @@ def main() -> int:
                 "limit exceeded",
                 "exceeded your current quota",
                 "high demand",
+                "503",
+                "service unavailable",
+                "overloaded",
+                "temporarily unavailable",
             )
         )
 
@@ -4839,12 +4843,13 @@ def main() -> int:
         for candidate in candidates:
             if candidate == current_name or candidate in failed_accounts:
                 continue
+            prev_acc = current_name or "api"
             switch_api_account(candidate, accounts[candidate])
             client.api_key = api_key
             failover_uses += 1
             model_cache = []
             persist_selection()
-            info(f"Auto failover switched to API account: {candidate}")
+            info(f"⚡ [Failover] Seamlessly switched API account: {prev_acc} ➔ {candidate}")
             return True
         return False
 
@@ -4871,18 +4876,21 @@ def main() -> int:
                         last_turn_tokens = int(usage["totalTokenCount"])
                 except RuntimeError as exc:
                     msg = str(exc).strip()
+                    if active_api_account:
+                        failed_accounts.add(active_api_account)
+                    
+                    # Seamless failover: silently transition to the next account without error dumps
+                    if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
+                        continue
+
+                    # Only show error if failover was disabled, exhausted, or error is not retryable
                     error(msg)
                     retry_match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", msg, re.IGNORECASE)
                     if retry_match:
                         model_cooldowns[client.model] = _now() + dt.timedelta(minutes=1)
                         warn(f"Cooldown set for {client.model}: {format_cooldown_until(model_cooldowns.get(client.model))}")
-                    if active_api_account:
-                        failed_accounts.add(active_api_account)
-                    if retryable_account_error(msg) and attempt_account_failover(failed_accounts):
-                        warn(f"Retrying the same request with {active_api_account}.")
-                        continue
                     if retryable_account_error(msg):
-                        warn("Try /models and choose a more common chat model like 3.6 flash or 2.5 flash.")
+                        warn("All available API accounts failed or were rate-limited. Try /mm to pick another model or /api to check accounts.")
                     return
                 candidates = response.get("candidates", [])
                 if not candidates:

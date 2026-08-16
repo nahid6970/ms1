@@ -133,8 +133,8 @@
         {
           "id": "523e5c0e",
           "label": "BS-6970",
-          "fires_at": 1785826586.4112973,
-          "created_at": 1785826286.417512,
+          "fires_at": 1786817581.0143883,
+          "created_at": 1786817281.0212653,
           "input_mode": "text",
           "input_value": "5m",
           "use_custom_colors": false

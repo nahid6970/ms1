@@ -2843,9 +2843,8 @@ class KomorebiAppsWidget(QWidget):
             self._icon_lbl._tip_text = tip
             return
         self._count_lbl.setText(str(len(self._apps)))
-        tip = []
         if not self._apps:
-            tip.append('<span style="color:#666666;">no windows open</span>')
+            tip_html = '<span style="color:#666666;">no windows open</span>'
         else:
             lines = []
             by_ws = {}
@@ -4220,6 +4219,35 @@ class StatusBar(QMainWindow):
     def _build_git(self, ll):
         self._config = load_config(); repos = self._config.get("git_repos", []); self._git_labels = {}
         
+        # Audio Recorder integration (placed to the left of Voice Input)
+        try:
+            self._audio_recorder = AudioRecorderHelper(self)
+            self._audio_rec_btn = IconLabel("🎙", {
+                "font": ["JetBrainsMono NFP", 18, "bold"],
+                "svg_content": self._config.get("audio_rec_svg_idle", DEFAULT_AUDIO_REC_IDLE_SVG),
+                "icon_width": 18,
+                "icon_height": 20
+            })
+            self._audio_rec_btn.setFixedSize(18, 20)
+            self._audio_rec_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self._audio_rec_btn.setStyleSheet("margin-left: 1px; margin-right: 5px;")
+            self._audio_rec_btn.setToolTip("Audio Recorder: IDLE\nLeft Click to START Recording\nRight Click for Settings")
+
+            def audio_rec_click(event):
+                if event.button() == Qt.MouseButton.LeftButton:
+                    self._audio_recorder.toggle(self._audio_rec_btn)
+                elif event.button() == Qt.MouseButton.RightButton:
+                    dlg = AudioRecorderSettingsDialog(self._config, self)
+                    if dlg.exec():
+                        save_config(self._config)
+                        self._audio_recorder.update_btn_icon(self._audio_rec_btn)
+
+            self._audio_rec_btn.mousePressEvent = audio_rec_click
+            _install_tip_filter(self._audio_rec_btn)
+            ll.addWidget(self._audio_rec_btn)
+        except Exception as e:
+            logging.error(f"Failed to integrate Audio Recorder: {e}")
+
         # Voice Input integration
         try:
             self._voice_app = VoiceApp()
@@ -4647,6 +4675,231 @@ def paste_text(text, preserve_clipboard=False):
         keyboard.release('v')
     if preserve_clipboard and previous_clipboard is not None:
         pyperclip.copy(previous_clipboard)
+
+
+DEFAULT_AUDIO_REC_IDLE_SVG = (
+    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="#00F0FF"/>'
+    '<path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="#00F0FF"/>'
+    '</svg>'
+)
+
+DEFAULT_AUDIO_REC_BUSY_SVG = (
+    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" fill="#FF003C"/>'
+    '<path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" fill="#FF003C"/>'
+    '</svg>'
+)
+
+
+# ─── Audio Recorder Module (FFmpeg System / Mic Audio Recording) ────────────
+class AudioRecorderSettingsDialog(QDialog):
+    """Settings dialog for the FFmpeg Audio Recorder module."""
+    def __init__(self, cfg, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Audio Recorder Settings")
+        self.setStyleSheet(DIALOG_QSS)
+        self.cfg = cfg
+        lay = QVBoxLayout(self)
+        form = QFormLayout()
+
+        self.source_cb = QComboBox()
+        self.source_cb.addItems(["Microphone", "System Audio (Stereo Mix / Loopback)"])
+        src = self.cfg.get("audio_rec_source", "Microphone")
+        if src.startswith("System Audio"):
+            self.source_cb.setCurrentIndex(1)
+        else:
+            self.source_cb.setCurrentIndex(0)
+        form.addRow("AUDIO SOURCE", self.source_cb)
+
+        self.device_le = QLineEdit(self.cfg.get("audio_rec_device", "audio=Microphone (High Definition Audio Device)"))
+        self.device_le.setToolTip("FFmpeg dshow audio device string, e.g. 'audio=Microphone (High Definition Audio Device)'")
+        form.addRow("DSHOW DEVICE", self.device_le)
+
+        out_row = QWidget()
+        out_lay = QHBoxLayout(out_row)
+        out_lay.setContentsMargins(0, 0, 0, 0)
+        self.dir_le = QLineEdit(self.cfg.get("audio_rec_dir", r"C:\Users\nahid\output\audio"))
+        browse_btn = QPushButton("...")
+        browse_btn.setFixedWidth(30)
+        browse_btn.clicked.connect(self._browse)
+        out_lay.addWidget(self.dir_le)
+        out_lay.addWidget(browse_btn)
+        form.addRow("OUTPUT FOLDER", out_row)
+
+        self.fmt_cb = QComboBox()
+        self.fmt_cb.addItems(["mp3", "wav", "m4a", "aac"])
+        self.fmt_cb.setCurrentText(self.cfg.get("audio_rec_format", "mp3"))
+        form.addRow("FORMAT", self.fmt_cb)
+
+        self.svg_start_edit = QPlainTextEdit()
+        self.svg_start_edit.setPlaceholderText("<svg>...</svg> for IDLE state")
+        self.svg_start_edit.setPlainText(self.cfg.get("audio_rec_svg_idle", DEFAULT_AUDIO_REC_IDLE_SVG))
+        self.svg_start_edit.setMaximumHeight(70)
+        form.addRow("SVG CODE (IDLE)", self.svg_start_edit)
+
+        self.svg_stop_edit = QPlainTextEdit()
+        self.svg_stop_edit.setPlaceholderText("<svg>...</svg> for RECORDING state")
+        self.svg_stop_edit.setPlainText(self.cfg.get("audio_rec_svg_busy", DEFAULT_AUDIO_REC_BUSY_SVG))
+        self.svg_stop_edit.setMaximumHeight(70)
+        form.addRow("SVG CODE (RECORDING)", self.svg_stop_edit)
+
+        lay.addLayout(form)
+
+        btns = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
+        btns.accepted.connect(self._save)
+        btns.rejected.connect(self.reject)
+        lay.addWidget(btns)
+
+    def _browse(self):
+        from PyQt6.QtWidgets import QFileDialog
+        d = QFileDialog.getExistingDirectory(self, "Select Output Folder", self.dir_le.text())
+        if d:
+            self.dir_le.setText(d)
+
+    def _save(self):
+        self.cfg["audio_rec_source"] = self.source_cb.currentText()
+        self.cfg["audio_rec_device"] = self.device_le.text().strip()
+        self.cfg["audio_rec_dir"] = self.dir_le.text().strip()
+        self.cfg["audio_rec_format"] = self.fmt_cb.currentText()
+        self.cfg["audio_rec_svg_idle"] = self.svg_start_edit.toPlainText().strip()
+        self.cfg["audio_rec_svg_busy"] = self.svg_stop_edit.toPlainText().strip()
+        self.accept()
+
+
+class AudioRecorderHelper:
+    """Manages audio recording via FFmpeg (Mic) or sounddevice WASAPI (System Audio Loopback)."""
+    def __init__(self, main_window):
+        self.main_window = main_window
+        self.proc = None
+        self.sd_thread = None
+        self.is_recording = False
+        self.output_file = ""
+
+    def toggle(self, btn):
+        if self.is_recording:
+            self.stop(btn)
+        else:
+            self.start(btn)
+
+    def update_btn_icon(self, btn):
+        cfg = load_config()
+        if self.is_recording:
+            svg = cfg.get("audio_rec_svg_busy", DEFAULT_AUDIO_REC_BUSY_SVG)
+        else:
+            svg = cfg.get("audio_rec_svg_idle", DEFAULT_AUDIO_REC_IDLE_SVG)
+        if hasattr(btn, "btn_cfg"):
+            btn.btn_cfg["svg_content"] = svg
+            btn.update()
+
+    def start(self, btn):
+        cfg = load_config()
+        output_dir = cfg.get("audio_rec_dir", r"C:\Users\nahid\output\audio")
+        os.makedirs(output_dir, exist_ok=True)
+        fmt = cfg.get("audio_rec_format", "mp3")
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.output_file = os.path.join(output_dir, f"rec_{ts}.{fmt}")
+        source = cfg.get("audio_rec_source", "Microphone")
+
+        if source.startswith("System Audio"):
+            self._start_system_loopback(btn)
+        else:
+            self._start_ffmpeg_mic(btn, cfg)
+
+    def _start_ffmpeg_mic(self, btn, cfg):
+        device = cfg.get("audio_rec_device", "audio=Microphone (High Definition Audio Device)")
+        cmd = ["ffmpeg", "-y", "-f", "dshow", "-i", device, self.output_file]
+        try:
+            self.proc = subprocess.Popen(
+                cmd, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+            self.is_recording = True
+            self.update_btn_icon(btn)
+            btn.setToolTip(f"Audio Recorder: RECORDING (Mic)...\nSaving to {self.output_file}\nLeft Click to STOP\nRight Click for Settings")
+        except Exception as e:
+            logging.error(f"Failed to start FFmpeg recording: {e}")
+            QMessageBox.warning(self.main_window, "Audio Recorder Error", f"Could not start FFmpeg recording:\n{e}")
+
+    def _start_system_loopback(self, btn):
+        try:
+            import sounddevice as sd
+            import soundfile as sf
+
+            # Find WASAPI output speaker device
+            devs = sd.query_devices()
+            wasapi_id = None
+            for idx, d in enumerate(devs):
+                if d.get("max_output_channels", 0) > 0:
+                    try:
+                        api_name = sd.query_hostapis(d["hostapi"])["name"]
+                        if "WASAPI" in api_name:
+                            wasapi_id = idx
+                            break
+                    except Exception:
+                        pass
+            if wasapi_id is None:
+                wasapi_id = sd.default.device[1]
+
+            stop_evt = threading.Event()
+            out_file = self.output_file
+
+            def _record_loopback():
+                try:
+                    dev_info = devs[wasapi_id]
+                    sr = int(dev_info.get("default_samplerate", 44100))
+                    channels = 2
+                    with sf.SoundFile(out_file, mode='w', samplerate=sr, channels=channels) as f:
+                        def callback(indata, frames, time_info, status):
+                            f.write(indata)
+
+                        with sd.InputStream(device=wasapi_id, channels=channels, samplerate=sr, callback=callback):
+                            while not stop_evt.is_set():
+                                time.sleep(0.1)
+                except Exception as ex:
+                    logging.warning(f"System Audio Loopback recording not supported on current audio driver: {ex}")
+                    self.is_recording = False
+                    QTimer.singleShot(0, lambda: self.update_btn_icon(btn))
+                    # Show user guidance on UI thread
+                    QTimer.singleShot(0, lambda: QMessageBox.information(
+                        self.main_window,
+                        "System Audio Recording Notice",
+                        "Direct WASAPI loopback is restricted by your system audio driver hardware.\n\n"
+                        "To enable System Audio recording on Windows:\n"
+                        "1. Open Sound Control Panel (mmsys.cpl) -> Recording tab\n"
+                        "2. Right-click empty area and check 'Show Disabled Devices'\n"
+                        "3. Right-click 'Stereo Mix' and click Enable\n"
+                        "4. Set Audio Source to Microphone or configure Stereo Mix in Settings."
+                    ))
+
+            self._sd_stop_evt = stop_evt
+            self.sd_thread = threading.Thread(target=_record_loopback, daemon=True)
+            self.sd_thread.start()
+            self.is_recording = True
+            self.update_btn_icon(btn)
+            btn.setToolTip(f"Audio Recorder: RECORDING (System Loopback)...\nSaving to {self.output_file}\nLeft Click to STOP\nRight Click for Settings")
+        except Exception as e:
+            logging.error(f"Failed to start sounddevice system loopback: {e}")
+            QMessageBox.warning(self.main_window, "Audio Recorder Error", f"Could not start System Audio Loopback recording:\n{e}")
+
+    def stop(self, btn):
+        if self.proc:
+            try:
+                self.proc.communicate(input=b"q\n", timeout=3)
+            except Exception:
+                try:
+                    self.proc.kill()
+                except Exception:
+                    pass
+            self.proc = None
+        if hasattr(self, "_sd_stop_evt") and self._sd_stop_evt:
+            self._sd_stop_evt.set()
+            self._sd_stop_evt = None
+            self.sd_thread = None
+
+        self.is_recording = False
+        self.update_btn_icon(btn)
+        btn.setToolTip("Audio Recorder: IDLE\nLeft Click to START Recording\nRight Click for Settings")
 
 
 class VoiceThread(QThread):

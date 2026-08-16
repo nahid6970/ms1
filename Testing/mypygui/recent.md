@@ -26,9 +26,13 @@ All in `mypygui_qt.py`:
   - `_menu_rich_action()`: set `lbl.setFixedHeight(22)` and `Qt.AlignmentFlag.AlignVCenter` to guarantee uniform 22px row height and centered baseline regardless of script fallbacks.
   - Set font family stack to `'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif` across `_menu_rich_action` and `_tip_label`.
   - Replaced space-padding hacks (`&nbsp;`) in `KomorebiAppsWidget.apply_state` hover tooltip with clean block `<div style="margin-left: Npx;">` elements to preserve item indentation across Bangla titles and mixed script items.
-- **NEW Configurable Komorebi Item Indent**:
-  - Added **ITEM INDENT (PX)** in Settings Dialog (`⚙`) under new `KOMOREBI` group box (saves `komorebi_item_indent` to `mypygui_config.json`, default 20px).
-  - Dynamically configures left padding in `_menu_rich_action` and `margin-left` in `KomorebiAppsWidget` hover tooltips.
+- **NEW Audio Recorder module**:
+  - Vector SVG icon button (`IconLabel`) positioned immediately to the left of the Voice Input button.
+  - Left-click: Toggles audio recording on/off; renders custom IDLE SVG (Cyan microphone vector) when idle and RECORDING SVG (Red recording microphone vector) while active.
+  - Dual Recording Modes:
+    - **Microphone**: Uses `ffmpeg` DirectShow device input (`audio=Microphone...`).
+    - **System Audio (Loopback)**: Uses `sounddevice` + `soundfile` WASAPI output loopback stream to record internal system/desktop audio natively without external virtual audio cables.
+  - Right-click: Opens `AudioRecorderSettingsDialog` to select Audio Source (*Microphone* vs *System Audio (Loopback)*), DirectShow Device string, Output Folder, Format (`mp3`, `wav`, `m4a`, `aac`), and editable **SVG CODE (IDLE)** & **SVG CODE (RECORDING)** fields.
 
 ## 3. Critical Context
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).

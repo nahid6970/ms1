@@ -52,6 +52,9 @@ IMPORT_TO_PKG = {
     "PyQt6": "PyQt6",
     "psutil": "psutil",
     "winpty": "pywinpty",
+    "sounddevice": "sounddevice",
+    "soundfile": "soundfile",
+    "numpy": "numpy",
 }
 
 VERIFY_SUBMODULE = {
