@@ -67,7 +67,8 @@ try:
     from PyQt6.QtWidgets import (
         QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
         QLabel, QPushButton, QLineEdit, QTextEdit, QDialog,
-        QGroupBox, QFormLayout, QScrollArea, QMessageBox, QSizePolicy, QFrame
+        QGroupBox, QFormLayout, QScrollArea, QMessageBox, QSizePolicy, QFrame,
+        QSpinBox
     )
     from PyQt6.QtCore import Qt, QTimer
     from PyQt6.QtGui import QFont, QTextCursor
@@ -92,19 +93,19 @@ CP_SUBTEXT = "#808080"      # Secondary Text
 if PYQT6_AVAILABLE:
     class CyberpunkSettingsDialog(QDialog):
         """Extensible Settings Dialog styled in Cyberpunk theme."""
-        def __init__(self, parent=None, current_model="", tool_loops=DEFAULT_TOOL_LOOPS):
+        def __init__(self, parent=None, current_model="", tool_loops=DEFAULT_TOOL_LOOPS, current_font_size=11):
             super().__init__(parent)
             self.setWindowTitle("⚙ SYSTEM SETTINGS")
-            self.resize(500, 320)
+            self.resize(520, 360)
             self.setStyleSheet(f"""
                 QDialog {{ background-color: {CP_BG}; }}
                 QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
-                QLineEdit {{
-                    background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px;
+                QLineEdit, QSpinBox {{
+                    background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; font-family: 'Consolas'; font-size: 10pt;
                 }}
-                QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                QLineEdit:focus, QSpinBox:focus {{ border: 1px solid {CP_CYAN}; }}
                 QPushButton {{
-                    background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
+                    background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 16px; font-weight: bold;
                 }}
                 QPushButton:hover {{
                     background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
@@ -121,18 +122,35 @@ if PYQT6_AVAILABLE:
             form = QFormLayout()
             self.model_input = QLineEdit(current_model)
             self.loops_input = QLineEdit(str(tool_loops))
+            self.font_size_input = QSpinBox()
+            self.font_size_input.setRange(8, 36)
+            self.font_size_input.setValue(int(current_font_size or 11))
+            
             form.addRow("Active Model:", self.model_input)
             form.addRow("Tool Loop Limit:", self.loops_input)
+            form.addRow("Output Font Size (pt):", self.font_size_input)
             grp.setLayout(form)
             layout.addWidget(grp)
 
             btn_box = QHBoxLayout()
-            save_btn = QPushButton("SAVE & CLOSE")
-            save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-            save_btn.clicked.connect(self.accept)
+            btn_box.setSpacing(10)
+            
             cancel_btn = QPushButton("CANCEL")
             cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             cancel_btn.clicked.connect(self.reject)
+            
+            save_btn = QPushButton("SAVE & CLOSE")
+            save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            save_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #111111; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; padding: 8px 18px; font-weight: bold;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_YELLOW}; color: #000000;
+                }}
+            """)
+            save_btn.clicked.connect(self.accept)
+            
             btn_box.addStretch()
             btn_box.addWidget(cancel_btn)
             btn_box.addWidget(save_btn)
@@ -210,9 +228,11 @@ if PYQT6_AVAILABLE:
             main_layout.addLayout(header_layout)
 
             # Output Text Display with Rich Markdown & Table rendering
+            self.font_size = 11
             self.output_view = QTextEdit()
             self.output_view.setReadOnly(True)
             self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.apply_font_size(self.font_size)
             self.full_markdown_history = initial_output.strip()
             self.update_display()
             main_layout.addWidget(self.output_view, stretch=1)
@@ -328,13 +348,29 @@ if PYQT6_AVAILABLE:
         def handle_restart(self):
             os.execv(sys.executable, [sys.executable] + sys.argv)
 
+        def apply_font_size(self, size_pt: int):
+            self.font_size = max(8, min(int(size_pt), 36))
+            font = QFont("Consolas", self.font_size)
+            if hasattr(self, 'output_view') and self.output_view:
+                self.output_view.setFont(font)
+                self.output_view.document().setDefaultFont(font)
+            if hasattr(self, 'input_field') and self.input_field:
+                self.input_field.setFont(QFont("Consolas", max(9, self.font_size - 1)))
+
         def handle_settings(self):
-            dlg = CyberpunkSettingsDialog(self, current_model=self.model_name_val)
+            dlg = CyberpunkSettingsDialog(
+                self,
+                current_model=self.model_name_val,
+                current_font_size=self.font_size,
+            )
             if dlg.exec():
                 new_m = dlg.model_input.text().strip()
                 if new_m:
                     self.model_name_val = new_m
                     self.status_lbl.setText(f"MODEL: {self.model_name_val.upper()}")
+                new_size = dlg.font_size_input.value()
+                self.apply_font_size(new_size)
+                self.update_display()
 
         def handle_send(self):
             text = self.input_field.text().strip()
