@@ -399,6 +399,12 @@ if PYQT6_AVAILABLE:
                     prefs["gui_font_size"] = int(self.font_size)
                     if new_m:
                         prefs["last_model"] = new_m
+                    try:
+                        new_loops = int(dlg.loops_input.text().strip())
+                        if new_loops > 0:
+                            prefs["tool_loop_limit"] = new_loops
+                    except ValueError:
+                        pass
                     MODEL_PREFS_FILE.write_text(json.dumps(prefs, indent=2, ensure_ascii=False), encoding="utf-8")
                 except Exception:
                     pass
@@ -5348,7 +5354,10 @@ def main() -> int:
             initial_output = last_assistant_raw_markdown or strip_ansi(last_assistant_response_text) or "No text output generated."
 
         def gui_query_handler(prompt_text_in: str) -> str:
-            nonlocal last_assistant_response_text, last_assistant_raw_markdown
+            nonlocal last_assistant_response_text, last_assistant_raw_markdown, tool_loop_limit
+            # Sync active model from GUI settings to client before running turn
+            if gui_window and hasattr(gui_window, "model_name_val") and gui_window.model_name_val:
+                client.model = gui_window.model_name_val
             last_assistant_response_text = ""
             last_assistant_raw_markdown = ""
             run_turn(prompt_text_in)
