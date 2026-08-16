@@ -5251,7 +5251,10 @@ def main() -> int:
             on_send_callback=gui_query_handler,
         )
         gui_window.show()
-        app.exec()
+        try:
+            app.exec()
+        except (KeyboardInterrupt, SystemExit):
+            pass
     elif args.prompt:
         run_turn(args.prompt)
     else:
