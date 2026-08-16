@@ -5976,10 +5976,13 @@ class VoiceApp(QMainWindow):
             self._live_recording = False
             self._recording_active = False
             return
+        logging.warning(f"Voice error: {error}")
         self._set_status(CP_RED)
         self._reset_record_btn()
         self._live_recording = False
         self._recording_active = False
+        # Flash red briefly then restore mode color
+        QTimer.singleShot(800, self._update_status_icon_mode)
 
 # ─── Entry point ──────────────────────────────────────────────────────────────
 _main_window = None
