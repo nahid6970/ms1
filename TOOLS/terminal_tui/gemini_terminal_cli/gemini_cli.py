@@ -64,6 +64,283 @@ except Exception:
     msvcrt = None
 
 try:
+    from PyQt6.QtWidgets import (
+        QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+        QLabel, QPushButton, QLineEdit, QTextEdit, QDialog,
+        QGroupBox, QFormLayout, QScrollArea, QMessageBox
+    )
+    from PyQt6.QtCore import Qt, QTimer
+    from PyQt6.QtGui import QFont, QTextCursor
+    PYQT6_AVAILABLE = True
+except Exception:
+    PYQT6_AVAILABLE = False
+
+
+# CYBERPUNK THEME PALETTE
+CP_BG = "#050505"           # Main Window Background
+CP_PANEL = "#111111"        # Panel/Input Background
+CP_YELLOW = "#FCEE0A"       # Accent: Yellow
+CP_CYAN = "#00F0FF"         # Accent: Cyan
+CP_RED = "#FF003C"          # Accent: Red
+CP_GREEN = "#00ff21"        # Accent: Green
+CP_ORANGE = "#ff934b"       # Accent: Orange
+CP_DIM = "#3a3a3a"          # Dimmed/Borders/Inactive
+CP_TEXT = "#E0E0E0"         # Primary Text
+CP_SUBTEXT = "#808080"      # Secondary Text
+
+
+if PYQT6_AVAILABLE:
+    class CyberpunkSettingsDialog(QDialog):
+        """Extensible Settings Dialog styled in Cyberpunk theme."""
+        def __init__(self, parent=None, current_model="", tool_loops=DEFAULT_TOOL_LOOPS):
+            super().__init__(parent)
+            self.setWindowTitle("⚙ SYSTEM SETTINGS")
+            self.resize(500, 320)
+            self.setStyleSheet(f"""
+                QDialog {{ background-color: {CP_BG}; }}
+                QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+                QLineEdit {{
+                    background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px;
+                }}
+                QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                QPushButton {{
+                    background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 14px; font-weight: bold;
+                }}
+                QPushButton:hover {{
+                    background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
+                }}
+                QGroupBox {{
+                    border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
+                }}
+                QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+            """)
+
+            layout = QVBoxLayout(self)
+            
+            grp = QGroupBox("CONFIG OVERRIDES")
+            form = QFormLayout()
+            self.model_input = QLineEdit(current_model)
+            self.loops_input = QLineEdit(str(tool_loops))
+            form.addRow("Active Model:", self.model_input)
+            form.addRow("Tool Loop Limit:", self.loops_input)
+            grp.setLayout(form)
+            layout.addWidget(grp)
+
+            btn_box = QHBoxLayout()
+            save_btn = QPushButton("SAVE & CLOSE")
+            save_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            save_btn.clicked.connect(self.accept)
+            cancel_btn = QPushButton("CANCEL")
+            cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            cancel_btn.clicked.connect(self.reject)
+            btn_box.addStretch()
+            btn_box.addWidget(cancel_btn)
+            btn_box.addWidget(save_btn)
+            layout.addLayout(btn_box)
+
+
+    class CyberpunkOutputGui(QMainWindow):
+        """Cyberpunk Output Viewer Window with Copy, Restart, and Settings."""
+        def __init__(self, initial_output: str = "", prompt: str = "", model_name_val: str = DEFAULT_MODEL, on_send_callback=None):
+            super().__init__()
+            self.setWindowTitle("⚡ CYBERPUNK TERMINAL // GEMINI AI")
+            self.resize(920, 680)
+            self.on_send_callback = on_send_callback
+            self.model_name_val = model_name_val
+
+            self.setStyleSheet(f"""
+                QMainWindow {{ background-color: {CP_BG}; }}
+                QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
+                
+                QTextEdit {{
+                    background-color: {CP_PANEL};
+                    color: {CP_TEXT};
+                    border: 1px solid {CP_DIM};
+                    padding: 10px;
+                    selection-background-color: {CP_CYAN};
+                    selection-color: #000000;
+                    line-height: 140%;
+                }}
+                QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                
+                QLineEdit {{
+                    background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 8px; font-weight: bold;
+                }}
+                QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                
+                QPushButton {{
+                    background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 8px 16px; font-weight: bold;
+                }}
+                QPushButton:hover {{
+                    background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
+                }}
+                QPushButton:pressed {{
+                    background-color: {CP_YELLOW}; color: black;
+                }}
+                
+                QGroupBox {{
+                    border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 10px; font-weight: bold; color: {CP_YELLOW};
+                }}
+                QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 5px; }}
+                
+                QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0px; }}
+                QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; background: none; }}
+                
+                QScrollBar:horizontal {{ background: {CP_BG}; height: 10px; margin: 0px; }}
+                QScrollBar::handle:horizontal {{ background: {CP_CYAN}; min-width: 20px; border-radius: 5px; }}
+                QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0px; background: none; }}
+            """)
+
+            central = QWidget()
+            self.setCentralWidget(central)
+            main_layout = QVBoxLayout(central)
+            main_layout.setContentsMargins(16, 16, 16, 16)
+            main_layout.setSpacing(12)
+
+            # Top Header Bar
+            header_layout = QHBoxLayout()
+            title_lbl = QLabel("⚡ // SYSTEM OUTPUT STREAM //")
+            title_lbl.setStyleSheet(f"color: {CP_CYAN}; font-size: 11pt; font-weight: bold;")
+            self.status_lbl = QLabel(f"MODEL: {self.model_name_val.upper()}")
+            self.status_lbl.setStyleSheet(f"color: {CP_YELLOW}; font-weight: bold;")
+            header_layout.addWidget(title_lbl)
+            header_layout.addStretch()
+            header_layout.addWidget(self.status_lbl)
+            main_layout.addLayout(header_layout)
+
+            # Output Text Display
+            self.output_view = QTextEdit()
+            self.output_view.setReadOnly(True)
+            self.output_view.setPlainText(initial_output)
+            main_layout.addWidget(self.output_view, stretch=1)
+
+            # Interactive Input Area
+            input_box = QHBoxLayout()
+            self.input_field = QLineEdit()
+            self.input_field.setPlaceholderText("Enter prompt / follow-up instruction here...")
+            if prompt:
+                self.input_field.setText(prompt)
+            self.input_field.returnPressed.connect(self.handle_send)
+            
+            self.send_btn = QPushButton("EXECUTE ▶")
+            self.send_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.send_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #111111; border: 1px solid {CP_CYAN}; color: {CP_CYAN}; padding: 8px 18px; font-weight: bold;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_CYAN}; color: #000000; border: 1px solid {CP_CYAN};
+                }}
+            """)
+            self.send_btn.clicked.connect(self.handle_send)
+            input_box.addWidget(self.input_field, stretch=1)
+            input_box.addWidget(self.send_btn)
+            main_layout.addLayout(input_box)
+
+            # Bottom Controls Bar
+            bottom_bar = QHBoxLayout()
+            
+            self.copy_btn = QPushButton("📋 COPY OUTPUT")
+            self.copy_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.copy_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #1a1a1a; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; font-weight: bold; padding: 8px 16px;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_GREEN}; color: #000000;
+                }}
+            """)
+            self.copy_btn.clicked.connect(self.handle_copy)
+
+            self.restart_btn = QPushButton("↺ RESTART")
+            self.restart_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.restart_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #1a1a1a; border: 1px solid {CP_ORANGE}; color: {CP_ORANGE}; font-weight: bold; padding: 8px 16px;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_ORANGE}; color: #000000;
+                }}
+            """)
+            self.restart_btn.clicked.connect(self.handle_restart)
+
+            self.settings_btn = QPushButton("⚙ SETTINGS")
+            self.settings_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            self.settings_btn.clicked.connect(self.handle_settings)
+
+            bottom_bar.addWidget(self.copy_btn)
+            bottom_bar.addWidget(self.restart_btn)
+            bottom_bar.addWidget(self.settings_btn)
+            bottom_bar.addStretch()
+            
+            close_btn = QPushButton("✕ CLOSE")
+            close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            close_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #1a1a1a; border: 1px solid {CP_RED}; color: {CP_RED}; font-weight: bold; padding: 8px 16px;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_RED}; color: #ffffff;
+                }}
+            """)
+            close_btn.clicked.connect(self.close)
+            bottom_bar.addWidget(close_btn)
+            main_layout.addLayout(bottom_bar)
+
+        def handle_copy(self):
+            text = self.output_view.toPlainText()
+            if text:
+                QApplication.clipboard().setText(text)
+                orig_text = self.copy_btn.text()
+                self.copy_btn.setText("✓ COPIED!")
+                self.copy_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold; padding: 8px 16px;")
+                QTimer.singleShot(1500, lambda: self.reset_copy_btn(orig_text))
+
+        def reset_copy_btn(self, orig_text):
+            self.copy_btn.setText(orig_text)
+            self.copy_btn.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: #1a1a1a; border: 1px solid {CP_GREEN}; color: {CP_GREEN}; font-weight: bold; padding: 8px 16px;
+                }}
+                QPushButton:hover {{
+                    background-color: {CP_GREEN}; color: #000000;
+                }}
+            """)
+
+        def handle_restart(self):
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+        def handle_settings(self):
+            dlg = CyberpunkSettingsDialog(self, current_model=self.model_name_val)
+            if dlg.exec():
+                new_m = dlg.model_input.text().strip()
+                if new_m:
+                    self.model_name_val = new_m
+                    self.status_lbl.setText(f"MODEL: {self.model_name_val.upper()}")
+
+        def handle_send(self):
+            text = self.input_field.text().strip()
+            if not text:
+                return
+            self.input_field.clear()
+            self.output_view.append(f"\n> USER: {text}\n")
+            if self.on_send_callback:
+                self.send_btn.setEnabled(False)
+                self.send_btn.setText("PROCESSING...")
+                QApplication.processEvents()
+                try:
+                    res = self.on_send_callback(text)
+                    self.output_view.append(f"{res}\n")
+                    self.output_view.moveCursor(QTextCursor.MoveOperation.End)
+                finally:
+                    self.send_btn.setEnabled(True)
+                    self.send_btn.setText("EXECUTE ▶")
+else:
+    CyberpunkSettingsDialog = None
+    CyberpunkOutputGui = None
+
+try:
     from prompt_toolkit import prompt as pt_prompt
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.completion import Completer, Completion
@@ -4338,6 +4615,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
     parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /api 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
+    parser.add_argument("-gui", "--gui", action="store_true", help="Display output in Cyberpunk PyQt6 GUI window")
     parser.add_argument("--api-key", default=None, help="Gemini API key")
     parser.add_argument("--password", "--api-password", dest="api_password", default=None, help="Password for locked API accounts")
     parser.add_argument("--model", default=None, help="Gemini model")
@@ -4946,7 +5224,35 @@ def main() -> int:
             auto_save_session()
             write_notification()
 
-    if args.prompt:
+    if args.gui:
+        if not PYQT6_AVAILABLE:
+            error("PyQt6 is required for GUI mode. Please run: pip install PyQt6")
+            return 1
+
+        initial_prompt = args.prompt or (" ".join(args.startup_args).strip() if args.startup_args else "")
+        initial_output = ""
+        
+        if initial_prompt:
+            info(f"Running query for GUI output: {initial_prompt}")
+            run_turn(initial_prompt)
+            initial_output = last_assistant_response_text or "No text output generated."
+
+        def gui_query_handler(prompt_text_in: str) -> str:
+            nonlocal last_assistant_response_text
+            last_assistant_response_text = ""
+            run_turn(prompt_text_in)
+            return last_assistant_response_text or "Done."
+
+        app = QApplication.instance() or QApplication(sys.argv)
+        gui_window = CyberpunkOutputGui(
+            initial_output=initial_output,
+            prompt="",
+            model_name_val=client.model,
+            on_send_callback=gui_query_handler,
+        )
+        gui_window.show()
+        app.exec()
+    elif args.prompt:
         run_turn(args.prompt)
     else:
         command_history: List[str] = load_prompt_history()
