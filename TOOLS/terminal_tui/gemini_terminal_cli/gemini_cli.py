@@ -209,11 +209,19 @@ if PYQT6_AVAILABLE:
             header_layout.addWidget(self.status_lbl)
             main_layout.addLayout(header_layout)
 
-            # Output Text Display
+            # Output Text Display with Rich Markdown & Table rendering
             self.output_view = QTextEdit()
             self.output_view.setReadOnly(True)
-            self.output_view.setPlainText(initial_output)
+            self.full_markdown_history = initial_output.strip()
+            clean_md = strip_ansi(self.full_markdown_history)
+            self.output_view.setMarkdown(clean_md)
+            self.output_view.moveCursor(QTextCursor.MoveOperation.End)
             main_layout.addWidget(self.output_view, stretch=1)
+
+        def update_display(self):
+            clean_md = strip_ansi(self.full_markdown_history)
+            self.output_view.setMarkdown(clean_md)
+            self.output_view.moveCursor(QTextCursor.MoveOperation.End)
 
             # Interactive Input Area
             input_box = QHBoxLayout()
@@ -324,15 +332,22 @@ if PYQT6_AVAILABLE:
             if not text:
                 return
             self.input_field.clear()
-            self.output_view.append(f"\n> USER: {text}\n")
+            
+            if self.full_markdown_history:
+                self.full_markdown_history += f"\n\n---\n\n### 👤 User\n{text}\n\n### 🤖 Assistant\n"
+            else:
+                self.full_markdown_history = f"### 👤 User\n{text}\n\n### 🤖 Assistant\n"
+            self.update_display()
+            
             if self.on_send_callback:
                 self.send_btn.setEnabled(False)
                 self.send_btn.setText("PROCESSING...")
                 QApplication.processEvents()
                 try:
                     res = self.on_send_callback(text)
-                    self.output_view.append(f"{res}\n")
-                    self.output_view.moveCursor(QTextCursor.MoveOperation.End)
+                    clean_res = strip_ansi(res)
+                    self.full_markdown_history += f"{clean_res}\n"
+                    self.update_display()
                 finally:
                     self.send_btn.setEnabled(True)
                     self.send_btn.setText("EXECUTE ▶")
@@ -2833,14 +2848,23 @@ def format_tool_result(result: str) -> str:
     return "\n".join(lines)
 
 
-def render_model_parts(parts: List[Dict[str, Any]]) -> str:
+def extract_model_raw_text(parts: List[Dict[str, Any]]) -> str:
     chunks: List[str] = []
     for part in parts:
         if "text" in part:
             chunk = normalize_text(str(part["text"]))
             if chunk:
                 chunks.append(chunk)
-    return render_markdown_text("\n\n".join(chunks).strip())
+    return "\n\n".join(chunks).strip()
+
+
+def strip_ansi(text: str) -> str:
+    return re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', text)
+
+
+def render_model_parts(parts: List[Dict[str, Any]]) -> str:
+    raw = extract_model_raw_text(parts)
+    return render_markdown_text(raw)
 
 
 def extract_function_calls(parts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -4646,6 +4670,7 @@ def main() -> int:
     prompt_bg = str(model_prefs.get("prompt_bg") or "")
     prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
     last_assistant_response_text = ""
+    last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
     saved_last_model = str(model_prefs.get("last_model") or DEFAULT_MODEL)
     saved_last_api_account = str(model_prefs.get("last_api_account") or "")
@@ -5180,10 +5205,12 @@ def main() -> int:
 
                 content_obj = candidates[0].get("content", {})
                 parts = content_obj.get("parts", [])
+                raw_txt = extract_model_raw_text(parts)
                 text = render_model_parts(parts)
                 if text:
-                    nonlocal last_assistant_response_text
+                    nonlocal last_assistant_response_text, last_assistant_raw_markdown
                     last_assistant_response_text = text
+                    last_assistant_raw_markdown = raw_txt
                     print()
                     print(text)
                     print()
@@ -5235,13 +5262,14 @@ def main() -> int:
         if initial_prompt:
             info(f"Running query for GUI output: {initial_prompt}")
             run_turn(initial_prompt)
-            initial_output = last_assistant_response_text or "No text output generated."
+            initial_output = last_assistant_raw_markdown or strip_ansi(last_assistant_response_text) or "No text output generated."
 
         def gui_query_handler(prompt_text_in: str) -> str:
-            nonlocal last_assistant_response_text
+            nonlocal last_assistant_response_text, last_assistant_raw_markdown
             last_assistant_response_text = ""
+            last_assistant_raw_markdown = ""
             run_turn(prompt_text_in)
-            return last_assistant_response_text or "Done."
+            return last_assistant_raw_markdown or strip_ansi(last_assistant_response_text) or "Done."
 
         app = QApplication.instance() or QApplication(sys.argv)
         gui_window = CyberpunkOutputGui(
