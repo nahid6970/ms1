@@ -4,6 +4,7 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 const SHOW_SEEN_KEY = "show_seen";
 const HIDE_SHORTS_KEY = "hide_shorts";
 const UNSEEN_FIRST_KEY = "unseen_first";
+const DEFAULT_FEED_FILTER_KEY = "default_feed_filter";
 const FEED_LIMIT_KEY = "feed_limit";
 const YOUTUBE_DATA_API_KEY = "youtube_data_api_key";
 
@@ -37,6 +38,7 @@ export const config = query({
     const showSeenRow = await getSetting(ctx, SHOW_SEEN_KEY);
     const hideShortsRow = await getSetting(ctx, HIDE_SHORTS_KEY);
     const unseenFirstRow = await getSetting(ctx, UNSEEN_FIRST_KEY);
+    const defaultFilterRow = await getSetting(ctx, DEFAULT_FEED_FILTER_KEY);
     const feedLimitRow = await getSetting(ctx, FEED_LIMIT_KEY);
     const apiKeyRow = await getSetting(ctx, YOUTUBE_DATA_API_KEY);
     const apiKey =
@@ -45,6 +47,7 @@ export const config = query({
       showSeen: showSeenRow ? (showSeenRow.value as boolean) : false,
       hideShorts: hideShortsRow ? (hideShortsRow.value as boolean) : false,
       unseenFirst: unseenFirstRow ? (unseenFirstRow.value as boolean) : false,
+      defaultFeedFilter: defaultFilterRow ? (defaultFilterRow.value as string) : "all",
       feedLimit: feedLimitRow ? Number(feedLimitRow.value) : 50,
       hasYoutubeDataApiKey: apiKey.length > 0,
     };
@@ -63,17 +66,21 @@ export const updateConfig = mutation({
     showSeen: v.boolean(),
     hideShorts: v.optional(v.boolean()),
     unseenFirst: v.optional(v.boolean()),
+    defaultFeedFilter: v.optional(v.string()),
     feedLimit: v.optional(v.number()),
     youtubeDataApiKey: v.optional(v.string()),
     clearYoutubeDataApiKey: v.optional(v.boolean()),
   },
-  handler: async (ctx, { showSeen, hideShorts, unseenFirst, feedLimit, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
+  handler: async (ctx, { showSeen, hideShorts, unseenFirst, defaultFeedFilter, feedLimit, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
     await upsertSetting(ctx, SHOW_SEEN_KEY, showSeen);
     if (hideShorts !== undefined) {
       await upsertSetting(ctx, HIDE_SHORTS_KEY, hideShorts);
     }
     if (unseenFirst !== undefined) {
       await upsertSetting(ctx, UNSEEN_FIRST_KEY, unseenFirst);
+    }
+    if (defaultFeedFilter !== undefined) {
+      await upsertSetting(ctx, DEFAULT_FEED_FILTER_KEY, defaultFeedFilter);
     }
     if (feedLimit !== undefined && feedLimit >= 0 && feedLimit <= 5000) {
       await upsertSetting(ctx, FEED_LIMIT_KEY, feedLimit);

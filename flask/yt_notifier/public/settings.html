@@ -70,6 +70,19 @@
                     </label>
                 </div>
                 <div class="border-t border-slate-800 pt-6">
+                    <label for="defaultFeedFilterSelect" class="block text-white font-medium">Default Landing Feed View</label>
+                    <p class="mt-1 text-xs text-slate-500">Select which feed filter is shown by default when opening the homepage.</p>
+                    <select id="defaultFeedFilterSelect" name="default_feed_filter" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
+                        <option value="all">All Videos</option>
+                        <option value="unseen">Unseen Videos</option>
+                        <option value="seen">Seen Videos</option>
+                        <option value="favorites">Saved Videos</option>
+                        <option value="watchlater">Watch Later Videos</option>
+                        <option value="shorts">Shorts Feed</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-slate-800 pt-6">
                     <label for="feedLimitSelect" class="block text-white font-medium">Videos Per Feed Page</label>
                     <p class="mt-1 text-xs text-slate-500">Choose how many videos to display on your feed page.</p>
                     <select id="feedLimitSelect" name="feed_limit" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">

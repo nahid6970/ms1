@@ -274,6 +274,19 @@ const POPUP_PAGES = {
           </label>
         </div>
         <div class="border-t border-slate-800 pt-6">
+          <label for="defaultFeedFilterSelect" class="block text-white font-medium">Default Landing Feed View</label>
+          <p class="mt-1 text-xs text-slate-500">Select which feed filter is shown by default when opening the homepage.</p>
+          <select id="defaultFeedFilterSelect" name="default_feed_filter" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <option value="all">All Videos</option>
+            <option value="unseen">Unseen Videos</option>
+            <option value="seen">Seen Videos</option>
+            <option value="favorites">Saved Videos</option>
+            <option value="watchlater">Watch Later Videos</option>
+            <option value="shorts">Shorts Feed</option>
+          </select>
+        </div>
+
+        <div class="border-t border-slate-800 pt-6">
           <label for="feedLimitSelect" class="block text-white font-medium">Videos Per Feed Page</label>
           <p class="mt-1 text-xs text-slate-500">Choose how many videos to display on your feed page.</p>
           <select id="feedLimitSelect" name="feed_limit" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
@@ -663,8 +676,8 @@ window.markAllSeen = async function markAllSeen() {
 
 async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
-  const settings = await callConvex("query", "settings:get");
-  const urlCategory = urlParams.get("category") || "all";
+  const config = await callConvex("query", "settings:config");
+  const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
   const urlSubCategory = urlParams.get("subCategory") || "all";
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
@@ -684,7 +697,7 @@ async function renderFeed() {
 
   renderNav({
     unreadCount: unread,
-    showSeen: settings,
+    showSeen: config.showSeen,
     category: urlCategory,
     subCategory: urlSubCategory,
     folder,
@@ -1277,6 +1290,7 @@ function initSettingsPage() {
     const checked = document.getElementById("showSeenToggle")?.checked ?? false;
     const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
     const unseenFirstChecked = document.getElementById("unseenFirstToggle")?.checked ?? false;
+    const defaultFeedFilterVal = document.getElementById("defaultFeedFilterSelect")?.value ?? "all";
     const feedLimitVal = Number(document.getElementById("feedLimitSelect")?.value ?? 50);
     const apiKeyInput = document.getElementById("youtubeDataApiKey");
     const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
@@ -1287,6 +1301,7 @@ function initSettingsPage() {
         showSeen: checked,
         hideShorts: hideShortsChecked,
         unseenFirst: unseenFirstChecked,
+        defaultFeedFilter: defaultFeedFilterVal,
         feedLimit: feedLimitVal,
         youtubeDataApiKey: apiKeyInput.value,
         clearYoutubeDataApiKey: clearApiKey,
@@ -1309,11 +1324,13 @@ function renderSettingsConfig(config) {
   const toggle = document.getElementById("showSeenToggle");
   const shortsToggle = document.getElementById("hideShortsToggle");
   const unseenFirstToggle = document.getElementById("unseenFirstToggle");
+  const defaultFilterSelect = document.getElementById("defaultFeedFilterSelect");
   const feedLimitSelect = document.getElementById("feedLimitSelect");
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
   if (unseenFirstToggle) unseenFirstToggle.checked = Boolean(config.unseenFirst);
+  if (defaultFilterSelect && config.defaultFeedFilter) defaultFilterSelect.value = config.defaultFeedFilter;
   if (feedLimitSelect && config.feedLimit != null) feedLimitSelect.value = String(config.feedLimit);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
