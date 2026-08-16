@@ -71,7 +71,7 @@ try:
         QSpinBox
     )
     from PyQt6.QtCore import Qt, QTimer
-    from PyQt6.QtGui import QFont, QTextCursor
+    from PyQt6.QtGui import QFont, QTextCursor, QTextBlockFormat
     PYQT6_AVAILABLE = True
 except Exception:
     PYQT6_AVAILABLE = False
@@ -334,6 +334,17 @@ if PYQT6_AVAILABLE:
         def update_display(self):
             clean_md = strip_ansi(self.full_markdown_history)
             self.output_view.setMarkdown(clean_md)
+            
+            # Apply real Qt Proportional Line Height to document blocks
+            try:
+                cursor = QTextCursor(self.output_view.document())
+                cursor.select(QTextCursor.SelectionType.Document)
+                block_fmt = QTextBlockFormat()
+                block_fmt.setLineHeight(float(self.line_height), 1)  # 1 = ProportionalHeight (100% - 260%)
+                cursor.mergeBlockFormat(block_fmt)
+            except Exception:
+                pass
+                
             self.output_view.moveCursor(QTextCursor.MoveOperation.End)
 
         def handle_copy(self):
