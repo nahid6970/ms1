@@ -4068,6 +4068,33 @@ class StatusBar(QMainWindow):
         komorebi_indent_le.setToolTip("Indentation in pixels for workspace app items in menus and hover tooltips")
         form_kom.addRow("ITEM INDENT (PX)", komorebi_indent_le)
         left_col.addWidget(grp_kom)
+
+        grp_voice = QGroupBox("VOICE INPUT"); form_voice = QFormLayout(); grp_voice.setLayout(form_voice)
+        v_cfg_file = Path(r"C:\@delta\ms1\tools\Voice\voice_config.json")
+        v_cfg = {}
+        if v_cfg_file.exists():
+            try:
+                with open(v_cfg_file, "r") as vf: v_cfg = json.load(vf)
+            except: pass
+
+        voice_mode_cb = QComboBox()
+        voice_mode_cb.addItems(["Search", "Clipboard", "GG"])
+        voice_mode_cb.setCurrentText(str(v_cfg.get("output_mode", "search")).title())
+        form_voice.addRow("ACTION MODE", voice_mode_cb)
+
+        voice_spc_chk = QCheckBox("STOP ON SPACE (SPC)")
+        voice_spc_chk.setChecked(v_cfg.get("stop_mode", "auto") == "space")
+        form_voice.addRow("", voice_spc_chk)
+
+        voice_time_le = QLineEdit(str(v_cfg.get("phrase_time_limit", 10)))
+        voice_time_le.setFixedWidth(60)
+        form_voice.addRow("MAX SPEAK (SEC)", voice_time_le)
+
+        voice_hk_cb = QComboBox()
+        voice_hk_cb.addItems(["RightAlt+Space", "RightAlt+H", "RightCtrl+Space", "RightCtrl+H", "Alt+H"])
+        voice_hk_cb.setCurrentText(v_cfg.get("hotkey", "RightAlt+Space"))
+        form_voice.addRow("HOTKEY", voice_hk_cb)
+        left_col.addWidget(grp_voice)
         
         left_col.addStretch()
 
@@ -4165,6 +4192,22 @@ class StatusBar(QMainWindow):
                 cfg["git_right_click"] = "lazygit" if git_rc_cb.currentText().lower() == "lazygit" else "menu"
                 cfg["komorebi_item_indent"] = int(komorebi_indent_le.text())
 
+                # Save Voice config
+                v_cfg_file = Path(r"C:\@delta\ms1\tools\Voice\voice_config.json")
+                if v_cfg_file.exists():
+                    try:
+                        with open(v_cfg_file, "r") as vf: v_data = json.load(vf)
+                        v_data["output_mode"] = voice_mode_cb.currentText().lower()
+                        v_data["stop_mode"] = "space" if voice_spc_chk.isChecked() else "auto"
+                        v_data["phrase_time_limit"] = int(voice_time_le.text())
+                        v_data["hotkey"] = voice_hk_cb.currentText()
+                        with open(v_cfg_file, "w") as vf: json.dump(v_data, vf, indent=2)
+                        if hasattr(self, "_voice_app") and self._voice_app:
+                            self._voice_app.config.update(v_data)
+                            self._voice_app._update_status_tooltip()
+                    except Exception as ve:
+                        logging.error(f"Failed to save voice config: {ve}")
+
                 
                 save_config(cfg); self._config = cfg; self._apply_statusbar_style(); self._apply_geometry(); dlg.accept(); self._bl_render()
                 for _lbl in getattr(self, "_git_labels", {}).values():
@@ -4224,9 +4267,7 @@ class StatusBar(QMainWindow):
         try:
             self._voice_app = VoiceApp()
             self._voice_app.status_btn.show()
-            self._voice_app.lang_btn.show()
             ll.addWidget(self._voice_app.status_btn)
-            ll.addWidget(self._voice_app.lang_btn)
         except Exception as e:
             logging.error(f"Failed to integrate Voice input: {e}")
 
@@ -5149,6 +5190,8 @@ class VoiceApp(QMainWindow):
             self.move(self.config["right_edge"] - self.width(), self.config.get("y", 100))
         else:
             self.move(self.config.get("x", 100), self.config.get("y", 100))
+        self._update_status_icon_mode()
+        self._update_status_tooltip()
 
     def update_style(self):
         border_color = self.config.get("border_color", CP_RED)
@@ -5218,13 +5261,14 @@ class VoiceApp(QMainWindow):
     def eventFilter(self, obj, event):
         if obj is self.status_btn and event.type() == QEvent.Type.MouseButtonPress:
             if event.button() == Qt.MouseButton.RightButton:
-                self.show_settings()
-                return True
-        if hasattr(self, 'lang_btn') and obj is self.lang_btn and event.type() == QEvent.Type.MouseButtonPress:
-            if event.button() == Qt.MouseButton.RightButton:
                 self._toggle_output_mode()
                 return True
         return super().eventFilter(obj, event)
+
+    def _update_status_tooltip(self):
+        mode = self.config.get("output_mode", "search")
+        labels = {"search": "🔍 Search", "clipboard": "📋 Clipboard", "gg": "⚡ GG"}
+        self.status_btn.setToolTip(f"Voice Input\nLeft Click: Record\nRight Click: Toggle Mode\nCurrent: {labels.get(mode, mode)}")
 
     def show_help(self):
         hotkey = self.config.get("hotkey", "RightAlt+Space")
@@ -5649,9 +5693,40 @@ class VoiceApp(QMainWindow):
         self.config["open_google"] = self.config["output_mode"] == "search"
         self.config["copy_to_clipboard"] = self.config["output_mode"] == "clipboard"
         self.save_config()
-        self._update_lang_btn()
-        self._update_google_btn()
-        self._update_copy_btn()
+        self._update_status_icon_mode()
+        self._update_status_tooltip()
+        if hasattr(self, 'lang_btn'): self._update_lang_btn()
+        if hasattr(self, 'google_btn'): self._update_google_btn()
+        if hasattr(self, 'copy_btn'): self._update_copy_btn()
+
+    def _update_status_icon_mode(self):
+        """Update the mic icon color to reflect current output mode."""
+        import re
+        mode = self.config.get("output_mode", "search")
+        color = {"search": "#FF8C00", "clipboard": "#00BFFF", "gg": "#39FF14"}.get(mode, CP_GREEN)
+        svg_tpl = self.config.get("status_svg", "")
+        if svg_tpl:
+            svg_content = svg_tpl
+            if "currentColor" in svg_content:
+                svg_content = svg_content.replace("currentColor", color)
+            else:
+                svg_content = re.sub(r'fill="[^"]+"', f'fill="{color}"', svg_content)
+                svg_content = re.sub(r'stroke="[^"]+"', f'stroke="{color}"', svg_content)
+            self.status_btn.btn_cfg["svg_content"] = svg_content
+            self.status_btn.update()
+        self.status_btn.setStyleSheet(f"""
+            QLabel {{
+                color: {color};
+                background: transparent;
+                padding: 0px;
+                margin: 1px 7px 1px 1px;
+                font-size: 18px;
+                font-weight: bold;
+                min-width: 18px;
+                max-width: 18px;
+                text-align: center;
+            }}
+        """)
 
     def _set_toggle_btn(self, btn, label, enabled):
         color = CP_GREEN if enabled else CP_DIM
