@@ -93,10 +93,10 @@ CP_SUBTEXT = "#808080"      # Secondary Text
 if PYQT6_AVAILABLE:
     class CyberpunkSettingsDialog(QDialog):
         """Extensible Settings Dialog styled in Cyberpunk theme."""
-        def __init__(self, parent=None, current_model="", tool_loops=DEFAULT_TOOL_LOOPS, current_font_size=11):
+        def __init__(self, parent=None, current_model="", tool_loops=DEFAULT_TOOL_LOOPS, current_font_size=11, current_line_height=140):
             super().__init__(parent)
             self.setWindowTitle("⚙ SYSTEM SETTINGS")
-            self.resize(520, 360)
+            self.resize(520, 390)
             self.setStyleSheet(f"""
                 QDialog {{ background-color: {CP_BG}; }}
                 QWidget {{ color: {CP_TEXT}; font-family: 'Consolas'; font-size: 10pt; }}
@@ -122,13 +122,21 @@ if PYQT6_AVAILABLE:
             form = QFormLayout()
             self.model_input = QLineEdit(current_model)
             self.loops_input = QLineEdit(str(tool_loops))
+            
             self.font_size_input = QSpinBox()
             self.font_size_input.setRange(8, 36)
             self.font_size_input.setValue(int(current_font_size or 11))
+
+            self.line_height_input = QSpinBox()
+            self.line_height_input.setRange(100, 260)
+            self.line_height_input.setSingleStep(5)
+            self.line_height_input.setSuffix("%")
+            self.line_height_input.setValue(int(current_line_height or 140))
             
             form.addRow("Active Model:", self.model_input)
             form.addRow("Tool Loop Limit:", self.loops_input)
             form.addRow("Output Font Size (pt):", self.font_size_input)
+            form.addRow("Line Height (%):", self.line_height_input)
             grp.setLayout(form)
             layout.addWidget(grp)
 
@@ -230,12 +238,13 @@ if PYQT6_AVAILABLE:
             # Output Text Display with Rich Markdown, Table & Clickable URL Link support
             saved_prefs = load_model_prefs()
             self.font_size = int(saved_prefs.get("gui_font_size") or 11)
+            self.line_height = int(saved_prefs.get("gui_line_height") or 140)
             self.output_view = QTextBrowser()
             self.output_view.setReadOnly(True)
             self.output_view.setOpenExternalLinks(True)
             self.output_view.document().setDocumentMargin(16)
             self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-            self.apply_font_size(self.font_size)
+            self.apply_typography(self.font_size, self.line_height)
             self.full_markdown_history = initial_output.strip()
             self.update_display()
             main_layout.addWidget(self.output_view, stretch=1)
@@ -351,14 +360,14 @@ if PYQT6_AVAILABLE:
         def handle_restart(self):
             os.execv(sys.executable, [sys.executable] + sys.argv)
 
-        def apply_font_size(self, size_pt: int):
+        def apply_typography(self, size_pt: int, line_height: int):
             self.font_size = max(8, min(int(size_pt), 36))
+            self.line_height = max(100, min(int(line_height), 260))
             font = QFont("Consolas", self.font_size)
             if hasattr(self, 'output_view') and self.output_view:
                 self.output_view.setFont(font)
                 self.output_view.document().setDefaultFont(font)
                 self.output_view.document().setDocumentMargin(16)
-                # Top/bottom document padding to prevent top glyph clipping while keeping standard line height
                 self.output_view.setStyleSheet(f"""
                     QTextBrowser, QTextEdit {{
                         background-color: {CP_PANEL};
@@ -369,7 +378,7 @@ if PYQT6_AVAILABLE:
                         font-size: {self.font_size}pt;
                         selection-background-color: {CP_CYAN};
                         selection-color: #000000;
-                        line-height: 140%;
+                        line-height: {self.line_height}%;
                     }}
                     QTextBrowser:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
                     a {{
@@ -385,6 +394,7 @@ if PYQT6_AVAILABLE:
                 self,
                 current_model=self.model_name_val,
                 current_font_size=self.font_size,
+                current_line_height=self.line_height,
             )
             if dlg.exec():
                 new_m = dlg.model_input.text().strip()
@@ -392,13 +402,15 @@ if PYQT6_AVAILABLE:
                     self.model_name_val = new_m
                     self.status_lbl.setText(f"MODEL: {self.model_name_val.upper()}")
                 new_size = dlg.font_size_input.value()
-                self.apply_font_size(new_size)
+                new_lh = dlg.line_height_input.value()
+                self.apply_typography(new_size, new_lh)
                 self.update_display()
                 
                 # Persist settings immediately to model_prefs.json
                 try:
                     prefs = load_model_prefs()
                     prefs["gui_font_size"] = int(self.font_size)
+                    prefs["gui_line_height"] = int(self.line_height)
                     if new_m:
                         prefs["last_model"] = new_m
                     try:
@@ -3123,6 +3135,7 @@ def default_model_prefs() -> Dict[str, Any]:
         "prompt_bg": "",
         "prompt_prefix_color": "1;32",
         "gui_font_size": 11,
+        "gui_line_height": 140,
     }
 
 
@@ -3188,6 +3201,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "prompt_bg": str(data.get("prompt_bg") or ""),
             "prompt_prefix_color": str(data.get("prompt_prefix_color") or "1;32"),
             "gui_font_size": int(data.get("gui_font_size") or 11),
+            "gui_line_height": int(data.get("gui_line_height") or 140),
         })
         return prefs
     except Exception:
@@ -3226,6 +3240,7 @@ def save_model_prefs(
     prompt_bg: str = "",
     prompt_prefix_color: str = "1;32",
     gui_font_size: int = 11,
+    gui_line_height: int = 140,
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
@@ -3249,6 +3264,7 @@ def save_model_prefs(
         "prompt_bg": prompt_bg,
         "prompt_prefix_color": prompt_prefix_color,
         "gui_font_size": int(gui_font_size),
+        "gui_line_height": int(gui_line_height),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -4758,6 +4774,7 @@ def main() -> int:
     prompt_bg = str(model_prefs.get("prompt_bg") or "")
     prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
     gui_font_size = int(model_prefs.get("gui_font_size") or 11)
+    gui_line_height = int(model_prefs.get("gui_line_height") or 140)
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
@@ -5128,7 +5145,7 @@ def main() -> int:
         return _ansi_wrap(f"{prefix}> ", prompt_prefix_color)
 
     def persist_selection() -> None:
-        nonlocal gui_font_size
+        nonlocal gui_font_size, gui_line_height
         account_name = active_api_account or saved_last_api_account
         if account_name:
             api_account_model_prefs[account_name] = {"failover_uses": max(0, int(failover_uses))}
@@ -5150,6 +5167,7 @@ def main() -> int:
             prompt_bg,
             prompt_prefix_color,
             gui_font_size,
+            gui_line_height,
         )
 
     def add_api_account_interactive(provider: str = "gemini") -> None:
