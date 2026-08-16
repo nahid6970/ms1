@@ -3,8 +3,8 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 export const list = query({
   args: {
-    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts")),
-    subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"))),
+    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts"), v.literal("watchlater")),
+    subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("watchlater"))),
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
   },
@@ -69,6 +69,8 @@ export const list = query({
       q = q.filter((f) => f.eq(f.field("isNew"), false));
     } else if (effectiveCategory === "favorites") {
       q = q.filter((f) => f.eq(f.field("isFavorite"), true));
+    } else if (effectiveCategory === "watchlater") {
+      q = q.filter((f) => f.eq(f.field("isWatchLater"), true));
     }
 
     const takeAmount = feedLimit === 0 ? 2000 : Math.max(300, feedLimit * 2);
@@ -81,6 +83,12 @@ export const list = query({
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )
+      .filter((video) => {
+        if (effectiveCategory === "watchlater") {
+          return Boolean(video.isWatchLater);
+        }
+        return !video.isWatchLater;
+      })
       .filter((video) => {
         if (isShortsView) return isShortVideo(video);
         return !hideShorts || !isShortVideo(video);
@@ -106,6 +114,7 @@ export const list = query({
       published: video.published,
       isNew: video.isNew,
       isFavorite: video.isFavorite ?? false,
+      isWatchLater: video.isWatchLater ?? false,
       isShort: isShortVideo(video),
       channelId: video.channelId,
       channelName: nameById.get(video.channelId) ?? "Unknown Channel",
@@ -123,6 +132,16 @@ export const toggleFavorite = mutation({
     await ctx.db.patch(id, { isFavorite: !(video.isFavorite ?? false) });
   },
 });
+
+export const toggleWatchLater = mutation({
+  args: { id: v.id("videos") },
+  handler: async (ctx, { id }) => {
+    const video = await ctx.db.get(id);
+    if (!video) return;
+    await ctx.db.patch(id, { isWatchLater: !(video.isWatchLater ?? false) });
+  },
+});
+
 
 export const toggleShort = mutation({
   args: { id: v.id("videos") },
@@ -179,6 +198,7 @@ export const unreadCount = query({
 
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) => !video.isWatchLater)
       .filter((video) =>
         titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
       )

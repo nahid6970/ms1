@@ -323,11 +323,13 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCat
     { id: "unseen", label: "Unseen Shorts", icon: "fa-eye-slash" },
     { id: "seen", label: "Seen Shorts", icon: "fa-eye" },
     { id: "favorites", label: "Saved Shorts", icon: "fa-star text-amber-400" },
+    { id: "watchlater", label: "Watch Later Shorts", icon: "fa-clock text-sky-400" },
   ] : [
     { id: "all", label: "All Videos", icon: "fa-border-all" },
     { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
     { id: "seen", label: "Seen", icon: "fa-eye" },
     { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
+    { id: "watchlater", label: "Watch Later", icon: "fa-clock text-sky-400" },
     { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" },
   ];
 
@@ -377,6 +379,9 @@ function renderNav({ unreadCount = 0, showSeen = false, category = "all", subCat
           </button>
           <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed" aria-label="Shorts Feed">
             <i class="fa-solid fa-mobile-screen-button"></i>
+          </a>
+          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed" aria-label="Watch Later Feed">
+            <i class="fa-solid fa-clock"></i>
           </a>
           <button type="button" onclick="openPopup('settings')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Settings" aria-label="Settings">
             <i class="fa-solid fa-gear"></i>
@@ -525,6 +530,7 @@ async function refreshNavOnly() {
 function videoCard(video, categories = []) {
   const isNew = video.isNew;
   const isFavorite = Boolean(video.isFavorite);
+  const isWatchLater = Boolean(video.isWatchLater);
   const currentCat = video.channelCategory || "";
   const cardTone = isNew
     ? "bg-slate-900/90 border-slate-800 ring-1 ring-red-500/20"
@@ -551,6 +557,9 @@ function videoCard(video, categories = []) {
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
       </a>
       <div class="absolute right-3 top-3 z-10 flex items-center gap-2">
+        <button onclick="toggleWatchLater('${esc(video._id)}')" class="${isWatchLater ? "inline-flex opacity-100 text-sky-400 border border-sky-500/50 bg-sky-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isWatchLater ? "Remove from Watch Later" : "Add to Watch Later"}">
+          <i class="${isWatchLater ? "fa-solid" : "fa-regular"} fa-clock text-sm"></i>
+        </button>
         <button onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
         </button>
@@ -608,6 +617,16 @@ window.toggleFavorite = async function toggleFavorite(id) {
     flash(err.message, "danger");
   }
 };
+
+window.toggleWatchLater = async function toggleWatchLater(id) {
+  try {
+    await callConvex("mutation", "videos:toggleWatchLater", { id });
+    await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 
 window.toggleRead = async function toggleRead(id) {
   try {
@@ -686,7 +705,7 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
+      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = videos.map((v) => videoCard(v, categories)).join("");

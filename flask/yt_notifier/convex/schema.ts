@@ -25,6 +25,7 @@ export default defineSchema({
     published: v.string(),
     isNew: v.boolean(),
     isFavorite: v.optional(v.boolean()),
+    isWatchLater: v.optional(v.boolean()),
     isShort: v.optional(v.boolean()),
   })
     .index("by_channelId", ["channelId"])
