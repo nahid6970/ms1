@@ -285,6 +285,18 @@ const POPUP_PAGES = {
             <option value="shorts">Shorts Feed</option>
           </select>
         </div>
+        <div class="border-t border-slate-800 pt-6">
+          <label for="defaultShortsFilterSelect" class="block text-white font-medium">Default Shorts Feed View</label>
+          <p class="mt-1 text-xs text-slate-500">Select which filter view is shown by default when opening the Shorts feed.</p>
+          <select id="defaultShortsFilterSelect" name="default_shorts_filter" class="mt-3 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-red-500 transition">
+            <option value="all">All Shorts</option>
+            <option value="unseen">Unseen Shorts</option>
+            <option value="seen">Seen Shorts</option>
+            <option value="favorites">Saved Shorts</option>
+            <option value="watchlater">Watch Later Shorts</option>
+          </select>
+        </div>
+
 
         <div class="border-t border-slate-800 pt-6">
           <label for="feedLimitSelect" class="block text-white font-medium">Videos Per Feed Page</label>
@@ -678,7 +690,7 @@ async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
   const config = await callConvex("query", "settings:config");
   const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
-  const urlSubCategory = urlParams.get("subCategory") || "all";
+  const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
 
@@ -1291,6 +1303,7 @@ function initSettingsPage() {
     const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
     const unseenFirstChecked = document.getElementById("unseenFirstToggle")?.checked ?? false;
     const defaultFeedFilterVal = document.getElementById("defaultFeedFilterSelect")?.value ?? "all";
+    const defaultShortsFilterVal = document.getElementById("defaultShortsFilterSelect")?.value ?? "all";
     const feedLimitVal = Number(document.getElementById("feedLimitSelect")?.value ?? 50);
     const apiKeyInput = document.getElementById("youtubeDataApiKey");
     const clearApiKey = document.getElementById("clearYoutubeDataApiKey").checked;
@@ -1302,6 +1315,7 @@ function initSettingsPage() {
         hideShorts: hideShortsChecked,
         unseenFirst: unseenFirstChecked,
         defaultFeedFilter: defaultFeedFilterVal,
+        defaultShortsFilter: defaultShortsFilterVal,
         feedLimit: feedLimitVal,
         youtubeDataApiKey: apiKeyInput.value,
         clearYoutubeDataApiKey: clearApiKey,
@@ -1325,12 +1339,14 @@ function renderSettingsConfig(config) {
   const shortsToggle = document.getElementById("hideShortsToggle");
   const unseenFirstToggle = document.getElementById("unseenFirstToggle");
   const defaultFilterSelect = document.getElementById("defaultFeedFilterSelect");
+  const defaultShortsFilterSelect = document.getElementById("defaultShortsFilterSelect");
   const feedLimitSelect = document.getElementById("feedLimitSelect");
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
   if (unseenFirstToggle) unseenFirstToggle.checked = Boolean(config.unseenFirst);
   if (defaultFilterSelect && config.defaultFeedFilter) defaultFilterSelect.value = config.defaultFeedFilter;
+  if (defaultShortsFilterSelect && config.defaultShortsFilter) defaultShortsFilterSelect.value = config.defaultShortsFilter;
   if (feedLimitSelect && config.feedLimit != null) feedLimitSelect.value = String(config.feedLimit);
   if (status) {
     status.textContent = config.hasYoutubeDataApiKey
