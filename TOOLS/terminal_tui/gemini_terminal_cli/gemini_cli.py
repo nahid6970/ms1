@@ -305,11 +305,12 @@ if PYQT6_AVAILABLE:
             self.output_view.moveCursor(QTextCursor.MoveOperation.End)
 
         def handle_copy(self):
-            text = self.output_view.toPlainText()
+            # Copy formatted markdown (preserving tables, bolding, code blocks, lists)
+            text = strip_ansi(self.full_markdown_history).strip() if self.full_markdown_history else self.output_view.toPlainText()
             if text:
                 QApplication.clipboard().setText(text)
                 orig_text = self.copy_btn.text()
-                self.copy_btn.setText("✓ COPIED!")
+                self.copy_btn.setText("✓ COPIED MARKDOWN!")
                 self.copy_btn.setStyleSheet(f"background-color: {CP_GREEN}; color: black; font-weight: bold; padding: 8px 16px;")
                 QTimer.singleShot(1500, lambda: self.reset_copy_btn(orig_text))
 
