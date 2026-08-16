@@ -4654,6 +4654,78 @@ def paste_text(text, preserve_clipboard=False):
 
 
 
+import concurrent.futures
+
+def recognize_cloud_auto(recognizer, audio_data, target_lang=None):
+    """
+    Sends audio to Google Cloud for both English ('en-US') and Bengali ('bn-BD') concurrently
+    if target_lang is 'auto' or not specified, otherwise uses the specified language.
+    """
+    if target_lang and target_lang not in ("auto", "AUTO"):
+        return recognizer.recognize_google(audio_data, language=target_lang)
+
+    def _query(lang_code):
+        try:
+            res = recognizer.recognize_google(audio_data, language=lang_code, show_all=True)
+            if not res or not isinstance(res, dict) or 'alternative' not in res or not res['alternative']:
+                return None
+            alt = res['alternative'][0]
+            confidence = alt.get('confidence', 0.8)
+            text = alt.get('transcript', '').strip()
+            if not text:
+                return None
+            return {"lang": lang_code, "text": text, "confidence": confidence}
+        except Exception:
+            return None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        f_en = executor.submit(_query, 'en-US')
+        f_bn = executor.submit(_query, 'bn-BD')
+        res_en = f_en.result()
+        res_bn = f_bn.result()
+
+    if res_en and not res_bn:
+        return res_en["text"]
+    if res_bn and not res_en:
+        return res_bn["text"]
+    if not res_en and not res_bn:
+        return recognizer.recognize_google(audio_data, language='en-US')
+
+    # Both returned results:
+    text_en = res_en.get("text", "")
+    text_bn = res_bn.get("text", "")
+    conf_en = res_en.get("confidence", 0.0)
+    conf_bn = res_bn.get("confidence", 0.0)
+
+    # If confidence is reported with a notable difference:
+    if abs(conf_bn - conf_en) >= 0.1:
+        return text_bn if conf_bn > conf_en else text_en
+
+    # If confidences are tied or unprovided (Google Speech API often omits confidence or returns None):
+    # Check if English words look like random phonetic gibberish / non-words
+    en_words = re.findall(r'[a-zA-Z]+', text_en.lower())
+    common_en = {
+        "the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with",
+        "he", "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her",
+        "she", "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up",
+        "out", "if", "about", "who", "get", "which", "go", "me", "when", "make", "can", "like", "time",
+        "no", "just", "him", "know", "take", "people", "into", "year", "your", "good", "some", "could",
+        "them", "see", "other", "than", "then", "now", "look", "only", "come", "its", "over", "think",
+        "also", "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", "even",
+        "new", "want", "because", "any", "these", "give", "day", "most", "us", "bro", "hey", "hello",
+        "hi", "ok", "okay", "yes", "please", "search", "open", "play", "code", "file", "run"
+    }
+    
+    # Calculate English vocabulary hit ratio
+    en_hits = sum(1 for w in en_words if w in common_en)
+    en_ratio = (en_hits / len(en_words)) if en_words else 0.0
+
+    # If the English text has solid recognized English words, it's English; otherwise it's Bengali
+    if en_words and en_ratio >= 0.5:
+        return text_en
+    return text_bn
+
+
 class VoiceThread(QThread):
     result = pyqtSignal(str)
     error  = pyqtSignal(str)
@@ -4672,7 +4744,7 @@ class VoiceThread(QThread):
                 self.running = True
                 audio = recognizer.listen(source, timeout=5, phrase_time_limit=self.phrase_time_limit)
                 self.running = False
-                self.result.emit(recognizer.recognize_google(audio, language=self.lang))
+                self.result.emit(recognize_cloud_auto(recognizer, audio, self.lang))
         except Exception as e:
             self.running = False
             self.error.emit(str(e))
@@ -4741,7 +4813,7 @@ class SpaceStopThread(QThread):
                 buf.seek(0)
                 with sr.AudioFile(buf) as source:
                     audio = recognizer.record(source)
-                part = recognizer.recognize_google(audio, language=lang)
+                part = recognize_cloud_auto(recognizer, audio, lang)
                 if part:
                     recognized_parts.append(part)
             self.result.emit(" ".join(recognized_parts).strip())
@@ -4783,7 +4855,7 @@ class ContinuousThread(QThread):
                     audio = recognizer.listen(source, timeout=1, phrase_time_limit=self.phrase_time_limit)
                 if self._stop:
                     break
-                text = recognizer.recognize_google(audio, language=self.lang_getter())
+                text = recognize_cloud_auto(recognizer, audio, self.lang_getter())
                 if text:
                     self.result.emit(text)
             except sr.WaitTimeoutError:
@@ -5441,8 +5513,10 @@ class VoiceApp(QMainWindow):
         self.setup_global_hotkey()
 
     def toggle_language(self):
-        new_lang = "bn-BD" if self.config["language"] == "en-US" else "en-US"
-        self.change_language(new_lang)
+        order = ["auto", "en-US", "bn-BD"]
+        curr = self.config.get("language", "auto")
+        next_idx = (order.index(curr) + 1) % len(order) if curr in order else 0
+        self.change_language(order[next_idx])
 
     def change_language(self, lang):
         self.config["language"] = lang
@@ -5451,11 +5525,20 @@ class VoiceApp(QMainWindow):
         self._update_lang_btn()
 
     def _update_lang_btn(self):
-        is_en = self.config["language"] == "en-US"
-        self.lang_btn.setText("EN" if is_en else "BN")
+        lang = self.config.get("language", "auto")
+        if lang == "auto":
+            lbl = "AU"
+            text_color = CP_CYAN
+        elif lang == "en-US":
+            lbl = "EN"
+            text_color = CP_RED
+        else:
+            lbl = "BN"
+            text_color = CP_GREEN
+
         mode = self.config.get("output_mode", "search")
         border_color = {"search": "#FF8C00", "clipboard": "#00BFFF", "gg": "#39FF14"}.get(mode, "#FF8C00")
-        text_color = CP_RED if is_en else CP_GREEN
+        self.lang_btn.setText(lbl)
         self.lang_btn.setStyleSheet(f"""
             QPushButton#lang {{
                 border: 2px solid {border_color};
