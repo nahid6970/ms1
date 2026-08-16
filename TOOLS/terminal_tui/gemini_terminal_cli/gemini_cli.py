@@ -66,7 +66,7 @@ except Exception:
 try:
     from PyQt6.QtWidgets import (
         QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-        QLabel, QPushButton, QLineEdit, QTextEdit, QDialog,
+        QLabel, QPushButton, QLineEdit, QTextEdit, QTextBrowser, QDialog,
         QGroupBox, QFormLayout, QScrollArea, QMessageBox, QSizePolicy, QFrame,
         QSpinBox
     )
@@ -227,11 +227,12 @@ if PYQT6_AVAILABLE:
             header_layout.addWidget(self.status_lbl)
             main_layout.addLayout(header_layout)
 
-            # Output Text Display with Rich Markdown & Table rendering
+            # Output Text Display with Rich Markdown, Table & Clickable URL Link support
             saved_prefs = load_model_prefs()
             self.font_size = int(saved_prefs.get("gui_font_size") or 11)
-            self.output_view = QTextEdit()
+            self.output_view = QTextBrowser()
             self.output_view.setReadOnly(True)
+            self.output_view.setOpenExternalLinks(True)
             self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.apply_font_size(self.font_size)
             self.full_markdown_history = initial_output.strip()
@@ -355,9 +356,9 @@ if PYQT6_AVAILABLE:
             if hasattr(self, 'output_view') and self.output_view:
                 self.output_view.setFont(font)
                 self.output_view.document().setDefaultFont(font)
-                # Override stylesheet font-size so Qt Markdown parser preserves chosen font size
+                # Override stylesheet font-size and add cyan hyperlink styling
                 self.output_view.setStyleSheet(f"""
-                    QTextEdit {{
+                    QTextBrowser, QTextEdit {{
                         background-color: {CP_PANEL};
                         color: {CP_TEXT};
                         border: 1px solid {CP_DIM};
@@ -368,7 +369,11 @@ if PYQT6_AVAILABLE:
                         selection-color: #000000;
                         line-height: 140%;
                     }}
-                    QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                    QTextBrowser:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                    a {{
+                        color: {CP_CYAN};
+                        text-decoration: underline;
+                    }}
                 """)
             if hasattr(self, 'input_field') and self.input_field:
                 self.input_field.setFont(QFont("Consolas", max(9, self.font_size - 1)))
