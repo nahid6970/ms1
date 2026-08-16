@@ -233,6 +233,7 @@ if PYQT6_AVAILABLE:
             self.output_view = QTextBrowser()
             self.output_view.setReadOnly(True)
             self.output_view.setOpenExternalLinks(True)
+            self.output_view.document().setDocumentMargin(16)
             self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.apply_font_size(self.font_size)
             self.full_markdown_history = initial_output.strip()
@@ -356,14 +357,15 @@ if PYQT6_AVAILABLE:
             if hasattr(self, 'output_view') and self.output_view:
                 self.output_view.setFont(font)
                 self.output_view.document().setDefaultFont(font)
-                # Override stylesheet font-size and add cyan hyperlink styling
+                self.output_view.document().setDocumentMargin(16)
+                # Top/bottom document padding to prevent top glyph clipping while keeping standard line height
                 self.output_view.setStyleSheet(f"""
                     QTextBrowser, QTextEdit {{
                         background-color: {CP_PANEL};
                         color: {CP_TEXT};
                         border: 1px solid {CP_DIM};
-                        padding: 10px;
-                        font-family: 'Consolas';
+                        padding: 14px 12px;
+                        font-family: 'Consolas', 'Segoe UI', 'Kalpurush', 'SolaimanLipi', monospace;
                         font-size: {self.font_size}pt;
                         selection-background-color: {CP_CYAN};
                         selection-color: #000000;
