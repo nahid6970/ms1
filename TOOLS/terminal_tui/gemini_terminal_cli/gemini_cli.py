@@ -332,7 +332,7 @@ if PYQT6_AVAILABLE:
             main_layout.addWidget(bottom_container, stretch=0)
 
         def update_display(self):
-            clean_md = strip_ansi(self.full_markdown_history)
+            clean_md = normalize_markdown_lists(strip_ansi(self.full_markdown_history))
             self.output_view.setMarkdown(clean_md)
             
             # Apply real Qt Proportional Line Height to document blocks
@@ -374,7 +374,9 @@ if PYQT6_AVAILABLE:
         def apply_typography(self, size_pt: int, line_height: int):
             self.font_size = max(8, min(int(size_pt), 36))
             self.line_height = max(100, min(int(line_height), 260))
-            font = QFont("Consolas", self.font_size)
+            # Primary Unicode font family supporting complex scripts without OpenType shaping warnings
+            font = QFont("Segoe UI", self.font_size)
+            font.setStyleHint(QFont.StyleHint.SansSerif)
             if hasattr(self, 'output_view') and self.output_view:
                 self.output_view.setFont(font)
                 self.output_view.document().setDefaultFont(font)
@@ -385,11 +387,10 @@ if PYQT6_AVAILABLE:
                         color: {CP_TEXT};
                         border: 1px solid {CP_DIM};
                         padding: 14px 12px;
-                        font-family: 'Consolas', 'Segoe UI', 'Kalpurush', 'SolaimanLipi', monospace;
+                        font-family: 'Segoe UI', 'Nirmala UI', 'Kalpurush', 'SolaimanLipi', 'Consolas', monospace;
                         font-size: {self.font_size}pt;
                         selection-background-color: {CP_CYAN};
                         selection-color: #000000;
-                        line-height: {self.line_height}%;
                     }}
                     QTextBrowser:focus, QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
                     a {{
@@ -398,7 +399,7 @@ if PYQT6_AVAILABLE:
                     }}
                 """)
             if hasattr(self, 'input_field') and self.input_field:
-                self.input_field.setFont(QFont("Consolas", max(9, self.font_size - 1)))
+                self.input_field.setFont(QFont("Segoe UI", max(9, self.font_size - 1)))
 
         def handle_settings(self):
             dlg = CyberpunkSettingsDialog(
@@ -2967,6 +2968,22 @@ def extract_model_raw_text(parts: List[Dict[str, Any]]) -> str:
 
 def strip_ansi(text: str) -> str:
     return re.sub(r'\x1b\[[0-9;?]*[a-zA-Z]', '', text)
+
+
+def normalize_markdown_lists(text: str) -> str:
+    """Ensure non-ASCII numerals (e.g. Bengali/Devanagari lists) maintain line breaks in Markdown."""
+    lines = text.splitlines()
+    formatted = []
+    for line in lines:
+        stripped = line.strip()
+        # Matches Bengali, Hindi, Arabic, or ASCII numbered lists e.g. "১. ", "২) ", "1. "
+        if re.match(r"^[\u09E6-\u09EF\u0660-\u0669\u0966-\u096F\d]+[\.\)]\s+", stripped):
+            formatted.append(f"{line}  ")
+        elif stripped.startswith(("•", "-", "*", "+")):
+            formatted.append(f"{line}  ")
+        else:
+            formatted.append(line)
+    return "\n".join(formatted)
 
 
 def render_model_parts(parts: List[Dict[str, Any]]) -> str:
