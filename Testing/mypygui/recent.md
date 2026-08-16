@@ -34,10 +34,21 @@ All in `mypygui_qt.py`:
 - **NEW `gg` mode cycle**: Right-clicking the `BN/EN` toggle now cycles through 3 modes: `search` (orange border) → `clipboard` (blue border) → `gg` (neon green border).
 - **FIX `gg` project root**: When in `gg` mode, executing `gg "text"` now explicitly uses the user's home directory (`cwd=os.path.expanduser("~")`) to prevent it from treating the `mypygui` repository directory as the project root.
 - **NEW Centered Language Selection Popup on Voice Stop**:
-  - When recording finishes (via hotkey / stop button / Space), `VoiceThread` / `SpaceStopThread` captures the raw audio buffer and displays `LanguageChoiceDialog` directly in the center of the screen with a sleek cyan border.
-  - Keyboard shortcuts enabled: press <kbd>E</kbd> for English (`en-US`), <kbd>B</kbd> for Bengali (`bn-BD`), or <kbd>Esc</kbd> to cancel.
-  - Spawns transcription in a background worker thread (`_run_transcription_worker`) and signals `transcription_ready` across threads to `on_result`.
-  - Dispatches to the active right-click mode (`search` ➔ Google search, `gg` ➔ `gg -gui "<text>"`, `clipboard` ➔ `paste_text` via <kbd>Ctrl+V</kbd>).
+  - When recording finishes (via hotkey / stop button / Space), `VoiceThread` / `SpaceStopThread` captures the raw audio buffer and displays `LanguageChoiceDialog` directly in the center of the screen with a cyan border and **square corners** (`border-radius: 0px`).
+  - Buttons show full text: **`ENGLISH`** (red background) and **`বাংলা`** (green background) — colors are applied immediately without requiring hover.
+  - Keyboard shortcuts: <kbd>E</kbd> for English, <kbd>B</kbd> for Bengali, <kbd>Esc</kbd> to cancel.
+  - Spawns transcription in a background worker thread (`_run_transcription_worker`) using `transcription_ready` / `transcription_error` Qt signals (not `QTimer.singleShot`) for reliable cross-thread dispatch to `on_result`.
+  - Dispatches to the active mode (`search` ➔ Google search, `gg` ➔ `gg -gui "<text>"`, `clipboard` ➔ `paste_text` via <kbd>Ctrl+V</kbd>).
+- **REFACTOR Voice Widget — lang button removed**:
+  - The `BN/EN` language toggle button has been removed from the status bar entirely.
+  - **Right-click on the mic icon** now cycles through the 3 output modes: `search` → `clipboard` → `gg`.
+  - The **mic icon color** reflects the active mode: 🟠 orange = search, 🔵 cyan = clipboard, 🟢 green = gg.
+  - `_update_status_icon_mode()` recolors the SVG mic fill; `_update_status_tooltip()` updates the hover tooltip with the current mode name.
+  - Mode color persists across all state transitions (after successful transcription, after cancel, after error flash) — `_update_status_icon_mode()` is called in `on_result`, `on_error`, `_on_continuous_finished`, and the dialog cancel branch.
+  - On error (no speech / API failure), mic **flashes red for 800ms** then auto-restores mode color.
+- **Voice settings moved to Main Settings dialog** (`VOICE INPUT` group box):
+  - Fields: `ACTION MODE` (Search / Clipboard / GG), `STOP ON SPACE`, `MAX SPEAK (SEC)`, `HOTKEY`.
+  - Saves directly to `voice_config.json`; hot-reloads the live `VoiceApp` instance on save.
 
 ## 3. Critical Context
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).
