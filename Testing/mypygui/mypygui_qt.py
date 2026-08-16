@@ -4692,43 +4692,146 @@ def recognize_cloud_auto(recognizer, audio_data, target_lang=None):
         return recognizer.recognize_google(audio_data, language='en-US')
 
     # Both returned results:
-    text_en = res_en.get("text", "")
-    text_bn = res_bn.get("text", "")
     conf_en = res_en.get("confidence", 0.0)
     conf_bn = res_bn.get("confidence", 0.0)
 
-    # If confidence is reported with a notable difference:
-    if abs(conf_bn - conf_en) >= 0.1:
-        return text_bn if conf_bn > conf_en else text_en
-
-    # If confidences are tied or unprovided (Google Speech API often omits confidence or returns None):
-    # Check if English words look like random phonetic gibberish / non-words
-    en_words = re.findall(r'[a-zA-Z]+', text_en.lower())
-    common_en = {
-        "the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with",
-        "he", "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her",
-        "she", "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up",
-        "out", "if", "about", "who", "get", "which", "go", "me", "when", "make", "can", "like", "time",
-        "no", "just", "him", "know", "take", "people", "into", "year", "your", "good", "some", "could",
-        "them", "see", "other", "than", "then", "now", "look", "only", "come", "its", "over", "think",
-        "also", "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", "even",
-        "new", "want", "because", "any", "these", "give", "day", "most", "us", "bro", "hey", "hello",
-        "hi", "ok", "okay", "yes", "please", "search", "open", "play", "code", "file", "run"
-    }
+    # Google Speech API often assigns default/high confidence to phonetic Bengali transliterations
+    # of English phrases (e.g. "What's up bro" -> "হোয়াটস আপ ব্রো").
+    # If English confidence is substantial (>= 0.7) or higher, prefer English.
+    if conf_en > conf_bn:
+        return res_en["text"]
+    if conf_bn > conf_en + 0.15:
+        return res_bn["text"]
     
-    # Calculate English vocabulary hit ratio
-    en_hits = sum(1 for w in en_words if w in common_en)
-    en_ratio = (en_hits / len(en_words)) if en_words else 0.0
+    # When close or equal confidence, default to English unless Bengali has significantly higher confidence
+    return res_en["text"]
 
-    # If the English text has solid recognized English words, it's English; otherwise it's Bengali
-    if en_words and en_ratio >= 0.5:
-        return text_en
-    return text_bn
+def paste_text(text, preserve_clipboard=False):
+    try:
+        import pyperclip
+        previous_clipboard = pyperclip.paste() if preserve_clipboard else None
+        pyperclip.copy(text)
+        import time; time.sleep(0.05)
+        from pynput.keyboard import Controller, Key
+        keyboard = Controller()
+        with keyboard.pressed(Key.ctrl):
+            keyboard.press('v')
+            keyboard.release('v')
+        if preserve_clipboard and previous_clipboard is not None:
+            time.sleep(0.05)
+            pyperclip.copy(previous_clipboard)
+    except Exception as e:
+        logging.error(f"paste_text error: {e}")
+
+
+class LanguageChoiceDialog(QDialog):
+    """
+    Sleek, centered popup to choose transcription language (EN / BN) with keyboard shortcuts.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Select Language")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self.selected_lang = "en-US"
+        self._init_ui()
+
+    def _init_ui(self):
+        self.setStyleSheet(f"""
+            QDialog {{
+                background-color: {CP_BG};
+                border: 2px solid {CP_CYAN};
+                border-radius: 8px;
+            }}
+            QLabel {{
+                color: {CP_TEXT};
+                font-family: 'JetBrainsMono NFP', 'Consolas', sans-serif;
+                font-size: 11pt;
+                font-weight: bold;
+            }}
+            QPushButton {{
+                background-color: {CP_PANEL};
+                border: 1px solid {CP_DIM};
+                border-radius: 4px;
+                color: white;
+                font-family: 'JetBrainsMono NFP', 'Consolas', sans-serif;
+                font-size: 10pt;
+                font-weight: bold;
+                padding: 8px 16px;
+                min-width: 90px;
+            }}
+            QPushButton#btn_en:hover, QPushButton#btn_en:focus {{
+                background-color: {CP_RED};
+                border: 1px solid {CP_RED};
+                color: white;
+            }}
+            QPushButton#btn_bn:hover, QPushButton#btn_bn:focus {{
+                background-color: {CP_GREEN};
+                border: 1px solid {CP_GREEN};
+                color: black;
+            }}
+            QPushButton#btn_cancel:hover, QPushButton#btn_cancel:focus {{
+                background-color: {CP_DIM};
+                border: 1px solid {CP_YELLOW};
+                color: {CP_YELLOW};
+            }}
+        """)
+        vbox = QVBoxLayout(self)
+        vbox.setContentsMargins(18, 14, 18, 14)
+        vbox.setSpacing(12)
+
+        lbl = QLabel("🎙️ Transcribe Language", self)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        vbox.addWidget(lbl)
+
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(10)
+
+        self.btn_en = QPushButton("🇺🇸 EN [E]", self)
+        self.btn_en.setObjectName("btn_en")
+        self.btn_en.clicked.connect(lambda: self._choose("en-US"))
+        btn_row.addWidget(self.btn_en)
+
+        self.btn_bn = QPushButton("🇧🇩 BD [B]", self)
+        self.btn_bn.setObjectName("btn_bn")
+        self.btn_bn.clicked.connect(lambda: self._choose("bn-BD"))
+        btn_row.addWidget(self.btn_bn)
+
+        self.btn_cancel = QPushButton("✕ Cancel [Esc]", self)
+        self.btn_cancel.setObjectName("btn_cancel")
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(self.btn_cancel)
+
+        vbox.addLayout(btn_row)
+        self.adjustSize()
+        self._center_on_screen()
+
+    def _center_on_screen(self):
+        screen = QApplication.primaryScreen().geometry()
+        x = (screen.width() - self.width()) // 2
+        y = (screen.height() - self.height()) // 2
+        self.move(x, y)
+
+    def _choose(self, lang):
+        self.selected_lang = lang
+        self.accept()
+
+    def keyPressEvent(self, event):
+        k = event.key()
+        if k == Qt.Key.Key_E:
+            self._choose("en-US")
+        elif k == Qt.Key.Key_B:
+            self._choose("bn-BD")
+        elif k == Qt.Key.Key_Escape:
+            self.reject()
+        else:
+            super().keyPressEvent(event)
 
 
 class VoiceThread(QThread):
     result = pyqtSignal(str)
     error  = pyqtSignal(str)
+    audio_ready = pyqtSignal(object) # emits (audio_data, recognizer)
 
     def __init__(self, lang, phrase_time_limit):
         super().__init__()
@@ -4744,7 +4847,7 @@ class VoiceThread(QThread):
                 self.running = True
                 audio = recognizer.listen(source, timeout=5, phrase_time_limit=self.phrase_time_limit)
                 self.running = False
-                self.result.emit(recognize_cloud_auto(recognizer, audio, self.lang))
+                self.audio_ready.emit((audio, recognizer))
         except Exception as e:
             self.running = False
             self.error.emit(str(e))
@@ -4756,6 +4859,7 @@ class VoiceThread(QThread):
 class SpaceStopThread(QThread):
     result = pyqtSignal(str)
     error  = pyqtSignal(str)
+    audio_ready = pyqtSignal(object) # emits (audio_data, recognizer)
 
     def __init__(self, lang_getter):
         super().__init__()
@@ -4769,7 +4873,7 @@ class SpaceStopThread(QThread):
         try:
             import speech_recognition as sr
             import io, wave, pyaudio
-            CHUNK, FORMAT, CHANNELS, RATE = 256, pyaudio.paInt16, 1, 16000
+            CHUNK, FORMAT, CHANNELS, RATE = 1024, pyaudio.paInt16, 1, 16000
             audio_interface = pyaudio.PyAudio()
             stream = audio_interface.open(
                 format=FORMAT,
@@ -4779,18 +4883,9 @@ class SpaceStopThread(QThread):
                 frames_per_buffer=CHUNK,
             )
             self.running = True
-            segments = []
-            current_lang = None
             current_frames = []
             while not self._stop:
                 chunk = stream.read(CHUNK, exception_on_overflow=False)
-                chunk_lang = self.lang_getter()
-                if current_lang is None:
-                    current_lang = chunk_lang
-                elif chunk_lang != current_lang and current_frames:
-                    segments.append((current_lang, current_frames))
-                    current_frames = []
-                    current_lang = chunk_lang
                 current_frames.append(chunk)
             if stream.is_active():
                 stream.stop_stream()
@@ -4798,25 +4893,9 @@ class SpaceStopThread(QThread):
             self.running = False
             recognizer = sr.Recognizer()
             if current_frames:
-                segments.append((current_lang or self.lang_getter(), current_frames))
-
-            recognized_parts = []
-            for lang, frames in segments:
-                if not frames:
-                    continue
-                buf = io.BytesIO()
-                with wave.open(buf, 'wb') as wf:
-                    wf.setnchannels(CHANNELS)
-                    wf.setsampwidth(sample_width)
-                    wf.setframerate(RATE)
-                    wf.writeframes(b''.join(frames))
-                buf.seek(0)
-                with sr.AudioFile(buf) as source:
-                    audio = recognizer.record(source)
-                part = recognize_cloud_auto(recognizer, audio, lang)
-                if part:
-                    recognized_parts.append(part)
-            self.result.emit(" ".join(recognized_parts).strip())
+                raw_bytes = b''.join(current_frames)
+                audio_data = sr.AudioData(raw_bytes, RATE, sample_width)
+                self.audio_ready.emit((audio_data, recognizer))
         except Exception as e:
             self.running = False
             self.error.emit(str(e))
@@ -4872,6 +4951,8 @@ class ContinuousThread(QThread):
 class VoiceApp(QMainWindow):
     toggle_record_requested = pyqtSignal()
     space_press_requested = pyqtSignal()
+    transcription_ready = pyqtSignal(int, str)
+    transcription_error = pyqtSignal(int, str)
 
     def __init__(self):
         super().__init__()
@@ -4889,6 +4970,8 @@ class VoiceApp(QMainWindow):
         self.init_ui()
         self.toggle_record_requested.connect(self.toggle_record)
         self.space_press_requested.connect(self._handle_space_press)
+        self.transcription_ready.connect(self.on_result)
+        self.transcription_error.connect(self.on_error)
         self.setup_global_hotkey()
 
     def load_config(self):
@@ -5647,10 +5730,44 @@ class VoiceApp(QMainWindow):
             self.record_btn.setText("⏹️ STOP")
             self.voice_thread = VoiceThread(self.config["language"], self.config.get("phrase_time_limit", 10))
         self.record_btn.setStyleSheet(f"background-color: {CP_RED}; color: white; border: 1px solid {CP_RED};")
-        self.voice_thread.result.connect(lambda text, sid=session_id: self.on_result(sid, text))
+        self.voice_thread.audio_ready.connect(lambda data, sid=session_id: self._on_audio_recorded(sid, data))
         self.voice_thread.error.connect(lambda error, sid=session_id: self.on_error(sid, error))
         self.voice_thread.finished.connect(lambda sid=session_id: self._on_local_finished(sid))
         self.voice_thread.start()
+
+    def _on_audio_recorded(self, session_id, data):
+        if session_id != self._session_id:
+            return
+        audio, recognizer = data
+        self._set_status(CP_YELLOW)
+        self._reset_record_btn()
+
+        # Show popup in the center of the display to choose language
+        dlg = LanguageChoiceDialog(self)
+        if dlg.exec() == QDialog.DialogCode.Accepted:
+            chosen_lang = dlg.selected_lang
+            self._set_status(CP_YELLOW)
+            threading.Thread(
+                target=self._run_transcription_worker,
+                args=(session_id, recognizer, audio, chosen_lang),
+                daemon=True
+            ).start()
+        else:
+            self._set_status(CP_GREEN)
+            self._recording_active = False
+
+    def _run_transcription_worker(self, session_id, recognizer, audio, lang):
+        try:
+            logging.info(f"Transcribing audio with Google Speech API ({lang})...")
+            text = recognizer.recognize_google(audio, language=lang)
+            logging.info(f"Transcription result: {text}")
+            if text:
+                self.transcription_ready.emit(session_id, text)
+            else:
+                self.transcription_error.emit(session_id, "No speech detected")
+        except Exception as e:
+            logging.error(f"Transcription error: {e}")
+            self.transcription_error.emit(session_id, str(e))
 
     def _start_continuous(self):
         self._session_id += 1
@@ -5683,19 +5800,12 @@ class VoiceApp(QMainWindow):
         if self.voice_thread:
             self.voice_thread.stop()
         self._recording_active = False
-        self._stop_requested = True
-        self._set_status(CP_YELLOW)
         self._reset_record_btn()
 
     def _on_local_finished(self, session_id):
         if session_id != self._session_id:
             return
         self.voice_thread = None
-        self._recording_active = False
-        if self._stop_requested:
-            self._stop_requested = False
-            self._set_status(CP_GREEN)
-            self._reset_record_btn()
 
     def _reset_record_btn(self):
         self.record_btn.setText("🎤 REC")
@@ -5727,37 +5837,43 @@ class VoiceApp(QMainWindow):
         if isinstance(self.voice_thread, SpaceStopThread):
             self.voice_thread.stop()
         self._recording_active = False
-        self._stop_requested = True
         self._reset_record_btn()
-        self._set_status(CP_YELLOW)
 
     def on_result(self, session_id, text):
-        if session_id != self._session_id:
-            return
+        logging.info(f"on_result triggered: session={session_id}, current_session={self._session_id}, text='{text}'")
         if not text or not text.strip():
-            self._stop_requested = False
             self._set_status(CP_GREEN)
             self._reset_record_btn()
             self._recording_active = False
             self._live_recording = False
             return
-        paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
-        self._stop_requested = False
+
+        text = text.strip()
+        mode = self.config.get("output_mode", "search")
+        logging.info(f"Executing voice action for mode='{mode}' with text: '{text}'")
+
         if self._live_recording:
+            paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
             self._set_status(CP_GREEN)
             QTimer.singleShot(400, lambda: self._set_status(CP_RED) if self._live_recording else None)
         else:
             self._set_status(CP_GREEN)
             self._reset_record_btn()
             self._recording_active = False
-            if self.config.get("open_google"):
+
+            if mode == "search" or self.config.get("open_google"):
+                logging.info(f"Opening Google search for: {text}")
                 webbrowser.open(f"https://www.google.com/search?q={text}")
-            elif self.config.get("output_mode") == "gg":
+            elif mode == "gg":
+                logging.info(f"Running gg -gui for: {text}")
                 subprocess.Popen(
-                    ["pwsh", "-NoExit", "-Command", f'gg -gui "{text.strip()}"'],
+                    ["pwsh", "-NoExit", "-Command", f'gg -gui "{text}"'],
                     creationflags=subprocess.CREATE_NEW_CONSOLE,
                     cwd=os.path.expanduser("~")
                 )
+            elif mode == "clipboard" or self.config.get("copy_to_clipboard", True):
+                logging.info(f"Pasting text to clipboard/active window: {text}")
+                paste_text(text, preserve_clipboard=False)
 
     def on_error(self, session_id, error):
         if session_id != self._session_id:
