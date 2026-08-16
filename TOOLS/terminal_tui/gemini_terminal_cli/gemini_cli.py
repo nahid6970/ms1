@@ -67,7 +67,7 @@ try:
     from PyQt6.QtWidgets import (
         QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
         QLabel, QPushButton, QLineEdit, QTextEdit, QDialog,
-        QGroupBox, QFormLayout, QScrollArea, QMessageBox
+        QGroupBox, QFormLayout, QScrollArea, QMessageBox, QSizePolicy, QFrame
     )
     from PyQt6.QtCore import Qt, QTimer
     from PyQt6.QtGui import QFont, QTextCursor
@@ -144,7 +144,7 @@ if PYQT6_AVAILABLE:
         def __init__(self, initial_output: str = "", prompt: str = "", model_name_val: str = DEFAULT_MODEL, on_send_callback=None):
             super().__init__()
             self.setWindowTitle("⚡ CYBERPUNK TERMINAL // GEMINI AI")
-            self.resize(920, 680)
+            self.resize(960, 720)
             self.on_send_callback = on_send_callback
             self.model_name_val = model_name_val
 
@@ -195,8 +195,8 @@ if PYQT6_AVAILABLE:
             central = QWidget()
             self.setCentralWidget(central)
             main_layout = QVBoxLayout(central)
-            main_layout.setContentsMargins(16, 16, 16, 16)
-            main_layout.setSpacing(12)
+            main_layout.setContentsMargins(14, 14, 14, 14)
+            main_layout.setSpacing(10)
 
             # Top Header Bar
             header_layout = QHBoxLayout()
@@ -212,16 +212,17 @@ if PYQT6_AVAILABLE:
             # Output Text Display with Rich Markdown & Table rendering
             self.output_view = QTextEdit()
             self.output_view.setReadOnly(True)
+            self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             self.full_markdown_history = initial_output.strip()
-            clean_md = strip_ansi(self.full_markdown_history)
-            self.output_view.setMarkdown(clean_md)
-            self.output_view.moveCursor(QTextCursor.MoveOperation.End)
+            self.update_display()
             main_layout.addWidget(self.output_view, stretch=1)
 
-        def update_display(self):
-            clean_md = strip_ansi(self.full_markdown_history)
-            self.output_view.setMarkdown(clean_md)
-            self.output_view.moveCursor(QTextCursor.MoveOperation.End)
+            # Bottom Section Container pinned at bottom
+            bottom_container = QWidget()
+            bottom_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            bottom_layout = QVBoxLayout(bottom_container)
+            bottom_layout.setContentsMargins(0, 0, 0, 0)
+            bottom_layout.setSpacing(8)
 
             # Interactive Input Area
             input_box = QHBoxLayout()
@@ -244,7 +245,7 @@ if PYQT6_AVAILABLE:
             self.send_btn.clicked.connect(self.handle_send)
             input_box.addWidget(self.input_field, stretch=1)
             input_box.addWidget(self.send_btn)
-            main_layout.addLayout(input_box)
+            bottom_layout.addLayout(input_box)
 
             # Bottom Controls Bar
             bottom_bar = QHBoxLayout()
@@ -294,7 +295,14 @@ if PYQT6_AVAILABLE:
             """)
             close_btn.clicked.connect(self.close)
             bottom_bar.addWidget(close_btn)
-            main_layout.addLayout(bottom_bar)
+            bottom_layout.addLayout(bottom_bar)
+
+            main_layout.addWidget(bottom_container, stretch=0)
+
+        def update_display(self):
+            clean_md = strip_ansi(self.full_markdown_history)
+            self.output_view.setMarkdown(clean_md)
+            self.output_view.moveCursor(QTextCursor.MoveOperation.End)
 
         def handle_copy(self):
             text = self.output_view.toPlainText()
