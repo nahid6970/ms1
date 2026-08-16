@@ -228,7 +228,8 @@ if PYQT6_AVAILABLE:
             main_layout.addLayout(header_layout)
 
             # Output Text Display with Rich Markdown & Table rendering
-            self.font_size = 11
+            saved_prefs = load_model_prefs()
+            self.font_size = int(saved_prefs.get("gui_font_size") or 11)
             self.output_view = QTextEdit()
             self.output_view.setReadOnly(True)
             self.output_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -354,6 +355,21 @@ if PYQT6_AVAILABLE:
             if hasattr(self, 'output_view') and self.output_view:
                 self.output_view.setFont(font)
                 self.output_view.document().setDefaultFont(font)
+                # Override stylesheet font-size so Qt Markdown parser preserves chosen font size
+                self.output_view.setStyleSheet(f"""
+                    QTextEdit {{
+                        background-color: {CP_PANEL};
+                        color: {CP_TEXT};
+                        border: 1px solid {CP_DIM};
+                        padding: 10px;
+                        font-family: 'Consolas';
+                        font-size: {self.font_size}pt;
+                        selection-background-color: {CP_CYAN};
+                        selection-color: #000000;
+                        line-height: 140%;
+                    }}
+                    QTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+                """)
             if hasattr(self, 'input_field') and self.input_field:
                 self.input_field.setFont(QFont("Consolas", max(9, self.font_size - 1)))
 
@@ -371,6 +387,16 @@ if PYQT6_AVAILABLE:
                 new_size = dlg.font_size_input.value()
                 self.apply_font_size(new_size)
                 self.update_display()
+                
+                # Persist settings immediately to model_prefs.json
+                try:
+                    prefs = load_model_prefs()
+                    prefs["gui_font_size"] = int(self.font_size)
+                    if new_m:
+                        prefs["last_model"] = new_m
+                    MODEL_PREFS_FILE.write_text(json.dumps(prefs, indent=2, ensure_ascii=False), encoding="utf-8")
+                except Exception:
+                    pass
 
         def handle_send(self):
             text = self.input_field.text().strip()
@@ -3083,6 +3109,7 @@ def default_model_prefs() -> Dict[str, Any]:
         "prompt_fg": "ansired",
         "prompt_bg": "",
         "prompt_prefix_color": "1;32",
+        "gui_font_size": 11,
     }
 
 
@@ -3147,6 +3174,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "prompt_fg": str(data.get("prompt_fg") or "ansired"),
             "prompt_bg": str(data.get("prompt_bg") or ""),
             "prompt_prefix_color": str(data.get("prompt_prefix_color") or "1;32"),
+            "gui_font_size": int(data.get("gui_font_size") or 11),
         })
         return prefs
     except Exception:
@@ -3184,6 +3212,7 @@ def save_model_prefs(
     prompt_fg: str = "ansired",
     prompt_bg: str = "",
     prompt_prefix_color: str = "1;32",
+    gui_font_size: int = 11,
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
@@ -3206,6 +3235,7 @@ def save_model_prefs(
         "prompt_fg": prompt_fg,
         "prompt_bg": prompt_bg,
         "prompt_prefix_color": prompt_prefix_color,
+        "gui_font_size": int(gui_font_size),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -4714,6 +4744,7 @@ def main() -> int:
     prompt_fg = str(model_prefs.get("prompt_fg") or "ansired")
     prompt_bg = str(model_prefs.get("prompt_bg") or "")
     prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
+    gui_font_size = int(model_prefs.get("gui_font_size") or 11)
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
@@ -5084,6 +5115,7 @@ def main() -> int:
         return _ansi_wrap(f"{prefix}> ", prompt_prefix_color)
 
     def persist_selection() -> None:
+        nonlocal gui_font_size
         account_name = active_api_account or saved_last_api_account
         if account_name:
             api_account_model_prefs[account_name] = {"failover_uses": max(0, int(failover_uses))}
@@ -5104,6 +5136,7 @@ def main() -> int:
             prompt_fg,
             prompt_bg,
             prompt_prefix_color,
+            gui_font_size,
         )
 
     def add_api_account_interactive(provider: str = "gemini") -> None:
@@ -5328,6 +5361,7 @@ def main() -> int:
             app.exec()
         except (KeyboardInterrupt, SystemExit):
             pass
+        return 0
     elif args.prompt:
         run_turn(args.prompt)
     else:
