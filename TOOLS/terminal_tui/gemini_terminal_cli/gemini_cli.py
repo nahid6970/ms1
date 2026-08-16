@@ -3008,7 +3008,10 @@ def interactive_select(
 
         for relative_i, item in enumerate(visible_slice):
             actual_i = top_index + relative_i
-            line = render_item(item, actual_i, actual_i == index)
+            try:
+                line = render_item(item, actual_i, actual_i == index, index)
+            except TypeError:
+                line = render_item(item, actual_i, actual_i == index)
             print(line)
 
         if len(items) > max_visible:
@@ -5405,21 +5408,43 @@ def main() -> int:
                                 "turn_num": len(user_turn_positions) - idx_num + 1,
                             })
 
-                        def render_revert_item(r_item: Dict[str, Any], idx: int, sel: bool = False) -> str:
+                        def render_revert_item(r_item: Dict[str, Any], idx: int, sel: bool = False, current_idx: int = 0) -> str:
                             marker = ">" if sel else " "
-                            row = f"{marker} {idx + 1:>2}. Turn {r_item['turn_num']:>2}: {r_item['prompt']}"
+                            will_delete = (idx <= current_idx)
+                            status_tag = _ansi_wrap("🗑️ [del]", "1;31") if will_delete else _ansi_wrap("  [keep]", "90")
+                            
+                            term_w = _get_term_width()
+                            prefix = f"{marker} {idx + 1:>2}. Turn {r_item['turn_num']:>2}: "
+                            avail_prompt = max(10, term_w - len(prefix) - 14)
+                            prompt = r_item['prompt']
+                            if len(prompt) > avail_prompt:
+                                prompt = prompt[:avail_prompt - 3] + "..."
+                            
+                            row = f"{prefix}{prompt:<{avail_prompt}}  {status_tag}"
                             if sel:
                                 return _ansi_wrap(row, "48;5;24;97")
-                            return row
+                            if will_delete:
+                                return row
+                            return _ansi_wrap(row, "90")
+
+                        def render_revert_footer(current_item: Dict[str, Any]) -> List[str]:
+                            turn_num = current_item["turn_num"]
+                            del_count = len(user_turn_positions) - turn_num + 1
+                            turns_str = f"Turn {turn_num}" if del_count == 1 else f"Turns {turn_num}..{len(user_turn_positions)} ({del_count} turns)"
+                            return [
+                                _ansi_wrap("─" * min(_get_term_width() - 2, 70), "90"),
+                                f"  {_ansi_wrap('Target:', '1;36')} Revert state back to before Turn {turn_num}",
+                                f"  {_ansi_wrap('Impact:', '1;31')} Discards {turns_str} 🗑️ and restores modified files to that state.",
+                                f"  Press {_ansi_wrap('[Enter]', '1;32')} to confirm revert | {_ansi_wrap('[Esc/Q]', '90')} to cancel",
+                            ]
 
                         chosen_revert = interactive_select(
-                            title_text="",
+                            title_text="Revert Conversation & Code Changes",
                             items=items,
                             render_item=render_revert_item,
-                            header_lines=None,
-                            dynamic_footer=None,
-                            footer_lines=["  Press Enter to revert conversation & file changes to this turn, Esc to cancel."],
-                            instructions="",
+                            header_lines=["  Select a turn to roll back to:"],
+                            dynamic_footer=render_revert_footer,
+                            instructions="Use Up/Down to preview rollback range, Enter to execute revert, Esc to cancel.",
                         )
                         if not chosen_revert:
                             continue
