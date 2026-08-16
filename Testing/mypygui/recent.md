@@ -33,6 +33,11 @@ All in `mypygui_qt.py`:
 - **Audio Recorder REVERTED**: Removed the recently added Audio Recorder (`AudioRecorderHelper` / FFmpeg / sounddevice) feature to clean up the code.
 - **NEW `gg` mode cycle**: Right-clicking the `BN/EN` toggle now cycles through 3 modes: `search` (orange border) → `clipboard` (blue border) → `gg` (neon green border).
 - **FIX `gg` project root**: When in `gg` mode, executing `gg "text"` now explicitly uses the user's home directory (`cwd=os.path.expanduser("~")`) to prevent it from treating the `mypygui` repository directory as the project root.
+- **NEW Centered Language Selection Popup on Voice Stop**:
+  - When recording finishes (via hotkey / stop button / Space), `VoiceThread` / `SpaceStopThread` captures the raw audio buffer and displays `LanguageChoiceDialog` directly in the center of the screen with a sleek cyan border.
+  - Keyboard shortcuts enabled: press <kbd>E</kbd> for English (`en-US`), <kbd>B</kbd> for Bengali (`bn-BD`), or <kbd>Esc</kbd> to cancel.
+  - Spawns transcription in a background worker thread (`_run_transcription_worker`) and signals `transcription_ready` across threads to `on_result`.
+  - Dispatches to the active right-click mode (`search` ➔ Google search, `gg` ➔ `gg -gui "<text>"`, `clipboard` ➔ `paste_text` via <kbd>Ctrl+V</kbd>).
 
 ## 3. Critical Context
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).
