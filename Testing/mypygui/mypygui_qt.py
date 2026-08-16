@@ -5839,6 +5839,7 @@ class VoiceApp(QMainWindow):
             ).start()
         else:
             self._set_status(CP_GREEN)
+            self._update_status_icon_mode()
             self._recording_active = False
 
     def _run_transcription_worker(self, session_id, recognizer, audio, lang):
@@ -5879,6 +5880,7 @@ class VoiceApp(QMainWindow):
     def _on_continuous_finished(self):
         self._live_recording = False
         self._set_status(CP_GREEN)
+        self._update_status_icon_mode()
         self._reset_record_btn()
 
     def _stop_single(self):
@@ -5928,6 +5930,7 @@ class VoiceApp(QMainWindow):
         logging.info(f"on_result triggered: session={session_id}, current_session={self._session_id}, text='{text}'")
         if not text or not text.strip():
             self._set_status(CP_GREEN)
+            self._update_status_icon_mode()
             self._reset_record_btn()
             self._recording_active = False
             self._live_recording = False
@@ -5940,9 +5943,11 @@ class VoiceApp(QMainWindow):
         if self._live_recording:
             paste_text(text, preserve_clipboard=not self.config.get("copy_to_clipboard", True))
             self._set_status(CP_GREEN)
+            self._update_status_icon_mode()
             QTimer.singleShot(400, lambda: self._set_status(CP_RED) if self._live_recording else None)
         else:
             self._set_status(CP_GREEN)
+            self._update_status_icon_mode()
             self._reset_record_btn()
             self._recording_active = False
 
@@ -5966,6 +5971,7 @@ class VoiceApp(QMainWindow):
         if self._stop_requested:
             self._stop_requested = False
             self._set_status(CP_GREEN)
+            self._update_status_icon_mode()
             self._reset_record_btn()
             self._live_recording = False
             self._recording_active = False
