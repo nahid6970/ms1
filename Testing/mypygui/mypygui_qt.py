@@ -5672,7 +5672,8 @@ class VoiceApp(QMainWindow):
             elif self.config.get("output_mode") == "gg":
                 subprocess.Popen(
                     ["pwsh", "-NoExit", "-Command", f'gg "{text.strip()}"'],
-                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                    creationflags=subprocess.CREATE_NEW_CONSOLE,
+                    cwd=os.path.expanduser("~")
                 )
 
     def on_error(self, session_id, error):

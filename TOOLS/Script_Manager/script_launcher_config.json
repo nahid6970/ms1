@@ -2628,7 +2628,7 @@
                     "keep_open": false,
                     "kill_window": false,
                     "new_terminal": false,
-                    "run_admin": false,
+                    "run_admin": true,
                     "ctrl_left_cmd": "",
                     "ctrl_right_cmd": "",
                     "use_inline": false,
@@ -2649,6 +2649,13 @@
                             "code": "oh-my-posh font list",
                             "comment_size": 12,
                             "comment_color": "#55FF00"
+                        },
+                        {
+                            "comment": "install Noto Sans Bengali Font",
+                            "type": "pwsh",
+                            "code": "    $dest = \"$env:TEMP\\NotoSansBengali.zip\"\n    Invoke-WebRequest -Uri \"https://fonts.google.com/download?family=Noto+Sans+Bengali\" -OutFile $dest\n    Expand-Archive -Path $dest -DestinationPath \"$env:TEMP\\NotoSansBengali\" -Force\n    $shell = New-Object -ComObject Shell.Application\n    Get-ChildItem \"$env:TEMP\\NotoSansBengali\\*.ttf\" | ForEach-Object {\n        $shell.Namespace(0x14).CopyHere($_.FullName)\n    }\n    Write-Host \"Done! Restart Windows Terminal.\"",
+                            "comment_size": 14,
+                            "comment_color": "#FF5500"
                         }
                     ],
                     "edit_on_click": true,
@@ -2669,7 +2676,10 @@
                     "_runtime_font_size": 14,
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
                     "_runtime_is_bold": true,
-                    "_runtime_is_italic": false
+                    "_runtime_is_italic": false,
+                    "auto_wrap": false,
+                    "hover_transparent_bg": false,
+                    "_runtime_text_align": "left"
                 }
             ],
             "type": "folder",

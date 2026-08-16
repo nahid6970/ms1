@@ -26,31 +26,21 @@ All in `mypygui_qt.py`:
   - `_menu_rich_action()`: set `lbl.setFixedHeight(22)` and `Qt.AlignmentFlag.AlignVCenter` to guarantee uniform 22px row height and centered baseline regardless of script fallbacks.
   - Set font family stack to `'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif` across `_menu_rich_action` and `_tip_label`.
   - Replaced space-padding hacks (`&nbsp;`) in `KomorebiAppsWidget.apply_state` hover tooltip with clean block `<div style="margin-left: Npx;">` elements to preserve item indentation across Bangla titles and mixed script items.
-- **NEW Audio Recorder module** (`AudioRecorderHelper`, `AudioRecorderSettingsDialog`):
-  - `IconLabel` (SVG vector) button placed immediately to the left of the Voice Input button in `_build_git()`.
-  - **Left-click**: Toggle REC/STOP. Icon is Cyan (IDLE) / Red (RECORDING). State resets automatically on failure.
-  - **Right-click**: Opens `AudioRecorderSettingsDialog` with fields:
-    - **AUDIO SOURCE**: `Microphone` (FFmpeg dshow) or `System Audio (Stereo Mix / Loopback)` (sounddevice WASAPI).
-    - **DSHOW DEVICE**: FFmpeg audio device string (e.g. `audio=Microphone (High Definition Audio Device)`).
-    - **OUTPUT FOLDER**: Browse button + path input. Saved to `mypygui_config.json` key `audio_rec_dir`.
-    - **FORMAT**: `mp3`, `wav`, `m4a`, `aac`.
-    - **SVG CODE (IDLE)** and **SVG CODE (RECORDING)**: Multiline edit fields; paste any custom `<svg>…</svg>` to change the icon for each state. Saved to `audio_rec_svg_idle` / `audio_rec_svg_busy`.
-  - **Microphone mode**: `ffmpeg -f dshow -i audio=<device> <output>` subprocess; graceful stop via `q\n` to stdin.
-  - **System Audio mode**: `sounddevice` WASAPI output InputStream. If the hardware driver rejects the loopback stream (PaErrorCode -9998 — Realtek HDA blocks unprivileged loopback), catches the exception, resets `is_recording=False`, restores Cyan icon via `QTimer.singleShot`, and shows a **one-time guidance dialog** explaining how to enable Stereo Mix via `mmsys.cpl`.
-  - `sounddevice`, `soundfile`, `numpy` added to `IMPORT_TO_PKG` in `install_deps.py` and installed in the mypygui_qt venv.
 - **FIX: `KomorebiAppsWidget.apply_state` `UnboundLocalError`** — `tip_html` was only assigned inside the `else` branch (apps exist), but used unconditionally after the `if/else`. Fixed by assigning `tip_html = '<span …>no windows open</span>'` in the empty-apps `if` branch.
 - **FIX: `KomorebiAppsWidget` configurable indent** (from prior session):
   - Added `ITEM INDENT (PX)` setting in Settings dialog → `KOMOREBI` group box → saves `komorebi_item_indent` (default 20).
   - Dynamic `margin-left: {indent_px}px` in both the hover tooltip `<div>` blocks and the `_menu_rich_action` left padding.
+- **Audio Recorder REVERTED**: Removed the recently added Audio Recorder (`AudioRecorderHelper` / FFmpeg / sounddevice) feature to clean up the code.
+- **NEW `gg` mode cycle**: Right-clicking the `BN/EN` toggle now cycles through 3 modes: `search` (orange border) → `clipboard` (blue border) → `gg` (neon green border).
+- **FIX `gg` project root**: When in `gg` mode, executing `gg "text"` now explicitly uses the user's home directory (`cwd=os.path.expanduser("~")`) to prevent it from treating the `mypygui` repository directory as the project root.
 
 ## 3. Critical Context
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).
 - `_GIT_SYNC_PS` = adjacent Python literals + `.replace("{path}", ...)` (not an f-string → braces literal).
 - Native Qt tooltips need window focus here → custom `_TipFilter` + always-on-top `_tip_label` (`Qt.ToolTip`, WA_ShowWithoutActivating); git labels + komorebi widget/labels/buttons carry `_tip_text`.
 - Komorebi layout label maps names via `_komorebi_layout_short` (BSP/COL/ROW/VSTK/HSTK/ULTW/GRID/RMAIN); shows ⏸ when paused; `focused_layout` reported separately so layout shows even when focused workspace is beyond the 3 visible dots.
-- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`, `audio_rec_source`, `audio_rec_device`, `audio_rec_dir`, `audio_rec_format`, `audio_rec_svg_idle`, `audio_rec_svg_busy`.
+- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`.
 - Komorebi config write path: `~/komorebi.json` (0.1.41, pretty-printed 4-space CRLF, NO trailing newline). `workspace_rules` per workspace = array of {kind, id, matching_strategy} — same shape as `ignore_rules`. Rules apply to apps started AFTER the rule is saved (komorebi applies at window-manage time).
-- Audio Recorder: `sounddevice` WASAPI loopback InputStream on output-only devices (e.g. device 10, `Speakers (High Definition Audio Device)`) returns `PaErrorCode -9998` on standard Realtek HDA drivers because they block unprivileged loopback. **Stereo Mix workaround**: enable via `mmsys.cpl` → Recording → Show Disabled Devices → Enable Stereo Mix → set DSHOW DEVICE to `audio=Stereo Mix (Realtek High Definition Audio)`.
 - File is CRLF; multi-line edits are safest via temp fix scripts.
 
 ## 4. Pending Task
