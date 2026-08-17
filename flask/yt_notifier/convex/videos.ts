@@ -87,7 +87,7 @@ export const list = query({
         const rulesText = rulesById.get(video.channelId);
         const fallbackFilters = filtersById.get(video.channelId) ?? [];
         if (effectiveCategory === "blocked") {
-          return isTitleBlocked(video.title, rulesText, fallbackFilters);
+          return isTitleBlocked(video.title, video, rulesText, fallbackFilters);
         }
         if (effectiveCategory === "watchlater") {
           return Boolean(video.isWatchLater);
@@ -268,8 +268,11 @@ export const counts = query({
 
     const allVideos = await ctx.db.query("videos").collect();
 
-    const validVideos = allVideos
-      .filter((video) => enabledChannelIds.has(video.channelId))
+    // channelVideos = all videos belonging to enabled/filtered channels
+    const channelVideos = allVideos.filter((video) => enabledChannelIds.has(video.channelId));
+
+    // validVideos = those that pass both playlist and title filters (shown in main/shorts/watchlater)
+    const validVideos = channelVideos
       .filter((video) => passesPlaylistFilter(video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []))
       .filter((video) =>
         titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
@@ -287,8 +290,9 @@ export const counts = query({
       (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
     ).length;
 
-    const blocked = validVideos.filter(
-      (video) => isTitleBlocked(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
+    // blocked = any channel video that fails either playlist filter or title rules
+    const blocked = channelVideos.filter(
+      (video) => isTitleBlocked(video.title, video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
     ).length;
 
     return { main, shorts, watchLater, blocked };
@@ -547,9 +551,20 @@ function passesPlaylistFilter(
   return allowedPlaylistIds.includes(video.sourcePlaylistId); // Check if video's playlist is allowed
 }
 
-function isTitleBlocked(title: string, rawText?: string, fallbackFilters: string[] = []): boolean {
+function isTitleBlocked(
+  title: string,
+  video: { sourcePlaylistId?: string },
+  rawText?: string,
+  fallbackFilters: string[] = [],
+): boolean {
+  // If the video is hidden by a playlist URL rule, it counts as blocked
+  if (!passesPlaylistFilter(video, rawText, fallbackFilters)) return true;
+
   const rules = parseRulesText(rawText, fallbackFilters);
-  const hasTextRules = rules.block.length > 0 || rules.allow.length > 0 || rules.playlists.some((p) => extractPlaylistId(p) === null);
+  const hasTextRules =
+    rules.block.length > 0 ||
+    rules.allow.length > 0 ||
+    rules.playlists.some((p) => extractPlaylistId(p) === null);
   if (!hasTextRules) return false;
   return !titleMatchesRules(title, rawText, fallbackFilters);
 }
