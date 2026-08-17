@@ -495,6 +495,11 @@ window.openPopup = async function openPopup(page) {
     if (page === "channels") {
       initChannelsPage();
       await renderChannels({ refreshNav: false });
+      // Auto-focus the search/add input once the popup is visible
+      requestAnimationFrame(() => {
+        const input = document.getElementById("channelUrl");
+        if (input) input.focus();
+      });
     } else if (page === "stats") {
       await renderStats({ refreshNav: false });
     } else if (page === "settings") {
@@ -1021,9 +1026,14 @@ window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
           <a href="${esc(pl.url)}" target="_blank" class="font-medium text-slate-200 hover:text-amber-400 transition truncate block">${esc(pl.title)}</a>
           <span class="text-[10px] text-slate-500">${pl.count} video${pl.count === 1 ? "" : "s"}</span>
         </div>
-        <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="flex-shrink-0 px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition">
-          + Add Rule
-        </button>
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <button onclick="loadPlaylistVideos('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', this)" class="px-2.5 py-1 rounded bg-sky-600/20 border border-sky-500/40 text-sky-300 hover:bg-sky-600 hover:text-white text-[11px] font-semibold transition" title="Add rule &amp; fetch videos into feed">
+            <i class="fa-solid fa-download text-[10px] mr-1"></i>Load Videos
+          </button>
+          <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition" title="Add playlist URL to channel rules only">
+            + Add Rule
+          </button>
+        </div>
       </div>
     `).join("");
   } catch (err) {
@@ -1050,6 +1060,46 @@ window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(chan
     if (PAGE === "feed") await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
+  }
+};
+
+window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, plTitle, btn) {
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-[10px] mr-1"></i>Loading...';
+  }
+  try {
+    // 1. Add the playlist URL to the channel rules (same logic as addPlaylistToChannelRules)
+    const channels = await callConvex("query", "channels:list");
+    const channel = (channels || []).find((c) => c.channelId === channelId);
+    let rawText = channel?.rulesText ?? "";
+    const alreadyAdded = rawText.includes(plUrl);
+    if (!alreadyAdded) {
+      if (!rawText) {
+        rawText = `:Allow-Rules:\n\n:Block-Rules:\n\n:Playlists:\n${plUrl}`;
+      } else if (rawText.includes(":Playlists:")) {
+        rawText = rawText.trim() + `\n${plUrl}`;
+      } else {
+        rawText = rawText.trim() + `\n\n:Playlists:\n${plUrl}`;
+      }
+      await callConvex("mutation", "channels:updateRules", { channelId, rulesText: rawText });
+    }
+
+    // 2. Refresh this channel so the playlist videos are fetched and stored
+    const res = await callConvex("action", "refresh:refreshChannel", { channelId });
+    flash(
+      `Loaded "${plTitle}" — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added to feed!`,
+      "success",
+    );
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-download text-[10px] mr-1"></i>Load Videos';
+    }
   }
 };
 
