@@ -928,6 +928,9 @@ function channelRow(channel, categories = []) {
         <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${disabled ? "text-slate-500 hover:bg-slate-800 hover:text-white" : "text-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-300"}" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
           <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"} text-lg"></i>
         </button>
+        <button onclick="toggleChannelPlaylistsBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-amber-400 transition" title="Load Channel Playlists" aria-label="Load Playlists">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
         <button onclick="toggleChannelRuleBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${ruleCount ? "text-sky-300 hover:bg-sky-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="Channel Rules" aria-label="Channel Rules">
           <i class="fa-solid fa-scale-balanced"></i>
         </button>
@@ -952,6 +955,16 @@ function channelRow(channel, categories = []) {
         <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Rules</button>
       </div>
     </form>
+    <div id="playlists-${esc(channel.channelId)}" class="mt-4 hidden border-t border-slate-800 pt-3">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-bars-staggered text-amber-400 mr-1.5"></i>Channel Playlists</span>
+        <button onclick="loadChannelPlaylists('${esc(channel.channelId)}')" class="text-xs text-amber-400 hover:underline"><i class="fa-solid fa-rotate text-[10px] mr-1"></i>Fetch Playlists</button>
+      </div>
+      <div id="playlists-list-${esc(channel.channelId)}" class="space-y-1.5 text-xs text-slate-400">
+        <p class="italic text-slate-500">Click Fetch Playlists to load available playlists...</p>
+      </div>
+    </div>
+
   </div>`;
 }
 
@@ -971,6 +984,65 @@ window.toggleChannelRuleBox = function toggleChannelRuleBox(channelId) {
   const form = document.getElementById(`rules-${channelId}`);
   if (form) form.classList.toggle("hidden");
 };
+
+window.toggleChannelPlaylistsBox = function toggleChannelPlaylistsBox(channelId) {
+  const box = document.getElementById(`playlists-${channelId}`);
+  if (!box) return;
+  const isHidden = box.classList.contains("hidden");
+  box.classList.toggle("hidden");
+  if (isHidden) {
+    loadChannelPlaylists(channelId);
+  }
+};
+
+window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
+  const listContainer = document.getElementById(`playlists-list-${channelId}`);
+  if (!listContainer) return;
+  listContainer.innerHTML = '<p class="text-xs text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-1.5 text-amber-400"></i>Loading playlists...</p>';
+  try {
+    const playlists = await callConvex("action", "youtube:listChannelPlaylists", { channelId });
+    if (!playlists || !playlists.length) {
+      listContainer.innerHTML = '<p class="text-xs text-slate-500">No public playlists found for this channel.</p>';
+      return;
+    }
+    listContainer.innerHTML = playlists.map((pl) => `
+      <div class="flex items-center justify-between gap-3 p-2 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 transition">
+        <div class="min-w-0 flex-1">
+          <a href="${esc(pl.url)}" target="_blank" class="font-medium text-slate-200 hover:text-amber-400 transition truncate block">${esc(pl.title)}</a>
+          <span class="text-[10px] text-slate-500">${pl.count} video${pl.count === 1 ? "" : "s"}</span>
+        </div>
+        <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="flex-shrink-0 px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition">
+          + Add Rule
+        </button>
+      </div>
+    `).join("");
+  } catch (err) {
+    listContainer.innerHTML = `<p class="text-xs text-rose-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${esc(err.message)}</p>`;
+  }
+};
+
+window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(channelId, plUrl, plTitle) {
+  try {
+    const channels = await callConvex("query", "channels:list");
+    const channel = (channels || []).find((c) => c.channelId === channelId);
+    let rawText = channel?.rulesText ?? "";
+    if (!rawText) {
+      rawText = `:Allow-Rules:\n\n:Block-Rules:\n\n:Playlists:\n${plUrl}`;
+    } else if (rawText.includes(":Playlists:")) {
+      rawText = rawText.trim() + `\n${plUrl}`;
+    } else {
+      rawText = rawText.trim() + `\n\n:Playlists:\n${plUrl}`;
+    }
+
+    await callConvex("mutation", "channels:updateRules", { channelId, rulesText: rawText });
+    flash(`Added "${plTitle}" to channel rules!`, "success");
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 
 window.saveChannelRules = async function saveChannelRules(event, channelId) {
   event.preventDefault();

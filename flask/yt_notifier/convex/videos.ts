@@ -438,47 +438,7 @@ export const addFromFeed = internalMutation({
   },
 });
 
-function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
-  if (!rawText && fallbackFilters.length > 0) {
-    return { allow: fallbackFilters, block: [], playlists: [] };
-  }
-  if (!rawText) return { allow: [], block: [], playlists: [] };
-
-  const allow: string[] = [];
-  const block: string[] = [];
-  const playlists: string[] = [];
-  let currentMode: "allow" | "block" | "playlist" = "allow";
-
-  const lines = rawText.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-
-    const lower = trimmed.toLowerCase();
-    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
-      currentMode = "allow";
-      continue;
-    }
-    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
-      currentMode = "block";
-      continue;
-    }
-    if (lower.includes("playlist")) {
-      currentMode = "playlist";
-      continue;
-    }
-
-    if (currentMode === "allow") {
-      allow.push(trimmed);
-    } else if (currentMode === "block") {
-      block.push(trimmed);
-    } else if (currentMode === "playlist") {
-      playlists.push(trimmed);
-    }
-  }
-
-  return { allow, block, playlists };
-}
+import { extractPlaylistId, parseRulesText } from "./youtube";
 
 function extractPlaylistTerms(playlistLine: string): string[] {
   const terms: string[] = [];
@@ -526,7 +486,10 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
 
   if (rules.playlists.length > 0) {
     for (const pl of rules.playlists) {
-      const extracted = extractPlaylistTerms(pl);
+      const cleanPl = pl.trim();
+      if (!cleanPl) continue;
+      if (extractPlaylistId(cleanPl) !== null) continue;
+      const extracted = extractPlaylistTerms(cleanPl);
       allowTerms.push(...extracted);
     }
   }
@@ -549,8 +512,8 @@ function matchesPlaylistRule(title: string, rawText?: string): boolean {
 
 function isTitleBlocked(title: string, rawText?: string, fallbackFilters: string[] = []): boolean {
   const rules = parseRulesText(rawText, fallbackFilters);
-  const hasRules = rules.block.length > 0 || rules.allow.length > 0 || rules.playlists.length > 0;
-  if (!hasRules) return false;
+  const hasTextRules = rules.block.length > 0 || rules.allow.length > 0 || rules.playlists.some((p) => extractPlaylistId(p) === null);
+  if (!hasTextRules) return false;
   return !titleMatchesRules(title, rawText, fallbackFilters);
 }
 

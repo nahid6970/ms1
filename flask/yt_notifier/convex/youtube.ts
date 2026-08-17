@@ -1,4 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
+import { v, ConvexError } from "convex/values";
+import { action } from "./_generated/server";
+import { internal } from "./_generated/api";
+
 
 const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
 
@@ -81,6 +85,111 @@ export async function fetchChannelFeedWithApiKey(
   const xml = await res.text();
   return parseFeed(xml);
 }
+
+export function extractPlaylistId(input: string): string | null {
+  const match = input.match(/(?:list=|^)(PL[A-Za-z0-9_-]{10,})/i);
+  return match ? match[1] : null;
+}
+
+export function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
+  if (!rawText && fallbackFilters.length > 0) {
+    return { allow: fallbackFilters, block: [], playlists: [] };
+  }
+  if (!rawText) return { allow: [], block: [], playlists: [] };
+
+  const allow: string[] = [];
+  const block: string[] = [];
+  const playlists: string[] = [];
+  let currentMode: "allow" | "block" | "playlist" = "allow";
+
+  const lines = rawText.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const lower = trimmed.toLowerCase();
+    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
+      currentMode = "allow";
+      continue;
+    }
+    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
+      currentMode = "block";
+      continue;
+    }
+    if (lower.includes("playlist")) {
+      currentMode = "playlist";
+      continue;
+    }
+
+    if (currentMode === "allow") {
+      allow.push(trimmed);
+    } else if (currentMode === "block") {
+      block.push(trimmed);
+    } else if (currentMode === "playlist") {
+      playlists.push(trimmed);
+    }
+  }
+
+  return { allow, block, playlists };
+}
+
+
+export async function fetchPlaylistFeedWithApiKey(
+  playlistId: string,
+  apiKey: string | null,
+): Promise<ChannelFeed | null> {
+  if (apiKey) {
+    const viaApi = await fetchFeedViaApi(playlistId, apiKey);
+    if (viaApi) return viaApi;
+  }
+
+  const url = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
+  const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return null;
+  const xml = await res.text();
+  return parseFeed(xml);
+}
+
+export const listChannelPlaylists = action({
+  args: { channelId: v.string() },
+  handler: async (ctx, { channelId }) => {
+    const apiKey =
+      (await ctx.runQuery(internal.settings.youtubeDataApiKey)) ??
+      process.env.YT_DATA_API_KEY ??
+      null;
+
+    if (!apiKey) {
+      throw new ConvexError(
+        "A YouTube Data API v3 Key is required in Settings to load channel playlists.",
+      );
+    }
+
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&key=${apiKey}`,
+    );
+    if (!res.ok) {
+      throw new ConvexError(
+        `Failed to fetch playlists from YouTube (HTTP ${res.status}). Check your API Key in Settings.`,
+      );
+    }
+    const data = (await res.json()) as {
+      items?: Array<{
+        id?: string;
+        snippet?: { title?: string };
+        contentDetails?: { itemCount?: number };
+      }>;
+    };
+
+    return (data.items ?? []).map((item) => ({
+      id: item.id ?? "",
+      title: item.snippet?.title ?? "Untitled Playlist",
+      url: `https://www.youtube.com/playlist?list=${item.id}`,
+      count: item.contentDetails?.itemCount ?? 0,
+    }));
+  },
+});
+
+
 
 /* ------------------------------ Data API v3 ------------------------------- */
 

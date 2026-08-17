@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { extractPlaylistId, parseRulesText } from "./youtube";
 
 function toDayStr(d: Date): string {
   const y = d.getFullYear();
@@ -189,48 +190,6 @@ export const heatmap = query({
   },
 });
 
-function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
-  if (!rawText && fallbackFilters.length > 0) {
-    return { allow: fallbackFilters, block: [], playlists: [] };
-  }
-  if (!rawText) return { allow: [], block: [], playlists: [] };
-
-  const allow: string[] = [];
-  const block: string[] = [];
-  const playlists: string[] = [];
-  let currentMode: "allow" | "block" | "playlist" = "allow";
-
-  const lines = rawText.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-
-    const lower = trimmed.toLowerCase();
-    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
-      currentMode = "allow";
-      continue;
-    }
-    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
-      currentMode = "block";
-      continue;
-    }
-    if (lower.includes("playlist")) {
-      currentMode = "playlist";
-      continue;
-    }
-
-    if (currentMode === "allow") {
-      allow.push(trimmed);
-    } else if (currentMode === "block") {
-      block.push(trimmed);
-    } else if (currentMode === "playlist") {
-      playlists.push(trimmed);
-    }
-  }
-
-  return { allow, block, playlists };
-}
-
 function extractPlaylistTerms(playlistLine: string): string[] {
   const terms: string[] = [];
   const raw = playlistLine.trim();
@@ -275,7 +234,10 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
 
   if (rules.playlists.length > 0) {
     for (const pl of rules.playlists) {
-      const extracted = extractPlaylistTerms(pl);
+      const cleanPl = pl.trim();
+      if (!cleanPl) continue;
+      if (extractPlaylistId(cleanPl) !== null) continue;
+      const extracted = extractPlaylistTerms(cleanPl);
       allowTerms.push(...extracted);
     }
   }

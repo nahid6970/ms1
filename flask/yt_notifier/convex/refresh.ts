@@ -3,11 +3,15 @@ import { ConvexError } from "convex/values";
 import { action, internalAction, internalMutation, internalQuery } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import {
+  extractPlaylistId,
   fetchChannelFeedWithApiKey,
   fetchFeedViaApiPaginated,
+  fetchPlaylistFeedWithApiKey,
   fetchVideoDurations,
+  parseRulesText,
   resolveChannelInfoWithApiKey,
 } from "./youtube";
+
 
 export interface RefreshChannelResult {
   channelId: string;
@@ -30,11 +34,12 @@ export const refreshChannel = action({
       process.env.YT_DATA_API_KEY ??
       null;
     const feed = await fetchChannelFeedWithApiKey(channelId, apiKey);
-    if (!feed || feed.entries.length === 0) {
-      return { channelId, channelName: null, newVideos: 0, durationsUpdated: 0 };
-    }
 
-    const entries = feed.entries.map((e) => ({
+    const channel = await ctx.runQuery(internal.channels.getByChannelId, {
+      channelId,
+    });
+
+    const entries = (feed?.entries ?? []).map((e) => ({
       videoId: e.videoId,
       title: e.title,
       link: e.link,
@@ -42,9 +47,34 @@ export const refreshChannel = action({
       published: e.published ? new Date(e.published).toISOString() : "",
     }));
 
-    const channel = await ctx.runQuery(internal.channels.getByChannelId, {
-      channelId,
-    });
+    const rulesText = channel?.rulesText ?? "";
+    const rules = parseRulesText(rulesText);
+    const playlistIds = rules.playlists
+      .map(extractPlaylistId)
+      .filter((id: string | null): id is string => Boolean(id));
+
+    for (const plId of playlistIds) {
+      try {
+        const plFeed = await fetchPlaylistFeedWithApiKey(plId, apiKey);
+        if (plFeed && plFeed.entries.length > 0) {
+          for (const e of plFeed.entries) {
+            entries.push({
+              videoId: e.videoId,
+              title: e.title,
+              link: e.link,
+              duration: e.duration,
+              published: e.published ? new Date(e.published).toISOString() : "",
+            });
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to fetch playlist ${plId}:`, err);
+      }
+    }
+
+    if (entries.length === 0) {
+      return { channelId, channelName: channel?.channelName ?? null, newVideos: 0, durationsUpdated: 0 };
+    }
 
     if (channel && !channel.thumbnail) {
       const info = await resolveChannelInfoWithApiKey(channel.url, apiKey);
@@ -56,9 +86,11 @@ export const refreshChannel = action({
       }
     }
 
+    const channelTitle = feed?.title ?? channel?.channelName ?? "Unknown Channel";
+
     await ctx.runMutation(internal.channels.updateRow, {
       channelId,
-      channelName: feed.title,
+      channelName: channelTitle,
     });
 
     const result = await ctx.runMutation(internal.videos.addFromFeed, {
@@ -70,7 +102,7 @@ export const refreshChannel = action({
     }
     return {
       channelId,
-      channelName: feed.title,
+      channelName: channelTitle,
       newVideos: result.newVideos,
       durationsUpdated: result.durationsUpdated,
     };
