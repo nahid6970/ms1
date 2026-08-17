@@ -28,6 +28,7 @@ export default defineSchema({
     isFavorite: v.optional(v.boolean()),
     isWatchLater: v.optional(v.boolean()),
     isShort: v.optional(v.boolean()),
+    sourcePlaylistId: v.optional(v.string()), // Playlist ID if loaded from a specific playlist
   })
     .index("by_channelId", ["channelId"])
     .index("by_channelId_published", ["channelId", "published"])

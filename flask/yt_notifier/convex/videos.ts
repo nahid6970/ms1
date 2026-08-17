@@ -92,6 +92,10 @@ export const list = query({
         if (effectiveCategory === "watchlater") {
           return Boolean(video.isWatchLater);
         }
+        // Check playlist filter first (strict mode when playlist URLs exist)
+        if (!passesPlaylistFilter(video, rulesText, fallbackFilters)) {
+          return false;
+        }
         return !video.isWatchLater && titleMatchesRules(video.title, rulesText, fallbackFilters);
       })
       .filter((video) => {
@@ -126,6 +130,7 @@ export const list = query({
       isFavorite: video.isFavorite ?? false,
       isWatchLater: video.isWatchLater ?? false,
       isShort: isShortVideo(video),
+      isPlaylist: matchesPlaylistRule(video.title, rulesById.get(video.channelId)),
       channelId: video.channelId,
       channelName: nameById.get(video.channelId) ?? "Unknown Channel",
       channelThumbnail: thumbById.get(video.channelId) ?? null,
@@ -212,6 +217,7 @@ export const unreadCount = query({
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) => !video.isWatchLater)
+      .filter((video) => passesPlaylistFilter(video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []))
       .filter((video) =>
         titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
       )
@@ -264,6 +270,7 @@ export const counts = query({
 
     const validVideos = allVideos
       .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) => passesPlaylistFilter(video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []))
       .filter((video) =>
         titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
       );
@@ -402,8 +409,10 @@ export const addFromFeed = internalMutation({
         published: v.string(),
       }),
     ),
+    skipTitleFilter: v.optional(v.boolean()),
+    sourcePlaylistId: v.optional(v.string()),
   },
-  handler: async (ctx, { channelId, entries }) => {
+  handler: async (ctx, { channelId, entries, skipTitleFilter, sourcePlaylistId }) => {
     const channel = await ctx.db
       .query("channels")
       .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
@@ -413,7 +422,7 @@ export const addFromFeed = internalMutation({
     let durationsUpdated = 0;
     for (const entry of entries) {
       if (!entry.videoId) continue;
-      if (!titleMatchesRules(entry.title, channel?.rulesText, titleFilters)) continue;
+      if (!skipTitleFilter && !titleMatchesRules(entry.title, channel?.rulesText, titleFilters)) continue;
       const existing = await ctx.db
         .query("videos")
         .withIndex("by_videoId", (q) => q.eq("videoId", entry.videoId))
@@ -427,6 +436,7 @@ export const addFromFeed = internalMutation({
           duration: entry.duration || undefined,
           published: entry.published,
           isNew: true,
+          sourcePlaylistId: sourcePlaylistId || undefined,
         });
         newVideos += 1;
       } else if (!existing.duration && entry.duration) {
@@ -506,8 +516,35 @@ function matchesPlaylistRule(title: string, rawText?: string): boolean {
   const rules = parseRulesText(rawText);
   if (rules.playlists.length === 0) return false;
   const normalizedTitle = title.toLocaleLowerCase();
-  const playlistMatches = rules.playlists.filter(Boolean).map((p) => p.toLocaleLowerCase());
-  return playlistMatches.some((p) => normalizedTitle.includes(p));
+  // Only use entries that are NOT a playlist URL — URL-only entries are for direct fetching, not title matching
+  const textOnlyMatches = rules.playlists
+    .filter(Boolean)
+    .filter((p) => extractPlaylistId(p.trim()) === null)
+    .map((p) => p.toLocaleLowerCase());
+  if (textOnlyMatches.length === 0) return false;
+  return textOnlyMatches.some((p) => normalizedTitle.includes(p));
+}
+
+function passesPlaylistFilter(
+  video: { sourcePlaylistId?: string },
+  rulesText?: string,
+  fallbackFilters: string[] = [],
+): boolean {
+  const rules = parseRulesText(rulesText, fallbackFilters);
+  const hasPlaylistUrls = rules.playlists.some((p) => extractPlaylistId(p.trim()) !== null);
+  
+  if (!hasPlaylistUrls) return true; // No playlist URL rules → allow all
+  
+  // Strict playlist mode: only show videos from allowed playlists
+  const allowedPlaylistIds = rules.playlists
+    .map((p) => extractPlaylistId(p.trim()))
+    .filter((id): id is string => Boolean(id));
+  
+  if (allowedPlaylistIds.length === 0) return true; // No valid playlist IDs → allow all
+  
+  if (!video.sourcePlaylistId) return false; // Video has no source playlist → hide
+  
+  return allowedPlaylistIds.includes(video.sourcePlaylistId); // Check if video's playlist is allowed
 }
 
 function isTitleBlocked(title: string, rawText?: string, fallbackFilters: string[] = []): boolean {

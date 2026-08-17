@@ -587,15 +587,20 @@ function videoCard(video, categories = []) {
   const isNew = video.isNew;
   const isFavorite = Boolean(video.isFavorite);
   const isWatchLater = Boolean(video.isWatchLater);
+  const isPlaylist = Boolean(video.isPlaylist);
   const currentCat = video.channelCategory || "";
   const cardTone = isNew
-    ? "bg-slate-900/90 border-slate-800 ring-1 ring-red-500/20"
+    ? isPlaylist
+      ? "bg-slate-900/90 border-slate-800 ring-1 ring-amber-500/30"
+      : "bg-slate-900/90 border-slate-800 ring-1 ring-red-500/20"
     : "bg-slate-900/55 border-slate-800/60 opacity-85";
   const imageTone = isNew
     ? "grayscale-0 opacity-100"
     : "grayscale opacity-60";
   const titleTone = isNew
-    ? "text-slate-100 group-hover:text-red-400"
+    ? isPlaylist
+      ? "text-slate-100 group-hover:text-amber-400"
+      : "text-slate-100 group-hover:text-red-400"
     : "text-slate-500 group-hover:text-slate-300";
   const channelTone = isNew
     ? "text-slate-200 group-hover:text-white"

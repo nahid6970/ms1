@@ -269,7 +269,7 @@ export const loadPlaylistVideos = action({
 
     const result: { newVideos: number; durationsUpdated: number } = await ctx.runMutation(
       internal.videos.addFromFeed,
-      { channelId, entries },
+      { channelId, entries, skipTitleFilter: true, sourcePlaylistId: playlistId },
     );
 
     await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });
