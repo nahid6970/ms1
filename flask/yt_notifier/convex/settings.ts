@@ -121,21 +121,10 @@ export const recordQuotaUsage = internalMutation({
   },
   handler: async (ctx, { units }) => {
     const today = new Date().toISOString().slice(0, 10);
-    const existing = await ctx.db
-      .query("apiQuota")
-      .withIndex("by_day", (q: any) => q.eq("day", today))
-      .first();
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        units: existing.units + units,
-        requests: existing.requests + 1,
-      });
-    } else {
-      await ctx.db.insert("apiQuota", {
-        day: today,
-        units,
-        requests: 1,
-      });
-    }
+    await ctx.db.insert("apiQuota", {
+      day: today,
+      units,
+      requests: 1,
+    });
   },
 });

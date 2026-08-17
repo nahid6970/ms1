@@ -476,14 +476,28 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
   const rules = parseRulesText(rawText, fallbackFilters);
   const normalizedTitle = title.toLocaleLowerCase();
 
+  // 1. Block-Rules check: reject if title matches any block rule
   const blockMatches = rules.block.filter(Boolean).map((b) => b.toLocaleLowerCase());
   if (blockMatches.some((b) => normalizedTitle.includes(b))) {
     return false;
   }
 
-  const allowMatches = rules.allow.filter(Boolean).map((a) => a.toLocaleLowerCase());
-  if (allowMatches.length > 0) {
-    return allowMatches.some((a) => normalizedTitle.includes(a));
+  // 2. Allow-Rules & Playlist rules check (phrase matching)
+  const allowTerms = [...rules.allow];
+
+  if (rules.playlists.length > 0) {
+    for (const pl of rules.playlists) {
+      const cleanPl = pl.trim();
+      if (!cleanPl) continue;
+      allowTerms.push(cleanPl);
+      const cleanPhrase = cleanPl.replace(/[()_-]/g, " ").replace(/\s+/g, " ").trim();
+      if (cleanPhrase) allowTerms.push(cleanPhrase);
+    }
+  }
+
+  const activeAllow = Array.from(new Set(allowTerms.map((a) => a.trim().toLocaleLowerCase()).filter(Boolean)));
+  if (activeAllow.length > 0) {
+    return activeAllow.some((term) => normalizedTitle.includes(term));
   }
 
   return true;

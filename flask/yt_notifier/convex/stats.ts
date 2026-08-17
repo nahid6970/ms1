@@ -52,6 +52,9 @@ export const heatmap = query({
     const filtersById = new Map(
       enabledChannels.map((c) => [c.channelId, c.titleFilters ?? []]),
     );
+    const rulesById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.rulesText ?? ""]),
+    );
 
     const dayStrs: string[] = [];
     for (let i = 0; i < days; i++) {
@@ -63,7 +66,7 @@ export const heatmap = query({
     const counts = new Map<string, Map<string, number>>();
     for (const video of videos) {
       if (!enabledChannelIds.has(video.channelId)) continue;
-      if (!titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? [])) {
+      if (!titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? [])) {
         continue;
       }
       const date = new Date(video.published);
@@ -89,12 +92,12 @@ export const heatmap = query({
     const visibleVideos = allVideos.filter(
       (video) =>
         enabledChannelIds.has(video.channelId) &&
-        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
     );
     const visiblePeriodVideos = videos.filter(
       (video) =>
         enabledChannelIds.has(video.channelId) &&
-        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
     );
 
     const unseenVisible = visiblePeriodVideos.filter((video) => video.isNew).length;
@@ -138,17 +141,14 @@ export const heatmap = query({
     const estimatedDbMb = Math.round((estimatedDbBytes / (1024 * 1024)) * 100) / 100;
 
     const todayStr = new Date().toISOString().slice(0, 10);
-    const todayQuotaRow = await ctx.db
-      .query("apiQuota")
-      .withIndex("by_day", (q) => q.eq("day", todayStr))
-      .first();
-
     const allQuotaRows = await ctx.db.query("apiQuota").collect();
+    const todayQuotaRows = allQuotaRows.filter((row) => row.day === todayStr);
+
     const totalQuotaUnits = allQuotaRows.reduce((acc, row) => acc + (row.units ?? 0), 0);
     const totalQuotaRequests = allQuotaRows.reduce((acc, row) => acc + (row.requests ?? 0), 0);
 
-    const todayQuotaUnits = todayQuotaRow?.units ?? 0;
-    const todayQuotaRequests = todayQuotaRow?.requests ?? 0;
+    const todayQuotaUnits = todayQuotaRows.reduce((acc, row) => acc + (row.units ?? 0), 0);
+    const todayQuotaRequests = todayQuotaRows.reduce((acc, row) => acc + (row.requests ?? 0), 0);
     const dailyQuotaLimit = 10000;
 
     return {
@@ -189,13 +189,75 @@ export const heatmap = query({
   },
 });
 
-function titleMatchesFilters(title: string, filters: string[]) {
-  const activeFilters = filters
-    .map((filter) => filter.trim().toLocaleLowerCase())
-    .filter(Boolean);
-  if (activeFilters.length === 0) return true;
+function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
+  if (!rawText && fallbackFilters.length > 0) {
+    return { allow: fallbackFilters, block: [], playlists: [] };
+  }
+  if (!rawText) return { allow: [], block: [], playlists: [] };
+
+  const allow: string[] = [];
+  const block: string[] = [];
+  const playlists: string[] = [];
+  let currentMode: "allow" | "block" | "playlist" = "allow";
+
+  const lines = rawText.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const lower = trimmed.toLowerCase();
+    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
+      currentMode = "allow";
+      continue;
+    }
+    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
+      currentMode = "block";
+      continue;
+    }
+    if (lower.includes("playlist")) {
+      currentMode = "playlist";
+      continue;
+    }
+
+    if (currentMode === "allow") {
+      allow.push(trimmed);
+    } else if (currentMode === "block") {
+      block.push(trimmed);
+    } else if (currentMode === "playlist") {
+      playlists.push(trimmed);
+    }
+  }
+
+  return { allow, block, playlists };
+}
+
+function titleMatchesRules(title: string, rawText?: string, fallbackFilters: string[] = []) {
+  const rules = parseRulesText(rawText, fallbackFilters);
   const normalizedTitle = title.toLocaleLowerCase();
-  return activeFilters.some((filter) => normalizedTitle.includes(filter));
+
+  const blockMatches = rules.block.filter(Boolean).map((b) => b.toLocaleLowerCase());
+  if (blockMatches.some((b) => normalizedTitle.includes(b))) {
+    return false;
+  }
+
+  const allowTerms = [...rules.allow];
+
+  if (rules.playlists.length > 0) {
+    for (const pl of rules.playlists) {
+      const cleanPl = pl.trim();
+      if (!cleanPl) continue;
+      allowTerms.push(cleanPl);
+      const cleanPhrase = cleanPl.replace(/[()_-]/g, " ").replace(/\s+/g, " ").trim();
+      if (cleanPhrase) allowTerms.push(cleanPhrase);
+    }
+  }
+
+  const activeAllow = Array.from(new Set(allowTerms.map((a) => a.trim().toLocaleLowerCase()).filter(Boolean)));
+  if (activeAllow.length > 0) {
+    return activeAllow.some((term) => normalizedTitle.includes(term));
+  }
+
+  return true;
 }
 
 function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
