@@ -480,6 +480,37 @@ function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
   return { allow, block, playlists };
 }
 
+function extractPlaylistTerms(playlistLine: string): string[] {
+  const terms: string[] = [];
+  const raw = playlistLine.trim();
+  if (!raw) return terms;
+
+  terms.push(raw);
+
+  const clean = raw.replace(/[()]/g, " ").replace(/\s+/g, " ").trim();
+  if (clean) terms.push(clean);
+
+  const segments = raw
+    .split(/[|/:-]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const fillerRegex = /^(all\s+episodes?|full\s+playlist|official\s+playlist|playlist|all\s+videos?|episodes?)$/i;
+
+  for (const seg of segments) {
+    if (seg.length >= 2 && !fillerRegex.test(seg)) {
+      terms.push(seg);
+    }
+  }
+
+  const meaningfulSegs = segments.filter((s) => !fillerRegex.test(s));
+  if (meaningfulSegs.length > 1) {
+    terms.push(meaningfulSegs.join(" "));
+  }
+
+  return terms;
+}
+
 function titleMatchesRules(title: string, rawText?: string, fallbackFilters: string[] = []) {
   const rules = parseRulesText(rawText, fallbackFilters);
   const normalizedTitle = title.toLocaleLowerCase();
@@ -490,16 +521,13 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
     return false;
   }
 
-  // 2. Allow-Rules & Playlist rules check (phrase matching)
+  // 2. Allow-Rules & Playlist rules check
   const allowTerms = [...rules.allow];
 
   if (rules.playlists.length > 0) {
     for (const pl of rules.playlists) {
-      const cleanPl = pl.trim();
-      if (!cleanPl) continue;
-      allowTerms.push(cleanPl);
-      const cleanPhrase = cleanPl.replace(/[()_-]/g, " ").replace(/\s+/g, " ").trim();
-      if (cleanPhrase) allowTerms.push(cleanPhrase);
+      const extracted = extractPlaylistTerms(pl);
+      allowTerms.push(...extracted);
     }
   }
 
