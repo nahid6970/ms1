@@ -193,6 +193,9 @@ export const unreadCount = query({
     const filtersById = new Map(
       filteredChannels.map((channel) => [channel.channelId, channel.titleFilters ?? []]),
     );
+    const rulesById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.rulesText ?? ""]),
+    );
 
     const unseen = await ctx.db
       .query("videos")
@@ -203,7 +206,7 @@ export const unreadCount = query({
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) => !video.isWatchLater)
       .filter((video) =>
-        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
       )
       .filter((video) => !hideShorts || !isShortVideo(video)).length;
   },
@@ -246,13 +249,16 @@ export const counts = query({
     const filtersById = new Map(
       filteredChannels.map((channel) => [channel.channelId, channel.titleFilters ?? []]),
     );
+    const rulesById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.rulesText ?? ""]),
+    );
 
     const allVideos = await ctx.db.query("videos").collect();
 
     const validVideos = allVideos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
-        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
       );
 
     const main = validVideos.filter(
