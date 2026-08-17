@@ -254,10 +254,8 @@ export const loadPlaylistVideos = action({
     channelId: v.string(),
     playlistId: v.string(),
     maxItems: v.optional(v.number()), // 0 = all
-    dateFrom: v.optional(v.string()), // ISO date string e.g. "2024-01-01"
-    dateTo: v.optional(v.string()),   // ISO date string e.g. "2024-12-31"
   },
-  handler: async (ctx, { channelId, playlistId, maxItems, dateFrom, dateTo }): Promise<{ newVideos: number; channelName: string }> => {
+  handler: async (ctx, { channelId, playlistId, maxItems }): Promise<{ newVideos: number; channelName: string }> => {
     const apiKey =
       (await ctx.runQuery(internal.settings.youtubeDataApiKey)) ??
       process.env.YT_DATA_API_KEY ??
@@ -277,28 +275,13 @@ export const loadPlaylistVideos = action({
       return { newVideos: 0, channelName: channel.channelName ?? "Unknown Channel" };
     }
 
-    const fromMs = dateFrom ? new Date(dateFrom).getTime() : null;
-    const toMs = dateTo ? new Date(dateTo + "T23:59:59Z").getTime() : null;
-
-    const entries = feed.entries
-      .map((e) => ({
-        videoId: e.videoId,
-        title: e.title,
-        link: e.link,
-        duration: e.duration,
-        published: e.published ? new Date(e.published).toISOString() : "",
-      }))
-      .filter((e) => {
-        if (!e.published) return true; // no date info → include
-        const t = new Date(e.published).getTime();
-        if (fromMs !== null && t < fromMs) return false;
-        if (toMs !== null && t > toMs) return false;
-        return true;
-      });
-
-    if (entries.length === 0) {
-      return { newVideos: 0, channelName: channel.channelName ?? "Unknown Channel" };
-    }
+    const entries = feed.entries.map((e) => ({
+      videoId: e.videoId,
+      title: e.title,
+      link: e.link,
+      duration: e.duration,
+      published: e.published ? new Date(e.published).toISOString() : "",
+    }));
 
     const result: { newVideos: number; durationsUpdated: number } = await ctx.runMutation(
       internal.videos.addFromFeed,

@@ -1102,22 +1102,6 @@ window.openLoadPlaylistModal = function openLoadPlaylistModal(channelId, plUrl, 
           <input type="hidden" id="plLimitValue" value="0">
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1.5">
-            Filter by date <span class="text-slate-600 font-normal">(optional — leave blank to load all)</span>
-          </label>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="text-[10px] text-slate-500 mb-1 block">From</label>
-              <input type="date" id="plDateFrom" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 transition">
-            </div>
-            <div>
-              <label class="text-[10px] text-slate-500 mb-1 block">To</label>
-              <input type="date" id="plDateTo" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 transition">
-            </div>
-          </div>
-        </div>
-
         <div class="flex gap-2 pt-1">
           <button type="button" onclick="closeLoadPlaylistModal()" class="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">Cancel</button>
           <button type="button" id="plLoadConfirmBtn" onclick="confirmLoadPlaylist('${esc(channelId)}', '${esc(plUrl)}', '${esc(plTitle)}')"
@@ -1150,8 +1134,6 @@ window.selectPlLimit = function selectPlLimit(btn) {
 
 window.confirmLoadPlaylist = async function confirmLoadPlaylist(channelId, plUrl, plTitle) {
   const maxItems = parseInt(document.getElementById("plLimitValue")?.value ?? "0", 10);
-  const dateFrom = document.getElementById("plDateFrom")?.value || null;
-  const dateTo = document.getElementById("plDateTo")?.value || null;
 
   const btn = document.getElementById("plLoadConfirmBtn");
   if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Loading...'; }
@@ -1182,16 +1164,11 @@ window.confirmLoadPlaylist = async function confirmLoadPlaylist(channelId, plUrl
       channelId,
       playlistId,
       maxItems,
-      dateFrom: dateFrom || undefined,
-      dateTo: dateTo || undefined,
     });
 
     const limitLabel = maxItems === 0 ? "all" : maxItems;
-    const dateLabel = dateFrom || dateTo
-      ? ` (${dateFrom || "start"} → ${dateTo || "now"})`
-      : "";
     flash(
-      `Loaded "${plTitle}" — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added (${limitLabel}${dateLabel})`,
+      `Loaded "${plTitle}" — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added (${limitLabel})`,
       "success",
     );
     closeLoadPlaylistModal();
