@@ -45,7 +45,7 @@
                         <i class="fa-solid fa-tv text-red-500 text-xs"></i>
                         <span id="channelCountNumber">0</span>
                     </div>
-                    <input type="text" id="channelUrl" name="url" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[180px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
+                    <input type="text" id="channelUrl" name="url" oninput="handleChannelSearchInput(this.value)" placeholder="Search channels or paste YouTube URL to add..." required class="flex-1 min-w-[180px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
                     <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">
                         Add Channel
                     </button>

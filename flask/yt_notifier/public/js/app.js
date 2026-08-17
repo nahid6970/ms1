@@ -202,7 +202,7 @@ const POPUP_PAGES = {
           <i class="fa-solid fa-tv text-red-500 text-xs"></i>
           <span id="channelCountNumber">0</span>
         </div>
-        <input type="text" id="channelUrl" name="channel_url" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Paste YouTube Channel URL (e.g. @username)" required class="flex-1 min-w-[180px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
+        <input type="text" id="channelUrl" name="channel_url" oninput="handleChannelSearchInput(this.value)" autocomplete="off" autocapitalize="off" spellcheck="false" data-bwignore="true" data-lpignore="true" data-1p-ignore="true" placeholder="Search channels or paste YouTube URL to add..." required class="flex-1 min-w-[180px] bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-red-500 transition">
         <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition flex-shrink-0">Add Channel</button>
         <select id="channelSortSelect" onchange="changeChannelSort(this.value)" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 outline-none focus:border-red-500 transition flex-shrink-0" title="Sort channels">
           <option value="recent">Sort: Recent</option>
@@ -1072,6 +1072,12 @@ window.deleteChannel = async function deleteChannel(channelId) {
 };
 
 let currentChannelSort = localStorage.getItem("channelSort") || "recent";
+let channelSearchQuery = "";
+
+window.handleChannelSearchInput = function handleChannelSearchInput(value) {
+  channelSearchQuery = value.trim().toLowerCase();
+  renderChannels({ refreshNav: false, keepQuery: true });
+};
 
 window.changeChannelSort = async function changeChannelSort(sortMethod) {
   currentChannelSort = sortMethod;
@@ -1102,7 +1108,7 @@ function sortChannelsList(channels, sortMethod) {
   return list;
 }
 
-async function renderChannels({ refreshNav = true } = {}) {
+async function renderChannels({ refreshNav = true, keepQuery = false } = {}) {
   const [channels, categories, settings, unread] = await Promise.all([
     callConvex("query", "channels:list"),
     callConvex("query", "channels:categories"),
@@ -1114,7 +1120,20 @@ async function renderChannels({ refreshNav = true } = {}) {
   const list = document.getElementById("channelList");
   if (!list) return;
 
+  if (!keepQuery) {
+    const input = document.getElementById("channelUrl");
+    if (input) channelSearchQuery = input.value.trim().toLowerCase();
+  }
+
   const sortedChannels = sortChannelsList(channels, currentChannelSort);
+  const filteredChannels = sortedChannels.filter((channel) => {
+    if (!channelSearchQuery) return true;
+    const nameMatch = (channel.channelName || "").toLowerCase().includes(channelSearchQuery);
+    const urlMatch = (channel.url || "").toLowerCase().includes(channelSearchQuery);
+    const categoryMatch = (channel.category || "").toLowerCase().includes(channelSearchQuery);
+    const rulesMatch = (channel.rulesText || "").toLowerCase().includes(channelSearchQuery);
+    return nameMatch || urlMatch || categoryMatch || rulesMatch;
+  });
 
   const sortSelect = document.getElementById("channelSortSelect");
   if (sortSelect) sortSelect.value = currentChannelSort;
@@ -1122,9 +1141,11 @@ async function renderChannels({ refreshNav = true } = {}) {
   const countNum = document.getElementById("channelCountNumber");
   if (countNum) countNum.textContent = `${channels.length}`;
 
-  list.innerHTML = sortedChannels.length
-    ? sortedChannels.map((channel) => channelRow(channel, categories)).join("")
-    : '<p class="text-slate-600 text-sm">No channels yet. Add your first one above!</p>';
+  list.innerHTML = filteredChannels.length
+    ? filteredChannels.map((channel) => channelRow(channel, categories)).join("")
+    : sortedChannels.length
+      ? '<p class="text-slate-600 text-sm">No matching channels found for your search.</p>'
+      : '<p class="text-slate-600 text-sm">No channels yet. Add your first one above!</p>';
 }
 
 function initChannelsPage() {
