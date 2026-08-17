@@ -97,14 +97,19 @@ export const list = query({
         return !hideShorts || !isShortVideo(video);
       });
 
-    if (unseenFirst) {
-      filtered.sort((a, b) => {
+    filtered.sort((a, b) => {
+      const aPlaylist = matchesPlaylistRule(a.title, rulesById.get(a.channelId)) ? 1 : 0;
+      const bPlaylist = matchesPlaylistRule(b.title, rulesById.get(b.channelId)) ? 1 : 0;
+      if (aPlaylist !== bPlaylist) return bPlaylist - aPlaylist;
+
+      if (unseenFirst) {
         const aNew = a.isNew ? 1 : 0;
         const bNew = b.isNew ? 1 : 0;
         if (aNew !== bNew) return bNew - aNew;
-        return b.published.localeCompare(a.published);
-      });
-    }
+      }
+
+      return b.published.localeCompare(a.published);
+    });
 
     const finalVideos = feedLimit === 0 ? filtered : filtered.slice(0, feedLimit);
 
@@ -427,13 +432,14 @@ export const addFromFeed = internalMutation({
 
 function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
   if (!rawText && fallbackFilters.length > 0) {
-    return { allow: fallbackFilters, block: [] };
+    return { allow: fallbackFilters, block: [], playlists: [] };
   }
-  if (!rawText) return { allow: [], block: [] };
+  if (!rawText) return { allow: [], block: [], playlists: [] };
 
   const allow: string[] = [];
   const block: string[] = [];
-  let currentMode: "allow" | "block" = "allow";
+  const playlists: string[] = [];
+  let currentMode: "allow" | "block" | "playlist" = "allow";
 
   const lines = rawText.split(/\r?\n/);
   for (const line of lines) {
@@ -449,15 +455,21 @@ function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
       currentMode = "block";
       continue;
     }
+    if (lower.includes("playlist")) {
+      currentMode = "playlist";
+      continue;
+    }
 
     if (currentMode === "allow") {
       allow.push(trimmed);
-    } else {
+    } else if (currentMode === "block") {
       block.push(trimmed);
+    } else if (currentMode === "playlist") {
+      playlists.push(trimmed);
     }
   }
 
-  return { allow, block };
+  return { allow, block, playlists };
 }
 
 function titleMatchesRules(title: string, rawText?: string, fallbackFilters: string[] = []) {
@@ -475,6 +487,14 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
   }
 
   return true;
+}
+
+function matchesPlaylistRule(title: string, rawText?: string): boolean {
+  const rules = parseRulesText(rawText);
+  if (rules.playlists.length === 0) return false;
+  const normalizedTitle = title.toLocaleLowerCase();
+  const playlistMatches = rules.playlists.filter(Boolean).map((p) => p.toLocaleLowerCase());
+  return playlistMatches.some((p) => normalizedTitle.includes(p));
 }
 
 function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {

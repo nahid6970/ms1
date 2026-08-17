@@ -867,13 +867,13 @@ function inactivityBadge(lastUpload) {
   return "";
 }
 
-const DEFAULT_RULES_TEMPLATE = `:Allow-Rules:\n\n\n\n:Block-Rules:`;
+const DEFAULT_RULES_TEMPLATE = `:Allow-Rules:\n\n:Block-Rules:\n\n:Playlists:`;
 
 function parseRulesCount(rulesText, titleFilters = []) {
   if (!rulesText && titleFilters.length > 0) return titleFilters.length;
   if (!rulesText) return 0;
   const lines = rulesText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  const activeLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules"));
+  const activeLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules") && !l.toLowerCase().includes("playlist"));
   return activeLines.length;
 }
 
@@ -882,7 +882,7 @@ function channelRow(channel, categories = []) {
   const filters = Array.isArray(channel.titleFilters) ? channel.titleFilters : [];
   const rulesText = channel.rulesText ?? "";
   const ruleCount = parseRulesCount(rulesText, filters);
-  const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n\n:Block-Rules:` : DEFAULT_RULES_TEMPLATE);
+  const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n:Block-Rules:\n\n:Playlists:` : DEFAULT_RULES_TEMPLATE);
   const category = channel.category ?? "";
 
   const optionsHtml = categories.map((cat) => `
@@ -937,7 +937,7 @@ function channelRow(channel, categories = []) {
       <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-scale-balanced text-sky-400 mr-1.5"></i>Channel Rules (Allow & Block)</label>
       <textarea rows="8" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 font-mono text-xs leading-relaxed outline-none transition focus:border-sky-500" placeholder="${esc(DEFAULT_RULES_TEMPLATE)}">${esc(initialRulesText)}</textarea>
       <div class="mt-3 flex items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">Type whitelisted words under :Allow-Rules: and blacklisted words under :Block-Rules:.</p>
+        <p class="text-xs text-slate-500">Type whitelisted words under :Allow-Rules:, blacklisted words under :Block-Rules:, and playlist names under :Playlists: to show them first.</p>
         <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Rules</button>
       </div>
     </form>
