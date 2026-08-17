@@ -3,46 +3,31 @@
 ## 1. Project DNA
 YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + **Cloudflare Pages** (static frontend, no framework). Frontend talks to Convex via raw HTTP API (`/api/query|mutation|action`). No SDK, no bundler.
 
-## 2. Latest Implementation (2026-08-17)
+## 2. Latest Implementation (2026-08-18)
 
 | File | What changed |
 |---|---|
-| `convex/youtube.ts` | `parseRulesText` — section headers only recognized when line **starts with `:`**. Fixes playlist URLs containing "playlist" being misread as headers. `fetchPlaylistFeedWithApiKey` hardCap raised 500→5000 for "All" loads. |
-| `convex/videos.ts` | Playlist URL rules and Allow-Rules are **OR conditions** (`list`, `unreadCount`, `counts`). `isTitleBlocked` returns false if video passes either filter. `counts` computes blocked from all channel videos. `addFromFeed` patches `sourcePlaylistId` on existing videos missing it. |
-| `convex/refresh.ts` | `refreshChannel` saves playlist videos via separate `addFromFeed` with `sourcePlaylistId`. `loadPlaylistVideos` accepts `maxItems` only (date filter removed). |
-| `convex/channels.ts` | `updateRules` only extracts `:Allow-Rules:` lines into `titleFilters`. |
-| `public/js/app.js` | `parseRulesCount` counts all non-header lines. Playlist row: inline select removed, Load opens a **modal** with limit pills (10/25/50/100/250/All — All pre-selected). Duplicate Load button fragment fixed. |
+| `convex/schema.ts` | Added `sourcePlaylistTitle` to videos table. Added `playlistMeta` (array of `{id, title}`) to channels table for caching playlist names. |
+| `convex/youtube.ts` | `parseRulesText` — headers only on lines starting with `:`. `fetchPlaylistFeedWithApiKey` now fetches real playlist title via `playlists?part=snippet` API (was wrongly using channel name). hardCap raised to 5000. |
+| `convex/videos.ts` | OR logic for playlist+allow rules. `addFromFeed` patches `sourcePlaylistId` + `sourcePlaylistTitle` on existing videos. `takeAmount=10000` when `playlistId` filter active. Added `listPlaylists` query (channel→playlist tree with counts/unseen). Added `playlistId` arg to `list` and `counts`. |
+| `convex/channels.ts` | `updateRules` only extracts allow-section lines into `titleFilters`. Added `upsertPlaylistMeta` (internal) and `savePlaylistMeta` (public mutation) to store playlist id→title map on channel. |
+| `convex/refresh.ts` | `refreshChannel` saves playlist videos with `sourcePlaylistId` + `sourcePlaylistTitle`, calls `upsertPlaylistMeta`. `loadPlaylistVideos` same. |
+| `public/js/app.js` | Playlist row: Load button opens modal (limit pills 10/25/50/100/250/All, All default). Added Playlists nav icon (list icon) → popup showing channel→playlist tree with unseen badges. Clicking a playlist navigates to `?playlistId=PLxxx`. Feed shows playlist banner when active. Auto-syncs missing titles via `listChannelPlaylists` on panel open. |
 
 ## 3. Critical Context — How Rules Work
 
-Each channel has a `rulesText` field parsed by `parseRulesText()` into three buckets.
-
-**`:Allow-Rules:`** — title whitelist. If any terms exist, a video's title must match at least one to appear in the main feed. Empty = all titles pass.
-
-**`:Block-Rules:`** — title blacklist. If a video title matches any term it is always excluded → Blocked Items.
-
+**`:Allow-Rules:`** — title whitelist. Empty = all pass.
+**`:Block-Rules:`** — title blacklist. Matches → always Blocked Items.
 **`:Playlists:`** — two sub-modes:
-- **Playlist URL** (`https://youtube.com/playlist?list=PLxxx`) → **strict playlist mode**: only videos with matching `sourcePlaylistId` in DB appear in main feed.
-- **Playlist name / text** (`Series Name`) → extra allow-rule matched by title substring; matching videos get amber highlight.
+- **URL** → strict playlist mode: only videos with matching `sourcePlaylistId` in main feed
+- **Text name** → extra allow-rule by title substring, amber highlight
 
-**OR logic (critical):** Playlist URL rules and Allow-Rules are **OR conditions**. Video reaches main feed if it **either** comes from an allowed playlist **or** its title matches an allow-rule. Fails both → Blocked Items.
+**OR logic:** Playlist URL rules and Allow-Rules are OR conditions. Video passes if either matches. Fails both → Blocked Items.
 
-**Example:**
-```
-:Allow-Rules:
-key odoo concept        ← non-playlist videos with this title also show
+**`sourcePlaylistId`** — stamped at insert. Re-load "All" to retroactively stamp existing videos.
+**`playlistMeta`** on channel — stores `{id, title}` pairs. Populated on Load/refresh/panel auto-sync. Used by Playlists panel so titles show without scanning videos.
+**Section headers** must start with `:`. URLs containing "playlist" are NOT headers.
+**Playlist titles** come from `playlists?part=snippet` API (not from `playlistItems` channelTitle which returns channel name).
 
-:Block-Rules:
-
-:Playlists:
-https://youtube.com/playlist?list=PLxxx   ← all playlist videos show
-```
-
-**`sourcePlaylistId`** — DB field stamped at insert. If videos existed before a playlist rule was added, hit **Load → All** to retroactively stamp them. Re-loading (even 0 new videos) patches unstamped existing videos.
-
-**Section header rule:** Lines must **start with `:`** to be treated as headers. Content lines including URLs are never headers.
-
-**Load modal:** Default is "All" (fetches up to 5000 from API). Use lower limits only to save API quota on very large playlists.
-
-## 4. Current Status
-Everything working. Key reminder: after re-loading a playlist, existing videos that were already marked **seen** (`isNew=false`) will appear at the bottom or be hidden if on Unseen filter — switch to **All Videos** filter to see them. No pending tasks.
+## 4. Pending Task
+Deploy + open Playlists panel to trigger auto-sync of titles. Re-load "All" on each playlist to stamp `sourcePlaylistId`/`sourcePlaylistTitle` on existing videos. Verify playlist view shows all videos (not capped by feedLimit).
