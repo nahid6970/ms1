@@ -198,7 +198,7 @@
             "action": "Run(\"C:\\@delta\\ms1\\testing\\screenshot\\region_screenshot.py\", \"\", \"Hide\")",
             "category": "General",
             "description": "",
-            "enabled": true,
+            "enabled": false,
             "hotkey": "PrintScreen",
             "name": "Take Screenshot"
         },
