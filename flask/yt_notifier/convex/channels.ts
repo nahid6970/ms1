@@ -61,6 +61,46 @@ export const updateNextPageToken = internalMutation({
   },
 });
 
+export const upsertPlaylistMeta = internalMutation({
+  args: {
+    channelId: v.string(),
+    playlistId: v.string(),
+    title: v.string(),
+  },
+  handler: async (ctx, { channelId, playlistId, title }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    const existing = channel.playlistMeta ?? [];
+    const updated = existing.filter((m) => m.id !== playlistId);
+    updated.push({ id: playlistId, title });
+    await ctx.db.patch(channel._id, { playlistMeta: updated });
+  },
+});
+
+export const savePlaylistMeta = mutation({
+  args: {
+    channelId: v.string(),
+    playlists: v.array(v.object({ id: v.string(), title: v.string() })),
+  },
+  handler: async (ctx, { channelId, playlists }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    const existing = new Map((channel.playlistMeta ?? []).map((m) => [m.id, m.title]));
+    for (const pl of playlists) {
+      existing.set(pl.id, pl.title);
+    }
+    await ctx.db.patch(channel._id, {
+      playlistMeta: Array.from(existing.entries()).map(([id, title]) => ({ id, title })),
+    });
+  },
+});
+
 
 export const categories = query({
   args: {},

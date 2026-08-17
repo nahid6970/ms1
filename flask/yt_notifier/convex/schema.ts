@@ -12,6 +12,8 @@ export default defineSchema({
     rulesText: v.optional(v.string()),
     category: v.optional(v.string()),
     nextPageToken: v.optional(v.string()),
+    // Map of playlistId → title for display in the Playlists panel
+    playlistMeta: v.optional(v.array(v.object({ id: v.string(), title: v.string() }))),
   })
     .index("by_channelId", ["channelId"])
     .index("by_url", ["url"]),

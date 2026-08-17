@@ -79,7 +79,8 @@ export const list = query({
 
     const isShortsView = category === "shorts";
 
-    const takeAmount = isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4);
+    // When filtering by playlist, fetch all videos so none are missed regardless of date
+    const takeAmount = playlistId ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
     const videos = await q.take(takeAmount);
 
     const filtered = videos
@@ -637,11 +638,18 @@ export const listPlaylists = query({
         .map((p) => extractPlaylistId(p.trim()))
         .filter((id): id is string => Boolean(id));
 
+      // Build title lookup from stored playlistMeta, fall back to scanning videos
+      const metaMap = new Map((channel.playlistMeta ?? []).map((m) => [m.id, m.title]));
+
       const channelVideos = allVideos.filter((v) => v.channelId === channel.channelId);
 
       const playlists = playlistIds.map((plId) => {
         const plVideos = channelVideos.filter((v) => v.sourcePlaylistId === plId);
-        const title = plVideos.find((v) => v.sourcePlaylistTitle)?.sourcePlaylistTitle ?? plId;
+        // Use stored meta title first, then video-level title, then raw ID
+        const title =
+          metaMap.get(plId) ??
+          plVideos.find((v) => v.sourcePlaylistTitle)?.sourcePlaylistTitle ??
+          plId;
         return {
           playlistId: plId,
           title,

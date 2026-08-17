@@ -75,6 +75,14 @@ export const refreshChannel = action({
             sourcePlaylistId: plId,
             sourcePlaylistTitle: plFeed.title || undefined,
           });
+          // Store playlist title in channel meta for the Playlists panel
+          if (plFeed.title) {
+            await ctx.runMutation(internal.channels.upsertPlaylistMeta, {
+              channelId,
+              playlistId: plId,
+              title: plFeed.title,
+            });
+          }
           playlistNewVideos += plResult.newVideos;
           playlistDurationsUpdated += plResult.durationsUpdated;
         }
@@ -288,6 +296,15 @@ export const loadPlaylistVideos = action({
       internal.videos.addFromFeed,
       { channelId, entries, skipTitleFilter: true, sourcePlaylistId: playlistId, sourcePlaylistTitle: feed.title || undefined },
     );
+
+    // Store playlist title in channel meta for the Playlists panel
+    if (feed.title) {
+      await ctx.runMutation(internal.channels.upsertPlaylistMeta, {
+        channelId,
+        playlistId,
+        title: feed.title,
+      });
+    }
 
     await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });
 

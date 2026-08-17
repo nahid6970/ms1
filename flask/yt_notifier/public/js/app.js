@@ -555,6 +555,31 @@ async function renderPlaylistsPanel() {
     return;
   }
 
+  // Auto-sync titles for any playlist still showing a raw ID
+  const channelsNeedingTitles = data.filter((ch) =>
+    ch.playlists.some((pl) => pl.title === pl.playlistId)
+  );
+  if (channelsNeedingTitles.length > 0) {
+    // Fetch titles in background and re-render when done
+    Promise.all(channelsNeedingTitles.map(async (ch) => {
+      try {
+        const playlists = await callConvex("action", "youtube:listChannelPlaylists", { channelId: ch.channelId });
+        if (!playlists || !playlists.length) return;
+        const meta = playlists.map((pl) => ({ id: pl.id, title: pl.title }));
+        await callConvex("mutation", "channels:savePlaylistMeta", { channelId: ch.channelId, playlists: meta });
+      } catch (e) { /* silently skip if API key missing */ }
+    })).then(() => {
+      // Re-render panel with updated titles
+      if (document.getElementById("playlistsPanel")) renderPlaylistsPanel();
+    });
+  }
+
+  renderPlaylistsPanelHtml(data, activePlaylistId);
+}
+
+function renderPlaylistsPanelHtml(data, activePlaylistId) {
+  const container = document.getElementById("playlistsPanel");
+  if (!container) return;
   container.innerHTML = data.map((channel) => `
     <div class="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
       <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-800/60">
