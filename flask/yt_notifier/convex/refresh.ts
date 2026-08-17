@@ -52,23 +52,39 @@ export const refreshChannel = action({
       .map(extractPlaylistId)
       .filter((id: string | null): id is string => Boolean(id));
 
+    let playlistNewVideos = 0;
+    let playlistDurationsUpdated = 0;
+
     for (const plId of playlistIds) {
       try {
         const plFeed = await fetchPlaylistFeedWithApiKey(plId, apiKey);
         if (plFeed && plFeed.entries.length > 0) {
-          for (const e of plFeed.entries) {
-            entries.push({
-              videoId: e.videoId,
-              title: e.title,
-              link: e.link,
-              duration: e.duration,
-              published: e.published ? new Date(e.published).toISOString() : "",
-            });
-          }
+          // Save playlist videos separately with their sourcePlaylistId so the
+          // passesPlaylistFilter check in the feed can show them correctly.
+          const plEntries = plFeed.entries.map((e) => ({
+            videoId: e.videoId,
+            title: e.title,
+            link: e.link,
+            duration: e.duration,
+            published: e.published ? new Date(e.published).toISOString() : "",
+          }));
+          const plResult = await ctx.runMutation(internal.videos.addFromFeed, {
+            channelId,
+            entries: plEntries,
+            skipTitleFilter: true,
+            sourcePlaylistId: plId,
+          });
+          playlistNewVideos += plResult.newVideos;
+          playlistDurationsUpdated += plResult.durationsUpdated;
         }
       } catch (err) {
         console.error(`Failed to fetch playlist ${plId}:`, err);
       }
+    }
+
+    if (entries.length === 0 && playlistIds.length > 0) {
+      // Only playlist rules — no regular channel feed needed
+      return { channelId, channelName: channel?.channelName ?? null, newVideos: playlistNewVideos, durationsUpdated: playlistDurationsUpdated };
     }
 
     if (entries.length === 0) {
@@ -102,8 +118,8 @@ export const refreshChannel = action({
     return {
       channelId,
       channelName: channelTitle,
-      newVideos: result.newVideos,
-      durationsUpdated: result.durationsUpdated,
+      newVideos: result.newVideos + playlistNewVideos,
+      durationsUpdated: result.durationsUpdated + playlistDurationsUpdated,
     };
   },
 });

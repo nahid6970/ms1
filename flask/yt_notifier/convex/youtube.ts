@@ -170,6 +170,7 @@ export async function fetchPlaylistFeedWithApiKey(
             channelTitle?: string;
             videoOwnerChannelTitle?: string;
             publishedAt?: string;
+            videoPublishedAt?: string;
             resourceId?: { videoId?: string };
           };
         }>;
@@ -201,7 +202,8 @@ export async function fetchPlaylistFeedWithApiKey(
           title: s.title ?? "",
           link: `https://www.youtube.com/watch?v=${videoId}`,
           duration: durationsById.get(videoId),
-          published: s.publishedAt ?? "",
+          // videoPublishedAt = actual video upload date; publishedAt = date added to playlist
+          published: s.videoPublishedAt ?? s.publishedAt ?? "",
         });
         if (allEntries.length >= hardCap) break;
       }

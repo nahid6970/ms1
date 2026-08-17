@@ -235,8 +235,24 @@ export const updateRules = mutation({
       .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
       .first();
     if (!channel) return;
-    const lines = rulesText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-    const allowLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules"));
+
+    // Parse rulesText into sections to extract only allow-rules lines for titleFilters
+    const lines = rulesText.split(/\r?\n/).map((l) => l.trim());
+    const allowLines: string[] = [];
+    let inAllowSection = false;
+    for (const line of lines) {
+      if (!line) continue;
+      const lower = line.toLowerCase();
+      if (line.startsWith(":")) {
+        // Section header — determine which section we're now in
+        inAllowSection = lower.includes("allow") || lower.includes("whitelist");
+        continue;
+      }
+      if (inAllowSection) {
+        allowLines.push(line);
+      }
+    }
+
     await ctx.db.patch(channel._id, {
       rulesText,
       titleFilters: allowLines,

@@ -901,7 +901,8 @@ function parseRulesCount(rulesText, titleFilters = []) {
   if (!rulesText && titleFilters.length > 0) return titleFilters.length;
   if (!rulesText) return 0;
   const lines = rulesText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  const activeLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules") && !l.toLowerCase().includes("playlist"));
+  // Count all non-header lines (section headers start with ":")
+  const activeLines = lines.filter((l) => !l.startsWith(":"));
   return activeLines.length;
 }
 
