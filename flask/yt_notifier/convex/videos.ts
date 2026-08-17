@@ -84,13 +84,15 @@ export const list = query({
     const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) => {
+        const rulesText = rulesById.get(video.channelId);
+        const fallbackFilters = filtersById.get(video.channelId) ?? [];
         if (effectiveCategory === "blocked") {
-          return isTitleBlocked(video.title, rulesById.get(video.channelId));
+          return isTitleBlocked(video.title, rulesText, fallbackFilters);
         }
         if (effectiveCategory === "watchlater") {
           return Boolean(video.isWatchLater);
         }
-        return !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []);
+        return !video.isWatchLater && titleMatchesRules(video.title, rulesText, fallbackFilters);
       })
       .filter((video) => {
         if (isShortsView) return isShortVideo(video);
@@ -267,16 +269,20 @@ export const counts = query({
       );
 
     const main = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId)) && (!hideShorts || !isShortVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)),
     ).length;
 
     const shorts = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId)) && isShortVideo(video),
+      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video),
     ).length;
 
-    const watchLater = validVideos.filter((video) => video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId))).length;
+    const watchLater = validVideos.filter(
+      (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
+    ).length;
 
-    const blocked = validVideos.filter((video) => isTitleBlocked(video.title, rulesById.get(video.channelId))).length;
+    const blocked = validVideos.filter(
+      (video) => isTitleBlocked(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
+    ).length;
 
     return { main, shorts, watchLater, blocked };
   },
@@ -513,12 +519,11 @@ function matchesPlaylistRule(title: string, rawText?: string): boolean {
   return playlistMatches.some((p) => normalizedTitle.includes(p));
 }
 
-function isTitleBlocked(title: string, rawText?: string): boolean {
-  const rules = parseRulesText(rawText);
-  if (rules.block.length === 0) return false;
-  const normalizedTitle = title.toLocaleLowerCase();
-  const blockMatches = rules.block.filter(Boolean).map((b) => b.toLocaleLowerCase());
-  return blockMatches.some((b) => normalizedTitle.includes(b));
+function isTitleBlocked(title: string, rawText?: string, fallbackFilters: string[] = []): boolean {
+  const rules = parseRulesText(rawText, fallbackFilters);
+  const hasRules = rules.block.length > 0 || rules.allow.length > 0 || rules.playlists.length > 0;
+  if (!hasRules) return false;
+  return !titleMatchesRules(title, rawText, fallbackFilters);
 }
 
 
