@@ -32,6 +32,10 @@
     "user_designation": {
       "content": "Business Analyst",
       "updated_at": "2026-08-12-02:18:45.283155"
+    },
+    "youtube_subtitle_download_command": {
+      "content": "Command to download only English subtitles (.srt) for a YouTube playlist or video without downloading video/audio:\n\n```powershell\nyt-dlp --write-sub --write-auto-sub --sub-lang \"en,en-orig,en-US,en-GB\" --sub-format srt --convert-subs srt --skip-download -o \"%(playlist_index)02d - %(title)s.%(ext)s\" \"<PLAYLIST_OR_VIDEO_URL>\"\n```\n\nKey flags:\n- `--write-sub`: Downloads human-made English subtitles if available.\n- `--write-auto-sub`: Falls back to YouTube's auto-generated English subtitles if manual ones are missing.\n- `--sub-lang \"en,en-orig,en-US,en-GB\"`: Downloads English subtitle tracks.\n- `--sub-format srt --convert-subs srt`: Formats/converts subtitles to standard `.srt`.\n- `--skip-download`: Skips downloading the video and audio streams.\n- `-o \"%(playlist_index)02d - %(title)s.%(ext)s\"`: Formats the filenames with leading zero playlist numbering and video title.",
+      "updated_at": "2026-08-17-14:15:11.754291"
     }
   },
   "sub_memories": {}
