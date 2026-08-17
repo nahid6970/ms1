@@ -619,9 +619,9 @@ function videoCard(video, categories = []) {
     </div>
     <div class="p-5 flex flex-col">
       <div class="flex items-center gap-3 mb-3">
-        <div class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden text-slate-500 ring-1 ring-slate-700">
-          ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user text-sm"></i>`}
-        </div>
+        <a href="https://www.youtube.com/channel/${esc(video.channelId)}" target="_blank" class="w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden text-slate-500 ring-1 ring-slate-700 transition hover:opacity-80 hover:scale-105 flex-shrink-0" title="Open ${esc(video.channelName)} on YouTube">
+          ${video.channelThumbnail ? `<img src="${esc(video.channelThumbnail)}" class="w-full h-full object-cover" alt="${esc(video.channelName)}">` : `<i class="fa-solid fa-user text-sm"></i>`}
+        </a>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 min-w-0">
             <span class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</span>
@@ -901,12 +901,15 @@ function channelRow(channel, categories = []) {
   <div class="motion-card border p-4 rounded-lg hover:-translate-y-0.5 transition ${disabled ? "bg-rose-950/30 border-rose-900/50 opacity-80 hover:border-rose-700/60" : "bg-slate-900/90 border-slate-800 hover:border-red-500/40"}">
     <div class="flex items-center justify-between gap-4">
       <div class="flex min-w-0 items-center space-x-4">
-        <div class="w-10 h-10 flex-shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden ${disabled ? "grayscale" : ""}">
-          ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="">` : `<i class="fa-solid fa-user"></i>`}
-        </div>
+        <a href="${esc(channel.url)}" target="_blank" class="w-10 h-10 flex-shrink-0 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 overflow-hidden transition hover:opacity-80 hover:scale-105 ring-1 ring-slate-700/60 ${disabled ? "grayscale" : ""}" title="Open ${esc(channel.channelName)} on YouTube">
+          ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="${esc(channel.channelName)}">` : `<i class="fa-solid fa-user"></i>`}
+        </a>
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="text-sm font-medium text-white">${esc(channel.channelName)}</span>
+            <a href="${esc(channel.url)}" target="_blank" class="text-sm font-medium text-white hover:text-red-400 transition flex items-center gap-1.5" title="Open ${esc(channel.channelName)} on YouTube">
+              <span>${esc(channel.channelName)}</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
+            </a>
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
@@ -1314,11 +1317,11 @@ function renderChannelStats(channels) {
       ${channels.map((channel) => `
         <div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 border-b border-slate-800 bg-slate-950/45 p-3 last:border-b-0">
           <div class="flex min-w-0 items-center gap-3">
-            <div class="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-800">
-              ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="h-full w-full object-cover" alt="">` : ""}
-            </div>
+            <a href="https://www.youtube.com/channel/${esc(channel.channelId)}" target="_blank" class="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full bg-slate-800 transition hover:opacity-80 hover:scale-105" title="Open ${esc(channel.name)} on YouTube">
+              ${channel.thumbnail ? `<img src="${esc(channel.thumbnail)}" class="h-full w-full object-cover" alt="${esc(channel.name)}">` : ""}
+            </a>
             <div class="min-w-0">
-              <div class="truncate text-sm font-semibold text-slate-200">${esc(channel.name)}</div>
+              <a href="https://www.youtube.com/channel/${esc(channel.channelId)}" target="_blank" class="truncate text-sm font-semibold text-slate-200 hover:text-red-400 transition block">${esc(channel.name)}</a>
               <div class="text-xs text-slate-500">${channel.lastUpload ? esc(timeLabel(channel.lastUpload)) : "No uploads"}</div>
             </div>
           </div>
