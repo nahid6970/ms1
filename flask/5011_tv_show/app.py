@@ -27,6 +27,7 @@ def add_header(response):
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
+MOVIES_FILE = r"C:\@delta\db\5011_tv_show\movies.json"
 IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
 SETTINGS_FILE = r"C:\@delta\db\5011_tv_show\settings.json"
 
@@ -36,7 +37,10 @@ def load_settings():
     default_settings = {
         "sonarr_url": "http://192.168.0.101:8989",
         "sonarr_api_key": "",
-        "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr"
+        "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr",
+        "radarr_url": "http://192.168.0.101:7878",
+        "radarr_api_key": "",
+        "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr"
     }
     if os.path.exists(SETTINGS_FILE):
         try:
@@ -83,6 +87,18 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
+
+def load_movies():
+    try:
+        with open(MOVIES_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+def save_movies(movies):
+    os.makedirs(os.path.dirname(MOVIES_FILE), exist_ok=True)
+    with open(MOVIES_FILE, 'w') as f:
+        json.dump(movies, f, indent=4)
 
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
@@ -241,8 +257,97 @@ def scan_and_add_missing_shows():
     
     print("Combined scan completed.")
 
+def sync_radarr_movies():
+    """Fetch downloaded movies from Radarr and upsert them into movies.json.
+    Returns (added, updated, error_message)."""
+    settings = load_settings()
+    radarr_url = settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/')
+    api_key = settings.get('radarr_api_key', '')
+
+    if not api_key:
+        return 0, 0, 'Radarr API Key not configured in Settings'
+
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        response = requests.get(f"{radarr_url}/api/v3/movie", headers=headers, timeout=15)
+        if response.status_code != 200:
+            return 0, 0, f'Failed to get movies from Radarr: HTTP {response.status_code}'
+
+        radarr_movies = response.json()
+        movies = load_movies()
+        added = 0
+        updated = 0
+
+        for rm in radarr_movies:
+            # Only track movies that actually have files on disk (like the shows app tracks existing shows)
+            if not rm.get('hasFile'):
+                continue
+
+            title = (rm.get('title') or '').strip()
+            if not title:
+                continue
+
+            tmdb_id = rm.get('tmdbId')
+            year = rm.get('year')
+            path = rm.get('path', '')
+
+            poster = ''
+            for img in (rm.get('images') or []):
+                if img.get('coverType') == 'poster':
+                    poster = img.get('remoteUrl') or img.get('url') or ''
+                    break
+
+            # Find existing local movie by tmdb_id or path
+            existing = None
+            for m in movies:
+                if tmdb_id and m.get('tmdb_id') == tmdb_id:
+                    existing = m
+                    break
+                if path and m.get('directory_path') and os.path.normpath(m.get('directory_path', '')).lower() == os.path.normpath(path).lower():
+                    existing = m
+                    break
+
+            if existing:
+                existing['title'] = title
+                existing['year'] = str(year) if year else existing.get('year', '')
+                if poster:
+                    existing['cover_image'] = poster
+                if path:
+                    existing['directory_path'] = path
+                existing['radarr_id'] = rm.get('id')
+                existing['status'] = rm.get('status', existing.get('status', ''))
+                updated += 1
+            else:
+                movies.append({
+                    'id': max([m.get('id', 0) for m in movies], default=0) + 1,
+                    'tmdb_id': tmdb_id,
+                    'radarr_id': rm.get('id'),
+                    'title': title,
+                    'year': str(year) if year else '',
+                    'cover_image': poster,
+                    'directory_path': path,
+                    'rating': None,
+                    'status': rm.get('status', ''),
+                    'watched': False,
+                    'added_date': datetime.now().isoformat()
+                })
+                added += 1
+
+        if added or updated:
+            save_movies(movies)
+
+        return added, updated, None
+
+    except requests.exceptions.RequestException as e:
+        return 0, 0, f'Network error communicating with Radarr: {str(e)}'
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=scan_and_add_missing_shows, trigger="interval", hours=1)
+scheduler.add_job(func=sync_radarr_movies, trigger="interval", hours=1)
 scheduler.start()
 
 @app.route('/cached_image/<filename>')
@@ -320,6 +425,37 @@ def index():
     next_order = 'desc' if order == 'asc' else 'asc'
 
     return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
+
+@app.route('/movies')
+def movies_page():
+    sort_by = request.args.get('sort_by', 'title')
+    order = request.args.get('order', 'asc')
+    query = request.args.get('query')
+
+    movies = load_movies()
+
+    # Filter movies based on query
+    if query:
+        movies = [movie for movie in movies if query.lower() in movie['title'].lower()]
+
+    # Cache cover images
+    for movie in movies:
+        movie['cover_image'] = get_cached_image(movie.get('cover_image', ''))
+
+    # Sort movies
+    if sort_by == 'title':
+        movies.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+    elif sort_by == 'year':
+        movies.sort(key=lambda x: int(x['year']) if str(x.get('year', '')).isdigit() else 0, reverse=(order == 'desc'))
+    elif sort_by == 'rating':
+        movies.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None and str(x.get('rating')).replace('.', '', 1).isdigit() else -1, reverse=(order == 'desc'))
+    elif sort_by == 'added':
+        movies.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
+
+    settings = load_settings()
+    next_order = 'desc' if order == 'asc' else 'asc'
+
+    return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
 
 @app.route('/add_show', methods=['GET', 'POST'])
 def add_show():
@@ -584,6 +720,9 @@ def api_settings():
         settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
         settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
         settings['root_shows_folder'] = data.get('root_shows_folder', settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr"))
+        settings['radarr_url'] = data.get('radarr_url', settings.get('radarr_url', 'http://192.168.0.101:7878'))
+        settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
+        settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         save_settings(settings)
         return jsonify({'success': True})
     return jsonify(load_settings())
@@ -800,6 +939,187 @@ def api_reset_sonarr_episode():
         
     except requests.exceptions.RequestException as e:
         return jsonify({'success': False, 'message': f'Network error communicating with Sonarr: {str(e)}'}), 500
+
+@app.route('/api/test_radarr', methods=['POST'])
+def api_test_radarr():
+    data = request.json or {}
+    radarr_url = data.get('radarr_url', '').rstrip('/')
+    api_key = data.get('radarr_api_key', '')
+
+    if not radarr_url or not api_key:
+        return jsonify({'success': False, 'message': 'Radarr URL and API Key are required'}), 400
+
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        response = requests.get(f"{radarr_url}/api/v3/system/status", headers=headers, timeout=5)
+        if response.status_code == 200:
+            status_data = response.json()
+            version = status_data.get('version', 'Unknown')
+            return jsonify({'success': True, 'message': f'Connected! Radarr version: {version}'})
+        else:
+            return jsonify({'success': False, 'message': f'Failed with status code {response.status_code}. Please check API key.'})
+    except requests.exceptions.RequestException as e:
+        return jsonify({'success': False, 'message': f'Connection failed: {str(e)}'})
+
+@app.route('/api/radarr/sync', methods=['POST'])
+def api_radarr_sync():
+    added, updated, error = sync_radarr_movies()
+    if error:
+        return jsonify({'success': False, 'message': error}), 500
+    return jsonify({'success': True, 'message': f'Radarr sync complete: {added} movies added, {updated} updated.'})
+
+@app.route('/api/update_radarr_paths', methods=['POST'])
+def api_update_radarr_paths():
+    settings = load_settings()
+    radarr_url = settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/')
+    api_key = settings.get('radarr_api_key', '')
+    root_folder = settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr")
+
+    if not api_key:
+        return jsonify({'success': False, 'message': 'Radarr API Key not configured in Settings'}), 400
+
+    headers = {
+        'X-Api-Key': api_key,
+        'Content-Type': 'application/json'
+    }
+
+    try:
+        # 1. Get all movies from Radarr
+        movies_response = requests.get(f"{radarr_url}/api/v3/movie", headers=headers, timeout=10)
+        if movies_response.status_code != 200:
+            return jsonify({'success': False, 'message': f'Failed to get movies: HTTP {movies_response.status_code}'}), 500
+
+        movies_list = movies_response.json()
+        updated_count = 0
+        failed_count = 0
+
+        normalized_root = os.path.normpath(root_folder).lower()
+
+        # Update in Radarr
+        for movie in movies_list:
+            current_path = movie.get('path', '')
+            if not current_path:
+                continue
+
+            norm_curr_path = os.path.normpath(current_path)
+            parent_dir = os.path.dirname(norm_curr_path)
+            folder_name = os.path.basename(norm_curr_path)
+
+            if parent_dir.lower() != normalized_root:
+                new_path = os.path.normpath(os.path.join(root_folder, folder_name))
+                movie['path'] = new_path
+
+                put_url = f"{radarr_url}/api/v3/movie/{movie['id']}?moveFiles=false"
+                put_response = requests.put(put_url, headers=headers, json=movie, timeout=10)
+
+                if put_response.status_code in [200, 202]:
+                    updated_count += 1
+                else:
+                    failed_count += 1
+
+        # 2. Update local movies.json
+        movies = load_movies()
+        local_updated = False
+        for movie in movies:
+            dir_path = movie.get('directory_path')
+            if dir_path:
+                norm_dir = os.path.normpath(dir_path)
+                parent_dir = os.path.dirname(norm_dir)
+                folder_name = os.path.basename(norm_dir)
+                if parent_dir.lower() != normalized_root:
+                    movie['directory_path'] = os.path.normpath(os.path.join(root_folder, folder_name))
+                    local_updated = True
+
+        if local_updated:
+            save_movies(movies)
+
+        return jsonify({
+            'success': True,
+            'message': f'Updated {updated_count} movie paths in Radarr. (Failed: {failed_count})'
+        })
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error migrating paths: {str(e)}'}), 500
+
+@app.route('/api/movie/<int:movie_id>', methods=['GET', 'POST'])
+def api_movie(movie_id):
+    movies = load_movies()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if not movie:
+        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+    if request.method == 'POST':
+        movie['title'] = request.form.get('title', movie['title'])
+        movie['year'] = request.form.get('year', movie.get('year', ''))
+        movie['cover_image'] = request.form.get('cover_image', movie.get('cover_image', ''))
+        movie['directory_path'] = request.form.get('directory_path', movie.get('directory_path', ''))
+        movie['status'] = request.form.get('status', movie.get('status', ''))
+        movie['rating'] = request.form.get('rating', movie.get('rating'))
+        save_movies(movies)
+        return jsonify({'success': True})
+    return jsonify(movie)
+
+@app.route('/api/movies/add', methods=['POST'])
+def api_movies_add():
+    movies = load_movies()
+    movies.append({
+        'id': max([m.get('id', 0) for m in movies], default=0) + 1,
+        'tmdb_id': None,
+        'radarr_id': None,
+        'title': request.form.get('title', '').strip(),
+        'year': request.form.get('year', ''),
+        'cover_image': request.form.get('cover_image', ''),
+        'directory_path': request.form.get('directory_path', ''),
+        'rating': request.form.get('rating', None),
+        'status': request.form.get('status', 'Downloaded'),
+        'watched': False,
+        'added_date': datetime.now().isoformat()
+    })
+    save_movies(movies)
+    return jsonify({'success': True})
+
+@app.route('/api/movie/<int:movie_id>/watched', methods=['POST'])
+def api_movie_watched(movie_id):
+    movies = load_movies()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if movie:
+        movie['watched'] = not movie.get('watched', False)
+        save_movies(movies)
+        return jsonify({'success': True, 'watched': movie['watched']})
+    return jsonify({'success': False, 'message': 'Movie not found'}), 404
+
+@app.route('/api/movie/<int:movie_id>/delete', methods=['POST'])
+def api_movie_delete(movie_id):
+    movies = load_movies()
+    movies = [m for m in movies if m['id'] != movie_id]
+    save_movies(movies)
+    return jsonify({'success': True})
+
+@app.route('/api/movie/<int:movie_id>/open_folder')
+def api_movie_open_folder(movie_id):
+    import subprocess
+    import sys
+
+    movies = load_movies()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+
+    if movie and movie.get('directory_path'):
+        folder_path = movie['directory_path']
+        try:
+            if sys.platform == 'win32':
+                subprocess.run(['explorer', folder_path], check=False)
+            elif sys.platform == 'darwin':
+                subprocess.run(['open', folder_path], check=True)
+            else:
+                subprocess.run(['xdg-open', folder_path], check=True)
+            return jsonify({'success': True, 'message': 'Folder opened successfully'})
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Error: {str(e)}'})
+
+    return jsonify({'success': False, 'message': 'Movie not found or no directory path'})
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5011)

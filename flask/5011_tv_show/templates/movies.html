@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Movies</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="sticky-controls-wrapper">
+        <div class="top-center-controls">
+            <a href="{{ url_for('index') }}" class="add-button" title="TV Shows">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            </a>
+            <button onclick="openAddMovieModal()" class="add-button" title="Add Movie">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <a href="javascript:void(0)" onclick="syncRadarrMovies(event)" class="add-button radarr-sync-button" title="Sync movies from Radarr">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            </a>
+
+            <form action="/movies" method="get" class="search-form" onsubmit="return false;">
+                <div class="search-wrapper">
+                    <input type="text" id="movieSearch" name="query" placeholder="Search Movies" value="{{ query if query }}" autocomplete="off">
+                    <button type="button" class="search-clear" id="movieSearchClear">&times;</button>
+                </div>
+            </form>
+
+            <div class="sort-menu-container">
+                <button class="add-button sort-menu-button" onclick="toggleSortMenu()" title="Sort movies">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="11" y1="12" x2="19" y2="12"></line><line x1="11" y1="6" x2="19" y2="6"></line><line x1="11" y1="18" x2="19" y2="18"></line><polyline points="4 16 7 19 10 16"></polyline><polyline points="10 8 7 5 4 8"></polyline><line x1="7" y1="19" x2="7" y2="5"></line></svg>
+                </button>
+                <div class="sort-menu-dropdown" id="sortMenuDropdown">
+                    <a href="{{ url_for('movies_page', sort_by='title', order=next_order, query=query) }}" class="sort-menu-item">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> Title
+                    </a>
+                    <a href="{{ url_for('movies_page', sort_by='year', order=next_order, query=query) }}" class="sort-menu-item">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Year
+                    </a>
+                    <a href="{{ url_for('movies_page', sort_by='rating', order=next_order, query=query) }}" class="sort-menu-item">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" /></svg> Rating
+                    </a>
+                    <a href="{{ url_for('movies_page', sort_by='added', order=next_order, query=query) }}" class="sort-menu-item">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Added
+                    </a>
+                </div>
+            </div>
+            <button onclick="openSettingsModal()" class="add-button settings-button" title="Settings">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="show-grid">
+        {% for movie in movies %}
+            <div class="movie-card{% if movie.watched %} completed{% endif %}" data-movie-id="{{ movie.id }}" data-title="{{ movie.title }}" data-year="{{ movie.year }}">
+                <div class="img-wrapper">
+                    <img src="{{ movie.cover_image }}" alt="{{ movie.title }}">
+                    <div class="hover-controls">
+                        <button onclick="toggleMovieWatched({{ movie.id }}, this)" class="hover-btn btn-watched" title="{{ 'Mark Unwatched' if movie.watched else 'Mark Watched' }}">
+                            {% if movie.watched %}
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            {% else %}
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            {% endif %}
+                        </button>
+                        <a href="javascript:void(0)" onclick="openMovieFolder(event, {{ movie.id }})" class="hover-btn btn-folder" title="Open Folder">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </a>
+                        {% if movie.radarr_id %}
+                            <a href="{{ radarr_url }}/movie/{{ movie.radarr_id }}" target="_blank" class="hover-btn btn-radarr" title="Open in Radarr">
+                        {% else %}
+                            <a href="{{ radarr_url }}" target="_blank" class="hover-btn btn-radarr" title="Open Radarr">
+                        {% endif %}
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        </a>
+                        <button onclick="openEditMovieModal({{ movie.id }})" class="hover-btn btn-edit" title="Edit">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button onclick="deleteMovie({{ movie.id }}, this)" class="hover-btn btn-delete" title="Delete">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                    </div>
+                    <div class="card-overlay">
+                        <div class="stars-container{% if movie.rating %} rating-{{ movie.rating | int }}{% endif %}">
+                            {% if movie.rating %}
+                                {% for i in range(movie.rating | int) %}
+                                    <svg viewBox="0 0 24 24" class="star-svg">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" />
+                                    </svg>
+                                {% endfor %}
+                            {% else %}
+                                &nbsp;
+                            {% endif %}
+                        </div>
+                        <div class="card-info">
+                            <p class="movie-year">{{ movie.year }}</p>
+                            <p class="movie-status {% if movie.watched %}all-episodes-watched{% else %}no-episodes-watched{% endif %}">{{ 'Watched' if movie.watched else 'Unwatched' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- The Add Movie Modal -->
+    <div id="addMovieModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddMovieModal()">&times;</span>
+            <h2 class="modal-title">Add a New Movie</h2>
+            <form id="addMovieForm" class="modal-form">
+                <label for="movieTitle">Title:</label>
+                <input type="text" id="movieTitle" name="title" class="modal-input" required>
+                <label for="movieYear">Year:</label>
+                <input type="number" id="movieYear" name="year" class="modal-input">
+                <label for="movieCoverImage">Cover Image URL:</label>
+                <input type="url" id="movieCoverImage" name="cover_image" class="modal-input">
+                <label for="movieDirectoryPath">Directory Path (Optional):</label>
+                <input type="text" id="movieDirectoryPath" name="directory_path" class="modal-input">
+                <label for="movieStatus">Status:</label>
+                <select id="movieStatus" name="status" class="modal-input">
+                    <option value="Downloaded">Downloaded</option>
+                    <option value="Missing">Missing</option>
+                    <option value="Released">Released</option>
+                    <option value="In Cinemas">In Cinemas</option>
+                </select>
+                <div class="rating-group">
+                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
+                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
+                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
+                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
+                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
+                </div><br>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Add Movie</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- The Edit Movie Modal -->
+    <div id="editMovieModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditMovieModal()">&times;</span>
+            <h2 class="modal-title">Edit Movie</h2>
+            <form id="editMovieForm" class="modal-form">
+                <input type="hidden" id="editMovieId" name="id">
+                <label for="editMovieTitle">Title:</label>
+                <input type="text" id="editMovieTitle" name="title" class="modal-input" required>
+                <label for="editMovieYear">Year:</label>
+                <input type="number" id="editMovieYear" name="year" class="modal-input">
+                <label for="editMovieCoverImage">Cover Image URL:</label>
+                <input type="url" id="editMovieCoverImage" name="cover_image" class="modal-input">
+                <label for="editMovieDirectoryPath">Directory Path (Optional):</label>
+                <input type="text" id="editMovieDirectoryPath" name="directory_path" class="modal-input">
+                <label for="editMovieStatus">Status:</label>
+                <select id="editMovieStatus" name="status" class="modal-input">
+                    <option value="Downloaded">Downloaded</option>
+                    <option value="Missing">Missing</option>
+                    <option value="Released">Released</option>
+                    <option value="In Cinemas">In Cinemas</option>
+                </select>
+                <div class="rating-group">
+                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
+                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
+                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
+                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
+                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
+                </div><br>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    {% include '_settings_modal.html' %}
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='movies.js') }}"></script>
+</body>
+</html>

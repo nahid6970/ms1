@@ -867,18 +867,27 @@ function inactivityBadge(lastUpload) {
   return "";
 }
 
+const DEFAULT_RULES_TEMPLATE = `:Allow-Rules:\n\n\n\n:Block-Rules:`;
+
+function parseRulesCount(rulesText, titleFilters = []) {
+  if (!rulesText && titleFilters.length > 0) return titleFilters.length;
+  if (!rulesText) return 0;
+  const lines = rulesText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const activeLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules"));
+  return activeLines.length;
+}
+
 function channelRow(channel, categories = []) {
   const disabled = Boolean(channel.disabled);
   const filters = Array.isArray(channel.titleFilters) ? channel.titleFilters : [];
-  const filterCount = filters.length;
-  const filterText = filters.join("\n");
+  const rulesText = channel.rulesText ?? "";
+  const ruleCount = parseRulesCount(rulesText, filters);
+  const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n\n:Block-Rules:` : DEFAULT_RULES_TEMPLATE);
   const category = channel.category ?? "";
 
   const optionsHtml = categories.map((cat) => `
     <option value="${esc(cat)}" ${cat.toLowerCase() === category.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>
   `).join("");
-
-  const isCustomInput = category && !categories.some((c) => c.toLowerCase() === category.toLowerCase());
 
   return `
   <div class="motion-card border p-4 rounded-lg hover:-translate-y-0.5 transition ${disabled ? "bg-rose-950/30 border-rose-900/50 opacity-80 hover:border-rose-700/60" : "bg-slate-900/90 border-slate-800 hover:border-red-500/40"}">
@@ -893,7 +902,7 @@ function channelRow(channel, categories = []) {
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
-            ${filterCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${filterCount} filter${filterCount === 1 ? "" : "s"}</span>` : ""}
+            ${ruleCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${ruleCount} Rule${ruleCount === 1 ? "" : "s"}</span>` : ""}
           </div>
           <div class="text-[10px] text-slate-500 truncate max-w-[260px]">${esc(channel.url)}</div>
         </div>
@@ -908,8 +917,8 @@ function channelRow(channel, categories = []) {
         <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${disabled ? "text-slate-500 hover:bg-slate-800 hover:text-white" : "text-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-300"}" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
           <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"} text-lg"></i>
         </button>
-        <button onclick="toggleChannelFilterBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${filterCount ? "text-sky-300 hover:bg-sky-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="Title filters" aria-label="Title filters">
-          <i class="fa-solid fa-filter"></i>
+        <button onclick="toggleChannelRuleBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${ruleCount ? "text-sky-300 hover:bg-sky-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="Channel Rules" aria-label="Channel Rules">
+          <i class="fa-solid fa-scale-balanced"></i>
         </button>
         <button onclick="deleteChannel('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-800 hover:text-red-400 transition" title="Delete channel">
           <i class="fa-solid fa-trash"></i>
@@ -924,12 +933,12 @@ function channelRow(channel, categories = []) {
       </select>
       <button type="submit" class="w-full sm:w-auto rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-500">Save Folder</button>
     </form>
-    <form id="filters-${esc(channel.channelId)}" onsubmit="saveChannelFilters(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
-      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Title filters</label>
-      <textarea rows="4" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-sky-500" placeholder="One title match per line">${esc(filterText)}</textarea>
+    <form id="rules-${esc(channel.channelId)}" onsubmit="saveChannelRules(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
+      <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-scale-balanced text-sky-400 mr-1.5"></i>Channel Rules (Allow & Block)</label>
+      <textarea rows="8" class="mt-2 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 font-mono text-xs leading-relaxed outline-none transition focus:border-sky-500" placeholder="${esc(DEFAULT_RULES_TEMPLATE)}">${esc(initialRulesText)}</textarea>
       <div class="mt-3 flex items-center justify-between gap-3">
-        <p class="text-xs text-slate-500">If filters are set, only matching video titles are fetched and shown.</p>
-        <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Filters</button>
+        <p class="text-xs text-slate-500">Type whitelisted words under :Allow-Rules: and blacklisted words under :Block-Rules:.</p>
+        <button type="submit" class="rounded-lg bg-sky-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-sky-500">Save Rules</button>
       </div>
     </form>
   </div>`;
@@ -946,6 +955,30 @@ window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
   const form = document.getElementById(`folder-${channelId}`);
   if (form) form.classList.toggle("hidden");
 };
+
+window.toggleChannelRuleBox = function toggleChannelRuleBox(channelId) {
+  const form = document.getElementById(`rules-${channelId}`);
+  if (form) form.classList.toggle("hidden");
+};
+
+window.saveChannelRules = async function saveChannelRules(event, channelId) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const textarea = form.querySelector("textarea");
+  const rulesText = textarea.value.trim();
+  try {
+    await callConvex("mutation", "channels:updateRules", {
+      channelId,
+      rulesText,
+    });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+    flash("Channel rules updated.", "success");
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 
 window.fetchMoreChannelVideos = async function fetchMoreChannelVideos(channelId, btn) {
   if (btn) {

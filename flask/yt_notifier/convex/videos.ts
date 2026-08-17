@@ -55,6 +55,9 @@ export const list = query({
     const filtersById = new Map(
       enabledChannels.map((c) => [c.channelId, c.titleFilters ?? []]),
     );
+    const rulesById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.rulesText ?? ""]),
+    );
     const channelCategoryMap = new Map(
       enabledChannels.map((c) => [c.channelId, c.category ?? ""]),
     );
@@ -81,7 +84,7 @@ export const list = query({
     const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) =>
-        titleMatchesFilters(video.title, filtersById.get(video.channelId) ?? []),
+        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
       )
       .filter((video) => {
         if (effectiveCategory === "watchlater") {
@@ -391,7 +394,7 @@ export const addFromFeed = internalMutation({
     let durationsUpdated = 0;
     for (const entry of entries) {
       if (!entry.videoId) continue;
-      if (!titleMatchesFilters(entry.title, titleFilters)) continue;
+      if (!titleMatchesRules(entry.title, channel?.rulesText, titleFilters)) continue;
       const existing = await ctx.db
         .query("videos")
         .withIndex("by_videoId", (q) => q.eq("videoId", entry.videoId))
@@ -416,13 +419,56 @@ export const addFromFeed = internalMutation({
   },
 });
 
-function titleMatchesFilters(title: string, filters: string[]) {
-  const activeFilters = filters
-    .map((filter) => filter.trim().toLocaleLowerCase())
-    .filter(Boolean);
-  if (activeFilters.length === 0) return true;
+function parseRulesText(rawText?: string, fallbackFilters: string[] = []) {
+  if (!rawText && fallbackFilters.length > 0) {
+    return { allow: fallbackFilters, block: [] };
+  }
+  if (!rawText) return { allow: [], block: [] };
+
+  const allow: string[] = [];
+  const block: string[] = [];
+  let currentMode: "allow" | "block" = "allow";
+
+  const lines = rawText.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const lower = trimmed.toLowerCase();
+    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
+      currentMode = "allow";
+      continue;
+    }
+    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
+      currentMode = "block";
+      continue;
+    }
+
+    if (currentMode === "allow") {
+      allow.push(trimmed);
+    } else {
+      block.push(trimmed);
+    }
+  }
+
+  return { allow, block };
+}
+
+function titleMatchesRules(title: string, rawText?: string, fallbackFilters: string[] = []) {
+  const rules = parseRulesText(rawText, fallbackFilters);
   const normalizedTitle = title.toLocaleLowerCase();
-  return activeFilters.some((filter) => normalizedTitle.includes(filter));
+
+  const blockMatches = rules.block.filter(Boolean).map((b) => b.toLocaleLowerCase());
+  if (blockMatches.some((b) => normalizedTitle.includes(b))) {
+    return false;
+  }
+
+  const allowMatches = rules.allow.filter(Boolean).map((a) => a.toLocaleLowerCase());
+  if (allowMatches.length > 0) {
+    return allowMatches.some((a) => normalizedTitle.includes(a));
+  }
+
+  return true;
 }
 
 function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {

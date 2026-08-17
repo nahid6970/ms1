@@ -20,6 +20,7 @@ export const list = query({
         ...channel,
         disabled: channel.disabled ?? false,
         titleFilters: channel.titleFilters ?? [],
+        rulesText: channel.rulesText ?? "",
         category: channel.category ?? "",
         lastUpload: latestVideo?.published ?? null,
       });
@@ -222,3 +223,24 @@ export const updateTitleFilters = mutation({
     await ctx.db.patch(channel._id, { titleFilters: normalized });
   },
 });
+
+export const updateRules = mutation({
+  args: {
+    channelId: v.string(),
+    rulesText: v.string(),
+  },
+  handler: async (ctx, { channelId, rulesText }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+    const lines = rulesText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const allowLines = lines.filter((l) => !l.startsWith(":") && !l.toLowerCase().includes("rules"));
+    await ctx.db.patch(channel._id, {
+      rulesText,
+      titleFilters: allowLines,
+    });
+  },
+});
+

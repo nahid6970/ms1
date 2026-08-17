@@ -29,7 +29,7 @@
             <a href="{{ url_for('index') }}" class="add-button" title="Home">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
             </a>
-            <a href="http://192.168.0.101:5013" class="add-button" title="Movies">
+            <a href="{{ url_for('movies_page') }}" class="add-button" title="Movies">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
             </a>
             <a href="javascript:void(0)" onclick="scanForEpisodes(event)" class="add-button scan-button" title="Scan for episodes and auto-add missing shows">
@@ -139,7 +139,7 @@
     <div id="hiddenShowsModal" class="modal">
         <div class="modal-content hidden-shows-modal-content">
             <span class="close" onclick="closeHiddenShowsModal()">&times;</span>
-            <h2>Hidden Shows</h2>
+            <h2 class="modal-title">Hidden Shows</h2>
             <div id="hiddenShowsList" class="hidden-shows-list">
                 <!-- Hidden shows will be populated here by JavaScript -->
             </div>
@@ -150,18 +150,18 @@
     <div id="addShowModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeAddShowModal()">&times;</span>
-            <h2>Add a New Show</h2>
-            <form action="{{ url_for('add_show') }}" method="post">
+            <h2 class="modal-title">Add a New Show</h2>
+            <form action="{{ url_for('add_show') }}" method="post" class="modal-form">
                 <label for="title">Title:</label>
-                <input type="text" id="title" name="title" required>
+                <input type="text" id="title" name="title" class="modal-input" required>
                 <label for="year">Year:</label>
-                <input type="number" id="year" name="year">
+                <input type="number" id="year" name="year" class="modal-input">
                 <label for="cover_image">Cover Image URL:</label>
-                <input type="url" id="cover_image" name="cover_image">
+                <input type="url" id="cover_image" name="cover_image" class="modal-input">
                 <label for="directory_path">Directory Path (Optional):</label>
-                <input type="text" id="directory_path" name="directory_path">
+                <input type="text" id="directory_path" name="directory_path" class="modal-input">
                 <label for="status">Status:</label>
-                <select id="status" name="status" class="setting-select">
+                <select id="status" name="status" class="modal-input">
                     <option value="Continuing">Continuing</option>
                     <option value="Ended">Ended</option>
                 </select>
@@ -172,7 +172,7 @@
                     <label><input type="radio" name="rating" value="4"> <span>4</span></label>
                     <label><input type="radio" name="rating" value="5"> <span>5</span></label>
                 </div><br>
-                <button type="submit">Add Show</button>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Add Show</button>
             </form>
         </div>
     </div>
@@ -181,21 +181,21 @@
     <div id="editShowModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditShowModal()">&times;</span>
-            <h2>Edit Show</h2>
-            <form id="editShowForm" action="/edit_show" method="post">
+            <h2 class="modal-title">Edit Show</h2>
+            <form id="editShowForm" action="/edit_show" method="post" class="modal-form">
                 <input type="hidden" id="editShowId" name="id">
                 <label for="editShowTitle">Title:</label>
-                <input type="text" id="editShowTitle" name="title" required>
+                <input type="text" id="editShowTitle" name="title" class="modal-input" required>
                 <label for="editShowYear">Year:</label>
-                <input type="number" id="editShowYear" name="year">
+                <input type="number" id="editShowYear" name="year" class="modal-input">
                 <label for="editShowCoverImage">Cover Image URL:</label>
-                <input type="url" id="editShowCoverImage" name="cover_image">
+                <input type="url" id="editShowCoverImage" name="cover_image" class="modal-input">
                 <label for="editShowDirectoryPath">Directory Path (Optional):</label>
-                <input type="text" id="editShowDirectoryPath" name="directory_path">
+                <input type="text" id="editShowDirectoryPath" name="directory_path" class="modal-input">
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
-                <input type="url" id="editShowSonarrUrl" name="sonarr_url">
+                <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
                 <label for="editShowStatus">Status:</label>
-                <select id="editShowStatus" name="status" class="setting-select">
+                <select id="editShowStatus" name="status" class="modal-input">
                     <option value="Continuing">Continuing</option>
                     <option value="Ended">Ended</option>
                 </select>
@@ -206,79 +206,20 @@
                     <label><input type="radio" name="rating" value="4"> <span>4</span></label>
                     <label><input type="radio" name="rating" value="5"> <span>5</span></label>
                 </div><br>
-                <button type="submit">Save Changes</button>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Save Changes</button>
             </form>
         </div>
     </div>
 
-    <!-- The Settings Modal -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content" style="max-width: 500px; padding: 25px; border-radius: 12px; background: #1c1c1c; border: 1px solid #333; position: relative;">
-            <span class="close" onclick="closeSettingsModal()">&times;</span>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 12px; font-size: 1.5rem; text-align: left;">Settings</h2>
-            
-            <!-- General Settings Section -->
-            <div style="margin-bottom: 25px;">
-                <h3 style="font-size: 1rem; color: #1db954; text-align: left; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">General</h3>
-                
-                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
-                    <label for="defaultHomePage" style="margin: 0; color: #eee; font-size: 0.95rem;">Default Home Page</label>
-                    <select id="defaultHomePage" class="setting-select">
-                        <option value="default">Default (Title A-Z)</option>
-                        <option value="last_episode">Last Episode Added</option>
-                    </select>
-                </div>
-                
-                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
-                    <label for="showHiddenShows" style="margin: 0; color: #eee; font-size: 0.95rem;">Show Hidden Shows</label>
-                    <label class="switch" style="margin: 0;">
-                        <input type="checkbox" id="showHiddenShows">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
-            
-            <!-- Sonarr Integration Section -->
-            <div style="margin-bottom: 20px;">
-                <h3 style="font-size: 1rem; color: #0084ff; text-align: left; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 1px;">Sonarr Connection</h3>
-                
-                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
-                    <label for="sonarrApiUrl" style="margin: 0; color: #eee; font-size: 0.95rem;">Sonarr URL</label>
-                    <input type="text" id="sonarrApiUrl" class="setting-input" placeholder="http://192.168.0.101:8989">
-                </div>
-                
-                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
-                    <label for="sonarrApiKey" style="margin: 0; color: #eee; font-size: 0.95rem;">Sonarr API Key</label>
-                    <input type="password" id="sonarrApiKey" class="setting-input" placeholder="Paste API Key here">
-                </div>
-                
-                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222;">
-                    <label for="rootShowsFolder" style="margin: 0; color: #eee; font-size: 0.95rem;">Shows Download Path</label>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-                        <input type="text" id="rootShowsFolder" class="setting-input" placeholder="C:\Users\nahid\Downloads\@sonarr">
-                        <button onclick="syncSonarrPaths(this)" class="add-button" style="padding: 4px 10px; font-size: 11px; background-color: #f2994a; color: white; border-radius: 4px; font-weight: bold; width: fit-content; border: none; cursor: pointer;">Update Paths in Sonarr & DB</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer Controls -->
-            <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; min-height: 40px;">
-                <span id="testConnectionStatus" style="font-size: 13px; font-weight: bold; text-align: left; max-width: 50%; display: inline-block;"></span>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="testSonarrConnection()" class="add-button" style="padding: 8px 16px; font-size: 14px; background-color: #0084ff; color: white; border-radius: 4px; font-weight: bold;">Test Connection</button>
-                    <button onclick="saveSonarrSettings()" class="add-button" style="padding: 8px 16px; font-size: 14px; background-color: #1db954; color: white; border-radius: 4px; font-weight: bold;">Save Settings</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include '_settings_modal.html' %}
 
     <!-- Scan Missing Episodes Modal -->
     <div id="scanMissingModal" class="modal">
         <div class="modal-content missing-modal-content">
             <span class="close" onclick="closeScanMissingModal()">&times;</span>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 12px; margin-bottom: 15px; padding-right: 30px;">
-                <h2 style="margin: 0;">Missing Episodes</h2>
-                <input type="text" id="missingEpisodesSearch" placeholder="Search missing episodes..." style="background: #252525; color: white; border: 1px solid #333; border-radius: 6px; padding: 6px 12px; width: 240px; margin: 0; box-sizing: border-box; font-size: 0.9rem;">
+            <div class="modal-header" style="padding-right: 30px;">
+                <h2 class="modal-title" style="margin: 0;">Missing Episodes</h2>
+                <input type="text" id="missingEpisodesSearch" class="modal-search" placeholder="Search missing episodes...">
             </div>
             <div id="missingEpisodesList" class="missing-episodes-list">
                 <p>Scanning...</p>
@@ -290,10 +231,10 @@
     <div id="episodesModal" class="modal">
         <div class="modal-content episodes-modal-content">
             <span class="close" onclick="closeEpisodesModal()">&times;</span>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 30px;">
-                <h2 id="episodesModalTitle" style="margin: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></h2>
-                <button id="sortEpisodesDesc" class="add-button" title="Sort by Name DESC" style="padding: 5px 10px; font-size: 12px; flex-shrink: 0; margin-left: 10px;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><polyline points="3 16 7 20 11 16"></polyline><line x1="7" y1="20" x2="7" y2="4"></line><line x1="11" y1="4" x2="21" y2="4"></line><line x1="11" y1="8" x2="19" y2="8"></line><line x1="11" y1="12" x2="17" y2="12"></line></svg>
+            <div class="modal-header" style="padding-right: 30px;">
+                <h2 id="episodesModalTitle" class="modal-title"></h2>
+                <button id="sortEpisodesDesc" class="modal-btn modal-btn-dark modal-btn-sm" title="Sort by Name DESC">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 16 7 20 11 16"></polyline><line x1="7" y1="20" x2="7" y2="4"></line><line x1="11" y1="4" x2="21" y2="4"></line><line x1="11" y1="8" x2="19" y2="8"></line><line x1="11" y1="12" x2="17" y2="12"></line></svg>
                     Sort DESC
                 </button>
             </div>

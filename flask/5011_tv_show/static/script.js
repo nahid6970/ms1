@@ -357,26 +357,37 @@ async function syncShow(event, showId, btn) {
 
 // Settings Modal Functions
 async function openSettingsModal() {
-    // Clear status span
-    const statusSpan = document.getElementById('testConnectionStatus');
-    if (statusSpan) {
-        statusSpan.textContent = '';
-        statusSpan.style.color = '';
+    // Clear status spans
+    const sonarrStatusSpan = document.getElementById('sonarrTestStatus');
+    if (sonarrStatusSpan) {
+        sonarrStatusSpan.textContent = '';
+        sonarrStatusSpan.style.color = '';
+    }
+    const radarrStatusSpan = document.getElementById('radarrTestStatus');
+    if (radarrStatusSpan) {
+        radarrStatusSpan.textContent = '';
+        radarrStatusSpan.style.color = '';
     }
     
     try {
         const response = await fetch('/api/settings');
         const settings = await response.json();
         
-        const urlInput = document.getElementById('sonarrApiUrl');
-        const keyInput = document.getElementById('sonarrApiKey');
-        const folderInput = document.getElementById('rootShowsFolder');
+        const sonarrUrlInput = document.getElementById('sonarrApiUrl');
+        const sonarrKeyInput = document.getElementById('sonarrApiKey');
+        const showsFolderInput = document.getElementById('rootShowsFolder');
+        const radarrUrlInput = document.getElementById('radarrApiUrl');
+        const radarrKeyInput = document.getElementById('radarrApiKey');
+        const moviesFolderInput = document.getElementById('rootMoviesFolder');
         
-        if (urlInput) urlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
-        if (keyInput) keyInput.value = settings.sonarr_api_key || '';
-        if (folderInput) folderInput.value = settings.root_shows_folder || 'C:\\Users\\nahid\\Downloads\\@sonarr';
+        if (sonarrUrlInput) sonarrUrlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
+        if (sonarrKeyInput) sonarrKeyInput.value = settings.sonarr_api_key || '';
+        if (showsFolderInput) showsFolderInput.value = settings.root_shows_folder || 'C:\\Users\\nahid\\Downloads\\@sonarr';
+        if (radarrUrlInput) radarrUrlInput.value = settings.radarr_url || 'http://192.168.0.101:7878';
+        if (radarrKeyInput) radarrKeyInput.value = settings.radarr_api_key || '';
+        if (moviesFolderInput) moviesFolderInput.value = settings.root_movies_folder || 'C:\\Users\\nahid\\Downloads\\@radarr';
     } catch (e) {
-        console.error('Error loading Sonarr settings:', e);
+        console.error('Error loading settings:', e);
     }
 
     document.getElementById('settingsModal').style.display = 'block';
@@ -391,7 +402,7 @@ function closeSettingsModal() {
 async function testSonarrConnection() {
     const url = document.getElementById('sonarrApiUrl').value;
     const apiKey = document.getElementById('sonarrApiKey').value;
-    const statusSpan = document.getElementById('testConnectionStatus');
+    const statusSpan = document.getElementById('sonarrTestStatus');
     
     if (!statusSpan) return;
     
@@ -450,10 +461,75 @@ async function syncSonarrPaths(button) {
     }
 }
 
-async function saveSonarrSettings() {
-    const url = document.getElementById('sonarrApiUrl').value;
-    const apiKey = document.getElementById('sonarrApiKey').value;
-    const folder = document.getElementById('rootShowsFolder').value;
+async function testRadarrConnection() {
+    const url = document.getElementById('radarrApiUrl').value;
+    const apiKey = document.getElementById('radarrApiKey').value;
+    const statusSpan = document.getElementById('radarrTestStatus');
+    
+    if (!statusSpan) return;
+    
+    statusSpan.textContent = 'Testing connection...';
+    statusSpan.style.color = '#e0e0e0';
+    
+    try {
+        const response = await fetch('/api/test_radarr', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                radarr_url: url,
+                radarr_api_key: apiKey
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            statusSpan.textContent = data.message;
+            statusSpan.style.color = '#4ade80';
+        } else {
+            statusSpan.textContent = data.message;
+            statusSpan.style.color = '#ff6b6b';
+        }
+    } catch (e) {
+        console.error('Error testing Radarr connection:', e);
+        statusSpan.textContent = 'Error connecting to application server';
+        statusSpan.style.color = '#ff6b6b';
+    }
+}
+
+async function syncRadarrPaths(button) {
+    const originalText = button.textContent;
+    button.textContent = 'Updating...';
+    button.disabled = true;
+    button.style.opacity = '0.7';
+    
+    try {
+        const response = await fetch('/api/update_radarr_paths', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        alert(data.message);
+    } catch (e) {
+        console.error('Error migrating Radarr paths:', e);
+        alert('Failed to connect to server');
+    } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+        button.style.opacity = '1';
+    }
+}
+
+async function saveSettings() {
+    const sonarrUrl = document.getElementById('sonarrApiUrl').value;
+    const sonarrApiKey = document.getElementById('sonarrApiKey').value;
+    const showsFolder = document.getElementById('rootShowsFolder').value;
+    const radarrUrl = document.getElementById('radarrApiUrl').value;
+    const radarrApiKey = document.getElementById('radarrApiKey').value;
+    const moviesFolder = document.getElementById('rootMoviesFolder').value;
     
     try {
         const response = await fetch('/api/settings', {
@@ -462,9 +538,12 @@ async function saveSonarrSettings() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                sonarr_url: url,
-                sonarr_api_key: apiKey,
-                root_shows_folder: folder
+                sonarr_url: sonarrUrl,
+                sonarr_api_key: sonarrApiKey,
+                root_shows_folder: showsFolder,
+                radarr_url: radarrUrl,
+                radarr_api_key: radarrApiKey,
+                root_movies_folder: moviesFolder
             })
         });
         const data = await response.json();

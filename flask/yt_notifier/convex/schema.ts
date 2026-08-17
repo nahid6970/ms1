@@ -9,6 +9,7 @@ export default defineSchema({
     thumbnail: v.optional(v.string()),
     disabled: v.optional(v.boolean()),
     titleFilters: v.optional(v.array(v.string())),
+    rulesText: v.optional(v.string()),
     category: v.optional(v.string()),
     nextPageToken: v.optional(v.string()),
   })

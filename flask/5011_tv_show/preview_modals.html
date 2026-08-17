@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Design Preview</title>
+    <link rel="stylesheet" href="static/style.css">
+    <style>
+        body { padding: 20px; }
+        .preview-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .preview-bar button {
+            padding: 9px 16px;
+            border: none;
+            border-radius: 9px;
+            background: linear-gradient(180deg, #2fd36b, #1db954);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .modal { display: none; }
+        .modal.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="preview-bar">
+        <button onclick="toggleModal('settingsModal')">Settings</button>
+        <button onclick="toggleModal('addMovieModal')">Add Movie</button>
+        <button onclick="toggleModal('addShowModal')">Add Show</button>
+        <button onclick="toggleModal('scanMissingModal')">Missing Episodes</button>
+    </div>
+
+    <!-- Settings modal (from _settings_modal.html) -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content settings-modal-content">
+            <span class="close" onclick="toggleModal('settingsModal')">&times;</span>
+            <h2 class="modal-title">Settings</h2>
+
+            <div class="settings-section section-general">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                    General
+                </h3>
+                <div class="setting-row">
+                    <label for="defaultHomePage">Default Home Page</label>
+                    <select id="defaultHomePage" class="modal-input">
+                        <option value="default">Default (Title A-Z)</option>
+                        <option value="last_episode">Last Episode Added</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label for="showHiddenShows">Show Hidden Shows</label>
+                    <label class="switch">
+                        <input type="checkbox" id="showHiddenShows">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section section-sonarr">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+                    Sonarr Connection
+                </h3>
+                <div class="setting-row">
+                    <label for="sonarrApiUrl">Sonarr URL</label>
+                    <input type="text" id="sonarrApiUrl" class="modal-input" placeholder="http://192.168.0.101:8989">
+                </div>
+                <div class="setting-row">
+                    <label for="sonarrApiKey">Sonarr API Key</label>
+                    <input type="password" id="sonarrApiKey" class="modal-input" placeholder="Paste API Key here">
+                </div>
+                <div class="setting-row">
+                    <label for="rootShowsFolder">Shows Download Path</label>
+                    <div class="setting-control-col">
+                        <input type="text" id="rootShowsFolder" class="modal-input" placeholder="C:\Users\nahid\Downloads\@sonarr">
+                        <button class="modal-btn modal-btn-blue modal-btn-sm">Update Paths in Sonarr &amp; DB</button>
+                    </div>
+                </div>
+                <div class="settings-test-row">
+                    <span class="test-status">Ready</span>
+                    <button class="modal-btn modal-btn-blue">Test Connection</button>
+                </div>
+            </div>
+
+            <div class="settings-section section-radarr">
+                <h3>
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+                    Radarr Connection
+                </h3>
+                <div class="setting-row">
+                    <label for="radarrApiUrl">Radarr URL</label>
+                    <input type="text" id="radarrApiUrl" class="modal-input" placeholder="http://192.168.0.101:7878">
+                </div>
+                <div class="setting-row">
+                    <label for="radarrApiKey">Radarr API Key</label>
+                    <input type="password" id="radarrApiKey" class="modal-input" placeholder="Paste API Key here">
+                </div>
+                <div class="setting-row">
+                    <label for="rootMoviesFolder">Movies Download Path</label>
+                    <div class="setting-control-col">
+                        <input type="text" id="rootMoviesFolder" class="modal-input" placeholder="C:\Users\nahid\Downloads\@radarr">
+                        <button class="modal-btn modal-btn-orange modal-btn-sm">Update Paths in Radarr &amp; DB</button>
+                    </div>
+                </div>
+                <div class="settings-test-row">
+                    <span class="test-status">Ready</span>
+                    <button class="modal-btn modal-btn-orange">Test Connection</button>
+                </div>
+            </div>
+
+            <div class="settings-footer">
+                <button class="modal-btn modal-btn-green modal-btn-block">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Movie modal (from movies.html) -->
+    <div id="addMovieModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleModal('addMovieModal')">&times;</span>
+            <h2 class="modal-title">Add a New Movie</h2>
+            <form class="modal-form" onsubmit="return false;">
+                <label for="movieTitle">Title:</label>
+                <input type="text" id="movieTitle" name="title" class="modal-input" placeholder="e.g. Dune: Part Two">
+                <label for="movieYear">Year:</label>
+                <input type="number" id="movieYear" name="year" class="modal-input" placeholder="2024">
+                <label for="movieCoverImage">Cover Image URL:</label>
+                <input type="url" id="movieCoverImage" name="cover_image" class="modal-input" placeholder="https://...">
+                <label for="movieDirectoryPath">Directory Path (Optional):</label>
+                <input type="text" id="movieDirectoryPath" name="directory_path" class="modal-input" placeholder="C:\Users\nahid\Downloads\@radarr\Dune Part Two (2024)">
+                <label for="movieStatus">Status:</label>
+                <select id="movieStatus" name="status" class="modal-input">
+                    <option value="Downloaded">Downloaded</option>
+                    <option value="Missing">Missing</option>
+                    <option value="Released">Released</option>
+                    <option value="In Cinemas">In Cinemas</option>
+                </select>
+                <div class="rating-group">
+                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
+                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
+                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
+                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
+                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
+                </div><br>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Add Movie</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Show modal (from index.html) -->
+    <div id="addShowModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleModal('addShowModal')">&times;</span>
+            <h2 class="modal-title">Add a New Show</h2>
+            <form class="modal-form" onsubmit="return false;">
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" class="modal-input" placeholder="e.g. Stranger Things">
+                <label for="year">Year:</label>
+                <input type="number" id="year" name="year" class="modal-input" placeholder="2016">
+                <label for="cover_image">Cover Image URL:</label>
+                <input type="url" id="cover_image" name="cover_image" class="modal-input" placeholder="https://...">
+                <label for="directory_path">Directory Path (Optional):</label>
+                <input type="text" id="directory_path" name="directory_path" class="modal-input" placeholder="C:\Users\nahid\Downloads\@sonarr\Stranger Things">
+                <label for="status">Status:</label>
+                <select id="status" name="status" class="modal-input">
+                    <option value="Continuing">Continuing</option>
+                    <option value="Ended">Ended</option>
+                </select>
+                <div class="rating-group">
+                    <label><input type="radio" name="rating" value="1"> <span>1</span></label>
+                    <label><input type="radio" name="rating" value="2"> <span>2</span></label>
+                    <label><input type="radio" name="rating" value="3"> <span>3</span></label>
+                    <label><input type="radio" name="rating" value="4"> <span>4</span></label>
+                    <label><input type="radio" name="rating" value="5"> <span>5</span></label>
+                </div><br>
+                <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Add Show</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scan Missing modal (from index.html) -->
+    <div id="scanMissingModal" class="modal">
+        <div class="modal-content missing-modal-content">
+            <span class="close" onclick="toggleModal('scanMissingModal')">&times;</span>
+            <div class="modal-header" style="padding-right: 30px;">
+                <h2 class="modal-title" style="margin: 0;">Missing Episodes</h2>
+                <input type="text" class="modal-search" placeholder="Search missing episodes...">
+            </div>
+            <div class="missing-episodes-list">
+                <div class="missing-episode-item">
+                    <div class="missing-episode-info">
+                        <span class="missing-show-title">Stranger Things</span>
+                        <span class="missing-episode-title">S04E09 - The Piggyback</span>
+                    </div>
+                    <div class="missing-episode-actions">
+                        <button class="btn-sync" title="Reset and Search in Sonarr" style="background-color: #0084ff; color: white;">Sonarr</button>
+                        <button class="btn-check" title="Mark as Watched">Check</button>
+                        <button class="btn-del" title="Delete from JSON">Del</button>
+                    </div>
+                </div>
+                <div class="missing-episode-item">
+                    <div class="missing-episode-info">
+                        <span class="missing-show-title">Breaking Bad</span>
+                        <span class="missing-episode-title">S05E16 - Felina</span>
+                    </div>
+                    <div class="missing-episode-actions">
+                        <button class="btn-sync" title="Reset and Search in Sonarr" style="background-color: #0084ff; color: white;">Sonarr</button>
+                        <button class="btn-check" title="Mark as Watched">Check</button>
+                        <button class="btn-del" title="Delete from JSON">Del</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(id) {
+            document.querySelectorAll('.modal.show').forEach(m => {
+                if (m.id !== id) m.classList.remove('show');
+            });
+            document.getElementById(id).classList.toggle('show');
+        }
+    </script>
+</body>
+</html>
