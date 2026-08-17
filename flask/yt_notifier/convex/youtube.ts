@@ -139,12 +139,25 @@ export async function fetchPlaylistFeedWithApiKey(
   maxItems: number = 500,
 ): Promise<ChannelFeed | null> {
   if (apiKey) {
-    // Fetch pages of the playlist up to maxItems (0 = no limit)
     const hardCap = maxItems === 0 ? 5000 : maxItems;
     const allEntries: FeedEntry[] = [];
     let pageToken: string | undefined;
     let playlistTitle = "Unknown Playlist";
-    const MAX_PAGES = Math.ceil(hardCap / 50); // pages needed to reach the limit
+    const MAX_PAGES = Math.ceil(hardCap / 50);
+
+    // Fetch the actual playlist title first
+    try {
+      const titleRes = await fetch(
+        `https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistId}&key=${apiKey}`
+      );
+      if (titleRes.ok) {
+        const titleData = (await titleRes.json()) as {
+          items?: Array<{ snippet?: { title?: string } }>;
+        };
+        const t = titleData.items?.[0]?.snippet?.title;
+        if (t) playlistTitle = t;
+      }
+    } catch (_) { /* fall through to default */ }
 
     for (let page = 0; page < MAX_PAGES; page++) {
       let url =
@@ -177,14 +190,6 @@ export async function fetchPlaylistFeedWithApiKey(
 
       const items = data.items ?? [];
       if (items.length === 0) break;
-
-      // Use the playlist owner's channel title on the first page
-      if (page === 0 && items[0]?.snippet) {
-        playlistTitle =
-          items[0].snippet.channelTitle ??
-          items[0].snippet.videoOwnerChannelTitle ??
-          playlistTitle;
-      }
 
       const videoIds = items
         .map((item) => item.snippet?.resourceId?.videoId)
