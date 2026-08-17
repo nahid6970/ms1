@@ -3,8 +3,8 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 export const list = query({
   args: {
-    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts"), v.literal("watchlater")),
-    subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("watchlater"))),
+    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts"), v.literal("watchlater"), v.literal("blocked")),
+    subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("watchlater"), v.literal("blocked"))),
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
   },
@@ -83,14 +83,14 @@ export const list = query({
 
     const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
-      .filter((video) =>
-        titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
-      )
       .filter((video) => {
+        if (effectiveCategory === "blocked") {
+          return isTitleBlocked(video.title, rulesById.get(video.channelId));
+        }
         if (effectiveCategory === "watchlater") {
           return Boolean(video.isWatchLater);
         }
-        return !video.isWatchLater;
+        return !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []);
       })
       .filter((video) => {
         if (isShortsView) return isShortVideo(video);
@@ -267,16 +267,18 @@ export const counts = query({
       );
 
     const main = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && (!hideShorts || !isShortVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId)) && (!hideShorts || !isShortVideo(video)),
     ).length;
 
     const shorts = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && isShortVideo(video),
+      (video) => video.isNew && !video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId)) && isShortVideo(video),
     ).length;
 
-    const watchLater = validVideos.filter((video) => video.isWatchLater).length;
+    const watchLater = validVideos.filter((video) => video.isWatchLater && !isTitleBlocked(video.title, rulesById.get(video.channelId))).length;
 
-    return { main, shorts, watchLater };
+    const blocked = validVideos.filter((video) => isTitleBlocked(video.title, rulesById.get(video.channelId))).length;
+
+    return { main, shorts, watchLater, blocked };
   },
 });
 
@@ -510,6 +512,15 @@ function matchesPlaylistRule(title: string, rawText?: string): boolean {
   const playlistMatches = rules.playlists.filter(Boolean).map((p) => p.toLocaleLowerCase());
   return playlistMatches.some((p) => normalizedTitle.includes(p));
 }
+
+function isTitleBlocked(title: string, rawText?: string): boolean {
+  const rules = parseRulesText(rawText);
+  if (rules.block.length === 0) return false;
+  const normalizedTitle = title.toLocaleLowerCase();
+  const blockMatches = rules.block.filter(Boolean).map((b) => b.toLocaleLowerCase());
+  return blockMatches.some((b) => normalizedTitle.includes(b));
+}
+
 
 function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
   if (video.isShort !== undefined) return video.isShort;

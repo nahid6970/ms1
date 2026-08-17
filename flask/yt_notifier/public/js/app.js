@@ -282,6 +282,7 @@ const POPUP_PAGES = {
             <option value="seen">Seen Videos</option>
             <option value="favorites">Saved Videos</option>
             <option value="watchlater">Watch Later Videos</option>
+            <option value="blocked">Blocked Items Feed</option>
             <option value="shorts">Shorts Feed</option>
           </select>
         </div>
@@ -336,12 +337,12 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0 }, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
   const isShorts = category === "shorts";
-  const isMainActive = PAGE === "feed" && category !== "shorts" && category !== "watchlater";
+  const isMainActive = PAGE === "feed" && category !== "shorts" && category !== "watchlater" && category !== "blocked";
   const activeFilterId = isShorts ? subCategory : category;
 
   const filterItems = isShorts ? [
@@ -350,18 +351,21 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0 }, showSeen = 
     { id: "seen", label: "Seen Shorts", icon: "fa-eye" },
     { id: "favorites", label: "Saved Shorts", icon: "fa-star text-amber-400" },
     { id: "watchlater", label: "Watch Later Shorts", icon: "fa-clock text-sky-400" },
+    { id: "blocked", label: "Blocked Shorts", icon: "fa-ban text-rose-400" },
   ] : [
     { id: "all", label: "All Videos", icon: "fa-border-all" },
     { id: "unseen", label: "Unseen", icon: "fa-eye-slash" },
     { id: "seen", label: "Seen", icon: "fa-eye" },
     { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
     { id: "watchlater", label: "Watch Later", icon: "fa-clock text-sky-400" },
+    { id: "blocked", label: "Blocked Items", icon: "fa-ban text-rose-400" },
     { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" },
   ];
 
   const mainCount = typeof counts === "object" ? counts.main ?? 0 : counts ?? 0;
   const shortsCount = typeof counts === "object" ? counts.shorts ?? 0 : 0;
   const watchLaterCount = typeof counts === "object" ? counts.watchLater ?? 0 : 0;
+  const blockedCount = typeof counts === "object" ? counts.blocked ?? 0 : 0;
 
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
@@ -386,6 +390,10 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0 }, showSeen = 
           <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${watchLaterCount} saved)" aria-label="Watch Later Feed (${watchLaterCount} saved)">
             <i class="fa-solid fa-clock"></i>
             ${watchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${watchLaterCount}</span>` : ""}
+          </a>
+          <a href="index.html?category=blocked" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${blockedCount} blocked)" aria-label="Blocked Items (${blockedCount} blocked)">
+            <i class="fa-solid fa-ban text-rose-400"></i>
+            ${blockedCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-rose-400 leading-none tracking-tight">${blockedCount}</span>` : ""}
           </a>
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
@@ -739,7 +747,7 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
+      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = videos.map((v) => videoCard(v, categories)).join("");
