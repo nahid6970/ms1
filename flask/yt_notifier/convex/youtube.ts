@@ -107,17 +107,16 @@ export function parseRulesText(rawText?: string, fallbackFilters: string[] = [])
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    const lower = trimmed.toLowerCase();
-    if (lower.includes("allow-rules") || lower.includes("whitelist")) {
-      currentMode = "allow";
-      continue;
-    }
-    if (lower.includes("block-rules") || lower.includes("blockrules") || lower.includes("blacklist")) {
-      currentMode = "block";
-      continue;
-    }
-    if (lower.includes("playlist")) {
-      currentMode = "playlist";
+    // Section headers must start with ":" (e.g. ":Allow-Rules:", ":Playlists:")
+    if (trimmed.startsWith(":")) {
+      const lower = trimmed.toLowerCase();
+      if (lower.includes("allow") || lower.includes("whitelist")) {
+        currentMode = "allow";
+      } else if (lower.includes("block") || lower.includes("blacklist")) {
+        currentMode = "block";
+      } else if (lower.includes("playlist")) {
+        currentMode = "playlist";
+      }
       continue;
     }
 
