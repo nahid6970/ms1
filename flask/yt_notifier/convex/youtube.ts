@@ -139,10 +139,80 @@ export async function fetchPlaylistFeedWithApiKey(
   apiKey: string | null,
 ): Promise<ChannelFeed | null> {
   if (apiKey) {
-    const viaApi = await fetchFeedViaApi(playlistId, apiKey);
-    if (viaApi) return viaApi;
+    // Fetch all pages of the playlist (up to 500 items, 50 per page)
+    const allEntries: FeedEntry[] = [];
+    let pageToken: string | undefined;
+    let playlistTitle = "Unknown Playlist";
+    const MAX_PAGES = 10; // cap at 500 items (10 × 50)
+
+    for (let page = 0; page < MAX_PAGES; page++) {
+      let url =
+        `https://www.googleapis.com/youtube/v3/playlistItems` +
+        `?part=snippet&playlistId=${playlistId}&maxResults=50&key=${apiKey}`;
+      if (pageToken) url += `&pageToken=${pageToken}`;
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error(
+          `YouTube Data API playlistItems error (${res.status}) for playlist ${playlistId}:`,
+          (await res.text()).slice(0, 300),
+        );
+        break;
+      }
+
+      const data = (await res.json()) as {
+        nextPageToken?: string;
+        items?: Array<{
+          snippet?: {
+            title?: string;
+            channelTitle?: string;
+            videoOwnerChannelTitle?: string;
+            publishedAt?: string;
+            resourceId?: { videoId?: string };
+          };
+        }>;
+      };
+
+      const items = data.items ?? [];
+      if (items.length === 0) break;
+
+      // Use the playlist owner's channel title on the first page
+      if (page === 0 && items[0]?.snippet) {
+        playlistTitle =
+          items[0].snippet.channelTitle ??
+          items[0].snippet.videoOwnerChannelTitle ??
+          playlistTitle;
+      }
+
+      const videoIds = items
+        .map((item) => item.snippet?.resourceId?.videoId)
+        .filter((id): id is string => Boolean(id));
+
+      const durationsById = await fetchVideoDurations(videoIds, apiKey);
+
+      for (const item of items) {
+        const s = item.snippet ?? {};
+        const videoId = s.resourceId?.videoId ?? "";
+        if (!videoId) continue;
+        allEntries.push({
+          videoId,
+          title: s.title ?? "",
+          link: `https://www.youtube.com/watch?v=${videoId}`,
+          duration: durationsById.get(videoId),
+          published: s.publishedAt ?? "",
+        });
+      }
+
+      pageToken = data.nextPageToken;
+      if (!pageToken) break; // no more pages
+    }
+
+    if (allEntries.length > 0) {
+      return { title: playlistTitle, entries: allEntries };
+    }
   }
 
+  // Fallback: RSS feed (limited to ~15 items)
   const url = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`;
   const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return null;
@@ -164,23 +234,39 @@ export const listChannelPlaylists = action({
       );
     }
 
-    const res = await fetch(
-      `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&key=${apiKey}`,
-    );
-    if (!res.ok) {
-      throw new ConvexError(
-        `Failed to fetch playlists from YouTube (HTTP ${res.status}). Check your API Key in Settings.`,
-      );
-    }
-    const data = (await res.json()) as {
-      items?: Array<{
-        id?: string;
-        snippet?: { title?: string };
-        contentDetails?: { itemCount?: number };
-      }>;
+    type PlaylistItem = {
+      id?: string;
+      snippet?: { title?: string };
+      contentDetails?: { itemCount?: number };
     };
 
-    return (data.items ?? []).map((item) => ({
+    const allItems: PlaylistItem[] = [];
+    let pageToken: string | undefined;
+    const MAX_PAGES = 20; // cap at 1000 playlists (20 × 50)
+
+    for (let page = 0; page < MAX_PAGES; page++) {
+      let url =
+        `https://www.googleapis.com/youtube/v3/playlists` +
+        `?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&key=${apiKey}`;
+      if (pageToken) url += `&pageToken=${pageToken}`;
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new ConvexError(
+          `Failed to fetch playlists from YouTube (HTTP ${res.status}). Check your API Key in Settings.`,
+        );
+      }
+      const data = (await res.json()) as {
+        nextPageToken?: string;
+        items?: PlaylistItem[];
+      };
+
+      allItems.push(...(data.items ?? []));
+      pageToken = data.nextPageToken;
+      if (!pageToken) break;
+    }
+
+    return allItems.map((item) => ({
       id: item.id ?? "",
       title: item.snippet?.title ?? "Untitled Playlist",
       url: `https://www.youtube.com/playlist?list=${item.id}`,
