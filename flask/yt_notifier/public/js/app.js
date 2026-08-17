@@ -1033,14 +1033,7 @@ window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
           <span class="text-[10px] text-slate-500">${pl.count} video${pl.count === 1 ? "" : "s"}</span>
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <select class="playlist-limit-select bg-slate-900 border border-slate-700 rounded text-[11px] text-slate-300 px-1.5 py-1 focus:outline-none focus:border-sky-500 transition" title="Number of videos to load">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50" selected>50</option>
-            <option value="100">100</option>
-            <option value="0">All</option>
-          </select>
-          <button onclick="loadPlaylistVideos('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', this)" class="px-2.5 py-1 rounded bg-sky-600/20 border border-sky-500/40 text-sky-300 hover:bg-sky-600 hover:text-white text-[11px] font-semibold transition" title="Add rule &amp; fetch videos into feed">
+          <button onclick="openLoadPlaylistModal('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', ${pl.count})" class="px-2.5 py-1 rounded bg-sky-600/20 border border-sky-500/40 text-sky-300 hover:bg-sky-600 hover:text-white text-[11px] font-semibold transition" title="Load videos into feed">
             <i class="fa-solid fa-download text-[10px] mr-1"></i>Load
           </button>
           <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition" title="Add playlist URL to channel rules only">
@@ -1076,16 +1069,93 @@ window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(chan
   }
 };
 
-window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, plTitle, btn) {
-  // Read the limit from the sibling <select>
-  const row = btn?.closest("div.flex");
-  const select = row?.querySelector(".playlist-limit-select");
-  const maxItems = select ? parseInt(select.value, 10) : 50;
+window.openLoadPlaylistModal = function openLoadPlaylistModal(channelId, plUrl, plTitle, totalCount) {
+  // Remove any existing modal
+  const existing = document.getElementById("loadPlaylistModal");
+  if (existing) existing.remove();
 
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-[10px] mr-1"></i>Loading...';
-  }
+  const modal = document.createElement("div");
+  modal.id = "loadPlaylistModal";
+  modal.className = "fixed inset-0 z-[100] flex items-center justify-center";
+  modal.innerHTML = `
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeLoadPlaylistModal()"></div>
+    <div class="relative z-10 w-[min(420px,calc(100vw-2rem))] rounded-xl border border-slate-700 bg-slate-900 shadow-2xl shadow-black/80 p-5">
+      <div class="flex items-start justify-between mb-4">
+        <div class="min-w-0">
+          <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-download text-sky-400 mr-1.5"></i>Load Playlist Videos</h3>
+          <p class="mt-0.5 text-xs text-slate-400 truncate max-w-[300px]">${esc(plTitle)}</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">${totalCount > 0 ? `${totalCount} videos in playlist` : ""}</p>
+        </div>
+        <button onclick="closeLoadPlaylistModal()" class="flex-shrink-0 text-slate-500 hover:text-white transition ml-3"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1.5">How many videos to load</label>
+          <div class="grid grid-cols-3 gap-1.5" id="plLimitBtns">
+            ${[["10","10"],["25","25"],["50","50"],["100","100"],["250","250"],["0","All"]].map(([val, label]) =>
+              `<button type="button" data-val="${val}" onclick="selectPlLimit(this)"
+                class="pl-limit-btn rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-sky-500 hover:text-sky-300 transition ${val === "0" ? "border-sky-500 text-sky-300 bg-sky-950/30" : ""}"
+              >${label}</button>`
+            ).join("")}
+          </div>
+          <input type="hidden" id="plLimitValue" value="0">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 mb-1.5">
+            Filter by date <span class="text-slate-600 font-normal">(optional — leave blank to load all)</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-500 mb-1 block">From</label>
+              <input type="date" id="plDateFrom" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 transition">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-500 mb-1 block">To</label>
+              <input type="date" id="plDateTo" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 transition">
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button type="button" onclick="closeLoadPlaylistModal()" class="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">Cancel</button>
+          <button type="button" id="plLoadConfirmBtn" onclick="confirmLoadPlaylist('${esc(channelId)}', '${esc(plUrl)}', '${esc(plTitle)}')"
+            class="flex-1 rounded-lg bg-sky-600 hover:bg-sky-500 px-4 py-2 text-xs font-semibold text-white transition">
+            <i class="fa-solid fa-download mr-1.5"></i>Load
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+};
+
+window.closeLoadPlaylistModal = function closeLoadPlaylistModal() {
+  const modal = document.getElementById("loadPlaylistModal");
+  if (modal) modal.remove();
+};
+
+window.selectPlLimit = function selectPlLimit(btn) {
+  document.querySelectorAll(".pl-limit-btn").forEach((b) => {
+    b.className = b.className
+      .replace("border-sky-500 text-sky-300 bg-sky-950/30", "")
+      .trim() + " border-slate-700 text-slate-300";
+  });
+  btn.className = btn.className
+    .replace("border-slate-700 text-slate-300", "")
+    .trim() + " border-sky-500 text-sky-300 bg-sky-950/30";
+  const input = document.getElementById("plLimitValue");
+  if (input) input.value = btn.dataset.val;
+};
+
+window.confirmLoadPlaylist = async function confirmLoadPlaylist(channelId, plUrl, plTitle) {
+  const maxItems = parseInt(document.getElementById("plLimitValue")?.value ?? "0", 10);
+  const dateFrom = document.getElementById("plDateFrom")?.value || null;
+  const dateTo = document.getElementById("plDateTo")?.value || null;
+
+  const btn = document.getElementById("plLoadConfirmBtn");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Loading...'; }
+
   try {
     // 1. Add the playlist URL to the channel rules if not already there
     const channels = await callConvex("query", "channels:list");
@@ -1103,7 +1173,7 @@ window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, 
       await callConvex("mutation", "channels:updateRules", { channelId, rulesText: rawText });
     }
 
-    // 2. Extract the playlist ID and fetch with the chosen limit
+    // 2. Extract playlist ID
     const playlistIdMatch = plUrl.match(/[?&]list=(PL[A-Za-z0-9_-]+)/i);
     const playlistId = playlistIdMatch ? playlistIdMatch[1] : null;
     if (!playlistId) throw new Error("Could not extract playlist ID from URL.");
@@ -1112,22 +1182,30 @@ window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, 
       channelId,
       playlistId,
       maxItems,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
     });
+
     const limitLabel = maxItems === 0 ? "all" : maxItems;
+    const dateLabel = dateFrom || dateTo
+      ? ` (${dateFrom || "start"} → ${dateTo || "now"})`
+      : "";
     flash(
-      `Loaded "${plTitle}" (${limitLabel} videos) — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added to feed!`,
+      `Loaded "${plTitle}" — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added (${limitLabel}${dateLabel})`,
       "success",
     );
+    closeLoadPlaylistModal();
     await renderChannels({ refreshNav: !isPopupOpen() });
     if (PAGE === "feed") await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-download text-[10px] mr-1"></i>Load';
-    }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-download mr-1.5"></i>Load'; }
   }
+};
+
+window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, plTitle, btn) {
+  // Legacy direct-call path (kept for compatibility) — now just opens the modal
+  openLoadPlaylistModal(channelId, plUrl, plTitle, 0);
 };
 
 

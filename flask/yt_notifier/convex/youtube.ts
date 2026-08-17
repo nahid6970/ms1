@@ -139,8 +139,8 @@ export async function fetchPlaylistFeedWithApiKey(
   maxItems: number = 500,
 ): Promise<ChannelFeed | null> {
   if (apiKey) {
-    // Fetch pages of the playlist up to maxItems (0 = no limit, capped at 500)
-    const hardCap = maxItems === 0 ? 500 : maxItems;
+    // Fetch pages of the playlist up to maxItems (0 = no limit)
+    const hardCap = maxItems === 0 ? 5000 : maxItems;
     const allEntries: FeedEntry[] = [];
     let pageToken: string | undefined;
     let playlistTitle = "Unknown Playlist";
