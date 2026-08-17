@@ -337,7 +337,7 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, category = "all", subCategory = "all", folder = "" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
@@ -366,16 +366,25 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
   const shortsCount = typeof counts === "object" ? counts.shorts ?? 0 : 0;
   const watchLaterCount = typeof counts === "object" ? counts.watchLater ?? 0 : 0;
   const blockedCount = typeof counts === "object" ? counts.blocked ?? 0 : 0;
+  const limitVal = feedLimit != null ? String(feedLimit) : "50";
 
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between gap-2 sm:gap-4">
         <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
-          <a href="index.html" class="flex items-center space-x-2 text-red-500 font-bold text-lg sm:text-xl tracking-tight flex-shrink-0">
-            <span class="bg-gradient-to-r from-red-500 to-amber-500 bg-clip-text text-transparent">YT Notifier</span>
-            <span id="headerCardCount" class="ml-1 px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
-          </a>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <select id="headerFeedLimitSelect" onchange="changeFeedLimitFromHeader(this.value)" class="rounded-lg border border-slate-700/80 bg-slate-950/90 px-2.5 py-1 text-xs font-semibold text-slate-200 outline-none focus:border-red-500 transition cursor-pointer shadow" title="Videos Per Feed Page">
+              <option value="20" ${limitVal === "20" ? "selected" : ""}>20 Limit</option>
+              <option value="50" ${limitVal === "50" ? "selected" : ""}>50 Limit</option>
+              <option value="100" ${limitVal === "100" ? "selected" : ""}>100 Limit</option>
+              <option value="200" ${limitVal === "200" ? "selected" : ""}>200 Limit</option>
+              <option value="500" ${limitVal === "500" ? "selected" : ""}>500 Limit</option>
+              <option value="1000" ${limitVal === "1000" ? "selected" : ""}>1000 Limit</option>
+              <option value="0" ${limitVal === "0" ? "selected" : ""}>All Limit</option>
+            </select>
+            <span id="headerCardCount" class="px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
+          </div>
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
@@ -564,7 +573,7 @@ async function refreshNavOnly() {
   ]);
   const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
   const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
-  renderNav({ counts, showSeen: config.showSeen, category: urlCategory, subCategory: urlSubCategory, folder });
+  renderNav({ counts, showSeen: config.showSeen, feedLimit: config.feedLimit, category: urlCategory, subCategory: urlSubCategory, folder });
 }
 
 /* --------------------------------- feed page ------------------------------- */
@@ -727,6 +736,7 @@ async function renderFeed() {
   renderNav({
     counts,
     showSeen: config.showSeen,
+    feedLimit: config.feedLimit,
     category: urlCategory,
     subCategory: urlSubCategory,
     folder,
@@ -1167,6 +1177,26 @@ window.changeChannelSort = async function changeChannelSort(sortMethod) {
   localStorage.setItem("channelSort", sortMethod);
   await renderChannels({ refreshNav: false });
 };
+
+window.changeFeedLimitFromHeader = async function changeFeedLimitFromHeader(newLimit) {
+  try {
+    const limitNum = Number(newLimit);
+    const config = await callConvex("query", "settings:config");
+    await callConvex("mutation", "settings:updateConfig", {
+      showSeen: config.showSeen,
+      hideShorts: config.hideShorts,
+      unseenFirst: config.unseenFirst,
+      defaultFeedFilter: config.defaultFeedFilter,
+      defaultShortsFilter: config.defaultShortsFilter,
+      feedLimit: limitNum,
+    });
+    flash(`Feed limit updated to ${limitNum === 0 ? "All" : limitNum} videos!`, "success");
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
 
 function sortChannelsList(channels, sortMethod) {
   const list = [...channels];
