@@ -44,5 +44,5 @@ https://youtube.com/playlist?list=PLxxx   ← all playlist videos show
 
 **Load modal:** Default is "All" (fetches up to 5000 from API). Use lower limits only to save API quota on very large playlists.
 
-## 4. Pending Task
-Re-load "All" on any playlist that previously loaded only 50 (old default) to stamp missing `sourcePlaylistId` on existing videos. Then verify: playlist videos + allow-rule title matches → main feed; everything else → Blocked Items.
+## 4. Current Status
+Everything working. Key reminder: after re-loading a playlist, existing videos that were already marked **seen** (`isNew=false`) will appear at the bottom or be hidden if on Unseen filter — switch to **All Videos** filter to see them. No pending tasks.

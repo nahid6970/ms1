@@ -73,6 +73,7 @@ export const refreshChannel = action({
             entries: plEntries,
             skipTitleFilter: true,
             sourcePlaylistId: plId,
+            sourcePlaylistTitle: plFeed.title || undefined,
           });
           playlistNewVideos += plResult.newVideos;
           playlistDurationsUpdated += plResult.durationsUpdated;
@@ -285,7 +286,7 @@ export const loadPlaylistVideos = action({
 
     const result: { newVideos: number; durationsUpdated: number } = await ctx.runMutation(
       internal.videos.addFromFeed,
-      { channelId, entries, skipTitleFilter: true, sourcePlaylistId: playlistId },
+      { channelId, entries, skipTitleFilter: true, sourcePlaylistId: playlistId, sourcePlaylistTitle: feed.title || undefined },
     );
 
     await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });

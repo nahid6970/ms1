@@ -7,8 +7,9 @@ export const list = query({
     subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("watchlater"), v.literal("blocked"))),
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
+    playlistId: v.optional(v.string()),
   },
-  handler: async (ctx, { category, subCategory, folder, channelId }) => {
+  handler: async (ctx, { category, subCategory, folder, channelId, playlistId }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -119,7 +120,12 @@ export const list = query({
 
     const finalVideos = feedLimit === 0 ? filtered : filtered.slice(0, feedLimit);
 
-    return finalVideos.map((video) => ({
+    // Apply playlistId filter after feed limit (playlist view shows all matching videos)
+    const outputVideos = playlistId
+      ? filtered.filter((v) => v.sourcePlaylistId === playlistId)
+      : finalVideos;
+
+    return outputVideos.map((video) => ({
       _id: video._id,
       videoId: video.videoId,
       title: video.title,
@@ -135,6 +141,8 @@ export const list = query({
       channelName: nameById.get(video.channelId) ?? "Unknown Channel",
       channelThumbnail: thumbById.get(video.channelId) ?? null,
       channelCategory: channelCategoryMap.get(video.channelId) ?? "",
+      sourcePlaylistId: video.sourcePlaylistId ?? null,
+      sourcePlaylistTitle: video.sourcePlaylistTitle ?? null,
     }));
   },
 });
@@ -231,8 +239,9 @@ export const counts = query({
   args: {
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
+    playlistId: v.optional(v.string()),
   },
-  handler: async (ctx, { folder, channelId }) => {
+  handler: async (ctx, { folder, channelId, playlistId }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -270,8 +279,10 @@ export const counts = query({
 
     const allVideos = await ctx.db.query("videos").collect();
 
-    // channelVideos = all videos belonging to enabled/filtered channels
-    const channelVideos = allVideos.filter((video) => enabledChannelIds.has(video.channelId));
+    // channelVideos = all videos belonging to enabled/filtered channels (optionally filtered by playlist)
+    const channelVideos = allVideos
+      .filter((video) => enabledChannelIds.has(video.channelId))
+      .filter((video) => !playlistId || video.sourcePlaylistId === playlistId);
 
     // validVideos = those that pass playlist OR title filter (shown in main/shorts/watchlater)
     const validVideos = channelVideos
@@ -419,8 +430,9 @@ export const addFromFeed = internalMutation({
     ),
     skipTitleFilter: v.optional(v.boolean()),
     sourcePlaylistId: v.optional(v.string()),
+    sourcePlaylistTitle: v.optional(v.string()),
   },
-  handler: async (ctx, { channelId, entries, skipTitleFilter, sourcePlaylistId }) => {
+  handler: async (ctx, { channelId, entries, skipTitleFilter, sourcePlaylistId, sourcePlaylistTitle }) => {
     const channel = await ctx.db
       .query("channels")
       .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
@@ -445,13 +457,14 @@ export const addFromFeed = internalMutation({
           published: entry.published,
           isNew: true,
           sourcePlaylistId: sourcePlaylistId || undefined,
+          sourcePlaylistTitle: sourcePlaylistTitle || undefined,
         });
         newVideos += 1;
       } else {
-        const patch: { duration?: string; sourcePlaylistId?: string } = {};
+        const patch: { duration?: string; sourcePlaylistId?: string; sourcePlaylistTitle?: string } = {};
         if (!existing.duration && entry.duration) patch.duration = entry.duration;
-        // Stamp sourcePlaylistId if this video was previously inserted without one
         if (sourcePlaylistId && !existing.sourcePlaylistId) patch.sourcePlaylistId = sourcePlaylistId;
+        if (sourcePlaylistTitle && !existing.sourcePlaylistTitle) patch.sourcePlaylistTitle = sourcePlaylistTitle;
         if (Object.keys(patch).length > 0) {
           await ctx.db.patch(existing._id, patch);
           if (patch.duration) durationsUpdated += 1;
@@ -599,3 +612,51 @@ function isShortVideo(video: { title: string; link: string; duration?: string; i
   }
   return false;
 }
+
+/** Returns all channels that have at least one playlist, with per-playlist video + unseen counts. */
+export const listPlaylists = query({
+  args: {},
+  handler: async (ctx) => {
+    const channels = await ctx.db.query("channels").collect();
+    const enabledChannels = channels.filter((c) => !c.disabled);
+
+    // Only channels that have playlist URL rules
+    const channelsWithPlaylists = enabledChannels.filter((c) => {
+      if (!c.rulesText) return false;
+      const rules = parseRulesText(c.rulesText);
+      return rules.playlists.some((p) => extractPlaylistId(p.trim()) !== null);
+    });
+
+    if (channelsWithPlaylists.length === 0) return [];
+
+    const allVideos = await ctx.db.query("videos").collect();
+
+    return channelsWithPlaylists.map((channel) => {
+      const rules = parseRulesText(channel.rulesText ?? "");
+      const playlistIds = rules.playlists
+        .map((p) => extractPlaylistId(p.trim()))
+        .filter((id): id is string => Boolean(id));
+
+      const channelVideos = allVideos.filter((v) => v.channelId === channel.channelId);
+
+      const playlists = playlistIds.map((plId) => {
+        const plVideos = channelVideos.filter((v) => v.sourcePlaylistId === plId);
+        const title = plVideos.find((v) => v.sourcePlaylistTitle)?.sourcePlaylistTitle ?? plId;
+        return {
+          playlistId: plId,
+          title,
+          total: plVideos.length,
+          unseen: plVideos.filter((v) => v.isNew && !v.isWatchLater).length,
+        };
+      }).filter((pl) => pl.total > 0);
+
+      return {
+        channelId: channel.channelId,
+        channelName: channel.channelName,
+        thumbnail: channel.thumbnail ?? null,
+        playlists,
+        totalUnseen: playlists.reduce((sum, pl) => sum + pl.unseen, 0),
+      };
+    }).filter((c) => c.playlists.length > 0);
+  },
+});

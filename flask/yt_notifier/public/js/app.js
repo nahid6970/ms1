@@ -335,6 +335,12 @@ const POPUP_PAGES = {
         <button type="submit" class="bg-red-600 text-white px-6 py-2 text-sm font-semibold hover:bg-red-500 transition">Save Settings</button>
       </form>`,
   },
+  playlists: {
+    title: "Playlists",
+    icon: "fa-list",
+    header: `<h2 class="text-lg font-bold text-white"><i class="fa-solid fa-list text-sky-400 mr-2"></i>Playlists</h2>`,
+    body: `<div id="playlistsPanel" class="space-y-3"><p class="text-slate-600 text-sm">Loading...</p></div>`,
+  },
 };
 
 function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "" } = {}) {
@@ -428,6 +434,9 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
           <button type="button" onclick="openPopup('channels')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Channels" aria-label="Channels">
             <i class="fa-solid fa-tv"></i>
           </button>
+          <button type="button" onclick="openPopup('playlists')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Playlists" aria-label="Playlists">
+            <i class="fa-solid fa-list"></i>
+          </button>
           <button type="button" onclick="openPopup('stats')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Stats" aria-label="Stats">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
@@ -506,6 +515,8 @@ window.openPopup = async function openPopup(page) {
       const configData = await callConvex("query", "settings:config");
       renderSettingsConfig(configData);
       initSettingsPage();
+    } else if (page === "playlists") {
+      await renderPlaylistsPanel();
     }
   } catch (err) {
     flash(err.message, "danger");
@@ -518,6 +529,66 @@ window.closePopup = function closePopup() {
   popup.classList.add("hidden");
   document.body.classList.remove("overflow-hidden");
 };
+
+async function renderPlaylistsPanel() {
+  const container = document.getElementById("playlistsPanel");
+  if (!container) return;
+
+  const urlParams = new URLSearchParams(location.search);
+  const activePlaylistId = urlParams.get("playlistId") || "";
+
+  let data;
+  try {
+    data = await callConvex("query", "videos:listPlaylists");
+  } catch (err) {
+    container.innerHTML = `<p class="text-rose-400 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>${esc(err.message)}</p>`;
+    return;
+  }
+
+  if (!data || !data.length) {
+    container.innerHTML = `
+      <div class="py-10 text-center text-slate-500">
+        <i class="fa-solid fa-list text-4xl mb-3 opacity-20"></i>
+        <p class="text-sm">No playlists yet.</p>
+        <p class="text-xs mt-1 text-slate-600">Open a channel's playlist panel and click Load on a playlist to add it.</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = data.map((channel) => `
+    <div class="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-800/60">
+        <div class="w-8 h-8 rounded-full bg-slate-800 flex-shrink-0 overflow-hidden ring-1 ring-slate-700">
+          ${channel.thumbnail
+            ? `<img src="${esc(channel.thumbnail)}" class="w-full h-full object-cover" alt="${esc(channel.channelName)}">`
+            : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400">${esc(channel.channelName.slice(0,2))}</div>`}
+        </div>
+        <span class="text-sm font-bold text-white truncate flex-1">${esc(channel.channelName)}</span>
+        ${channel.totalUnseen > 0
+          ? `<span class="flex-shrink-0 text-[11px] font-extrabold text-red-400">${channel.totalUnseen} unseen</span>`
+          : ""}
+      </div>
+      <div class="divide-y divide-slate-800/50">
+        ${channel.playlists.map((pl) => {
+          const isActive = pl.playlistId === activePlaylistId;
+          const href = isActive
+            ? "?"
+            : `?playlistId=${encodeURIComponent(pl.playlistId)}&category=all`;
+          return `
+          <a href="${href}" onclick="closePopup()" class="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-800/50 ${isActive ? "bg-sky-950/40 border-l-2 border-sky-500" : ""}">
+            <i class="fa-solid fa-list-ul text-xs ${isActive ? "text-sky-400" : "text-slate-500"} flex-shrink-0"></i>
+            <span class="flex-1 text-sm ${isActive ? "text-sky-300 font-semibold" : "text-slate-200"} truncate">${esc(pl.title)}</span>
+            <span class="flex-shrink-0 text-[10px] text-slate-500">${pl.total} video${pl.total === 1 ? "" : "s"}</span>
+            ${pl.unseen > 0
+              ? `<span class="flex-shrink-0 text-[11px] font-extrabold text-red-400 min-w-[1.5rem] text-right">${pl.unseen}</span>`
+              : `<span class="flex-shrink-0 min-w-[1.5rem]"></span>`}
+          </a>`;
+        }).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
 
 window.toggleDropdown = function toggleDropdown() {
   const menu = document.getElementById("dropdownMenu");
@@ -572,9 +643,14 @@ async function refreshNavOnly() {
   const urlParams = new URLSearchParams(location.search);
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
+  const playlistId = urlParams.get("playlistId") || "";
   const [config, counts] = await Promise.all([
     callConvex("query", "settings:config"),
-    callConvex("query", "videos:counts", { folder: folder || undefined, channelId: channelId || undefined }),
+    callConvex("query", "videos:counts", {
+      folder: folder || undefined,
+      channelId: channelId || undefined,
+      playlistId: playlistId || undefined,
+    }),
   ]);
   const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
   const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
@@ -729,14 +805,20 @@ async function renderFeed() {
   const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
+  const playlistId = urlParams.get("playlistId") || "";
 
   const [allVideos, counts, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
       folder: folder || undefined,
+      playlistId: playlistId || undefined,
     }),
-    callConvex("query", "videos:counts", { folder: folder || undefined, channelId: channelId || undefined }),
+    callConvex("query", "videos:counts", {
+      folder: folder || undefined,
+      channelId: channelId || undefined,
+      playlistId: playlistId || undefined,
+    }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
   ]);
@@ -755,6 +837,33 @@ async function renderFeed() {
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
   renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory);
 
+  // Playlist header banner
+  const existingBanner = document.getElementById("playlistBanner");
+  if (existingBanner) existingBanner.remove();
+  if (playlistId && videos.length > 0) {
+    const plTitle = videos[0]?.sourcePlaylistTitle || playlistId;
+    const plChannel = videos[0]?.channelName || "";
+    const banner = document.createElement("div");
+    banner.id = "playlistBanner";
+    banner.className = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4";
+    banner.innerHTML = `
+      <div class="flex items-center justify-between gap-3 rounded-xl border border-sky-800/50 bg-sky-950/30 px-4 py-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <i class="fa-solid fa-list text-sky-400 flex-shrink-0"></i>
+          <div class="min-w-0">
+            <span class="text-sm font-bold text-sky-300 truncate block">${esc(plTitle)}</span>
+            <span class="text-xs text-slate-500">${esc(plChannel)} · ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
+          </div>
+        </div>
+        <a href="?" class="flex-shrink-0 text-xs text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <i class="fa-solid fa-xmark text-xs"></i> Clear
+        </a>
+      </div>`;
+    const main = document.querySelector("main");
+    const grid = document.getElementById("videoGrid");
+    if (main && grid) main.insertBefore(banner, grid);
+  }
+
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
     countBadge.textContent = `${videos.length}`;
@@ -767,7 +876,7 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. ${urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
+      <p class="text-lg">No videos found. ${playlistId ? "No videos loaded for this playlist yet — open Channels and use Load to fetch them." : urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = videos.map((v) => videoCard(v, categories)).join("");
