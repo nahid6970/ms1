@@ -12,7 +12,6 @@ import {
   resolveChannelInfoWithApiKey,
 } from "./youtube";
 
-
 export interface RefreshChannelResult {
   channelId: string;
   channelName: string | null;
@@ -230,6 +229,55 @@ export const backfillDurations = action({
     }
 
     return { updated, checked: videos.length };
+  },
+});
+
+/** Load videos from a specific playlist (with an optional item limit) into the feed. */
+export const loadPlaylistVideos = action({
+  args: {
+    channelId: v.string(),
+    playlistId: v.string(),
+    maxItems: v.optional(v.number()), // 0 = all (up to 500)
+  },
+  handler: async (ctx, { channelId, playlistId, maxItems }): Promise<{ newVideos: number; channelName: string }> => {
+    const apiKey =
+      (await ctx.runQuery(internal.settings.youtubeDataApiKey)) ??
+      process.env.YT_DATA_API_KEY ??
+      null;
+
+    if (!apiKey) {
+      throw new ConvexError(
+        "A YouTube Data API v3 Key is required in Settings to load playlist videos.",
+      );
+    }
+
+    const channel = await ctx.runQuery(internal.channels.getByChannelId, { channelId });
+    if (!channel) throw new ConvexError("Channel not found.");
+
+    const feed = await fetchPlaylistFeedWithApiKey(playlistId, apiKey, maxItems ?? 0);
+    if (!feed || feed.entries.length === 0) {
+      return { newVideos: 0, channelName: channel.channelName ?? "Unknown Channel" };
+    }
+
+    const entries = feed.entries.map((e) => ({
+      videoId: e.videoId,
+      title: e.title,
+      link: e.link,
+      duration: e.duration,
+      published: e.published ? new Date(e.published).toISOString() : "",
+    }));
+
+    const result: { newVideos: number; durationsUpdated: number } = await ctx.runMutation(
+      internal.videos.addFromFeed,
+      { channelId, entries },
+    );
+
+    await ctx.runMutation(internal.settings.recordQuotaUsage, { units: 2 });
+
+    return {
+      newVideos: result.newVideos,
+      channelName: channel.channelName ?? "Unknown Channel",
+    };
   },
 });
 

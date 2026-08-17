@@ -1027,11 +1027,18 @@ window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
           <span class="text-[10px] text-slate-500">${pl.count} video${pl.count === 1 ? "" : "s"}</span>
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0">
+          <select class="playlist-limit-select bg-slate-900 border border-slate-700 rounded text-[11px] text-slate-300 px-1.5 py-1 focus:outline-none focus:border-sky-500 transition" title="Number of videos to load">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="0">All</option>
+          </select>
           <button onclick="loadPlaylistVideos('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', this)" class="px-2.5 py-1 rounded bg-sky-600/20 border border-sky-500/40 text-sky-300 hover:bg-sky-600 hover:text-white text-[11px] font-semibold transition" title="Add rule &amp; fetch videos into feed">
-            <i class="fa-solid fa-download text-[10px] mr-1"></i>Load Videos
+            <i class="fa-solid fa-download text-[10px] mr-1"></i>Load
           </button>
           <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition" title="Add playlist URL to channel rules only">
-            + Add Rule
+            + Rule
           </button>
         </div>
       </div>
@@ -1064,12 +1071,17 @@ window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(chan
 };
 
 window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, plTitle, btn) {
+  // Read the limit from the sibling <select>
+  const row = btn?.closest("div.flex");
+  const select = row?.querySelector(".playlist-limit-select");
+  const maxItems = select ? parseInt(select.value, 10) : 50;
+
   if (btn) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-[10px] mr-1"></i>Loading...';
   }
   try {
-    // 1. Add the playlist URL to the channel rules (same logic as addPlaylistToChannelRules)
+    // 1. Add the playlist URL to the channel rules if not already there
     const channels = await callConvex("query", "channels:list");
     const channel = (channels || []).find((c) => c.channelId === channelId);
     let rawText = channel?.rulesText ?? "";
@@ -1085,10 +1097,19 @@ window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, 
       await callConvex("mutation", "channels:updateRules", { channelId, rulesText: rawText });
     }
 
-    // 2. Refresh this channel so the playlist videos are fetched and stored
-    const res = await callConvex("action", "refresh:refreshChannel", { channelId });
+    // 2. Extract the playlist ID and fetch with the chosen limit
+    const playlistIdMatch = plUrl.match(/[?&]list=(PL[A-Za-z0-9_-]+)/i);
+    const playlistId = playlistIdMatch ? playlistIdMatch[1] : null;
+    if (!playlistId) throw new Error("Could not extract playlist ID from URL.");
+
+    const res = await callConvex("action", "refresh:loadPlaylistVideos", {
+      channelId,
+      playlistId,
+      maxItems,
+    });
+    const limitLabel = maxItems === 0 ? "all" : maxItems;
     flash(
-      `Loaded "${plTitle}" — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added to feed!`,
+      `Loaded "${plTitle}" (${limitLabel} videos) — ${res.newVideos} new video${res.newVideos === 1 ? "" : "s"} added to feed!`,
       "success",
     );
     await renderChannels({ refreshNav: !isPopupOpen() });
@@ -1098,7 +1119,7 @@ window.loadPlaylistVideos = async function loadPlaylistVideos(channelId, plUrl, 
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-download text-[10px] mr-1"></i>Load Videos';
+      btn.innerHTML = '<i class="fa-solid fa-download text-[10px] mr-1"></i>Load';
     }
   }
 };

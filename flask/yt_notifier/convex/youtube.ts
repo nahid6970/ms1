@@ -137,13 +137,15 @@ export function parseRulesText(rawText?: string, fallbackFilters: string[] = [])
 export async function fetchPlaylistFeedWithApiKey(
   playlistId: string,
   apiKey: string | null,
+  maxItems: number = 500,
 ): Promise<ChannelFeed | null> {
   if (apiKey) {
-    // Fetch all pages of the playlist (up to 500 items, 50 per page)
+    // Fetch pages of the playlist up to maxItems (0 = no limit, capped at 500)
+    const hardCap = maxItems === 0 ? 500 : maxItems;
     const allEntries: FeedEntry[] = [];
     let pageToken: string | undefined;
     let playlistTitle = "Unknown Playlist";
-    const MAX_PAGES = 10; // cap at 500 items (10 × 50)
+    const MAX_PAGES = Math.ceil(hardCap / 50); // pages needed to reach the limit
 
     for (let page = 0; page < MAX_PAGES; page++) {
       let url =
@@ -201,10 +203,11 @@ export async function fetchPlaylistFeedWithApiKey(
           duration: durationsById.get(videoId),
           published: s.publishedAt ?? "",
         });
+        if (allEntries.length >= hardCap) break;
       }
 
       pageToken = data.nextPageToken;
-      if (!pageToken) break; // no more pages
+      if (!pageToken || allEntries.length >= hardCap) break; // no more pages or limit reached
     }
 
     if (allEntries.length > 0) {
