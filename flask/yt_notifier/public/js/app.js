@@ -860,7 +860,7 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory);
+  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory, playlistId);
 
   // Playlist header banner
   const existingBanner = document.getElementById("playlistBanner");
@@ -955,7 +955,7 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
     </div>`;
 }
 
-function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all") {
+function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all", activePlaylistId = "") {
   let bar = document.getElementById("channelAvatarsBar");
   if (!channels || !channels.length) {
     if (bar) bar.remove();
@@ -985,10 +985,11 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
   const folderParam = currentFolder ? `&folder=${encodeURIComponent(currentFolder)}` : "";
   const subParam = currentCategory === "shorts" && currentSubCategory ? `&subCategory=${currentSubCategory}` : "";
   const baseUrl = `?category=${currentCategory}${subParam}${folderParam}`;
+  const playlistParam = activePlaylistId ? `&playlistId=${encodeURIComponent(activePlaylistId)}` : "";
 
   const avatarsHtml = activeChannels.map((c) => {
     const isActive = activeChannelId === c.channelId;
-    const targetUrl = isActive ? baseUrl : `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}`;
+    const targetUrl = isActive ? baseUrl : `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}${playlistParam}`;
     return `
       <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ${isActive ? "ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-1 ring-slate-800/80 hover:ring-2 hover:ring-red-500/50"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
         ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover rounded-full" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 rounded-full">${esc(c.channelName.slice(0, 2))}</div>`}
@@ -1000,9 +1001,14 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
       ${avatarsHtml}
     </div>
     ${activeChannelId ? `
-      <a href="${baseUrl}" class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-md ml-2" title="Show all channels">
+      <a href="${baseUrl}${playlistParam}" class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/90 border border-slate-700/80 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-md ml-2" title="Show all channels">
         <i class="fa-solid fa-xmark text-xs text-red-400"></i>
         <span>All</span>
+      </a>` : ""}
+    ${activePlaylistId ? `
+      <a href="${baseUrl}${activeChannelId ? `&channelId=${encodeURIComponent(activeChannelId)}` : ""}" class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-900/60 border border-sky-700/60 text-xs font-semibold text-sky-300 hover:text-white hover:bg-sky-800/60 transition shadow-md ml-1" title="Clear playlist filter">
+        <i class="fa-solid fa-xmark text-xs text-sky-400"></i>
+        <span>Playlist</span>
       </a>` : ""}
   `;
 }
