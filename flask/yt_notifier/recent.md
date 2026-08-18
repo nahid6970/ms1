@@ -30,6 +30,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 | Sort | Client-side sort before grid render. `sortBy` URL param (`date-desc` default). |
 | `hidePrivate` | Toggle wired in `renderSettingsConfig`, form submit, `changeFeedLimitFromHeader`. |
 | `addPlaylistToChannelRules` | Now accepts `plCount`. After saving rule + re-rendering channels: re-opens playlists box + reloads its list, re-opens rules box, **auto-opens Load modal** — one click does add rule + load. |
+| `removePlaylistRule` | New `channels:removePlaylistRule` mutation strips playlist URL line from `rulesText` (videos untouched). Playlists panel rows have a hover `×` button — removes rule, re-renders panel, navigates away if currently on that playlist. |
 
 ## 3. Critical Context — How Rules Work
 
