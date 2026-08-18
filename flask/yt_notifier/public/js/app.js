@@ -674,7 +674,6 @@ async function refreshNavOnly() {
     callConvex("query", "videos:counts", {
       folder: folder || undefined,
       channelId: channelId || undefined,
-      playlistId: playlistId || undefined,
     }),
   ]);
   const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
@@ -842,7 +841,6 @@ async function renderFeed() {
     callConvex("query", "videos:counts", {
       folder: folder || undefined,
       channelId: channelId || undefined,
-      playlistId: playlistId || undefined,
     }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
