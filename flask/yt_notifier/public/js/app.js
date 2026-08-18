@@ -908,7 +908,8 @@ async function renderFeed() {
         <span class="text-[11px] text-sky-400/70 flex-shrink-0 font-medium">${esc(plChannel)}</span>
         <span class="text-slate-500 text-[11px] flex-shrink-0">/</span>
         <span class="text-xs font-bold text-white truncate">${esc(plTitle)}</span>
-        <span class="text-[11px] text-slate-500 flex-shrink-0">&middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
+        <span class="text-[11px] text-slate-400 flex-shrink-0 font-medium">&middot; <span class="text-sky-400 font-bold">${videos.length}</span> video${videos.length === 1 ? "" : "s"}</span>
+        <a href="https://www.youtube.com/playlist?list=${encodeURIComponent(playlistId)}" target="_blank" rel="noopener" class="flex-shrink-0 text-red-400 hover:text-red-300 transition ml-1" title="Open on YouTube"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
       </div>`;
     const main = document.querySelector("main");
     const grid = document.getElementById("videoGrid");
