@@ -22,7 +22,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 |---|---|
 | `headerCardCount` | White bg, black text, more visible pill badge. |
 | `channelAvatarsBar` | Square corners, fully opaque bg, `border-b` only — fixes scroll bleed-through. Sticky `× Playlist` pill when `playlistId` active (sky color). `playlistTitle` preserved in avatar links. |
-| Playlist banner | Compact single-line: `[icon] Channel / Playlist Name · N videos`. Title resolved via: URL param → `sourcePlaylistTitle` → `playlistMeta` cache → `"Playlist"`. No Clear button (redundant with sticky bar). |
+| Playlist banner | Compact single-line: `[icon] Channel / Playlist Name · N videos ↗`. Title resolved via: URL param → `sourcePlaylistTitle` → `playlistMeta` cache → `"Playlist"`. No Clear button (redundant with sticky bar). Count number sky-400 bold. YouTube external link icon red-400 at end. |
 | Playlist panel URLs | Include `&playlistTitle=...` so banner title is immediately available on page load without DB lookup. |
 | Nav counts | `playlistId` removed from `videos:counts` call — badges always show global unread. |
 | `renderNav` | Accepts `playlistId` + `sortBy`. `isMainActive` false when on a playlist. Playlist button highlights sky + dot when active. Shorts removed from main feed filter dropdown. **Playlist button moved before Blocked Items button.** |
