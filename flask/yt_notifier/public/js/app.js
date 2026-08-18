@@ -343,7 +343,7 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "", sortBy = "date-desc" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
@@ -415,18 +415,37 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
             <button id="dropdownButton" onclick="toggleDropdown()" class="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition" title="Filter: ${esc(activeFilterId)}" aria-label="Filter: ${esc(activeFilterId)}">
               <i class="fa-solid fa-filter"></i>
             </button>
-            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-40 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
+            <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/80 z-50 py-1.5 popup-enter">
               <div class="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800/80 mb-1">${isShorts ? "Filter Shorts" : "Filter Feed"}</div>
               ${filterItems.map((item) => {
                 const isActive = item.id === activeFilterId;
                 const folderParam = folder ? `&folder=${encodeURIComponent(folder)}` : "";
+                const sortParam = sortBy !== "date-desc" ? `&sortBy=${sortBy}` : "";
                 const linkHref = isShorts
-                  ? `?category=shorts&subCategory=${item.id}${folderParam}`
-                  : `?category=${item.id}${folderParam}`;
+                  ? `?category=shorts&subCategory=${item.id}${folderParam}${sortParam}`
+                  : `?category=${item.id}${folderParam}${sortParam}`;
                 return `
                 <a href="${linkHref}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${isActive ? "bg-red-500/15 text-red-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
                   <i class="fa-solid ${item.icon} w-3.5 text-center text-xs"></i>
                   <span>${esc(item.label)}</span>
+                </a>`;
+              }).join("")}
+              <div class="px-3 py-1 mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-t border-slate-800/80 border-b border-slate-800/80 mb-1">Sort By</div>
+              ${[
+                { id: "date-desc", label: "Newest First",   icon: "fa-arrow-down-wide-short" },
+                { id: "date-asc",  label: "Oldest First",   icon: "fa-arrow-up-wide-short" },
+                { id: "title-asc", label: "Title A → Z",    icon: "fa-arrow-down-a-z" },
+                { id: "title-desc",label: "Title Z → A",    icon: "fa-arrow-up-a-z" },
+              ].map((s) => {
+                const isActiveSortItem = s.id === sortBy;
+                const folderParam = folder ? `&folder=${encodeURIComponent(folder)}` : "";
+                const catParam = isShorts ? `category=shorts&subCategory=${activeFilterId}` : `category=${activeFilterId}`;
+                const plParam = playlistId ? `&playlistId=${encodeURIComponent(playlistId)}` : "";
+                const sortHref = `?${catParam}${folderParam}${plParam}&sortBy=${s.id}`;
+                return `
+                <a href="${sortHref}" class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition ${isActiveSortItem ? "bg-indigo-500/15 text-indigo-400 font-semibold" : "text-slate-300 hover:bg-slate-800/70 hover:text-white"}">
+                  <i class="fa-solid ${s.icon} w-3.5 text-center text-xs"></i>
+                  <span>${s.label}</span>
                 </a>`;
               }).join("")}
             </div>
@@ -832,6 +851,7 @@ async function renderFeed() {
   const channelId = urlParams.get("channelId") || "";
   const playlistId = urlParams.get("playlistId") || "";
   const playlistTitleFromUrl = urlParams.get("playlistTitle") || "";
+  const sortBy = urlParams.get("sortBy") || "date-desc";
 
   const [allVideos, counts, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
@@ -858,6 +878,7 @@ async function renderFeed() {
     subCategory: urlSubCategory,
     folder,
     playlistId,
+    sortBy,
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
@@ -900,6 +921,17 @@ async function renderFeed() {
     countBadge.title = `${videos.length} video card${videos.length === 1 ? "" : "s"} showing on current page`;
   }
 
+  // Client-side sort (backend already returns date-desc; other sorts applied here)
+  const sortedVideos = [...videos];
+  if (sortBy === "date-asc") {
+    sortedVideos.sort((a, b) => a.published.localeCompare(b.published));
+  } else if (sortBy === "title-asc") {
+    sortedVideos.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortBy === "title-desc") {
+    sortedVideos.sort((a, b) => b.title.localeCompare(a.title));
+  }
+  // date-desc: already sorted by backend
+
   const grid = document.getElementById("videoGrid");
   if (!grid) return;
   if (!videos.length) {
@@ -909,7 +941,7 @@ async function renderFeed() {
       <p class="text-lg">No videos found. ${playlistId ? "No videos loaded for this playlist yet — open Channels and use Load to fetch them." : urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
-    grid.innerHTML = videos.map((v) => videoCard(v, categories)).join("");
+    grid.innerHTML = sortedVideos.map((v) => videoCard(v, categories)).join("");
   }
 }
 
