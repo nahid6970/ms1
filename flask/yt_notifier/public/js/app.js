@@ -406,6 +406,10 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
             <i class="fa-solid fa-clock"></i>
             ${watchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${watchLaterCount}</span>` : ""}
           </a>
+          <button type="button" onclick="openPopup('playlists')" class="nav-link relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isPlaylistActive ? "bg-slate-800 text-sky-400 is-active" : "text-slate-300"}" title="Playlists" aria-label="Playlists">
+            <i class="fa-solid fa-list"></i>
+            ${isPlaylistActive ? `<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400"></span>` : ""}
+          </button>
           <a href="index.html?category=blocked" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${blockedCount} blocked)" aria-label="Blocked Items (${blockedCount} blocked)">
             <i class="fa-solid fa-ban text-rose-400"></i>
             ${blockedCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-rose-400 leading-none tracking-tight">${blockedCount}</span>` : ""}
@@ -452,10 +456,6 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
           </div>` : ""}
           <button type="button" onclick="openPopup('channels')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Channels" aria-label="Channels">
             <i class="fa-solid fa-tv"></i>
-          </button>
-          <button type="button" onclick="openPopup('playlists')" class="nav-link relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isPlaylistActive ? "bg-slate-800 text-sky-400 is-active" : "text-slate-300"}" title="Playlists" aria-label="Playlists">
-            <i class="fa-solid fa-list"></i>
-            ${isPlaylistActive ? `<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400"></span>` : ""}
           </button>
           <button type="button" onclick="openPopup('stats')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Stats" aria-label="Stats">
             <i class="fa-solid fa-chart-pie"></i>
