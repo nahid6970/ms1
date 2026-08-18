@@ -1213,7 +1213,7 @@ window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
           <button onclick="openLoadPlaylistModal('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', ${pl.count})" class="px-2.5 py-1 rounded bg-sky-600/20 border border-sky-500/40 text-sky-300 hover:bg-sky-600 hover:text-white text-[11px] font-semibold transition" title="Load videos into feed">
             <i class="fa-solid fa-download text-[10px] mr-1"></i>Load
           </button>
-          <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}')" class="px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition" title="Add playlist URL to channel rules only">
+          <button onclick="addPlaylistToChannelRules('${esc(channelId)}', '${esc(pl.url)}', '${esc(pl.title)}', ${pl.count})" class="px-2.5 py-1 rounded bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600 hover:text-white text-[11px] font-semibold transition" title="Add playlist URL to channel rules and load videos">
             + Rule
           </button>
         </div>
@@ -1224,7 +1224,7 @@ window.loadChannelPlaylists = async function loadChannelPlaylists(channelId) {
   }
 };
 
-window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(channelId, plUrl, plTitle) {
+window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(channelId, plUrl, plTitle, plCount = 0) {
   try {
     const channels = await callConvex("query", "channels:list");
     const channel = (channels || []).find((c) => c.channelId === channelId);
@@ -1240,6 +1240,16 @@ window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(chan
     await callConvex("mutation", "channels:updateRules", { channelId, rulesText: rawText });
     flash(`Added "${plTitle}" to channel rules!`, "success");
     await renderChannels({ refreshNav: !isPopupOpen() });
+    // Re-open the playlists and rules boxes so user doesn't lose their place
+    const playlistsBox = document.getElementById(`playlists-${channelId}`);
+    if (playlistsBox) {
+      playlistsBox.classList.remove("hidden");
+      loadChannelPlaylists(channelId); // repopulate the list (re-render wiped it)
+    }
+    const rulesBox = document.getElementById(`rules-${channelId}`);
+    if (rulesBox) rulesBox.classList.remove("hidden");
+    // Immediately open the Load modal so user can load videos without extra steps
+    openLoadPlaylistModal(channelId, plUrl, plTitle, plCount);
     if (PAGE === "feed") await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
