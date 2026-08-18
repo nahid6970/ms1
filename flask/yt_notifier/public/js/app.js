@@ -343,12 +343,13 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
   const isShorts = category === "shorts";
-  const isMainActive = PAGE === "feed" && category !== "shorts" && category !== "watchlater" && category !== "blocked";
+  const isPlaylistActive = Boolean(playlistId);
+  const isMainActive = PAGE === "feed" && !isPlaylistActive && category !== "shorts" && category !== "watchlater" && category !== "blocked";
   const activeFilterId = isShorts ? subCategory : category;
 
   const filterItems = isShorts ? [
@@ -434,8 +435,9 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
           <button type="button" onclick="openPopup('channels')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Channels" aria-label="Channels">
             <i class="fa-solid fa-tv"></i>
           </button>
-          <button type="button" onclick="openPopup('playlists')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Playlists" aria-label="Playlists">
+          <button type="button" onclick="openPopup('playlists')" class="nav-link relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isPlaylistActive ? "bg-slate-800 text-sky-400 is-active" : "text-slate-300"}" title="Playlists" aria-label="Playlists">
             <i class="fa-solid fa-list"></i>
+            ${isPlaylistActive ? `<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400"></span>` : ""}
           </button>
           <button type="button" onclick="openPopup('stats')" class="nav-link inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 text-slate-300" title="Stats" aria-label="Stats">
             <i class="fa-solid fa-chart-pie"></i>
@@ -855,6 +857,7 @@ async function renderFeed() {
     category: urlCategory,
     subCategory: urlSubCategory,
     folder,
+    playlistId,
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
