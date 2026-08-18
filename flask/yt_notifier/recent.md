@@ -9,7 +9,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 |---|---|
 | `convex/schema.ts` | Added `sourcePlaylistTitle` to videos table. Added `playlistMeta` (array of `{id, title}`) to channels table for caching playlist names. |
 | `convex/youtube.ts` | `parseRulesText` — headers only on lines starting with `:`. `fetchPlaylistFeedWithApiKey` fetches real playlist title via `playlists?part=snippet`. hardCap raised to 5000. |
-| `convex/videos.ts` | OR logic for playlist+allow rules. `addFromFeed` patches `sourcePlaylistId`+`sourcePlaylistTitle`. `listPlaylists` query. `playlistId` arg on `list`+`counts`. **Blocked/watchlater use `take(10000)` and skip feedLimit slice.** **`hideShorts` scoped to main feeds only** (not blocked/watchlater). `isPrivateVideo()` helper; `hidePrivate` applied in `list` and `counts`. |
+| `convex/videos.ts` | OR logic for playlist+allow rules. `addFromFeed` patches `sourcePlaylistId`+`sourcePlaylistTitle`. `listPlaylists` query. `playlistId` arg on `list`+`counts`. Blocked/watchlater use `take(10000)` and skip feedLimit slice. `hideShorts` scoped to main feeds only. `isPrivateVideo()` helper; `hidePrivate` applied in `list` and `counts`. |
 | `convex/channels.ts` | `updateRules` extracts allow-section lines into `titleFilters`. `upsertPlaylistMeta` (internal) + `savePlaylistMeta` (public mutation). |
 | `convex/refresh.ts` | `refreshChannel` saves `sourcePlaylistId`+`sourcePlaylistTitle`, calls `upsertPlaylistMeta`. `loadPlaylistVideos` same. |
 | `convex/settings.ts` | Added `hide_private` key. Exposed `hidePrivate` in `config` + `updateConfig`. |
@@ -21,14 +21,15 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 | Area | What changed |
 |---|---|
 | `headerCardCount` | White bg, black text, more visible pill badge. |
-| `channelAvatarsBar` | Square corners, fully opaque bg, `border-b` only — fixes scroll bleed-through. **Sticky `× Playlist` pill** appears when `playlistId` active (sky color). `playlistTitle` preserved in avatar links. |
+| `channelAvatarsBar` | Square corners, fully opaque bg, `border-b` only — fixes scroll bleed-through. Sticky `× Playlist` pill when `playlistId` active (sky color). `playlistTitle` preserved in avatar links. |
 | Playlist banner | Compact single-line: `[icon] Channel / Playlist Name · N videos`. Title resolved via: URL param → `sourcePlaylistTitle` → `playlistMeta` cache → `"Playlist"`. No Clear button (redundant with sticky bar). |
+| Playlist panel URLs | Include `&playlistTitle=...` so banner title is immediately available on page load without DB lookup. |
 | Nav counts | `playlistId` removed from `videos:counts` call — badges always show global unread. |
-| `renderNav` | Accepts `playlistId` + `sortBy` params. `isMainActive` false when on a playlist. **Playlist button** highlights sky + dot when `?playlistId=` active. **Shorts removed** from main feed filter dropdown. |
-| Playlist panel URLs | Now include `&playlistTitle=...` so banner title is immediately available on page load. |
+| `renderNav` | Accepts `playlistId` + `sortBy`. `isMainActive` false when on a playlist. Playlist button highlights sky + dot when active. Shorts removed from main feed filter dropdown. **Playlist button moved before Blocked Items button.** |
 | Filter dropdown | Added **Sort By section**: Newest First (default), Oldest First, Title A→Z, Title Z→A. Active sort highlighted in indigo. Filter links preserve `sortBy`. Sort links preserve `category`+`playlistId`. |
-| Sort | Client-side sort applied before grid render. `date-desc` = free (backend order). Others sort JS array. `sortBy` URL param (`date-desc` default). |
+| Sort | Client-side sort before grid render. `sortBy` URL param (`date-desc` default). |
 | `hidePrivate` | Toggle wired in `renderSettingsConfig`, form submit, `changeFeedLimitFromHeader`. |
+| `addPlaylistToChannelRules` | Now accepts `plCount`. After saving rule + re-rendering channels: re-opens playlists box + reloads its list, re-opens rules box, **auto-opens Load modal** — one click does add rule + load. |
 
 ## 3. Critical Context — How Rules Work
 
@@ -47,13 +48,15 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 
 ## 4. Key Behavioral Notes
 
-- **`hideShorts`** — hides shorts from main/unseen/seen/favorites feeds only. Shorts still appear in Shorts feed, Blocked Items, and Watch Later.
+- **`hideShorts`** — hides shorts from main/unseen/seen/favorites only. Shorts still appear in Shorts feed, Blocked Items, Watch Later.
 - **`hidePrivate`** — filters out `"Private video"` / `"Deleted video"` from all feeds and counts.
 - **Blocked Items** — no feedLimit cap. `take(10000)`, no slice. Count in nav badge always matches.
 - **Watch Later** — same, no feedLimit cap.
 - **Nav badges** — always global counts, never scoped to active `playlistId`.
-- **Playlist banner** — compact pill, title from URL param first (most reliable), falls back through `sourcePlaylistTitle` → `playlistMeta` → `"Playlist"`.
-- **Sort** — `?sortBy=date-desc|date-asc|title-asc|title-desc`. Client-side only. Default is `date-desc`.
+- **Playlist banner** — compact pill. Title from `?playlistTitle=` URL param (set by panel nav) first, then fallbacks.
+- **Sort** — `?sortBy=date-desc|date-asc|title-asc|title-desc`. Client-side. Default `date-desc`.
+- **Nav button order** — YouTube → Shorts → Watch Later → Playlists → Blocked → Filter → Channels → Stats → Settings → Refresh.
+- **"+ Rule" button** — adds playlist URL to channel rules AND immediately opens the Load modal. No scrolling needed.
 
 ## 5. Pending Task
-Deploy + open Playlists panel to trigger auto-sync of titles. Re-load "All" on each playlist to stamp `sourcePlaylistId`/`sourcePlaylistTitle` on existing videos.
+Deploy to production. Verify playlist views load correctly end-to-end.
