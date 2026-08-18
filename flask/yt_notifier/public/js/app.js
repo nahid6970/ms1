@@ -872,16 +872,18 @@ async function renderFeed() {
     banner.id = "playlistBanner";
     banner.className = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4";
     banner.innerHTML = `
-      <div class="flex items-center justify-between gap-3 rounded-xl border border-sky-800/50 bg-sky-950/30 px-4 py-3">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <i class="fa-solid fa-list text-sky-400 flex-shrink-0"></i>
+      <div class="flex items-center justify-between gap-3 rounded-xl bg-gradient-to-r from-sky-600/20 via-indigo-600/10 to-transparent border border-sky-500/30 px-4 py-3 shadow-lg shadow-sky-900/20">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-500/30 flex items-center justify-center">
+            <i class="fa-solid fa-list text-sky-400 text-sm"></i>
+          </div>
           <div class="min-w-0">
-            <span class="text-sm font-bold text-sky-300 truncate block">${esc(plTitle)}</span>
-            <span class="text-xs text-slate-500">${esc(plChannel)} · ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
+            <span class="text-sm font-bold text-white truncate block leading-tight">${esc(plTitle)}</span>
+            <span class="text-[11px] text-sky-400/80 font-medium">${esc(plChannel)} &middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
           </div>
         </div>
-        <a href="?" class="flex-shrink-0 text-xs text-slate-400 hover:text-white transition flex items-center gap-1.5">
-          <i class="fa-solid fa-xmark text-xs"></i> Clear
+        <a href="?" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition">
+          <i class="fa-solid fa-xmark text-xs text-red-400"></i> Clear
         </a>
       </div>`;
     const main = document.querySelector("main");
