@@ -16,6 +16,12 @@ export const list = query({
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const hidePrivateSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_private"))
+      .first();
+    const hidePrivate = Boolean(hidePrivateSetting?.value);
+
     const unseenFirstSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "unseen_first"))
@@ -78,9 +84,12 @@ export const list = query({
     }
 
     const isShortsView = category === "shorts";
+    const isBlockedView = effectiveCategory === "blocked";
+    const isWatchLaterView = effectiveCategory === "watchlater";
 
-    // When filtering by playlist, fetch all videos so none are missed regardless of date
-    const takeAmount = playlistId ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
+    // When filtering by playlist, fetch all videos so none are missed regardless of date.
+    // For blocked/watchlater, also fetch all so count matches what's shown.
+    const takeAmount = (playlistId || isBlockedView || isWatchLaterView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
     const videos = await q.take(takeAmount);
 
     const filtered = videos
@@ -88,10 +97,10 @@ export const list = query({
       .filter((video) => {
         const rulesText = rulesById.get(video.channelId);
         const fallbackFilters = filtersById.get(video.channelId) ?? [];
-        if (effectiveCategory === "blocked") {
+        if (isBlockedView) {
           return isTitleBlocked(video.title, video, rulesText, fallbackFilters);
         }
-        if (effectiveCategory === "watchlater") {
+        if (isWatchLaterView) {
           return Boolean(video.isWatchLater);
         }
         // A video passes if it comes from an allowed playlist OR its title matches allow-rules.
@@ -101,9 +110,13 @@ export const list = query({
         return !video.isWatchLater && (fromAllowedPlaylist || titleAllowed);
       })
       .filter((video) => {
+        // Shorts view: show only shorts.
+        // hideShorts only applies to main feeds (all/unseen/seen/favorites) — NOT blocked/watchlater/shorts.
         if (isShortsView) return isShortVideo(video);
+        if (isBlockedView || isWatchLaterView) return true;
         return !hideShorts || !isShortVideo(video);
-      });
+      })
+      .filter((video) => !hidePrivate || !isPrivateVideo(video));
 
     filtered.sort((a, b) => {
       const aPlaylist = matchesPlaylistRule(a.title, rulesById.get(a.channelId)) ? 1 : 0;
@@ -119,7 +132,7 @@ export const list = query({
       return b.published.localeCompare(a.published);
     });
 
-    const finalVideos = feedLimit === 0 ? filtered : filtered.slice(0, feedLimit);
+    const finalVideos = (feedLimit === 0 || isBlockedView || isWatchLaterView) ? filtered : filtered.slice(0, feedLimit);
 
     // Apply playlistId filter after feed limit (playlist view shows all matching videos)
     const outputVideos = playlistId
@@ -249,6 +262,12 @@ export const counts = query({
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const hidePrivateSettingCounts = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_private"))
+      .first();
+    const hidePrivate = Boolean(hidePrivateSettingCounts?.value);
+
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
 
@@ -295,15 +314,15 @@ export const counts = query({
       });
 
     const main = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     const shorts = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video),
+      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     const watchLater = validVideos.filter(
-      (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
+      (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     // blocked = any channel video that fails either playlist filter or title rules
@@ -612,6 +631,10 @@ function isShortVideo(video: { title: string; link: string; duration?: string; i
     }
   }
   return false;
+}
+
+function isPrivateVideo(video: { title: string }) {
+  return video.title === "Private video" || video.title === "Deleted video";
 }
 
 /** Returns all channels that have at least one playlist, with per-playlist video + unseen counts. */

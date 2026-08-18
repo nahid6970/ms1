@@ -3,6 +3,7 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 const SHOW_SEEN_KEY = "show_seen";
 const HIDE_SHORTS_KEY = "hide_shorts";
+const HIDE_PRIVATE_KEY = "hide_private";
 const UNSEEN_FIRST_KEY = "unseen_first";
 const DEFAULT_FEED_FILTER_KEY = "default_feed_filter";
 const DEFAULT_SHORTS_FILTER_KEY = "default_shorts_filter";
@@ -38,6 +39,7 @@ export const config = query({
   handler: async (ctx) => {
     const showSeenRow = await getSetting(ctx, SHOW_SEEN_KEY);
     const hideShortsRow = await getSetting(ctx, HIDE_SHORTS_KEY);
+    const hidePrivateRow = await getSetting(ctx, HIDE_PRIVATE_KEY);
     const unseenFirstRow = await getSetting(ctx, UNSEEN_FIRST_KEY);
     const defaultFilterRow = await getSetting(ctx, DEFAULT_FEED_FILTER_KEY);
     const defaultShortsFilterRow = await getSetting(ctx, DEFAULT_SHORTS_FILTER_KEY);
@@ -48,6 +50,7 @@ export const config = query({
     return {
       showSeen: showSeenRow ? (showSeenRow.value as boolean) : false,
       hideShorts: hideShortsRow ? (hideShortsRow.value as boolean) : false,
+      hidePrivate: hidePrivateRow ? (hidePrivateRow.value as boolean) : false,
       unseenFirst: unseenFirstRow ? (unseenFirstRow.value as boolean) : false,
       defaultFeedFilter: defaultFilterRow ? (defaultFilterRow.value as string) : "all",
       defaultShortsFilter: defaultShortsFilterRow ? (defaultShortsFilterRow.value as string) : "all",
@@ -68,6 +71,7 @@ export const updateConfig = mutation({
   args: {
     showSeen: v.boolean(),
     hideShorts: v.optional(v.boolean()),
+    hidePrivate: v.optional(v.boolean()),
     unseenFirst: v.optional(v.boolean()),
     defaultFeedFilter: v.optional(v.string()),
     defaultShortsFilter: v.optional(v.string()),
@@ -75,10 +79,13 @@ export const updateConfig = mutation({
     youtubeDataApiKey: v.optional(v.string()),
     clearYoutubeDataApiKey: v.optional(v.boolean()),
   },
-  handler: async (ctx, { showSeen, hideShorts, unseenFirst, defaultFeedFilter, defaultShortsFilter, feedLimit, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
+  handler: async (ctx, { showSeen, hideShorts, hidePrivate, unseenFirst, defaultFeedFilter, defaultShortsFilter, feedLimit, youtubeDataApiKey, clearYoutubeDataApiKey }) => {
     await upsertSetting(ctx, SHOW_SEEN_KEY, showSeen);
     if (hideShorts !== undefined) {
       await upsertSetting(ctx, HIDE_SHORTS_KEY, hideShorts);
+    }
+    if (hidePrivate !== undefined) {
+      await upsertSetting(ctx, HIDE_PRIVATE_KEY, hidePrivate);
     }
     if (unseenFirst !== undefined) {
       await upsertSetting(ctx, UNSEEN_FIRST_KEY, unseenFirst);

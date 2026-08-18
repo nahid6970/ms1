@@ -1451,6 +1451,7 @@ window.changeFeedLimitFromHeader = async function changeFeedLimitFromHeader(newL
     await callConvex("mutation", "settings:updateConfig", {
       showSeen: config.showSeen,
       hideShorts: config.hideShorts,
+      hidePrivate: config.hidePrivate,
       unseenFirst: config.unseenFirst,
       defaultFeedFilter: config.defaultFeedFilter,
       defaultShortsFilter: config.defaultShortsFilter,
@@ -1743,6 +1744,7 @@ function initSettingsPage() {
     e.preventDefault();
     const checked = document.getElementById("showSeenToggle")?.checked ?? false;
     const hideShortsChecked = document.getElementById("hideShortsToggle")?.checked ?? false;
+    const hidePrivateChecked = document.getElementById("hidePrivateToggle")?.checked ?? false;
     const unseenFirstChecked = document.getElementById("unseenFirstToggle")?.checked ?? false;
     const defaultFeedFilterVal = document.getElementById("defaultFeedFilterSelect")?.value ?? "all";
     const defaultShortsFilterVal = document.getElementById("defaultShortsFilterSelect")?.value ?? "all";
@@ -1755,6 +1757,7 @@ function initSettingsPage() {
       await callConvex("mutation", "settings:updateConfig", {
         showSeen: checked,
         hideShorts: hideShortsChecked,
+        hidePrivate: hidePrivateChecked,
         unseenFirst: unseenFirstChecked,
         defaultFeedFilter: defaultFeedFilterVal,
         defaultShortsFilter: defaultShortsFilterVal,
@@ -1779,6 +1782,7 @@ function initSettingsPage() {
 function renderSettingsConfig(config) {
   const toggle = document.getElementById("showSeenToggle");
   const shortsToggle = document.getElementById("hideShortsToggle");
+  const privateToggle = document.getElementById("hidePrivateToggle");
   const unseenFirstToggle = document.getElementById("unseenFirstToggle");
   const defaultFilterSelect = document.getElementById("defaultFeedFilterSelect");
   const defaultShortsFilterSelect = document.getElementById("defaultShortsFilterSelect");
@@ -1786,6 +1790,7 @@ function renderSettingsConfig(config) {
   const status = document.getElementById("youtubeApiKeyStatus");
   if (toggle) toggle.checked = config.showSeen;
   if (shortsToggle) shortsToggle.checked = Boolean(config.hideShorts);
+  if (privateToggle) privateToggle.checked = Boolean(config.hidePrivate);
   if (unseenFirstToggle) unseenFirstToggle.checked = Boolean(config.unseenFirst);
   if (defaultFilterSelect && config.defaultFeedFilter) defaultFilterSelect.value = config.defaultFeedFilter;
   if (defaultShortsFilterSelect && config.defaultShortsFilter) defaultShortsFilterSelect.value = config.defaultShortsFilter;
