@@ -3,7 +3,7 @@
     "height": 39,
     "x": 13,
     "y": 983,
-    "check_interval": 600,
+    "check_interval": 60,
     "topmost": false,
     "icon_l": "\uf100",
     "icon_r": "\uf101",

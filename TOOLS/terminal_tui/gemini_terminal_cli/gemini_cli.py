@@ -48,14 +48,19 @@ MAIN_MEMORY_FILE = MEMORY_DIR / "main.json"
 SKILLS_DIR = Path(__file__).parent / "skills"
 
 DEFAULT_SYSTEM = (
-    "You are a terminal coding assistant. "
+    "You are a terminal coding and OS automation assistant. "
     "Be concise, practical, and ask before making destructive changes. "
     "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
     "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
     "AUTOSAVE MEMORY & USER BEHAVIOR: Memory tools are active. You MUST immediately call `save_memory` whenever the user shares personal facts or preferences. "
-    f"CREATING SKILLS: When the user asks to create or add a skill, ALWAYS use write_file to save a markdown file into `{SKILLS_DIR.as_posix()}/<skill_name>.md` so it is loaded by /skill. DO NOT call save_memory for skills!"
+    f"CREATING SKILLS: When the user asks to create or add a skill, ALWAYS use write_file to save a markdown file into `{SKILLS_DIR.as_posix()}/<skill_name>.md` so it is loaded by /skill. DO NOT call save_memory for skills! "
+    "OS & GUI AUTOMATION RULES: When asked to control the computer, mouse, or keyboard: "
+    "1. ALWAYS call `take_screenshot` first on each step to visually perceive the current desktop and UI elements. "
+    "2. Analyze the visual screenshot to locate exact pixel coordinates (x, y) for UI targets. "
+    "3. Execute the corresponding action (`mouse_click`, `mouse_move`, `mouse_drag`, `keyboard_type`, `keyboard_hotkey`, `mouse_scroll`). "
+    "4. Take another screenshot if needed to visually verify the step succeeded before declaring completion."
 )
 
 try:
@@ -1343,6 +1348,220 @@ def inspect_image_file(filepath: Path) -> tuple[str, Optional[Dict[str, Any]]]:
         return f"Error inspecting image: {exc}", None
 
 
+SCREENSHOTS_DIR = Path(__file__).parent / "screenshots"
+
+
+def os_take_screenshot(save_path: Optional[str] = None) -> str:
+    """Captures a screenshot of the display and saves it for multimodal vision perception."""
+    try:
+        from PIL import ImageGrab
+        SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+        if save_path and save_path.strip():
+            target_p = Path(save_path.strip())
+        else:
+            stamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+            target_p = SCREENSHOTS_DIR / f"screenshot_{stamp}.png"
+
+        target_p.parent.mkdir(parents=True, exist_ok=True)
+        img = ImageGrab.grab(all_screens=True)
+        img.save(str(target_p))
+        return f"Screenshot captured: {target_p} (Resolution: {img.width}x{img.height}). Gemini can inspect it via inspect_image."
+    except Exception as exc:
+        return f"Error taking screenshot: {exc}"
+
+
+def os_get_cursor_pos() -> tuple[int, int]:
+    try:
+        import ctypes
+        class POINT(ctypes.Structure):
+            _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+        pt = POINT()
+        ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+        return pt.x, pt.y
+    except Exception:
+        return 0, 0
+
+
+def os_set_cursor_pos(x: int, y: int) -> None:
+    try:
+        import ctypes
+        ctypes.windll.user32.SetCursorPos(int(x), int(y))
+    except Exception:
+        pass
+
+
+def os_mouse_click(x: Optional[int] = None, y: Optional[int] = None, button: str = "left", modifiers: str = "") -> str:
+    try:
+        import ctypes
+        import time
+
+        btn = button.lower().strip() or "left"
+        cur_x, cur_y = os_get_cursor_pos()
+        target_x = int(x) if x is not None else cur_x
+        target_y = int(y) if y is not None else cur_y
+        
+        os_set_cursor_pos(target_x, target_y)
+        time.sleep(0.05)
+
+        VK_CODES = {"ctrl": 0x11, "shift": 0x10, "alt": 0x12, "win": 0x5B}
+        pressed_mods = []
+        if modifiers:
+            for mod in modifiers.lower().replace("+", " ").split():
+                if mod in VK_CODES:
+                    ctypes.windll.user32.keybd_event(VK_CODES[mod], 0, 0, 0)
+                    pressed_mods.append(VK_CODES[mod])
+
+        down_flag, up_flag = 0x0002, 0x0004  # Left
+        if btn == "right":
+            down_flag, up_flag = 0x0008, 0x0010
+        elif btn == "middle":
+            down_flag, up_flag = 0x0020, 0x0040
+
+        clicks = 2 if btn == "double" else 1
+        for _ in range(clicks):
+            ctypes.windll.user32.mouse_event(down_flag, 0, 0, 0, 0)
+            time.sleep(0.05)
+            ctypes.windll.user32.mouse_event(up_flag, 0, 0, 0, 0)
+            if clicks > 1:
+                time.sleep(0.08)
+
+        for vk in reversed(pressed_mods):
+            ctypes.windll.user32.keybd_event(vk, 0, 2, 0)
+
+        return f"Clicked {btn} at ({target_x}, {target_y})" + (f" with {modifiers}" if modifiers else "")
+    except Exception as exc:
+        return f"Error executing mouse click: {exc}"
+
+
+def os_mouse_move(x: int, y: int) -> str:
+    try:
+        os_set_cursor_pos(x, y)
+        return f"Moved cursor to ({x}, {y})"
+    except Exception as exc:
+        return f"Error moving cursor: {exc}"
+
+
+def os_mouse_drag(x1: int, y1: int, x2: int, y2: int, button: str = "left") -> str:
+    try:
+        import ctypes
+        import time
+        btn = button.lower().strip() or "left"
+        down_flag, up_flag = (0x0002, 0x0004) if btn != "right" else (0x0008, 0x0010)
+
+        os_set_cursor_pos(x1, y1)
+        time.sleep(0.05)
+        ctypes.windll.user32.mouse_event(down_flag, 0, 0, 0, 0)
+        time.sleep(0.05)
+
+        # Smooth drag interpolation in 10 steps
+        steps = 10
+        for step in range(1, steps + 1):
+            curr_x = int(x1 + (x2 - x1) * (step / steps))
+            curr_y = int(y1 + (y2 - y1) * (step / steps))
+            os_set_cursor_pos(curr_x, curr_y)
+            time.sleep(0.01)
+
+        time.sleep(0.05)
+        ctypes.windll.user32.mouse_event(up_flag, 0, 0, 0, 0)
+        return f"Dragged from ({x1}, {y1}) to ({x2}, {y2})"
+    except Exception as exc:
+        return f"Error executing drag: {exc}"
+
+
+def os_keyboard_type(text: str) -> str:
+    try:
+        import ctypes
+        import time
+        user32 = ctypes.windll.user32
+        
+        # Send characters via SendInput with unicode
+        class KEYBDINPUT(ctypes.Structure):
+            _fields_ = [
+                ("wVk", ctypes.c_ushort),
+                ("wScan", ctypes.c_ushort),
+                ("dwFlags", ctypes.c_ulong),
+                ("time", ctypes.c_ulong),
+                ("dwExtraInfo", ctypes.POINTER(ctypes.c_ulong)),
+            ]
+
+        class INPUT(ctypes.Structure):
+            class _INPUT(ctypes.Union):
+                _fields_ = [("ki", KEYBDINPUT)]
+            _anonymous_ = ("_input",)
+            _fields_ = [("type", ctypes.c_ulong), ("_input", _INPUT)]
+
+        for char in text:
+            code = ord(char)
+            inp_down = INPUT(type=1)
+            inp_down.ki.wScan = code
+            inp_down.ki.dwFlags = 0x0004  # KEYEVENTF_UNICODE
+            user32.SendInput(1, ctypes.byref(inp_down), ctypes.sizeof(INPUT))
+            
+            inp_up = INPUT(type=1)
+            inp_up.ki.wScan = code
+            inp_up.ki.dwFlags = 0x0004 | 0x0002  # KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
+            user32.SendInput(1, ctypes.byref(inp_up), ctypes.sizeof(INPUT))
+            time.sleep(0.01)
+
+        return f"Typed {len(text)} characters into active window."
+    except Exception as exc:
+        return f"Error typing text: {exc}"
+
+
+def os_keyboard_hotkey(hotkey: str) -> str:
+    try:
+        import ctypes
+        import time
+        user32 = ctypes.windll.user32
+
+        VK_MAP = {
+            "ctrl": 0x11, "control": 0x11,
+            "shift": 0x10,
+            "alt": 0x12,
+            "win": 0x5B, "super": 0x5B,
+            "enter": 0x0D, "return": 0x0D,
+            "tab": 0x09,
+            "esc": 0x1B, "escape": 0x1B,
+            "backspace": 0x08,
+            "space": 0x20,
+            "delete": 0x2E, "del": 0x2E,
+            "up": 0x26, "down": 0x28, "left": 0x25, "right": 0x27,
+            "pageup": 0x21, "pagedown": 0x22, "home": 0x24, "end": 0x23,
+            "f1": 0x70, "f2": 0x71, "f3": 0x72, "f4": 0x73, "f5": 0x74,
+            "f6": 0x75, "f7": 0x76, "f8": 0x77, "f9": 0x78, "f10": 0x79,
+            "f11": 0x7A, "f12": 0x7B,
+        }
+
+        keys = hotkey.lower().replace("+", " ").split()
+        vk_keys = []
+        for k in keys:
+            if k in VK_MAP:
+                vk_keys.append(VK_MAP[k])
+            elif len(k) == 1:
+                vk_keys.append(ord(k.upper()))
+
+        for vk in vk_keys:
+            user32.keybd_event(vk, 0, 0, 0)
+        time.sleep(0.05)
+        for vk in reversed(vk_keys):
+            user32.keybd_event(vk, 0, 2, 0)
+
+        return f"Sent key combo: {hotkey}"
+    except Exception as exc:
+        return f"Error executing hotkey: {exc}"
+
+
+def os_mouse_scroll(amount: int) -> str:
+    try:
+        import ctypes
+        # WHEEL_DELTA is 120
+        ticks = int(amount) * 120
+        ctypes.windll.user32.mouse_event(0x0800, 0, 0, ticks, 0)
+        return f"Scrolled mouse wheel by {amount} units."
+    except Exception as exc:
+        return f"Error scrolling mouse: {exc}"
+
+
 def search_tavily(query: str, tavily_accounts: Dict[str, str], max_results: int = 5) -> str:
     if not query.strip():
         return "Error: query is required."
@@ -2231,7 +2450,89 @@ FUNCTIONS = {
             },
         },
     },
-
+    "take_screenshot": {
+        "name": "take_screenshot",
+        "description": "Take a screenshot of the current screen for visual perception and OS automation.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "save_path": {"type": "STRING", "description": "Optional file path to save screenshot (default: screenshots/screen_<timestamp>.png)."},
+            },
+        },
+    },
+    "mouse_click": {
+        "name": "mouse_click",
+        "description": "Click the mouse at specific (x, y) coordinates or at the current cursor position with optional button and modifier keys.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "x": {"type": "INTEGER", "description": "X pixel coordinate on screen (omit to use current cursor position)."},
+                "y": {"type": "INTEGER", "description": "Y pixel coordinate on screen (omit to use current cursor position)."},
+                "button": {"type": "STRING", "description": "'left', 'right', 'middle', or 'double' (default: 'left')."},
+                "modifiers": {"type": "STRING", "description": "Optional key modifiers like 'ctrl', 'shift', 'alt', 'ctrl+shift'."},
+            },
+        },
+    },
+    "mouse_move": {
+        "name": "mouse_move",
+        "description": "Move the mouse cursor to specific (x, y) pixel coordinates on screen.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "x": {"type": "INTEGER", "description": "X pixel coordinate."},
+                "y": {"type": "INTEGER", "description": "Y pixel coordinate."},
+            },
+            "required": ["x", "y"],
+        },
+    },
+    "mouse_drag": {
+        "name": "mouse_drag",
+        "description": "Click and drag from start coordinates (x1, y1) to end coordinates (x2, y2).",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "x1": {"type": "INTEGER", "description": "Start X coordinate."},
+                "y1": {"type": "INTEGER", "description": "Start Y coordinate."},
+                "x2": {"type": "INTEGER", "description": "End X coordinate."},
+                "y2": {"type": "INTEGER", "description": "End Y coordinate."},
+                "button": {"type": "STRING", "description": "'left' or 'right' (default: 'left')."},
+            },
+            "required": ["x1", "y1", "x2", "y2"],
+        },
+    },
+    "keyboard_type": {
+        "name": "keyboard_type",
+        "description": "Type a string of text into the active focused window or input field.",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "text": {"type": "STRING", "description": "The exact text string to type."},
+            },
+            "required": ["text"],
+        },
+    },
+    "keyboard_hotkey": {
+        "name": "keyboard_hotkey",
+        "description": "Press a key or key combination (e.g. 'ctrl+s', 'alt+f4', 'enter', 'tab', 'win+r', 'ctrl+c', 'ctrl+v').",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "hotkey": {"type": "STRING", "description": "Key combination (e.g. 'ctrl+s', 'enter', 'alt+tab', 'win+r')."},
+            },
+            "required": ["hotkey"],
+        },
+    },
+    "mouse_scroll": {
+        "name": "mouse_scroll",
+        "description": "Scroll the mouse wheel up or down by amount (positive for up, negative for down).",
+        "parameters": {
+            "type": "OBJECT",
+            "properties": {
+                "amount": {"type": "INTEGER", "description": "Number of scroll ticks (e.g., 3 for scroll up, -3 for scroll down)."},
+            },
+            "required": ["amount"],
+        },
+    },
 }
 
 
@@ -2337,6 +2638,35 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
         path = str(args.get("path", "main"))
         key = args.get("key")
         return delete_memory_item(path=path, key=str(key) if key is not None else None)
+    if name == "take_screenshot":
+        save_path = args.get("save_path")
+        return os_take_screenshot(save_path)
+    if name == "mouse_click":
+        x = args.get("x")
+        y = args.get("y")
+        button = str(args.get("button", "left"))
+        modifiers = str(args.get("modifiers", ""))
+        return os_mouse_click(int(x) if x is not None else None, int(y) if y is not None else None, button=button, modifiers=modifiers)
+    if name == "mouse_move":
+        x = int(args.get("x", 0))
+        y = int(args.get("y", 0))
+        return os_mouse_move(x, y)
+    if name == "mouse_drag":
+        x1 = int(args.get("x1", 0))
+        y1 = int(args.get("y1", 0))
+        x2 = int(args.get("x2", 0))
+        y2 = int(args.get("y2", 0))
+        button = str(args.get("button", "left"))
+        return os_mouse_drag(x1, y1, x2, y2, button=button)
+    if name == "keyboard_type":
+        text = str(args.get("text", ""))
+        return os_keyboard_type(text)
+    if name == "keyboard_hotkey":
+        hotkey = str(args.get("hotkey", ""))
+        return os_keyboard_hotkey(hotkey)
+    if name == "mouse_scroll":
+        amount = int(args.get("amount", 1))
+        return os_mouse_scroll(amount)
 
 
     if name == "replace_lines":
@@ -5359,6 +5689,8 @@ def main() -> int:
 
                 contents.append(content_obj)
                 responses: List[Dict[str, Any]] = []
+                extra_vision_parts: List[Dict[str, Any]] = []
+
                 for function_call in function_calls:
                     name = function_call.get("name", "")
                     call_args = function_call.get("args", {}) or {}
@@ -5372,13 +5704,30 @@ def main() -> int:
                             }
                         }
                     )
+
+                    # Automatically attach screenshot image to turn so Gemini instantly sees the screen
+                    if name == "take_screenshot":
+                        match = re.search(r"Screenshot captured:\s*([^\s(]+)", result)
+                        if match:
+                            sc_file = Path(match.group(1).strip())
+                            if sc_file.exists():
+                                _, inline_part = inspect_image_file(sc_file)
+                                if inline_part:
+                                    extra_vision_parts.append(inline_part)
+                    elif name == "inspect_image":
+                        fp_raw = call_args.get("filepath", "")
+                        if fp_raw:
+                            _, inline_part = inspect_image_file(resolve_path(str(fp_raw), cwd))
+                            if inline_part:
+                                extra_vision_parts.append(inline_part)
+
                     formatted_res = format_tool_result(result)
                     if result.lower().startswith("error") or "error:" in result.lower():
                         error(formatted_res)
                     else:
                         info(formatted_res)
 
-                contents.append({"role": "user", "parts": responses})
+                contents.append({"role": "user", "parts": responses + extra_vision_parts})
 
             warn(f"Reached the maximum tool-call loop depth ({tool_loop_limit}).")
         except KeyboardInterrupt:

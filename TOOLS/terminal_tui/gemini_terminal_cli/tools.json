@@ -150,5 +150,47 @@
     "category": "Control Flow",
     "rating": "Safe",
     "description": "Request another AI turn for multi-step work. The AI calls this when it needs more turns to complete a task. Returns a reason string. No side effects."
+  },
+  {
+    "name": "take_screenshot",
+    "category": "OS & GUI Automation",
+    "rating": "Best (Visual Perception)",
+    "description": "Capture a screenshot of the entire desktop or multi-monitor setup to inspect UI elements, windows, dialogs, and current visual state."
+  },
+  {
+    "name": "mouse_click",
+    "category": "OS & GUI Automation",
+    "rating": "Interactive (Direct OS Control)",
+    "description": "Click the mouse at target (x, y) coordinates or at current position. Supports left, right, middle, double click, and modifiers (ctrl, shift, alt, win)."
+  },
+  {
+    "name": "mouse_move",
+    "category": "OS & GUI Automation",
+    "rating": "Safe",
+    "description": "Move the mouse cursor directly to (x, y) coordinates on the screen without clicking."
+  },
+  {
+    "name": "mouse_drag",
+    "category": "OS & GUI Automation",
+    "rating": "Interactive (Drag & Drop)",
+    "description": "Click and drag from (x1, y1) to (x2, y2) with smooth interpolation."
+  },
+  {
+    "name": "keyboard_type",
+    "category": "OS & GUI Automation",
+    "rating": "Interactive (Unicode Input)",
+    "description": "Type a string of characters directly into the currently focused window or field using Windows SendInput."
+  },
+  {
+    "name": "keyboard_hotkey",
+    "category": "OS & GUI Automation",
+    "rating": "Interactive (Key Combos)",
+    "description": "Send keyboard shortcuts and key combinations such as ctrl+s, win+r, alt+f4, enter, tab, ctrl+c, ctrl+v."
+  },
+  {
+    "name": "mouse_scroll",
+    "category": "OS & GUI Automation",
+    "rating": "Safe",
+    "description": "Scroll the mouse wheel up (positive) or down (negative) by the given number of notches."
   }
 ]
