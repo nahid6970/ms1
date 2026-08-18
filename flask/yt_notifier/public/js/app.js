@@ -866,25 +866,24 @@ async function renderFeed() {
   const existingBanner = document.getElementById("playlistBanner");
   if (existingBanner) existingBanner.remove();
   if (playlistId && videos.length > 0) {
-    const plTitle = videos[0]?.sourcePlaylistTitle || playlistId;
+    // Resolve title: prefer stamped sourcePlaylistTitle, fall back to playlistMeta cache on channels
+    let plTitle = videos[0]?.sourcePlaylistTitle || "";
+    if (!plTitle) {
+      for (const ch of channels) {
+        const meta = (ch.playlistMeta || []).find((m) => m.id === playlistId);
+        if (meta) { plTitle = meta.title; break; }
+      }
+    }
+    if (!plTitle) plTitle = playlistId;
     const plChannel = videos[0]?.channelName || "";
     const banner = document.createElement("div");
     banner.id = "playlistBanner";
-    banner.className = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-4";
+    banner.className = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-3";
     banner.innerHTML = `
-      <div class="flex items-center justify-between gap-3 rounded-xl bg-gradient-to-r from-sky-600/20 via-indigo-600/10 to-transparent border border-sky-500/30 px-4 py-3 shadow-lg shadow-sky-900/20">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="flex-shrink-0 w-9 h-9 rounded-lg bg-sky-500/20 border border-sky-500/30 flex items-center justify-center">
-            <i class="fa-solid fa-list text-sky-400 text-sm"></i>
-          </div>
-          <div class="min-w-0">
-            <span class="text-sm font-bold text-white truncate block leading-tight">${esc(plTitle)}</span>
-            <span class="text-[11px] text-sky-400/80 font-medium">${esc(plChannel)} &middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
-          </div>
-        </div>
-        <a href="?" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-700 transition">
-          <i class="fa-solid fa-xmark text-xs text-red-400"></i> Clear
-        </a>
+      <div class="flex items-center gap-2.5 bg-gradient-to-r from-sky-600/15 via-indigo-600/8 to-transparent border border-sky-500/25 rounded-lg px-3 py-1.5 shadow shadow-sky-900/20">
+        <i class="fa-solid fa-list text-sky-400 text-xs flex-shrink-0"></i>
+        <span class="text-xs font-bold text-white truncate">${esc(plTitle)}</span>
+        <span class="text-[11px] text-sky-400/70 flex-shrink-0">${esc(plChannel)} &middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
       </div>`;
     const main = document.querySelector("main");
     const grid = document.getElementById("videoGrid");
