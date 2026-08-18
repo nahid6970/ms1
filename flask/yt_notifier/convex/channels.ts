@@ -102,6 +102,33 @@ export const savePlaylistMeta = mutation({
 });
 
 
+export const removePlaylistRule = mutation({
+  args: { channelId: v.string(), playlistId: v.string() },
+  handler: async (ctx, { channelId, playlistId }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel || !channel.rulesText) return;
+
+    // Remove any line in rulesText whose URL contains this playlistId
+    const lines = channel.rulesText.split("\n");
+    const filtered = lines.filter((line) => {
+      const trimmed = line.trim();
+      // Keep the line unless it's a playlist URL containing this playlistId
+      if (!trimmed.includes("youtube.com") && !trimmed.includes("youtu.be")) return true;
+      return !trimmed.includes(playlistId);
+    });
+    await ctx.db.patch(channel._id, { rulesText: filtered.join("\n") });
+
+    // Also remove from titleFilters if present (belt-and-suspenders)
+    if (channel.titleFilters?.length) {
+      const newFilters = channel.titleFilters.filter((f) => !f.includes(playlistId));
+      await ctx.db.patch(channel._id, { titleFilters: newFilters });
+    }
+  },
+});
+
 export const categories = query({
   args: {},
   handler: async (ctx) => {

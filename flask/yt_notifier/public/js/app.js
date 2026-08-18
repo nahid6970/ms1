@@ -620,14 +620,19 @@ function renderPlaylistsPanelHtml(data, activePlaylistId) {
             ? "?"
             : `?playlistId=${encodeURIComponent(pl.playlistId)}&playlistTitle=${encodeURIComponent(pl.title)}&category=all`;
           return `
-          <a href="${href}" onclick="closePopup()" class="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-800/50 ${isActive ? "bg-sky-950/40 border-l-2 border-sky-500" : ""}">
-            <i class="fa-solid fa-list-ul text-xs ${isActive ? "text-sky-400" : "text-slate-500"} flex-shrink-0"></i>
-            <span class="flex-1 text-sm ${isActive ? "text-sky-300 font-semibold" : "text-slate-200"} truncate">${esc(pl.title)}</span>
+          <div class="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-800/50 ${isActive ? "bg-sky-950/40 border-l-2 border-sky-500" : ""} group">
+            <a href="${href}" onclick="closePopup()" class="flex items-center gap-3 flex-1 min-w-0">
+              <i class="fa-solid fa-list-ul text-xs ${isActive ? "text-sky-400" : "text-slate-500"} flex-shrink-0"></i>
+              <span class="flex-1 text-sm ${isActive ? "text-sky-300 font-semibold" : "text-slate-200"} truncate">${esc(pl.title)}</span>
+            </a>
             <span class="flex-shrink-0 text-[10px] text-slate-500">${pl.total} video${pl.total === 1 ? "" : "s"}</span>
             ${pl.unseen > 0
               ? `<span class="flex-shrink-0 text-[11px] font-extrabold text-red-400 min-w-[1.5rem] text-right">${pl.unseen}</span>`
               : `<span class="flex-shrink-0 min-w-[1.5rem]"></span>`}
-          </a>`;
+            <button onclick="removePlaylistRule('${esc(channel.channelId)}', '${esc(pl.playlistId)}')" class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition text-slate-600 hover:text-rose-400 ml-1" title="Remove playlist from rules">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>`;
         }).join("")}
       </div>
     </div>
@@ -1251,6 +1256,22 @@ window.addPlaylistToChannelRules = async function addPlaylistToChannelRules(chan
     if (rulesBox) rulesBox.classList.remove("hidden");
     // Immediately open the Load modal so user can load videos without extra steps
     openLoadPlaylistModal(channelId, plUrl, plTitle, plCount);
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+window.removePlaylistRule = async function removePlaylistRule(channelId, playlistId) {
+  try {
+    await callConvex("mutation", "channels:removePlaylistRule", { channelId, playlistId });
+    flash("Playlist removed from rules.", "success");
+    // If currently viewing this playlist, navigate away
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.get("playlistId") === playlistId) {
+      history.replaceState(null, "", "?");
+    }
+    await renderPlaylistsPanel();
     if (PAGE === "feed") await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
