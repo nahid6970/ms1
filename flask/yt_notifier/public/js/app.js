@@ -965,7 +965,7 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
     const main = document.querySelector("main");
     if (main) main.insertBefore(bar, main.firstChild);
   }
-  bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900/95 border border-slate-800/80 rounded-2xl px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
+  bar.className = "sticky top-[var(--navbar-height,0px)] z-30 mb-4 flex items-center justify-between gap-3 bg-slate-900 border-b border-slate-800/80 px-4 backdrop-blur-md shadow-xl shadow-black/40 transition-all duration-200";
 
   const enabledChannels = (channels || []).filter((c) => !c.disabled);
   const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
