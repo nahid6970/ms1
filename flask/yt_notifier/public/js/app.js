@@ -599,7 +599,7 @@ function renderPlaylistsPanelHtml(data, activePlaylistId) {
           const isActive = pl.playlistId === activePlaylistId;
           const href = isActive
             ? "?"
-            : `?playlistId=${encodeURIComponent(pl.playlistId)}&category=all`;
+            : `?playlistId=${encodeURIComponent(pl.playlistId)}&playlistTitle=${encodeURIComponent(pl.title)}&category=all`;
           return `
           <a href="${href}" onclick="closePopup()" class="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-800/50 ${isActive ? "bg-sky-950/40 border-l-2 border-sky-500" : ""}">
             <i class="fa-solid fa-list-ul text-xs ${isActive ? "text-sky-400" : "text-slate-500"} flex-shrink-0"></i>
@@ -831,6 +831,7 @@ async function renderFeed() {
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
   const playlistId = urlParams.get("playlistId") || "";
+  const playlistTitleFromUrl = urlParams.get("playlistTitle") || "";
 
   const [allVideos, counts, categories, channels] = await Promise.all([
     callConvex("query", "videos:list", {
@@ -860,30 +861,33 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory, playlistId);
+  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory, playlistId, playlistTitleFromUrl);
 
   // Playlist header banner
   const existingBanner = document.getElementById("playlistBanner");
   if (existingBanner) existingBanner.remove();
   if (playlistId && videos.length > 0) {
-    // Resolve title: prefer stamped sourcePlaylistTitle, fall back to playlistMeta cache on channels
-    let plTitle = videos[0]?.sourcePlaylistTitle || "";
+    // Resolve title: URL param (set by panel) → stamped on video → playlistMeta cache → generic
+    let plTitle = playlistTitleFromUrl || videos[0]?.sourcePlaylistTitle || "";
     if (!plTitle) {
       for (const ch of channels) {
         const meta = (ch.playlistMeta || []).find((m) => m.id === playlistId);
         if (meta) { plTitle = meta.title; break; }
       }
     }
-    if (!plTitle) plTitle = playlistId;
+    // If title looks like a raw playlist ID or is missing, show a generic label
+    if (!plTitle || /^PL[A-Za-z0-9_-]{10,}$/.test(plTitle)) plTitle = "Playlist";
     const plChannel = videos[0]?.channelName || "";
     const banner = document.createElement("div");
     banner.id = "playlistBanner";
     banner.className = "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-3";
     banner.innerHTML = `
-      <div class="flex items-center gap-2.5 bg-gradient-to-r from-sky-600/15 via-indigo-600/8 to-transparent border border-sky-500/25 rounded-lg px-3 py-1.5 shadow shadow-sky-900/20">
+      <div class="flex items-center gap-2 bg-gradient-to-r from-sky-600/15 via-indigo-600/8 to-transparent border border-sky-500/25 rounded-lg px-3 py-1.5 shadow shadow-sky-900/20 min-w-0">
         <i class="fa-solid fa-list text-sky-400 text-xs flex-shrink-0"></i>
+        <span class="text-[11px] text-sky-400/70 flex-shrink-0 font-medium">${esc(plChannel)}</span>
+        <span class="text-slate-500 text-[11px] flex-shrink-0">/</span>
         <span class="text-xs font-bold text-white truncate">${esc(plTitle)}</span>
-        <span class="text-[11px] text-sky-400/70 flex-shrink-0">${esc(plChannel)} &middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
+        <span class="text-[11px] text-slate-500 flex-shrink-0">&middot; ${videos.length} video${videos.length === 1 ? "" : "s"}</span>
       </div>`;
     const main = document.querySelector("main");
     const grid = document.getElementById("videoGrid");
@@ -954,7 +958,7 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
     </div>`;
 }
 
-function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all", activePlaylistId = "") {
+function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all", activePlaylistId = "", activePlaylistTitle = "") {
   let bar = document.getElementById("channelAvatarsBar");
   if (!channels || !channels.length) {
     if (bar) bar.remove();
@@ -984,7 +988,7 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
   const folderParam = currentFolder ? `&folder=${encodeURIComponent(currentFolder)}` : "";
   const subParam = currentCategory === "shorts" && currentSubCategory ? `&subCategory=${currentSubCategory}` : "";
   const baseUrl = `?category=${currentCategory}${subParam}${folderParam}`;
-  const playlistParam = activePlaylistId ? `&playlistId=${encodeURIComponent(activePlaylistId)}` : "";
+  const playlistParam = activePlaylistId ? `&playlistId=${encodeURIComponent(activePlaylistId)}${activePlaylistTitle ? `&playlistTitle=${encodeURIComponent(activePlaylistTitle)}` : ""}` : "";
 
   const avatarsHtml = activeChannels.map((c) => {
     const isActive = activeChannelId === c.channelId;
