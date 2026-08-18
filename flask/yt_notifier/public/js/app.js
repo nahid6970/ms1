@@ -389,7 +389,7 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
               <option value="1000" ${limitVal === "1000" ? "selected" : ""}>1000 Limit</option>
               <option value="0" ${limitVal === "0" ? "selected" : ""}>All Limit</option>
             </select>
-            <span id="headerCardCount" class="px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/60 text-[11px] font-bold text-slate-300 shadow flex items-center" title="Videos showing on current page">0</span>
+            <span id="headerCardCount" class="inline-flex items-center px-2.5 py-1 rounded-full bg-white text-xs font-bold text-black shadow-md shadow-black/30 tracking-wide" title="Videos showing on current page">0</span>
           </div>
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
