@@ -366,7 +366,6 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
     { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
     { id: "watchlater", label: "Watch Later", icon: "fa-clock text-sky-400" },
     { id: "blocked", label: "Blocked Items", icon: "fa-ban text-rose-400" },
-    { id: "shorts", label: "Shorts", icon: "fa-mobile-screen-button text-amber-400" },
   ];
 
   const mainCount = typeof counts === "object" ? counts.main ?? 0 : counts ?? 0;
