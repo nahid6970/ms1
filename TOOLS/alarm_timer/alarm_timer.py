@@ -1358,8 +1358,9 @@ class TextCard(QFrame):
         # top row: label + edit + duplicate + delete
         top = QHBoxLayout()
         self._lbl = QLabel(self.label)
+        self._lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._lbl.setStyleSheet(
-            f"color: {CP_YELLOW}; font-weight: bold; font-size: 22pt;"
+            f"color: {CP_YELLOW}; font-weight: bold; font-size: 26pt;"
             " background: transparent; border: none;"
         )
         self._lbl.setWordWrap(True)
@@ -1400,13 +1401,14 @@ class TextCard(QFrame):
         del_btn.setToolTip("Delete")
         del_btn.clicked.connect(lambda: self.removed.emit(self.card_id))
 
-        top.addWidget(self._lbl, 1)
+        top.addStretch(1)
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
 
         # optional body text
         self._body_lbl = QLabel(self.body)
+        self._body_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._body_lbl.setWordWrap(True)
         self._body_lbl.setStyleSheet(
             f"color: {CP_TEXT}; font-size: 12pt; background: transparent; border: none;"
@@ -1422,6 +1424,7 @@ class TextCard(QFrame):
         )
 
         root.addLayout(top)
+        root.addWidget(self._lbl)
         root.addWidget(self._body_lbl)
         root.addWidget(badge)
 
