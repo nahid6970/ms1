@@ -1117,7 +1117,7 @@ body::before {
     width: min(1480px, 100%);
     margin: 0 auto;
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 26px;
     pointer-events: auto;
