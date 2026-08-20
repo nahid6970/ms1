@@ -1671,3 +1671,61 @@ body::before {
     #settingsModal .settings-panel-integrations .setting-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
     #settingsModal .setting-control-col { display: flex; align-items: stretch; flex-direction: column; }
 }
+
+/* Library navigation: square button tabs with a precise active underline. */
+.library-nav {
+    gap: 6px;
+}
+
+.nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 62px;
+    height: 34px;
+    box-sizing: border-box;
+    padding: 7px 12px;
+    color: #9aa8bb;
+    background: #182334;
+    border: 1px solid #2c3c52;
+    border-radius: 3px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #f0fdf8;
+    background: #223148;
+    border-color: #48607d;
+}
+
+.nav-link.active {
+    color: #ecfdf5;
+    background: #223148;
+    border-color: #48607d;
+    box-shadow: none;
+}
+
+.nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: #34d399;
+    border-radius: 0;
+}
+
+/* Modal heading accents should match the heading text, not an arbitrary short width. */
+.modal-content > .modal-title {
+    width: max-content;
+    max-width: 100%;
+}
+
+.modal-content > .modal-title::after {
+    width: 100%;
+}
