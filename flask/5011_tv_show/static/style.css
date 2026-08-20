@@ -1075,3 +1075,476 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 
 .btn-watched:hover { background: #1db954; color: white; }
 .btn-radarr:hover { background: #f2994a; color: black; }
+
+/* Library chrome refresh: keep the poster cards, simplify everything around them. */
+:root { color-scheme: dark; }
+
+html, body {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #111827;
+    color: #f5f7fb;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(circle at 50% -20%, rgba(52, 211, 153, 0.10), transparent 42%);
+}
+
+.sticky-controls-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px clamp(16px, 4vw, 48px);
+    background: rgba(17, 24, 39, 0.92);
+    border-bottom: 1px solid #273449;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    pointer-events: none;
+}
+
+.app-header-inner {
+    width: min(1480px, 100%);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 26px;
+    pointer-events: auto;
+}
+
+.library-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: max-content;
+    text-align: left;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    color: #0b1412;
+    background: #34d399;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.brand-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1;
+}
+
+.brand-kicker {
+    color: #91a0b5;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+}
+
+.brand-copy strong {
+    color: #f8fafc;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.library-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-link {
+    padding: 8px 12px;
+    border-radius: 8px;
+    color: #8e9bb0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #eafff7;
+    background: #1e293b;
+}
+
+.nav-link.active { box-shadow: inset 0 -2px 0 #34d399; }
+
+.top-center-controls {
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: none;
+}
+
+.top-center-controls > a[href="/"],
+.top-center-controls > a[href="/movies"] {
+    display: none;
+}
+
+.add-button {
+    width: 36px;
+    height: 36px;
+    box-sizing: border-box;
+    padding: 8px;
+    color: #b9c5d5;
+    background: #1b2637;
+    border: 1px solid #34445b;
+    border-radius: 9px;
+    box-shadow: none;
+}
+
+.add-button:hover {
+    color: #ecfdf5;
+    background: #26364a;
+    border-color: #4b637f;
+    transform: translateY(-1px);
+}
+
+.search-form {
+    margin: 0 4px 0 8px;
+}
+
+.search-wrapper { height: 36px; }
+
+.search-form input[type="text"] {
+    width: 190px;
+    height: 36px;
+    padding: 8px 34px 8px 12px;
+    color: #eef2f7;
+    background: #172234;
+    border: 1px solid #34445b;
+    border-radius: 9px;
+    font-size: 0.86rem;
+}
+
+.search-form input[type="text"]::placeholder { color: #8290a3; }
+
+.search-form input[type="text"]:focus {
+    width: 230px;
+    outline: none;
+    border-color: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+}
+
+.search-clear { color: #8e9bb0; }
+
+.sort-menu-container { height: 36px; }
+
+.sort-menu-dropdown {
+    top: calc(100% + 10px);
+    margin-top: 0;
+    background: #182335;
+    border: 1px solid #34445b;
+    border-radius: 10px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+}
+
+.sort-menu-item { color: #c3cfdd; }
+.sort-menu-item:hover { color: #f8fafc; background: #24334a; }
+
+.show-grid {
+    width: min(1480px, 100%);
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 32px clamp(16px, 4vw, 48px) 48px;
+}
+
+/* Flatter modal surfaces keep the card language as the visual focus. */
+.modal {
+    background: rgba(7, 12, 21, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    background: #182335;
+    border: 1px solid #34445b;
+    border-radius: 14px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.50);
+}
+
+.modal-content::before { display: none; }
+
+.modal-title {
+    color: #f8fafc;
+    text-shadow: none;
+}
+
+.modal-title::after {
+    background: #34d399;
+    box-shadow: none;
+}
+
+.close {
+    color: #a8b5c7;
+    background: #202e42;
+    border-color: #3a4b63;
+}
+
+.close:hover {
+    color: #ffffff;
+    background: #2c3d54;
+    box-shadow: none;
+    transform: none;
+}
+
+.modal-form label {
+    color: #aab7c8;
+}
+
+.modal-input,
+.modal-search,
+.modal-content input.modal-input,
+.modal-content select.modal-input,
+.modal-form input.modal-input,
+.modal-form select.modal-input {
+    background: #111b2a;
+    border-color: #34445b;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.modal-input:focus,
+.modal-search:focus {
+    background: #111b2a;
+    border-color: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+}
+
+.settings-section {
+    background: transparent !important;
+    border: 0;
+    border-bottom: 1px solid #2c3c52;
+    border-left: 0;
+    border-radius: 0;
+    padding: 12px 0 14px;
+    margin-bottom: 8px;
+    box-shadow: none !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.settings-section h3 {
+    color: #aab7c8 !important;
+    text-shadow: none;
+}
+
+.settings-footer {
+    border-top-color: #2c3c52;
+}
+
+.modal-btn {
+    border-color: #3b506b;
+    border-radius: 8px;
+    box-shadow: none !important;
+}
+
+.modal-btn-green { background: #1f9d68; }
+.modal-btn-blue { background: #2878b9; }
+.modal-btn-orange { background: #b7781f; }
+.modal-btn-red { background: #b84046; }
+.modal-btn-dark { background: #26364a; }
+
+@media (max-width: 1040px) {
+    .app-header-inner {
+        grid-template-columns: auto 1fr;
+        gap: 12px 20px;
+    }
+
+    .top-center-controls {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+}
+
+@media (max-width: 600px) {
+    .sticky-controls-wrapper { padding: 12px 14px; }
+    .library-nav { justify-content: flex-end; }
+    .search-form { order: -1; flex: 1 1 170px; margin-left: 0; }
+    .search-form input[type="text"],
+    .search-form input[type="text"]:focus { width: 100%; }
+    .show-grid { padding-top: 22px; }
+}
+
+/* Missing episodes: a quiet, utility-style list instead of a glossy dashboard modal. */
+#scanMissingModal {
+    background: rgba(0, 0, 0, 0.76);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+#scanMissingModal .missing-modal-content {
+    width: min(780px, calc(100% - 32px));
+    max-width: none;
+    margin: 5vh auto;
+    padding: 22px;
+    background: #1c1c1c;
+    border: 1px solid #424242;
+    border-radius: 6px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+    animation: none;
+}
+
+#scanMissingModal .modal-header {
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 14px;
+    padding: 0 0 16px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+#scanMissingModal .modal-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    color: #f2f2f2;
+    font-size: 1.18rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-shadow: none;
+}
+
+#scanMissingModal .modal-title::after { display: none; }
+
+#scanMissingModal .close {
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    color: #b9b9b9;
+    background: transparent;
+    border-color: #4a4a4a;
+}
+
+#scanMissingModal .close:hover {
+    color: #ffffff;
+    background: #303030;
+    border-color: #666666;
+}
+
+#scanMissingModal .modal-search {
+    flex: 0 1 300px;
+    width: 300px;
+    height: 38px;
+    padding: 8px 11px;
+    background: #121212;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    color: #ededed;
+    box-shadow: none;
+}
+
+#scanMissingModal .modal-search:focus {
+    background: #121212;
+    border-color: #8a8a8a;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+#scanMissingModal .missing-episodes-list {
+    max-height: 500px;
+    padding: 1px 8px 1px 1px;
+    scrollbar-color: #656565 #242424;
+    scrollbar-width: thin;
+}
+
+#scanMissingModal .missing-episodes-list::-webkit-scrollbar { width: 8px; }
+#scanMissingModal .missing-episodes-list::-webkit-scrollbar-track { background: #242424; border-radius: 0; }
+#scanMissingModal .missing-episodes-list::-webkit-scrollbar-thumb { background: #656565; border: 2px solid #242424; border-radius: 4px; }
+
+#scanMissingModal .missing-episode-item {
+    min-height: 58px;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+    padding: 10px 12px;
+    gap: 14px;
+    background: #252525;
+    border-left: 3px solid #42b866;
+    border-radius: 3px;
+}
+
+#scanMissingModal .missing-episode-item:hover { background: #2b2b2b; }
+
+#scanMissingModal .missing-show-title {
+    color: #63d17e;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+#scanMissingModal .missing-episode-title {
+    color: #e2e2e2;
+    font-size: 0.9rem;
+}
+
+#scanMissingModal .missing-episode-actions {
+    gap: 6px;
+}
+
+#scanMissingModal .missing-episode-actions button {
+    min-height: 32px;
+    padding: 7px 10px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    box-shadow: none;
+}
+
+#scanMissingModal .missing-episode-actions .btn-sync {
+    background: #3b4652 !important;
+    border-color: #5c6875;
+    color: #f5f5f5 !important;
+}
+
+#scanMissingModal .missing-episode-actions .btn-sync:hover {
+    background: #4c5966 !important;
+}
+
+#scanMissingModal .missing-episode-actions .btn-check {
+    background: #347d42;
+    border-color: #4a9c59;
+}
+
+#scanMissingModal .missing-episode-actions .btn-check:hover { background: #429b52; }
+
+#scanMissingModal .missing-episode-actions .btn-delete {
+    background: #3a3a3a;
+    border-color: #555555;
+    color: #e4e4e4;
+}
+
+#scanMissingModal .missing-episode-actions .btn-delete:hover {
+    background: #4b4b4b;
+    border-color: #6a6a6a;
+}
+
+@media (max-width: 680px) {
+    #scanMissingModal .modal-header { align-items: stretch; flex-direction: column; gap: 10px; }
+    #scanMissingModal .modal-search { flex-basis: auto; width: 100%; }
+    #scanMissingModal .missing-episode-item { align-items: stretch; flex-direction: column; }
+    #scanMissingModal .missing-episode-actions { justify-content: flex-end; }
+}
