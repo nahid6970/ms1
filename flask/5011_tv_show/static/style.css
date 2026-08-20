@@ -1116,10 +1116,11 @@ body::before {
 .app-header-inner {
     width: min(1480px, 100%);
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 26px;
+    gap: 8px;
     pointer-events: auto;
 }
 
@@ -1188,7 +1189,8 @@ body::before {
 .nav-link.active { box-shadow: inset 0 -2px 0 #34d399; }
 
 .top-center-controls {
-    justify-content: flex-end;
+    flex: 0 1 auto;
+    justify-content: center;
     gap: 8px;
     padding: 0;
     background: transparent;
