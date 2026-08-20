@@ -1359,7 +1359,7 @@ class TextCard(QFrame):
         top = QHBoxLayout()
         self._lbl = QLabel(self.label)
         self._lbl.setStyleSheet(
-            f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt;"
+            f"color: {CP_YELLOW}; font-weight: bold; font-size: 22pt;"
             " background: transparent; border: none;"
         )
         self._lbl.setWordWrap(True)
@@ -1409,7 +1409,7 @@ class TextCard(QFrame):
         self._body_lbl = QLabel(self.body)
         self._body_lbl.setWordWrap(True)
         self._body_lbl.setStyleSheet(
-            f"color: {CP_TEXT}; font-size: 9pt; background: transparent; border: none;"
+            f"color: {CP_TEXT}; font-size: 12pt; background: transparent; border: none;"
         )
         self._body_lbl.setVisible(bool(self.body))
 
