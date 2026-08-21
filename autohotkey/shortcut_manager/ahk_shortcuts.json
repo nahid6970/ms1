@@ -907,7 +907,7 @@
             "window_title_enabled": false,
             "process_name_enabled": false,
             "window_class_enabled": false,
-            "enabled": false,
+            "enabled": true,
             "favourite": true
         }
     ],

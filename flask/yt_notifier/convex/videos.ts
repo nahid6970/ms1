@@ -3,7 +3,7 @@ import { internalMutation, internalQuery, mutation, query } from "./_generated/s
 
 export const list = query({
   args: {
-    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts"), v.literal("watchlater"), v.literal("blocked")),
+    category: v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("shorts"), v.literal("watchlater"), v.literal("long"), v.literal("blocked")),
     subCategory: v.optional(v.union(v.literal("all"), v.literal("unseen"), v.literal("seen"), v.literal("favorites"), v.literal("watchlater"), v.literal("blocked"))),
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
@@ -81,15 +81,18 @@ export const list = query({
       q = q.filter((f) => f.eq(f.field("isFavorite"), true));
     } else if (effectiveCategory === "watchlater") {
       q = q.filter((f) => f.eq(f.field("isWatchLater"), true));
+    } else if (effectiveCategory === "long") {
+      q = q.filter((f) => f.eq(f.field("isLong"), true));
     }
 
     const isShortsView = category === "shorts";
     const isBlockedView = effectiveCategory === "blocked";
     const isWatchLaterView = effectiveCategory === "watchlater";
+    const isLongView = effectiveCategory === "long";
 
     // When filtering by playlist, fetch all videos so none are missed regardless of date.
     // For blocked/watchlater, also fetch all so count matches what's shown.
-    const takeAmount = (playlistId || isBlockedView || isWatchLaterView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
+    const takeAmount = (playlistId || isBlockedView || isWatchLaterView || isLongView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
     const videos = await q.take(takeAmount);
 
     const filtered = videos
@@ -103,17 +106,20 @@ export const list = query({
         if (isWatchLaterView) {
           return Boolean(video.isWatchLater);
         }
+        if (isLongView) {
+          return Boolean(video.isLong);
+        }
         // A video passes if it comes from an allowed playlist OR its title matches allow-rules.
         // The two systems are independent OR conditions — having both means either is enough.
         const fromAllowedPlaylist = passesPlaylistFilter(video, rulesText, fallbackFilters);
         const titleAllowed = titleMatchesRules(video.title, rulesText, fallbackFilters);
-        return !video.isWatchLater && (fromAllowedPlaylist || titleAllowed);
+        return !video.isWatchLater && !video.isLong && (fromAllowedPlaylist || titleAllowed);
       })
       .filter((video) => {
         // Shorts view: show only shorts.
-        // hideShorts only applies to main feeds (all/unseen/seen/favorites) — NOT blocked/watchlater/shorts.
+        // hideShorts only applies to main feeds (all/unseen/seen/favorites) — NOT blocked/watchlater/long/shorts.
         if (isShortsView) return isShortVideo(video);
-        if (isBlockedView || isWatchLaterView) return true;
+        if (isBlockedView || isWatchLaterView || isLongView) return true;
         return !hideShorts || !isShortVideo(video);
       })
       .filter((video) => !hidePrivate || !isPrivateVideo(video));
@@ -132,7 +138,7 @@ export const list = query({
       return b.published.localeCompare(a.published);
     });
 
-    const finalVideos = (feedLimit === 0 || isBlockedView || isWatchLaterView) ? filtered : filtered.slice(0, feedLimit);
+    const finalVideos = (feedLimit === 0 || isBlockedView || isWatchLaterView || isLongView) ? filtered : filtered.slice(0, feedLimit);
 
     // Apply playlistId filter after feed limit (playlist view shows all matching videos)
     const outputVideos = playlistId
@@ -149,6 +155,7 @@ export const list = query({
       isNew: video.isNew,
       isFavorite: video.isFavorite ?? false,
       isWatchLater: video.isWatchLater ?? false,
+      isLong: video.isLong ?? false,
       isShort: isShortVideo(video),
       isPlaylist: matchesPlaylistRule(video.title, rulesById.get(video.channelId)),
       channelId: video.channelId,
@@ -176,6 +183,15 @@ export const toggleWatchLater = mutation({
     const video = await ctx.db.get(id);
     if (!video) return;
     await ctx.db.patch(id, { isWatchLater: !(video.isWatchLater ?? false) });
+  },
+});
+
+export const toggleLong = mutation({
+  args: { id: v.id("videos") },
+  handler: async (ctx, { id }) => {
+    const video = await ctx.db.get(id);
+    if (!video) return;
+    await ctx.db.patch(id, { isLong: !(video.isLong ?? false) });
   },
 });
 
@@ -238,7 +254,7 @@ export const unreadCount = query({
 
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))
-      .filter((video) => !video.isWatchLater)
+      .filter((video) => !video.isWatchLater && !video.isLong)
       .filter((video) => {
         const rulesText = rulesById.get(video.channelId);
         const fallbackFilters = filtersById.get(video.channelId) ?? [];
@@ -314,15 +330,19 @@ export const counts = query({
       });
 
     const main = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)) && (!hidePrivate || !isPrivateVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     const shorts = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video) && (!hidePrivate || !isPrivateVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     const watchLater = validVideos.filter(
       (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hidePrivate || !isPrivateVideo(video)),
+    ).length;
+
+    const longVideos = channelVideos.filter(
+      (video) => video.isLong && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     // blocked = any channel video that fails either playlist filter or title rules
@@ -330,7 +350,7 @@ export const counts = query({
       (video) => isTitleBlocked(video.title, video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
     ).length;
 
-    return { main, shorts, watchLater, blocked };
+    return { main, shorts, watchLater, longVideos, blocked };
   },
 });
 
@@ -677,7 +697,7 @@ export const listPlaylists = query({
           playlistId: plId,
           title,
           total: plVideos.length,
-          unseen: plVideos.filter((v) => v.isNew && !v.isWatchLater).length,
+          unseen: plVideos.filter((v) => v.isNew && !v.isWatchLater && !v.isLong).length,
         };
       }).filter((pl) => pl.total > 0);
 

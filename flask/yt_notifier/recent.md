@@ -56,8 +56,22 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 - **Nav badges** — always global counts, never scoped to active `playlistId`.
 - **Playlist banner** — compact pill. Title from `?playlistTitle=` URL param (set by panel nav) first, then fallbacks.
 - **Sort** — `?sortBy=date-desc|date-asc|title-asc|title-desc`. Client-side. Default `date-desc`.
-- **Nav button order** — YouTube → Shorts → Watch Later → Playlists → Blocked → Filter → Channels → Stats → Settings → Refresh.
+- **Nav button order** — YouTube → Shorts → Watch Later → Long Videos → Playlists → Blocked → Filter → Channels → Stats → Settings → Refresh.
 - **"+ Rule" button** — adds playlist URL to channel rules AND immediately opens the Load modal. No scrolling needed.
 
-## 5. Pending Task
+## 5. Long Videos Feed (2026-08-21)
+
+| File | What changed |
+|---|---|
+| `convex/schema.ts` | Added optional `isLong` flag to videos. |
+| `convex/videos.ts` | Added `long` category, `toggleLong` mutation, uncapped Long Videos listing/count, and excludes selected long videos from ordinary feeds. |
+| `public/js/app.js` | Added Long Videos nav item immediately after Watch Later, filter/settings entries, long-video count badge, and hover hourglass toggle on cards. |
+
+Long Videos behaves like Watch Later: selecting a video moves it out of ordinary feeds and into the uncapped dedicated feed. Videos may be in both collections.
+
+## 5. Key Behavioral Notes Addendum
+
+- **Long Videos** — manually selected with the hourglass hover button; uncapped, hidden from ordinary feeds, and independent from Watch Later.
+
+## 6. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.

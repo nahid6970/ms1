@@ -29,6 +29,7 @@ export default defineSchema({
     isNew: v.boolean(),
     isFavorite: v.optional(v.boolean()),
     isWatchLater: v.optional(v.boolean()),
+    isLong: v.optional(v.boolean()),
     isShort: v.optional(v.boolean()),
     sourcePlaylistId: v.optional(v.string()), // Playlist ID if loaded from a specific playlist
     sourcePlaylistTitle: v.optional(v.string()), // Playlist title for display

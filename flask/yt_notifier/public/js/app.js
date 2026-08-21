@@ -282,6 +282,7 @@ const POPUP_PAGES = {
             <option value="seen">Seen Videos</option>
             <option value="favorites">Saved Videos</option>
             <option value="watchlater">Watch Later Videos</option>
+            <option value="long">Long Videos</option>
             <option value="blocked">Blocked Items Feed</option>
             <option value="shorts">Shorts Feed</option>
           </select>
@@ -343,13 +344,13 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "", sortBy = "date-desc" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "", sortBy = "date-desc" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
   const isShorts = category === "shorts";
   const isPlaylistActive = Boolean(playlistId);
-  const isMainActive = PAGE === "feed" && !isPlaylistActive && category !== "shorts" && category !== "watchlater" && category !== "blocked";
+  const isMainActive = PAGE === "feed" && !isPlaylistActive && category !== "shorts" && category !== "watchlater" && category !== "long" && category !== "blocked";
   const activeFilterId = isShorts ? subCategory : category;
 
   const filterItems = isShorts ? [
@@ -365,12 +366,14 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
     { id: "seen", label: "Seen", icon: "fa-eye" },
     { id: "favorites", label: "Saved", icon: "fa-star text-amber-400" },
     { id: "watchlater", label: "Watch Later", icon: "fa-clock text-sky-400" },
+    { id: "long", label: "Long Videos", icon: "fa-hourglass text-violet-400" },
     { id: "blocked", label: "Blocked Items", icon: "fa-ban text-rose-400" },
   ];
 
   const mainCount = typeof counts === "object" ? counts.main ?? 0 : counts ?? 0;
   const shortsCount = typeof counts === "object" ? counts.shorts ?? 0 : 0;
   const watchLaterCount = typeof counts === "object" ? counts.watchLater ?? 0 : 0;
+  const longVideosCount = typeof counts === "object" ? counts.longVideos ?? 0 : 0;
   const blockedCount = typeof counts === "object" ? counts.blocked ?? 0 : 0;
   const limitVal = feedLimit != null ? String(feedLimit) : "50";
 
@@ -405,6 +408,10 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, blocked: 0 },
           <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${watchLaterCount} saved)" aria-label="Watch Later Feed (${watchLaterCount} saved)">
             <i class="fa-solid fa-clock"></i>
             ${watchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${watchLaterCount}</span>` : ""}
+          </a>
+          <a href="index.html?category=long" class="nav-link ${category === "long" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "long" ? "bg-slate-800 text-violet-400" : "text-slate-300"}" title="Long Videos Feed (${longVideosCount} saved)" aria-label="Long Videos Feed (${longVideosCount} saved)">
+            <i class="fa-solid fa-hourglass"></i>
+            ${longVideosCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-violet-400 leading-none tracking-tight">${longVideosCount}</span>` : ""}
           </a>
           <button type="button" onclick="openPopup('playlists')" class="nav-link relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isPlaylistActive ? "bg-slate-800 text-sky-400 is-active" : "text-slate-300"}" title="Playlists" aria-label="Playlists">
             <i class="fa-solid fa-list"></i>
@@ -712,6 +719,7 @@ function videoCard(video, categories = []) {
   const isNew = video.isNew;
   const isFavorite = Boolean(video.isFavorite);
   const isWatchLater = Boolean(video.isWatchLater);
+  const isLong = Boolean(video.isLong);
   const isPlaylist = Boolean(video.isPlaylist);
   const currentCat = video.channelCategory || "";
   const cardTone = isNew
@@ -745,6 +753,9 @@ function videoCard(video, categories = []) {
       <div class="absolute right-3 top-3 z-10 flex items-center gap-2">
         <button onclick="toggleWatchLater('${esc(video._id)}')" class="${isWatchLater ? "inline-flex opacity-100 text-sky-400 border border-sky-500/50 bg-sky-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isWatchLater ? "Remove from Watch Later" : "Add to Watch Later"}">
           <i class="${isWatchLater ? "fa-solid" : "fa-regular"} fa-clock text-sm"></i>
+        </button>
+        <button onclick="toggleLong('${esc(video._id)}')" class="${isLong ? "inline-flex opacity-100 text-violet-400 border border-violet-500/50 bg-violet-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-violet-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isLong ? "Remove from Long Videos" : "Add to Long Videos"}">
+          <i class="fa-solid fa-hourglass text-sm"></i>
         </button>
         <button onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
@@ -807,6 +818,15 @@ window.toggleFavorite = async function toggleFavorite(id) {
 window.toggleWatchLater = async function toggleWatchLater(id) {
   try {
     await callConvex("mutation", "videos:toggleWatchLater", { id });
+    await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+window.toggleLong = async function toggleLong(id) {
+  try {
+    await callConvex("mutation", "videos:toggleLong", { id });
     await renderFeed();
   } catch (err) {
     flash(err.message, "danger");
@@ -944,7 +964,7 @@ async function renderFeed() {
     grid.innerHTML = `
     <div class="col-span-full py-20 text-center text-slate-600">
       <i class="fa-solid fa-video-slash text-5xl mb-4 opacity-20"></i>
-      <p class="text-lg">No videos found. ${playlistId ? "No videos loaded for this playlist yet — open Channels and use Load to fetch them." : urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
+      <p class="text-lg">No videos found. ${playlistId ? "No videos loaded for this playlist yet — open Channels and use Load to fetch them." : urlCategory === "favorites" ? "Star videos to save them for later!" : urlCategory === "watchlater" ? "Click the clock icon on any video card to add it to Watch Later!" : urlCategory === "long" ? "Hover a video and click the hourglass icon to add it here." : urlCategory === "blocked" ? "No blocked videos in your database matching your Block-Rules." : urlCategory === "shorts" ? "No Shorts videos found in this feed." : "Add channels or adjust filters to see videos."}</p>
     </div>`;
   } else {
     grid.innerHTML = sortedVideos.map((v) => videoCard(v, categories)).join("");
