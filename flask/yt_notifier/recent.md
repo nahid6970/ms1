@@ -73,6 +73,7 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 
 - **Long Videos** — manually selected with the hourglass hover button; uncapped, hidden from ordinary feeds, and independent from Watch Later.
 - **Mobile navbar** — feed controls and navigation/action icons use separate centered rows on narrow screens; desktop alignment is unchanged.
+- **Folder Only channels** — channel cards have a toggle that requires an assigned folder; enabled channels are hidden from All/other feeds and unread counts until their assigned folder is selected.
 
 ## 6. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.

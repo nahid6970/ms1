@@ -22,6 +22,7 @@ export const list = query({
         titleFilters: channel.titleFilters ?? [],
         rulesText: channel.rulesText ?? "",
         category: channel.category ?? "",
+        folderOnly: channel.folderOnly ?? false,
         lastUpload: latestVideo?.published ?? null,
       });
     }
@@ -41,7 +42,30 @@ export const updateCategory = mutation({
       .first();
     if (!channel) return;
     const cleanCategory = category?.trim() ?? "";
-    await ctx.db.patch(channel._id, { category: cleanCategory });
+    await ctx.db.patch(channel._id, {
+      category: cleanCategory,
+      ...(cleanCategory ? {} : { folderOnly: false }),
+    });
+  },
+});
+
+export const toggleFolderOnly = mutation({
+  args: { channelId: v.string() },
+  handler: async (ctx, { channelId }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+
+    const category = channel.category?.trim() ?? "";
+    const folderOnly = !(channel.folderOnly ?? false);
+    if (folderOnly && !category) {
+      throw new ConvexError("Assign a folder before enabling Folder Only.");
+    }
+
+    await ctx.db.patch(channel._id, { folderOnly });
+    return { folderOnly };
   },
 });
 

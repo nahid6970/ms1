@@ -46,6 +46,10 @@ export const list = query({
         : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
       : enabledChannels;
 
+    if (!targetFolder) {
+      filteredChannels = filteredChannels.filter((c) => !c.folderOnly);
+    }
+
     if (channelId) {
       filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);
     }
@@ -233,6 +237,10 @@ export const unreadCount = query({
           )
       : enabledChannels;
 
+    if (!targetFolder) {
+      filteredChannels = filteredChannels.filter((c) => !c.folderOnly);
+    }
+
     if (channelId) {
       filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);
     }
@@ -298,6 +306,10 @@ export const counts = query({
             (c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase(),
           )
       : enabledChannels;
+
+    if (!targetFolder) {
+      filteredChannels = filteredChannels.filter((c) => !c.folderOnly);
+    }
 
     if (channelId) {
       filteredChannels = filteredChannels.filter((c) => c.channelId === channelId);

@@ -1116,6 +1116,7 @@ function channelRow(channel, categories = []) {
   const ruleCount = parseRulesCount(rulesText, filters);
   const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n:Block-Rules:\n\n:Playlists:` : DEFAULT_RULES_TEMPLATE);
   const category = channel.category ?? "";
+  const folderOnly = Boolean(channel.folderOnly);
 
   const optionsHtml = categories.map((cat) => `
     <option value="${esc(cat)}" ${cat.toLowerCase() === category.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>
@@ -1135,6 +1136,7 @@ function channelRow(channel, categories = []) {
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
             </a>
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
+            ${folderOnly ? `<span class="rounded bg-amber-950/80 border border-amber-800/60 px-2 py-0.5 text-[10px] font-bold text-amber-300 shadow"><i class="fa-solid fa-folder-tree text-[9px] mr-1"></i>Folder Only</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
             ${ruleCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${ruleCount} Rule${ruleCount === 1 ? "" : "s"}</span>` : ""}
@@ -1148,6 +1150,9 @@ function channelRow(channel, categories = []) {
         </button>
         <button onclick="toggleChannelFolderBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${category ? "text-red-400 hover:bg-red-950/40" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="${category ? "Folder: " + esc(category) : "Assign Folder/Category"}" aria-label="Assign Folder">
           <i class="fa-solid fa-folder-plus"></i>
+        </button>
+        <button onclick="toggleChannelFolderOnly('${esc(channel.channelId)}')" ${!category ? "disabled" : ""} class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${!category ? "text-slate-700 cursor-not-allowed" : folderOnly ? "text-amber-400 hover:bg-amber-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-amber-300"}" title="${folderOnly ? "Show this channel in all feeds" : category ? "Only show videos in the " + esc(category) + " folder" : "Assign a folder first"}" aria-label="${folderOnly ? "Disable Folder Only" : "Enable Folder Only"}">
+          <i class="fa-solid ${folderOnly ? "fa-toggle-on" : "fa-toggle-off"} text-lg"></i>
         </button>
         <button onclick="toggleChannelDisabled('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${disabled ? "text-slate-500 hover:bg-slate-800 hover:text-white" : "text-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-300"}" title="${disabled ? "Enable channel" : "Disable channel"}" aria-label="${disabled ? "Enable channel" : "Disable channel"}">
           <i class="fa-solid ${disabled ? "fa-toggle-off" : "fa-toggle-on"} text-lg"></i>
@@ -1202,6 +1207,17 @@ window.applyFolderDropdownSelection = function applyFolderDropdownSelection(sele
 window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
   const form = document.getElementById(`folder-${channelId}`);
   if (form) form.classList.toggle("hidden");
+};
+
+window.toggleChannelFolderOnly = async function toggleChannelFolderOnly(channelId) {
+  try {
+    const result = await callConvex("mutation", "channels:toggleFolderOnly", { channelId });
+    flash(result?.folderOnly ? "Channel is now limited to its assigned folder." : "Channel is visible in all feeds again.", "success");
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
 };
 
 window.toggleChannelRuleBox = function toggleChannelRuleBox(channelId) {
