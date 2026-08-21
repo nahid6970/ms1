@@ -382,6 +382,8 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
   const displayLongVideosCount = hasCurrentCount && category === "long" ? currentCount : longVideosCount;
   const displayBlockedCount = hasCurrentCount && category === "blocked" ? currentCount : blockedCount;
   const limitVal = feedLimit != null ? String(feedLimit) : "50";
+  const folderSuffix = folder ? `&folder=${encodeURIComponent(folder)}` : "";
+  const folderQuery = folder ? `?folder=${encodeURIComponent(folder)}` : "";
 
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
@@ -403,19 +405,19 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
         <div class="flex w-full min-w-0 flex-wrap items-center justify-center gap-1.5 pb-0.5 sm:w-auto sm:flex-nowrap sm:justify-end sm:gap-3 sm:pb-0">
-          <a href="index.html" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})" aria-label="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})">
+          <a href="index.html${folderQuery}" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})" aria-label="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})">
             <i class="fa-brands fa-youtube text-lg"></i>
             ${displayMainCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${displayMainCount}</span>` : ""}
           </a>
-          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})" aria-label="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})">
+          <a href="index.html?category=shorts${folderSuffix}" class="nav-link ${category === "shorts" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})" aria-label="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})">
             <i class="fa-solid fa-mobile-screen-button"></i>
             ${displayShortsCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-amber-400 leading-none tracking-tight">${displayShortsCount}</span>` : ""}
           </a>
-          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})" aria-label="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})">
+          <a href="index.html?category=watchlater${folderSuffix}" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})" aria-label="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})">
             <i class="fa-solid fa-clock"></i>
             ${displayWatchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${displayWatchLaterCount}</span>` : ""}
           </a>
-          <a href="index.html?category=long" class="nav-link ${category === "long" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "long" ? "bg-slate-800 text-violet-400" : "text-slate-300"}" title="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})" aria-label="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})">
+          <a href="index.html?category=long${folderSuffix}" class="nav-link ${category === "long" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "long" ? "bg-slate-800 text-violet-400" : "text-slate-300"}" title="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})" aria-label="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})">
             <i class="fa-solid fa-hourglass"></i>
             ${displayLongVideosCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-violet-400 leading-none tracking-tight">${displayLongVideosCount}</span>` : ""}
           </a>
@@ -423,7 +425,7 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
             <i class="fa-solid fa-list"></i>
             ${isPlaylistActive ? `<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400"></span>` : ""}
           </button>
-          <a href="index.html?category=blocked" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})" aria-label="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})">
+          <a href="index.html?category=blocked${folderSuffix}" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})" aria-label="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})">
             <i class="fa-solid fa-ban text-rose-400"></i>
             ${displayBlockedCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-rose-400 leading-none tracking-tight">${displayBlockedCount}</span>` : ""}
           </a>

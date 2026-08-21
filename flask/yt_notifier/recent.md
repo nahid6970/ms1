@@ -77,6 +77,7 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Feed counts** — the active feed’s navbar/header count uses the total matching videos before the page limit, so it remains stable when switching between a numeric limit and All Limit; inactive badges retain their unseen/saved indicators.
 - **Channel feed loading** — channel-scoped list queries fetch the full channel set before applying the feed limit, so channel card counts are not based on the global page slice.
 - **Folder feed loading** — folder-scoped list queries also fetch the full folder set before applying the feed limit, so a 50-limit folder feed can fill all 50 cards.
+- **Folder navigation** — switching between Main, Shorts, Watch Later, Long Videos, and Blocked preserves the active folder filter.
 
 ## 7. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
