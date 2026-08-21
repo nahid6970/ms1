@@ -39,6 +39,7 @@ export const list = query({
     
     const targetFolder = folder?.trim();
     const isUncategorized = targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+    const isMainFeed = !playlistId && category !== "shorts" && category !== "watchlater" && category !== "long" && category !== "blocked";
 
     let filteredChannels = targetFolder
       ? isUncategorized
@@ -46,7 +47,7 @@ export const list = query({
         : enabledChannels.filter((c) => (c.category ?? "").trim().toLowerCase() === targetFolder.toLowerCase())
       : enabledChannels;
 
-    if (!targetFolder) {
+    if (!targetFolder && isMainFeed) {
       filteredChannels = filteredChannels.filter((c) => !c.folderOnly);
     }
 
@@ -307,6 +308,7 @@ export const counts = query({
     const targetFolder = folder?.trim();
     const isUncategorized =
       targetFolder?.toLowerCase() === "n/a" || targetFolder?.toLowerCase() === "uncategorized";
+    const isMainFeed = !playlistId && category !== "shorts" && category !== "watchlater" && category !== "long" && category !== "blocked";
 
     let filteredChannels = targetFolder
       ? isUncategorized
@@ -316,7 +318,7 @@ export const counts = query({
           )
       : enabledChannels;
 
-    if (!targetFolder) {
+    if (!targetFolder && isMainFeed) {
       filteredChannels = filteredChannels.filter((c) => !c.folderOnly);
     }
 
@@ -326,6 +328,10 @@ export const counts = query({
 
     const enabledChannelIds = new Set(
       filteredChannels.map((channel) => channel.channelId),
+    );
+    const mainChannelIds = new Set(
+      (targetFolder ? filteredChannels : filteredChannels.filter((channel) => !channel.folderOnly))
+        .map((channel) => channel.channelId),
     );
     const filtersById = new Map(
       filteredChannels.map((channel) => [channel.channelId, channel.titleFilters ?? []]),
@@ -340,6 +346,9 @@ export const counts = query({
     const channelVideos = allVideos
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) => !playlistId || video.sourcePlaylistId === playlistId);
+    const mainChannelVideos = allVideos
+      .filter((video) => mainChannelIds.has(video.channelId))
+      .filter((video) => !playlistId || video.sourcePlaylistId === playlistId);
 
     // Ordinary feeds use playlist OR title rules. Curated feeds bypass those rules.
     const ordinaryVideos = channelVideos
@@ -350,8 +359,16 @@ export const counts = query({
           titleMatchesRules(video.title, rulesText, fallbackFilters);
       })
       .filter((video) => !hidePrivate || !isPrivateVideo(video));
+    const ordinaryMainVideos = mainChannelVideos
+      .filter((video) => {
+        const rulesText = rulesById.get(video.channelId);
+        const fallbackFilters = filtersById.get(video.channelId) ?? [];
+        return passesPlaylistFilter(video, rulesText, fallbackFilters) ||
+          titleMatchesRules(video.title, rulesText, fallbackFilters);
+      })
+      .filter((video) => !hidePrivate || !isPrivateVideo(video));
 
-    const main = ordinaryVideos.filter(
+    const main = ordinaryMainVideos.filter(
       (video) => video.isNew && !video.isWatchLater && !video.isLong && (!hideShorts || !isShortVideo(video)),
     ).length;
 

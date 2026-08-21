@@ -53,7 +53,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 - **`hidePrivate`** — filters out `"Private video"` / `"Deleted video"` from all feeds and counts.
 - **Blocked Items** — no feedLimit cap. `take(10000)`, no slice. Count in nav badge always matches.
 - **Watch Later** — same, no feedLimit cap.
-- **Nav badges** — always global counts, never scoped to active `playlistId`.
+- **Nav badges** — the active feed badge/header shows the total matching videos before the page limit, scoped to the active folder, channel, and category; inactive badges retain unseen/saved indicators.
 - **Playlist banner** — compact pill. Title from `?playlistTitle=` URL param (set by panel nav) first, then fallbacks.
 - **Sort** — `?sortBy=date-desc|date-asc|title-asc|title-desc`. Client-side. Default `date-desc`.
 - **Nav button order** — YouTube → Shorts → Watch Later → Long Videos → Playlists → Blocked → Filter → Channels → Stats → Settings → Refresh.
@@ -69,14 +69,14 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 
 Long Videos behaves like Watch Later: selecting a video moves it out of ordinary feeds and into the uncapped dedicated feed. Videos may be in both collections.
 
-## 5. Key Behavioral Notes Addendum
+## 6. Key Behavioral Notes Addendum
 
 - **Long Videos** — manually selected with the hourglass hover button; uncapped, hidden from ordinary feeds, and independent from Watch Later.
 - **Mobile navbar** — feed controls and navigation/action icons use separate centered rows on narrow screens; desktop alignment is unchanged.
-- **Folder Only channels** — channel cards have a toggle that requires an assigned folder; enabled channels are hidden from All/other feeds and unread counts until their assigned folder is selected.
+- **Folder Only channels** — channel cards have a toggle that requires an assigned folder; enabled channels are hidden from ordinary main feeds and unread counts until their assigned folder is selected, but remain visible in Shorts, Watch Later, Long Videos, and Blocked feeds.
 - **Feed counts** — the active feed’s navbar/header count uses the total matching videos before the page limit, so it remains stable when switching between a numeric limit and All Limit; inactive badges retain their unseen/saved indicators.
 - **Channel feed loading** — channel-scoped list queries fetch the full channel set before applying the feed limit, so channel card counts are not based on the global page slice.
 - **Folder feed loading** — folder-scoped list queries also fetch the full folder set before applying the feed limit, so a 50-limit folder feed can fill all 50 cards.
 
-## 6. Pending Task
+## 7. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
