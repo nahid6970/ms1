@@ -96,7 +96,7 @@ export const list = query({
 
     // When filtering by playlist, fetch all videos so none are missed regardless of date.
     // For blocked/watchlater, also fetch all so count matches what's shown.
-    const takeAmount = (playlistId || isBlockedView || isWatchLaterView || isLongView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
+    const takeAmount = (playlistId || folder || channelId || isBlockedView || isWatchLaterView || isLongView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
     const videos = await q.take(takeAmount);
 
     const filtered = videos
@@ -222,6 +222,12 @@ export const unreadCount = query({
       .first();
     const hideShorts = Boolean(hideShortsSetting?.value);
 
+    const hidePrivateSetting = await ctx.db
+      .query("settings")
+      .withIndex("by_key", (q) => q.eq("key", "hide_private"))
+      .first();
+    const hidePrivate = Boolean(hidePrivateSetting?.value);
+
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
 
@@ -269,7 +275,8 @@ export const unreadCount = query({
         return passesPlaylistFilter(video, rulesText, fallbackFilters) ||
           titleMatchesRules(video.title, rulesText, fallbackFilters);
       })
-      .filter((video) => !hideShorts || !isShortVideo(video)).length;
+      .filter((video) => !hideShorts || !isShortVideo(video))
+      .filter((video) => !hidePrivate || !isPrivateVideo(video)).length;
   },
 });
 
@@ -278,8 +285,10 @@ export const counts = query({
     folder: v.optional(v.string()),
     channelId: v.optional(v.string()),
     playlistId: v.optional(v.string()),
+    category: v.optional(v.string()),
+    subCategory: v.optional(v.string()),
   },
-  handler: async (ctx, { folder, channelId, playlistId }) => {
+  handler: async (ctx, { folder, channelId, playlistId, category, subCategory }) => {
     const hideShortsSetting = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", "hide_shorts"))
@@ -332,37 +341,72 @@ export const counts = query({
       .filter((video) => enabledChannelIds.has(video.channelId))
       .filter((video) => !playlistId || video.sourcePlaylistId === playlistId);
 
-    // validVideos = those that pass playlist OR title filter (shown in main/shorts/watchlater)
-    const validVideos = channelVideos
+    // Ordinary feeds use playlist OR title rules. Curated feeds bypass those rules.
+    const ordinaryVideos = channelVideos
       .filter((video) => {
         const rulesText = rulesById.get(video.channelId);
         const fallbackFilters = filtersById.get(video.channelId) ?? [];
         return passesPlaylistFilter(video, rulesText, fallbackFilters) ||
           titleMatchesRules(video.title, rulesText, fallbackFilters);
-      });
+      })
+      .filter((video) => !hidePrivate || !isPrivateVideo(video));
 
-    const main = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !video.isLong && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hideShorts || !isShortVideo(video)) && (!hidePrivate || !isPrivateVideo(video)),
+    const main = ordinaryVideos.filter(
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && (!hideShorts || !isShortVideo(video)),
     ).length;
 
-    const shorts = validVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !video.isLong && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && isShortVideo(video) && (!hidePrivate || !isPrivateVideo(video)),
+    const shorts = ordinaryVideos.filter(
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && isShortVideo(video),
     ).length;
 
-    const watchLater = validVideos.filter(
-      (video) => video.isWatchLater && titleMatchesRules(video.title, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hidePrivate || !isPrivateVideo(video)),
+    const watchLater = channelVideos.filter(
+      (video) => video.isWatchLater && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
     const longVideos = channelVideos.filter(
       (video) => video.isLong && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
+    const effectiveFeedCategory = category === "shorts" ? (subCategory || "all") : (category || "all");
+    const isShortsFeed = category === "shorts";
+    let feedVideos;
+
+    if (effectiveFeedCategory === "blocked") {
+      feedVideos = channelVideos.filter(
+        (video) => isTitleBlocked(video.title, video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hidePrivate || !isPrivateVideo(video)),
+      );
+    } else if (effectiveFeedCategory === "watchlater") {
+      feedVideos = channelVideos.filter(
+        (video) => video.isWatchLater && (!hidePrivate || !isPrivateVideo(video)),
+      );
+    } else if (effectiveFeedCategory === "long") {
+      feedVideos = channelVideos.filter(
+        (video) => video.isLong && (!hidePrivate || !isPrivateVideo(video)),
+      );
+    } else {
+      feedVideos = ordinaryVideos.filter((video) => !video.isWatchLater && !video.isLong);
+      if (effectiveFeedCategory === "unseen") {
+        feedVideos = feedVideos.filter((video) => video.isNew);
+      } else if (effectiveFeedCategory === "seen") {
+        feedVideos = feedVideos.filter((video) => !video.isNew);
+      } else if (effectiveFeedCategory === "favorites") {
+        feedVideos = feedVideos.filter((video) => video.isFavorite);
+      }
+      if (!isShortsFeed && hideShorts) {
+        feedVideos = feedVideos.filter((video) => !isShortVideo(video));
+      }
+    }
+
+    if (isShortsFeed) {
+      feedVideos = feedVideos.filter((video) => isShortVideo(video));
+    }
+
     // blocked = any channel video that fails either playlist filter or title rules
     const blocked = channelVideos.filter(
-      (video) => isTitleBlocked(video.title, video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []),
+      (video) => isTitleBlocked(video.title, video, rulesById.get(video.channelId), filtersById.get(video.channelId) ?? []) && (!hidePrivate || !isPrivateVideo(video)),
     ).length;
 
-    return { main, shorts, watchLater, longVideos, blocked };
+    return { main, shorts, watchLater, longVideos, blocked, feedTotal: feedVideos.length };
   },
 });
 

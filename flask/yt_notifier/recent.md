@@ -24,7 +24,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 | `channelAvatarsBar` | Square corners, fully opaque bg, `border-b` only — fixes scroll bleed-through. Sticky `× Playlist` pill when `playlistId` active (sky color). `playlistTitle` preserved in avatar links. |
 | Playlist banner | Compact single-line: `[icon] Channel / Playlist Name · N videos ↗`. Title resolved via: URL param → `sourcePlaylistTitle` → `playlistMeta` cache → `"Playlist"`. No Clear button (redundant with sticky bar). Count number sky-400 bold. YouTube external link icon red-400 at end. |
 | Playlist panel URLs | Include `&playlistTitle=...` so banner title is immediately available on page load without DB lookup. |
-| Nav counts | `playlistId` removed from `videos:counts` call — badges always show global unread. |
+| Nav counts | `videos:counts` follows the active folder/channel, while playlist views keep global nav counts. |
 | `renderNav` | Accepts `playlistId` + `sortBy`. `isMainActive` false when on a playlist. Playlist button highlights sky + dot when active. Shorts removed from main feed filter dropdown. **Playlist button moved before Blocked Items button.** |
 | Filter dropdown | Added **Sort By section**: Newest First (default), Oldest First, Title A→Z, Title Z→A. Active sort highlighted in indigo. Filter links preserve `sortBy`. Sort links preserve `category`+`playlistId`. |
 | Sort | Client-side sort before grid render. `sortBy` URL param (`date-desc` default). |
@@ -74,6 +74,9 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Long Videos** — manually selected with the hourglass hover button; uncapped, hidden from ordinary feeds, and independent from Watch Later.
 - **Mobile navbar** — feed controls and navigation/action icons use separate centered rows on narrow screens; desktop alignment is unchanged.
 - **Folder Only channels** — channel cards have a toggle that requires an assigned folder; enabled channels are hidden from All/other feeds and unread counts until their assigned folder is selected.
+- **Feed counts** — the active feed’s navbar/header count uses the total matching videos before the page limit, so it remains stable when switching between a numeric limit and All Limit; inactive badges retain their unseen/saved indicators.
+- **Channel feed loading** — channel-scoped list queries fetch the full channel set before applying the feed limit, so channel card counts are not based on the global page slice.
+- **Folder feed loading** — folder-scoped list queries also fetch the full folder set before applying the feed limit, so a 50-limit folder feed can fill all 50 cards.
 
 ## 6. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.

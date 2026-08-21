@@ -344,7 +344,7 @@ const POPUP_PAGES = {
   },
 };
 
-function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0, blocked: 0 }, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "", sortBy = "date-desc" } = {}) {
+function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0, blocked: 0 }, currentCount = null, showSeen = false, feedLimit = 50, category = "all", subCategory = "all", folder = "", playlistId = "", sortBy = "date-desc" } = {}) {
   const el = document.getElementById("navbar");
   if (!el) return;
 
@@ -375,6 +375,12 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
   const watchLaterCount = typeof counts === "object" ? counts.watchLater ?? 0 : 0;
   const longVideosCount = typeof counts === "object" ? counts.longVideos ?? 0 : 0;
   const blockedCount = typeof counts === "object" ? counts.blocked ?? 0 : 0;
+  const hasCurrentCount = Number.isFinite(currentCount);
+  const displayMainCount = hasCurrentCount && isMainActive ? currentCount : mainCount;
+  const displayShortsCount = hasCurrentCount && isShorts ? currentCount : shortsCount;
+  const displayWatchLaterCount = hasCurrentCount && category === "watchlater" ? currentCount : watchLaterCount;
+  const displayLongVideosCount = hasCurrentCount && category === "long" ? currentCount : longVideosCount;
+  const displayBlockedCount = hasCurrentCount && category === "blocked" ? currentCount : blockedCount;
   const limitVal = feedLimit != null ? String(feedLimit) : "50";
 
   el.innerHTML = `
@@ -397,29 +403,29 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
         <div class="flex w-full min-w-0 flex-wrap items-center justify-center gap-1.5 pb-0.5 sm:w-auto sm:flex-nowrap sm:justify-end sm:gap-3 sm:pb-0">
-          <a href="index.html" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${mainCount} unseen)" aria-label="Main Feed (${mainCount} unseen)">
+          <a href="index.html" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})" aria-label="Main Feed (${displayMainCount} ${hasCurrentCount && isMainActive ? "available" : "unseen"})">
             <i class="fa-brands fa-youtube text-lg"></i>
-            ${mainCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${mainCount}</span>` : ""}
+            ${displayMainCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${displayMainCount}</span>` : ""}
           </a>
-          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed (${shortsCount} unseen)" aria-label="Shorts Feed (${shortsCount} unseen)">
+          <a href="index.html?category=shorts" class="nav-link ${category === "shorts" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "shorts" ? "bg-slate-800 text-amber-400" : "text-slate-300"}" title="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})" aria-label="Shorts Feed (${displayShortsCount} ${hasCurrentCount && isShorts ? "available" : "unseen"})">
             <i class="fa-solid fa-mobile-screen-button"></i>
-            ${shortsCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-amber-400 leading-none tracking-tight">${shortsCount}</span>` : ""}
+            ${displayShortsCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-amber-400 leading-none tracking-tight">${displayShortsCount}</span>` : ""}
           </a>
-          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${watchLaterCount} saved)" aria-label="Watch Later Feed (${watchLaterCount} saved)">
+          <a href="index.html?category=watchlater" class="nav-link ${category === "watchlater" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "watchlater" ? "bg-slate-800 text-sky-400" : "text-slate-300"}" title="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})" aria-label="Watch Later Feed (${displayWatchLaterCount} ${hasCurrentCount && category === "watchlater" ? "available" : "saved"})">
             <i class="fa-solid fa-clock"></i>
-            ${watchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${watchLaterCount}</span>` : ""}
+            ${displayWatchLaterCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-sky-400 leading-none tracking-tight">${displayWatchLaterCount}</span>` : ""}
           </a>
-          <a href="index.html?category=long" class="nav-link ${category === "long" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "long" ? "bg-slate-800 text-violet-400" : "text-slate-300"}" title="Long Videos Feed (${longVideosCount} saved)" aria-label="Long Videos Feed (${longVideosCount} saved)">
+          <a href="index.html?category=long" class="nav-link ${category === "long" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "long" ? "bg-slate-800 text-violet-400" : "text-slate-300"}" title="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})" aria-label="Long Videos Feed (${displayLongVideosCount} ${hasCurrentCount && category === "long" ? "available" : "saved"})">
             <i class="fa-solid fa-hourglass"></i>
-            ${longVideosCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-violet-400 leading-none tracking-tight">${longVideosCount}</span>` : ""}
+            ${displayLongVideosCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-violet-400 leading-none tracking-tight">${displayLongVideosCount}</span>` : ""}
           </a>
           <button type="button" onclick="openPopup('playlists')" class="nav-link relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isPlaylistActive ? "bg-slate-800 text-sky-400 is-active" : "text-slate-300"}" title="Playlists" aria-label="Playlists">
             <i class="fa-solid fa-list"></i>
             ${isPlaylistActive ? `<span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-sky-400"></span>` : ""}
           </button>
-          <a href="index.html?category=blocked" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${blockedCount} blocked)" aria-label="Blocked Items (${blockedCount} blocked)">
+          <a href="index.html?category=blocked" class="nav-link ${category === "blocked" ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${category === "blocked" ? "bg-slate-800 text-rose-400" : "text-slate-300"}" title="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})" aria-label="Blocked Items (${displayBlockedCount} blocked${hasCurrentCount && category === "blocked" ? " available" : ""})">
             <i class="fa-solid fa-ban text-rose-400"></i>
-            ${blockedCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-rose-400 leading-none tracking-tight">${blockedCount}</span>` : ""}
+            ${displayBlockedCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-rose-400 leading-none tracking-tight">${displayBlockedCount}</span>` : ""}
           </a>
           ${PAGE === "feed" ? `
           <div class="relative inline-block text-left">
@@ -883,11 +889,14 @@ async function renderFeed() {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
       folder: folder || undefined,
+      channelId: channelId || undefined,
       playlistId: playlistId || undefined,
     }),
     callConvex("query", "videos:counts", {
       folder: folder || undefined,
       channelId: channelId || undefined,
+      category: urlCategory,
+      subCategory: urlSubCategory || undefined,
     }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
@@ -895,8 +904,11 @@ async function renderFeed() {
 
   const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
 
+  const feedTotal = counts.feedTotal ?? videos.length;
+
   renderNav({
     counts,
+    currentCount: feedTotal,
     showSeen: config.showSeen,
     feedLimit: config.feedLimit,
     category: urlCategory,
@@ -943,8 +955,8 @@ async function renderFeed() {
 
   const countBadge = document.getElementById("headerCardCount");
   if (countBadge) {
-    countBadge.textContent = `${videos.length}`;
-    countBadge.title = `${videos.length} video card${videos.length === 1 ? "" : "s"} showing on current page`;
+    countBadge.textContent = `${feedTotal}`;
+    countBadge.title = `${feedTotal} matching video${feedTotal === 1 ? "" : "s"} in this feed${videos.length !== feedTotal ? ` (${videos.length} currently shown)` : ""}`;
   }
 
   // Client-side sort (backend already returns date-desc; other sorts applied here)
