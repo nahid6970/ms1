@@ -72,6 +72,7 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 ## 5. Key Behavioral Notes Addendum
 
 - **Long Videos** — manually selected with the hourglass hover button; uncapped, hidden from ordinary feeds, and independent from Watch Later.
+- **Mobile navbar** — feed controls and navigation/action icons use separate centered rows on narrow screens; desktop alignment is unchanged.
 
 ## 6. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
