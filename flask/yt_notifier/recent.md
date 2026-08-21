@@ -65,7 +65,7 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 |---|---|
 | `convex/schema.ts` | Added optional `isLong` flag to videos. |
 | `convex/videos.ts` | Added `long` category, `toggleLong` mutation, uncapped Long Videos listing/count, and excludes selected long videos from ordinary feeds. |
-| `public/js/app.js` | Added Long Videos nav item immediately after Watch Later, filter/settings entries, long-video count badge, and hover hourglass toggle on cards. |
+| `public/js/app.js` | Added Long Videos nav item immediately after Watch Later, filter/settings entries, long-video count badge, hover hourglass toggle on cards, and a two-row responsive navbar on narrow screens. |
 
 Long Videos behaves like Watch Later: selecting a video moves it out of ordinary feeds and into the uncapped dedicated feed. Videos may be in both collections.
 

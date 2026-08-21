@@ -380,8 +380,8 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
   el.innerHTML = `
   <nav class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex h-16 items-center justify-between gap-2 sm:gap-4">
-        <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+      <div class="flex min-h-[4rem] flex-col items-stretch justify-center gap-2 py-2 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-0">
+        <div class="flex w-full items-center space-x-2 flex-shrink-0 min-w-0 sm:w-auto sm:space-x-3">
           <div class="flex items-center gap-1.5 flex-shrink-0">
             <select id="headerFeedLimitSelect" onchange="changeFeedLimitFromHeader(this.value)" class="rounded-lg border border-slate-700/80 bg-slate-950/90 px-2.5 py-1 text-xs font-semibold text-slate-200 outline-none focus:border-red-500 transition cursor-pointer shadow" title="Videos Per Feed Page">
               <option value="20" ${limitVal === "20" ? "selected" : ""}>20 Limit</option>
@@ -396,7 +396,7 @@ function renderNav({ counts = { main: 0, shorts: 0, watchLater: 0, longVideos: 0
           </div>
           <div id="headerFolderPills" class="relative flex items-center py-1"></div>
         </div>
-        <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <div class="flex w-full min-w-0 flex-wrap items-center justify-start gap-1.5 pb-0.5 sm:w-auto sm:flex-nowrap sm:justify-end sm:gap-3 sm:pb-0">
           <a href="index.html" class="nav-link ${isMainActive ? "is-active" : ""} relative inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-sm font-medium transition hover:bg-slate-800 ${isMainActive ? "bg-slate-800 text-red-500" : "text-slate-300"}" title="Main Feed (${mainCount} unseen)" aria-label="Main Feed (${mainCount} unseen)">
             <i class="fa-brands fa-youtube text-lg"></i>
             ${mainCount > 0 ? `<span class="absolute -top-1.5 -right-1.5 text-[10px] sm:text-[11px] font-extrabold text-red-400 leading-none tracking-tight">${mainCount}</span>` : ""}
