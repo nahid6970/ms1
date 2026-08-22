@@ -925,7 +925,7 @@ async function renderFeed() {
   const playlistTitleFromUrl = urlParams.get("playlistTitle") || "";
   const sortBy = urlParams.get("sortBy") || "date-desc";
 
-  const [allVideos, counts, categories, channels] = await Promise.all([
+  const [allVideos, counts, categories, channels, avatarVideos] = await Promise.all([
     callConvex("query", "videos:list", {
       category: urlCategory,
       subCategory: urlSubCategory || undefined,
@@ -941,6 +941,12 @@ async function renderFeed() {
     }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
+    callConvex("query", "videos:list", {
+      category: urlCategory,
+      subCategory: urlSubCategory || undefined,
+      folder: folder || undefined,
+      playlistId: playlistId || undefined,
+    }),
   ]);
 
   const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
@@ -960,7 +966,7 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory, playlistId, playlistTitleFromUrl);
+  renderChannelAvatarsBar(channels, avatarVideos, channelId, urlCategory, folder, urlSubCategory, playlistId, playlistTitleFromUrl, allVideos);
 
   // Playlist header banner
   const existingBanner = document.getElementById("playlistBanner");
@@ -1069,7 +1075,7 @@ function renderFolderPills(categories, currentFolder, currentCategory, currentSu
     </div>`;
 }
 
-function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all", activePlaylistId = "", activePlaylistTitle = "") {
+function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCategory, currentFolder, currentSubCategory = "all", activePlaylistId = "", activePlaylistTitle = "", selectedChannelVideos = []) {
   let bar = document.getElementById("channelAvatarsBar");
   if (!channels || !channels.length) {
     if (bar) bar.remove();
@@ -1085,7 +1091,11 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
 
   const enabledChannels = (channels || []).filter((c) => !c.disabled);
   const channelIdsWithVideos = new Set((videos || []).map((v) => v.channelId));
-  if (activeChannelId) channelIdsWithVideos.add(activeChannelId);
+  // The selected channel is loaded through a separate channel-scoped query,
+  // so include it alongside channels represented in the current feed.
+  if (activeChannelId && (selectedChannelVideos || []).some((v) => v.channelId === activeChannelId)) {
+    channelIdsWithVideos.add(activeChannelId);
+  }
 
   const activeChannels = enabledChannels.filter((c) => channelIdsWithVideos.has(c.channelId));
 
@@ -1105,7 +1115,7 @@ function renderChannelAvatarsBar(channels, videos, activeChannelId, currentCateg
     const isActive = activeChannelId === c.channelId;
     const targetUrl = isActive ? baseUrl : `?category=${currentCategory}${subParam}&channelId=${encodeURIComponent(c.channelId)}${folderParam}${playlistParam}`;
     return `
-      <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ${isActive ? "ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-1 ring-slate-800/80 hover:ring-2 hover:ring-red-500/50"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
+      <a href="${targetUrl}" class="avatar-item rounded-full overflow-hidden bg-slate-800 ${isActive ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-105 z-30" : "ring-1 ring-slate-800/80 hover:ring-2 hover:ring-red-500/50"} transition-all duration-200" title="${esc(c.channelName)}${isActive ? " (Click to unselect)" : ""}">
         ${c.thumbnail ? `<img src="${esc(c.thumbnail)}" class="w-full h-full object-cover rounded-full" alt="${esc(c.channelName)}">` : `<div class="w-full h-full flex items-center justify-center text-[10px] font-bold text-slate-400 rounded-full">${esc(c.channelName.slice(0, 2))}</div>`}
       </a>`;
   }).join("");

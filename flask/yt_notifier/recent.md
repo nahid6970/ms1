@@ -82,7 +82,8 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Folder navigation** — switching between Main, Shorts, Watch Later, Long Videos, and Blocked preserves the active folder filter.
 - **Per-channel Shorts cutoff** — configured through the channel card’s gear button as seconds; defaults to 60, affects automatic Shorts detection, and displays as a compact stopwatch/`≤ Xs` badge when customized. Folder Only displays as an icon badge.
 - **Video card folder picker** — uses a compact custom button and a content-sized menu so each folder name remains readable without the native select’s shared width.
-- **Folder picker overflow** — video cards keep the custom folder menu above neighboring grid items for the full time it is open, instead of clipping or dropping it behind the next card.
+- **Folder picker overflow** — video cards use visible overflow and keep their custom folder menu’s parent card at elevated stacking order for the full time the menu is open, so it remains above neighboring feed cards even after the pointer leaves the dropdown.
+- **Channel avatar strip** — derives visible avatars from channels represented in the current feed, including the selected channel’s scoped results, and highlights the selected avatar with a white ring.
 
 ## 7. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
