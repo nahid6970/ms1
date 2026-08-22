@@ -757,7 +757,7 @@ function videoCard(video, categories = []) {
   }).join("");
 
   return `
-  <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1">
+  <article class="motion-card group relative z-0 soft-panel ${cardTone} border rounded-none overflow-visible transition-all duration-300 hover:z-50 hover:-translate-y-1">
     <div class="relative aspect-video bg-slate-950 overflow-hidden">
       <a href="${esc(video.link)}" target="_blank" class="absolute inset-0">
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
