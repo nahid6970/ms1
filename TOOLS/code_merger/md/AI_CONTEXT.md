@@ -21,7 +21,7 @@ code_merger/
 - **Projects Sidebar**: Pinned projects with contiguous numeric pin indices, custom icons (Emoji/SVG), category tags with dynamic dropdown selectors, and elided path displays.
 - **Source Files Panel**: File toggling, Full/Outline mode selection, minification, drag-and-drop support, token estimation, and sorting.
 - **Diff Preview Dialog**: Visual unified diff preview with selective block application.
-- **Matching Engines**: Exact Match and Smart/Fuzzy Match.
+- **Matching Engines**: Exact Match and conservative Whitespace-Tolerant Match. The tolerant matcher accepts harmless line formatting differences but rejects ambiguous or low-confidence matches.
 
 ## Critical Invariants
 - `_HERE = os.path.dirname(os.path.abspath(__file__))` — all data files use this as base.

@@ -716,80 +716,110 @@ def analyze_match_failure(content: str, target_block: str, mode: str) -> str:
     )
 
 
-def fuzzy_replace_block(content: str, from_block: str, to_block: str, threshold: float = 0.70) -> str | None:
+def _normalize_match_line(line: str) -> str:
+    """Normalize harmless line formatting while preserving code content."""
+    line = line.rstrip()
+    if not line:
+        return ""
+
+    # Only expand tabs used for indentation. Internal whitespace is preserved
+    # because it may be part of a string literal or another meaningful token.
+    indent_match = re.match(r"^[ \t]*", line)
+    indent = indent_match.group(0) if indent_match else ""
+    return indent.expandtabs(4) + line[len(indent):]
+
+
+def _match_lines(text: str) -> list[str]:
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    return [_normalize_match_line(line) for line in text.splitlines()]
+
+
+def _find_whitespace_tolerant_match(content: str, target: str, threshold: float = 0.92) -> str | None:
+    """Return one safe match, or None when no unique high-confidence match exists."""
+    if not target.strip():
+        return None
+
+    content_lines = content.splitlines(keepends=True)
+    content_norm = [_normalize_match_line(line.rstrip("\r\n")) for line in content_lines]
+    target_norm = _match_lines(target)
+
+    # Parser delimiters can leave blank lines around a block. They should not
+    # prevent matching, but they also should not be consumed by replacement.
+    while target_norm and not target_norm[0].strip():
+        target_norm.pop(0)
+    while target_norm and not target_norm[-1].strip():
+        target_norm.pop()
+    if not target_norm:
+        return None
+
+    target_text = "\n".join(target_norm)
+    target_len = len(target_norm)
+
+    # First accept only a unique line-normalized match. This handles CRLF/LF,
+    # trailing whitespace, and indentation tabs without guessing at code.
+    exact_ranges = []
+    for start in range(len(content_norm) - target_len + 1):
+        if content_norm[start:start + target_len] == target_norm:
+            exact_ranges.append((start, start + target_len))
+    if len(exact_ranges) == 1:
+        start, end = exact_ranges[0]
+        return "".join(content_lines[start:end])
+    if len(exact_ranges) > 1:
+        return None
+
+    # Allow at most one inserted/removed line, but require a strong and unique
+    # similarity score. A 70% match is too risky for source-code edits.
+    import difflib
+    best_by_start: dict[int, tuple[float, int]] = {}
+    min_len = max(1, target_len - 1)
+    max_len = min(len(content_norm), target_len + 1)
+    for window_len in range(min_len, max_len + 1):
+        for start in range(len(content_norm) - window_len + 1):
+            candidate_text = "\n".join(content_norm[start:start + window_len])
+            score = difflib.SequenceMatcher(None, candidate_text, target_text, autojunk=False).ratio()
+            previous = best_by_start.get(start)
+            if previous is None or score > previous[0]:
+                best_by_start[start] = (score, window_len)
+
+    candidates = sorted(
+        ((score, start, start + window_len) for start, (score, window_len) in best_by_start.items()),
+        reverse=True,
+    )
+    if not candidates or candidates[0][0] < threshold:
+        return None
+
+    # Refuse close competing matches; applying the wrong block is worse than
+    # asking the user to use an exact block or preview the change manually.
+    if len(candidates) > 1 and candidates[0][0] - candidates[1][0] < 0.04:
+        return None
+
+    _, start, end = candidates[0]
+    return "".join(content_lines[start:end])
+
+
+def fuzzy_replace_block(content: str, from_block: str, to_block: str, threshold: float = 0.92) -> str | None:
     if from_block in content:
+        if content.count(from_block) > 1:
+            return None
         return content.replace(from_block, to_block, 1)
 
-    lines_content = content.splitlines(keepends=True)
-    lines_content_raw = [l.strip() for l in content.splitlines()]
-    lines_from_raw = [l.strip() for l in from_block.splitlines()]
-
-    if not lines_from_raw:
+    target_substr = _find_whitespace_tolerant_match(content, from_block, threshold)
+    if target_substr is None:
         return None
-
-    n_from = len(lines_from_raw)
-    for i in range(len(lines_content_raw) - n_from + 1):
-        slice_raw = lines_content_raw[i : i + n_from]
-        if slice_raw == lines_from_raw:
-            target_substr = "".join(lines_content[i : i + n_from])
-            return content.replace(target_substr, to_block, 1)
-
-    import difflib
-    best_ratio = 0.0
-    best_range = None
-
-    for window_len in range(max(1, n_from - 2), n_from + 3):
-        for i in range(len(lines_content) - window_len + 1):
-            slice_str = "".join(lines_content[i : i + window_len])
-            matcher = difflib.SequenceMatcher(None, slice_str, from_block)
-            ratio = matcher.ratio()
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_range = (i, i + window_len)
-
-    if best_ratio >= threshold and best_range is not None:
-        start_idx, end_idx = best_range
-        target_substr = "".join(lines_content[start_idx:end_idx])
-        return content.replace(target_substr, to_block, 1)
-
-    return None
+    return content.replace(target_substr, to_block, 1)
 
 
-def fuzzy_find_anchor(content: str, anchor: str, threshold: float = 0.70) -> str | None:
+def fuzzy_find_anchor(content: str, anchor: str, threshold: float = 0.92) -> str | None:
     if anchor in content:
+        if content.count(anchor) > 1:
+            return None
         return anchor
+    return _find_whitespace_tolerant_match(content, anchor, threshold)
 
-    lines_content = content.splitlines(keepends=True)
-    lines_content_raw = [l.strip() for l in content.splitlines()]
-    lines_anchor_raw = [l.strip() for l in anchor.splitlines()]
 
-    if not lines_anchor_raw:
-        return None
-
-    n_anchor = len(lines_anchor_raw)
-    for i in range(len(lines_content_raw) - n_anchor + 1):
-        slice_raw = lines_content_raw[i : i + n_anchor]
-        if slice_raw == lines_anchor_raw:
-            return "".join(lines_content[i : i + n_anchor])
-
-    import difflib
-    best_ratio = 0.0
-    best_range = None
-
-    for window_len in range(max(1, n_anchor - 2), n_anchor + 3):
-        for i in range(len(lines_content) - window_len + 1):
-            slice_str = "".join(lines_content[i : i + window_len])
-            matcher = difflib.SequenceMatcher(None, slice_str, anchor)
-            ratio = matcher.ratio()
-            if ratio > best_ratio:
-                best_ratio = ratio
-                best_range = (i, i + window_len)
-
-    if best_ratio >= threshold and best_range is not None:
-        start_idx, end_idx = best_range
-        return "".join(lines_content[start_idx:end_idx])
-
-    return None
+def is_fuzzy_match_mode(label: str | None) -> bool:
+    """Support the renamed UI label and older saved preferences."""
+    return bool(label) and ("Whitespace-Tolerant" in label or "Fuzzy" in label)
 
 
 def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str = "exact") -> list[str]:
@@ -833,7 +863,7 @@ def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str 
                             _backup(fpath)
                         with open(fpath, 'w', encoding='utf-8', newline='\n') as f:
                             f.write(new_content)
-                        results.append(f"✔ replace_block (fuzzy) → {ch['file']}")
+                        results.append(f"✔ replace_block (whitespace-tolerant) → {ch['file']}")
                         continue
 
                 if target_from not in content:
@@ -893,7 +923,7 @@ def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str 
                 new = content.replace(anchor_target, anchor_target + '\n' + ch["insert"], 1)
                 with open(fpath, 'w', encoding='utf-8') as f:
                     f.write(new)
-                tag = "insert_after (fuzzy)" if is_fuzzy and anchor_target != ch["after"] else "insert_after"
+                tag = "insert_after (whitespace-tolerant)" if is_fuzzy and anchor_target != ch["after"] else "insert_after"
                 results.append(f"✔ {tag}  → {ch['file']}")
 
             elif mode == "delete_block":
@@ -917,7 +947,7 @@ def apply_changes(changes: list[dict], root: str, backup: bool, match_mode: str 
                             _backup(fpath)
                         with open(fpath, 'w', encoding='utf-8') as f:
                             f.write(new_content)
-                        results.append(f"✔ delete_block (fuzzy)  → {ch['file']}")
+                        results.append(f"✔ delete_block (whitespace-tolerant)  → {ch['file']}")
                         continue
 
                 if ch["from"] not in content:
@@ -4389,7 +4419,7 @@ class DiffPreviewDialog(QDialog):
 
         selected_changes = [self.changes[i] for i in selected_indices]
         backup = self.parent().chk_backup.isChecked() if hasattr(self.parent(), 'chk_backup') else True
-        match_mode = "fuzzy" if hasattr(self.parent(), 'match_mode_cb') and self.parent().match_mode_cb and "Fuzzy" in self.parent().match_mode_cb() else "exact"
+        match_mode = "fuzzy" if hasattr(self.parent(), 'match_mode_cb') and self.parent().match_mode_cb and is_fuzzy_match_mode(self.parent().match_mode_cb()) else "exact"
 
         results = apply_changes(selected_changes, self.root, backup, match_mode=match_mode)
 
@@ -4748,7 +4778,7 @@ class MergeTab(QWidget):
             dlg = DiffPreviewDialog(self._pending_changes, root, self)
             dlg.exec()
         else:
-            match_mode = "fuzzy" if self.match_mode_cb and self.match_mode_cb() and "Fuzzy" in self.match_mode_cb() else "exact"
+            match_mode = "fuzzy" if self.match_mode_cb and is_fuzzy_match_mode(self.match_mode_cb()) else "exact"
             results = apply_changes(self._pending_changes, root, self.chk_backup.isChecked(), match_mode=match_mode)
             ok  = sum(1 for r in results if r.startswith("✔"))
             err = len(results) - ok
@@ -5550,8 +5580,8 @@ class MainWindow(QMainWindow):
         btn_restart.clicked.connect(lambda: os.execv(sys.executable, [sys.executable] + sys.argv))
 
         self.combo_match_mode = QComboBox()
-        self.combo_match_mode.addItems(["🎯 Exact Match", "⚡ Smart / Fuzzy Match"])
-        self.combo_match_mode.setToolTip("Select code matching engine:\n• Exact Match: Strict string matching\n• Smart / Fuzzy Match: Insensitive to trailing spaces/minor LLM formatting errors")
+        self.combo_match_mode.addItems(["🎯 Exact Match", "⚡ Whitespace-Tolerant Match"])
+        self.combo_match_mode.setToolTip("Select code matching engine:\n• Exact Match: Strict string matching\n• Whitespace-Tolerant Match: Handles line endings, trailing spaces, and indentation tabs; rejects ambiguous matches")
         self.combo_match_mode.setCursor(Qt.CursorShape.PointingHandCursor)
         self.combo_match_mode.setStyleSheet(f"""
             QComboBox {{
@@ -5646,7 +5676,10 @@ class MainWindow(QMainWindow):
                 with open(SETTINGS_PATH, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if isinstance(data, dict) and 'match_mode' in data:
-                    self.combo_match_mode.setCurrentText(data['match_mode'])
+                    saved_mode = data['match_mode']
+                    if isinstance(saved_mode, str) and "Fuzzy" in saved_mode:
+                        saved_mode = "⚡ Whitespace-Tolerant Match"
+                    self.combo_match_mode.setCurrentText(saved_mode)
         except Exception:
             pass
 

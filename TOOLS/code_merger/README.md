@@ -6,7 +6,7 @@ A PyQt6 GUI tool to prep local files for AI web UIs (Gemini, ChatGPT, Claude, et
 
 - **Interactive Projects Sidebar** — Pin projects with custom numeric pin indices, categorize with dynamic tags, assign custom icons (Emojis, Nerd Fonts, or SVG).
 - **Advanced File Management** — Enable/disable files, toggle between Full and Outline (API skeleton) modes, minify code, filter by name or extension.
-- **Smart / Fuzzy Code Matching** — Tolerates minor LLM whitespace or formatting divergences when merging changes.
+- **Whitespace-Tolerant Code Matching** — Handles line endings, trailing spaces, and indentation tabs while rejecting ambiguous or low-confidence matches.
 - **Selective Diff Preview** — Review unified diffs block-by-block and selectively apply changes.
 - **Built-in Command Runner** — Execute shell commands (`git status`, `npm test`, etc.) directly within the project directory.
 - **Auto Git Commit** — After a successful merge, automatically stage only the changed files and commit. Unrelated dirty files in the repo are never touched.
@@ -59,7 +59,7 @@ Enable **Auto git add + commit after merge** in the Merge tab options. After a s
 
 | Mode | What it does |
 |---|---|
-| `replace_block` | Replaces a specific block matched by exact or fuzzy search |
+| `replace_block` | Replaces a specific block matched by exact or whitespace-tolerant search |
 | `replace_file` | Overwrites the entire file |
 | `insert_after` | Inserts lines after a matched anchor block |
 | `delete_block` | Removes a matched block entirely |
