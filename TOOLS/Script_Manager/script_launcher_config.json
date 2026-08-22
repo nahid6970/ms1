@@ -2678,8 +2678,7 @@
                     "_runtime_is_bold": true,
                     "_runtime_is_italic": false,
                     "auto_wrap": false,
-                    "hover_transparent_bg": false,
-                    "_runtime_text_align": "left"
+                    "hover_transparent_bg": false
                 }
             ],
             "type": "folder",
@@ -4733,6 +4732,54 @@
                     "edit_on_click": false,
                     "auto_wrap": false,
                     "hover_transparent_bg": false
+                },
+                {
+                    "name": "Chrome Flag Fix",
+                    "path": "",
+                    "type": "script",
+                    "nf_char": "",
+                    "icon_path": "",
+                    "tags": [],
+                    "icon_width": 0,
+                    "icon_height": 0,
+                    "icon_gap": 2,
+                    "icon_position": "top",
+                    "hide_terminal": false,
+                    "keep_open": false,
+                    "kill_window": false,
+                    "new_terminal": false,
+                    "run_admin": false,
+                    "ctrl_left_cmd": "",
+                    "ctrl_right_cmd": "",
+                    "use_inline": false,
+                    "use_multi_block": true,
+                    "inline_type": "cmd",
+                    "inline_script": "",
+                    "inline_blocks": [
+                        {
+                            "comment": "Open the site",
+                            "type": "cmd",
+                            "code": "start helium://flags/#unsafely-treat-insecure-origin-as-secure",
+                            "comment_size": 12,
+                            "comment_color": "#FF5500"
+                        }
+                    ],
+                    "edit_on_click": false,
+                    "require_password": false,
+                    "font_family": "JetBrainsMono Nerd Font Propo",
+                    "font_size": 14,
+                    "is_bold": true,
+                    "is_italic": false,
+                    "text_align": "center",
+                    "auto_wrap": false,
+                    "transparent_bg": false,
+                    "hover_transparent_bg": false,
+                    "col_span": 1,
+                    "row_span": 1,
+                    "width": 0,
+                    "height": 0,
+                    "corner_radius": 0,
+                    "border_width": 0
                 }
             ],
             "svg_content": "",
