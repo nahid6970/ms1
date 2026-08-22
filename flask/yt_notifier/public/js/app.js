@@ -1151,8 +1151,8 @@ function channelRow(channel, categories = []) {
               <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
             </a>
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
-            ${folderOnly ? `<span class="rounded bg-amber-950/80 border border-amber-800/60 px-2 py-0.5 text-[10px] font-bold text-amber-300 shadow"><i class="fa-solid fa-folder-tree text-[9px] mr-1"></i>Folder Only</span>` : ""}
-            ${shortsThreshold !== 60 ? `<span class="rounded bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 shadow"><i class="fa-solid fa-stopwatch text-[9px] mr-1"></i>Shorts ≤ ${shortsThreshold}s</span>` : ""}
+            ${folderOnly ? `<span class="inline-flex h-5 w-6 items-center justify-center rounded bg-amber-950/80 border border-amber-800/60 text-[10px] font-bold text-amber-300 shadow" title="Folder Only"><i class="fa-solid fa-folder-tree text-[9px]"></i></span>` : ""}
+            ${shortsThreshold !== 60 ? `<span class="inline-flex items-center gap-1 rounded bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 shadow" title="Automatic Shorts cutoff: ${shortsThreshold} seconds"><i class="fa-solid fa-stopwatch text-[9px]"></i>≤ ${shortsThreshold}s</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
             ${ruleCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${ruleCount} Rule${ruleCount === 1 ? "" : "s"}</span>` : ""}

@@ -80,7 +80,7 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Channel feed loading** — channel-scoped list queries fetch the full channel set before applying the feed limit, so channel card counts are not based on the global page slice.
 - **Folder feed loading** — folder-scoped list queries also fetch the full folder set before applying the feed limit, so a 50-limit folder feed can fill all 50 cards.
 - **Folder navigation** — switching between Main, Shorts, Watch Later, Long Videos, and Blocked preserves the active folder filter.
-- **Per-channel Shorts cutoff** — configured through the channel card’s gear button as seconds; defaults to 60 and affects automatic Shorts detection for that channel.
+- **Per-channel Shorts cutoff** — configured through the channel card’s gear button as seconds; defaults to 60, affects automatic Shorts detection, and displays as a compact stopwatch/`≤ Xs` badge when customized. Folder Only displays as an icon badge.
 
 ## 7. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
