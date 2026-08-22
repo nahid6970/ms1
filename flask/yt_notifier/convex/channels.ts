@@ -23,6 +23,7 @@ export const list = query({
         rulesText: channel.rulesText ?? "",
         category: channel.category ?? "",
         folderOnly: channel.folderOnly ?? false,
+        shortsThresholdSeconds: channel.shortsThresholdSeconds ?? 60,
         lastUpload: latestVideo?.published ?? null,
       });
     }
@@ -66,6 +67,28 @@ export const toggleFolderOnly = mutation({
 
     await ctx.db.patch(channel._id, { folderOnly });
     return { folderOnly };
+  },
+});
+
+export const updateShortsThreshold = mutation({
+  args: {
+    channelId: v.string(),
+    seconds: v.number(),
+  },
+  handler: async (ctx, { channelId, seconds }) => {
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", channelId))
+      .first();
+    if (!channel) return;
+
+    const normalized = Math.round(seconds);
+    if (normalized < 1 || normalized > 3600) {
+      throw new ConvexError("Shorts cutoff must be between 1 and 3600 seconds.");
+    }
+
+    await ctx.db.patch(channel._id, { shortsThresholdSeconds: normalized });
+    return { seconds: normalized };
   },
 });
 

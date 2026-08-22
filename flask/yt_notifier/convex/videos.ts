@@ -73,6 +73,9 @@ export const list = query({
     const channelCategoryMap = new Map(
       enabledChannels.map((c) => [c.channelId, c.category ?? ""]),
     );
+    const shortsThresholdById = new Map(
+      enabledChannels.map((c) => [c.channelId, c.shortsThresholdSeconds ?? 60]),
+    );
 
     let q = ctx.db.query("videos").withIndex("by_published").order("desc");
 
@@ -123,9 +126,9 @@ export const list = query({
       .filter((video) => {
         // Shorts view: show only shorts.
         // hideShorts only applies to main feeds (all/unseen/seen/favorites) — NOT blocked/watchlater/long/shorts.
-        if (isShortsView) return isShortVideo(video);
+        if (isShortsView) return isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60);
         if (isBlockedView || isWatchLaterView || isLongView) return true;
-        return !hideShorts || !isShortVideo(video);
+        return !hideShorts || !isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60);
       })
       .filter((video) => !hidePrivate || !isPrivateVideo(video));
 
@@ -161,7 +164,7 @@ export const list = query({
       isFavorite: video.isFavorite ?? false,
       isWatchLater: video.isWatchLater ?? false,
       isLong: video.isLong ?? false,
-      isShort: isShortVideo(video),
+      isShort: isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60),
       isPlaylist: matchesPlaylistRule(video.title, rulesById.get(video.channelId)),
       channelId: video.channelId,
       channelName: nameById.get(video.channelId) ?? "Unknown Channel",
@@ -206,7 +209,11 @@ export const toggleShort = mutation({
   handler: async (ctx, { id }) => {
     const video = await ctx.db.get(id);
     if (!video) return;
-    const currentIsShort = video.isShort ?? isShortVideo(video);
+    const channel = await ctx.db
+      .query("channels")
+      .withIndex("by_channelId", (q) => q.eq("channelId", video.channelId))
+      .first();
+    const currentIsShort = video.isShort ?? isShortVideo(video, channel?.shortsThresholdSeconds ?? 60);
     await ctx.db.patch(id, { isShort: !currentIsShort });
   },
 });
@@ -261,6 +268,9 @@ export const unreadCount = query({
     const rulesById = new Map(
       filteredChannels.map((channel) => [channel.channelId, channel.rulesText ?? ""]),
     );
+    const shortsThresholdById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 60]),
+    );
 
     const unseen = await ctx.db
       .query("videos")
@@ -276,7 +286,7 @@ export const unreadCount = query({
         return passesPlaylistFilter(video, rulesText, fallbackFilters) ||
           titleMatchesRules(video.title, rulesText, fallbackFilters);
       })
-      .filter((video) => !hideShorts || !isShortVideo(video))
+      .filter((video) => !hideShorts || !isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60))
       .filter((video) => !hidePrivate || !isPrivateVideo(video)).length;
   },
 });
@@ -339,6 +349,9 @@ export const counts = query({
     const rulesById = new Map(
       filteredChannels.map((channel) => [channel.channelId, channel.rulesText ?? ""]),
     );
+    const shortsThresholdById = new Map(
+      filteredChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 60]),
+    );
 
     const allVideos = await ctx.db.query("videos").collect();
 
@@ -369,11 +382,11 @@ export const counts = query({
       .filter((video) => !hidePrivate || !isPrivateVideo(video));
 
     const main = ordinaryMainVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !video.isLong && (!hideShorts || !isShortVideo(video)),
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && (!hideShorts || !isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60)),
     ).length;
 
     const shorts = ordinaryVideos.filter(
-      (video) => video.isNew && !video.isWatchLater && !video.isLong && isShortVideo(video),
+      (video) => video.isNew && !video.isWatchLater && !video.isLong && isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60),
     ).length;
 
     const watchLater = channelVideos.filter(
@@ -410,12 +423,12 @@ export const counts = query({
         feedVideos = feedVideos.filter((video) => video.isFavorite);
       }
       if (!isShortsFeed && hideShorts) {
-        feedVideos = feedVideos.filter((video) => !isShortVideo(video));
+        feedVideos = feedVideos.filter((video) => !isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60));
       }
     }
 
     if (isShortsFeed) {
-      feedVideos = feedVideos.filter((video) => isShortVideo(video));
+      feedVideos = feedVideos.filter((video) => isShortVideo(video, shortsThresholdById.get(video.channelId) ?? 60));
     }
 
     // blocked = any channel video that fails either playlist filter or title rules
@@ -712,15 +725,15 @@ function isTitleBlocked(
 }
 
 
-function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
+function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }, thresholdSeconds = 60) {
   if (video.isShort !== undefined) return video.isShort;
   if (video.link.includes("/shorts/")) return true;
   if (/#shorts?\b/i.test(video.title)) return true;
   if (video.duration) {
     const parts = video.duration.split(":").map(Number);
-    if (parts.length === 2) {
-      const [minutes, seconds] = parts;
-      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
+    if (parts.every(Number.isFinite) && parts.length >= 2) {
+      const totalSeconds = parts.reduce((total, part) => total * 60 + part, 0);
+      if (totalSeconds <= thresholdSeconds) return true;
     }
   }
   return false;

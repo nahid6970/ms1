@@ -36,11 +36,17 @@ export const heatmap = query({
       .order("desc")
       .take(1500);
 
-    const videos = hideShorts ? rawVideos.filter((v) => !isShortVideo(v)) : rawVideos;
-    const allVideos = hideShorts ? rawAllVideos.filter((v) => !isShortVideo(v)) : rawAllVideos;
-
     const channels = await ctx.db.query("channels").collect();
     const enabledChannels = channels.filter((channel) => !channel.disabled);
+    const shortsThresholdById = new Map(
+      enabledChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 60]),
+    );
+    const videos = hideShorts
+      ? rawVideos.filter((v) => !isShortVideo(v, shortsThresholdById.get(v.channelId) ?? 60))
+      : rawVideos;
+    const allVideos = hideShorts
+      ? rawAllVideos.filter((v) => !isShortVideo(v, shortsThresholdById.get(v.channelId) ?? 60))
+      : rawAllVideos;
     const enabledChannelIds = new Set(
       enabledChannels.map((channel) => channel.channelId),
     );
@@ -250,15 +256,15 @@ function titleMatchesRules(title: string, rawText?: string, fallbackFilters: str
   return true;
 }
 
-function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }) {
+function isShortVideo(video: { title: string; link: string; duration?: string; isShort?: boolean }, thresholdSeconds = 60) {
   if (video.isShort !== undefined) return video.isShort;
   if (video.link.includes("/shorts/")) return true;
   if (/#shorts?\b/i.test(video.title)) return true;
   if (video.duration) {
     const parts = video.duration.split(":").map(Number);
-    if (parts.length === 2) {
-      const [minutes, seconds] = parts;
-      if (minutes === 0 || (minutes === 1 && seconds === 0)) return true;
+    if (parts.every(Number.isFinite) && parts.length >= 2) {
+      const totalSeconds = parts.reduce((total, part) => total * 60 + part, 0);
+      if (totalSeconds <= thresholdSeconds) return true;
     }
   }
   return false;

@@ -1131,6 +1131,7 @@ function channelRow(channel, categories = []) {
   const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n:Block-Rules:\n\n:Playlists:` : DEFAULT_RULES_TEMPLATE);
   const category = channel.category ?? "";
   const folderOnly = Boolean(channel.folderOnly);
+  const shortsThreshold = Number(channel.shortsThresholdSeconds ?? 60);
 
   const optionsHtml = categories.map((cat) => `
     <option value="${esc(cat)}" ${cat.toLowerCase() === category.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>
@@ -1151,6 +1152,7 @@ function channelRow(channel, categories = []) {
             </a>
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
             ${folderOnly ? `<span class="rounded bg-amber-950/80 border border-amber-800/60 px-2 py-0.5 text-[10px] font-bold text-amber-300 shadow"><i class="fa-solid fa-folder-tree text-[9px] mr-1"></i>Folder Only</span>` : ""}
+            ${shortsThreshold !== 60 ? `<span class="rounded bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 shadow"><i class="fa-solid fa-stopwatch text-[9px] mr-1"></i>Shorts ≤ ${shortsThreshold}s</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
             ${ruleCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${ruleCount} Rule${ruleCount === 1 ? "" : "s"}</span>` : ""}
@@ -1164,6 +1166,9 @@ function channelRow(channel, categories = []) {
         </button>
         <button onclick="toggleChannelFolderBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${category ? "text-red-400 hover:bg-red-950/40" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="${category ? "Folder: " + esc(category) : "Assign Folder/Category"}" aria-label="Assign Folder">
           <i class="fa-solid fa-folder-plus"></i>
+        </button>
+        <button onclick="toggleChannelShortsBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${shortsThreshold !== 60 ? "text-purple-400 hover:bg-purple-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-purple-300"}" title="Configure Shorts cutoff" aria-label="Configure Shorts cutoff">
+          <i class="fa-solid fa-gear"></i>
         </button>
         <button onclick="toggleChannelFolderOnly('${esc(channel.channelId)}')" ${!category ? "disabled" : ""} class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${!category ? "text-slate-700 cursor-not-allowed" : folderOnly ? "text-amber-400 hover:bg-amber-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-amber-300"}" title="${folderOnly ? "Show this channel in all feeds" : category ? "Only show videos in the " + esc(category) + " folder" : "Assign a folder first"}" aria-label="${folderOnly ? "Disable Folder Only" : "Enable Folder Only"}">
           <i class="fa-solid ${folderOnly ? "fa-toggle-on" : "fa-toggle-off"} text-lg"></i>
@@ -1182,13 +1187,20 @@ function channelRow(channel, categories = []) {
         </button>
       </div>
     </div>
-    <form id="folder-${esc(channel.channelId)}" onsubmit="saveChannelFolder(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex flex-col sm:flex-row items-center gap-2">
+    <form id="folder-${esc(channel.channelId)}" onsubmit="saveChannelFolder(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex flex-col sm:flex-row sm:items-end gap-2">
       <input id="input-folder-${esc(channel.channelId)}" type="text" value="${esc(category)}" class="flex-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-red-500" placeholder="Folder name (e.g. Tech, Gaming)">
       <select onchange="applyFolderDropdownSelection(this, '${esc(channel.channelId)}')" class="w-full sm:w-auto rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-300 outline-none focus:border-red-500">
         <option value="">Existing Folders...</option>
         ${optionsHtml}
       </select>
       <button type="submit" class="w-full sm:w-auto rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-500">Save Folder</button>
+    </form>
+    <form id="shorts-${esc(channel.channelId)}" onsubmit="saveChannelShortsSettings(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-3 flex flex-col sm:flex-row sm:items-end gap-2">
+      <label class="w-full sm:w-48">
+        <span class="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-500" title="Videos at or below this duration are automatically classified as Shorts">Shorts cutoff (seconds)</span>
+        <input id="input-shorts-threshold-${esc(channel.channelId)}" type="number" min="1" max="3600" step="1" value="${shortsThreshold}" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-100 outline-none focus:border-purple-500" title="Automatic Shorts cutoff in seconds">
+      </label>
+      <button type="submit" class="w-full sm:w-auto rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-purple-500">Save Shorts Setting</button>
     </form>
     <form id="rules-${esc(channel.channelId)}" onsubmit="saveChannelRules(event, '${esc(channel.channelId)}')" class="mt-4 hidden border-t border-slate-800 pt-4">
       <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400"><i class="fa-solid fa-scale-balanced text-sky-400 mr-1.5"></i>Channel Rules (Allow & Block)</label>
@@ -1223,12 +1235,35 @@ window.toggleChannelFolderBox = function toggleChannelFolderBox(channelId) {
   if (form) form.classList.toggle("hidden");
 };
 
+window.toggleChannelShortsBox = function toggleChannelShortsBox(channelId) {
+  const form = document.getElementById(`shorts-${channelId}`);
+  if (form) form.classList.toggle("hidden");
+};
+
 window.toggleChannelFolderOnly = async function toggleChannelFolderOnly(channelId) {
   try {
     const result = await callConvex("mutation", "channels:toggleFolderOnly", { channelId });
     flash(result?.folderOnly ? "Channel is now limited to its assigned folder." : "Channel is visible in all feeds again.", "success");
     await renderChannels({ refreshNav: !isPopupOpen() });
     if (PAGE === "feed") await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+window.saveChannelShortsSettings = async function saveChannelShortsSettings(event, channelId) {
+  event.preventDefault();
+  const input = document.getElementById(`input-shorts-threshold-${channelId}`);
+  const seconds = input ? Number(input.value) : 60;
+  if (!Number.isFinite(seconds) || seconds < 1 || seconds > 3600) {
+    flash("Shorts cutoff must be between 1 and 3600 seconds.", "danger");
+    return;
+  }
+  try {
+    await callConvex("mutation", "channels:updateShortsThreshold", { channelId, seconds });
+    await renderChannels({ refreshNav: !isPopupOpen() });
+    if (PAGE === "feed") await renderFeed();
+    flash("Shorts setting updated.", "success");
   } catch (err) {
     flash(err.message, "danger");
   }

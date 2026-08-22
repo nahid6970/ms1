@@ -65,7 +65,9 @@ YouTube channel RSS/API notifier. **Convex** (DB + backend functions + crons) + 
 |---|---|
 | `convex/schema.ts` | Added optional `isLong` flag to videos. |
 | `convex/videos.ts` | Added `long` category, `toggleLong` mutation, uncapped Long Videos listing/count, folder-aware feed loading/counting, and main-feed-only Folder Only filtering. |
-| `public/js/app.js` | Added Long Videos nav item immediately after Watch Later, filter/settings entries, active-feed total counts, hover hourglass toggle, two-row responsive navbar, and folder-preserving feed navigation. |
+| `convex/channels.ts` | Added per-channel Shorts cutoff persistence with a 60-second default. |
+| `convex/stats.ts` | Applies each channel’s Shorts cutoff to stats filtering. |
+| `public/js/app.js` | Added Long Videos nav item immediately after Watch Later, separate gear-based per-channel Shorts settings, active-feed total counts, hover hourglass toggle, two-row responsive navbar, and folder-preserving feed navigation. |
 
 Long Videos behaves like Watch Later: selecting a video moves it out of ordinary feeds and into the uncapped dedicated feed. Videos may be in both collections.
 
@@ -78,6 +80,7 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Channel feed loading** — channel-scoped list queries fetch the full channel set before applying the feed limit, so channel card counts are not based on the global page slice.
 - **Folder feed loading** — folder-scoped list queries also fetch the full folder set before applying the feed limit, so a 50-limit folder feed can fill all 50 cards.
 - **Folder navigation** — switching between Main, Shorts, Watch Later, Long Videos, and Blocked preserves the active folder filter.
+- **Per-channel Shorts cutoff** — configured through the channel card’s gear button as seconds; defaults to 60 and affects automatic Shorts detection for that channel.
 
 ## 7. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
