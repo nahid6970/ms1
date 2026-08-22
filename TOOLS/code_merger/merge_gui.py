@@ -15,7 +15,7 @@ from PyQt6.QtWidgets import (
     QDialog, QScrollArea, QGridLayout, QComboBox, QTableWidget,
     QTableWidgetItem, QHeaderView, QSpinBox, QColorDialog, QInputDialog
 )
-from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray
+from PyQt6.QtCore import Qt, QPoint, QSize, QEvent, QByteArray, QTimer
 from PyQt6.QtWidgets import QSizePolicy
 from PyQt6.QtGui import QFont, QColor, QPainter, QPixmap, QIcon, QAction
 
@@ -2543,10 +2543,20 @@ class PrepTab(QWidget):
         self.disabled_files: set[str] = set()
         self.project_root = ""
         self._sort_mode: str = "none"   # "none" | "ext" | "name"
+        self._file_row_refs: dict[str, dict[str, QWidget]] = {}
+        self._file_render_generation = 0
+        self._pending_save = False
+        self._save_timer = QTimer(self)
+        self._save_timer.setSingleShot(True)
+        self._save_timer.setInterval(250)
+        self._save_timer.timeout.connect(self._flush_pending_save)
         self.setAcceptDrops(True) # Enable Drag & Drop support for files and folders
         self._build()
         self._load_session()
         self._populate_projects()
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self.flush_pending_save)
 
     def eventFilter(self, obj, event):
         if hasattr(self, 'file_list') and obj == self.file_list.viewport() and event.type() == QEvent.Type.Resize:
@@ -2680,8 +2690,11 @@ class PrepTab(QWidget):
             match = (not query) or (query in fp.lower())
             item.setHidden(not match)
 
-    def _save_session(self):
+    def _save_session(self, sync_recent: bool = True):
         import json
+        self._pending_save = False
+        if self._save_timer.isActive():
+            self._save_timer.stop()
         data = {
             'files': self.files,
             'project_root': self.project_root.strip(),
@@ -2691,7 +2704,22 @@ class PrepTab(QWidget):
         }
 
         _write_json_if_changed(SESSION_PATH, data)
-        self._sync_to_recent_projects()
+        if sync_recent:
+            self._sync_to_recent_projects()
+
+    def _queue_save_session(self):
+        """Persist changes after a short quiet period instead of on every click."""
+        self._pending_save = True
+        self._save_timer.start()
+
+    def _flush_pending_save(self):
+        if self._pending_save:
+            self._save_session()
+
+    def flush_pending_save(self):
+        """Flush deferred state before the application exits."""
+        self._save_timer.stop()
+        self._flush_pending_save()
 
     def apply_panel_sizes(self):
         if hasattr(self, 'splitter'):
@@ -2807,17 +2835,36 @@ class PrepTab(QWidget):
     def _refresh_file_items(self):
         if not hasattr(self, 'file_list'):
             return
+        # Rebuild with enabled files first, disabled files strictly at the end.
+        # Rendering is chunked so a large project does not monopolize the GUI thread.
+        enabled = [fp for fp in self.files if fp not in self.disabled_files]
+        disabled = [fp for fp in self.files if fp in self.disabled_files]
+        self.files = enabled + disabled
+
+        self._file_render_generation += 1
+        generation = self._file_render_generation
+        self._file_row_refs.clear()
+        self.file_list.clear()
+        self._render_file_items_chunk(list(self.files), 0, generation)
+
+    def _render_file_items_chunk(self, files: list[str], start: int, generation: int):
+        """Add a bounded number of rows, yielding to Qt between chunks."""
+        if generation != self._file_render_generation:
+            return
+
+        end = min(start + 100, len(files))
         self.file_list.setUpdatesEnabled(False)
         try:
-            # Rebuild with enabled files first, disabled files strictly at the end
-            enabled = [fp for fp in self.files if fp not in self.disabled_files]
-            disabled = [fp for fp in self.files if fp in self.disabled_files]
-            self.files = enabled + disabled
-            self.file_list.clear()
-            for fp in self.files:
+            for fp in files[start:end]:
                 self._add_file_item(fp)
         finally:
             self.file_list.setUpdatesEnabled(True)
+
+        if end < len(files):
+            QTimer.singleShot(0, lambda: self._render_file_items_chunk(files, end, generation))
+        else:
+            self._update_file_item_texts()
+            self._filter_files()
 
     def _update_root(self):
         if not self.files:
@@ -2846,7 +2893,7 @@ class PrepTab(QWidget):
         self._update_project_label()
         if save_recent:
             add_recent(d, self.files, [], overwrite_existing=True)
-        self._save_session()
+            self._save_session(sync_recent=False)
         self._update_active_project_highlight()
 
     def _add_file_item(self, fp: str):
@@ -2864,6 +2911,7 @@ class PrepTab(QWidget):
         
         # Smart file size analysis for warning highlights and context limits
         tooltip = [fp]
+        sz_bytes = None
         try:
             sz_bytes = os.path.getsize(fp)
             sz_kb = sz_bytes / 1024
@@ -2940,7 +2988,8 @@ class PrepTab(QWidget):
 
         # Token estimate label
         try:
-            sz_bytes = os.path.getsize(fp)
+            if sz_bytes is None:
+                sz_bytes = os.path.getsize(fp)
             tokens = int(sz_bytes / 3.5)
             if tokens >= 1000:
                 tok_text = f"{tokens/1000:.1f}k"
@@ -2989,16 +3038,48 @@ class PrepTab(QWidget):
         item.setSizeHint(QSize(100, item_height))
         self.file_list.addItem(item)
         self.file_list.setItemWidget(item, widget)
-        self._update_file_item_texts()
+        self._file_row_refs[fp] = {
+            "widget": widget,
+            "label": lbl,
+            "mode": mode_combo,
+            "toggle": btn_toggle,
+            "disabled_indicator": disabled_indicator,
+            "enabled_color": lbl_color,
+        }
+
+    def _update_file_row_state(self, fp: str):
+        refs = self._file_row_refs.get(fp)
+        if not refs:
+            return
+
+        disabled = fp in self.disabled_files
+        label = refs["label"]
+        mode = refs["mode"]
+        toggle = refs["toggle"]
+        indicator = refs["disabled_indicator"]
+
+        label_color = CP_SUB if disabled else refs["enabled_color"]
+        label.setStyleSheet(
+            f"color: {label_color}; background: transparent; "
+            f"font-size: {SOURCE_FILES_FONT_SIZE}pt;"
+        )
+        mode.setEnabled(not disabled)
+        indicator.setText("❌" if disabled else "")
+        self._apply_toggle_style(toggle, not disabled)
 
     def _remove_file(self, fp: str, item: QListWidgetItem):
+        render_incomplete = self.file_list.count() < len(self.files)
+        self._file_render_generation += 1
         if fp in self.files:
             self.files.remove(fp)
         if fp in self.disabled_files:
             self.disabled_files.discard(fp)
         row = self.file_list.row(item)
-        if row >= 0:
+        if render_incomplete:
+            self._refresh_file_items()
+        elif row >= 0:
             self.file_list.takeItem(row)
+        self._file_row_refs.pop(fp, None)
         self._update_root()
         self._save_session()
         self.status_cb(f"Removed: {os.path.basename(fp)}")
@@ -3031,8 +3112,8 @@ class PrepTab(QWidget):
         else:
             self.disabled_files.add(fp)
             self.status_cb(f"Disabled: {os.path.basename(fp)}")
-        self._refresh_file_items()
-        self._save_session()
+        self._update_file_row_state(fp)
+        self._queue_save_session()
 
     def _file_item_context_menu(self, fp: str, item: QListWidgetItem, pos, widget: QWidget):
         menu = QMenu(self)
@@ -3103,28 +3184,36 @@ class PrepTab(QWidget):
                     self.disabled_files.add(fp)
                 count += 1
 
-        self._refresh_file_items()
-        self._save_session()
+        for fp in self.files:
+            if (os.path.splitext(fp)[1].lower() or "(no ext)") == target_ext:
+                self._update_file_row_state(fp)
+        self._queue_save_session()
         self.status_cb(f"{'Enabled' if enable else 'Disabled'} all {target_ext} files ({count} file(s))")
 
 
     def _on_file_mode_changed(self, fp: str, mode: str):
         self.file_modes[fp] = mode
-        self._save_session()
+        self._queue_save_session()
         self.status_cb(f"Set {os.path.basename(fp)} to {mode}")
 
     def _set_all_full(self):
         for fp in self.files:
             self.file_modes[fp] = 'Full'
-        self._refresh_file_items()
-        self._save_session()
+        for fp in self.files:
+            refs = self._file_row_refs.get(fp)
+            if refs:
+                refs["mode"].setCurrentText("Full")
+        self._queue_save_session()
         self.status_cb("Set all files to Full mode")
 
     def _set_all_outline(self):
         for fp in self.files:
             self.file_modes[fp] = 'Outline'
-        self._refresh_file_items()
-        self._save_session()
+        for fp in self.files:
+            refs = self._file_row_refs.get(fp)
+            if refs:
+                refs["mode"].setCurrentText("Outline")
+        self._queue_save_session()
         self.status_cb("Set all files to Outline (API Skeleton) mode")
 
     # ── Header bar actions ────────────────────────────────────────────────────
@@ -3167,8 +3256,9 @@ class PrepTab(QWidget):
         else:
             self.disabled_files.clear()
             self.status_cb("All files enabled")
-        self._refresh_file_items()
-        self._save_session()
+        for fp in self.files:
+            self._update_file_row_state(fp)
+        self._queue_save_session()
 
     def _apply_sort(self):
         """Re-order self.files according to current _sort_mode, then refresh."""
@@ -3343,7 +3433,7 @@ class PrepTab(QWidget):
         self.chk_minify = QCheckBox("Minify")
         self.chk_minify.setChecked(False)
         self.chk_minify.setToolTip("Strips comments and blank lines to save tokens.")
-        self.chk_minify.stateChanged.connect(self._save_session)
+        self.chk_minify.stateChanged.connect(lambda _state: self._queue_save_session())
         bulk_row.addWidget(self.chk_minify)
         
         bulk_row.addStretch()
@@ -3566,7 +3656,7 @@ class PrepTab(QWidget):
         add_recent(d, added_files, exts_list, overwrite_existing=overwrite_recent)
         self.status_cb(f"Added {count} file(s) from directory")
         self._update_root()
-        self._save_session()
+        self._save_session(sync_recent=False)
         self._populate_projects()
 
     def _load_specific_files(self, d: str, files: list[str], extensions: list[str], disabled_files: list[str] = None):
@@ -3593,7 +3683,7 @@ class PrepTab(QWidget):
         add_recent(d, self.files, extensions, overwrite_existing=False, disabled_files=sorted(self.disabled_files))
         self.status_cb(f"Loaded {count} saved file(s) for project: {os.path.basename(d)}")
         self._update_root()
-        self._save_session()
+        self._save_session(sync_recent=False)
 
     def _load_all_project_files(self, d: str):
         d = os.path.normpath(d)
@@ -3642,7 +3732,7 @@ class PrepTab(QWidget):
             self.status_cb(f"Re-scanned and loaded {count} file(s) from directory")
 
         self._update_root()
-        self._save_session()
+        self._save_session(sync_recent=False)
 
     def _edit_project(self, path: str):
         norm_p = os.path.normpath(path)
@@ -3872,18 +3962,12 @@ class PrepTab(QWidget):
         if not path:
             return
 
-        norm_p = os.path.normpath(path)
-        # Fetch fresh details from disk to avoid stale QListWidgetItem data
-        fresh_items = load_recent_details()
-        fresh_target = None
-        for fi in fresh_items:
-            if os.path.normpath(fi["path"]) == norm_p:
-                fresh_target = fi
-                break
-
-        files = fresh_target.get("files", []) if fresh_target else data.get("files", [])
-        extensions = fresh_target.get("extensions", []) if fresh_target else data.get("extensions", [])
-        disabled_files = fresh_target.get("disabled_files", []) if fresh_target else data.get("disabled_files", [])
+        # QListWidgetItem stores the complete project snapshot populated from disk.
+        # Avoid reparsing settings.json on every click; all internal mutations
+        # repopulate the list and therefore refresh this snapshot.
+        files = data.get("files", [])
+        extensions = data.get("extensions", [])
+        disabled_files = data.get("disabled_files", [])
 
         self._load_specific_files(path, files, extensions, disabled_files)
 
