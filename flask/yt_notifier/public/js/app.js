@@ -851,15 +851,23 @@ window.toggleVideoFolderMenu = function toggleVideoFolderMenu(event, videoId) {
   const menu = document.getElementById(`video-folder-menu-${videoId}`);
   if (!menu) return;
   document.querySelectorAll(".video-folder-menu").forEach((item) => {
-    if (item !== menu) item.classList.add("hidden");
+    if (item !== menu) {
+      item.classList.add("hidden");
+      item.closest("article")?.classList.remove("z-50");
+    }
   });
+  const isOpening = menu.classList.contains("hidden");
   menu.classList.toggle("hidden");
+  menu.closest("article")?.classList.toggle("z-50", isOpening);
 };
 
 window.selectVideoFolder = async function selectVideoFolder(event, encodedCategory, channelId, videoId) {
   event.stopPropagation();
   const menu = document.getElementById(`video-folder-menu-${videoId}`);
-  if (menu) menu.classList.add("hidden");
+  if (menu) {
+    menu.classList.add("hidden");
+    menu.closest("article")?.classList.remove("z-50");
+  }
   await changeChannelFolderFromCard(decodeURIComponent(encodedCategory), channelId);
 };
 
@@ -2030,7 +2038,10 @@ window.addEventListener("click", (event) => {
     if (folderMenu && !folderMenu.classList.contains("hidden")) folderMenu.classList.add("hidden");
   }
   if (!event.target.closest(".video-folder-picker")) {
-    document.querySelectorAll(".video-folder-menu").forEach((menu) => menu.classList.add("hidden"));
+    document.querySelectorAll(".video-folder-menu").forEach((menu) => {
+      menu.classList.add("hidden");
+      menu.closest("article")?.classList.remove("z-50");
+    });
   }
 });
 
