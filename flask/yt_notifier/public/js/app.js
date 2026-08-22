@@ -730,6 +730,7 @@ function videoCard(video, categories = []) {
   const isLong = Boolean(video.isLong);
   const isPlaylist = Boolean(video.isPlaylist);
   const currentCat = video.channelCategory || "";
+  const folderTagWidth = Math.max(58, 38 + (currentCat || "+ Folder").length * 6);
   const cardTone = isNew
     ? isPlaylist
       ? "bg-slate-900/90 border-slate-800 ring-1 ring-amber-500/30"
@@ -747,9 +748,13 @@ function videoCard(video, categories = []) {
     ? "text-slate-200 group-hover:text-white"
     : "text-slate-500 group-hover:text-slate-300";
 
-  const optionsHtml = (categories || []).map((cat) => `
-    <option value="${esc(cat)}" ${cat.toLowerCase() === currentCat.toLowerCase() ? "selected" : ""}>📁 ${esc(cat)}</option>
-  `).join("");
+  const folderOptionsHtml = (categories || []).map((cat) => {
+    const encodedCategory = encodeURIComponent(cat);
+    const active = cat.toLowerCase() === currentCat.toLowerCase();
+    return `<button type="button" onclick="selectVideoFolder(event, '${encodedCategory}', '${esc(video.channelId)}', '${esc(video._id)}')" class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-[11px] font-semibold transition ${active ? "bg-red-600 text-white" : "text-slate-200 hover:bg-slate-700"}">
+      <i class="fa-solid fa-folder text-[10px] ${active ? "text-amber-300" : "text-amber-400"}"></i>${esc(cat)}
+    </button>`;
+  }).join("");
 
   return `
   <article class="motion-card group soft-panel ${cardTone} border rounded-none overflow-hidden transition-all duration-300 hover:-translate-y-1">
@@ -788,10 +793,19 @@ function videoCard(video, categories = []) {
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 min-w-0">
             <span class="truncate text-sm font-semibold ${channelTone} transition">${esc(video.channelName)}</span>
-            <select onchange="changeChannelFolderFromCard(this.value, '${esc(video.channelId)}')" class="flex-shrink-0 rounded bg-red-950/80 border border-red-800/60 px-1.5 py-0.5 text-[10px] font-bold text-red-300 outline-none transition cursor-pointer hover:bg-red-900/90" title="Change folder for ${esc(video.channelName)}">
-              <option value="" ${!currentCat ? "selected" : ""}>+ Folder</option>
-              ${optionsHtml}
-            </select>
+            <div class="video-folder-picker relative flex-shrink-0">
+              <button type="button" onclick="toggleVideoFolderMenu(event, '${esc(video._id)}')" style="width: ${folderTagWidth}px" class="inline-flex items-center gap-1 rounded bg-red-950/80 border border-red-800/60 px-1.5 py-0.5 text-[10px] font-bold text-red-300 outline-none transition hover:bg-red-900/90" title="Change folder for ${esc(video.channelName)}">
+                <i class="fa-solid fa-folder text-[9px] text-amber-300"></i>
+                <span class="truncate">${esc(currentCat || "+ Folder")}</span>
+                <i class="fa-solid fa-chevron-down ml-auto text-[8px] text-red-200"></i>
+              </button>
+              <div id="video-folder-menu-${esc(video._id)}" class="video-folder-menu hidden absolute left-0 top-full z-50 mt-1 w-max min-w-full overflow-hidden rounded border border-red-800/80 bg-red-950/95 py-1 shadow-xl shadow-black/50">
+                <button type="button" onclick="selectVideoFolder(event, '', '${esc(video.channelId)}', '${esc(video._id)}')" class="flex w-full items-center gap-2 whitespace-nowrap px-3 py-1.5 text-left text-[11px] font-semibold transition ${!currentCat ? "bg-red-600 text-white" : "text-slate-200 hover:bg-slate-700"}">
+                  <i class="fa-solid fa-folder-plus text-[10px] text-amber-300"></i>+ Folder
+                </button>
+                ${folderOptionsHtml}
+              </div>
+            </div>
           </div>
           <div class="mt-0.5 text-xs text-slate-500" title="${esc(isoDate(video.published))}">${esc(timeLabel(video.published))}</div>
         </div>
@@ -830,6 +844,23 @@ window.toggleWatchLater = async function toggleWatchLater(id) {
   } catch (err) {
     flash(err.message, "danger");
   }
+};
+
+window.toggleVideoFolderMenu = function toggleVideoFolderMenu(event, videoId) {
+  event.stopPropagation();
+  const menu = document.getElementById(`video-folder-menu-${videoId}`);
+  if (!menu) return;
+  document.querySelectorAll(".video-folder-menu").forEach((item) => {
+    if (item !== menu) item.classList.add("hidden");
+  });
+  menu.classList.toggle("hidden");
+};
+
+window.selectVideoFolder = async function selectVideoFolder(event, encodedCategory, channelId, videoId) {
+  event.stopPropagation();
+  const menu = document.getElementById(`video-folder-menu-${videoId}`);
+  if (menu) menu.classList.add("hidden");
+  await changeChannelFolderFromCard(decodeURIComponent(encodedCategory), channelId);
 };
 
 window.toggleLong = async function toggleLong(id) {
@@ -1997,6 +2028,9 @@ window.addEventListener("click", (event) => {
   if (!event.target.closest("#folderDropdownBtn")) {
     const folderMenu = document.getElementById("folderDropdownMenu");
     if (folderMenu && !folderMenu.classList.contains("hidden")) folderMenu.classList.add("hidden");
+  }
+  if (!event.target.closest(".video-folder-picker")) {
+    document.querySelectorAll(".video-folder-menu").forEach((menu) => menu.classList.add("hidden"));
   }
 });
 
