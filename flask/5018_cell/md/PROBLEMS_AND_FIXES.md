@@ -1,5 +1,25 @@
 # Problems & Fixes Log
 
+## [2026-08-23 12:14] - F3 Outside-Edit Shortcut and F10 Conflict
+
+**Problem:** F3 opened the Quick Formatter while editing a cell, but outside edit mode users had to use F10 to mark rendered text before returning to F3. Replacing F10 directly with F3 would make it difficult to open the formatter outside edit mode.
+
+**Root Cause:** F3 and F10 had separate context-specific responsibilities, and the outside-edit selection flow had no press-duration distinction.
+
+**Solution:** Made F3 context-sensitive:
+1. While editing a cell, F3 opens the Quick Formatter as before.
+2. Outside edit mode, a quick F3 press uses the hover word/span selection flow.
+3. Holding F3 for 400 ms opens the Quick Formatter for that selection.
+4. Removed the standalone F10 keyboard handler to prevent the old shortcut from remaining active.
+
+**Files Modified:**
+- `static/script.js` — added hold detection and removed the F10 handler
+- `md/KEYBOARD_SHORTCUTS.md` — documented the new F3 behavior
+
+**Related Issues:** This keeps one shortcut available for both editing and outside-edit formatting without making a short outside-edit press open the formatter immediately.
+
+---
+
 ## [2026-08-15 20:00] - Pasted Multi-Line Content Becomes Single Line
 
 **Problem:** When pasting multi-line text content into a cell, all newlines were being collapsed into a single line with spaces. This forced users to manually re-enter newlines after pasting.

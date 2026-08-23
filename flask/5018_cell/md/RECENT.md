@@ -1,5 +1,29 @@
 # Recent Development Log
 
+## [2026-08-23 12:14] - F3 Outside-Edit Selection and F10 Shortcut Removal
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+
+### ⌨️ Context-sensitive F3 shortcut
+- F3 continues to open the Quick Formatter while a cell is being edited.
+- Outside edit mode, a quick F3 press selects the hovered word; pressing F3 on another word extends the selection span.
+- Holding F3 for 400 ms opens the Quick Formatter for the outside-edit selection.
+- Removed the standalone F10 hover-selection shortcut.
+
+**Files Modified:**
+- `static/script.js` — context-sensitive F3 handling and F10 shortcut removal
+- `md/KEYBOARD_SHORTCUTS.md` — updated shortcut reference
+- `md/RECENT.md` — recorded this session
+- `md/PROBLEMS_AND_FIXES.md` — documented the shortcut conflict and fix
+
+**Current Status:**
+- ✅ F3 supports both edit-mode formatting and outside-edit selection/formatting.
+- ✅ F10 no longer triggers the application hover-selection behavior.
+
+---
+
 ## [2026-08-15 20:15] - Fixed Paste Newline Collapse Issue
 
 **Session Duration:** 0.5 hours

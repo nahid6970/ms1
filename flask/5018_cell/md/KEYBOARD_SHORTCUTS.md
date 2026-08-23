@@ -23,9 +23,8 @@ Complete guide to all keyboard shortcuts available in the application.
 ### Basic Editing
 | Shortcut | Description |
 |----------|-------------|
-| **F3** | Open Quick Markdown Formatter (with text selected) |
+| **F3** | In edit mode, open the Quick Markdown Formatter; outside edit mode, quick-press to select the hovered word/span or hold to open the formatter |
 | **F8** | Search word under cursor/selection and copy to clipboard |
-| **F10** | Mark hovered word span for F3 formatting or draft text preview without entering edit mode |
 | **F9** | Swap two words separated by space/comma (with text selected) |
 | **Ctrl+S** | Save data (manual save) |
 | **Alt+N** | Quick add row |
@@ -61,7 +60,13 @@ When text is selected, press F3 to open the formatter with these options:
 - **🔄 Find & Replace Syntax** - Replace syntax patterns in entire cell
 - **🔍➡️ Find & Replace Text** - Simple text search and replace in cell
 - **🛠️ Syntax Inspector** - Inspect nested syntaxes and reorder them
-- **F10** - Hover-select one word, then another word in the same cell to mark the full span for F3; while active, text keys, Backspace/Delete, Shift+Enter, and Tab update a temporary draft overlay, Enter commits it, Escape cancels it, and arrows move the selection before a draft starts. If the same visible text appears multiple times, F10 labels the rendered occurrences with `v1`, `v2`, etc.; end your draft with `v2` to commit to that numbered match.
+
+### Outside-Edit F3 Behavior
+When the mouse is over rendered cell text and the cell is not being edited:
+- A quick **F3** press marks the hovered word for formatting.
+- Press **F3** on a second word in the same cell to extend the marked span.
+- Hold **F3** for 400 ms or longer to open the Quick Formatter for the marked span.
+- The former **F10** hover-selection shortcut has been removed.
 
 ---
 
