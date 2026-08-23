@@ -25,6 +25,8 @@ let f10HighlightOverlay = null;
 let f10MatchOverlay = null;
 let f10ActiveIndicator = null;
 let f10DraftOverlay = null;
+let f3OutsidePress = null;
+const F3_HOLD_DELAY = 400;
 
 /**
  * MULTI-CELL OPERATION PATTERN:
@@ -55,6 +57,7 @@ function initializeApp() {
 
     // Set up keyboard shortcuts
     document.addEventListener('keydown', handleKeyboardShortcuts, true); // Use capture phase
+    document.addEventListener('keyup', handleKeyboardShortcutKeyUp, true);
 
     // Prevent scroll jump on Enter, Cut, and other operations in textareas
     document.addEventListener('beforeinput', e => {
@@ -1270,6 +1273,97 @@ function getHoverFormatterSelection() {
     return null;
 }
 
+function isEditingCellElement(element) {
+    if (!element || !element.closest) return false;
+
+    const isCellEditor = (element.classList && element.classList.contains('markdown-preview') && element.isContentEditable) ||
+        ((element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') && element.closest('td[data-row][data-col]'));
+
+    return !!(isCellEditor && element.closest('td[data-row][data-col]'));
+}
+
+function openQuickFormatterFromF10Selection() {
+    if (!f10FormatterAnchor) return false;
+
+    const liveInput = getF10CurrentInput();
+    if (!liveInput) {
+        clearF10SelectionMode();
+        showToast('F10 selection expired', 'warning');
+        return false;
+    }
+
+    f10FormatterAnchor.input = liveInput;
+    showQuickFormatter(liveInput, {
+        isContentEditable: false,
+        start: f10FormatterAnchor.start,
+        end: f10FormatterAnchor.end,
+        noRefocus: true
+    });
+    return true;
+}
+
+function markF10SelectionFromHover() {
+    const hoverPick = getHoverFormatterSelection();
+    if (!hoverPick) {
+        showToast('Hover over a cell word first', 'warning');
+        return false;
+    }
+
+    let start = hoverPick.start;
+    let end = hoverPick.end;
+    let previewRange = hoverPick.previewRange || null;
+    const sameAnchor = f10FormatterAnchor &&
+        f10FormatterAnchor.input === hoverPick.input &&
+        f10FormatterAnchor.start !== hoverPick.start;
+
+    if (sameAnchor) {
+        start = Math.min(f10FormatterAnchor.start, hoverPick.start);
+        end = Math.max(f10FormatterAnchor.end, hoverPick.end);
+        previewRange = mergeF10PreviewRanges(f10FormatterAnchor.previewRange, hoverPick.previewRange);
+    }
+
+    clearF10SelectionHighlight();
+    const anchorCell = hoverPick.input.closest('td[data-row][data-col]');
+    f10FormatterAnchor = {
+        input: hoverPick.input,
+        rowIndex: anchorCell ? parseInt(anchorCell.dataset.row) : undefined,
+        colIndex: anchorCell ? parseInt(anchorCell.dataset.col) : undefined,
+        start,
+        end,
+        previewRange,
+        rawText: hoverPick.input.value.substring(start, end),
+        matches: sameAnchor ? null : hoverPick.matches
+    };
+    showF10SelectionHighlight(f10FormatterAnchor);
+    showF10MatchLabels(f10FormatterAnchor, true);
+    updateF10ActiveIndicator();
+    return true;
+}
+
+function handleF3OutsidePress() {
+    if (!f3OutsidePress || f3OutsidePress.holdOpened) return;
+
+    f3OutsidePress.holdOpened = true;
+    if (!openQuickFormatterFromF10Selection()) {
+        const hoverPick = getHoverFormatterSelection();
+        if (hoverPick) {
+            showQuickFormatter(hoverPick.input, {
+                isContentEditable: false,
+                start: hoverPick.start,
+                end: hoverPick.end,
+                noRefocus: true
+            });
+        }
+    }
+}
+
+function handleKeyboardShortcutKeyUp(e) {
+    if (e.key !== 'F3' || !f3OutsidePress) return;
+
+    if (f3OutsidePress.timer) clearTimeout(f3OutsidePress.timer);
+    f3OutsidePress = null;
+}
+
 
 
 function handleKeyboardShortcuts(e) {
@@ -1420,25 +1514,26 @@ function handleKeyboardShortcuts(e) {
     // F3 to open quick markdown formatter
     if (e.key === 'F3') {
         e.preventDefault();
-        if (f10FormatterAnchor) {
-            const liveInput = getF10CurrentInput();
-            if (!liveInput) {
-                clearF10SelectionMode();
-                showToast('F10 selection expired', 'warning');
-                return;
-            }
 
-            f10FormatterAnchor.input = liveInput;
-            showQuickFormatter(liveInput, {
-                isContentEditable: false,
-                start: f10FormatterAnchor.start,
-                end: f10FormatterAnchor.end,
-                noRefocus: true
-            });
+        const activeElement = document.activeElement;
+        if (!isEditingCellElement(activeElement)) {
+            // Outside edit mode, a quick press acts like the old F10 hover picker.
+            // Holding F3 opens the formatter for the picked word/span.
+            if (e.repeat || f3OutsidePress) return;
+
+            if (!markF10SelectionFromHover()) return;
+
+            f3OutsidePress = {
+                holdOpened: false,
+                timer: setTimeout(handleF3OutsidePress, F3_HOLD_DELAY)
+            };
             return;
         }
 
-        const activeElement = document.activeElement;
+        if (f10FormatterAnchor) {
+            openQuickFormatterFromF10Selection();
+            return;
+        }
 
         // Open for contenteditable (WYSIWYG mode) - no selection required
         if (activeElement.classList && activeElement.classList.contains('markdown-preview') &&
@@ -1594,45 +1689,10 @@ function handleKeyboardShortcuts(e) {
         }
     }
 
-    // F10 marks the word under the mouse for F3 formatting without entering edit mode.
-    // Press F10 on one word, then F10 on another word in the same cell to mark the full span.
+    // F10 remains supported as a legacy alias for the outside-editing hover picker.
     if (e.key === 'F10') {
         e.preventDefault();
-        const hoverPick = getHoverFormatterSelection();
-        if (!hoverPick) {
-            showToast('Hover over a cell word first', 'warning');
-            return;
-        }
-
-        let start = hoverPick.start;
-        let end = hoverPick.end;
-        let previewRange = hoverPick.previewRange || null;
-        const sameAnchor = f10FormatterAnchor &&
-            f10FormatterAnchor.input === hoverPick.input &&
-            f10FormatterAnchor.start !== hoverPick.start;
-
-        if (sameAnchor) {
-            start = Math.min(f10FormatterAnchor.start, hoverPick.start);
-            end = Math.max(f10FormatterAnchor.end, hoverPick.end);
-            previewRange = mergeF10PreviewRanges(f10FormatterAnchor.previewRange, hoverPick.previewRange);
-        }
-
-        clearF10SelectionHighlight();
-        const anchorCell = hoverPick.input.closest('td[data-row][data-col]');
-        f10FormatterAnchor = {
-            input: hoverPick.input,
-            rowIndex: anchorCell ? parseInt(anchorCell.dataset.row) : undefined,
-            colIndex: anchorCell ? parseInt(anchorCell.dataset.col) : undefined,
-            start,
-            end,
-            previewRange,
-            rawText: hoverPick.input.value.substring(start, end),
-            matches: sameAnchor ? null : hoverPick.matches
-        };
-        showF10SelectionHighlight(f10FormatterAnchor);
-        // Show labels AND the consolidated dropdown on initial F10 trigger
-        showF10MatchLabels(f10FormatterAnchor, true);
-        updateF10ActiveIndicator();
+        markF10SelectionFromHover();
         return;
     }
 
