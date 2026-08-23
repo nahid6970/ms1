@@ -1098,7 +1098,7 @@ function handleF10ActiveKey(e) {
 
     const formatter = document.getElementById('quickFormatter');
     if (formatter && formatter.style.display === 'block') return false;
-    if (e.key === 'F10' || e.key === 'F3') return false;
+    if (e.key === 'F3') return false;
     if (e.ctrlKey || e.metaKey || e.altKey) return false;
 
     const consume = () => {
@@ -1687,13 +1687,6 @@ function handleKeyboardShortcuts(e) {
                 searchInput.focus();
             }
         }
-    }
-
-    // F10 remains supported as a legacy alias for the outside-editing hover picker.
-    if (e.key === 'F10') {
-        e.preventDefault();
-        markF10SelectionFromHover();
-        return;
     }
 
     // F9 to swap two words containing a separator in the middle
