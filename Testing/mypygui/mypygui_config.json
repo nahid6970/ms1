@@ -1373,6 +1373,7 @@
                 "type": "subprocess",
                 "hide": false,
                 "admin": false,
+                "new_terminal": false,
                 "cmd": "taskmgr"
             }
         },
