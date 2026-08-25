@@ -2453,6 +2453,305 @@ class ProcessPopup(QFrame):
         super().leaveEvent(event)
 
 
+# ─── Disk Hover Popup ─────────────────────────────────────────────────────────
+class DiskPopup(QFrame):
+    """Frameless popup showing per-drive usage + read/write I/O speed.
+    Appears on hover over either disk button; auto-refreshes every 2s.
+    """
+    HOVER_DELAY_MS = 250
+    REFRESH_MS     = 2000
+    ACCENT         = CP_GREEN   # green border/accent — distinct from cyan/orange
+
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint
+                         | Qt.WindowType.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self._anchor_btn   = None
+        self._cursor_inside = False
+        # per-drive I/O baseline for delta read/write speed
+        self._io_last: dict = {}   # {mountpoint: (read_bytes, write_bytes)}
+
+        self.setStyleSheet(
+            f"DiskPopup {{ background: {CP_BG}; border: 1px solid {self.ACCENT}; }}"
+        )
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(1, 1, 1, 1)
+        outer.setSpacing(0)
+
+        inner = QWidget()
+        inner.setStyleSheet(f"background: {CP_BG};")
+        outer.addWidget(inner)
+
+        self._vbox = QVBoxLayout(inner)
+        self._vbox.setContentsMargins(6, 4, 6, 6)
+        self._vbox.setSpacing(0)
+
+        # ── header ───────────────────────────────────────────────────────
+        hdr_row = QHBoxLayout()
+        hdr_row.setContentsMargins(0, 0, 0, 4)
+        hdr_row.setSpacing(4)
+        hdr = QLabel("  💾  DISK DRIVES")
+        hdr.setStyleSheet(
+            f"color: {self.ACCENT}; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 9pt; font-weight: bold; background: transparent; border: none;"
+        )
+        hdr_row.addWidget(hdr)
+        hdr_row.addStretch()
+        close_btn = QPushButton("✕")
+        close_btn.setFixedSize(18, 18)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+            f"font-size: 9pt; font-weight: bold; padding: 0; }}"
+            f"QPushButton:hover {{ color: {CP_RED}; }}"
+        )
+        close_btn.clicked.connect(self.hide)
+        hdr_row.addWidget(close_btn)
+        self._vbox.addLayout(hdr_row)
+
+        # ── separator ────────────────────────────────────────────────────
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px;")
+        self._vbox.addWidget(sep)
+
+        # ── column header ────────────────────────────────────────────────
+        col_w = QWidget()
+        col_w.setStyleSheet("background: transparent; border: none;")
+        col_row = QHBoxLayout(col_w)
+        col_row.setContentsMargins(2, 2, 2, 0)
+        col_row.setSpacing(0)
+        col_style = (
+            f"color: #aaaaaa; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 8pt; background: transparent; border: none;"
+        )
+        c_drv  = QLabel("DRIVE");  c_drv.setStyleSheet(col_style)
+        c_used = QLabel("USED / TOTAL G"); c_used.setFixedWidth(110); c_used.setStyleSheet(col_style)
+        c_pct  = QLabel("USE%");   c_pct.setFixedWidth(46);  c_pct.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_pct.setStyleSheet(col_style)
+        c_rd   = QLabel("R MB/s"); c_rd.setFixedWidth(62);   c_rd.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_rd.setStyleSheet(col_style)
+        c_wr   = QLabel("W MB/s"); c_wr.setFixedWidth(62);   c_wr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_wr.setStyleSheet(col_style)
+        col_row.addWidget(c_drv); col_row.addStretch()
+        col_row.addWidget(c_used); col_row.addWidget(c_pct)
+        col_row.addWidget(c_rd);  col_row.addWidget(c_wr)
+        self._vbox.addWidget(col_w)
+
+        # ── drive rows container (rebuilt on refresh) ─────────────────────
+        self._rows_widget = QWidget()
+        self._rows_widget.setStyleSheet("background: transparent; border: none;")
+        self._rows_vbox = QVBoxLayout(self._rows_widget)
+        self._rows_vbox.setContentsMargins(0, 2, 0, 0)
+        self._rows_vbox.setSpacing(1)
+        self._vbox.addWidget(self._rows_widget)
+
+        # ── timers ────────────────────────────────────────────────────────
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.setInterval(self.REFRESH_MS)
+        self._refresh_timer.timeout.connect(self._refresh)
+
+        self._show_timer = QTimer(self)
+        self._show_timer.setSingleShot(True)
+        self._show_timer.setInterval(self.HOVER_DELAY_MS)
+        self._show_timer.timeout.connect(self._do_show)
+
+    # ── data ──────────────────────────────────────────────────────────────
+
+    def _get_drive_data(self):
+        """Return list of dicts with usage + I/O delta for each active drive."""
+        drives = get_active_drives()
+        result = []
+        try:
+            io_all = psutil.disk_io_counters(perdisk=True)
+        except Exception:
+            io_all = {}
+
+        # psutil perdisk keys on Windows are like "PhysicalDrive0" — map via
+        # partition device path when possible; fall back to no-speed display
+        # Build a mountpoint→(read,write) map using partition device names
+        part_map: dict = {}
+        try:
+            for p in psutil.disk_partitions(all=False):
+                dev = p.device.replace("\\", "").replace("/", "").upper()  # e.g. "C:"
+                # find matching io key heuristically (same drive letter in key)
+                for k, v in io_all.items():
+                    if dev.rstrip(":") in k.upper():
+                        part_map[p.mountpoint] = (v.read_bytes, v.write_bytes)
+                        break
+        except Exception:
+            pass
+
+        now = time.time()
+        elapsed = max(self._io_last.get("_t", now - self.REFRESH_MS / 1000.0 - 0.001),
+                      now - 60)  # cap at 60s
+        dt = now - elapsed if now > elapsed else self.REFRESH_MS / 1000.0
+
+        for mp in drives:
+            try:
+                usage = psutil.disk_usage(mp)
+                used_gb  = usage.used  / (1024**3)
+                total_gb = usage.total / (1024**3)
+                pct      = usage.percent
+
+                # I/O speed MB/s
+                r_speed = w_speed = None
+                if mp in part_map:
+                    r_now, w_now = part_map[mp]
+                    if mp in self._io_last:
+                        r_prev, w_prev = self._io_last[mp]
+                        r_speed = max(0.0, (r_now - r_prev) / dt / (1024**2))
+                        w_speed = max(0.0, (w_now - w_prev) / dt / (1024**2))
+                    self._io_last[mp] = (r_now, w_now)
+
+                result.append({
+                    "mp": mp,
+                    "used_gb": used_gb,
+                    "total_gb": total_gb,
+                    "pct": pct,
+                    "r_speed": r_speed,
+                    "w_speed": w_speed,
+                })
+            except Exception:
+                pass
+
+        self._io_last["_t"] = now
+        return result
+
+    def _refresh(self):
+        """Rebuild drive rows with fresh data."""
+        # clear old rows
+        while self._rows_vbox.count():
+            item = self._rows_vbox.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
+
+        base = (
+            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
+            f"background: transparent; border: none;"
+        )
+        drives = self._get_drive_data()
+
+        for d in drives:
+            mp       = d["mp"].rstrip("\\")   # "C:" / "D:"
+            used_gb  = d["used_gb"]
+            total_gb = d["total_gb"]
+            pct      = d["pct"]
+            r_speed  = d["r_speed"]
+            w_speed  = d["w_speed"]
+
+            # heat color for usage %
+            if pct >= 90:
+                pct_color = CP_RED
+            elif pct >= 70:
+                pct_color = CP_YELLOW
+            else:
+                pct_color = self.ACCENT
+
+            row_w = QWidget()
+            row_w.setStyleSheet(
+                f"QWidget {{ background: transparent; border: none; }}"
+                f"QWidget:hover {{ background: {CP_PANEL}; }}"
+            )
+            row_h = QHBoxLayout(row_w)
+            row_h.setContentsMargins(2, 2, 2, 2)
+            row_h.setSpacing(0)
+
+            # drive letter label
+            drv_lbl = QLabel(mp)
+            drv_lbl.setFixedWidth(34)
+            drv_lbl.setStyleSheet(f"color: {self.ACCENT}; font-weight: bold; " + base)
+
+            # used / total
+            used_lbl = QLabel(f"{used_gb:.1f} / {total_gb:.1f} G")
+            used_lbl.setFixedWidth(110)
+            used_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
+
+            # usage %
+            pct_lbl = QLabel(f"{pct:.1f}%")
+            pct_lbl.setFixedWidth(46)
+            pct_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            pct_lbl.setStyleSheet(f"color: {pct_color}; font-weight: bold; " + base)
+
+            # read speed
+            r_txt = f"{r_speed:.1f}" if r_speed is not None else "—"
+            r_lbl = QLabel(r_txt)
+            r_lbl.setFixedWidth(62)
+            r_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            r_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
+
+            # write speed
+            w_txt = f"{w_speed:.1f}" if w_speed is not None else "—"
+            w_lbl = QLabel(w_txt)
+            w_lbl.setFixedWidth(62)
+            w_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            w_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
+
+            row_h.addWidget(drv_lbl)
+            row_h.addStretch()
+            row_h.addWidget(used_lbl)
+            row_h.addWidget(pct_lbl)
+            row_h.addWidget(r_lbl)
+            row_h.addWidget(w_lbl)
+            self._rows_vbox.addWidget(row_w)
+
+        self.adjustSize()
+
+    # ── show / hide ───────────────────────────────────────────────────────
+
+    def schedule_show(self, anchor_btn):
+        self._anchor_btn = anchor_btn
+        if not self.isVisible():
+            self._show_timer.start()
+
+    def cancel_show(self):
+        self._show_timer.stop()
+        QTimer.singleShot(120, self._check_hide)
+
+    def _do_show(self):
+        self._refresh()
+        self._position_popup()
+        self.show()
+        self.raise_()
+        self._refresh_timer.start()
+
+    def _position_popup(self):
+        if self._anchor_btn is None:
+            return
+        try:
+            docked = load_config().get("statusbar", {}).get("docked", False)
+            btn_gpos = self._anchor_btn.mapToGlobal(QPoint(0, 0))
+            btn_h    = self._anchor_btn.height()
+            self.adjustSize()
+            ph, pw = self.height(), self.width()
+            y = (btn_gpos.y() + btn_h + 2) if docked else (btn_gpos.y() - ph - 2)
+            x = btn_gpos.x()
+            try:
+                scr   = QApplication.screenAt(btn_gpos) or QApplication.primaryScreen()
+                avail = scr.availableGeometry()
+                x = max(avail.left() + 2, min(x, avail.right() - pw - 4))
+                y = max(avail.top() + 2, y) if docked else min(avail.bottom() - ph - 4, y)
+            except Exception:
+                pass
+            self.move(x, y)
+        except Exception as e:
+            logging.warning(f"DiskPopup position: {e}")
+
+    def _check_hide(self):
+        if not self._cursor_inside and self.isVisible():
+            self.hide()
+            self._refresh_timer.stop()
+
+    def enterEvent(self, event):
+        self._cursor_inside = True
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._cursor_inside = False
+        QTimer.singleShot(120, self._check_hide)
+        super().leaveEvent(event)
+
+
+
 def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     """Add a menu item rendered as rich colored HTML (matches tooltip style).
     QMenu actions cannot render HTML, so each item is a QWidgetAction hosting
@@ -4885,6 +5184,15 @@ class StatusBar(QMainWindow):
         _attach_proc_popup(self.lb_ram, self._ram_popup)
         self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_drive(self.lb_duc, "drive_c", 0); rl.addWidget(self.lb_duc)
         self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_drive(self.lb_dud, "drive_d", 1); rl.addWidget(self.lb_dud)
+        # ── Disk hover popup (shared by both drive buttons) ────────────────
+        self._disk_popup = DiskPopup()
+        def _attach_disk_popup(btn):
+            _oe, _ol = btn.enterEvent, btn.leaveEvent
+            def _enter(ev): self._disk_popup.schedule_show(btn); _oe(ev)
+            def _leave(ev): self._disk_popup.cancel_show(); _ol(ev)
+            btn.enterEvent = _enter; btn.leaveEvent = _leave
+        _attach_disk_popup(self.lb_duc)
+        _attach_disk_popup(self.lb_dud)
         _st_cfg = load_config().get("static_bindings", {}).get("settings", {}); settings_bt = IconLabel("⚙", _st_cfg); _apply_static_style(settings_bt, "settings")
         if not _st_cfg: settings_bt.setStyleSheet(f"color: {CP_DIM}; font-size: 12pt; background: transparent;")
         settings_bt.mousePressEvent = lambda e: (self._open_unified_settings() if not e.modifiers() & Qt.KeyboardModifier.ShiftModifier else _open_static_edit("settings")); rl.addWidget(settings_bt)
