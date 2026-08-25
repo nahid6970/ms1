@@ -86,9 +86,10 @@ All in `mypygui_qt.py`:
   - Added `-c gc.auto=0 --no-optional-locks` and `timeout=3s` to all git polling functions, preventing background maintenance tasks, index lock file contention, and hanging orphan processes.
   - Added `_git_loop_started` guard to prevent duplicate polling thread spawns.
 
-- **FIX: `NetPopup` dynamic shrink & empty process state**:
-  - Added fallback `no active transfers` label when `proc_snap` returns an empty process list so the popup maintains clear status rather than showing a blank space.
-  - Used `self.setFixedSize(hint)` in `_fit_and_reposition()` paired with `layout().invalidate()` / `layout().activate()` to force Windows DWM to shrink top-level frameless popups immediately when the active process count decreases.
+- **FIX: `NetPopup` text clipping and dynamic row pooling**:
+  - Replaced destructive widget rebuilds (`takeAt`/`deleteLater`) with pre-built row pools (`_proc_rows` and `_nic_rows`) like `ProcessPopup`.
+  - Hiding and showing pre-allocated rows allows Qt's native `adjustSize()` to calculate the exact, complete window bounds including bottom margins, eliminating bottom row text clipping.
+  - Separate `_proc_container` and `_nic_container` toggle cleanly without layout shifts or extra spacing.
 
 ## 4. Pending Task
 Live-test workspace app rules: right-click a dot → assign an exe → launch it → confirm it opens on that workspace; remove the rule afterwards.

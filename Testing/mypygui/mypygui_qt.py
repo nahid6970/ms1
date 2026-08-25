@@ -2829,14 +2829,14 @@ class NetPopup(QFrame):
         # ── separator ────────────────────────────────────────────────────
         sep = QFrame()
         sep.setFrameShape(QFrame.Shape.HLine)
-        sep.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px;")
+        sep.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px; margin-top: 2px; margin-bottom: 2px;")
         self._vbox.addWidget(sep)
 
         # ── column header ────────────────────────────────────────────────
         col_w = QWidget()
         col_w.setStyleSheet("background: transparent; border: none;")
         col_row = QHBoxLayout(col_w)
-        col_row.setContentsMargins(2, 2, 2, 0)
+        col_row.setContentsMargins(2, 2, 2, 2)
         col_row.setSpacing(0)
         col_style = (
             f"color: #aaaaaa; font-family: 'JetBrainsMono NFP', Consolas; "
@@ -2847,7 +2847,6 @@ class NetPopup(QFrame):
         c_dn  = QLabel("▼ MB/s");  c_dn.setFixedWidth(64);   c_dn.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_dn.setStyleSheet(col_style)
         c_ts  = QLabel("SENT G");  c_ts.setFixedWidth(58);   c_ts.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_ts.setStyleSheet(col_style)
         c_tr  = QLabel("RECV G");  c_tr.setFixedWidth(58);   c_tr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_tr.setStyleSheet(col_style)
-        # store for dynamic updates in _refresh
         self._col_nic, self._col_up, self._col_dn = c_nic, c_up, c_dn
         self._col_ts,  self._col_tr               = c_ts,  c_tr
         col_row.addWidget(c_nic)
@@ -2856,13 +2855,111 @@ class NetPopup(QFrame):
         col_row.addStretch()
         self._vbox.addWidget(col_w)
 
-        # ── NIC rows container ────────────────────────────────────────────
-        self._rows_widget = QWidget()
-        self._rows_widget.setStyleSheet("background: transparent; border: none;")
-        self._rows_vbox = QVBoxLayout(self._rows_widget)
-        self._rows_vbox.setContentsMargins(0, 2, 0, 0)
-        self._rows_vbox.setSpacing(1)
-        self._vbox.addWidget(self._rows_widget)
+        # ── Pre-built process rows container (stable pool, zero clipping) ──
+        self._proc_container = QWidget()
+        self._proc_container.setStyleSheet("background: transparent; border: none;")
+        self._proc_vbox = QVBoxLayout(self._proc_container)
+        self._proc_vbox.setContentsMargins(0, 2, 0, 2)
+        self._proc_vbox.setSpacing(2)
+
+        base = (
+            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
+            f"background: transparent; border: none;"
+        )
+        self._proc_empty_lbl = QLabel("no active transfers")
+        self._proc_empty_lbl.setStyleSheet(f"color: {CP_DIM}; " + base)
+        self._proc_empty_lbl.setFixedHeight(20)
+        self._proc_vbox.addWidget(self._proc_empty_lbl)
+
+        self._proc_rows = []
+        for _ in range(12):
+            row_w = QWidget()
+            row_w.setFixedHeight(20)
+            row_w.setStyleSheet(
+                f"QWidget {{ background: transparent; border: none; }}"
+                f"QWidget:hover {{ background: {CP_PANEL}; }}"
+            )
+            row_h = QHBoxLayout(row_w)
+            row_h.setContentsMargins(2, 0, 2, 0)
+            row_h.setSpacing(0)
+
+            n_lbl = QLabel("")
+            n_lbl.setFixedWidth(170)
+            n_lbl.setFixedHeight(18)
+            n_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
+
+            s_lbl = QLabel("")
+            s_lbl.setFixedWidth(70)
+            s_lbl.setFixedHeight(18)
+            s_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            s_lbl.setStyleSheet(f"color: {self.ACCENT}; font-weight: bold; " + base)
+
+            row_h.addWidget(n_lbl)
+            row_h.addWidget(s_lbl)
+            self._proc_vbox.addWidget(row_w)
+            row_w.hide()
+            self._proc_rows.append((row_w, n_lbl, s_lbl))
+
+        self._vbox.addWidget(self._proc_container)
+
+        # ── Pre-built adapter rows container ──────────────────────────────
+        self._nic_container = QWidget()
+        self._nic_container.setStyleSheet("background: transparent; border: none;")
+        self._nic_vbox = QVBoxLayout(self._nic_container)
+        self._nic_vbox.setContentsMargins(0, 2, 0, 2)
+        self._nic_vbox.setSpacing(2)
+
+        self._nic_empty_lbl = QLabel("no active adapters")
+        self._nic_empty_lbl.setStyleSheet(f"color: {CP_DIM}; " + base)
+        self._nic_empty_lbl.setFixedHeight(20)
+        self._nic_vbox.addWidget(self._nic_empty_lbl)
+
+        self._nic_rows = []
+        for _ in range(6):
+            row_w = QWidget()
+            row_w.setFixedHeight(20)
+            row_w.setStyleSheet(
+                f"QWidget {{ background: transparent; border: none; }}"
+                f"QWidget:hover {{ background: {CP_PANEL}; }}"
+            )
+            row_h = QHBoxLayout(row_w)
+            row_h.setContentsMargins(2, 0, 2, 0)
+            row_h.setSpacing(0)
+
+            nic_l = QLabel(""); nic_l.setFixedWidth(140); nic_l.setFixedHeight(18); nic_l.setStyleSheet(f"color: {CP_TEXT}; " + base)
+            up_l  = QLabel(""); up_l.setFixedWidth(64);   up_l.setFixedHeight(18);  up_l.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); up_l.setStyleSheet(f"color: {self.ACCENT}; font-weight: bold; " + base)
+            dn_l  = QLabel(""); dn_l.setFixedWidth(64);   dn_l.setFixedHeight(18);  dn_l.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); dn_l.setStyleSheet(f"color: {self.ACCENT}; font-weight: bold; " + base)
+            ts_l  = QLabel(""); ts_l.setFixedWidth(58);   ts_l.setFixedHeight(18);  ts_l.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); ts_l.setStyleSheet(f"color: #aaaaaa; " + base)
+            tr_l  = QLabel(""); tr_l.setFixedWidth(58);   tr_l.setFixedHeight(18);  tr_l.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); tr_l.setStyleSheet(f"color: #aaaaaa; " + base)
+
+            row_h.addWidget(nic_l)
+            row_h.addWidget(up_l); row_h.addWidget(dn_l)
+            row_h.addWidget(ts_l); row_h.addWidget(tr_l)
+            self._nic_vbox.addWidget(row_w)
+            row_w.hide()
+            self._nic_rows.append((row_w, nic_l, up_l, dn_l, ts_l, tr_l))
+
+        sep2 = QFrame(); sep2.setFrameShape(QFrame.Shape.HLine)
+        sep2.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px; margin-top: 2px; margin-bottom: 2px;")
+        self._nic_vbox.addWidget(sep2)
+
+        launch_btn = QPushButton("▶  Launch Net Speed Monitor")
+        launch_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        launch_btn.setStyleSheet(
+            f"QPushButton {{ background: {CP_PANEL}; color: {self.ACCENT}; border: 1px solid {CP_DIM}; "
+            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; padding: 3px 8px; }}"
+            f"QPushButton:hover {{ border-color: {self.ACCENT}; }}"
+        )
+        launch_btn.clicked.connect(lambda: (
+            __import__("subprocess").Popen(
+                [__import__("sys").executable,
+                 r"C:\@delta\ms1\tools\net_speed_hooker\net_speed_monitor_wd.py"],
+                creationflags=0x00000008  # DETACHED_PROCESS
+            ),
+            self.hide()
+        ))
+        self._nic_vbox.addWidget(launch_btn)
+        self._vbox.addWidget(self._nic_container)
 
         # ── timers ────────────────────────────────────────────────────────
         self._refresh_timer = QTimer(self)
@@ -2874,7 +2971,7 @@ class NetPopup(QFrame):
         self._show_timer.setInterval(self.HOVER_DELAY_MS)
         self._show_timer.timeout.connect(self._do_show)
 
-    # ── data ──────────────────────────────────────────────────────────────
+    # ── data ────────────────────────────────────────────────────────────
 
     # Shared memory constants (must match net_speed_monitor_wd.py)
     _SHM_NAME = "mypygui_netspeed"
@@ -2936,27 +3033,20 @@ class NetPopup(QFrame):
         return result
 
     def _refresh(self):
-        """Rebuild rows — per-process from shared memory, or NIC-level fallback."""
-        while self._rows_vbox.count():
-            item = self._rows_vbox.takeAt(0)
-            w = item.widget()
-            if w:
-                w.setParent(None)
-                w.deleteLater()
-
+        """Update row content and show/hide rows dynamically."""
         base = (
             f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
             f"background: transparent; border: none;"
         )
 
-        # ── try shared memory (per-process) first ─────────────────────────
         proc_snap = self._read_shm_snapshot()
         if proc_snap is not None:
             self._hdr_lbl.setText("  🌐  NETWORK — PER PROCESS")
             self._col_ts.setVisible(False)
             self._col_tr.setVisible(False)
+            self._nic_container.hide()
+            self._proc_container.show()
 
-            # Show only the relevant speed column based on which button is hovered
             dl_mode = (self._mode == "dl")
             self._col_nic.setText("PROCESS")
             self._col_nic.setFixedWidth(170)
@@ -2971,47 +3061,30 @@ class NetPopup(QFrame):
                 self._col_dn.setVisible(False)
                 self._col_up.setText("▲ MB/s")
 
-            # sort by relevant speed desc
             proc_snap.sort(key=lambda x: x["dl"] if dl_mode else x["ul"], reverse=True)
 
             if not proc_snap:
-                empty = QLabel("no active transfers")
-                empty.setStyleSheet(f"color: {CP_DIM}; " + base)
-                empty.setFixedHeight(20)
-                self._rows_vbox.addWidget(empty)
+                self._proc_empty_lbl.show()
+                for row_w, _, _ in self._proc_rows:
+                    row_w.hide()
             else:
-                for d in proc_snap:
-                    name    = d["name"]
-                    display = name if len(name) <= 20 else name[:18] + "…"
-                    speed   = d["dl"] if dl_mode else d["ul"]
-                    sp_txt  = f"{speed:.2f}"
-                    sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
+                self._proc_empty_lbl.hide()
+                for i, (row_w, n_lbl, s_lbl) in enumerate(self._proc_rows):
+                    if i < len(proc_snap):
+                        d = proc_snap[i]
+                        name = d["name"]
+                        display = name if len(name) <= 20 else name[:18] + "…"
+                        speed = d["dl"] if dl_mode else d["ul"]
+                        sp_txt = f"{speed:.2f}"
+                        sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
 
-                    row_w = QWidget()
-                    row_w.setFixedHeight(22)
-                    row_w.setStyleSheet(
-                        f"QWidget {{ background: transparent; border: none; }}"
-                        f"QWidget:hover {{ background: {CP_PANEL}; }}"
-                    )
-                    row_h = QHBoxLayout(row_w)
-                    row_h.setContentsMargins(2, 0, 2, 0)
-                    row_h.setSpacing(0)
-
-                    name_lbl = QLabel(display)
-                    name_lbl.setFixedWidth(170)
-                    name_lbl.setFixedHeight(20)
-                    name_lbl.setToolTip(name)
-                    name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
-
-                    sp_lbl = QLabel(sp_txt)
-                    sp_lbl.setFixedWidth(70)
-                    sp_lbl.setFixedHeight(20)
-                    sp_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                    sp_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
-
-                    row_h.addWidget(name_lbl)
-                    row_h.addWidget(sp_lbl)
-                    self._rows_vbox.addWidget(row_w)
+                        n_lbl.setText(display)
+                        n_lbl.setToolTip(name)
+                        s_lbl.setText(sp_txt)
+                        s_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+                        row_w.show()
+                    else:
+                        row_w.hide()
 
             self._fit_and_reposition()
             return
@@ -3031,99 +3104,43 @@ class NetPopup(QFrame):
         self._col_tr.setVisible(True)
         self._col_tr.setFixedWidth(58)
 
+        self._proc_container.hide()
+        self._nic_container.show()
+
         nics = self._get_nic_data()
-
         if not nics:
-            empty = QLabel("no active adapters")
-            empty.setStyleSheet(f"color: {CP_DIM}; " + base)
-            self._rows_vbox.addWidget(empty)
+            self._nic_empty_lbl.show()
+            for row_w, *_ in self._nic_rows:
+                row_w.hide()
         else:
-            for d in nics:
-                name    = d["nic"]
-                display = name if len(name) <= 16 else name[:14] + "…"
-                up_txt  = f"{d['up_speed']:.2f}" if d["up_speed"] is not None else "—"
-                dn_txt  = f"{d['dn_speed']:.2f}" if d["dn_speed"] is not None else "—"
-                combined = (d["up_speed"] or 0) + (d["dn_speed"] or 0)
-                sp_color = CP_RED if combined >= 50 else (CP_YELLOW if combined >= 5 else self.ACCENT)
+            self._nic_empty_lbl.hide()
+            for i, (row_w, nic_l, up_l, dn_l, ts_l, tr_l) in enumerate(self._nic_rows):
+                if i < len(nics):
+                    d = nics[i]
+                    name = d["nic"]
+                    display = name if len(name) <= 16 else name[:14] + "…"
+                    up_txt  = f"{d['up_speed']:.2f}" if d["up_speed"] is not None else "—"
+                    dn_txt  = f"{d['dn_speed']:.2f}" if d["dn_speed"] is not None else "—"
+                    combined = (d["up_speed"] or 0) + (d["dn_speed"] or 0)
+                    sp_color = CP_RED if combined >= 50 else (CP_YELLOW if combined >= 5 else self.ACCENT)
 
-                row_w = QWidget()
-                row_w.setFixedHeight(22)
-                row_w.setStyleSheet(
-                    f"QWidget {{ background: transparent; border: none; }}"
-                    f"QWidget:hover {{ background: {CP_PANEL}; }}"
-                )
-                row_h = QHBoxLayout(row_w)
-                row_h.setContentsMargins(2, 0, 2, 0)
-                row_h.setSpacing(0)
-
-                nic_lbl = QLabel(display)
-                nic_lbl.setFixedWidth(140)
-                nic_lbl.setFixedHeight(20)
-                nic_lbl.setToolTip(name)
-                nic_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
-
-                up_lbl = QLabel(up_txt)
-                up_lbl.setFixedWidth(64)
-                up_lbl.setFixedHeight(20)
-                up_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                up_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
-
-                dn_lbl = QLabel(dn_txt)
-                dn_lbl.setFixedWidth(64)
-                dn_lbl.setFixedHeight(20)
-                dn_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                dn_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
-
-                ts_lbl = QLabel(f"{d['sent_g']:.2f}")
-                ts_lbl.setFixedWidth(58)
-                ts_lbl.setFixedHeight(20)
-                ts_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                ts_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
-
-                tr_lbl = QLabel(f"{d['recv_g']:.2f}")
-                tr_lbl.setFixedWidth(58)
-                tr_lbl.setFixedHeight(20)
-                tr_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                tr_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
-
-                row_h.addWidget(nic_lbl)
-                row_h.addWidget(up_lbl); row_h.addWidget(dn_lbl)
-                row_h.addWidget(ts_lbl); row_h.addWidget(tr_lbl)
-                self._rows_vbox.addWidget(row_w)
-
-        # launch button — shown only when monitor is not running
-        sep2 = QFrame(); sep2.setFrameShape(QFrame.Shape.HLine)
-        sep2.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px;")
-        self._rows_vbox.addWidget(sep2)
-
-        launch_btn = QPushButton("▶  Launch Net Speed Monitor")
-        launch_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        launch_btn.setStyleSheet(
-            f"QPushButton {{ background: {CP_PANEL}; color: {self.ACCENT}; border: 1px solid {CP_DIM}; "
-            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; padding: 3px 8px; }}"
-            f"QPushButton:hover {{ border-color: {self.ACCENT}; }}"
-        )
-        launch_btn.clicked.connect(lambda: (
-            __import__("subprocess").Popen(
-                [__import__("sys").executable,
-                 r"C:\@delta\ms1\tools\net_speed_hooker\net_speed_monitor_wd.py"],
-                creationflags=0x00000008  # DETACHED_PROCESS
-            ),
-            self.hide()
-        ))
-        self._rows_vbox.addWidget(launch_btn)
+                    nic_l.setText(display)
+                    nic_l.setToolTip(name)
+                    up_l.setText(up_txt)
+                    up_l.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+                    dn_l.setText(dn_txt)
+                    dn_l.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+                    ts_l.setText(f"{d['sent_g']:.2f}")
+                    tr_l.setText(f"{d['recv_g']:.2f}")
+                    row_w.show()
+                else:
+                    row_w.hide()
 
         self._fit_and_reposition()
 
     def _fit_and_reposition(self):
-        """Force exact content size and reposition anchor."""
-        self.setMinimumSize(0, 0)
-        self.setMaximumSize(16777215, 16777215)
-        if self.layout():
-            self.layout().invalidate()
-            self.layout().activate()
-        hint = self.sizeHint()
-        self.setFixedSize(hint)
+        """Adjust to exact content size and reposition anchor."""
+        self.adjustSize()
         if self.isVisible():
             self._position_popup()
 
