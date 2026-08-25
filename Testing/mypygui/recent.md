@@ -55,7 +55,7 @@ All in `mypygui_qt.py`:
 - `_GIT_SYNC_PS` = adjacent Python literals + `.replace("{path}", ...)` (not an f-string → braces literal).
 - Native Qt tooltips need window focus here → custom `_TipFilter` + always-on-top `_tip_label` (`Qt.ToolTip`, WA_ShowWithoutActivating); git labels + komorebi widget/labels/buttons carry `_tip_text`.
 - Komorebi layout label maps names via `_komorebi_layout_short` (BSP/COL/ROW/VSTK/HSTK/ULTW/GRID/RMAIN); shows ⏸ when paused; `focused_layout` reported separately so layout shows even when focused workspace is beyond the 3 visible dots.
-- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`.
+- Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`, `proc_top_n` (default 8, controls ProcessPopup row count).
 - Komorebi config write path: `~/komorebi.json` (0.1.41, pretty-printed 4-space CRLF, NO trailing newline). `workspace_rules` per workspace = array of {kind, id, matching_strategy} — same shape as `ignore_rules`. Rules apply to apps started AFTER the rule is saved (komorebi applies at window-manage time).
 - File is CRLF; multi-line edits are safest via temp fix scripts.
 
@@ -65,7 +65,9 @@ All in `mypygui_qt.py`:
   - Appears after a **250 ms dwell** on the `lb_cpu` or `lb_ram` button (prevents flicker on quick mouse-over). Auto-refreshes every **2 s** while visible.
   - Header: `🖥 CPU TOP PROCESSES` (cyan border/accent) or `🧠 RAM TOP PROCESSES` (orange border/accent); ↻ manual refresh button + ✕ close button in the header.
   - Column header row: `PROCESS · PID · USAGE` (dim text).
-  - **8 process rows** each showing: rank `#N`, process name (truncated to 22 chars, full name in tooltip), PID, usage `%.1f%` with heat-color (accent < 20%, yellow 20–60%, red ≥ 60%), and a `✕` kill button (hover = red background). Killing a process triggers a 400 ms delayed refresh.
+  - **Configurable N process rows** (default 8, set via Settings → PROCESS MONITOR → TOP N PROCESSES, range 1–30, saved as `proc_top_n` in config). Each row: rank `#N` (purple `#A78BFA`), process name (truncated to 22 chars, full name in tooltip), PID, usage `%.1f%` with heat-color (accent < 20%, yellow 20–60%, red ≥ 60%), and a `✕` kill button (hover = red background). Killing a process triggers a 400 ms delayed refresh.
+  - `_top_n` is read from config on `__init__`; `_do_show` re-reads it and calls `_build_rows` to rebuild if the count changed (no restart needed). `_build_rows` clears existing rows before building.
+  - `RANK_COLOR = "#A78BFA"` (purple) — visually distinct from cyan/orange accents, dim-gray PIDs, and white process names.
   - Data source: `psutil.process_iter(["pid", "name", "cpu_percent"])` for CPU mode; `memory_info.rss / total_memory * 100` for RAM mode.
   - **Positioning**: same above/below logic as `_menu_gpos` — docked bar → popup below button; undocked/bottom bar → popup above button.
   - **Hover-to-popup bridge**: `_attach_proc_popup(btn, popup)` wraps `btn.enterEvent`/`leaveEvent` with `popup.schedule_show(btn)` / `popup.cancel_show()`. A 120 ms grace timer prevents the popup from hiding when the cursor moves from the button into the popup itself (`_cursor_inside` flag in `enterEvent`/`leaveEvent` of the popup).
