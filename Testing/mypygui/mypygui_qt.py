@@ -2252,12 +2252,12 @@ class ProcessPopup(QFrame):
 
             # rank — distinct purple color so it reads separately from names/PIDs
             rank_lbl = QLabel(f"#{i+1}")
-            rank_lbl.setFixedWidth(22)
+            rank_lbl.setFixedWidth(30)
             rank_lbl.setStyleSheet(f"color: {self.RANK_COLOR}; " + base_style)
 
             # process name
             name_lbl = QLabel("—")
-            name_lbl.setFixedWidth(170)
+            name_lbl.setFixedWidth(162)
             name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base_style)
 
             # pid
