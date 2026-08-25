@@ -2974,38 +2974,44 @@ class NetPopup(QFrame):
             # sort by relevant speed desc
             proc_snap.sort(key=lambda x: x["dl"] if dl_mode else x["ul"], reverse=True)
 
-            for d in proc_snap:
-                name    = d["name"]
-                display = name if len(name) <= 20 else name[:18] + "…"
-                speed   = d["dl"] if dl_mode else d["ul"]
-                sp_txt  = f"{speed:.2f}"
-                sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
+            if not proc_snap:
+                empty = QLabel("no active transfers")
+                empty.setStyleSheet(f"color: {CP_DIM}; " + base)
+                empty.setFixedHeight(20)
+                self._rows_vbox.addWidget(empty)
+            else:
+                for d in proc_snap:
+                    name    = d["name"]
+                    display = name if len(name) <= 20 else name[:18] + "…"
+                    speed   = d["dl"] if dl_mode else d["ul"]
+                    sp_txt  = f"{speed:.2f}"
+                    sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
 
-                row_w = QWidget()
-                row_w.setFixedHeight(22)
-                row_w.setStyleSheet(
-                    f"QWidget {{ background: transparent; border: none; }}"
-                    f"QWidget:hover {{ background: {CP_PANEL}; }}"
-                )
-                row_h = QHBoxLayout(row_w)
-                row_h.setContentsMargins(2, 0, 2, 0)
-                row_h.setSpacing(0)
+                    row_w = QWidget()
+                    row_w.setFixedHeight(22)
+                    row_w.setStyleSheet(
+                        f"QWidget {{ background: transparent; border: none; }}"
+                        f"QWidget:hover {{ background: {CP_PANEL}; }}"
+                    )
+                    row_h = QHBoxLayout(row_w)
+                    row_h.setContentsMargins(2, 0, 2, 0)
+                    row_h.setSpacing(0)
 
-                name_lbl = QLabel(display)
-                name_lbl.setFixedWidth(170)
-                name_lbl.setFixedHeight(20)
-                name_lbl.setToolTip(name)
-                name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
+                    name_lbl = QLabel(display)
+                    name_lbl.setFixedWidth(170)
+                    name_lbl.setFixedHeight(20)
+                    name_lbl.setToolTip(name)
+                    name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
 
-                sp_lbl = QLabel(sp_txt)
-                sp_lbl.setFixedWidth(70)
-                sp_lbl.setFixedHeight(20)
-                sp_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                sp_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+                    sp_lbl = QLabel(sp_txt)
+                    sp_lbl.setFixedWidth(70)
+                    sp_lbl.setFixedHeight(20)
+                    sp_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    sp_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
 
-                row_h.addWidget(name_lbl)
-                row_h.addWidget(sp_lbl)
-                self._rows_vbox.addWidget(row_w)
+                    row_h.addWidget(name_lbl)
+                    row_h.addWidget(sp_lbl)
+                    self._rows_vbox.addWidget(row_w)
 
             self._fit_and_reposition()
             return
@@ -3110,12 +3116,14 @@ class NetPopup(QFrame):
         self._fit_and_reposition()
 
     def _fit_and_reposition(self):
-        """Force exact content size (no floor) then reposition anchor."""
+        """Force exact content size and reposition anchor."""
         self.setMinimumSize(0, 0)
         self.setMaximumSize(16777215, 16777215)
-        self.adjustSize()
+        if self.layout():
+            self.layout().invalidate()
+            self.layout().activate()
         hint = self.sizeHint()
-        self.resize(hint)
+        self.setFixedSize(hint)
         if self.isVisible():
             self._position_popup()
 
@@ -3135,24 +3143,19 @@ class NetPopup(QFrame):
         if not hasattr(self, "_mode"):
             self._mode = "dl"
         self._refresh()
-        self._position_popup()
         self.show()
         self.raise_()
+        self._position_popup()
         self._refresh_timer.start()
 
     def _position_popup(self):
         if self._anchor_btn is None:
             return
         try:
-            self.setMinimumSize(0, 0)
-            self.setMaximumSize(16777215, 16777215)
-            self.adjustSize()
-            hint = self.sizeHint()
-            pw, ph = hint.width(), hint.height()
-            self.resize(pw, ph)
-            docked    = load_config().get("statusbar", {}).get("docked", False)
-            btn_gpos  = self._anchor_btn.mapToGlobal(QPoint(0, 0))
-            btn_h     = self._anchor_btn.height()
+            docked   = load_config().get("statusbar", {}).get("docked", False)
+            btn_gpos = self._anchor_btn.mapToGlobal(QPoint(0, 0))
+            btn_h    = self._anchor_btn.height()
+            ph, pw   = self.height(), self.width()
             y = (btn_gpos.y() + btn_h + 2) if docked else (btn_gpos.y() - ph - 2)
             x = btn_gpos.x()
             try:
