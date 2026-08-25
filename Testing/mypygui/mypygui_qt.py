@@ -2317,11 +2317,14 @@ class ProcessPopup(QFrame):
             import psutil as _ps
             procs = []
             if self.mode == "cpu":
-                # cpu_percent needs two calls; use interval=0 for non-blocking
+                # cpu_percent is per-core (can exceed 100% on multi-core);
+                # divide by cpu_count to normalise to 0–100% of total CPU.
+                _ncpu = _ps.cpu_count() or 1
                 for p in _ps.process_iter(["pid", "name", "cpu_percent"]):
                     try:
+                        raw = p.info["cpu_percent"] or 0.0
                         procs.append((p.info["name"] or "?", p.info["pid"],
-                                      p.info["cpu_percent"] or 0.0))
+                                      raw / _ncpu))
                     except (_ps.NoSuchProcess, _ps.AccessDenied):
                         pass
             else:
