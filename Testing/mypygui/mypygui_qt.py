@@ -2751,6 +2751,265 @@ class DiskPopup(QFrame):
         super().leaveEvent(event)
 
 
+# ─── Network Hover Popup ──────────────────────────────────────────────────────
+class NetPopup(QFrame):
+    """Frameless popup showing per-NIC upload/download speed + totals.
+    Appears on hover over the upload or download speed buttons.
+    """
+    HOVER_DELAY_MS = 250
+    REFRESH_MS     = 2000
+    ACCENT         = "#00BFFF"   # deep sky blue — distinct from CPU cyan
+
+    def __init__(self, parent=None):
+        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint
+                         | Qt.WindowType.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self._anchor_btn    = None
+        self._cursor_inside = False
+        self._io_last: dict = {}
+        self._io_last["_t"] = 0.0
+
+        self.setStyleSheet(
+            f"NetPopup {{ background: {CP_BG}; border: 1px solid {self.ACCENT}; }}"
+        )
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(1, 1, 1, 1)
+        outer.setSpacing(0)
+
+        inner = QWidget()
+        inner.setStyleSheet(f"background: {CP_BG};")
+        outer.addWidget(inner)
+
+        self._vbox = QVBoxLayout(inner)
+        self._vbox.setContentsMargins(6, 4, 6, 6)
+        self._vbox.setSpacing(0)
+
+        # ── header ───────────────────────────────────────────────────────
+        hdr_row = QHBoxLayout()
+        hdr_row.setContentsMargins(0, 0, 0, 4)
+        hdr_row.setSpacing(4)
+        hdr = QLabel("  🌐  NETWORK")
+        hdr.setStyleSheet(
+            f"color: {self.ACCENT}; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 9pt; font-weight: bold; background: transparent; border: none;"
+        )
+        hdr_row.addWidget(hdr)
+        hdr_row.addStretch()
+        close_btn = QPushButton("✕")
+        close_btn.setFixedSize(18, 18)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+            f"font-size: 9pt; font-weight: bold; padding: 0; }}"
+            f"QPushButton:hover {{ color: {CP_RED}; }}"
+        )
+        close_btn.clicked.connect(self.hide)
+        hdr_row.addWidget(close_btn)
+        self._vbox.addLayout(hdr_row)
+
+        # ── separator ────────────────────────────────────────────────────
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px;")
+        self._vbox.addWidget(sep)
+
+        # ── column header ────────────────────────────────────────────────
+        col_w = QWidget()
+        col_w.setStyleSheet("background: transparent; border: none;")
+        col_row = QHBoxLayout(col_w)
+        col_row.setContentsMargins(2, 2, 2, 0)
+        col_row.setSpacing(0)
+        col_style = (
+            f"color: #aaaaaa; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 8pt; background: transparent; border: none;"
+        )
+        c_nic = QLabel("ADAPTER");  c_nic.setFixedWidth(140); c_nic.setStyleSheet(col_style)
+        c_up  = QLabel("▲ MB/s");  c_up.setFixedWidth(62);   c_up.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_up.setStyleSheet(col_style)
+        c_dn  = QLabel("▼ MB/s");  c_dn.setFixedWidth(62);   c_dn.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_dn.setStyleSheet(col_style)
+        c_ts  = QLabel("SENT G");  c_ts.setFixedWidth(62);   c_ts.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_ts.setStyleSheet(col_style)
+        c_tr  = QLabel("RECV G");  c_tr.setFixedWidth(62);   c_tr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_tr.setStyleSheet(col_style)
+        col_row.addWidget(c_nic)
+        col_row.addWidget(c_up); col_row.addWidget(c_dn)
+        col_row.addWidget(c_ts); col_row.addWidget(c_tr)
+        col_row.addStretch()
+        self._vbox.addWidget(col_w)
+
+        # ── NIC rows container ────────────────────────────────────────────
+        self._rows_widget = QWidget()
+        self._rows_widget.setStyleSheet("background: transparent; border: none;")
+        self._rows_vbox = QVBoxLayout(self._rows_widget)
+        self._rows_vbox.setContentsMargins(0, 2, 0, 0)
+        self._rows_vbox.setSpacing(1)
+        self._vbox.addWidget(self._rows_widget)
+
+        # ── timers ────────────────────────────────────────────────────────
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.setInterval(self.REFRESH_MS)
+        self._refresh_timer.timeout.connect(self._refresh)
+
+        self._show_timer = QTimer(self)
+        self._show_timer.setSingleShot(True)
+        self._show_timer.setInterval(self.HOVER_DELAY_MS)
+        self._show_timer.timeout.connect(self._do_show)
+
+    # ── data ──────────────────────────────────────────────────────────────
+
+    def _get_nic_data(self):
+        """Return list of dicts per active NIC with speed deltas."""
+        try:
+            counters = psutil.net_io_counters(pernic=True)
+        except Exception:
+            return []
+
+        now    = time.time()
+        prev_t = self._io_last.get("_t", 0.0)
+        dt     = max(now - prev_t, 0.001) if prev_t else self.REFRESH_MS / 1000.0
+
+        result = []
+        for nic, c in counters.items():
+            if c.bytes_sent == 0 and c.bytes_recv == 0:
+                continue
+            up_speed = dn_speed = None
+            if nic in self._io_last:
+                ps, pr = self._io_last[nic]
+                up_speed = max(0.0, (c.bytes_sent - ps) / dt / (1024**2))
+                dn_speed = max(0.0, (c.bytes_recv - pr) / dt / (1024**2))
+            self._io_last[nic] = (c.bytes_sent, c.bytes_recv)
+            result.append({
+                "nic":      nic,
+                "up_speed": up_speed,
+                "dn_speed": dn_speed,
+                "sent_g":   c.bytes_sent / (1024**3),
+                "recv_g":   c.bytes_recv / (1024**3),
+            })
+
+        self._io_last["_t"] = now
+        result.sort(key=lambda x: (
+            (x["up_speed"] or 0) + (x["dn_speed"] or 0),
+            x["sent_g"] + x["recv_g"]
+        ), reverse=True)
+        return result
+
+    def _refresh(self):
+        """Rebuild NIC rows with fresh data."""
+        while self._rows_vbox.count():
+            item = self._rows_vbox.takeAt(0)
+            if item.widget():
+                item.widget().setParent(None)
+
+        base = (
+            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
+            f"background: transparent; border: none;"
+        )
+        nics = self._get_nic_data()
+
+        if not nics:
+            empty = QLabel("no active adapters")
+            empty.setStyleSheet(f"color: {CP_DIM}; " + base)
+            self._rows_vbox.addWidget(empty)
+            self.adjustSize()
+            return
+
+        for d in nics:
+            name    = d["nic"]
+            display = name if len(name) <= 18 else name[:16] + "…"
+            up_txt  = f"{d['up_speed']:.2f}" if d["up_speed"] is not None else "—"
+            dn_txt  = f"{d['dn_speed']:.2f}" if d["dn_speed"] is not None else "—"
+
+            combined = (d["up_speed"] or 0) + (d["dn_speed"] or 0)
+            sp_color = CP_RED if combined >= 50 else (CP_YELLOW if combined >= 5 else self.ACCENT)
+
+            row_w = QWidget()
+            row_w.setStyleSheet(
+                f"QWidget {{ background: transparent; border: none; }}"
+                f"QWidget:hover {{ background: {CP_PANEL}; }}"
+            )
+            row_h = QHBoxLayout(row_w)
+            row_h.setContentsMargins(2, 2, 2, 2)
+            row_h.setSpacing(0)
+
+            nic_lbl = QLabel(display); nic_lbl.setFixedWidth(140); nic_lbl.setToolTip(name)
+            nic_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
+
+            up_lbl = QLabel(up_txt); up_lbl.setFixedWidth(62)
+            up_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            up_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+
+            dn_lbl = QLabel(dn_txt); dn_lbl.setFixedWidth(62)
+            dn_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            dn_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+
+            ts_lbl = QLabel(f"{d['sent_g']:.2f}"); ts_lbl.setFixedWidth(62)
+            ts_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            ts_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
+
+            tr_lbl = QLabel(f"{d['recv_g']:.2f}"); tr_lbl.setFixedWidth(62)
+            tr_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            tr_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
+
+            row_h.addWidget(nic_lbl)
+            row_h.addWidget(up_lbl); row_h.addWidget(dn_lbl)
+            row_h.addWidget(ts_lbl); row_h.addWidget(tr_lbl)
+            self._rows_vbox.addWidget(row_w)
+
+        self.adjustSize()
+
+    # ── show / hide ───────────────────────────────────────────────────────
+
+    def schedule_show(self, anchor_btn):
+        self._anchor_btn = anchor_btn
+        if not self.isVisible():
+            self._show_timer.start()
+
+    def cancel_show(self):
+        self._show_timer.stop()
+        QTimer.singleShot(120, self._check_hide)
+
+    def _do_show(self):
+        self._refresh()
+        self._position_popup()
+        self.show()
+        self.raise_()
+        self._refresh_timer.start()
+
+    def _position_popup(self):
+        if self._anchor_btn is None:
+            return
+        try:
+            docked    = load_config().get("statusbar", {}).get("docked", False)
+            btn_gpos  = self._anchor_btn.mapToGlobal(QPoint(0, 0))
+            btn_h     = self._anchor_btn.height()
+            self.adjustSize()
+            ph, pw = self.height(), self.width()
+            y = (btn_gpos.y() + btn_h + 2) if docked else (btn_gpos.y() - ph - 2)
+            x = btn_gpos.x()
+            try:
+                scr   = QApplication.screenAt(btn_gpos) or QApplication.primaryScreen()
+                avail = scr.availableGeometry()
+                x = max(avail.left() + 2, min(x, avail.right() - pw - 4))
+                y = max(avail.top() + 2, y) if docked else min(avail.bottom() - ph - 4, y)
+            except Exception:
+                pass
+            self.move(x, y)
+        except Exception as e:
+            logging.warning(f"NetPopup position: {e}")
+
+    def _check_hide(self):
+        if not self._cursor_inside and self.isVisible():
+            self.hide()
+            self._refresh_timer.stop()
+
+    def enterEvent(self, event):
+        self._cursor_inside = True
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._cursor_inside = False
+        QTimer.singleShot(120, self._check_hide)
+        super().leaveEvent(event)
+
 
 def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     """Add a menu item rendered as rich colored HTML (matches tooltip style).
@@ -5162,6 +5421,15 @@ class StatusBar(QMainWindow):
         
         self.download_lb = IconLabel("", load_config().get("static_bindings", {}).get("download", {})); _bind_static(self.download_lb, "download", "sniffnet"); rl.addWidget(self.download_lb)
         self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {})); _bind_static(self.upload_lb, "upload", "sniffnet"); rl.addWidget(self.upload_lb)
+        # ── Network hover popup (shared by upload + download buttons) ──────
+        self._net_popup = NetPopup()
+        def _attach_net_popup(btn):
+            _oe, _ol = btn.enterEvent, btn.leaveEvent
+            def _enter(ev): self._net_popup.schedule_show(btn); _oe(ev)
+            def _leave(ev): self._net_popup.cancel_show(); _ol(ev)
+            btn.enterEvent = _enter; btn.leaveEvent = _leave
+        _attach_net_popup(self.download_lb)
+        _attach_net_popup(self.upload_lb)
         self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {})); _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py"); rl.addWidget(self.lb_cpu)
         self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
         self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
