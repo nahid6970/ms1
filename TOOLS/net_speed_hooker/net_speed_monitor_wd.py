@@ -8,6 +8,7 @@ import install_deps
 install_deps.bootstrap(__file__)
 
 import sys, os, psutil, socket, threading, time, json, sqlite3
+from multiprocessing.shared_memory import SharedMemory
 from datetime import datetime
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
@@ -27,6 +28,10 @@ SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 DB_FILE = os.path.join(SETTINGS_DIR, "traffic.db")
 BLOCKED_FILE = os.path.join(SETTINGS_DIR, "blocked.json")
 ICON_FILE = os.path.join(SETTINGS_DIR, "icon.svg")
+
+# Shared memory IPC — live per-process speed snapshot for statusbar popup
+SHM_NAME = "mypygui_netspeed"
+SHM_SIZE = 65536   # 64 KB — plenty for ~100 process entries as JSON
 
 import ipaddress
 
@@ -551,6 +556,16 @@ class App(QMainWindow):
         self.icon_cache = {}; self.icon_provider = QFileIconProvider()
         self.init_ui(); self.init_tray()
         self.timer = QTimer(); self.timer.timeout.connect(self.update_stats); self.timer.start(1000)
+        # Shared memory for live per-process speed IPC (statusbar reads this)
+        self._shm = None
+        try:
+            try:
+                self._shm = SharedMemory(name=SHM_NAME, create=False, size=SHM_SIZE)
+                # already exists from a previous crash — reuse it
+            except FileNotFoundError:
+                self._shm = SharedMemory(name=SHM_NAME, create=True, size=SHM_SIZE)
+        except Exception as e:
+            print(f"[shm] init failed: {e}")
 
     def init_tray(self):
         self.tray_icon = QSystemTrayIcon(self)
@@ -582,6 +597,14 @@ class App(QMainWindow):
     def full_exit(self):
         self.monitor.running = False
         self.save_settings()
+        # Zero out shared memory so statusbar knows monitor stopped, then release
+        if self._shm:
+            try:
+                self._shm.buf[:4] = b'\x00\x00\x00\x00'
+                self._shm.close()
+                self._shm.unlink()
+            except Exception:
+                pass
         QApplication.quit()
 
     def load_settings(self):
@@ -843,6 +866,22 @@ class App(QMainWindow):
         self.tree.viewport().update()
         self._save_db(groups)
         self._sync_blocked()
+        # ── write live snapshot to shared memory for statusbar popup ──────
+        if self._shm:
+            try:
+                snap = [
+                    {"n": name, "d": round(gd["dl_s"] / 1024 / 1024, 4),
+                                "u": round(gd["ul_s"] / 1024 / 1024, 4)}
+                    for name, gd in groups.items()
+                    if gd["dl_s"] > 0 or gd["ul_s"] > 0
+                ]
+                raw = json.dumps(snap, separators=(",", ":")).encode("utf-8")
+                length = len(raw)
+                if length + 4 <= SHM_SIZE:
+                    self._shm.buf[0:4] = length.to_bytes(4, "little")
+                    self._shm.buf[4:4 + length] = raw
+            except Exception as e:
+                print(f"[shm] write failed: {e}")
 
     def _save_db(self, groups):
         # groups is per-name aggregation from update_stats
