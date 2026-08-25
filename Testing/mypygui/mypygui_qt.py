@@ -2159,18 +2159,6 @@ class ProcessPopup(QFrame):
         hdr_row.addWidget(hdr)
         hdr_row.addStretch()
 
-        # small refresh button
-        refresh_btn = QPushButton("↻")
-        refresh_btn.setFixedSize(18, 18)
-        refresh_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        refresh_btn.setStyleSheet(
-            f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
-            f"font-size: 11pt; font-weight: bold; padding: 0; }}"
-            f"QPushButton:hover {{ color: {accent}; }}"
-        )
-        refresh_btn.clicked.connect(self._refresh)
-        hdr_row.addWidget(refresh_btn)
-
         # close button ✕
         close_btn = QPushButton("✕")
         close_btn.setFixedSize(18, 18)
@@ -2197,7 +2185,7 @@ class ProcessPopup(QFrame):
         col_row.setContentsMargins(2, 2, 2, 0)
         col_row.setSpacing(0)
         col_style = (
-            f"color: {CP_DIM}; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"color: #aaaaaa; font-family: 'JetBrainsMono NFP', Consolas; "
             f"font-size: 8pt; background: transparent; border: none;"
         )
         c_name = QLabel("PROCESS"); c_name.setStyleSheet(col_style)
@@ -2253,7 +2241,7 @@ class ProcessPopup(QFrame):
             # rank
             rank_lbl = QLabel(f"#{i+1}")
             rank_lbl.setFixedWidth(22)
-            rank_lbl.setStyleSheet(f"color: {CP_DIM}; " + base_style)
+            rank_lbl.setStyleSheet(f"color: #aaaaaa; " + base_style)
 
             # process name
             name_lbl = QLabel("—")
@@ -2263,7 +2251,7 @@ class ProcessPopup(QFrame):
             # pid
             pid_lbl = QLabel("—")
             pid_lbl.setFixedWidth(52)
-            pid_lbl.setStyleSheet(f"color: {CP_DIM}; " + base_style)
+            pid_lbl.setStyleSheet(f"color: #aaaaaa; " + base_style)
 
             # usage
             use_lbl = QLabel("—")
@@ -2277,9 +2265,9 @@ class ProcessPopup(QFrame):
             kill_btn.setFixedSize(22, 18)
             kill_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             kill_btn.setStyleSheet(
-                f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+                f"QPushButton {{ background: transparent; color: #aaaaaa; border: none; "
                 f"font-size: 9pt; font-weight: bold; padding: 0; }}"
-                f"QPushButton:hover {{ background: {CP_RED}; color: white; }}"
+                f"QPushButton:hover {{ background: transparent; color: {CP_RED}; }}"
             )
             kill_btn.setProperty("proc_pid", -1)
             kill_btn.setProperty("proc_name", "")
