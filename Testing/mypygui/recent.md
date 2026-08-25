@@ -73,6 +73,19 @@ All in `mypygui_qt.py`:
   - **Hover-to-popup bridge**: `_attach_proc_popup(btn, popup)` wraps `btn.enterEvent`/`leaveEvent` with `popup.schedule_show(btn)` / `popup.cancel_show()`. A 120 ms grace timer prevents the popup from hiding when the cursor moves from the button into the popup itself (`_cursor_inside` flag in `enterEvent`/`leaveEvent` of the popup).
   - In `_build_right`: `self._cpu_popup` and `self._ram_popup` created after `lb_cpu`/`lb_ram` `_bind_static` calls; `_attach_proc_popup` wires hover for both.
 
+- **FIX: `NetPopup` dynamic resize & layout spacing / text overlap**:
+  - Removed old fixed size restrictions (`setFixedSize` locking `minimumSize`) which prevented the popup from shrinking when the process list shortened, causing big empty gaps.
+  - Replaced `item.widget().setParent(None)` with `w.setParent(None)` and `w.deleteLater()` during row cleanup so Qt layout resets its cached geometries immediately.
+  - Explicitly fixed row height (`setFixedHeight(22)`) and label heights (`setFixedHeight(20)`) with zero layout margins and matched column widths between headers and rows (170px process name, 70px speed in per-process mode; 140px/64px/64px/58px/58px in adapter mode) preventing text overlap and label clipping.
+  - Updated `_fit_and_reposition()` and `_position_popup()` to reset `setMinimumSize(0, 0)` and dynamic resize via `sizeHint()` so window expands and contracts cleanly.
+
+- **FIX: Git background processes pileup (`git.exe` in CPU/RAM process list)**:
+  - Previously, `check_git_status` ran 3 separate `git` commands sequentially (`git status`, `git branch --show-current`, `git rev-list`) with no timeouts and default git lock / auto-gc behavior.
+  - Combined into a **single atomic command** per repo: `git -c gc.auto=0 --no-optional-locks status --porcelain=v1 -b` with a hard `timeout=3s`.
+  - Extracted branch name and ahead/behind counts directly from the `# branch...upstream [ahead X, behind Y]` porcelain header, cutting git process executions by 67%.
+  - Added `-c gc.auto=0 --no-optional-locks` and `timeout=3s` to all git polling functions, preventing background maintenance tasks, index lock file contention, and hanging orphan processes.
+  - Added `_git_loop_started` guard to prevent duplicate polling thread spawns.
+
 ## 4. Pending Task
 Live-test workspace app rules: right-click a dot → assign an exe → launch it → confirm it opens on that workspace; remove the rule afterwards.
 

@@ -1591,15 +1591,33 @@ class CpuCoreFrame(QWidget):
 
 # ─── Git status ───────────────────────────────────────────────────────────────
 _git_queue = Queue()
+_git_loop_started = False
+
 def check_git_status(repo, q):
-    if not os.path.exists(repo["path"]): q.put({"name": repo["name"], "text": repo["label"], "color": "#000000", "tooltip": "Path not found"}); return
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
-    lines = result.stdout.strip().splitlines()
-    
+    if not os.path.exists(repo["path"]):
+        q.put({"name": repo["name"], "text": repo["label"], "color": "#000000", "tooltip": "Path not found"})
+        return
+    try:
+        # Single command: disable auto-gc/locks, fetch status + branch + upstream info
+        result = subprocess.run(
+            ["git", "-c", "gc.auto=0", "--no-optional-locks", "status", "--porcelain=v1", "-b"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
+        )
+    except Exception:
+        return
+
+    raw_lines = result.stdout.strip().splitlines()
+    if not raw_lines:
+        return
+
+    header = raw_lines[0][3:].strip() if raw_lines[0].startswith("## ") else ""
+    lines = raw_lines[1:] if raw_lines[0].startswith("## ") else raw_lines
+
     config = load_config()
     git_cfg = config.get("git_status_colors", {"rules": ".json:#ff55ff", "default": "#fe1616"})
     default_color = git_cfg.get("default", "#fe1616")
-    
+
     # Parse rules string: ".ext:color, .ext2:color"
     rules = {}
     for rule in git_cfg.get("rules", "").split(","):
@@ -1608,7 +1626,7 @@ def check_git_status(repo, q):
             rules[ext.lower().strip()] = col.strip()
 
     if not lines:
-        color = "#00ff21" # Clean
+        color = "#00ff21"  # Clean
     else:
         # Get all changed extensions
         changed_exts = set()
@@ -1616,40 +1634,37 @@ def check_git_status(repo, q):
             fname = line[3:].strip().lower()
             _, ext = os.path.splitext(fname)
             changed_exts.add(ext)
-        
+
         # If ALL changed files match a single rule, use that rule's color
         if len(changed_exts) == 1:
             ext = list(changed_exts)[0]
             color = rules.get(ext, default_color)
         elif changed_exts.issubset(rules.keys()):
-            # If all files match SOME rules, but there are multiple types, 
-            # we still use the default to show it's a "mixed" dirty state
             color = default_color
         else:
             color = default_color
-            
-    # Current branch (empty when detached or no commits)
-    branch = _get_current_branch(repo["path"])
 
-    # Ahead/behind vs upstream: `git rev-list --left-right --count @{u}...HEAD` prints "behind ahead"
+    # Parse branch name and ahead/behind directly from porcelain header
+    branch = ""
     ahead = behind = 0
-    try:
-        r = subprocess.run(["git", "rev-list", "--left-right", "--count", "@{u}...HEAD"], capture_output=True, text=True, cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW)
-        if r.returncode == 0:
-            parts = r.stdout.strip().split()
-            if len(parts) == 2:
-                try:
-                    behind, ahead = int(parts[0]), int(parts[1])
-                except ValueError:
-                    pass
-    except Exception:
-        pass
+    if header:
+        if header.startswith("HEAD (no branch)") or header.startswith("No commits yet on ") or header.startswith("Initial commit on "):
+            if " on " in header:
+                branch = header.split(" on ", 1)[1].strip()
+            else:
+                branch = ""
+        else:
+            m_branch = re.match(r"^([^.\s\[]+|\S+?)(?:\.\.\.|\s|$)", header)
+            if m_branch:
+                branch = m_branch.group(1).strip()
+            m_ahead = re.search(r"ahead (\d+)", header)
+            if m_ahead:
+                ahead = int(m_ahead.group(1))
+            m_behind = re.search(r"behind (\d+)", header)
+            if m_behind:
+                behind = int(m_behind.group(1))
 
     text = repo["label"]
-    # Note: no ⇡/⇣ arrows on the label — they flashed for 1-2s after pushing
-    # (commit lands before push finishes, so the repo is briefly ahead).
-    # Ahead/behind info is still available in the hover tooltip below.
-
     tip = []
     if branch:
         bcol = branch_color(branch)
@@ -1672,7 +1687,8 @@ def check_git_status(repo, q):
 
 def _git_status_loop(repos, q):
     while True:
-        for repo in repos: check_git_status(repo, q)
+        for repo in repos:
+            check_git_status(repo, q)
         time.sleep(5)
 
 
@@ -2780,7 +2796,6 @@ class NetPopup(QFrame):
 
         inner = QWidget()
         inner.setStyleSheet(f"background: {CP_BG};")
-        inner.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         outer.addWidget(inner)
 
         self._vbox = QVBoxLayout(inner)
@@ -2828,10 +2843,10 @@ class NetPopup(QFrame):
             f"font-size: 8pt; background: transparent; border: none;"
         )
         c_nic = QLabel("ADAPTER");  c_nic.setFixedWidth(140); c_nic.setStyleSheet(col_style)
-        c_up  = QLabel("▲ MB/s");  c_up.setFixedWidth(62);   c_up.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_up.setStyleSheet(col_style)
-        c_dn  = QLabel("▼ MB/s");  c_dn.setFixedWidth(62);   c_dn.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_dn.setStyleSheet(col_style)
-        c_ts  = QLabel("SENT G");  c_ts.setFixedWidth(62);   c_ts.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_ts.setStyleSheet(col_style)
-        c_tr  = QLabel("RECV G");  c_tr.setFixedWidth(62);   c_tr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_tr.setStyleSheet(col_style)
+        c_up  = QLabel("▲ MB/s");  c_up.setFixedWidth(64);   c_up.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_up.setStyleSheet(col_style)
+        c_dn  = QLabel("▼ MB/s");  c_dn.setFixedWidth(64);   c_dn.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_dn.setStyleSheet(col_style)
+        c_ts  = QLabel("SENT G");  c_ts.setFixedWidth(58);   c_ts.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_ts.setStyleSheet(col_style)
+        c_tr  = QLabel("RECV G");  c_tr.setFixedWidth(58);   c_tr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter);  c_tr.setStyleSheet(col_style)
         # store for dynamic updates in _refresh
         self._col_nic, self._col_up, self._col_dn = c_nic, c_up, c_dn
         self._col_ts,  self._col_tr               = c_ts,  c_tr
@@ -2844,7 +2859,6 @@ class NetPopup(QFrame):
         # ── NIC rows container ────────────────────────────────────────────
         self._rows_widget = QWidget()
         self._rows_widget.setStyleSheet("background: transparent; border: none;")
-        self._rows_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self._rows_vbox = QVBoxLayout(self._rows_widget)
         self._rows_vbox.setContentsMargins(0, 2, 0, 0)
         self._rows_vbox.setSpacing(1)
@@ -2925,8 +2939,10 @@ class NetPopup(QFrame):
         """Rebuild rows — per-process from shared memory, or NIC-level fallback."""
         while self._rows_vbox.count():
             item = self._rows_vbox.takeAt(0)
-            if item.widget():
-                item.widget().setParent(None)
+            w = item.widget()
+            if w:
+                w.setParent(None)
+                w.deleteLater()
 
         base = (
             f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
@@ -2943,12 +2959,15 @@ class NetPopup(QFrame):
             # Show only the relevant speed column based on which button is hovered
             dl_mode = (self._mode == "dl")
             self._col_nic.setText("PROCESS")
+            self._col_nic.setFixedWidth(170)
             if dl_mode:
                 self._col_up.setVisible(False)
                 self._col_dn.setVisible(True)
+                self._col_dn.setFixedWidth(70)
                 self._col_dn.setText("▼ MB/s")
             else:
                 self._col_up.setVisible(True)
+                self._col_up.setFixedWidth(70)
                 self._col_dn.setVisible(False)
                 self._col_up.setText("▲ MB/s")
 
@@ -2957,24 +2976,30 @@ class NetPopup(QFrame):
 
             for d in proc_snap:
                 name    = d["name"]
-                display = name if len(name) <= 22 else name[:20] + "…"
+                display = name if len(name) <= 20 else name[:18] + "…"
                 speed   = d["dl"] if dl_mode else d["ul"]
                 sp_txt  = f"{speed:.2f}"
                 sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
 
                 row_w = QWidget()
+                row_w.setFixedHeight(22)
                 row_w.setStyleSheet(
                     f"QWidget {{ background: transparent; border: none; }}"
                     f"QWidget:hover {{ background: {CP_PANEL}; }}"
                 )
                 row_h = QHBoxLayout(row_w)
-                row_h.setContentsMargins(2, 2, 2, 2)
+                row_h.setContentsMargins(2, 0, 2, 0)
                 row_h.setSpacing(0)
 
-                name_lbl = QLabel(display); name_lbl.setFixedWidth(160); name_lbl.setToolTip(name)
+                name_lbl = QLabel(display)
+                name_lbl.setFixedWidth(170)
+                name_lbl.setFixedHeight(20)
+                name_lbl.setToolTip(name)
                 name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
 
-                sp_lbl = QLabel(sp_txt); sp_lbl.setFixedWidth(62)
+                sp_lbl = QLabel(sp_txt)
+                sp_lbl.setFixedWidth(70)
+                sp_lbl.setFixedHeight(20)
                 sp_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 sp_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
 
@@ -2988,12 +3013,17 @@ class NetPopup(QFrame):
         # ── fallback: NIC-level stats ─────────────────────────────────────
         self._hdr_lbl.setText("  🌐  NETWORK — ADAPTER LEVEL")
         self._col_nic.setText("ADAPTER")
+        self._col_nic.setFixedWidth(140)
         self._col_up.setVisible(True)
-        self._col_dn.setVisible(True)
+        self._col_up.setFixedWidth(64)
         self._col_up.setText("▲ MB/s")
+        self._col_dn.setVisible(True)
+        self._col_dn.setFixedWidth(64)
         self._col_dn.setText("▼ MB/s")
         self._col_ts.setVisible(True)
+        self._col_ts.setFixedWidth(58)
         self._col_tr.setVisible(True)
+        self._col_tr.setFixedWidth(58)
 
         nics = self._get_nic_data()
 
@@ -3004,37 +3034,49 @@ class NetPopup(QFrame):
         else:
             for d in nics:
                 name    = d["nic"]
-                display = name if len(name) <= 18 else name[:16] + "…"
+                display = name if len(name) <= 16 else name[:14] + "…"
                 up_txt  = f"{d['up_speed']:.2f}" if d["up_speed"] is not None else "—"
                 dn_txt  = f"{d['dn_speed']:.2f}" if d["dn_speed"] is not None else "—"
                 combined = (d["up_speed"] or 0) + (d["dn_speed"] or 0)
                 sp_color = CP_RED if combined >= 50 else (CP_YELLOW if combined >= 5 else self.ACCENT)
 
                 row_w = QWidget()
+                row_w.setFixedHeight(22)
                 row_w.setStyleSheet(
                     f"QWidget {{ background: transparent; border: none; }}"
                     f"QWidget:hover {{ background: {CP_PANEL}; }}"
                 )
                 row_h = QHBoxLayout(row_w)
-                row_h.setContentsMargins(2, 2, 2, 2)
+                row_h.setContentsMargins(2, 0, 2, 0)
                 row_h.setSpacing(0)
 
-                nic_lbl = QLabel(display); nic_lbl.setFixedWidth(140); nic_lbl.setToolTip(name)
+                nic_lbl = QLabel(display)
+                nic_lbl.setFixedWidth(140)
+                nic_lbl.setFixedHeight(20)
+                nic_lbl.setToolTip(name)
                 nic_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
 
-                up_lbl = QLabel(up_txt); up_lbl.setFixedWidth(62)
+                up_lbl = QLabel(up_txt)
+                up_lbl.setFixedWidth(64)
+                up_lbl.setFixedHeight(20)
                 up_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 up_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
 
-                dn_lbl = QLabel(dn_txt); dn_lbl.setFixedWidth(62)
+                dn_lbl = QLabel(dn_txt)
+                dn_lbl.setFixedWidth(64)
+                dn_lbl.setFixedHeight(20)
                 dn_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 dn_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
 
-                ts_lbl = QLabel(f"{d['sent_g']:.2f}"); ts_lbl.setFixedWidth(62)
+                ts_lbl = QLabel(f"{d['sent_g']:.2f}")
+                ts_lbl.setFixedWidth(58)
+                ts_lbl.setFixedHeight(20)
                 ts_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 ts_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
 
-                tr_lbl = QLabel(f"{d['recv_g']:.2f}"); tr_lbl.setFixedWidth(62)
+                tr_lbl = QLabel(f"{d['recv_g']:.2f}")
+                tr_lbl.setFixedWidth(58)
+                tr_lbl.setFixedHeight(20)
                 tr_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 tr_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
 
@@ -3069,10 +3111,11 @@ class NetPopup(QFrame):
 
     def _fit_and_reposition(self):
         """Force exact content size (no floor) then reposition anchor."""
-        # setFixedSize(sizeHint) is reliable on Windows where adjustSize()
-        # won't shrink a visible window below its previous size.
+        self.setMinimumSize(0, 0)
+        self.setMaximumSize(16777215, 16777215)
+        self.adjustSize()
         hint = self.sizeHint()
-        self.setFixedSize(hint)
+        self.resize(hint)
         if self.isVisible():
             self._position_popup()
 
@@ -3101,12 +3144,15 @@ class NetPopup(QFrame):
         if self._anchor_btn is None:
             return
         try:
-            # Unlock fixed size so the window can be repositioned freely
+            self.setMinimumSize(0, 0)
             self.setMaximumSize(16777215, 16777215)
+            self.adjustSize()
+            hint = self.sizeHint()
+            pw, ph = hint.width(), hint.height()
+            self.resize(pw, ph)
             docked    = load_config().get("statusbar", {}).get("docked", False)
             btn_gpos  = self._anchor_btn.mapToGlobal(QPoint(0, 0))
             btn_h     = self._anchor_btn.height()
-            ph, pw = self.height(), self.width()
             y = (btn_gpos.y() + btn_h + 2) if docked else (btn_gpos.y() - ph - 2)
             x = btn_gpos.x()
             try:
@@ -4070,7 +4116,7 @@ def open_github(path):
 
 def _get_current_branch(path):
     try:
-        r = subprocess.run(["git", "branch", "--show-current"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        r = subprocess.run(["git", "-c", "gc.auto=0", "--no-optional-locks", "branch", "--show-current"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
         return r.stdout.strip()
     except Exception:
         return ""
@@ -4081,12 +4127,12 @@ def _get_branches(path):
     local = []
     remote = []
     try:
-        r = subprocess.run(["git", "branch", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        r = subprocess.run(["git", "-c", "gc.auto=0", "--no-optional-locks", "branch", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
         local = [ln.strip() for ln in r.stdout.splitlines() if ln.strip()]
     except Exception:
         pass
     try:
-        r = subprocess.run(["git", "branch", "-r", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW)
+        r = subprocess.run(["git", "-c", "gc.auto=0", "--no-optional-locks", "branch", "-r", "--format=%(refname:short)"], capture_output=True, text=True, encoding="utf-8", errors="replace", cwd=path, creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
         remote = [ln.strip() for ln in r.stdout.splitlines() if ln.strip() and not ln.strip().endswith("/HEAD")]
     except Exception:
         pass
@@ -5363,7 +5409,10 @@ class StatusBar(QMainWindow):
                 return click
             lbl.mousePressEvent = _make_click(p, repo, idx, lbl); git_row.addWidget(lbl); self._git_labels[repo["name"]] = lbl
 
-        if repos: threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
+        global _git_loop_started
+        if repos and not _git_loop_started:
+            _git_loop_started = True
+            threading.Thread(target=_git_status_loop, args=(repos, _git_queue), daemon=True).start()
 
     def _init_script_monitor(self, ll):
         self._script_monitor_btn = IconLabel("⚡", {
