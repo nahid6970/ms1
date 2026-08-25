@@ -2527,14 +2527,15 @@ class DiskPopup(QFrame):
             f"color: #aaaaaa; font-family: 'JetBrainsMono NFP', Consolas; "
             f"font-size: 8pt; background: transparent; border: none;"
         )
-        c_drv  = QLabel("DRIVE");  c_drv.setStyleSheet(col_style)
+        c_drv  = QLabel("DRIVE");  c_drv.setFixedWidth(50);  c_drv.setStyleSheet(col_style)
         c_used = QLabel("USED / TOTAL G"); c_used.setFixedWidth(110); c_used.setStyleSheet(col_style)
         c_pct  = QLabel("USE%");   c_pct.setFixedWidth(46);  c_pct.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_pct.setStyleSheet(col_style)
         c_rd   = QLabel("R MB/s"); c_rd.setFixedWidth(62);   c_rd.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_rd.setStyleSheet(col_style)
         c_wr   = QLabel("W MB/s"); c_wr.setFixedWidth(62);   c_wr.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter); c_wr.setStyleSheet(col_style)
-        col_row.addWidget(c_drv); col_row.addStretch()
+        col_row.addWidget(c_drv)
         col_row.addWidget(c_used); col_row.addWidget(c_pct)
         col_row.addWidget(c_rd);  col_row.addWidget(c_wr)
+        col_row.addStretch()
         self._vbox.addWidget(col_w)
 
         # ── drive rows container (rebuilt on refresh) ─────────────────────
@@ -2658,7 +2659,7 @@ class DiskPopup(QFrame):
 
             # drive letter label
             drv_lbl = QLabel(mp)
-            drv_lbl.setFixedWidth(34)
+            drv_lbl.setFixedWidth(50)
             drv_lbl.setStyleSheet(f"color: {self.ACCENT}; font-weight: bold; " + base)
 
             # used / total
@@ -2687,7 +2688,6 @@ class DiskPopup(QFrame):
             w_lbl.setStyleSheet(f"color: #aaaaaa; " + base)
 
             row_h.addWidget(drv_lbl)
-            row_h.addStretch()
             row_h.addWidget(used_lbl)
             row_h.addWidget(pct_lbl)
             row_h.addWidget(r_lbl)
