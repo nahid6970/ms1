@@ -2780,6 +2780,7 @@ class NetPopup(QFrame):
 
         inner = QWidget()
         inner.setStyleSheet(f"background: {CP_BG};")
+        inner.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         outer.addWidget(inner)
 
         self._vbox = QVBoxLayout(inner)
@@ -2843,6 +2844,7 @@ class NetPopup(QFrame):
         # ── NIC rows container ────────────────────────────────────────────
         self._rows_widget = QWidget()
         self._rows_widget.setStyleSheet("background: transparent; border: none;")
+        self._rows_widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self._rows_vbox = QVBoxLayout(self._rows_widget)
         self._rows_vbox.setContentsMargins(0, 2, 0, 0)
         self._rows_vbox.setSpacing(1)
@@ -2934,25 +2936,31 @@ class NetPopup(QFrame):
         # ── try shared memory (per-process) first ─────────────────────────
         proc_snap = self._read_shm_snapshot()
         if proc_snap is not None:
-            # update header to show per-process mode
             self._hdr_lbl.setText("  🌐  NETWORK — PER PROCESS")
-            # update column headers: NAME · ▲ MB/s · ▼ MB/s  (no SENT/RECV cols)
-            self._col_nic.setText("PROCESS")
-            self._col_up.setText("▲ MB/s")
-            self._col_dn.setText("▼ MB/s")
             self._col_ts.setVisible(False)
             self._col_tr.setVisible(False)
 
-            # sort by combined speed desc
-            proc_snap.sort(key=lambda x: x["dl"] + x["ul"], reverse=True)
+            # Show only the relevant speed column based on which button is hovered
+            dl_mode = (self._mode == "dl")
+            self._col_nic.setText("PROCESS")
+            if dl_mode:
+                self._col_up.setVisible(False)
+                self._col_dn.setVisible(True)
+                self._col_dn.setText("▼ MB/s")
+            else:
+                self._col_up.setVisible(True)
+                self._col_dn.setVisible(False)
+                self._col_up.setText("▲ MB/s")
+
+            # sort by relevant speed desc
+            proc_snap.sort(key=lambda x: x["dl"] if dl_mode else x["ul"], reverse=True)
 
             for d in proc_snap:
                 name    = d["name"]
                 display = name if len(name) <= 22 else name[:20] + "…"
-                ul_txt  = f"{d['ul']:.2f}"
-                dl_txt  = f"{d['dl']:.2f}"
-                combined = d["dl"] + d["ul"]
-                sp_color = CP_RED if combined >= 50 else (CP_YELLOW if combined >= 5 else self.ACCENT)
+                speed   = d["dl"] if dl_mode else d["ul"]
+                sp_txt  = f"{speed:.2f}"
+                sp_color = CP_RED if speed >= 50 else (CP_YELLOW if speed >= 5 else self.ACCENT)
 
                 row_w = QWidget()
                 row_w.setStyleSheet(
@@ -2966,27 +2974,22 @@ class NetPopup(QFrame):
                 name_lbl = QLabel(display); name_lbl.setFixedWidth(160); name_lbl.setToolTip(name)
                 name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base)
 
-                ul_lbl = QLabel(ul_txt); ul_lbl.setFixedWidth(62)
-                ul_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                ul_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
-
-                dl_lbl = QLabel(dl_txt); dl_lbl.setFixedWidth(62)
-                dl_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                dl_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
+                sp_lbl = QLabel(sp_txt); sp_lbl.setFixedWidth(62)
+                sp_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                sp_lbl.setStyleSheet(f"color: {sp_color}; font-weight: bold; " + base)
 
                 row_h.addWidget(name_lbl)
-                row_h.addWidget(ul_lbl); row_h.addWidget(dl_lbl)
+                row_h.addWidget(sp_lbl)
                 self._rows_vbox.addWidget(row_w)
 
-            self.resize(1, 1)
-            self.adjustSize()
-            if self.isVisible():
-                self._position_popup()
+            self._fit_and_reposition()
             return
 
         # ── fallback: NIC-level stats ─────────────────────────────────────
         self._hdr_lbl.setText("  🌐  NETWORK — ADAPTER LEVEL")
         self._col_nic.setText("ADAPTER")
+        self._col_up.setVisible(True)
+        self._col_dn.setVisible(True)
         self._col_up.setText("▲ MB/s")
         self._col_dn.setText("▼ MB/s")
         self._col_ts.setVisible(True)
@@ -3062,20 +3065,22 @@ class NetPopup(QFrame):
         ))
         self._rows_vbox.addWidget(launch_btn)
 
-        # Reset to minimum before adjustSize so Qt doesn't use the old larger
-        # size as a floor — this prevents leftover blank space when rows shrink.
-        self.resize(1, 1)
-        self.adjustSize()
-        # Reposition every refresh so the popup anchors correctly after resize.
+        self._fit_and_reposition()
+
+    def _fit_and_reposition(self):
+        """Force exact content size (no floor) then reposition anchor."""
+        # setFixedSize(sizeHint) is reliable on Windows where adjustSize()
+        # won't shrink a visible window below its previous size.
+        hint = self.sizeHint()
+        self.setFixedSize(hint)
         if self.isVisible():
             self._position_popup()
 
-
-
     # ── show / hide ───────────────────────────────────────────────────────
 
-    def schedule_show(self, anchor_btn):
+    def schedule_show(self, anchor_btn, mode="dl"):
         self._anchor_btn = anchor_btn
+        self._mode = mode
         if not self.isVisible():
             self._show_timer.start()
 
@@ -3084,6 +3089,8 @@ class NetPopup(QFrame):
         QTimer.singleShot(120, self._check_hide)
 
     def _do_show(self):
+        if not hasattr(self, "_mode"):
+            self._mode = "dl"
         self._refresh()
         self._position_popup()
         self.show()
@@ -3094,10 +3101,11 @@ class NetPopup(QFrame):
         if self._anchor_btn is None:
             return
         try:
+            # Unlock fixed size so the window can be repositioned freely
+            self.setMaximumSize(16777215, 16777215)
             docked    = load_config().get("statusbar", {}).get("docked", False)
             btn_gpos  = self._anchor_btn.mapToGlobal(QPoint(0, 0))
             btn_h     = self._anchor_btn.height()
-            self.adjustSize()
             ph, pw = self.height(), self.width()
             y = (btn_gpos.y() + btn_h + 2) if docked else (btn_gpos.y() - ph - 2)
             x = btn_gpos.x()
@@ -5539,13 +5547,13 @@ class StatusBar(QMainWindow):
         self.upload_lb = IconLabel("", load_config().get("static_bindings", {}).get("upload", {})); _bind_static(self.upload_lb, "upload", "sniffnet"); rl.addWidget(self.upload_lb)
         # ── Network hover popup (shared by upload + download buttons) ──────
         self._net_popup = NetPopup()
-        def _attach_net_popup(btn):
+        def _attach_net_popup(btn, mode):
             _oe, _ol = btn.enterEvent, btn.leaveEvent
-            def _enter(ev): self._net_popup.schedule_show(btn); _oe(ev)
+            def _enter(ev): self._net_popup.schedule_show(btn, mode); _oe(ev)
             def _leave(ev): self._net_popup.cancel_show(); _ol(ev)
             btn.enterEvent = _enter; btn.leaveEvent = _leave
-        _attach_net_popup(self.download_lb)
-        _attach_net_popup(self.upload_lb)
+        _attach_net_popup(self.download_lb, "dl")
+        _attach_net_popup(self.upload_lb, "ul")
         self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {})); _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py"); rl.addWidget(self.lb_cpu)
         self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
         self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
