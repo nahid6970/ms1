@@ -2101,6 +2101,350 @@ def _menu_gpos(anchor_widget, menu, cursor_pos=None):
     return QPoint(x, y)
 
 
+# ─── Process Hover Popup ──────────────────────────────────────────────────────
+class ProcessPopup(QFrame):
+    """Frameless popup that shows top N processes by CPU or RAM usage.
+    Appears on hover over the CPU / RAM status-bar buttons; each row has a
+    ✕ kill button so you can terminate the process directly from the bar.
+    """
+
+    # How many processes to show
+    TOP_N = 8
+    # Min ms the cursor must dwell on the button before the popup appears
+    HOVER_DELAY_MS = 250
+    # ms between auto-refreshes while the popup is visible
+    REFRESH_MS = 2000
+
+    def __init__(self, mode: str, parent=None):
+        """mode: 'cpu' or 'ram'"""
+        super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint
+                         | Qt.WindowType.WindowStaysOnTopHint)
+        self.mode = mode  # 'cpu' or 'ram'
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        self._anchor_btn = None   # the IconLabel that opened us
+        self._rows = []           # list of (QLabel, QPushButton) per row
+
+        # ── outer border frame ────────────────────────────────────────────
+        accent = CP_CYAN if mode == "cpu" else CP_ORANGE
+        self.setStyleSheet(
+            f"ProcessPopup {{ background: {CP_BG}; border: 1px solid {accent}; }}"
+        )
+
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(1, 1, 1, 1)
+        outer.setSpacing(0)
+
+        # ── inner content widget ──────────────────────────────────────────
+        inner = QWidget()
+        inner.setStyleSheet(f"background: {CP_BG};")
+        outer.addWidget(inner)
+
+        self._vbox = QVBoxLayout(inner)
+        self._vbox.setContentsMargins(6, 4, 6, 6)
+        self._vbox.setSpacing(0)
+
+        # ── header row ────────────────────────────────────────────────────
+        hdr_row = QHBoxLayout()
+        hdr_row.setContentsMargins(0, 0, 0, 4)
+        hdr_row.setSpacing(4)
+
+        icon = "🖥" if mode == "cpu" else "🧠"
+        label_text = "CPU  TOP PROCESSES" if mode == "cpu" else "RAM  TOP PROCESSES"
+        hdr = QLabel(f"  {icon}  {label_text}")
+        hdr.setStyleSheet(
+            f"color: {accent}; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 9pt; font-weight: bold; background: transparent; border: none;"
+        )
+        hdr_row.addWidget(hdr)
+        hdr_row.addStretch()
+
+        # small refresh button
+        refresh_btn = QPushButton("↻")
+        refresh_btn.setFixedSize(18, 18)
+        refresh_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        refresh_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+            f"font-size: 11pt; font-weight: bold; padding: 0; }}"
+            f"QPushButton:hover {{ color: {accent}; }}"
+        )
+        refresh_btn.clicked.connect(self._refresh)
+        hdr_row.addWidget(refresh_btn)
+
+        # close button ✕
+        close_btn = QPushButton("✕")
+        close_btn.setFixedSize(18, 18)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.setStyleSheet(
+            f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+            f"font-size: 9pt; font-weight: bold; padding: 0; }}"
+            f"QPushButton:hover {{ color: {CP_RED}; }}"
+        )
+        close_btn.clicked.connect(self.hide)
+        hdr_row.addWidget(close_btn)
+        self._vbox.addLayout(hdr_row)
+
+        # ── separator ─────────────────────────────────────────────────────
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.HLine)
+        sep.setStyleSheet(f"color: {CP_DIM}; background: {CP_DIM}; border: none; max-height: 1px;")
+        self._vbox.addWidget(sep)
+
+        # ── col header ────────────────────────────────────────────────────
+        col_w = QWidget()
+        col_w.setStyleSheet("background: transparent; border: none;")
+        col_row = QHBoxLayout(col_w)
+        col_row.setContentsMargins(2, 2, 2, 0)
+        col_row.setSpacing(0)
+        col_style = (
+            f"color: {CP_DIM}; font-family: 'JetBrainsMono NFP', Consolas; "
+            f"font-size: 8pt; background: transparent; border: none;"
+        )
+        c_name = QLabel("PROCESS"); c_name.setStyleSheet(col_style)
+        c_pid  = QLabel("PID");     c_pid.setFixedWidth(52); c_pid.setStyleSheet(col_style)
+        c_use  = QLabel("USAGE");   c_use.setFixedWidth(52); c_use.setStyleSheet(col_style); c_use.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        c_kill = QLabel("");        c_kill.setFixedWidth(24); c_kill.setStyleSheet(col_style)
+        col_row.addWidget(c_name); col_row.addStretch()
+        col_row.addWidget(c_pid); col_row.addWidget(c_use); col_row.addWidget(c_kill)
+        self._vbox.addWidget(col_w)
+
+        # ── process rows (pre-built, updated in _refresh) ─────────────────
+        self._proc_container = QWidget()
+        self._proc_container.setStyleSheet("background: transparent; border: none;")
+        self._proc_vbox = QVBoxLayout(self._proc_container)
+        self._proc_vbox.setContentsMargins(0, 2, 0, 0)
+        self._proc_vbox.setSpacing(1)
+        self._vbox.addWidget(self._proc_container)
+        self._build_rows()
+
+        # ── auto-refresh timer ────────────────────────────────────────────
+        self._refresh_timer = QTimer(self)
+        self._refresh_timer.setInterval(self.REFRESH_MS)
+        self._refresh_timer.timeout.connect(self._refresh)
+
+        # ── hover-delay timer (show only after dwell) ─────────────────────
+        self._show_timer = QTimer(self)
+        self._show_timer.setSingleShot(True)
+        self._show_timer.setInterval(self.HOVER_DELAY_MS)
+        self._show_timer.timeout.connect(self._do_show)
+
+        # track whether cursor is inside *us* (to avoid hiding when moving
+        # from the button into the popup)
+        self._cursor_inside = False
+
+    # ── row building ──────────────────────────────────────────────────────
+
+    def _build_rows(self):
+        """Create TOP_N row widgets (hidden initially)."""
+        base_style = (
+            f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
+            f"background: transparent; border: none;"
+        )
+        for i in range(self.TOP_N):
+            row_w = QWidget()
+            row_w.setStyleSheet(
+                f"QWidget {{ background: transparent; border: none; }}"
+                f"QWidget:hover {{ background: {CP_PANEL}; }}"
+            )
+            row_h = QHBoxLayout(row_w)
+            row_h.setContentsMargins(2, 1, 2, 1)
+            row_h.setSpacing(0)
+
+            # rank
+            rank_lbl = QLabel(f"#{i+1}")
+            rank_lbl.setFixedWidth(22)
+            rank_lbl.setStyleSheet(f"color: {CP_DIM}; " + base_style)
+
+            # process name
+            name_lbl = QLabel("—")
+            name_lbl.setFixedWidth(170)
+            name_lbl.setStyleSheet(f"color: {CP_TEXT}; " + base_style)
+
+            # pid
+            pid_lbl = QLabel("—")
+            pid_lbl.setFixedWidth(52)
+            pid_lbl.setStyleSheet(f"color: {CP_DIM}; " + base_style)
+
+            # usage
+            use_lbl = QLabel("—")
+            use_lbl.setFixedWidth(52)
+            use_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            accent = CP_CYAN if self.mode == "cpu" else CP_ORANGE
+            use_lbl.setStyleSheet(f"color: {accent}; font-weight: bold; " + base_style)
+
+            # kill button
+            kill_btn = QPushButton("✕")
+            kill_btn.setFixedSize(22, 18)
+            kill_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            kill_btn.setStyleSheet(
+                f"QPushButton {{ background: transparent; color: {CP_DIM}; border: none; "
+                f"font-size: 9pt; font-weight: bold; padding: 0; }}"
+                f"QPushButton:hover {{ background: {CP_RED}; color: white; }}"
+            )
+            kill_btn.setProperty("proc_pid", -1)
+            kill_btn.setProperty("proc_name", "")
+            kill_btn.clicked.connect(self._make_kill_handler(kill_btn))
+
+            row_h.addWidget(rank_lbl)
+            row_h.addWidget(name_lbl)
+            row_h.addWidget(pid_lbl)
+            row_h.addWidget(use_lbl)
+            row_h.addWidget(kill_btn)
+
+            self._proc_vbox.addWidget(row_w)
+            self._rows.append((row_w, name_lbl, pid_lbl, use_lbl, kill_btn))
+
+    def _make_kill_handler(self, btn):
+        def _kill():
+            pid = btn.property("proc_pid")
+            name = btn.property("proc_name")
+            if pid and pid > 0:
+                try:
+                    import psutil as _ps
+                    proc = _ps.Process(pid)
+                    proc.kill()
+                    # small delay then refresh
+                    QTimer.singleShot(400, self._refresh)
+                except Exception as e:
+                    logging.warning(f"ProcessPopup kill pid={pid} ({name}): {e}")
+        return _kill
+
+    # ── data fetch ────────────────────────────────────────────────────────
+
+    def _get_top_procs(self):
+        """Return list of (name, pid, value_pct) sorted desc, top TOP_N."""
+        try:
+            import psutil as _ps
+            procs = []
+            if self.mode == "cpu":
+                # cpu_percent needs two calls; use interval=0 for non-blocking
+                for p in _ps.process_iter(["pid", "name", "cpu_percent"]):
+                    try:
+                        procs.append((p.info["name"] or "?", p.info["pid"],
+                                      p.info["cpu_percent"] or 0.0))
+                    except (_ps.NoSuchProcess, _ps.AccessDenied):
+                        pass
+            else:
+                mem_total = _ps.virtual_memory().total
+                for p in _ps.process_iter(["pid", "name", "memory_info"]):
+                    try:
+                        mi = p.info["memory_info"]
+                        pct = (mi.rss / mem_total * 100.0) if mi else 0.0
+                        procs.append((p.info["name"] or "?", p.info["pid"], pct))
+                    except (_ps.NoSuchProcess, _ps.AccessDenied):
+                        pass
+            procs.sort(key=lambda x: x[2], reverse=True)
+            return procs[:self.TOP_N]
+        except Exception as e:
+            logging.warning(f"ProcessPopup get_top_procs: {e}")
+            return []
+
+    def _refresh(self):
+        """Fetch fresh data and update the row widgets."""
+        procs = self._get_top_procs()
+        accent = CP_CYAN if self.mode == "cpu" else CP_ORANGE
+        for i, (row_w, name_lbl, pid_lbl, use_lbl, kill_btn) in enumerate(self._rows):
+            if i < len(procs):
+                name, pid, pct = procs[i]
+                # truncate long names
+                display = name if len(name) <= 22 else name[:20] + "…"
+                name_lbl.setText(display)
+                name_lbl.setToolTip(f"{name}  (PID {pid})")
+                pid_lbl.setText(str(pid))
+                use_lbl.setText(f"{pct:.1f}%")
+                # heat colour: green < 20, yellow 20–60, red > 60
+                if pct >= 60:
+                    c = CP_RED
+                elif pct >= 20:
+                    c = CP_YELLOW
+                else:
+                    c = accent
+                use_lbl.setStyleSheet(
+                    f"color: {c}; font-weight: bold; font-family: 'JetBrainsMono NFP', Consolas; "
+                    f"font-size: 9pt; background: transparent; border: none;"
+                )
+                kill_btn.setProperty("proc_pid", pid)
+                kill_btn.setProperty("proc_name", name)
+                row_w.show()
+            else:
+                row_w.hide()
+        self.adjustSize()
+
+    # ── show / hide logic ─────────────────────────────────────────────────
+
+    def schedule_show(self, anchor_btn):
+        """Called from the button's enterEvent. Starts the dwell timer."""
+        self._anchor_btn = anchor_btn
+        if not self.isVisible():
+            self._show_timer.start()
+
+    def cancel_show(self):
+        """Called from the button's leaveEvent."""
+        self._show_timer.stop()
+        # give a tiny grace period — if cursor entered the popup itself, stay
+        QTimer.singleShot(120, self._check_hide)
+
+    def _do_show(self):
+        """Actually show the popup after dwell delay."""
+        self._refresh()
+        self._position_popup()
+        self.show()
+        self.raise_()
+        self._refresh_timer.start()
+
+    def _position_popup(self):
+        """Position above/below the statusbar next to the anchor button."""
+        if self._anchor_btn is None:
+            return
+        try:
+            docked = load_config().get("statusbar", {}).get("docked", False)
+        except Exception:
+            docked = False
+        try:
+            btn_gpos = self._anchor_btn.mapToGlobal(QPoint(0, 0))
+            btn_h = self._anchor_btn.height()
+            self.adjustSize()
+            ph = self.height()
+            pw = self.width()
+            if docked:
+                # bar is at top → popup goes below
+                y = btn_gpos.y() + btn_h + 2
+            else:
+                # bar is at bottom → popup goes above
+                y = btn_gpos.y() - ph - 2
+            # x: align left edge to button, clamped to screen
+            x = btn_gpos.x()
+            try:
+                scr = QApplication.screenAt(btn_gpos) or QApplication.primaryScreen()
+                avail = scr.availableGeometry()
+                x = max(avail.left() + 2, min(x, avail.right() - pw - 4))
+                if docked:
+                    y = max(avail.top() + 2, y)
+                else:
+                    y = min(avail.bottom() - ph - 4, y)
+            except Exception:
+                pass
+            self.move(x, y)
+        except Exception as e:
+            logging.warning(f"ProcessPopup position: {e}")
+
+    def _check_hide(self):
+        if not self._cursor_inside and self.isVisible():
+            self.hide()
+            self._refresh_timer.stop()
+
+    # ── Qt events ─────────────────────────────────────────────────────────
+
+    def enterEvent(self, event):
+        self._cursor_inside = True
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        self._cursor_inside = False
+        QTimer.singleShot(120, self._check_hide)
+        super().leaveEvent(event)
+
+
 def _menu_rich_action(menu, html, callback=None, disabled=False, indent=False):
     """Add a menu item rendered as rich colored HTML (matches tooltip style).
     QMenu actions cannot render HTML, so each item is a QWidgetAction hosting
@@ -4508,6 +4852,22 @@ class StatusBar(QMainWindow):
         self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
         self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
         self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {})); _bind_static(self.lb_ram, "ram", "taskmgr"); rl.addWidget(self.lb_ram)
+        # ── Process hover popups ───────────────────────────────────────────
+        self._cpu_popup = ProcessPopup("cpu")
+        self._ram_popup = ProcessPopup("ram")
+        def _attach_proc_popup(btn, popup):
+            _orig_enter = btn.enterEvent
+            _orig_leave = btn.leaveEvent
+            def _enter(ev):
+                popup.schedule_show(btn)
+                _orig_enter(ev)
+            def _leave(ev):
+                popup.cancel_show()
+                _orig_leave(ev)
+            btn.enterEvent = _enter
+            btn.leaveEvent = _leave
+        _attach_proc_popup(self.lb_cpu, self._cpu_popup)
+        _attach_proc_popup(self.lb_ram, self._ram_popup)
         self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_drive(self.lb_duc, "drive_c", 0); rl.addWidget(self.lb_duc)
         self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_drive(self.lb_dud, "drive_d", 1); rl.addWidget(self.lb_dud)
         _st_cfg = load_config().get("static_bindings", {}).get("settings", {}); settings_bt = IconLabel("⚙", _st_cfg); _apply_static_style(settings_bt, "settings")
