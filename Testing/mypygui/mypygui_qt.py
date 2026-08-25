@@ -2108,8 +2108,11 @@ class ProcessPopup(QFrame):
     ✕ kill button so you can terminate the process directly from the bar.
     """
 
-    # How many processes to show
+    # Default process count (overridden by config key "proc_top_n")
     TOP_N = 8
+    # Distinct color for rank numbers (#1, #2, …) — purple, different from
+    # cyan/orange accents, dim-gray PID, and white process names
+    RANK_COLOR = "#A78BFA"
     # Min ms the cursor must dwell on the button before the popup appears
     HOVER_DELAY_MS = 250
     # ms between auto-refreshes while the popup is visible
@@ -2123,7 +2126,9 @@ class ProcessPopup(QFrame):
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
         self._anchor_btn = None   # the IconLabel that opened us
-        self._rows = []           # list of (QLabel, QPushButton) per row
+        self._rows = []           # list of (row_w, name_lbl, pid_lbl, use_lbl, kill_btn)
+        # Read configurable top-N (falls back to class default 8)
+        self._top_n = load_config().get("proc_top_n", self.TOP_N)
 
         # ── outer border frame ────────────────────────────────────────────
         accent = CP_CYAN if mode == "cpu" else CP_ORANGE
@@ -2223,12 +2228,19 @@ class ProcessPopup(QFrame):
     # ── row building ──────────────────────────────────────────────────────
 
     def _build_rows(self):
-        """Create TOP_N row widgets (hidden initially)."""
+        """Create _top_n row widgets (hidden initially).
+        If rows already exist and the count changed, they are destroyed first.
+        """
+        # Clear any existing rows
+        for row_w, *_ in self._rows:
+            row_w.setParent(None)
+        self._rows.clear()
+
         base_style = (
             f"font-family: 'JetBrainsMono NFP', Consolas; font-size: 9pt; "
             f"background: transparent; border: none;"
         )
-        for i in range(self.TOP_N):
+        for i in range(self._top_n):
             row_w = QWidget()
             row_w.setStyleSheet(
                 f"QWidget {{ background: transparent; border: none; }}"
@@ -2238,10 +2250,10 @@ class ProcessPopup(QFrame):
             row_h.setContentsMargins(2, 1, 2, 1)
             row_h.setSpacing(0)
 
-            # rank
+            # rank — distinct purple color so it reads separately from names/PIDs
             rank_lbl = QLabel(f"#{i+1}")
             rank_lbl.setFixedWidth(22)
-            rank_lbl.setStyleSheet(f"color: #aaaaaa; " + base_style)
+            rank_lbl.setStyleSheet(f"color: {self.RANK_COLOR}; " + base_style)
 
             # process name
             name_lbl = QLabel("—")
@@ -2300,7 +2312,7 @@ class ProcessPopup(QFrame):
     # ── data fetch ────────────────────────────────────────────────────────
 
     def _get_top_procs(self):
-        """Return list of (name, pid, value_pct) sorted desc, top TOP_N."""
+        """Return list of (name, pid, value_pct) sorted desc, top _top_n."""
         try:
             import psutil as _ps
             procs = []
@@ -2325,7 +2337,7 @@ class ProcessPopup(QFrame):
                     except (_ps.NoSuchProcess, _ps.AccessDenied):
                         pass
             procs.sort(key=lambda x: x[2], reverse=True)
-            return procs[:self.TOP_N]
+            return procs[:self._top_n]
         except Exception as e:
             logging.warning(f"ProcessPopup get_top_procs: {e}")
             return []
@@ -2377,6 +2389,11 @@ class ProcessPopup(QFrame):
 
     def _do_show(self):
         """Actually show the popup after dwell delay."""
+        # Re-read configurable top-N — rebuild rows if it changed
+        new_n = load_config().get("proc_top_n", self.TOP_N)
+        if new_n != self._top_n:
+            self._top_n = new_n
+            self._build_rows()
         self._refresh()
         self._position_popup()
         self.show()
@@ -4479,6 +4496,12 @@ class StatusBar(QMainWindow):
         form_sb.addRow("", dock_chk)
         form_sb.addRow("", aot_chk)
         right_col.addWidget(grp_sb)
+        grp_proc = QGroupBox("PROCESS MONITOR"); form_proc = QFormLayout(); grp_proc.setLayout(form_proc)
+        proc_top_n_spin = QSpinBox(); proc_top_n_spin.setRange(1, 30); proc_top_n_spin.setValue(self._config.get("proc_top_n", 8))
+        proc_top_n_spin.setFixedWidth(60); proc_top_n_spin.setToolTip("How many processes to show in the CPU / RAM hover popup (1–30)")
+        form_proc.addRow("TOP N PROCESSES", proc_top_n_spin)
+        right_col.addWidget(grp_proc)
+
         right_col.addStretch()
 
         btn = QPushButton("SAVE"); btn.setObjectName("btn_save"); btn.setCursor(Qt.CursorShape.PointingHandCursor); lay.addWidget(btn)
@@ -4526,6 +4549,7 @@ class StatusBar(QMainWindow):
                 cfg["git_indicator_style"] = git_ind_cb.currentText().lower()
                 cfg["git_right_click"] = "lazygit" if git_rc_cb.currentText().lower() == "lazygit" else "menu"
                 cfg["komorebi_item_indent"] = int(komorebi_indent_le.text())
+                cfg["proc_top_n"] = proc_top_n_spin.value()
 
                 # Save Voice config
                 v_cfg_file = Path(r"C:\@delta\ms1\tools\Voice\voice_config.json")
