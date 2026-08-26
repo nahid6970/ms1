@@ -85,5 +85,24 @@ Long Videos behaves like Watch Later: selecting a video moves it out of ordinary
 - **Folder picker overflow** — video cards use visible overflow and keep their custom folder menu’s parent card at elevated stacking order for the full time the menu is open, so it remains above neighboring feed cards even after the pointer leaves the dropdown.
 - **Channel avatar strip** — uses a separate current-feed query instead of the channel-scoped card query, so it shows only channels represented in the active feed while retaining the selected channel when it has matching videos; the selected avatar uses a white ring.
 
-## 7. Pending Task
+## 7. Stats Heatmap & Database I/O Fixes (2026-08-26)
+
+| File | What changed |
+|---|---|
+| `convex/stats.ts` | Heatmap now counts **all non-short videos per channel** — no rules/hideShorts/blocked filtering applied. Removed `hideShortsSetting` DB lookup, `rulesById`/`filtersById` maps, `titleMatchesRules`/`extractPlaylistTerms` helpers, and unused `extractPlaylistId`/`parseRulesText` imports. `channelSummaries` periodCount/unseenCount/lastUpload also use the unfiltered base. |
+| `convex/videos.ts` | **`counts` query**: replaced `ctx.db.query("videos").collect()` (full table scan on every nav update) with a ternary — single-channel uses `by_channelId` index + `.collect()`, multi-channel uses `take(5000)` ordered by `by_published` desc. **`unreadCount` query**: replaced `.filter(isNew).collect()` with `take(3000)` from `by_published` index. **`listPlaylists` query**: replaced single all-videos `.collect()` with per-channel `by_channelId` indexed reads inside a loop. |
+| `convex/schema.ts` | Added three new indexes to `videos` table: `by_isNew` (`["isNew","published"]`), `by_isWatchLater` (`["isWatchLater","published"]`), `by_isLong` (`["isLong","published"]`). |
+
+### Why This Mattered
+Convex Database I/O was at **6.09 GB / 6 GB** (free tier limit). Root cause: `counts` called `ctx.db.query("videos").collect()` — reading every video in the DB — on every single nav update, page load, and tab switch. With 9 MB of video data read hundreds of times per session, I/O accumulated rapidly.
+
+### Key Behavioral Notes
+- **Stats heatmap** — shows every video a channel uploaded (excluding shorts), regardless of rules, hideShorts setting, or feed category. Reflects raw channel output activity.
+- **`counts` single-channel path** — uses `by_channelId` index `.collect()` (reads only that channel's videos, not the whole table).
+- **`counts` multi-channel path** — capped at `take(5000)` most recent videos. Accurate for all practical use.
+- **`unreadCount`** — capped at 3000 most recent videos. Unread videos are always recent, so this is accurate.
+- **`listPlaylists`** — fetches videos per-channel via index loop; only reads video rows for channels that actually have playlist rules.
+- **New indexes** — `by_isNew`, `by_isWatchLater`, `by_isLong` available for future use to enable O(1) filtered queries without table scans.
+
+## 8. Pending Task
 Deploy to production. Verify playlist views load correctly end-to-end.
