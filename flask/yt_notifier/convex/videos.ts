@@ -272,10 +272,13 @@ export const unreadCount = query({
       filteredChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 60]),
     );
 
+    // Cap at 3000 most recent videos — unread videos are always recent ones.
+    // Avoids reading the entire table on every nav badge update.
     const unseen = await ctx.db
       .query("videos")
-      .filter((f) => f.eq(f.field("isNew"), true))
-      .collect();
+      .withIndex("by_published")
+      .order("desc")
+      .take(3000);
 
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))
@@ -353,7 +356,22 @@ export const counts = query({
       filteredChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 60]),
     );
 
-    const allVideos = await ctx.db.query("videos").collect();
+    // Use by_channelId index for single-channel queries to avoid full table scan.
+    // For multi-channel queries cap at 5000 rows — enough for accurate counts without
+    // reading the entire table on every nav update.
+    let allVideos: (typeof (await ctx.db.query("videos").take(1)))[number][];
+    if (channelId && filteredChannels.length === 1) {
+      allVideos = await ctx.db
+        .query("videos")
+        .withIndex("by_channelId", (q) => q.eq("channelId", filteredChannels[0].channelId))
+        .collect();
+    } else {
+      allVideos = await ctx.db
+        .query("videos")
+        .withIndex("by_published")
+        .order("desc")
+        .take(5000);
+    }
 
     // channelVideos = all videos belonging to enabled/filtered channels (optionally filtered by playlist)
     const channelVideos = allVideos
@@ -759,7 +777,15 @@ export const listPlaylists = query({
 
     if (channelsWithPlaylists.length === 0) return [];
 
-    const allVideos = await ctx.db.query("videos").collect();
+    // Fetch videos per channel using the by_channelId index instead of scanning the full table.
+    const channelVideoMap = new Map<string, typeof (await ctx.db.query("videos").take(1))>();
+    for (const channel of channelsWithPlaylists) {
+      const vids = await ctx.db
+        .query("videos")
+        .withIndex("by_channelId", (q) => q.eq("channelId", channel.channelId))
+        .collect();
+      channelVideoMap.set(channel.channelId, vids);
+    }
 
     return channelsWithPlaylists.map((channel) => {
       const rules = parseRulesText(channel.rulesText ?? "");
@@ -770,7 +796,7 @@ export const listPlaylists = query({
       // Build title lookup from stored playlistMeta, fall back to scanning videos
       const metaMap = new Map((channel.playlistMeta ?? []).map((m) => [m.id, m.title]));
 
-      const channelVideos = allVideos.filter((v) => v.channelId === channel.channelId);
+      const channelVideos = channelVideoMap.get(channel.channelId) ?? [];
 
       const playlists = playlistIds.map((plId) => {
         const plVideos = channelVideos.filter((v) => v.sourcePlaylistId === plId);

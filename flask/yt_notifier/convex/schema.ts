@@ -39,7 +39,10 @@ export default defineSchema({
     .index("by_channelId", ["channelId"])
     .index("by_channelId_published", ["channelId", "published"])
     .index("by_videoId", ["videoId"])
-    .index("by_published", ["published"]),
+    .index("by_published", ["published"])
+    .index("by_isNew", ["isNew", "published"])
+    .index("by_isWatchLater", ["isWatchLater", "published"])
+    .index("by_isLong", ["isLong", "published"]),
 
   settings: defineTable({
     key: v.string(),
