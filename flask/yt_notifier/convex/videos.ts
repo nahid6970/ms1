@@ -359,19 +359,16 @@ export const counts = query({
     // Use by_channelId index for single-channel queries to avoid full table scan.
     // For multi-channel queries cap at 5000 rows — enough for accurate counts without
     // reading the entire table on every nav update.
-    let allVideos: (typeof (await ctx.db.query("videos").take(1)))[number][];
-    if (channelId && filteredChannels.length === 1) {
-      allVideos = await ctx.db
-        .query("videos")
-        .withIndex("by_channelId", (q) => q.eq("channelId", filteredChannels[0].channelId))
-        .collect();
-    } else {
-      allVideos = await ctx.db
-        .query("videos")
-        .withIndex("by_published")
-        .order("desc")
-        .take(5000);
-    }
+    const allVideos = channelId && filteredChannels.length === 1
+      ? await ctx.db
+          .query("videos")
+          .withIndex("by_channelId", (q) => q.eq("channelId", filteredChannels[0].channelId))
+          .collect()
+      : await ctx.db
+          .query("videos")
+          .withIndex("by_published")
+          .order("desc")
+          .take(5000);
 
     // channelVideos = all videos belonging to enabled/filtered channels (optionally filtered by playlist)
     const channelVideos = allVideos
@@ -778,7 +775,7 @@ export const listPlaylists = query({
     if (channelsWithPlaylists.length === 0) return [];
 
     // Fetch videos per channel using the by_channelId index instead of scanning the full table.
-    const channelVideoMap = new Map<string, typeof (await ctx.db.query("videos").take(1))>();
+    const channelVideoMap = new Map<string, Array<{ channelId: string; sourcePlaylistId?: string; sourcePlaylistTitle?: string; isNew: boolean; isWatchLater?: boolean; isLong?: boolean }>>();
     for (const channel of channelsWithPlaylists) {
       const vids = await ctx.db
         .query("videos")
