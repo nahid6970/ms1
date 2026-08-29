@@ -4815,13 +4815,13 @@ class StatusBar(QMainWindow):
         # Komorebi control
         def _get_komorebi_svg(running):
             if running:
-                return '<svg viewBox="0 0 24 24" fill="none" stroke="#FF003C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>'
+                return '<svg viewBox="0 0 24 24" fill="none" stroke="#FF003C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"></rect></svg>'
             return '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
 
         is_running = any("komorebi.exe" in p.name().lower() for p in psutil.process_iter(['name']))
         self.komorebi_toggle = IconLabel("", {
             "svg_content": _get_komorebi_svg(is_running),
-            "icon_width": 16, "icon_height": 16
+            "icon_width": 20, "icon_height": 20
         })
         self.komorebi_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         def _toggle_komorebi():
@@ -4834,9 +4834,9 @@ class StatusBar(QMainWindow):
                 self.komorebi_toggle.btn_cfg["svg_content"] = _get_komorebi_svg(True)
             self.komorebi_toggle.update()
         self.komorebi_toggle.mousePressEvent = lambda e: _toggle_komorebi()
-        ll.addWidget(self.komorebi_toggle)
-
+        
         self.komorebi_widget = KomorebiWidget()
+        ll.addWidget(self.komorebi_toggle)
         ll.addWidget(self.komorebi_widget)
         self.komorebi_apps = KomorebiAppsWidget()
         ll.addWidget(self.komorebi_apps)
