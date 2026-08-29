@@ -147,3 +147,32 @@ Do not terminate a process unless you know it is the stale FCC server or another
 - FCC health check: `http://127.0.0.1:8082/health`
 
 The PowerShell update notification is unrelated to FCC or Gemini connectivity.
+
+## Selecting Gemini models from `/model`
+
+FCC advertises discovered Gemini models in Claude Code's `/model` menu. If you select an exact entry such as:
+
+```text
+gemini/models/gemini-3.5-flash-lite
+```
+
+FCC routes that session to Gemini 3.5. It does not fall back to the configured Gemini 3.1 model.
+
+The selection controls are:
+
+- Press `s` to use the selected model for the current session only.
+- Press `Enter` to make the selected model the default for new sessions.
+- Select `Default` to use the server's configured `MODEL` value.
+
+With this configuration:
+
+```text
+MODEL=gemini/models/gemini-3.1-flash-lite
+MODEL_OPUS=
+MODEL_SONNET=
+MODEL_HAIKU=
+```
+
+the `Default` option uses Gemini 3.1. Claude compatibility aliases such as `Opus`, `Sonnet`, `Haiku`, and `Claude Fable 5` also fall back to Gemini 3.1 because their per-alias settings are empty. They are not Anthropic API calls; FCC translates Claude Code requests to the configured Gemini provider.
+
+The `no thinking` variant points to the same Gemini model but requests it without thinking/reasoning output.
