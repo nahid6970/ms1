@@ -4814,21 +4814,18 @@ class StatusBar(QMainWindow):
         
         # Komorebi control
         self.komorebi_toggle = IconLabel("", {
-            "svg_content": '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+            "svg_content": '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
             "icon_width": 16, "icon_height": 16
         })
-        self.komorebi_toggle.setStyleSheet(f"color: {CP_GREEN}; padding: 0 5px;")
         self.komorebi_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         def _toggle_komorebi():
             is_running = any("komorebi.exe" in p.name().lower() for p in psutil.process_iter(['name']))
             if is_running:
                 subprocess.run(["komorebic", "stop"], creationflags=0x08000000)
-                self.komorebi_toggle.btn_cfg["svg_content"] = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
-                self.komorebi_toggle.setStyleSheet(f"color: {CP_GREEN}; padding: 0 5px;")
+                self.komorebi_toggle.btn_cfg["svg_content"] = '<svg viewBox="0 0 24 24" fill="none" stroke="#00ff21" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>'
             else:
                 subprocess.Popen(["komorebi"], creationflags=0x08000000)
-                self.komorebi_toggle.btn_cfg["svg_content"] = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>'
-                self.komorebi_toggle.setStyleSheet(f"color: {CP_RED}; padding: 0 5px;")
+                self.komorebi_toggle.btn_cfg["svg_content"] = '<svg viewBox="0 0 24 24" fill="none" stroke="#FF003C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>'
             self.komorebi_toggle.update()
         self.komorebi_toggle.mousePressEvent = lambda e: _toggle_komorebi()
         ll.addWidget(self.komorebi_toggle)
