@@ -1599,10 +1599,13 @@ def check_git_status(repo, q):
         return
     try:
         # Single command: disable auto-gc/locks, fetch status + branch + upstream info
+        # Use shell=False and ensure we don't spawn extra shells
         result = subprocess.run(
             ["git", "-c", "gc.auto=0", "--no-optional-locks", "status", "--porcelain=v1", "-b"],
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            cwd=repo["path"], creationflags=subprocess.CREATE_NO_WINDOW, timeout=3
+            cwd=repo["path"], 
+            creationflags=subprocess.CREATE_NO_WINDOW | 0x08000000, # CREATE_NO_WINDOW | CREATE_BREAKAWAY_FROM_JOB
+            timeout=3
         )
     except Exception:
         return
