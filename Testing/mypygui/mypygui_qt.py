@@ -4812,6 +4812,23 @@ class StatusBar(QMainWindow):
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
         
+        # Komorebi control
+        self.komorebi_toggle = IconLabel("▶", {})
+        self.komorebi_toggle.setStyleSheet(f"color: {CP_GREEN}; font-size: 12pt; padding: 0 5px;")
+        self.komorebi_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        def _toggle_komorebi():
+            is_running = any("komorebi.exe" in p.name().lower() for p in psutil.process_iter(['name']))
+            if is_running:
+                subprocess.run(["komorebic", "stop"], creationflags=0x08000000)
+                self.komorebi_toggle.setText("▶")
+                self.komorebi_toggle.setStyleSheet(f"color: {CP_GREEN}; font-size: 12pt; padding: 0 5px;")
+            else:
+                subprocess.Popen(["komorebi"], creationflags=0x08000000)
+                self.komorebi_toggle.setText("⏹")
+                self.komorebi_toggle.setStyleSheet(f"color: {CP_RED}; font-size: 12pt; padding: 0 5px;")
+        self.komorebi_toggle.mousePressEvent = lambda e: _toggle_komorebi()
+        ll.addWidget(self.komorebi_toggle)
+
         self.komorebi_widget = KomorebiWidget()
         ll.addWidget(self.komorebi_widget)
         self.komorebi_apps = KomorebiAppsWidget()
