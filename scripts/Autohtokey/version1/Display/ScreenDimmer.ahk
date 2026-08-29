@@ -16,7 +16,7 @@ DimmerGui.Add("Text", "x0 y0", "Dimmer")
 DimmerGui.Add("Text", "x0 y0", "Brighter")
 SD_MySlider := DimmerGui.Add("Slider", "W200 x50 y5 AltSubmit Tooltip Range0-180 vSD_MySlider")
 SD_MySlider.OnEvent("Change", SD_Dimmer)
-SD_MySlider.Value := 180 - 128 ; Adjust initial value for "Reverse" logic manually
+SD_MySlider.Value := 128 ; Set to 128 directly
 SB := DimmerGui.Add("StatusBar")
 SB.SetText("Default Brightness 128 (Click Status Bar to Reset)")
 SB.OnEvent("Click", SD_Reset)
@@ -27,8 +27,9 @@ DimmerGui.Show("W300")
 
 SD_Dimmer(*) {
   Saved := DimmerGui.Submit(false)
-  ; Reverse logic: 180 - slider value
-  Brightness := 180 - Saved.SD_MySlider
+  ; If moving slider right (increasing value) should increase brightness:
+  ; We just use the value directly.
+  Brightness := Saved.SD_MySlider
   DisplaySetBrightness(Brightness)
   SB.SetText("Brightness level is " . Brightness . " (Click Status Bar to Reset)")
 }
@@ -49,6 +50,6 @@ DisplaySetBrightness(Br := 128) {
 
 SD_Reset(*) {
   DisplaySetBrightness(128)
-  SD_MySlider.Value := 180 - 128
+  SD_MySlider.Value := 128
   SB.SetText("Default Brightness 128 (Click Status Bar to Reset)")
 }
