@@ -358,15 +358,15 @@ class MainWindow(QMainWindow):
             }}
             QListWidget::item {{ padding: 7px; }}
             QListWidget::item:selected {{ background-color: #17363a; color: {CP_CYAN}; }}
-            QTabBar::tab {{
+            QPushButton[clientTab="true"] {{
                 background-color: {CP_DIM};
                 color: {CP_SUBTEXT};
                 border: 1px solid {CP_DIM};
                 padding: 7px 18px;
                 font-weight: bold;
             }}
-            QTabBar::tab:hover {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
-            QTabBar::tab:selected {{
+            QPushButton[clientTab="true"]:hover {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            QPushButton[clientTab="true"]:checked {{
                 background-color: #17363a;
                 color: {CP_CYAN};
                 border-color: {CP_CYAN};
@@ -501,7 +501,6 @@ class MainWindow(QMainWindow):
                 CP_GREEN,
             )
         )
-        command_layout.addWidget(self.command_row("NORMAL OPENAI", "codex", CP_ORANGE))
         layout.addWidget(commands)
         close = CyberButton("× CLOSE CODEX PANEL", accent=CP_SUBTEXT)
         close.clicked.connect(self.close_client_tab)

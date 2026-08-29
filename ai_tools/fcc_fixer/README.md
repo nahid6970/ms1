@@ -14,8 +14,8 @@ Cyberpunk-themed PyQt6 utility for diagnosing and repairing common Free Claude C
 - Detects FCC/Gemini entries in Codex `models_cache.json` and can move that cache to a timestamped backup so normal Codex can rebuild it.
 - Opens the Claude settings, Codex config, and FCC environment files.
 - Starts `fcc-server` in a new Windows console when it is not already listening.
-- Provides separate quick-command reminders for FCC Claude, FCC Codex, and normal OpenAI Codex.
-- Provides one-click copy buttons for full-auto FCC Claude/Codex commands, a Gemini 3.5 example, and normal `codex`.
+- Provides client-specific quick-command copy controls for FCC Claude and FCC Codex.
+- Provides one-click copy buttons for full-auto FCC Claude/Codex commands and a Gemini 3.5 example.
 - Shows general FCC actions first, with initially unselected `CODEX` and `CLAUDE` tabs for client-specific repairs and commands.
 
 The GUI never displays API-key values and does not automatically rewrite Codex configuration because Codex settings may contain unrelated user customizations.
@@ -53,4 +53,4 @@ fcc-claude --dangerously-skip-permissions
 fcc-codex --dangerously-bypass-approvals-and-sandbox
 ```
 
-These skip confirmation and sandbox protections. Use them only in a trusted, externally controlled environment. The normal commands remain available as safer copy options.
+These skip confirmation and sandbox protections. Use them only in a trusted, externally controlled environment. The normal FCC commands can be run manually when you want the standard safety prompts.
