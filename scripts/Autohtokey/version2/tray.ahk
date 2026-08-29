@@ -8,6 +8,7 @@ Tray.Delete() ; Remove default items
 Tray.Add("Restart Explorer", (*) => RestartExplorer())
 Tray.SetIcon("Restart Explorer", "shell32.dll", 239)
 Tray.Add("Screen Dimmer", (*) => Run("C:\@delta\ms1\scripts\Autohtokey\version1\Display\ScreenDimmer.ahk"))
+Tray.SetIcon("Screen Dimmer", "shell32.dll", 35)
 Tray.Add("Reset WS", (*) => Toggle_Reset_Workspace())
 Tray.Add("Suspend", (*) => Suspend(-1))
 Tray.Default := "Suspend"
