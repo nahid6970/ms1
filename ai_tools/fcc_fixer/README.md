@@ -15,6 +15,7 @@ Cyberpunk-themed PyQt6 utility for diagnosing and repairing common Free Claude C
 - Opens the Claude settings, Codex config, and FCC environment files.
 - Starts `fcc-server` in a new Windows console when it is not already listening.
 - Provides separate quick-command reminders for FCC Claude, FCC Codex, and normal OpenAI Codex.
+- Provides one-click copy buttons for normal and full-auto FCC Claude/Codex commands, plus a Gemini 3.5 example.
 
 The GUI never displays API-key values and does not automatically rewrite Codex configuration because Codex settings may contain unrelated user customizations.
 
@@ -41,3 +42,14 @@ If launching with another Python environment that does not have PyQt6, install i
 8. Use normal `codex` separately when you want OpenAI models directly.
 
 All Codex repairs are confirmation-based and create recoverable backups. The GUI does not touch Codex authentication or unrelated configuration entries.
+
+## Full-auto command names
+
+The GUI copies the currently supported flags:
+
+```text
+fcc-claude --dangerously-skip-permissions
+fcc-codex --dangerously-bypass-approvals-and-sandbox
+```
+
+These skip confirmation and sandbox protections. Use them only in a trusted, externally controlled environment. The normal commands remain available as safer copy options.

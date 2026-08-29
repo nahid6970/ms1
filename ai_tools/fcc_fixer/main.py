@@ -439,14 +439,33 @@ class MainWindow(QMainWindow):
         open_env.clicked.connect(lambda: self.open_path(FCC_ENV))
         action_layout.addWidget(open_env)
 
-        commands = QGroupBox("QUICK COMMANDS")
+        commands = QGroupBox("COPY COMMANDS")
         command_layout = QVBoxLayout(commands)
-        command_layout.addWidget(QLabel("FCC Claude"))
-        command_layout.addWidget(self.command_label("fcc-claude"))
-        command_layout.addWidget(QLabel("FCC Codex"))
-        command_layout.addWidget(self.command_label("fcc-codex"))
-        command_layout.addWidget(QLabel("Normal OpenAI Codex"))
-        command_layout.addWidget(self.command_label("codex"))
+        command_layout.setSpacing(4)
+        command_layout.addWidget(self.command_row("FCC Claude", "fcc-claude", CP_CYAN))
+        command_layout.addWidget(
+            self.command_row(
+                "FCC Claude // FULL AUTO",
+                "fcc-claude --dangerously-skip-permissions",
+                CP_YELLOW,
+            )
+        )
+        command_layout.addWidget(self.command_row("FCC Codex", "fcc-codex", CP_CYAN))
+        command_layout.addWidget(
+            self.command_row(
+                "FCC Codex // FULL AUTO",
+                "fcc-codex --dangerously-bypass-approvals-and-sandbox",
+                CP_RED,
+            )
+        )
+        command_layout.addWidget(
+            self.command_row(
+                "FCC Codex // GEMINI 3.5",
+                "fcc-codex --model gemini/models/gemini-3.5-flash-lite",
+                CP_GREEN,
+            )
+        )
+        command_layout.addWidget(self.command_row("Normal OpenAI Codex", "codex", CP_ORANGE))
 
         layout.addWidget(actions)
         layout.addWidget(commands)
@@ -458,6 +477,27 @@ class MainWindow(QMainWindow):
         label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         label.setStyleSheet(f"color: {CP_CYAN}; padding: 3px 0 7px 8px;")
         return label
+
+    def command_row(self, caption: str, command: str, accent: str) -> QWidget:
+        row = QWidget()
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(5)
+        name = QLabel(caption)
+        name.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 8pt;")
+        name.setToolTip(command)
+        copy_button = CyberButton("COPY", accent=accent)
+        copy_button.setMinimumHeight(28)
+        copy_button.setMaximumHeight(30)
+        copy_button.setToolTip(command)
+        copy_button.clicked.connect(lambda _checked=False, value=command: self.copy_command(value))
+        layout.addWidget(name, stretch=1)
+        layout.addWidget(copy_button)
+        return row
+
+    def copy_command(self, command: str) -> None:
+        QApplication.clipboard().setText(command)
+        self.footer_status.setText(f"Copied: {command}")
 
     def build_monitor_panel(self) -> QWidget:
         panel = QWidget()
