@@ -16,6 +16,7 @@ Cyberpunk-themed PyQt6 utility for diagnosing and repairing common Free Claude C
 - Starts `fcc-server` in a new Windows console when it is not already listening.
 - Provides separate quick-command reminders for FCC Claude, FCC Codex, and normal OpenAI Codex.
 - Provides one-click copy buttons for full-auto FCC Claude/Codex commands, a Gemini 3.5 example, and normal `codex`.
+- Shows general FCC actions first, with initially unselected `CODEX` and `CLAUDE` tabs for client-specific repairs and commands.
 
 The GUI never displays API-key values and does not automatically rewrite Codex configuration because Codex settings may contain unrelated user customizations.
 

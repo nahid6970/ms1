@@ -39,6 +39,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSplitter,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -357,6 +358,19 @@ class MainWindow(QMainWindow):
             }}
             QListWidget::item {{ padding: 7px; }}
             QListWidget::item:selected {{ background-color: #17363a; color: {CP_CYAN}; }}
+            QTabBar::tab {{
+                background-color: {CP_DIM};
+                color: {CP_SUBTEXT};
+                border: 1px solid {CP_DIM};
+                padding: 7px 18px;
+                font-weight: bold;
+            }}
+            QTabBar::tab:hover {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            QTabBar::tab:selected {{
+                background-color: #17363a;
+                color: {CP_CYAN};
+                border-color: {CP_CYAN};
+            }}
             QScrollBar:vertical {{ background: {CP_BG}; width: 10px; margin: 0; }}
             QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
@@ -413,74 +427,126 @@ class MainWindow(QMainWindow):
 
         actions = QGroupBox("ACTIONS")
         action_layout = QVBoxLayout(actions)
-        self.refresh_button = CyberButton("⟳ REFRESH DIAGNOSTICS", accent=CP_CYAN)
-        self.refresh_button.clicked.connect(self.refresh_diagnostics)
-        action_layout.addWidget(self.refresh_button)
+        general = QGroupBox("GENERAL FCC")
+        general_layout = QVBoxLayout(general)
+        self.refresh_button = self.add_action_button(
+            general_layout, "⟳ REFRESH DIAGNOSTICS", self.refresh_diagnostics, CP_CYAN
+        )
+        self.add_action_button(general_layout, "▶ START FCC SERVER", self.start_server, CP_GREEN)
+        self.add_action_button(
+            general_layout, "OPEN FCC ENV", lambda: self.open_path(FCC_ENV), CP_ORANGE
+        )
+        action_layout.addWidget(general)
 
-        start_server = CyberButton("▶ START FCC SERVER", accent=CP_GREEN)
-        start_server.clicked.connect(self.start_server)
-        action_layout.addWidget(start_server)
+        client_group = QGroupBox("AI CLIENT SETTINGS")
+        client_layout = QVBoxLayout(client_group)
+        tab_row = QHBoxLayout()
+        tab_row.setSpacing(4)
+        self.client_tab_buttons: list[QPushButton] = []
+        for index, caption in enumerate(("CODEX", "CLAUDE")):
+            tab = QPushButton(caption)
+            tab.setCheckable(True)
+            tab.setProperty("clientTab", "true")
+            tab.setCursor(Qt.CursorShape.PointingHandCursor)
+            tab.clicked.connect(lambda _checked=False, tab_index=index: self.select_client_tab(tab_index))
+            self.client_tab_buttons.append(tab)
+            tab_row.addWidget(tab)
+        client_layout.addLayout(tab_row)
 
-        claude_fix = CyberButton("⚡ FIX CLAUDE ROUTER CONFLICT", accent=CP_YELLOW)
-        claude_fix.clicked.connect(self.fix_claude_router_conflict)
-        action_layout.addWidget(claude_fix)
+        self.client_stack = QStackedWidget()
+        self.client_stack.addWidget(self.build_codex_actions())
+        self.client_stack.addWidget(self.build_claude_actions())
+        self.client_stack.setCurrentIndex(0)
+        self.client_stack.setVisible(False)
+        client_layout.addWidget(self.client_stack)
+        action_layout.addWidget(client_group)
 
-        open_claude = CyberButton("OPEN CLAUDE SETTINGS", accent=CP_CYAN)
-        open_claude.clicked.connect(lambda: self.open_path(CLAUDE_SETTINGS))
-        action_layout.addWidget(open_claude)
+        layout.addWidget(actions)
+        layout.addStretch()
+        return panel
 
-        open_codex = CyberButton("OPEN CODEX CONFIG", accent=CP_CYAN)
-        open_codex.clicked.connect(lambda: self.open_path(CODEX_CONFIG))
-        action_layout.addWidget(open_codex)
+    def add_action_button(
+        self,
+        layout: QVBoxLayout,
+        text: str,
+        callback: object,
+        accent: str,
+    ) -> QPushButton:
+        button = CyberButton(text, accent=accent)
+        button.clicked.connect(callback)  # type: ignore[arg-type]
+        layout.addWidget(button)
+        return button
 
-        codex_fix = CyberButton("⚡ FIX CODEX FCC OVERRIDES", accent=CP_ORANGE)
-        codex_fix.clicked.connect(self.fix_codex_conflict)
-        action_layout.addWidget(codex_fix)
-
-        codex_cache = CyberButton("▣ QUARANTINE CODEX CACHE", accent=CP_RED)
-        codex_cache.clicked.connect(self.fix_codex_cache)
-        action_layout.addWidget(codex_cache)
-
-        open_env = CyberButton("OPEN FCC ENV", accent=CP_ORANGE)
-        open_env.clicked.connect(lambda: self.open_path(FCC_ENV))
-        action_layout.addWidget(open_env)
-
-        commands = QGroupBox("COPY COMMANDS")
+    def build_codex_actions(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 8, 0, 0)
+        self.add_action_button(layout, "OPEN CODEX CONFIG", lambda: self.open_path(CODEX_CONFIG), CP_CYAN)
+        self.add_action_button(layout, "⚡ FIX CODEX FCC OVERRIDES", self.fix_codex_conflict, CP_ORANGE)
+        self.add_action_button(layout, "▣ QUARANTINE CODEX CACHE", self.fix_codex_cache, CP_RED)
+        commands = QGroupBox("CODEX COMMANDS")
         command_layout = QVBoxLayout(commands)
         command_layout.setSpacing(4)
         command_layout.addWidget(
             self.command_row(
-                "FCC Claude // FULL AUTO",
-                "fcc-claude --dangerously-skip-permissions",
-                CP_YELLOW,
-            )
-        )
-        command_layout.addWidget(
-            self.command_row(
-                "FCC Codex // FULL AUTO",
+                "FULL AUTO",
                 "fcc-codex --dangerously-bypass-approvals-and-sandbox",
                 CP_RED,
             )
         )
         command_layout.addWidget(
             self.command_row(
-                "FCC Codex // GEMINI 3.5",
+                "GEMINI 3.5",
                 "fcc-codex --model gemini/models/gemini-3.5-flash-lite",
                 CP_GREEN,
             )
         )
-        command_layout.addWidget(self.command_row("Normal OpenAI Codex", "codex", CP_ORANGE))
-
-        layout.addWidget(actions)
+        command_layout.addWidget(self.command_row("NORMAL OPENAI", "codex", CP_ORANGE))
         layout.addWidget(commands)
+        close = CyberButton("× CLOSE CODEX PANEL", accent=CP_SUBTEXT)
+        close.clicked.connect(self.close_client_tab)
+        layout.addWidget(close)
         layout.addStretch()
-        return panel
+        return page
 
-    def command_label(self, text: str) -> QLabel:
-        label = QLabel(text)
-        label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        label.setStyleSheet(f"color: {CP_CYAN}; padding: 3px 0 7px 8px;")
-        return label
+    def build_claude_actions(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(0, 8, 0, 0)
+        self.add_action_button(
+            layout, "⚡ FIX CLAUDE ROUTER CONFLICT", self.fix_claude_router_conflict, CP_YELLOW
+        )
+        self.add_action_button(
+            layout, "OPEN CLAUDE SETTINGS", lambda: self.open_path(CLAUDE_SETTINGS), CP_CYAN
+        )
+        commands = QGroupBox("CLAUDE COMMANDS")
+        command_layout = QVBoxLayout(commands)
+        command_layout.setSpacing(4)
+        command_layout.addWidget(
+            self.command_row(
+                "FULL AUTO",
+                "fcc-claude --dangerously-skip-permissions",
+                CP_YELLOW,
+            )
+        )
+        layout.addWidget(commands)
+        close = CyberButton("× CLOSE CLAUDE PANEL", accent=CP_SUBTEXT)
+        close.clicked.connect(self.close_client_tab)
+        layout.addWidget(close)
+        layout.addStretch()
+        return page
+
+    def select_client_tab(self, index: int) -> None:
+        for tab_index, tab in enumerate(self.client_tab_buttons):
+            tab.setChecked(tab_index == index)
+        if index < 0:
+            self.client_stack.setVisible(False)
+            return
+        self.client_stack.setCurrentIndex(index)
+        self.client_stack.setVisible(True)
+
+    def close_client_tab(self) -> None:
+        self.select_client_tab(-1)
 
     def command_row(self, caption: str, command: str, accent: str) -> QWidget:
         row = QWidget()
