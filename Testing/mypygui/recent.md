@@ -30,7 +30,7 @@ All in `mypygui_qt.py`:
 - **FIX: `KomorebiAppsWidget` configurable indent** (from prior session):
   - Added `ITEM INDENT (PX)` setting in Settings dialog → `KOMOREBI` group box → saves `komorebi_item_indent` (default 20).
   - Dynamic `margin-left: {indent_px}px` in both the hover tooltip `<div>` blocks and the `_menu_rich_action` left padding.
-- **Audio Recorder REVERTED**: Removed the recently added Audio Recorder (`AudioRecorderHelper` / FFmpeg / sounddevice) feature to clean up the code.
+- **Removed internet speed hover popup**: Disabled the hover window for upload and download speed buttons in `mypygui_qt.py` and removed the `NetPopup` class and associated helper code.
 - **NEW `gg` mode cycle**: Right-clicking the `BN/EN` toggle now cycles through 3 modes: `search` (orange border) → `clipboard` (blue border) → `gg` (neon green border).
 - **FIX `gg` project root**: When in `gg` mode, executing `gg "text"` now explicitly uses the user's home directory (`cwd=os.path.expanduser("~")`) to prevent it from treating the `mypygui` repository directory as the project root.
 - **NEW Centered Language Selection Popup on Voice Stop**:
