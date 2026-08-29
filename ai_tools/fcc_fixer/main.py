@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -61,6 +62,7 @@ CLAUDE_SETTINGS = HOME / ".claude" / "settings.json"
 FCC_ENV = HOME / ".fcc" / ".env"
 FCC_LOG = HOME / ".fcc" / "logs" / "server.log"
 CODEX_CONFIG = HOME / ".codex" / "config.toml"
+CODEX_CACHE = HOME / ".codex" / "models_cache.json"
 CODEX_CATALOG = HOME / ".fcc" / "codex-model-catalog.json"
 
 CLAUDE_ROUTER_KEYS = {
@@ -144,6 +146,103 @@ def timestamped_backup(path: Path) -> Path:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     backup = path.with_name(f"{path.stem}.backup-{stamp}{path.suffix}")
     shutil.copy2(path, backup)
+    return backup
+
+
+def inspect_codex_conflicts() -> list[str]:
+    """Find only recognizable persistent FCC/Codex conflicts."""
+
+    conflicts: list[str] = []
+    config_text = ""
+    if CODEX_CONFIG.is_file():
+        try:
+            config_text = CODEX_CONFIG.read_text(encoding="utf-8")
+        except OSError:
+            conflicts.append("Codex config could not be read")
+        else:
+            if re.search(r"(?m)^\s*model_provider\s*=\s*[\"']fcc[\"']", config_text):
+                conflicts.append("config.toml selects the FCC provider")
+            if re.search(r"(?m)^\s*\[model_providers\.fcc\]\s*$", config_text):
+                conflicts.append("config.toml contains a persistent FCC provider section")
+            if re.search(r"(?mi)^\s*model_catalog_json\s*=.*(?:fcc|codex-model-catalog)", config_text):
+                conflicts.append("config.toml points to the FCC model catalog")
+            if re.search(r"(?mi)^\s*model\s*=\s*[\"'](?:gemini/|anthropic/gemini/)", config_text):
+                conflicts.append("config.toml selects a Gemini model")
+
+    if CODEX_CACHE.is_file():
+        try:
+            cache_text = CODEX_CACHE.read_text(encoding="utf-8").lower()
+        except OSError:
+            conflicts.append("Codex model cache could not be read")
+        else:
+            if "gemini" in cache_text or "free claude" in cache_text:
+                conflicts.append("models_cache.json contains FCC/Gemini entries")
+
+    for key in ("OPENAI_BASE_URL", "OPENAI_API_BASE", "FCC_CODEX_API_KEY"):
+        if os.environ.get(key):
+            conflicts.append(f"current shell has {key} set")
+    return conflicts
+
+
+def clean_codex_config() -> tuple[list[str], Path | None]:
+    """Remove recognizable FCC overrides from config.toml after backing it up."""
+
+    if not CODEX_CONFIG.is_file():
+        return [], None
+    original = CODEX_CONFIG.read_text(encoding="utf-8")
+    has_fcc_marker = bool(
+        re.search(r"(?mi)^\s*(?:model_provider|model_catalog_json)\s*=.*(?:fcc|codex-model-catalog)", original)
+        or re.search(r"(?mi)^\s*\[model_providers\.fcc\]\s*$", original)
+        or re.search(r"(?mi)^\s*model\s*=\s*[\"'](?:gemini/|anthropic/gemini/)", original)
+    )
+    lines = original.splitlines(keepends=True)
+    cleaned: list[str] = []
+    removed: list[str] = []
+    skip_fcc_section = False
+
+    for line in lines:
+        stripped = line.strip()
+        is_section = stripped.startswith("[") and stripped.endswith("]")
+        if skip_fcc_section:
+            if is_section:
+                skip_fcc_section = False
+            else:
+                continue
+
+        if re.fullmatch(r"\[model_providers\.fcc\]", stripped, flags=re.IGNORECASE):
+            skip_fcc_section = True
+            removed.append("[model_providers.fcc] section")
+            continue
+        if re.fullmatch(r"model_provider\s*=\s*[\"']fcc[\"']\s*(?:#.*)?", stripped, flags=re.IGNORECASE):
+            removed.append("model_provider = fcc")
+            continue
+        if re.match(r"(?i)^model_catalog_json\s*=", stripped) and (
+            "fcc" in stripped.lower() or "codex-model-catalog" in stripped.lower()
+        ):
+            removed.append("FCC model_catalog_json")
+            continue
+        if has_fcc_marker and re.match(r"(?i)^model\s*=\s*[\"'](?:gemini/|anthropic/gemini/)", stripped):
+            removed.append("FCC Gemini model")
+            continue
+        cleaned.append(line)
+
+    if not removed:
+        return [], None
+    backup = timestamped_backup(CODEX_CONFIG)
+    temp_path = CODEX_CONFIG.with_name(f".{CODEX_CONFIG.name}.tmp")
+    temp_path.write_text("".join(cleaned), encoding="utf-8")
+    os.replace(temp_path, CODEX_CONFIG)
+    return removed, backup
+
+
+def quarantine_codex_cache() -> Path | None:
+    """Move a contaminated Codex cache aside so normal Codex can rebuild it."""
+
+    if not CODEX_CACHE.is_file():
+        return None
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    backup = CODEX_CACHE.with_name(f"models_cache.backup-{stamp}.json")
+    CODEX_CACHE.replace(backup)
     return backup
 
 
@@ -328,6 +427,14 @@ class MainWindow(QMainWindow):
         open_codex.clicked.connect(lambda: self.open_path(CODEX_CONFIG))
         action_layout.addWidget(open_codex)
 
+        codex_fix = CyberButton("⚡ FIX CODEX FCC OVERRIDES", accent=CP_ORANGE)
+        codex_fix.clicked.connect(self.fix_codex_conflict)
+        action_layout.addWidget(codex_fix)
+
+        codex_cache = CyberButton("▣ QUARANTINE CODEX CACHE", accent=CP_RED)
+        codex_cache.clicked.connect(self.fix_codex_cache)
+        action_layout.addWidget(codex_cache)
+
         open_env = CyberButton("OPEN FCC ENV", accent=CP_ORANGE)
         open_env.clicked.connect(lambda: self.open_path(FCC_ENV))
         action_layout.addWidget(open_env)
@@ -443,13 +550,7 @@ class MainWindow(QMainWindow):
             except (OSError, json.JSONDecodeError):
                 warnings.append("Claude: settings could not be inspected")
 
-        if CODEX_CONFIG.is_file():
-            try:
-                codex_text = CODEX_CONFIG.read_text(encoding="utf-8").lower()
-                if any(token in codex_text for token in ("model_provider", "model_catalog_json", "gemini", "fcc")):
-                    warnings.append("Codex: inspect config.toml for persistent FCC/provider overrides")
-            except OSError:
-                warnings.append("Codex: config.toml could not be read")
+        warnings.extend(f"Codex: {conflict}" for conflict in inspect_codex_conflicts())
 
         output_lines = [
             f"Proxy health: {health_detail}",
@@ -524,6 +625,96 @@ class MainWindow(QMainWindow):
             self,
             "REPAIR COMPLETE",
             f"Removed the conflicting Router entries.\n\nBackup:\n{backup}\n\nRestart Claude Code for the change to apply.",
+        )
+        self.refresh_diagnostics()
+
+    def fix_codex_conflict(self) -> None:
+        conflicts = inspect_codex_conflicts()
+        config_conflicts = [
+            conflict
+            for conflict in conflicts
+            if "config.toml" in conflict
+        ]
+        if not config_conflicts:
+            QMessageBox.information(
+                self,
+                "CODEX CONFIG",
+                "No persistent FCC overrides were found in config.toml.\n\n"
+                "If Gemini still appears in normal Codex, close Codex first and use "
+                "QUARANTINE CODEX CACHE.",
+            )
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "BACKUP AND REPAIR CODEX",
+            "Back up config.toml and remove only recognized FCC provider, catalog, "
+            "and Gemini model overrides?\n\n"
+            + "\n".join(f"• {conflict}" for conflict in config_conflicts),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            removed, backup = clean_codex_config()
+        except (OSError, UnicodeError) as exc:
+            QMessageBox.critical(self, "CODEX REPAIR FAILED", str(exc))
+            return
+        if not removed or backup is None:
+            QMessageBox.information(self, "CODEX CONFIG", "No removable FCC entries were found.")
+            return
+
+        QMessageBox.information(
+            self,
+            "CODEX REPAIR COMPLETE",
+            "Removed:\n- " + "\n- ".join(removed) + f"\n\nBackup:\n{backup}\n\n"
+            "Start normal Codex with `codex` after closing any existing Codex sessions.",
+        )
+        self.refresh_diagnostics()
+
+    def fix_codex_cache(self) -> None:
+        if not CODEX_CACHE.is_file():
+            QMessageBox.information(self, "CODEX CACHE", f"Cache not found:\n{CODEX_CACHE}")
+            return
+        try:
+            cache_text = CODEX_CACHE.read_text(encoding="utf-8").lower()
+        except OSError as exc:
+            QMessageBox.critical(self, "CODEX CACHE", str(exc))
+            return
+        if "gemini" not in cache_text and "free claude" not in cache_text:
+            QMessageBox.information(
+                self,
+                "CODEX CACHE",
+                "No FCC/Gemini entries were detected, so the cache was left untouched.",
+            )
+            return
+
+        answer = QMessageBox.question(
+            self,
+            "QUARANTINE CODEX CACHE",
+            "Close all Codex windows first. Move the FCC/Gemini model cache to a "
+            "timestamped backup so normal Codex can rebuild it?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        try:
+            backup = quarantine_codex_cache()
+        except OSError as exc:
+            QMessageBox.critical(
+                self,
+                "CACHE QUARANTINE FAILED",
+                f"Close all Codex processes and try again.\n\n{exc}",
+            )
+            return
+        QMessageBox.information(
+            self,
+            "CACHE QUARANTINED",
+            f"The old cache was moved to:\n{backup}\n\n"
+            "Start normal Codex with `codex`; it can create a fresh cache.",
         )
         self.refresh_diagnostics()
 

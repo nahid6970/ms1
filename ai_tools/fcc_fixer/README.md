@@ -9,6 +9,9 @@ Cyberpunk-themed PyQt6 utility for diagnosing and repairing common Free Claude C
 - Shows the non-secret model routing values from `%USERPROFILE%\.fcc\.env`.
 - Detects stale Claude Code Router settings in `%USERPROFILE%\.claude\settings.json`.
 - Backs up `settings.json` before removing the old `apiKeyHelper` and `:3456` endpoint entries.
+- Detects persistent FCC/Gemini provider, catalog, and model overrides in Codex `config.toml`.
+- Backs up and removes only recognized FCC overrides from Codex configuration.
+- Detects FCC/Gemini entries in Codex `models_cache.json` and can move that cache to a timestamped backup so normal Codex can rebuild it.
 - Opens the Claude settings, Codex config, and FCC environment files.
 - Starts `fcc-server` in a new Windows console when it is not already listening.
 - Provides separate quick-command reminders for FCC Claude, FCC Codex, and normal OpenAI Codex.
@@ -33,4 +36,8 @@ If launching with another Python environment that does not have PyQt6, install i
 3. Start `fcc-server` if the FCC health check is offline.
 4. Use `FIX CLAUDE ROUTER CONFLICT` only when the warning is present; a timestamped backup is created first.
 5. Use `fcc-claude` or `fcc-codex` only while `fcc-server` is running.
-6. Use normal `codex` separately when you want OpenAI models directly.
+6. If normal Codex ever shows FCC/Gemini models, close Codex and use `FIX CODEX FCC OVERRIDES` first.
+7. If the issue remains and the GUI detects a contaminated cache, use `QUARANTINE CODEX CACHE`.
+8. Use normal `codex` separately when you want OpenAI models directly.
+
+All Codex repairs are confirmation-based and create recoverable backups. The GUI does not touch Codex authentication or unrelated configuration entries.
