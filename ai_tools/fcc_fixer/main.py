@@ -55,6 +55,13 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+ACCENT_NAMES = {
+    CP_YELLOW: "yellow",
+    CP_CYAN: "cyan",
+    CP_RED: "red",
+    CP_GREEN: "green",
+    CP_ORANGE: "orange",
+}
 
 
 HOME = Path.home()
@@ -261,27 +268,7 @@ class CyberButton(QPushButton):
         super().__init__(text, parent)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setMinimumHeight(36)
-        self.setStyleSheet(
-            f"""
-            QPushButton {{
-                background-color: {CP_DIM};
-                color: {CP_TEXT};
-                border: 1px solid {CP_DIM};
-                padding: 7px 10px;
-                font-family: Consolas;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: #2a2a2a;
-                border: 1px solid {accent};
-                color: {accent};
-            }}
-            QPushButton:pressed {{
-                background-color: {accent};
-                color: #050505;
-            }}
-            """
-        )
+        self.setProperty("accent", ACCENT_NAMES.get(accent, "yellow"))
 
 
 class SettingsDialog(QDialog):
@@ -319,7 +306,7 @@ class MainWindow(QMainWindow):
 
         self.refresh_timer = QTimer(self)
         self.refresh_timer.timeout.connect(self.refresh_diagnostics)
-        self.refresh_timer.start(5000)
+        self.refresh_timer.start(15000)
 
     def apply_theme(self) -> None:
         self.setStyleSheet(
@@ -342,6 +329,25 @@ class MainWindow(QMainWindow):
                 subcontrol-position: top left;
                 padding: 0 6px;
             }}
+            QPushButton {{
+                background-color: {CP_DIM};
+                color: {CP_TEXT};
+                border: 1px solid {CP_DIM};
+                padding: 7px 10px;
+                font-family: Consolas;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #2a2a2a;
+                border: 1px solid {CP_YELLOW};
+                color: {CP_YELLOW};
+            }}
+            QPushButton:pressed {{ background-color: {CP_YELLOW}; color: {CP_BG}; }}
+            QPushButton[accent="cyan"]:hover {{ border-color: {CP_CYAN}; color: {CP_CYAN}; }}
+            QPushButton[accent="red"]:hover {{ border-color: {CP_RED}; color: {CP_RED}; }}
+            QPushButton[accent="green"]:hover {{ border-color: {CP_GREEN}; color: {CP_GREEN}; }}
+            QPushButton[accent="orange"]:hover {{ border-color: {CP_ORANGE}; color: {CP_ORANGE}; }}
+            QPushButton[accent="yellow"]:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}
             QPlainTextEdit, QListWidget {{
                 background-color: {CP_PANEL};
                 color: {CP_CYAN};
@@ -442,7 +448,6 @@ class MainWindow(QMainWindow):
         commands = QGroupBox("COPY COMMANDS")
         command_layout = QVBoxLayout(commands)
         command_layout.setSpacing(4)
-        command_layout.addWidget(self.command_row("FCC Claude", "fcc-claude", CP_CYAN))
         command_layout.addWidget(
             self.command_row(
                 "FCC Claude // FULL AUTO",
@@ -450,7 +455,6 @@ class MainWindow(QMainWindow):
                 CP_YELLOW,
             )
         )
-        command_layout.addWidget(self.command_row("FCC Codex", "fcc-codex", CP_CYAN))
         command_layout.addWidget(
             self.command_row(
                 "FCC Codex // FULL AUTO",
