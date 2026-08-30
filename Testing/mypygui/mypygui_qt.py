@@ -4926,24 +4926,58 @@ class StatusBar(QMainWindow):
             self._clock_overrides.update(kwargs)
             self._update_clock_tip()
 
-        def _off_str(v): return f"UTC {'+' if v >= 0 else ''}{v}"
+        def _off_str(v):
+            sign = "+" if v >= 0 else ""
+            return f"UTC {sign}{v}"
 
-        menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
+        def _edit_clock(title, lbl_default, off_default):
+            """Small dialog: one text field for label + one spinbox for UTC offset."""
+            dlg = QDialog(self)
+            dlg.setWindowTitle(title)
+            dlg.setStyleSheet(DIALOG_QSS)
+            lay = QFormLayout(dlg)
+            lay.setContentsMargins(14, 12, 14, 12)
+            lay.setSpacing(8)
+            lbl_edit = QLineEdit(lbl_default)
+            off_spin = QSpinBox(); off_spin.setRange(-12, 14); off_spin.setValue(off_default)
+            lay.addRow("Label:", lbl_edit)
+            lay.addRow("UTC offset:", off_spin)
+            btns = QHBoxLayout()
+            ok_btn = QPushButton("OK"); ok_btn.setDefault(True)
+            cancel_btn = QPushButton("Cancel")
+            btns.addStretch(); btns.addWidget(cancel_btn); btns.addWidget(ok_btn)
+            lay.addRow(btns)
+            ok_btn.clicked.connect(dlg.accept)
+            cancel_btn.clicked.connect(dlg.reject)
+            # Center on screen
+            dlg.adjustSize()
+            scr = QApplication.primaryScreen().availableGeometry()
+            dlg.move(scr.center().x() - dlg.width() // 2, scr.center().y() - dlg.height() // 2)
+            if dlg.exec() == QDialog.DialogCode.Accepted:
+                return lbl_edit.text().strip() or lbl_default, off_spin.value()
+            return None, None
 
-        fmt_act  = menu.addAction(f"Format: {fmt}  →  {'12h' if fmt == '24h' else '24h'}")
+        def _color_icon(hex_color):
+            """12×12 filled square QIcon for menu alignment."""
+            pix = QPixmap(12, 12); pix.fill(QColor(hex_color))
+            return QIcon(pix)
+
+        _CLOCK_MENU_QSS = (
+            f"QMenu {{ background-color: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 4px; }}"
+            f"QMenu::item {{ padding: 5px 18px 5px 8px; }}"
+            f"QMenu::item:selected {{ background-color: {CP_CYAN}; color: black; }}"
+            f"QMenu::item:disabled {{ color: {CP_DIM}; }}"
+            f"QMenu::separator {{ height: 1px; background: {CP_DIM}; margin: 3px 6px; }}"
+        )
+
+        menu = QMenu(self); menu.setStyleSheet(_CLOCK_MENU_QSS)
+
+        fmt_act  = menu.addAction(f"{fmt}  →  {'12h' if fmt == '24h' else '24h'}")
         menu.addSeparator()
-
-        # ── Clock 1 (yellow) ──────────────────────────────────────────────
-        lbl1_act = menu.addAction(f"🟡  {bd_label}  [{_off_str(bd_offset)}]  — change label")
-        off1_act = menu.addAction(f"🟡  Change timezone  (current: {_off_str(bd_offset)})")
+        clk1_act = menu.addAction(_color_icon("#FCEE0A"), f"{bd_label}  {_off_str(bd_offset)}")
+        clk2_act = menu.addAction(_color_icon("#00F0FF"), f"{ca_label}  {_off_str(ca_offset)}")
         menu.addSeparator()
-
-        # ── Clock 2 (cyan) ────────────────────────────────────────────────
-        lbl2_act = menu.addAction(f"🔵  {ca_label}  [{_off_str(ca_offset)}]  — change label")
-        off2_act = menu.addAction(f"🔵  Change timezone  (current: {_off_str(ca_offset)})")
-        menu.addSeparator()
-
-        reset_act = menu.addAction(f"↺  Reset to defaults{'  ●' if has_ov else '  (no overrides)'}")
+        reset_act = menu.addAction(f"Reset{'  ●' if has_ov else ''}")
         if not has_ov:
             reset_act.setEnabled(False)
 
@@ -4956,23 +4990,13 @@ class StatusBar(QMainWindow):
         if action == fmt_act:
             _apply(format="24h" if fmt == "12h" else "12h")
 
-        elif action == lbl1_act:
-            val, ok = QInputDialog.getText(self, "Clock 1 Label", "Label:", text=bd_label)
-            if ok and val.strip(): _apply(bd_label=val.strip())
+        elif action == clk1_act:
+            new_lbl, new_off = _edit_clock(f"Clock 1 — {bd_label}", bd_label, bd_offset)
+            if new_lbl is not None: _apply(bd_label=new_lbl, bd_offset=new_off)
 
-        elif action == off1_act:
-            val, ok = QInputDialog.getInt(self, "Clock 1 Timezone",
-                f"UTC offset for  {bd_label}  (-12 to +14):", value=bd_offset, min=-12, max=14)
-            if ok: _apply(bd_offset=val)
-
-        elif action == lbl2_act:
-            val, ok = QInputDialog.getText(self, "Clock 2 Label", "Label:", text=ca_label)
-            if ok and val.strip(): _apply(ca_label=val.strip())
-
-        elif action == off2_act:
-            val, ok = QInputDialog.getInt(self, "Clock 2 Timezone",
-                f"UTC offset for  {ca_label}  (-12 to +14):", value=ca_offset, min=-12, max=14)
-            if ok: _apply(ca_offset=val)
+        elif action == clk2_act:
+            new_lbl, new_off = _edit_clock(f"Clock 2 — {ca_label}", ca_label, ca_offset)
+            if new_lbl is not None: _apply(ca_label=new_lbl, ca_offset=new_off)
 
         elif action == reset_act:
             self._clock_overrides.clear()

@@ -4,6 +4,12 @@
 PyQt6 status bar desktop app (`mypygui_qt.py`) for system automation, script monitoring, and launcher controls, driven by config (`mypygui_config.json`) and pwsh-launching helpers (`run_command`, `open_git_cmd`).
 
 ## 2. Latest Implementation
+- **NEW: Scroll-wheel hour shift on uptime label (clock tooltip)**:
+  - When hovering over the uptime label, scrolling the mouse wheel **up = +1h**, **down = −1h** shifts **both** clocks (Bangladesh yellow + Canada cyan) simultaneously, preserving their relative timezone difference.
+  - Stored in `self._clock_hour_scroll` (int, in-memory, separate from `_clock_overrides`) so it survives label/timezone menu changes without touching config.
+  - The floating tooltip refreshes **instantly** on each scroll tick — no wait for the 1s timer (`_get_tip_label()` text updated directly if visible).
+  - Left-click → clock menu → **↺ Reset to defaults** now clears `_clock_hour_scroll` too; `has_ov` check includes `_clock_hour_scroll != 0` so Reset is enabled after scrolling even with no other overrides.
+  - Implementation: `_uptime_wheel` closure in `_build_left` assigned to `self.uptime_label.wheelEvent`; `_update_clock_tip` adds `_clock_hour_scroll` to both `bd_offset` and `ca_offset` before computing times.
 All in `mypygui_qt.py`:
 - **FIX: komorebi event pipe crash (error 230 "pipe state is invalid")** — pipe was created with `FILE_FLAG_OVERLAPPED` (async mode), but `PeekNamedPipe` only works on synchronous pipes; calling it on an overlapped pipe immediately returns Windows error 230 (`ERROR_BAD_PIPE`), causing connect → instant crash → 5s retry → connect loop. Fix: removed `FILE_FLAG_OVERLAPPED` from `CreateNamedPipe` (now synchronous). The overlapped `ConnectNamedPipe` timeout trick was replaced with a background thread + `join(timeout=5.0)`. `win32event` import removed. Event pipe now stays connected and drives instant workspace updates as intended.
 - **Reverted to komorebi workspace widget** (GlazeWM code removed, commit aedde00f7).
@@ -58,6 +64,7 @@ All in `mypygui_qt.py`:
 - `check_git_status` / `check_komorebi_status` (worker threads) queue dicts; `_drain_git_queue` / `_drain_komorebi_queue` (GUI timers) apply them. Komorebi queue item: {ok, workspaces(≤3), focused, focused_layout, paused, apps}. `_komorebi_parse_state(data)` is shared by the poll loop and the event-pipe listener; requires pywin32 (`win32pipe`/`win32file` in install_deps.py IMPORT_TO_PKG) and komorebi ≥ 0.1.x with `subscribe` named-pipe support. Statusbar now reflects workspace switches/window changes instantly (~<200ms).
 - `_GIT_SYNC_PS` = adjacent Python literals + `.replace("{path}", ...)` (not an f-string → braces literal).
 - Native Qt tooltips need window focus here → custom `_TipFilter` + always-on-top `_tip_label` (`Qt.ToolTip`, WA_ShowWithoutActivating); git labels + komorebi widget/labels/buttons carry `_tip_text`.
+- Clock overrides: `_clock_overrides` (dict, in-memory, from left-click menu) + `_clock_hour_scroll` (int, from scroll wheel) both feed `_update_clock_tip`; Reset clears both. Neither is saved to config.
 - Komorebi layout label maps names via `_komorebi_layout_short` (BSP/COL/ROW/VSTK/HSTK/ULTW/GRID/RMAIN); shows ⏸ when paused; `focused_layout` reported separately so layout shows even when focused workspace is beyond the 3 visible dots.
 - Config keys: `branch_colors`, `git_indicator_style`, `git_status_colors`, `komorebi_item_indent`, `proc_top_n` (default 8, controls ProcessPopup row count).
 - Komorebi config write path: `~/komorebi.json` (0.1.41, pretty-printed 4-space CRLF, NO trailing newline). `workspace_rules` per workspace = array of {kind, id, matching_strategy} — same shape as `ignore_rules`. Rules apply to apps started AFTER the rule is saved (komorebi applies at window-manage time).
