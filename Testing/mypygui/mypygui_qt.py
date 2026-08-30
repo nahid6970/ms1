@@ -4842,6 +4842,7 @@ class StatusBar(QMainWindow):
                 
         self.uptime_label.mousePressEvent = lambda e: e.accept()
         self.uptime_label.mouseReleaseEvent = _uptime_release
+        _install_tip_filter(self.uptime_label)
         ll.addWidget(self.uptime_label)
         ll.addSpacing(10)
         
@@ -5595,12 +5596,68 @@ class StatusBar(QMainWindow):
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
         self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(1000)
         self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(100)
+        self._clock_tip_timer = QTimer(self); self._clock_tip_timer.timeout.connect(self._update_clock_tip); self._clock_tip_timer.start(1000)
         threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         threading.Thread(target=_komorebi_event_listener, daemon=True).start()
         self._trigger_rclone_checks_if_enabled()
+        self._update_clock_tip()  # seed tip immediately on startup
 
     def _update_uptime(self):
         if not self._timer_active: self.uptime_label.setText(format_uptime())
+
+    def _update_clock_tip(self):
+        """Regenerate the dual BD+CA digital-clock tooltip for the uptime label."""
+        from datetime import timezone, timedelta
+        _TZ_BD = timezone(timedelta(hours=6))    # Bangladesh  UTC+6
+        _TZ_CA = timezone(timedelta(hours=-4))   # Canada EDT  UTC-4 (Toronto summer time)
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        bd = now_utc.astimezone(_TZ_BD)
+        ca = now_utc.astimezone(_TZ_CA)
+
+        def _clock_block(label, flag, time_obj, accent):
+            hh = time_obj.strftime("%I")   # 12h, zero-padded
+            mm = time_obj.strftime("%M")
+            ss = time_obj.strftime("%S")
+            ampm = time_obj.strftime("%p")   # AM / PM
+            date_str = time_obj.strftime("%a %d %b %Y")
+            dstyle = (
+                f"display:inline-block; font-family:'JetBrainsMono NFP','Consolas',monospace; "
+                f"font-size:22pt; font-weight:bold; color:{accent}; "
+                f"letter-spacing:2px; text-shadow: 0 0 8px {accent}88;"
+            )
+            sep = f'<span style="color:{accent}88; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
+            ampm_span = f'<span style="color:{accent}99; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
+            date_span = f'<span style="color:#888; font-size:8pt;">{date_str}</span>'
+            tz_label = "UTC−4 (EDT)" if accent == "#00F0FF" else "UTC+6"
+            tz_span = f'<span style="color:{accent}66; font-size:7.5pt;">{tz_label}</span>'
+            header = (
+                f'<div style="margin-bottom:2px;">'
+                f'<span style="font-size:13pt; margin-right:5px;">{flag}</span>'
+                f'<span style="color:{accent}; font-size:9pt; font-weight:bold; letter-spacing:1px;">{label}</span>'
+                f'<span style="margin-left:6px;">{tz_span}</span>'
+                f'</div>'
+            )
+            digits = (
+                f'<div style="margin-bottom:2px;">'
+                f'<span style="{dstyle}">{hh}</span>{sep}'
+                f'<span style="{dstyle}">{mm}</span>{sep}'
+                f'<span style="{dstyle}">{ss}</span>{ampm_span}'
+                f'</div>'
+            )
+            return (
+                f'<div style="background:#111; border:1px solid {accent}44; border-radius:4px; '
+                f'padding:8px 12px; margin-bottom:6px;">'
+                f'{header}{digits}'
+                f'<div style="margin-top:2px;">{date_span}</div>'
+                f'</div>'
+            )
+
+        bd_block = _clock_block("BANGLADESH", "🇧🇩", bd, "#FCEE0A")
+        ca_block  = _clock_block("CANADA",     "🇨🇦", ca, "#00F0FF")
+        self.uptime_label._tip_text = (
+            f'<div style="min-width:220px;">{bd_block}{ca_block}</div>'
+        )
+
     def _update_info(self):
         cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
         self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.update_usage(gpu)
