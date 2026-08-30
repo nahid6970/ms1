@@ -4772,6 +4772,7 @@ class StatusBar(QMainWindow):
         self._last_timer_type = None # "alarm" or "shutdown"
         self._last_timer_mins = 0
         self._clock_overrides = {}   # temporary in-memory clock overrides (not saved to config)
+        self._clock_hour_scroll = 0  # cumulative ±hour offset from scroll wheel on uptime label
         
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self._config = load_config()
@@ -4841,8 +4842,26 @@ class StatusBar(QMainWindow):
             elif btn == Qt.MouseButton.RightButton:
                 self._show_timer_menu()
                 
+        def _uptime_wheel(event):
+            """Scroll up = +1h, scroll down = -1h on both clock displays."""
+            delta = event.angleDelta().y()
+            if delta > 0:
+                self._clock_hour_scroll += 1
+            elif delta < 0:
+                self._clock_hour_scroll -= 1
+            else:
+                return
+            self._update_clock_tip()
+            # Refresh the visible floating tip label immediately
+            tip = _get_tip_label()
+            if tip.isVisible():
+                tip.setText(self.uptime_label._tip_text)
+                tip.adjustSize()
+            event.accept()
+
         self.uptime_label.mousePressEvent = lambda e: e.accept()
         self.uptime_label.mouseReleaseEvent = _uptime_release
+        self.uptime_label.wheelEvent = _uptime_wheel
         _install_tip_filter(self.uptime_label)
         ll.addWidget(self.uptime_label)
         ll.addSpacing(10)
@@ -4901,7 +4920,7 @@ class StatusBar(QMainWindow):
         bd_label   = ov.get("bd_label",  DEF_BD_LBL)
         ca_label   = ov.get("ca_label",  DEF_CA_LBL)
         fmt        = ov.get("format",    DEF_FMT)
-        has_ov     = bool(ov)
+        has_ov     = bool(ov) or self._clock_hour_scroll != 0
 
         def _apply(**kwargs):
             self._clock_overrides.update(kwargs)
@@ -4957,6 +4976,7 @@ class StatusBar(QMainWindow):
 
         elif action == reset_act:
             self._clock_overrides.clear()
+            self._clock_hour_scroll = 0
             self._update_clock_tip()
 
     def _show_timer_menu(self):
@@ -5691,6 +5711,9 @@ class StatusBar(QMainWindow):
         ca_label   = ov.get("ca_label",   cs.get("ca_label",  "CANADA"))
         fmt24      = ov.get("format",     cs.get("format",    "12h")) == "24h"
         swap       = ov.get("swap",       cs.get("swap",      False))
+        # Apply scroll-wheel hour shift to both clocks (no clamp — wrap is fine for display)
+        bd_offset  = bd_offset + self._clock_hour_scroll
+        ca_offset  = ca_offset + self._clock_hour_scroll
 
         now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
         t1 = now_utc.astimezone(timezone(timedelta(hours=bd_offset)))
