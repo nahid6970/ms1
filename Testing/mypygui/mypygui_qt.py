@@ -5658,7 +5658,9 @@ class StatusBar(QMainWindow):
         bd_block = _clock_block("BANGLADESH", bd, "#FCEE0A")
         ca_block  = _clock_block("CANADA",     ca, "#00F0FF")
         self.uptime_label._tip_text = (
-            f'<div style="min-width:220px;">{bd_block}<br>{ca_block}</div>'
+            f'<div style="min-width:220px;">{bd_block}'
+            f'<table><tr><td height="6"></td></tr></table>'
+            f'{ca_block}</div>'
         )
 
     def _update_info(self):
