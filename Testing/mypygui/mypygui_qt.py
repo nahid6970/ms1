@@ -31,6 +31,18 @@ try:
 except Exception:
     _HAS_ADL = False
 
+# ─── Helpers ──────────────────────────────────────────────────────────────────
+def run_detached(cmd, cwd=None, shell=False):
+    """Helper to launch processes detached from the GUI."""
+    # 0x08000000 = DETACHED_PROCESS
+    # 0x00000008 = CREATE_NO_WINDOW
+    # 0x08000000 | 0x00000008 = DETACHED_PROCESS | CREATE_NO_WINDOW
+    flags = 0x08000000 | 0x00000008
+    if shell:
+        subprocess.Popen(cmd, cwd=cwd, shell=True, creationflags=flags)
+    else:
+        subprocess.Popen(cmd, cwd=cwd, creationflags=flags)
+
 # ─── Logging Setup ────────────────────────────────────────────────────────────
 LOG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "output", "mypygui", "mypygui_log.log"))
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)

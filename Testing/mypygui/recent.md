@@ -31,6 +31,7 @@ All in `mypygui_qt.py`:
   - Added `ITEM INDENT (PX)` setting in Settings dialog → `KOMOREBI` group box → saves `komorebi_item_indent` (default 20).
   - Dynamic `margin-left: {indent_px}px` in both the hover tooltip `<div>` blocks and the `_menu_rich_action` left padding.
 - **Improved Komorebi toggle button**: Replaced text-based play/stop icon with color-coded SVG icons (green for play, red for stop) for a cleaner look.
+- **Optimization**: Added `run_detached` helper to centralize and standardize subprocess management, ensuring all external processes are detached from the GUI.
 - **Optimization**: Increased `_git_timer` interval from 100ms to 1000ms to reduce CPU usage.
 - **GPU Bar Graph**: Replaced GPU text label with a 5-second cumulative bar graph in the status bar, with color-coded bars (green <50%, yellow <80%, red >=80%).
 - **Git status performance fix**: Added `CREATE_BREAKAWAY_FROM_JOB` to `git status` subprocess calls in `mypygui_qt.py` to prevent git processes from being tied to the parent process's job object, which should help reduce orphaned git process accumulation.
