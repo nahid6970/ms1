@@ -4836,7 +4836,7 @@ class StatusBar(QMainWindow):
             if mods & Qt.KeyboardModifier.ShiftModifier: _open_static_edit("uptime"); return
             
             if btn == Qt.MouseButton.LeftButton:
-                subprocess.Popen("timedate.cpl", shell=True)
+                self._show_clock_menu()
             elif btn == Qt.MouseButton.RightButton:
                 self._show_timer_menu()
                 
@@ -4883,6 +4883,62 @@ class StatusBar(QMainWindow):
         add_bt = IconLabel("+", {}); _apply_static_style(add_bt, "add_button"); add_bt.mousePressEvent = lambda e: (_open_static_edit("add_button") if e.modifiers() & Qt.KeyboardModifier.ShiftModifier else open_edit_gui({"text": "NEW", "fg": "#ffffff", "bg": CP_BG, "id": f"btn_{int(time.time())}", "bindings": {}}, "buttons_left")); ll.addWidget(add_bt)
         
         self._countdown_timer = QTimer(self); self._countdown_timer.timeout.connect(self._timer_tick)
+
+    def _show_clock_menu(self):
+        cs = load_config().get("clock_settings", {})
+        bd_offset = cs.get("bd_offset",  6)
+        ca_offset = cs.get("ca_offset", -4)
+        bd_label  = cs.get("bd_label",  "BANGLADESH")
+        ca_label  = cs.get("ca_label",  "CANADA")
+        fmt       = cs.get("format",    "12h")
+        swap      = cs.get("swap",      False)
+
+        def _save(**kwargs):
+            cfg = load_config()
+            cfg.setdefault("clock_settings", {}).update(kwargs)
+            save_config(cfg)
+            self._update_clock_tip()
+
+        menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
+
+        fmt_act  = menu.addAction(f"Format: {'24h  →  switch to 12h' if fmt == '24h' else '12h  →  switch to 24h'}")
+        menu.addSeparator()
+        lbl1_act = menu.addAction(f"🟡  Label:  {bd_label}")
+        off1_act = menu.addAction(f"🟡  UTC Offset:  {'+' if bd_offset >= 0 else ''}{bd_offset}")
+        menu.addSeparator()
+        lbl2_act = menu.addAction(f"🔵  Label:  {ca_label}")
+        off2_act = menu.addAction(f"🔵  UTC Offset:  {'+' if ca_offset >= 0 else ''}{ca_offset}")
+        menu.addSeparator()
+        swap_act = menu.addAction(f"Swap Order: {'🔵 top / 🟡 bottom' if swap else '🟡 top / 🔵 bottom'}  →  flip")
+        menu.addSeparator()
+        dt_act   = menu.addAction("⏰  Windows Date && Time Settings")
+
+        gpos = self.uptime_label.mapToGlobal(QPoint(0, 0))
+        mh   = menu.sizeHint().height()
+        my   = (gpos.y() + self.uptime_label.height()) if gpos.y() < 150 else (gpos.y() - mh)
+        action = menu.exec(QPoint(gpos.x(), my))
+        if not action: return
+
+        if action == fmt_act:
+            _save(format="24h" if fmt == "12h" else "12h")
+        elif action == lbl1_act:
+            val, ok = QInputDialog.getText(self, "Clock 1 Label", "Label:", text=bd_label)
+            if ok and val.strip(): _save(bd_label=val.strip())
+        elif action == off1_act:
+            val, ok = QInputDialog.getInt(self, "Clock 1 UTC Offset", "Hours offset from UTC (-12 to +14):",
+                                          value=bd_offset, min=-12, max=14)
+            if ok: _save(bd_offset=val)
+        elif action == lbl2_act:
+            val, ok = QInputDialog.getText(self, "Clock 2 Label", "Label:", text=ca_label)
+            if ok and val.strip(): _save(ca_label=val.strip())
+        elif action == off2_act:
+            val, ok = QInputDialog.getInt(self, "Clock 2 UTC Offset", "Hours offset from UTC (-12 to +14):",
+                                          value=ca_offset, min=-12, max=14)
+            if ok: _save(ca_offset=val)
+        elif action == swap_act:
+            _save(swap=not swap)
+        elif action == dt_act:
+            subprocess.Popen("timedate.cpl", shell=True)
 
     def _show_timer_menu(self):
         if self._timer_active:
@@ -5606,34 +5662,46 @@ class StatusBar(QMainWindow):
         if not self._timer_active: self.uptime_label.setText(format_uptime())
 
     def _update_clock_tip(self):
-        """Regenerate the dual BD+CA digital-clock tooltip for the uptime label."""
+        """Regenerate the dual clock tooltip using current clock_settings from config."""
         from datetime import timezone, timedelta
-        _TZ_BD = timezone(timedelta(hours=6))    # Bangladesh  UTC+6
-        _TZ_CA = timezone(timedelta(hours=-4))   # Canada EDT  UTC-4 (Toronto summer time)
-        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
-        bd = now_utc.astimezone(_TZ_BD)
-        ca = now_utc.astimezone(_TZ_CA)
+        cs = load_config().get("clock_settings", {})
+        bd_offset  = cs.get("bd_offset",  6)
+        ca_offset  = cs.get("ca_offset", -4)
+        bd_label   = cs.get("bd_label",  "BANGLADESH")
+        ca_label   = cs.get("ca_label",  "CANADA")
+        fmt24      = cs.get("format", "12h") == "24h"
+        swap       = cs.get("swap", False)
 
-        def _clock_block(label, time_obj, accent):
+        now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
+        t1 = now_utc.astimezone(timezone(timedelta(hours=bd_offset)))
+        t2 = now_utc.astimezone(timezone(timedelta(hours=ca_offset)))
+
+        def _tz_str(offset):
+            sign = "+" if offset >= 0 else "−"
+            return f"UTC{sign}{abs(offset)}"
+
+        def _clock_block(label, time_obj, accent, offset):
             hh24 = time_obj.hour
-            hh = f"{(hh24 % 12) or 12:02d}"  # 12h, zero-padded, manual
+            if fmt24:
+                hh = f"{hh24:02d}"
+                ampm_span = ""
+            else:
+                hh = f"{(hh24 % 12) or 12:02d}"
+                ampm = "AM" if hh24 < 12 else "PM"
+                ampm_color = "#a08020" if accent == "#FCEE0A" else "#009aaa"
+                ampm_span = f'<span style="color:{ampm_color}; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
             mm = time_obj.strftime("%M")
             ss = time_obj.strftime("%S")
-            ampm = "AM" if hh24 < 12 else "PM"
             date_str = time_obj.strftime("%a %d %b %Y")
             dstyle = (
                 f"display:inline-block; font-family:'JetBrainsMono NFP','Consolas',monospace; "
-                f"font-size:22pt; font-weight:bold; color:{accent}; "
-                f"letter-spacing:2px;"
+                f"font-size:22pt; font-weight:bold; color:{accent}; letter-spacing:2px;"
             )
-            sep_color   = "#907010" if accent == "#FCEE0A" else "#007888"
-            ampm_color  = "#a08020" if accent == "#FCEE0A" else "#009aaa"
-            tz_color    = "#706010" if accent == "#FCEE0A" else "#006070"
-            sep = f'<span style="color:{sep_color}; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
-            ampm_span = f'<span style="color:{ampm_color}; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
-            date_span = f'<span style="color:#888888; font-size:8pt;">{date_str}</span>'
-            tz_label = "UTC−4" if accent == "#00F0FF" else "UTC+6"
-            tz_span = f'<span style="color:{tz_color}; font-size:7.5pt;">{tz_label}</span>'
+            sep_color  = "#907010" if accent == "#FCEE0A" else "#007888"
+            tz_color   = "#706010" if accent == "#FCEE0A" else "#006070"
+            sep        = f'<span style="color:{sep_color}; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
+            date_span  = f'<span style="color:#888888; font-size:8pt;">{date_str}</span>'
+            tz_span    = f'<span style="color:{tz_color}; font-size:7.5pt;">{_tz_str(offset)}</span>'
             header = (
                 f'<div style="margin-bottom:2px;">'
                 f'<span style="color:{accent}; font-size:9pt; font-weight:bold; letter-spacing:1px;">{label}</span>'
@@ -5649,18 +5717,20 @@ class StatusBar(QMainWindow):
             )
             return (
                 f'<div style="background:#111; border:1px solid {accent}44; border-radius:4px; '
-                f'padding:8px 12px; margin-bottom:14px;">'
+                f'padding:8px 12px;">'
                 f'{header}{digits}'
                 f'<div style="margin-top:4px;">{date_span}</div>'
                 f'</div>'
             )
 
-        bd_block = _clock_block("BANGLADESH", bd, "#FCEE0A")
-        ca_block  = _clock_block("CANADA",     ca, "#00F0FF")
+        blk1 = _clock_block(bd_label, t1, "#FCEE0A", bd_offset)
+        blk2 = _clock_block(ca_label, t2, "#00F0FF", ca_offset)
+        if swap:
+            blk1, blk2 = blk2, blk1
         self.uptime_label._tip_text = (
-            f'<div style="min-width:220px;">{bd_block}'
+            f'<div style="min-width:220px;">{blk1}'
             f'<table><tr><td height="6"></td></tr></table>'
-            f'{ca_block}</div>'
+            f'{blk2}</div>'
         )
 
     def _update_info(self):
