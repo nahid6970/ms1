@@ -1605,7 +1605,11 @@ class GpuGraph(QWidget):
         bar_w = w // 10
         for i, val in enumerate(self._history):
             bar_h = int((val / 100) * h)
-            painter.fillRect(i * bar_w, h - bar_h, bar_w - 1, bar_h, QColor(CP_CYAN))
+            # Determine color based on usage
+            if val < 50: color = QColor(CP_GREEN)
+            elif val < 80: color = QColor(CP_YELLOW)
+            else: color = QColor(CP_RED)
+            painter.fillRect(i * bar_w, h - bar_h, bar_w - 1, bar_h, color)
 _git_queue = Queue()
 _git_loop_started = False
 
