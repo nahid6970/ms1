@@ -5614,7 +5614,7 @@ class StatusBar(QMainWindow):
         bd = now_utc.astimezone(_TZ_BD)
         ca = now_utc.astimezone(_TZ_CA)
 
-        def _clock_block(label, flag, time_obj, accent):
+        def _clock_block(label, time_obj, accent):
             hh = time_obj.strftime("%I")   # 12h, zero-padded
             mm = time_obj.strftime("%M")
             ss = time_obj.strftime("%S")
@@ -5628,13 +5628,12 @@ class StatusBar(QMainWindow):
             sep = f'<span style="color:{accent}88; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
             ampm_span = f'<span style="color:{accent}99; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
             date_span = f'<span style="color:#888; font-size:8pt;">{date_str}</span>'
-            tz_label = "UTC−4 (EDT)" if accent == "#00F0FF" else "UTC+6"
+            tz_label = "UTC−4" if accent == "#00F0FF" else "UTC+6"
             tz_span = f'<span style="color:{accent}66; font-size:7.5pt;">{tz_label}</span>'
             header = (
                 f'<div style="margin-bottom:2px;">'
-                f'<span style="font-size:13pt; margin-right:5px;">{flag}</span>'
                 f'<span style="color:{accent}; font-size:9pt; font-weight:bold; letter-spacing:1px;">{label}</span>'
-                f'<span style="margin-left:6px;">{tz_span}</span>'
+                f'<span style="margin-left:6px;">&nbsp;{tz_span}</span>'
                 f'</div>'
             )
             digits = (
@@ -5652,8 +5651,8 @@ class StatusBar(QMainWindow):
                 f'</div>'
             )
 
-        bd_block = _clock_block("BANGLADESH", "🇧🇩", bd, "#FCEE0A")
-        ca_block  = _clock_block("CANADA",     "🇨🇦", ca, "#00F0FF")
+        bd_block = _clock_block("BANGLADESH", bd, "#FCEE0A")
+        ca_block  = _clock_block("CANADA",     ca, "#00F0FF")
         self.uptime_label._tip_text = (
             f'<div style="min-width:220px;">{bd_block}{ca_block}</div>'
         )
