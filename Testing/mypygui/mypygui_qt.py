@@ -4771,6 +4771,7 @@ class StatusBar(QMainWindow):
         self._timer_seconds = 0
         self._last_timer_type = None # "alarm" or "shutdown"
         self._last_timer_mins = 0
+        self._clock_overrides = {}   # temporary in-memory clock overrides (not saved to config)
         
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self._config = load_config()
@@ -4885,33 +4886,47 @@ class StatusBar(QMainWindow):
         self._countdown_timer = QTimer(self); self._countdown_timer.timeout.connect(self._timer_tick)
 
     def _show_clock_menu(self):
-        cs = load_config().get("clock_settings", {})
-        bd_offset = cs.get("bd_offset",  6)
-        ca_offset = cs.get("ca_offset", -4)
-        bd_label  = cs.get("bd_label",  "BANGLADESH")
-        ca_label  = cs.get("ca_label",  "CANADA")
-        fmt       = cs.get("format",    "12h")
-        swap      = cs.get("swap",      False)
+        # Defaults from config
+        cs          = load_config().get("clock_settings", {})
+        DEF_BD_OFF  = cs.get("bd_offset",  6)
+        DEF_CA_OFF  = cs.get("ca_offset", -4)
+        DEF_BD_LBL  = cs.get("bd_label",  "BANGLADESH")
+        DEF_CA_LBL  = cs.get("ca_label",  "CANADA")
+        DEF_FMT     = cs.get("format",    "12h")
 
-        def _save(**kwargs):
-            cfg = load_config()
-            cfg.setdefault("clock_settings", {}).update(kwargs)
-            save_config(cfg)
+        # Current values (override takes priority)
+        ov         = self._clock_overrides
+        bd_offset  = ov.get("bd_offset", DEF_BD_OFF)
+        ca_offset  = ov.get("ca_offset", DEF_CA_OFF)
+        bd_label   = ov.get("bd_label",  DEF_BD_LBL)
+        ca_label   = ov.get("ca_label",  DEF_CA_LBL)
+        fmt        = ov.get("format",    DEF_FMT)
+        has_ov     = bool(ov)
+
+        def _apply(**kwargs):
+            self._clock_overrides.update(kwargs)
             self._update_clock_tip()
+
+        def _off_str(v): return f"UTC {'+' if v >= 0 else ''}{v}"
 
         menu = QMenu(self); menu.setStyleSheet(DIALOG_QSS)
 
-        fmt_act  = menu.addAction(f"Format: {'24h  →  switch to 12h' if fmt == '24h' else '12h  →  switch to 24h'}")
+        fmt_act  = menu.addAction(f"Format: {fmt}  →  {'12h' if fmt == '24h' else '24h'}")
         menu.addSeparator()
-        lbl1_act = menu.addAction(f"🟡  Label:  {bd_label}")
-        off1_act = menu.addAction(f"🟡  UTC Offset:  {'+' if bd_offset >= 0 else ''}{bd_offset}")
+
+        # ── Clock 1 (yellow) ──────────────────────────────────────────────
+        lbl1_act = menu.addAction(f"🟡  {bd_label}  [{_off_str(bd_offset)}]  — change label")
+        off1_act = menu.addAction(f"🟡  Change timezone  (current: {_off_str(bd_offset)})")
         menu.addSeparator()
-        lbl2_act = menu.addAction(f"🔵  Label:  {ca_label}")
-        off2_act = menu.addAction(f"🔵  UTC Offset:  {'+' if ca_offset >= 0 else ''}{ca_offset}")
+
+        # ── Clock 2 (cyan) ────────────────────────────────────────────────
+        lbl2_act = menu.addAction(f"🔵  {ca_label}  [{_off_str(ca_offset)}]  — change label")
+        off2_act = menu.addAction(f"🔵  Change timezone  (current: {_off_str(ca_offset)})")
         menu.addSeparator()
-        swap_act = menu.addAction(f"Swap Order: {'🔵 top / 🟡 bottom' if swap else '🟡 top / 🔵 bottom'}  →  flip")
-        menu.addSeparator()
-        dt_act   = menu.addAction("⏰  Windows Date && Time Settings")
+
+        reset_act = menu.addAction(f"↺  Reset to defaults{'  ●' if has_ov else '  (no overrides)'}")
+        if not has_ov:
+            reset_act.setEnabled(False)
 
         gpos = self.uptime_label.mapToGlobal(QPoint(0, 0))
         mh   = menu.sizeHint().height()
@@ -4920,25 +4935,29 @@ class StatusBar(QMainWindow):
         if not action: return
 
         if action == fmt_act:
-            _save(format="24h" if fmt == "12h" else "12h")
+            _apply(format="24h" if fmt == "12h" else "12h")
+
         elif action == lbl1_act:
             val, ok = QInputDialog.getText(self, "Clock 1 Label", "Label:", text=bd_label)
-            if ok and val.strip(): _save(bd_label=val.strip())
+            if ok and val.strip(): _apply(bd_label=val.strip())
+
         elif action == off1_act:
-            val, ok = QInputDialog.getInt(self, "Clock 1 UTC Offset", "Hours offset from UTC (-12 to +14):",
-                                          value=bd_offset, min=-12, max=14)
-            if ok: _save(bd_offset=val)
+            val, ok = QInputDialog.getInt(self, "Clock 1 Timezone",
+                f"UTC offset for  {bd_label}  (-12 to +14):", value=bd_offset, min=-12, max=14)
+            if ok: _apply(bd_offset=val)
+
         elif action == lbl2_act:
             val, ok = QInputDialog.getText(self, "Clock 2 Label", "Label:", text=ca_label)
-            if ok and val.strip(): _save(ca_label=val.strip())
+            if ok and val.strip(): _apply(ca_label=val.strip())
+
         elif action == off2_act:
-            val, ok = QInputDialog.getInt(self, "Clock 2 UTC Offset", "Hours offset from UTC (-12 to +14):",
-                                          value=ca_offset, min=-12, max=14)
-            if ok: _save(ca_offset=val)
-        elif action == swap_act:
-            _save(swap=not swap)
-        elif action == dt_act:
-            subprocess.Popen("timedate.cpl", shell=True)
+            val, ok = QInputDialog.getInt(self, "Clock 2 Timezone",
+                f"UTC offset for  {ca_label}  (-12 to +14):", value=ca_offset, min=-12, max=14)
+            if ok: _apply(ca_offset=val)
+
+        elif action == reset_act:
+            self._clock_overrides.clear()
+            self._update_clock_tip()
 
     def _show_timer_menu(self):
         if self._timer_active:
@@ -5665,12 +5684,13 @@ class StatusBar(QMainWindow):
         """Regenerate the dual clock tooltip using current clock_settings from config."""
         from datetime import timezone, timedelta
         cs = load_config().get("clock_settings", {})
-        bd_offset  = cs.get("bd_offset",  6)
-        ca_offset  = cs.get("ca_offset", -4)
-        bd_label   = cs.get("bd_label",  "BANGLADESH")
-        ca_label   = cs.get("ca_label",  "CANADA")
-        fmt24      = cs.get("format", "12h") == "24h"
-        swap       = cs.get("swap", False)
+        ov = self._clock_overrides
+        bd_offset  = ov.get("bd_offset",  cs.get("bd_offset",  6))
+        ca_offset  = ov.get("ca_offset",  cs.get("ca_offset", -4))
+        bd_label   = ov.get("bd_label",   cs.get("bd_label",  "BANGLADESH"))
+        ca_label   = ov.get("ca_label",   cs.get("ca_label",  "CANADA"))
+        fmt24      = ov.get("format",     cs.get("format",    "12h")) == "24h"
+        swap       = ov.get("swap",       cs.get("swap",      False))
 
         now_utc = datetime.utcnow().replace(tzinfo=timezone.utc)
         t1 = now_utc.astimezone(timezone(timedelta(hours=bd_offset)))
