@@ -5649,16 +5649,16 @@ class StatusBar(QMainWindow):
             )
             return (
                 f'<div style="background:#111; border:1px solid {accent}44; border-radius:4px; '
-                f'padding:8px 12px; margin-bottom:6px;">'
+                f'padding:8px 12px; margin-bottom:14px;">'
                 f'{header}{digits}'
-                f'<div style="margin-top:2px;">{date_span}</div>'
+                f'<div style="margin-top:4px;">{date_span}</div>'
                 f'</div>'
             )
 
         bd_block = _clock_block("BANGLADESH", bd, "#FCEE0A")
         ca_block  = _clock_block("CANADA",     ca, "#00F0FF")
         self.uptime_label._tip_text = (
-            f'<div style="min-width:220px;">{bd_block}{ca_block}</div>'
+            f'<div style="min-width:220px;">{bd_block}<br>{ca_block}</div>'
         )
 
     def _update_info(self):
