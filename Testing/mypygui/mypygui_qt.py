@@ -5615,21 +5615,25 @@ class StatusBar(QMainWindow):
         ca = now_utc.astimezone(_TZ_CA)
 
         def _clock_block(label, time_obj, accent):
-            hh = time_obj.strftime("%I")   # 12h, zero-padded
+            hh24 = time_obj.hour
+            hh = f"{(hh24 % 12) or 12:02d}"  # 12h, zero-padded, manual
             mm = time_obj.strftime("%M")
             ss = time_obj.strftime("%S")
-            ampm = time_obj.strftime("%p")   # AM / PM
+            ampm = "AM" if hh24 < 12 else "PM"
             date_str = time_obj.strftime("%a %d %b %Y")
             dstyle = (
                 f"display:inline-block; font-family:'JetBrainsMono NFP','Consolas',monospace; "
                 f"font-size:22pt; font-weight:bold; color:{accent}; "
-                f"letter-spacing:2px; text-shadow: 0 0 8px {accent}88;"
+                f"letter-spacing:2px;"
             )
-            sep = f'<span style="color:{accent}88; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
-            ampm_span = f'<span style="color:{accent}99; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
-            date_span = f'<span style="color:#888; font-size:8pt;">{date_str}</span>'
+            sep_color   = "#907010" if accent == "#FCEE0A" else "#007888"
+            ampm_color  = "#a08020" if accent == "#FCEE0A" else "#009aaa"
+            tz_color    = "#706010" if accent == "#FCEE0A" else "#006070"
+            sep = f'<span style="color:{sep_color}; font-size:20pt; font-weight:bold; margin:0 1px;">:</span>'
+            ampm_span = f'<span style="color:{ampm_color}; font-size:8pt; font-weight:bold; vertical-align:middle; margin-left:4px;">{ampm}</span>'
+            date_span = f'<span style="color:#888888; font-size:8pt;">{date_str}</span>'
             tz_label = "UTC−4" if accent == "#00F0FF" else "UTC+6"
-            tz_span = f'<span style="color:{accent}66; font-size:7.5pt;">{tz_label}</span>'
+            tz_span = f'<span style="color:{tz_color}; font-size:7.5pt;">{tz_label}</span>'
             header = (
                 f'<div style="margin-bottom:2px;">'
                 f'<span style="color:{accent}; font-size:9pt; font-weight:bold; letter-spacing:1px;">{label}</span>'
