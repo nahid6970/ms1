@@ -5580,7 +5580,7 @@ class StatusBar(QMainWindow):
         self._uptime_timer = QTimer(self); self._uptime_timer.timeout.connect(self._update_uptime); self._uptime_timer.start(1000)
         self._info_timer = QTimer(self); self._info_timer.timeout.connect(self._update_info); self._info_timer.start(1000)
         self._core_timer = QTimer(self); self._core_timer.timeout.connect(self._update_cores); self._core_timer.start(1000)
-        self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(100)
+        self._git_timer = QTimer(self); self._git_timer.timeout.connect(self._drain_git_queue); self._git_timer.start(1000)
         self._komorebi_timer = QTimer(self); self._komorebi_timer.timeout.connect(self._drain_komorebi_queue); self._komorebi_timer.start(100)
         threading.Thread(target=_komorebi_status_loop, args=(_komorebi_queue,), daemon=True).start()
         threading.Thread(target=_komorebi_event_listener, daemon=True).start()
