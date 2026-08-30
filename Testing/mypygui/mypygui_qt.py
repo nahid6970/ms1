@@ -4843,6 +4843,7 @@ class StatusBar(QMainWindow):
         self.uptime_label.mousePressEvent = lambda e: e.accept()
         self.uptime_label.mouseReleaseEvent = _uptime_release
         ll.addWidget(self.uptime_label)
+        ll.addSpacing(10)
         
         # Komorebi control
         def _get_komorebi_svg(running):
