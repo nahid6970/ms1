@@ -1589,7 +1589,23 @@ class CpuCoreFrame(QWidget):
             painter.fillRect(2 + i * (BAR_WIDTH + 2), 2 + (BAR_HEIGHT // 2) - bar_h, BAR_WIDTH, bar_h * 2, color)
 
 
-# ─── Git status ───────────────────────────────────────────────────────────────
+class GpuGraph(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(50, 20)
+        self._history = [0] * 10
+    def update_usage(self, usage):
+        self._history.append(usage)
+        self._history.pop(0)
+        self.update()
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor("#111111"))
+        w, h = self.width(), self.height()
+        bar_w = w // 10
+        for i, val in enumerate(self._history):
+            bar_h = int((val / 100) * h)
+            painter.fillRect(i * bar_w, h - bar_h, bar_w - 1, bar_h, QColor(CP_CYAN))
 _git_queue = Queue()
 _git_loop_started = False
 
@@ -5447,7 +5463,7 @@ class StatusBar(QMainWindow):
         # _attach_net_popup(self.upload_lb, "ul")
         self.lb_cpu = IconLabel("", load_config().get("static_bindings", {}).get("cpu", {})); _bind_static(self.lb_cpu, "cpu", r"C:\@delta\ms1\scripts\process\process_viewer.py"); rl.addWidget(self.lb_cpu)
         self.cpu_core_frame = CpuCoreFrame(); rl.addWidget(self.cpu_core_frame)
-        self.lb_gpu = IconLabel("", load_config().get("static_bindings", {}).get("gpu", {})); _bind_static(self.lb_gpu, "gpu", "start ms-settings:display"); rl.addWidget(self.lb_gpu)
+        self.lb_gpu = GpuGraph(); rl.addWidget(self.lb_gpu)
         self.lb_ram = IconLabel("", load_config().get("static_bindings", {}).get("ram", {})); _bind_static(self.lb_ram, "ram", "taskmgr"); rl.addWidget(self.lb_ram)
         # ── Process hover popups ───────────────────────────────────────────
         self._cpu_popup = ProcessPopup("cpu")
@@ -5570,7 +5586,7 @@ class StatusBar(QMainWindow):
         if not self._timer_active: self.uptime_label.setText(format_uptime())
     def _update_info(self):
         cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
-        self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.setText(f"{gpu}%")
+        self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.update_usage(gpu)
         self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
         
         drives = get_active_drives()

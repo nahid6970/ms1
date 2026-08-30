@@ -31,6 +31,7 @@ All in `mypygui_qt.py`:
   - Added `ITEM INDENT (PX)` setting in Settings dialog → `KOMOREBI` group box → saves `komorebi_item_indent` (default 20).
   - Dynamic `margin-left: {indent_px}px` in both the hover tooltip `<div>` blocks and the `_menu_rich_action` left padding.
 - **Improved Komorebi toggle button**: Replaced text-based play/stop icon with color-coded SVG icons (green for play, red for stop) for a cleaner look.
+- **GPU Bar Graph**: Replaced GPU text label with a 5-second cumulative bar graph in the status bar.
 - **Git status performance fix**: Added `CREATE_BREAKAWAY_FROM_JOB` to `git status` subprocess calls in `mypygui_qt.py` to prevent git processes from being tied to the parent process's job object, which should help reduce orphaned git process accumulation.
 - **NEW `gg` mode cycle**: Right-clicking the `BN/EN` toggle now cycles through 3 modes: `search` (orange border) → `clipboard` (blue border) → `gg` (neon green border).
 - **FIX `gg` project root**: When in `gg` mode, executing `gg "text"` now explicitly uses the user's home directory (`cwd=os.path.expanduser("~")`) to prevent it from treating the `mypygui` repository directory as the project root.
