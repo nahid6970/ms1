@@ -6070,7 +6070,27 @@ def main() -> int:
                             error("Failed to generate summary: received empty response.")
                             continue
 
-                        # Replace conversation contents with the compressed summary turn
+                        # 1. Force flush & archive the full uncompacted transcript to disk first
+                        TRANSCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
+                        if current_session_path is None:
+                            current_session_path = TRANSCRIPTS_DIR / f"session_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+                        pre_summary_state = {
+                            "model": client.model,
+                            "system_instruction": system_instruction,
+                            "project_root": str(cwd),
+                            "disabled_tools": sorted(disabled_tools),
+                            "contents": list(contents),
+                            "tool_loop_limit": tool_loop_limit,
+                            "custom_title": f"Pre-Summary ({old_msg_count} msgs, ~{_format_token_count(old_tokens)} tokens)",
+                        }
+                        save_transcript(current_session_path, pre_summary_state)
+                        old_session_file = current_session_path.name
+
+                        # 2. Reset session path so summary starts in its own new separate transcript file
+                        current_session_path = TRANSCRIPTS_DIR / f"session_{dt.datetime.now().strftime('%Y%m%d_%H%M%S')}_compact.json"
+
+                        # 3. Replace active conversation contents with the compressed summary turn
                         contents = [
                             make_user_content(
                                 "[SYSTEM CONTEXT / CONVERSATION SUMMARY]\n\n"
@@ -6094,8 +6114,10 @@ def main() -> int:
 
                         info("=" * 60)
                         info(f"✓ CONVERSATION COMPACTED SUCCESSFULLY")
-                        info(f"  Messages : {old_msg_count} -> {len(contents)}")
-                        info(f"  Tokens   : ~{_format_token_count(old_tokens)} -> ~{_format_token_count(new_tokens)} (~{pct}% saved)")
+                        info(f"  Archived Full Session : {old_session_file}")
+                        info(f"  New Compact Session   : {current_session_path.name}")
+                        info(f"  Messages              : {old_msg_count} -> {len(contents)}")
+                        info(f"  Tokens                : ~{_format_token_count(old_tokens)} -> ~{_format_token_count(new_tokens)} (~{pct}% saved)")
                         info("=" * 60)
                         auto_save_session()
                         persist_selection()
