@@ -73,6 +73,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/help` - show commands
 - `/exit` - quit
 - `/reset` - clear conversation
+- `/summ` - summarize & condense conversation into a structured briefing to reduce token usage for subsequent turns
 - `/mm` - open the model picker
 - `/test` - test all models and auto-hide failures
 - `/addapi` - add a named API key

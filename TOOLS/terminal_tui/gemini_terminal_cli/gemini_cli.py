@@ -974,6 +974,7 @@ if Completer is not None:
             ("/exit", "Quit CLI"),
             ("/quit", "Quit CLI"),
             ("/reset", "Clear conversation history"),
+            ("/summ", "Summarize and condense conversation to reduce tokens"),
             ("/mm", "Open model picker / switch model"),
             ("/test", "Test all models and hide failures"),
             ("/api", "Open API account picker"),
@@ -4539,6 +4540,7 @@ def print_help() -> None:
               /help                 Show this message
               /exit                 Quit
               /reset                Clear conversation history
+              /summ                 Summarize & compress conversation into compact context
               /mm                   Open the model picker
               /test                 Test all models and hide failures
               /api                  Open the API account picker
@@ -6001,6 +6003,104 @@ def main() -> int:
                     contents = []
                     last_turn_tokens = None
                     info("Conversation cleared.")
+                    continue
+                if command in {"/summ", "/summarize", "/compact"}:
+                    if not contents:
+                        warn("No conversation history to summarize.")
+                        continue
+
+                    old_tokens = last_turn_tokens if last_turn_tokens is not None else get_token_estimate()
+                    old_msg_count = len(contents)
+
+                    # Build transcript summary from contents
+                    conv_lines: List[str] = []
+                    for msg in contents:
+                        role = msg.get("role", "unknown")
+                        for part in msg.get("parts", []):
+                            if isinstance(part, dict):
+                                if "text" in part:
+                                    t = str(part["text"]).strip()
+                                    if t:
+                                        conv_lines.append(f"{role.upper()}: {t}")
+                                elif "functionCall" in part:
+                                    fc = part["functionCall"]
+                                    fname = fc.get("name", "tool")
+                                    conv_lines.append(f"TOOL_CALL [{fname}]")
+                                elif "functionResponse" in part:
+                                    fr = part["functionResponse"]
+                                    fname = fr.get("name", "tool")
+                                    res_str = str(fr.get("response", {}).get("result", ""))[:300]
+                                    conv_lines.append(f"TOOL_RESULT [{fname}]: {res_str}")
+
+                    full_history_text = "\n".join(conv_lines)
+                    if not full_history_text.strip():
+                        warn("Conversation history has no text or tool data to summarize.")
+                        continue
+
+                    info(f"Summarizing conversation ({old_msg_count} messages, ~{_format_token_count(old_tokens)} tokens)...")
+
+                    summarizer_prompt = (
+                        "You are an expert context compression assistant. "
+                        "Summarize the preceding conversation and tool executions into a comprehensive, structured briefing. "
+                        "Retain all critical information: "
+                        "1. Key user goals, requirements, preferences, and decisions made. "
+                        "2. Files modified, created, or read, along with key code changes or findings. "
+                        "3. Current task state, ongoing work, unresolved questions, and next steps. "
+                        "Write concisely using bullet points and Markdown headings. "
+                        "Do NOT lose essential technical facts or context needed for future turns.\n\n"
+                        f"CONVERSATION HISTORY TO COMPACT:\n\n{full_history_text}"
+                    )
+
+                    try:
+                        sum_client = GeminiClient(client.api_key, client.model)
+                        sum_res = sum_client.generate(
+                            contents=[make_user_content(summarizer_prompt)],
+                            system_instruction="You are a precise technical summarizer. Output only the structured markdown summary.",
+                            tool_names=[],
+                            temperature=0.2,
+                            max_output_tokens=2048,
+                        )
+                        cands = sum_res.get("candidates", [])
+                        if not cands:
+                            error("Failed to generate summary: model returned no candidates.")
+                            continue
+
+                        summary_markdown = extract_model_raw_text(cands[0].get("content", {}).get("parts", []))
+                        if not summary_markdown.strip():
+                            error("Failed to generate summary: received empty response.")
+                            continue
+
+                        # Replace conversation contents with the compressed summary turn
+                        contents = [
+                            make_user_content(
+                                "[SYSTEM CONTEXT / CONVERSATION SUMMARY]\n\n"
+                                "The previous conversation has been compacted to save tokens. "
+                                "Here is the comprehensive context and history summary of all work done so far:\n\n"
+                                f"{summary_markdown}\n\n"
+                                "---\nUse the summary above as full context for all subsequent questions and instructions."
+                            ),
+                            {
+                                "role": "model",
+                                "parts": [
+                                    {"text": "Understood. I have loaded the conversation summary into working memory and am ready to proceed with full context."}
+                                ]
+                            }
+                        ]
+
+                        last_turn_tokens = None
+                        new_tokens = get_token_estimate()
+                        saved_tokens = max(0, old_tokens - new_tokens)
+                        pct = int((saved_tokens / old_tokens * 100)) if old_tokens > 0 else 0
+
+                        info("=" * 60)
+                        info(f"✓ CONVERSATION COMPACTED SUCCESSFULLY")
+                        info(f"  Messages : {old_msg_count} -> {len(contents)}")
+                        info(f"  Tokens   : ~{_format_token_count(old_tokens)} -> ~{_format_token_count(new_tokens)} (~{pct}% saved)")
+                        info("=" * 60)
+                        auto_save_session()
+                        persist_selection()
+                    except Exception as exc:
+                        error(f"Error during summarization: {exc}")
                     continue
                 if command in {"/mm", "/test"}:
                     if not model_cache:
