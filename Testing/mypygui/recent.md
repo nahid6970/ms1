@@ -102,7 +102,43 @@ All in `mypygui_qt.py`:
   - Hiding and showing pre-allocated rows allows Qt's native `adjustSize()` to calculate the exact, complete window bounds including bottom margins, eliminating bottom row text clipping.
   - Separate `_proc_container` and `_nic_container` toggle cleanly without layout shifts or extra spacing.
 
-## 4. Pending Task
+## 4. Pending Task / Known Issue
+
+### 🐛 Chrome black top bar on statusbar restart (UNSOLVED)
+
+**Symptom:** After restarting the statusbar (🔄 button → `_app_restart()`), Chrome windows (identified by komorebi as "Chrome Legacy Window") show a black strip at the top, and the minimize/maximize/close buttons appear shifted down. The more restarts, the worse it gets — if the focused window is on workspace 2 when restarting, workspace 1's Chrome gets the black bar.
+
+**Root cause confirmed:** Komorebi is the cause. Manually pausing komorebi (`komorebic toggle-pause`) *before* clicking restart fixes it completely. When komorebi is active during restart, it fights the AppBar work-area reservation and retiles windows with wrong top offsets — particularly affecting *unfocused* workspace windows.
+
+**What was tried (all reverted):**
+- Moved `hwnd = int(self.winId())` to after `setWindowFlags + show()` — didn't help
+- `reset_workarea()` via `SPI_SETWORKAREA` before register — didn't help, also broke positioning
+- Replacing `SHAppBarMessage` entirely with `SPI_SETWORKAREA` — bar appeared at bottom
+- `komorebic toggle-pause` in `_app_restart` before relaunch — correct approach but `pause`/`unpause` subcommands don't exist; correct command is `komorebic toggle-pause`
+- Polling until `is_paused=true` confirmed before launching new process + 2500ms unpause delay + `komorebic retile` after unpause — still intermittent
+
+**What works manually:** pause komorebi → restart statusbar → windows settle correctly → unpause komorebi.
+
+**Fix needed in `_app_restart()` (line ~697 in `mypygui_qt.py`):**
+```python
+def _app_restart():
+    def _do():
+        try:
+            subprocess.run(["komorebic", "toggle-pause"],
+                           creationflags=subprocess.CREATE_NO_WINDOW, timeout=3)
+        except Exception:
+            pass
+        time.sleep(5)  # wait for AppBar to settle with komorebi paused
+        subprocess.Popen([sys.executable] + sys.argv)
+        QTimer.singleShot(0, QApplication.instance().quit)
+    threading.Thread(target=_do, daemon=True).start()
+```
+Note: This leaves komorebi paused after restart — user unpauses manually. A smarter version would check prior state and auto-unpause, but timing is tricky.
+
+**AppBar code:** `register_appbar` / `unregister_appbar` / `set_appbar_position` using `SHAppBarMessage` are correct and should NOT be changed. The work area is correct (`top=39`) when measured — the problem is purely komorebi retiling windows before the AppBar reservation is stable.
+
+---
+
 Live-test workspace app rules: right-click a dot → assign an exe → launch it → confirm it opens on that workspace; remove the rule afterwards.
 
 Verify event pipe stays stable after the FILE_FLAG_OVERLAPPED fix (no more error 230 loop in log).
