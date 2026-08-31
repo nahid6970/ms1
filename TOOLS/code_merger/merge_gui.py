@@ -989,7 +989,8 @@ def _backup(fpath: str):
 def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tuple[bool, str]:
     """
     Stage only the given files (relative to root) and commit inside `root`.
-    Never touches any parent git repository — operates strictly within `root`.
+    Always operates against the git repo that directly owns `root`, never a
+    parent repo that merely contains `root` as a subdirectory.
     Returns (success, log_text).
     """
     # Suppress Windows console flash for all subprocess calls
@@ -1016,16 +1017,19 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
         working_root = os.path.normpath(root)
 
         # Stage each file by its path relative to the repo root
-        # so we never accidentally stage files outside `root`
         staged = []
         for rel_path in file_paths:
             abs_path = os.path.normpath(os.path.join(root, rel_path.lstrip("/\\")))
-            # Safety: must be inside working_root
-            if not abs_path.startswith(working_root + os.sep) and abs_path != working_root:
+            # Safety: must be inside working_root (use commonpath to avoid prefix collisions)
+            try:
+                common = os.path.commonpath([abs_path, working_root])
+            except ValueError:
+                common = ""
+            if common != working_root:
                 log.append(f"  ⚠ Skipped (outside root): {rel_path}")
                 continue
-            # Path relative to repo root for git add
-            git_rel = os.path.relpath(abs_path, repo_root)
+            # Path relative to repo root for git add — use forward slashes for git
+            git_rel = os.path.relpath(abs_path, repo_root).replace("\\", "/")
             add_result = subprocess.run(
                 ["git", "add", git_rel],
                 cwd=repo_root, capture_output=True, text=True, **_no_win
@@ -1051,6 +1055,10 @@ def _git_add_and_commit(root: str, file_paths: list[str], commit_msg: str) -> tu
         else:
             err = (commit_result.stderr or commit_result.stdout).strip()
             log.append(f"  ✘ git commit failed: {err}")
+            # Give a hint when the identity is not configured
+            if "user.email" in err or "user.name" in err or "Author identity" in err:
+                log.append("  ℹ  Hint: run  git config user.email \"you@example.com\"  and")
+                log.append("            git config user.name  \"Your Name\"  inside the repo.")
             return False, "\n".join(log)
 
     except FileNotFoundError:
@@ -4865,10 +4873,16 @@ class MergeTab(QWidget):
             staged = []
             for rel_path in file_paths:
                 abs_path = os.path.normpath(os.path.join(root, rel_path.lstrip("/\\")))
-                if not abs_path.startswith(working_root + os.sep) and abs_path != working_root:
+                # Safety: must be inside working_root (commonpath avoids prefix collisions)
+                try:
+                    common = os.path.commonpath([abs_path, working_root])
+                except ValueError:
+                    common = ""
+                if common != working_root:
                     dlg.append_line(f"   ⚠ Skipped (outside root): {rel_path}", "warn")
                     continue
-                git_rel = os.path.relpath(abs_path, repo_root)
+                # Use forward slashes — git expects them even on Windows
+                git_rel = os.path.relpath(abs_path, repo_root).replace("\\", "/")
                 dlg.append_line(f"   git add  {git_rel}", "cmd")
                 r = subprocess.run(
                     ["git", "add", git_rel],
@@ -4903,6 +4917,13 @@ class MergeTab(QWidget):
             else:
                 for line in out.splitlines():
                     dlg.append_line(f"   {line}", "err")
+                # Give a hint when git identity is not configured in that repo
+                if "user.email" in out or "user.name" in out or "Author identity" in out:
+                    dlg.append_line("", "info")
+                    dlg.append_line('   ℹ Hint: git identity not set for this repo.', "warn")
+                    dlg.append_line('   Run inside the repo:', "warn")
+                    dlg.append_line('     git config user.email "you@example.com"', "cmd")
+                    dlg.append_line('     git config user.name  "Your Name"', "cmd")
                 dlg.set_status("Commit failed")
 
         except FileNotFoundError:
