@@ -20,6 +20,12 @@
       },
       "bookmarks": [
         {
+          "command": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358",
+          "global": true,
+          "name": "🧠 myGG",
+          "windowTitle": ""
+        },
+        {
           "command": "agy --dangerously-skip-permissions -c",
           "global": true,
           "name": "🤖 Antigravity",

@@ -1641,17 +1641,17 @@
                             </svg>
                         </button>
                         <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; flex-direction: column;">
-                            <div id="bookmark-items-list" style="max-height: 280px; overflow-y: auto;">
+                            <div id="bookmark-items-list" style="overflow-y: auto;">
                                 <!-- Bookmarks will be injected here dynamically -->
                             </div>
-                            <div id="bookmark-add-row" style="display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--border-color);">
-                                <input type="text" id="bookmark-add-input" placeholder="label::command or just command"
-                                    style="flex: 1; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 5px; color: var(--text-primary); padding: 4px 8px; font-size: 0.75rem; font-family: 'Fira Code', monospace; outline: none;"
-                                    onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
-                                    onkeydown="if(event.key==='Enter'){event.stopPropagation(); addBookmarkFromInput()}"
-                                    onclick="event.stopPropagation()">
-                                <button onclick="event.stopPropagation(); addBookmarkFromInput()"
-                                    style="padding: 4px 9px; background: var(--accent-color); border: none; border-radius: 5px; color: white; font-size: 0.72rem; cursor: pointer; white-space: nowrap; font-weight: 500;">Add</button>
+                            <div style="display: flex; justify-content: center; padding: 8px 12px; border-top: 1px solid var(--border-color);">
+                                <button onclick="event.stopPropagation(); openNewBookmarkModal()"
+                                    style="width: 100%; padding: 6px; background: none; border: 1px dashed var(--border-color); border-radius: 6px; color: var(--text-secondary); font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;"
+                                    onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'"
+                                    onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    Add Command
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -2467,7 +2467,7 @@
     <div class="modal-overlay" id="bookmark-modal">
         <div class="modal-content" style="max-width: 420px; padding: 24px;">
             <div class="modal-header" style="margin-bottom: 16px;">
-                <h2>Edit Bookmark</h2>
+                <h2 id="bookmark-modal-title">Edit Bookmark</h2>
                 <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="bookmark-modal-subtitle"></div>
             </div>
             <form id="bookmark-edit-form" onsubmit="handleSaveBookmark(event)">
@@ -2481,7 +2481,7 @@
                     <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Build Project" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
                 </div>
 
-                <div class="form-group" style="margin-bottom: 20px;">
+                <div id="bookmark-position-row" class="form-group" style="margin-bottom: 20px;">
                     <label for="edit-bookmark-index" style="font-size: 0.8rem; font-weight: 500;">Position / Order</label>
                     <select id="edit-bookmark-index" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer;">
                         <!-- Options populated dynamically -->
@@ -2489,7 +2489,32 @@
                 </div>
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
                     <button type="button" class="btn btn-secondary" onclick="closeBookmarkModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Changes</button>
+                    <button type="submit" id="bookmark-modal-save-btn" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subcommand Add Modal -->
+    <div class="modal-overlay" id="subcmd-add-modal">
+        <div class="modal-content" style="max-width: 400px; padding: 24px;">
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2>Add Sub-command</h2>
+                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="subcmd-add-modal-subtitle"></div>
+            </div>
+            <form onsubmit="handleSaveSubcmd(event)">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="font-size: 0.8rem; font-weight: 500;">Command</label>
+                    <textarea id="subcmd-add-cmd" class="form-input" required autocomplete="off" rows="3"
+                        style="padding: 8px 12px; font-size: 0.82rem; font-family: 'Fira Code', monospace; resize: vertical; min-height: 60px; width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 0.8rem; font-weight: 500;">Display Label <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
+                    <input type="text" id="subcmd-add-label" class="form-input" placeholder="e.g. Run Tests" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
+                </div>
+                <div class="form-actions" style="border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeSubcmdAddModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Add</button>
                 </div>
             </form>
         </div>
@@ -3556,6 +3581,7 @@
                 else if (id === 'extension-icons-modal') closeExtensionIconsModal();
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
+                else if (id === 'subcmd-add-modal') closeSubcmdAddModal();
                 else if (id === 'ports-modal') closePortsMonitorModal();
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
@@ -6295,10 +6321,32 @@
             }
         }
 
+        let _bookmarkModalIsNew = false;
+
+        function openNewBookmarkModal() {
+            if (!activeProject) return;
+            _bookmarkModalIsNew = true;
+            editingBookmarkProj = activeProject;
+            editingBookmarkIndex = null;
+
+            document.getElementById('bookmark-modal-title').innerText = 'Add Command';
+            document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${activeProject}`;
+            document.getElementById('edit-bookmark-cmd').value = '';
+            document.getElementById('edit-bookmark-name').value = '';
+            document.getElementById('bookmark-modal-save-btn').innerText = 'Add';
+            document.getElementById('bookmark-position-row').style.display = 'none';
+            document.getElementById('bookmark-modal').classList.add('show');
+            document.getElementById('edit-bookmark-cmd').focus();
+        }
+
         function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle) {
+            _bookmarkModalIsNew = false;
             editingBookmarkProj = projName;
             editingBookmarkIndex = index;
-            
+
+            document.getElementById('bookmark-modal-title').innerText = 'Edit Bookmark';
+            document.getElementById('bookmark-modal-save-btn').innerText = 'Save Changes';
+            document.getElementById('bookmark-position-row').style.display = '';
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName} (Current Position: ${index + 1})`;
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
@@ -6428,17 +6476,41 @@
 
         async function handleSaveBookmark(event) {
             event.preventDefault();
-            if (!editingBookmarkProj || editingBookmarkIndex === null) return;
-            
+            if (!editingBookmarkProj) return;
+
             const cmd = document.getElementById('edit-bookmark-cmd').value.trim();
             const alias = document.getElementById('edit-bookmark-name').value.trim();
-            const newIndex = parseInt(document.getElementById('edit-bookmark-index').value);
-            
+
             if (!cmd) {
                 alert("Command is required");
                 return;
             }
-            
+
+            if (_bookmarkModalIsNew) {
+                // Add new bookmark
+                try {
+                    const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: cmd, name: alias })
+                    });
+                    if (response.ok) {
+                        projects = await response.json();
+                        closeBookmarkModal();
+                        updateBookmarksDropdown();
+                    } else {
+                        const data = await response.json();
+                        alert(data.error || "Failed to add bookmark");
+                    }
+                } catch (err) {
+                    console.error("Error adding bookmark:", err);
+                }
+                return;
+            }
+
+            if (editingBookmarkIndex === null) return;
+            const newIndex = parseInt(document.getElementById('edit-bookmark-index').value);
+
             try {
                 const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks/${editingBookmarkIndex}/edit`, {
                     method: 'POST',
@@ -6450,7 +6522,7 @@
                         newIndex: newIndex
                     })
                 });
-                
+
                 if (response.ok) {
                     projects = await response.json();
                     closeBookmarkModal();
@@ -6605,16 +6677,15 @@
                     <button onclick="closeSubcmdPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem;line-height:1;padding:0 2px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">✕</button>
                 </div>
                 <div id="subcmd-items-list"></div>
-                <div class="subcmd-add-row">
-                    <input type="text" id="subcmd-input" placeholder="command or label::command"
-                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); padding:4px 8px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none;"
-                        onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
-                        onkeydown="if(event.key==='Enter'){event.stopPropagation();addSubcmd('${bmCmd.replace(/'/g,"\\'")}')}"
-                        onclick="event.stopPropagation()">
-                    <button onclick="event.stopPropagation(); addSubcmd('${bmCmd.replace(/'/g,"\\'")}' )"
-                        style="padding:4px 9px; background:var(--accent-color); border:none; border-radius:5px; color:white; font-size:0.72rem; cursor:pointer; white-space:nowrap; font-weight:500;">Add</button>
+                <div style="padding: 8px 10px; border-top: 1px solid var(--border-color);">
+                    <button onclick="event.stopPropagation(); openSubcmdAddModal('${bmCmd.replace(/'/g, "\\'")}')"
+                        style="width:100%; padding:5px; background:none; border:1px dashed var(--border-color); border-radius:5px; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;"
+                        onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'"
+                        onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Sub-command
+                    </button>
                 </div>
-                <div style="padding:0 10px 7px; font-size:0.67rem; color:var(--text-muted);">Format: <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">label::command</code> or just <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">command</code></div>
             `;
 
             // Populate items list with DOM elements for drag support
@@ -6712,6 +6783,38 @@
             saveSubcmds(bmCmd, list);
             const panel = document.getElementById('active-subcmd-panel');
             if (panel) renderSubcmdPanelContent(panel, bmCmd);
+        }
+
+        let _subcmdAddModalCmd = null;
+
+        function openSubcmdAddModal(bmCmd) {
+            _subcmdAddModalCmd = bmCmd;
+            const shortName = bmCmd.length > 40 ? bmCmd.slice(0, 40) + '…' : bmCmd;
+            document.getElementById('subcmd-add-modal-subtitle').innerText = `For: ${shortName}`;
+            document.getElementById('subcmd-add-cmd').value = '';
+            document.getElementById('subcmd-add-label').value = '';
+            document.getElementById('subcmd-add-modal').classList.add('show');
+            setTimeout(() => document.getElementById('subcmd-add-cmd').focus(), 50);
+        }
+
+        function closeSubcmdAddModal() {
+            document.getElementById('subcmd-add-modal').classList.remove('show');
+            _subcmdAddModalCmd = null;
+        }
+
+        function handleSaveSubcmd(event) {
+            event.preventDefault();
+            if (!_subcmdAddModalCmd) return;
+            const cmd = document.getElementById('subcmd-add-cmd').value.trim();
+            const label = document.getElementById('subcmd-add-label').value.trim();
+            if (!cmd) return;
+            const list = loadSubcmds(_subcmdAddModalCmd);
+            list.push({ cmd, label });
+            saveSubcmds(_subcmdAddModalCmd, list);
+            closeSubcmdAddModal();
+            // Re-render subcmd panel if still open
+            const panel = document.getElementById('active-subcmd-panel');
+            if (panel) renderSubcmdPanelContent(panel, _subcmdAddModalCmd);
         }
 
         function reorderSubcmd(bmCmd, fromIdx, toIdx) {
