@@ -4085,7 +4085,7 @@ Markdown Table Styles */
     position: absolute;
     left: 100%;
     top: 0;
-    width: 280px;
+    width: 320px;
     margin-left: 20px;
     background: white;
     border: 2px solid #007bff;
@@ -4119,23 +4119,29 @@ Markdown Table Styles */
 .color-picker-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
 .color-picker-row label {
     font-size: 13px;
     font-weight: 600;
     color: #495057;
-    min-width: 80px;
+    min-width: 90px;
 }
 
 .color-picker-row input[type="color"] {
-    width: 60px;
-    height: 35px;
+    width: 70px;
+    height: 40px;
     border: 2px solid #dee2e6;
     border-radius: 6px;
     cursor: pointer;
+    transition: all 0.2s;
+}
+
+.color-picker-row input[type="color"]:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .btn-sm {
@@ -4228,8 +4234,8 @@ Markdown Table Styles */
 
 /* Color Swatches for Quick Formatter */
 .color-swatches-container {
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #e9ecef;
 }
 
@@ -4237,7 +4243,7 @@ Markdown Table Styles */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .color-swatches-header span {
@@ -4269,19 +4275,19 @@ Markdown Table Styles */
 
 .color-swatches {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
 }
 
 .color-swatch {
     position: relative;
     width: 100%;
-    height: 40px;
+    height: 45px;
     border: 2px solid #dee2e6;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -4320,8 +4326,8 @@ Markdown Table Styles */
 
 /* Color History for Quick Formatter */
 .color-history-container {
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #e9ecef;
 }
 
@@ -4329,7 +4335,7 @@ Markdown Table Styles */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .color-history-header span {
@@ -4340,19 +4346,19 @@ Markdown Table Styles */
 
 .color-history {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
 }
 
 .color-history-item {
     position: relative;
     width: 100%;
-    height: 40px;
+    height: 45px;
     border: 2px solid #dee2e6;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
