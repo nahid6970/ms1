@@ -12924,6 +12924,8 @@ function loadColorSwatches() {
             document.getElementById('quickFgColor').value = swatch.fg;
             document.getElementById('quickBgColor').value = swatch.bg;
             document.getElementById('noBgCheckbox').checked = swatch.noBg || false;
+            // Auto-apply the color format when swatch is clicked
+            applyColorFormat();
         };
 
         // Add delete button for saved swatches
@@ -12987,6 +12989,8 @@ function loadColorHistory() {
             document.getElementById('quickFgColor').value = item.fg;
             document.getElementById('quickBgColor').value = item.bg;
             document.getElementById('noBgCheckbox').checked = item.noBg || false;
+            // Auto-apply the color format when history item is clicked
+            applyColorFormat();
         };
 
         // Add delete button that appears on hover
@@ -13096,6 +13100,43 @@ function applyColorFormat() {
 
     // Otherwise, apply color format alone
     const input = quickFormatterTarget;
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        const formattedText = colorSyntax + selectedText + '{/}';
+
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+
+            // Trigger change event to save data
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+
+        // Set cursor after the formatted text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast('Color format applied', 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
     const selectedText = input.value.substring(start, end);
@@ -13124,9 +13165,6 @@ function applyMultipleFormatsWithColor(colorSyntax) {
     if (!quickFormatterTarget) return;
 
     const input = quickFormatterTarget;
-    const start = quickFormatterSelection.start;
-    const end = quickFormatterSelection.end;
-    let selectedText = input.value.substring(start, end);
 
     // Build the complete format string with all selected formats plus color
     let allPrefixes = colorSyntax; // Color goes first
@@ -13137,6 +13175,46 @@ function applyMultipleFormatsWithColor(colorSyntax) {
         allPrefixes += format.prefix;
         allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
     });
+
+    // Handle contenteditable (WYSIWYG mode)
+    if (quickFormatterSelection.isContentEditable) {
+        const selectedText = quickFormatterSelection.text || '';
+        const formattedText = allPrefixes + selectedText + allSuffixes;
+
+        // Insert formatted text into contentEditable
+        const range = quickFormatterSelection.range;
+        range.deleteContents();
+        const textNode = document.createTextNode(formattedText);
+        range.insertNode(textNode);
+
+        // Update the underlying input value
+        const rawText = extractRawText(input);
+        const actualInput = input.previousElementSibling;
+        if (actualInput && (actualInput.tagName === 'INPUT' || actualInput.tagName === 'TEXTAREA')) {
+            actualInput.value = rawText;
+
+            // Trigger change event to save data
+            const changeEvent = new Event('input', { bubbles: true });
+            actualInput.dispatchEvent(changeEvent);
+        }
+
+        // Set cursor after the formatted text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.setStartAfter(textNode);
+        newRange.collapse(true);
+        selection.addRange(newRange);
+
+        closeQuickFormatter();
+        showToast(`Applied color + ${selectedFormats.length} formats`, 'success');
+        return;
+    }
+
+    // Handle input/textarea (legacy mode)
+    const start = quickFormatterSelection.start;
+    const end = quickFormatterSelection.end;
+    let selectedText = input.value.substring(start, end);
 
     // Insert the markdown syntax
     const newText = input.value.substring(0, start) +
