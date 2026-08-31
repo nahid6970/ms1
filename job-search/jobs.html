@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Tracker — Bangladesh</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f0f4ff;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 1.8rem;
+    }
+
+    .filters {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1.4rem;
+    }
+
+    .filter-btn {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid #334155;
+      background: #1e2535;
+      color: #94a3b8;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #1e2d3d;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead tr {
+      background: #161d2f;
+      border-bottom: 1px solid #1e2d3d;
+    }
+
+    thead th {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    thead th:hover { color: #94a3b8; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted .sort-icon { opacity: 1; color: #3b82f6; }
+
+    tbody tr {
+      border-bottom: 1px solid #1a2332;
+      transition: background 0.1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #1a2336; }
+
+    td {
+      padding: 0.85rem 1rem;
+      vertical-align: middle;
+    }
+
+    /* Org column */
+    .org-name {
+      font-weight: 600;
+      color: #f0f4ff;
+    }
+    .org-type {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Position column */
+    .position-title {
+      color: #93c5fd;
+      font-weight: 500;
+    }
+    .position-note {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Vacancy */
+    .vacancy-badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #1e3a2f;
+      color: #4ade80;
+      border: 1px solid #166534;
+    }
+    .vacancy-badge.unknown {
+      background: #1e2535;
+      color: #64748b;
+      border-color: #334155;
+    }
+
+    /* Deadline */
+    .deadline-cell { white-space: nowrap; }
+    .deadline-date {
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    .days-left {
+      font-size: 0.72rem;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .urgent   { color: #f87171; }  /* ≤7 days */
+    .soon     { color: #fb923c; }  /* 8–14 days */
+    .moderate { color: #facc15; }  /* 15–30 days */
+    .comfortable { color: #4ade80; } /* >30 days */
+    .expired  { color: #475569; text-decoration: line-through; }
+
+    /* Status badge */
+    .status-open {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: #14532d;
+      color: #86efac;
+      border: 1px solid #166534;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-expired {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: #1c1f26;
+      color: #475569;
+      border: 1px solid #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-check {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: #1c2a40;
+      color: #7dd3fc;
+      border: 1px solid #1e3a5f;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Salary */
+    .salary { color: #a78bfa; font-size: 0.82rem; }
+
+    /* Apply link */
+    .apply-link {
+      display: inline-block;
+      padding: 0.3rem 0.75rem;
+      border-radius: 6px;
+      background: #1d4ed8;
+      color: #bfdbfe;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .apply-link:hover { background: #2563eb; color: #fff; }
+    .apply-link.disabled {
+      background: #1e2535;
+      color: #475569;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* Note row highlight — important constraint */
+    .note-row td {
+      background: #1a1a2e;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      padding: 0.4rem 1rem 0.7rem 1rem;
+      border-bottom: 1px solid #1a2332;
+    }
+    .note-row .note-label {
+      color: #fbbf24;
+      font-weight: 600;
+      margin-right: 0.3rem;
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1.4rem;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.3rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    .updated-at {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #334155;
+      margin-top: 1rem;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<h1>📋 Job Tracker — Bangladesh</h1>
+<p class="subtitle">Finance / BBA / MBA — Fresher & Entry-Level Openings &nbsp;|&nbsp; Sorted by Closest Deadline</p>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterJobs('all', this)">All</button>
+  <button class="filter-btn" onclick="filterJobs('open', this)">Open Only</button>
+  <button class="filter-btn" onclick="filterJobs('bank', this)">Banks</button>
+  <button class="filter-btn" onclick="filterJobs('govt', this)">Govt / Authority</button>
+  <button class="filter-btn" onclick="filterJobs('nbfi', this)">NBFI</button>
+</div>
+
+<div class="table-wrap">
+  <table id="jobTable">
+    <thead>
+      <tr>
+        <th>Organization</th>
+        <th>Position</th>
+        <th>Vacancy</th>
+        <th class="sorted" onclick="sortByDeadline()">Deadline <span class="sort-icon">▲</span></th>
+        <th>Salary (BDT)</th>
+        <th>Status</th>
+        <th>Apply</th>
+      </tr>
+    </thead>
+    <tbody id="jobBody">
+      <!-- Rows injected by JS -->
+    </tbody>
+  </table>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="dot" style="background:#f87171"></span> ≤7 days left</span>
+  <span class="legend-item"><span class="dot" style="background:#fb923c"></span> 8–14 days</span>
+  <span class="legend-item"><span class="dot" style="background:#facc15"></span> 15–30 days</span>
+  <span class="legend-item"><span class="dot" style="background:#4ade80"></span> >30 days</span>
+  <span class="legend-item"><span class="dot" style="background:#475569"></span> Expired / No deadline</span>
+</div>
+
+<p class="updated-at">Last updated: 31 August 2026</p>
+
+<script>
+const TODAY = new Date("2026-08-31");
+
+const jobs = [
+  {
+    org: "LankaBangla Finance",
+    orgType: "NBFI",
+    category: "nbfi",
+    position: "Auto Loan Portfolio Management Officer",
+    positionNote: "Fresher accepted",
+    vacancy: null,
+    deadlineStr: "03 Sep 2026",
+    deadline: new Date("2026-09-03"),
+    salary: "N/A",
+    status: "open",
+    applyUrl: "https://bdjobs.com/h/details/1525251",
+    note: "⚠️ MOST URGENT — Apply before 03 Sept 2026"
+  },
+  {
+    org: "LankaBangla Finance",
+    orgType: "NBFI",
+    category: "nbfi",
+    position: "Credit Card Sales Officer",
+    positionNote: "Fresher accepted",
+    vacancy: null,
+    deadlineStr: "~Sep 2026",
+    deadline: new Date("2026-09-10"),
+    salary: "N/A",
+    status: "open",
+    applyUrl: "https://bdjobs.com",
+    note: null
+  },
+  {
+    org: "LankaBangla Finance",
+    orgType: "NBFI",
+    category: "nbfi",
+    position: "Collections Officer",
+    positionNote: "Fresher accepted",
+    vacancy: null,
+    deadlineStr: "~Sep 2026",
+    deadline: new Date("2026-09-10"),
+    salary: "N/A",
+    status: "open",
+    applyUrl: "https://bdjobs.com",
+    note: null
+  },
+  {
+    org: "Dutch-Bangla Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "Management Trainee Officer (MTO)",
+    positionNote: "Fresher — CGPA 3.00+/4.00 required",
+    vacancy: null,
+    deadlineStr: "13 Sep 2026",
+    deadline: new Date("2026-09-13"),
+    salary: "~70,000",
+    status: "open",
+    applyUrl: "https://dutchbanglabank.com",
+    note: "⚠️ Can apply to ONLY ONE DBBL post — exam held same day for all posts"
+  },
+  {
+    org: "Dutch-Bangla Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "Assistant Officer",
+    positionNote: "Fresher",
+    vacancy: null,
+    deadlineStr: "13 Sep 2026",
+    deadline: new Date("2026-09-13"),
+    salary: "~40,000",
+    status: "open",
+    applyUrl: "https://dutchbanglabank.com",
+    note: null
+  },
+  {
+    org: "Dutch-Bangla Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "Trainee Cash Officer",
+    positionNote: "Fresher",
+    vacancy: null,
+    deadlineStr: "13 Sep 2026",
+    deadline: new Date("2026-09-13"),
+    salary: "~26,000",
+    status: "open",
+    applyUrl: "https://dutchbanglabank.com",
+    note: null
+  },
+  {
+    org: "Modhumoti Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "Retail Business Associate",
+    positionNote: "Fresher / Trainee",
+    vacancy: 3,
+    deadlineStr: "10–15 Sep 2026",
+    deadline: new Date("2026-09-15"),
+    salary: "N/A",
+    status: "open",
+    applyUrl: "https://modhumotibank.com",
+    note: null
+  },
+  {
+    org: "BHTPA",
+    orgType: "Govt Authority",
+    category: "govt",
+    position: "Assistant Director (Investment)",
+    positionNote: "Finance / MBA preferred — 42 total posts",
+    vacancy: null,
+    deadlineStr: "26 Sep 2026",
+    deadline: new Date("2026-09-26"),
+    salary: "N/A",
+    status: "open",
+    applyUrl: "https://bhtpa.teletalk.com.bd",
+    note: null
+  },
+  {
+    org: "BEPZA",
+    orgType: "Govt Authority",
+    category: "govt",
+    position: "Multiple Posts (34 Categories)",
+    positionNote: "Check for Finance/Admin roles — apply at teletalk",
+    vacancy: null,
+    deadlineStr: "22 Jun 2027",
+    deadline: new Date("2027-06-22"),
+    salary: "8,250 – 38,640",
+    status: "open",
+    applyUrl: "https://bepza.teletalk.com.bd",
+    note: "Check circular for Finance/Admin post eligibility at bepza.gov.bd/job-circulars"
+  },
+  {
+    org: "Invest Bangladesh",
+    orgType: "Govt Authority (New — BIDA+BEZA+PPPA merged)",
+    category: "govt",
+    position: "No Circular Yet",
+    positionNote: "Formed 20 Aug 2026 — awaiting first recruitment circular",
+    vacancy: null,
+    deadlineStr: "—",
+    deadline: null,
+    salary: "—",
+    status: "check",
+    applyUrl: "https://investbangladesh.gov.bd",
+    note: "Monitor investbangladesh.gov.bd — expected to release circular soon"
+  },
+  {
+    org: "Bangladesh Bank",
+    orgType: "Central Bank",
+    category: "bank",
+    position: "General Officer (Finance/Accounts)",
+    positionNote: "No Finance circular active — IT/Law/Medical posts only now",
+    vacancy: null,
+    deadlineStr: "—",
+    deadline: null,
+    salary: "N/A",
+    status: "check",
+    applyUrl: "https://erecruitment.bb.org.bd",
+    note: "Check erecruitment.bb.org.bd periodically for General Officer circular"
+  },
+  {
+    org: "Jamuna Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "All Posts (6 open)",
+    positionNote: "Needs 14–22 yrs experience — not suitable",
+    vacancy: null,
+    deadlineStr: "Expired",
+    deadline: new Date("2026-08-01"),
+    salary: "N/A",
+    status: "expired",
+    applyUrl: "#",
+    note: null
+  },
+  {
+    org: "NRB Bank",
+    orgType: "Private Bank",
+    category: "bank",
+    position: "Head of Internal Audit",
+    positionNote: "Needs 15 yrs experience — not suitable",
+    vacancy: 1,
+    deadlineStr: "Expired",
+    deadline: new Date("2026-08-01"),
+    salary: "N/A",
+    status: "expired",
+    applyUrl: "#",
+    note: null
+  },
+];
+
+function daysLeft(deadline) {
+  if (!deadline) return null;
+  const diff = Math.ceil((deadline - TODAY) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function deadlineClass(days) {
+  if (days === null) return "";
+  if (days < 0) return "expired";
+  if (days <= 7) return "urgent";
+  if (days <= 14) return "soon";
+  if (days <= 30) return "moderate";
+  return "comfortable";
+}
+
+function renderRows(data) {
+  const tbody = document.getElementById("jobBody");
+  tbody.innerHTML = "";
+
+  data.forEach(job => {
+    const days = daysLeft(job.deadline);
+    const dClass = deadlineClass(days);
+    const isExpired = job.status === "expired" || (days !== null && days < 0);
+
+    let daysLabel = "";
+    if (days === null) {
+      daysLabel = `<div class="days-left" style="color:#475569">No deadline set</div>`;
+    } else if (days < 0) {
+      daysLabel = `<div class="days-left expired">Expired</div>`;
+    } else if (days === 0) {
+      daysLabel = `<div class="days-left urgent">🔥 Today!</div>`;
+    } else {
+      daysLabel = `<div class="days-left ${dClass}">${days} day${days !== 1 ? 's' : ''} left</div>`;
+    }
+
+    const vacancyHtml = job.vacancy
+      ? `<span class="vacancy-badge">${job.vacancy}</span>`
+      : `<span class="vacancy-badge unknown">—</span>`;
+
+    let statusHtml = "";
+    if (job.status === "open") statusHtml = `<span class="status-open">Open</span>`;
+    else if (job.status === "expired") statusHtml = `<span class="status-expired">Closed</span>`;
+    else statusHtml = `<span class="status-check">Monitor</span>`;
+
+    const applyDisabled = (job.status === "expired" || job.applyUrl === "#") ? " disabled" : "";
+
+    // Main row
+    const tr = document.createElement("tr");
+    tr.dataset.category = job.category;
+    tr.dataset.status = job.status;
+    if (isExpired) tr.style.opacity = "0.5";
+
+    tr.innerHTML = `
+      <td>
+        <div class="org-name">${job.org}</div>
+        <div class="org-type">${job.orgType}</div>
+      </td>
+      <td>
+        <div class="position-title">${job.position}</div>
+        ${job.positionNote ? `<div class="position-note">${job.positionNote}</div>` : ""}
+      </td>
+      <td>${vacancyHtml}</td>
+      <td class="deadline-cell">
+        <div class="deadline-date ${dClass}">${job.deadlineStr}</div>
+        ${daysLabel}
+      </td>
+      <td><span class="salary">${job.salary}</span></td>
+      <td>${statusHtml}</td>
+      <td><a href="${job.applyUrl}" class="apply-link${applyDisabled}" target="_blank" ${applyDisabled ? "" : ""}>Apply →</a></td>
+    `;
+    tbody.appendChild(tr);
+
+    // Note row (if applicable)
+    if (job.note) {
+      const noteRow = document.createElement("tr");
+      noteRow.classList.add("note-row");
+      noteRow.dataset.category = job.category;
+      noteRow.dataset.status = job.status;
+      if (isExpired) noteRow.style.opacity = "0.5";
+      noteRow.innerHTML = `<td colspan="7"><span class="note-label">Note:</span>${job.note}</td>`;
+      tbody.appendChild(noteRow);
+    }
+  });
+}
+
+function getSortKey(job) {
+  if (job.deadline === null) return 99999; // push to bottom
+  const days = daysLeft(job.deadline);
+  if (days < 0) return 9999 + Math.abs(days); // expired: push near-bottom, most recent expired closer
+  return days; // open: closer deadline = lower number = higher in list
+}
+
+function sortAndRender(data) {
+  const sorted = [...data].sort((a, b) => getSortKey(a) - getSortKey(b));
+  renderRows(sorted);
+}
+
+let currentFilter = "all";
+
+function filterJobs(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  let filtered;
+  if (type === "all") {
+    filtered = jobs;
+  } else if (type === "open") {
+    filtered = jobs.filter(j => j.status === "open" || j.status === "check");
+  } else {
+    filtered = jobs.filter(j => j.category === type);
+  }
+  sortAndRender(filtered);
+}
+
+// Initial render
+sortAndRender(jobs);
+</script>
+</body>
+</html>
