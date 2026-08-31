@@ -2,7 +2,13 @@
 
 ---
 
-## [2026-07-06 15:24] - PowerShell Command Parsing Error with `$?`
+## [2026-08-31] - Ctrl+C in Terminal Pane Accidentally Closes the Browser Tab
+**Problem:** Pressing Ctrl+C inside a workspace terminal pane (to cancel a running AI agent or command) would sometimes trigger the auto-close sequence, closing the entire browser tab unexpectedly.
+**Root Cause:** `startBackendHealthCheck()` polled `/api/projects` every 1 second with an 800ms abort timeout and a threshold of only 2 consecutive failures. When Ctrl+C caused a subprocess/PTY cleanup that briefly blocked Flask's event loop, the fetch timed out twice in a row — enough to satisfy the failure threshold and trigger `window.close()`.
+**Solution:** Removed the feature entirely (`showConnectionLostOverlay` and `startBackendHealthCheck` functions + the `window.onload` call). The feature's benefit (auto-closing a dead tab) did not outweigh the false-trigger cost for a tool used heavily with Ctrl+C.
+**Files Modified:** `templates/index.html`
+
+
 **Problem:** Running debug scripts via PowerShell wrapper `& { script } ; if (-not $?) { ... }` failed with parser errors:
 ```
 Missing expression after unary operator '-not'.

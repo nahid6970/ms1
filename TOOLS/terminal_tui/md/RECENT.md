@@ -5,6 +5,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-08-31] - Remove Backend Health Check Auto-Close Feature
+**What We Accomplished:**
+- Identified a bug where pressing Ctrl+C in a workspace terminal pane (to cancel an AI agent or command) could accidentally close the browser tab.
+- Root cause: `startBackendHealthCheck()` polled `/api/projects` every second with an 800ms timeout and only needed 2 consecutive failures to trigger the auto-close. A brief Flask event loop spike from PTY/subprocess cleanup was enough to fire false positives.
+- Removed `showConnectionLostOverlay()` and `startBackendHealthCheck()` functions entirely.
+- Removed the `startBackendHealthCheck()` call from `window.onload`.
+- The tab will no longer auto-close when the server stops or restarts — users must close it manually.
+
+**Files Modified:**
+- `templates/index.html` — removed both functions and the `window.onload` call
+
+---
+
 ## [2026-07-03] - Git Integration & Mobile Controls Overhaul
 **What We Accomplished:**
 - Changed `git add .` to `git add -A` to handle moved files
