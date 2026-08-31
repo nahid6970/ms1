@@ -281,6 +281,15 @@
             "hotkey": "+Backspace",
             "action": "Send(\"{End}+{Home}{Delete}\")",
             "enabled": true
+        },
+        {
+            "action": "Run(\"komorebic.exe focus-workspace 2\", , \"Hide\")",
+            "category": "General",
+            "description": "",
+            "enabled": true,
+            "hotkey": "#3",
+            "name": "Komorebi W3",
+            "favourite": false
         }
     ],
     "launcher_shortcuts": [
