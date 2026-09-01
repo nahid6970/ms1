@@ -1173,10 +1173,10 @@ class TimerCard(QFrame):
         del_btn.clicked.connect(self._on_delete)
         
         top.addWidget(self._lbl, 1)
-        top.addWidget(self._toggle_btn, 0)
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
+        top.addWidget(self._toggle_btn, 0)
 
         # countdown display row: display + checkmark on the right
         disp_row = QHBoxLayout()
