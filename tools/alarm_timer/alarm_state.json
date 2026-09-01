@@ -41,7 +41,8 @@
           "created_at": 1788241136.5781627,
           "input_mode": "picker",
           "input_value": "",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         }
       ]
     },
@@ -56,7 +57,8 @@
           "created_at": 1787988887.490157,
           "input_mode": "custom_3",
           "input_value": "19:25 on 21 Sep",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "505a49e5",
@@ -65,7 +67,8 @@
           "created_at": 1785048627.2017696,
           "input_mode": "custom_3",
           "input_value": "10:12 on 25 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "a7f5c453",
@@ -74,7 +77,8 @@
           "created_at": 1785136240.01894,
           "input_mode": "custom_3",
           "input_value": "21:32 on 25 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "6e33452c",
@@ -83,7 +87,8 @@
           "created_at": 1785079871.2110238,
           "input_mode": "custom_3",
           "input_value": "13:08 on 25 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "ed31453c",
@@ -92,7 +97,8 @@
           "created_at": 1785144359.5915592,
           "input_mode": "custom_3",
           "input_value": "13:12 on 26 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "5d7fdebf",
@@ -101,7 +107,8 @@
           "created_at": 1785163359.775358,
           "input_mode": "custom_3",
           "input_value": "15:27 on 26 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "92ab5510",
@@ -110,7 +117,8 @@
           "created_at": 1785039039.9335992,
           "input_mode": "custom_3",
           "input_value": "10:58 on 23 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "3ca619ac",
@@ -119,7 +127,8 @@
           "created_at": 1787404609.9487283,
           "input_mode": "custom_3",
           "input_value": "11:21 on 19 Sep",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "b8ccf04d",
@@ -128,7 +137,8 @@
           "created_at": 1783952065.2003613,
           "input_mode": "custom_3",
           "input_value": "23:06 on 8 Aug",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "523e5c0e",
@@ -137,7 +147,8 @@
           "created_at": 1786817281.0212653,
           "input_mode": "text",
           "input_value": "5m",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         }
       ]
     },
@@ -152,7 +163,8 @@
           "created_at": 1785322259.8812988,
           "input_mode": "text",
           "input_value": "167h 33m",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "1199e223",
@@ -161,16 +173,18 @@
           "created_at": 1785320549.0620644,
           "input_mode": "text",
           "input_value": "41h 30m",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "624ab947",
           "label": "02",
-          "fires_at": 1783952596.8434925,
-          "created_at": 1783952296.8447645,
+          "fires_at": 1788249923.8797684,
+          "created_at": 1788249917.8862462,
           "input_mode": "text",
-          "input_value": "5",
-          "use_custom_colors": false
+          "input_value": ".1",
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "a645bc31",
@@ -179,7 +193,8 @@
           "created_at": 1784225232.868197,
           "input_mode": "text",
           "input_value": "117h 23m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "560a1fec",
@@ -188,7 +203,8 @@
           "created_at": 1784348142.210708,
           "input_mode": "text",
           "input_value": "74h 2m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "85a58ee8",
@@ -197,7 +213,8 @@
           "created_at": 1783953129.0630958,
           "input_mode": "text",
           "input_value": ".1",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         },
         {
           "id": "58f70497",
@@ -206,7 +223,8 @@
           "created_at": 1784782493.8721666,
           "input_mode": "text",
           "input_value": "128h 39m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "c46aa4f9",
@@ -215,7 +233,8 @@
           "created_at": 1784390556.1441557,
           "input_mode": "text",
           "input_value": "156h 15m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "fedfb2ff",
@@ -224,7 +243,8 @@
           "created_at": 1784445555.0579777,
           "input_mode": "text",
           "input_value": "155h 49m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "b2776c38",
@@ -233,7 +253,8 @@
           "created_at": 1783953671.35356,
           "input_mode": "text",
           "input_value": "68h 5m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "26ad736c",
@@ -242,7 +263,8 @@
           "created_at": 1783953853.7010791,
           "input_mode": "text",
           "input_value": "94h 25m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "54925b15",
@@ -251,7 +273,8 @@
           "created_at": 1783953850.316313,
           "input_mode": "text",
           "input_value": "139h 1m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "a5cbb234",
@@ -260,7 +283,8 @@
           "created_at": 1784640615.9328241,
           "input_mode": "text",
           "input_value": "124h 26m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "d0ec93d0",
@@ -269,7 +293,8 @@
           "created_at": 1784523031.1858525,
           "input_mode": "text",
           "input_value": "146h 49m",
-          "use_custom_colors": true
+          "use_custom_colors": true,
+          "toggled": false
         },
         {
           "id": "cf25f407",
@@ -278,7 +303,8 @@
           "created_at": 1783954253.9571614,
           "input_mode": "text",
           "input_value": "155h 30m",
-          "use_custom_colors": false
+          "use_custom_colors": false,
+          "toggled": false
         }
       ]
     }

@@ -64,6 +64,11 @@ def icon_delete(color: str = "#FF003C", size: int = 16) -> QIcon:
         "1H5v2h14V4z",
         color), size)
 
+def icon_check(color: str = "#00ff21", size: int = 16) -> QIcon:
+    return svg_icon(_svg(
+        "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+        color), size)
+
 def icon_duplicate(color: str = "#00F0FF", size: int = 16) -> QIcon:
     return svg_icon(_svg(
         "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 "
@@ -1075,7 +1080,7 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", use_custom_colors: bool = False, parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", use_custom_colors: bool = False, toggled: bool = False, parent=None):
         super().__init__(parent)
         self.card_id  = card_id
         self.label    = label
@@ -1083,6 +1088,7 @@ class TimerCard(QFrame):
         self.input_mode = input_mode
         self.input_value = input_value
         self.use_custom_colors = use_custom_colors
+        self.toggled  = toggled
         
         now = time.time()
         if created_at <= 0.0 or created_at >= fires_at:
@@ -1109,13 +1115,26 @@ class TimerCard(QFrame):
         root.setContentsMargins(10, 10, 10, 10)
         root.setSpacing(6)
 
-        # top row: label + edit + duplicate + delete
+        # top row: label + toggle + edit + duplicate + delete
         top = QHBoxLayout()
         self._lbl = QLabel(self.label)
         self._lbl.setStyleSheet(
             f"color: {CP_YELLOW}; font-weight: bold; font-size: 10pt; background: transparent; border: none;"
         )
         self._lbl.setWordWrap(True)
+
+        # ── toggle button (before edit) ───────────────────
+        self._toggle_btn = QPushButton()
+        self._toggle_btn.setFixedSize(22, 22)
+        self._toggle_btn.setCheckable(True)
+        self._toggle_btn.setChecked(self.toggled)
+        self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
+        self._toggle_btn.setIconSize(QSize(13, 13))
+        # Disable until timer fires; re-evaluated every tick
+        self._toggle_btn.setEnabled(time.time() >= self.fires_at)
+        self._apply_toggle_style()
+        self._toggle_btn.setToolTip("Toggle checkmark (available when timer finishes)")
+        self._toggle_btn.clicked.connect(self._on_toggle)
 
         edit_btn = QPushButton()
         edit_btn.setFixedSize(22, 22)
@@ -1154,17 +1173,33 @@ class TimerCard(QFrame):
         del_btn.clicked.connect(self._on_delete)
         
         top.addWidget(self._lbl, 1)
+        top.addWidget(self._toggle_btn, 0)
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
 
-        # countdown display
+        # countdown display row: display + checkmark on the right
+        disp_row = QHBoxLayout()
+        disp_row.setContentsMargins(0, 0, 0, 0)
+        disp_row.setSpacing(6)
+
         self._display = QLabel("00:00")
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._display.setStyleSheet(
             f"color: {CP_DIM}; font-size: 26pt; font-weight: bold;"
             " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
         )
+
+        self._check_lbl = QLabel("✔")
+        self._check_lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
+        self._check_lbl.setStyleSheet(
+            f"color: {CP_GREEN}; font-size: 22pt; font-weight: bold;"
+            " background: transparent; border: none;"
+        )
+        self._check_lbl.setVisible(self.toggled)
+
+        disp_row.addWidget(self._display, 1)
+        disp_row.addWidget(self._check_lbl, 0)
 
         # thin progress bar
         self._prog_bg = QWidget()
@@ -1175,13 +1210,38 @@ class TimerCard(QFrame):
         self._prog_fill.setStyleSheet(f"background: {CP_CYAN};")
 
         root.addLayout(top)
-        root.addWidget(self._display)
+        root.addLayout(disp_row)
         root.addWidget(self._prog_bg)
 
     def _set_border(self, color: str):
         self.setStyleSheet(
             f"TimerCard {{ border: 1px solid {color}; background: {CP_PANEL}; }}"
         )
+
+    def _apply_toggle_style(self):
+        if self._toggle_btn.isChecked():
+            self._toggle_btn.setStyleSheet(
+                f"QPushButton {{ background: {CP_GREEN}33; border: 1px solid {CP_GREEN}; }}"
+                f"QPushButton:hover {{ background: {CP_GREEN}55; }}"
+                f"QPushButton:disabled {{ background: transparent; border: 1px solid #333; }}"
+            )
+        else:
+            self._toggle_btn.setStyleSheet(
+                f"QPushButton {{ background: transparent; border: 1px solid {CP_DIM}; }}"
+                f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_GREEN}; }}"
+                f"QPushButton:disabled {{ background: transparent; border: 1px solid #222; }}"
+            )
+        # cursor: hand when enabled, forbidden when locked
+        if self._toggle_btn.isEnabled():
+            self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        else:
+            self._toggle_btn.setCursor(Qt.CursorShape.ForbiddenCursor)
+
+    def _on_toggle(self):
+        self.toggled = self._toggle_btn.isChecked()
+        self._apply_toggle_style()
+        self._check_lbl.setVisible(self.toggled)
+        self.state_changed.emit()
 
     def _get_colors(self) -> tuple[str, str]:
         """Return (fired_color, active_color) — from settings if custom colors enabled."""
@@ -1243,6 +1303,11 @@ class TimerCard(QFrame):
             self._set_border(fired_color)
             self._prog_fill.setFixedWidth(0)
             self._prog_bg.setVisible(False)
+
+            # Enable the checkmark toggle only once the timer has fired
+            self._toggle_btn.setEnabled(True)
+            self._toggle_btn.setToolTip("Toggle checkmark")
+            self._apply_toggle_style()
             
             if not self.fired:
                 self.fired = True
@@ -1259,6 +1324,11 @@ class TimerCard(QFrame):
             )
             self._set_border(CP_GREEN)
             self._update_bar(active_color)
+
+            # Keep toggle locked while the timer is still running
+            self._toggle_btn.setEnabled(False)
+            self._toggle_btn.setToolTip("Checkmark available when timer finishes")
+            self._apply_toggle_style()
 
     def _on_delete(self):
         self._ticker.stop()
@@ -1300,6 +1370,10 @@ class TimerCard(QFrame):
         if new_fires_at is not None:
             if abs(new_fires_at - self.fires_at) > 0.01:
                 self.created_at = time.time()
+                # New timer set — reset checkmark state
+                self.toggled = False
+                self._toggle_btn.setChecked(False)
+                self._check_lbl.setVisible(False)
             self.fires_at = new_fires_at
         self.fired = False
         self._tick()
@@ -1315,6 +1389,7 @@ class TimerCard(QFrame):
             "input_mode": self.input_mode,
             "input_value": self.input_value,
             "use_custom_colors": self.use_custom_colors,
+            "toggled": self.toggled,
         }
 
     @classmethod
@@ -1326,7 +1401,8 @@ class TimerCard(QFrame):
         input_mode = d.get("input_mode", "text")
         input_value = d.get("input_value", "")
         use_custom_colors = d.get("use_custom_colors", False)
-        return cls(card_id, label, fires_at, created_at, input_mode, input_value, use_custom_colors, parent)
+        toggled = d.get("toggled", False)
+        return cls(card_id, label, fires_at, created_at, input_mode, input_value, use_custom_colors, toggled, parent)
 
 
 # ── TextCard ──────────────────────────────────────────────
@@ -1668,6 +1744,7 @@ class ColumnWidget(QFrame):
                 src.input_mode,
                 src.input_value,
                 src.use_custom_colors,
+                False,   # toggled resets on duplicate
                 self,
             )
         self.add_card(new_card)
