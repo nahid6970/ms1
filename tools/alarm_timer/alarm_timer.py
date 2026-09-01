@@ -1130,8 +1130,8 @@ class TimerCard(QFrame):
         self._toggle_btn.setChecked(self.toggled)
         self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
         self._toggle_btn.setIconSize(QSize(13, 13))
-        # Disable until timer fires; re-evaluated every tick
-        self._toggle_btn.setEnabled(time.time() >= self.fires_at)
+        # Hide until timer fires; re-evaluated every tick
+        self._toggle_btn.setVisible(time.time() >= self.fires_at)
         self._apply_toggle_style()
         self._toggle_btn.setToolTip("Toggle checkmark (available when timer finishes)")
         self._toggle_btn.clicked.connect(self._on_toggle)
@@ -1224,11 +1224,8 @@ class TimerCard(QFrame):
                 f"QPushButton:disabled {{ background: transparent; border: 1px solid #222; }}"
             )
             self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
-        # cursor: hand when enabled, forbidden when locked
-        if self._toggle_btn.isEnabled():
-            self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        else:
-            self._toggle_btn.setCursor(Qt.CursorShape.ForbiddenCursor)
+        # cursor: always pointing hand (button is hidden when unavailable)
+        self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
     def _on_toggle(self):
         self.toggled = self._toggle_btn.isChecked()
@@ -1296,8 +1293,8 @@ class TimerCard(QFrame):
             self._prog_fill.setFixedWidth(0)
             self._prog_bg.setVisible(False)
 
-            # Enable the checkmark toggle only once the timer has fired
-            self._toggle_btn.setEnabled(True)
+            # Show the checkmark toggle only once the timer has fired
+            self._toggle_btn.setVisible(True)
             self._toggle_btn.setToolTip("Toggle checkmark")
             self._apply_toggle_style()
             
@@ -1317,8 +1314,8 @@ class TimerCard(QFrame):
             self._set_border(CP_GREEN)
             self._update_bar(active_color)
 
-            # Keep toggle locked while the timer is still running
-            self._toggle_btn.setEnabled(False)
+            # Keep toggle hidden while the timer is still running
+            self._toggle_btn.setVisible(False)
             self._toggle_btn.setToolTip("Checkmark available when timer finishes")
             self._apply_toggle_style()
 
