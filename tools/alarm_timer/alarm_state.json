@@ -78,7 +78,7 @@
           "input_mode": "custom_3",
           "input_value": "21:32 on 25 Aug",
           "use_custom_colors": false,
-          "toggled": false
+          "toggled": true
         },
         {
           "id": "6e33452c",
@@ -98,7 +98,7 @@
           "input_mode": "custom_3",
           "input_value": "13:12 on 26 Aug",
           "use_custom_colors": false,
-          "toggled": false
+          "toggled": true
         },
         {
           "id": "5d7fdebf",
