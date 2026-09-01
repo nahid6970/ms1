@@ -1089,6 +1089,7 @@ class TimerCard(QFrame):
         self.input_value = input_value
         self.use_custom_colors = use_custom_colors
         self.toggled  = toggled
+        self._toggle_available: bool | None = None
         
         now = time.time()
         if created_at <= 0.0 or created_at >= fires_at:
@@ -1108,7 +1109,10 @@ class TimerCard(QFrame):
         self._ticker.timeout.connect(self._tick)
         self._ticker.start()
 
-        QTimer.singleShot(100, self._tick)
+        # Apply the initial state before the main window is shown.  Delaying
+        # this until the event loop starts makes every card hide/show its
+        # toggle independently, causing repeated startup layout repaints.
+        self._tick()
 
     def _build_ui(self):
         root = QVBoxLayout(self)
@@ -1130,8 +1134,7 @@ class TimerCard(QFrame):
         self._toggle_btn.setChecked(self.toggled)
         self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
         self._toggle_btn.setIconSize(QSize(13, 13))
-        # Hide until timer fires; re-evaluated every tick
-        self._toggle_btn.setVisible(time.time() >= self.fires_at)
+        self._toggle_btn.setVisible(False)
         self._apply_toggle_style()
         self._toggle_btn.setToolTip("Toggle checkmark (available when timer finishes)")
         self._toggle_btn.clicked.connect(self._on_toggle)
@@ -1182,6 +1185,13 @@ class TimerCard(QFrame):
         disp_row.setContentsMargins(0, 0, 0, 0)
         disp_row.setSpacing(6)
 
+        self._toggle_slot = QWidget()
+        self._toggle_slot.setFixedSize(22, 22)
+        toggle_slot_layout = QHBoxLayout(self._toggle_slot)
+        toggle_slot_layout.setContentsMargins(0, 0, 0, 0)
+        toggle_slot_layout.setSpacing(0)
+        toggle_slot_layout.addWidget(self._toggle_btn)
+
         self._display = QLabel("00:00")
         self._display.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._display.setStyleSheet(
@@ -1189,7 +1199,7 @@ class TimerCard(QFrame):
             " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
         )
 
-        disp_row.addWidget(self._toggle_btn, 0)
+        disp_row.addWidget(self._toggle_slot, 0)
         disp_row.addWidget(self._display, 1)
 
         # thin progress bar
@@ -1226,6 +1236,17 @@ class TimerCard(QFrame):
             self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
         # cursor: always pointing hand (button is hidden when unavailable)
         self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def _set_toggle_available(self, available: bool):
+        if self._toggle_available == available:
+            return
+        self._toggle_available = available
+        self._toggle_btn.setVisible(available)
+        self._toggle_btn.setToolTip(
+            "Toggle checkmark" if available else "Checkmark available when timer finishes"
+        )
+        if available:
+            self._apply_toggle_style()
 
     def _on_toggle(self):
         self.toggled = self._toggle_btn.isChecked()
@@ -1293,10 +1314,7 @@ class TimerCard(QFrame):
             self._prog_fill.setFixedWidth(0)
             self._prog_bg.setVisible(False)
 
-            # Show the checkmark toggle only once the timer has fired
-            self._toggle_btn.setVisible(True)
-            self._toggle_btn.setToolTip("Toggle checkmark")
-            self._apply_toggle_style()
+            self._set_toggle_available(True)
             
             if not self.fired:
                 self.fired = True
@@ -1314,10 +1332,7 @@ class TimerCard(QFrame):
             self._set_border(CP_GREEN)
             self._update_bar(active_color)
 
-            # Keep toggle hidden while the timer is still running
-            self._toggle_btn.setVisible(False)
-            self._toggle_btn.setToolTip("Checkmark available when timer finishes")
-            self._apply_toggle_style()
+            self._set_toggle_available(False)
 
     def _on_delete(self):
         self._ticker.stop()
@@ -1684,7 +1699,7 @@ class ColumnWidget(QFrame):
         root.addWidget(self._scroll, 1)
         root.addWidget(self._add_btn)
 
-    def add_card(self, card: "TimerCard | TextCard"):
+    def add_card(self, card: "TimerCard | TextCard", sort: bool = True):
         idx = self._card_layout.count() - 1   # before stretch
         self._card_layout.insertWidget(idx, card)
         self._cards[card.card_id] = card
@@ -1692,7 +1707,8 @@ class ColumnWidget(QFrame):
         card.duplicated.connect(self._on_card_duplicated)
         card.state_changed.connect(self.state_changed)
         card.state_changed.connect(self.sort_cards)
-        self.sort_cards()
+        if sort:
+            self.sort_cards()
 
     def sort_cards(self):
         cards = list(self._cards.values())
@@ -1805,9 +1821,10 @@ class ColumnWidget(QFrame):
         col = cls(d["id"], d.get("name", "Column"), col_width, parent)
         for cd in d.get("cards", []):
             if cd.get("type") == "text":
-                col.add_card(TextCard.from_dict(cd, col))
+                col.add_card(TextCard.from_dict(cd, col), sort=False)
             else:
-                col.add_card(TimerCard.from_dict(cd, col))
+                col.add_card(TimerCard.from_dict(cd, col), sort=False)
+        col.sort_cards()
         return col
 
 
