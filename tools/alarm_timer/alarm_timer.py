@@ -1176,9 +1176,8 @@ class TimerCard(QFrame):
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
-        top.addWidget(self._toggle_btn, 0)
 
-        # countdown display row: display + checkmark on the right
+        # countdown display row: toggle + display
         disp_row = QHBoxLayout()
         disp_row.setContentsMargins(0, 0, 0, 0)
         disp_row.setSpacing(6)
@@ -1190,16 +1189,8 @@ class TimerCard(QFrame):
             " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
         )
 
-        self._check_lbl = QLabel("✔")
-        self._check_lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignRight)
-        self._check_lbl.setStyleSheet(
-            f"color: {CP_GREEN}; font-size: 22pt; font-weight: bold;"
-            " background: transparent; border: none;"
-        )
-        self._check_lbl.setVisible(self.toggled)
-
+        disp_row.addWidget(self._toggle_btn, 0)
         disp_row.addWidget(self._display, 1)
-        disp_row.addWidget(self._check_lbl, 0)
 
         # thin progress bar
         self._prog_bg = QWidget()
@@ -1221,16 +1212,18 @@ class TimerCard(QFrame):
     def _apply_toggle_style(self):
         if self._toggle_btn.isChecked():
             self._toggle_btn.setStyleSheet(
-                f"QPushButton {{ background: {CP_GREEN}33; border: 1px solid {CP_GREEN}; }}"
-                f"QPushButton:hover {{ background: {CP_GREEN}55; }}"
-                f"QPushButton:disabled {{ background: transparent; border: 1px solid #333; }}"
+                f"QPushButton {{ background: {CP_GREEN}; border: 1px solid {CP_GREEN}; color: #000000; }}"
+                f"QPushButton:hover {{ background: {CP_GREEN}cc; border: 1px solid {CP_GREEN}; }}"
+                f"QPushButton:disabled {{ background: {CP_GREEN}88; border: 1px solid {CP_GREEN}55; }}"
             )
+            self._toggle_btn.setIcon(icon_check(color="#000000", size=13))
         else:
             self._toggle_btn.setStyleSheet(
                 f"QPushButton {{ background: transparent; border: 1px solid {CP_DIM}; }}"
                 f"QPushButton:hover {{ background: #1e1e1e; border: 1px solid {CP_GREEN}; }}"
                 f"QPushButton:disabled {{ background: transparent; border: 1px solid #222; }}"
             )
+            self._toggle_btn.setIcon(icon_check(color=CP_GREEN, size=13))
         # cursor: hand when enabled, forbidden when locked
         if self._toggle_btn.isEnabled():
             self._toggle_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -1240,7 +1233,6 @@ class TimerCard(QFrame):
     def _on_toggle(self):
         self.toggled = self._toggle_btn.isChecked()
         self._apply_toggle_style()
-        self._check_lbl.setVisible(self.toggled)
         self.state_changed.emit()
 
     def _get_colors(self) -> tuple[str, str]:
@@ -1373,7 +1365,6 @@ class TimerCard(QFrame):
                 # New timer set — reset checkmark state
                 self.toggled = False
                 self._toggle_btn.setChecked(False)
-                self._check_lbl.setVisible(False)
             self.fires_at = new_fires_at
         self.fired = False
         self._tick()
