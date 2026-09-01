@@ -68,7 +68,7 @@
           "input_mode": "custom_3",
           "input_value": "10:12 on 25 Aug",
           "use_custom_colors": false,
-          "toggled": false
+          "toggled": true
         },
         {
           "id": "a7f5c453",
@@ -88,7 +88,7 @@
           "input_mode": "custom_3",
           "input_value": "13:08 on 25 Aug",
           "use_custom_colors": false,
-          "toggled": false
+          "toggled": true
         },
         {
           "id": "ed31453c",
@@ -108,7 +108,7 @@
           "input_mode": "custom_3",
           "input_value": "15:27 on 26 Aug",
           "use_custom_colors": false,
-          "toggled": false
+          "toggled": true
         },
         {
           "id": "92ab5510",
