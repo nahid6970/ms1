@@ -1071,6 +1071,22 @@
             "process_name_enabled": true,
             "window_class_enabled": false,
             "match_foreground": false
+        },
+        {
+            "name": "Chrome Duplicate Tab",
+            "category": "General",
+            "description": "",
+            "hotkey": "^+d",
+            "window_title": "",
+            "process_name": "chrome.exe",
+            "window_class": "",
+            "window_title_enabled": false,
+            "process_name_enabled": true,
+            "window_class_enabled": false,
+            "match_foreground": false,
+            "action": "{\n    Send \"^l\"            ; Focus the address bar (Cmd/Ctrl + L)\n    Sleep 50             ; Brief pause to ensure the address bar is active\n    Send \"!{Enter}\"      ; Press Alt + Enter to open the URL in a new tab\n}",
+            "enabled": true,
+            "favourite": false
         }
     ],
     "exclusion_rules": [
