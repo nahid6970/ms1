@@ -4,6 +4,8 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
+- `app.py`: Added preset TMDb discovery modes for Popular, Top Rated, and monthly release/air-date trending; combined media results are ranked before pagination so high-rated TV shows are not hidden.
+- `templates/discover.html`, `static/discover.js`: Added automatic preset loading without a query, remembered discovery mode, and compact labels: Search, Media, and Trending Month.
 - `static/style.css`: Moved TV episode progress and movie watched/unwatched badges to the poster top-right; made metadata badges square, fully watched badges light green with black text, and rating stars left-aligned.
 
 # 3. Critical Context

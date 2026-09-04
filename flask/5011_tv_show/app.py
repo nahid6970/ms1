@@ -693,6 +693,11 @@ def discover_search():
                 results['total_results'] += page_results.get('total_results', 0)
             results['total_pages'] = max(results['total_pages'], page_results.get('total_pages', 0))
 
+    if preset == 'top_rated':
+        results['results'].sort(key=lambda item: float(item.get('vote_average') or 0), reverse=True)
+    elif preset in {'popular', 'trending_month'}:
+        results['results'].sort(key=lambda item: float(item.get('popularity') or 0), reverse=True)
+
     local_start = start_index % source_page_size
     page_items = results['results'][local_start:local_start + result_limit]
 
