@@ -160,6 +160,82 @@ def catalog_match_key(title, year):
     normalized_year = str(year or '')[:4]
     return f'{normalized_title}:{normalized_year}'
 
+def tvmaze_request(path, params=None):
+    try:
+        response = requests.get(
+            f'https://api.tvmaze.com/{path.lstrip("/")}',
+            params=params or {},
+            timeout=15
+        )
+        if response.status_code != 200:
+            return None, f'TVmaze returned HTTP {response.status_code}'
+        return response.json(), None
+    except requests.exceptions.RequestException as error:
+        return None, f'Unable to reach TVmaze: {error}'
+
+def tvmaze_show_for_catalog_item(show):
+    matches, error = tvmaze_request('search/shows', {'q': show.get('title', '')})
+    if error:
+        return None, error
+    target_title = str(show.get('title', '')).casefold().strip()
+    target_year = str(show.get('year', ''))[:4]
+    ranked = []
+    for match in matches or []:
+        candidate = match.get('show') or {}
+        candidate_title = str(candidate.get('name', '')).casefold().strip()
+        premiered_year = str(candidate.get('premiered') or '')[:4]
+        title_match = candidate_title == target_title
+        year_match = bool(target_year and premiered_year == target_year)
+        ranked.append((0 if title_match else 1, 0 if year_match else 1, -float(match.get('score') or 0), candidate))
+    if not ranked:
+        return None, f'No TVmaze show found for {show.get("title", "this show")}'
+    ranked.sort(key=lambda item: item[:3])
+    return ranked[0][3], None
+
+def merge_tvmaze_episodes(show, tvmaze_show, episodes):
+    existing_episodes = show.get('episodes', [])
+    by_number = {
+        (episode.get('season_number'), episode.get('episode_number')): episode
+        for episode in existing_episodes
+        if episode.get('season_number') is not None and episode.get('episode_number') is not None
+    }
+    added = 0
+    updated = 0
+    for source_episode in episodes or []:
+        season_number = source_episode.get('season')
+        episode_number = source_episode.get('number')
+        if season_number is None or episode_number is None:
+            continue
+        key = (season_number, episode_number)
+        target = by_number.get(key)
+        metadata = {
+            'season_number': season_number,
+            'episode_number': episode_number,
+            'title': source_episode.get('name') or f'S{season_number:02d}E{episode_number:02d}',
+            'air_date': source_episode.get('airdate') or '',
+            'airtime': source_episode.get('airtime') or '',
+            'air_datetime': source_episode.get('airstamp') or '',
+            'overview': re.sub(r'<[^>]+>', '', source_episode.get('summary') or '').strip(),
+            'still_image': (source_episode.get('image') or {}).get('original') or (source_episode.get('image') or {}).get('medium') or '',
+            'tvmaze_episode_id': source_episode.get('id')
+        }
+        if target:
+            target.update(metadata)
+            updated += 1
+        else:
+            metadata.update({
+                'id': max([episode.get('id', 0) for episode in existing_episodes], default=0) + 1,
+                'watched': False,
+                'notify': 'unseen'
+            })
+            existing_episodes.append(metadata)
+            by_number[key] = metadata
+            added += 1
+    existing_episodes.sort(key=lambda episode: (episode.get('season_number', 0), episode.get('episode_number', 0)))
+    show['episodes'] = existing_episodes
+    show['tvmaze_id'] = tvmaze_show.get('id')
+    return added, updated
+
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
     settings = load_settings()
@@ -570,6 +646,31 @@ def discover_add():
         save_data(shows)
 
     return jsonify({'success': True, 'message': f'{title} added to your {"movies" if media_type == "movie" else "shows"}'})
+
+@app.route('/api/show/<int:show_id>/episodes/update', methods=['POST'])
+def update_show_episodes(show_id):
+    shows = load_data()
+    show = next((item for item in shows if item.get('id') == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+
+    tvmaze_show, error = tvmaze_show_for_catalog_item(show)
+    if error:
+        return jsonify({'success': False, 'message': error}), 502
+    episodes, error = tvmaze_request(f"shows/{tvmaze_show['id']}/episodes", {'specials': 1})
+    if error:
+        return jsonify({'success': False, 'message': error}), 502
+
+    added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    show['episode_source'] = 'tvmaze'
+    show['episodes_updated_at'] = datetime.now().isoformat()
+    save_data(shows)
+    return jsonify({
+        'success': True,
+        'message': f'Updated {show["title"]}: {added} episodes added, {updated} updated.',
+        'added': added,
+        'updated': updated
+    })
 
 @app.route('/')
 def index():

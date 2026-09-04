@@ -290,6 +290,7 @@ body {
 .btn-sync:hover { background: #3498db; }
 .btn-folder:hover { background: #ffc936; color: black; }
 .btn-sonarr:hover { background: #00d2ff; color: black; }
+.btn-episodes-update:hover { background: #90cea1; color: #111; }
 
 /* Animations */
 @keyframes spin {

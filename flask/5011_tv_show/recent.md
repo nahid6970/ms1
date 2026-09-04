@@ -4,17 +4,18 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb helpers, paged search/import APIs, duplicate detection, and whole-number rating conversion.
+- `app.py`: Added TMDb helpers, paged search/import APIs, duplicate detection, rating conversion, and TVmaze episode/air-date merging.
 - `templates/discover.html`: Added unified discovery, per-page count, type/sort selectors, and Previous/Next controls.
 - `static/discover.js`: Added search rendering, local add actions, sorting, checkmarks, pagination, and remembered preferences.
-- `templates/index.html`, `templates/movies.html`: Added Discover buttons and original TMDb score display.
+- `templates/index.html`: Added Discover and TVmaze episode-update buttons plus original TMDb score display.
+- `templates/movies.html`: Added Discover button and original TMDb score display.
 - `templates/_settings_modal.html`: Added the masked TMDb API-key field.
-- `static/script.js`: Added TMDb key loading and saving through settings.
-- `static/style.css`: Added compact controls, sorting layout, added-state, TMDb score styling, and card alignment.
+- `static/script.js`: Added TMDb key loading/saving and TVmaze episode-update feedback.
+- `static/style.css`: Added compact controls, sorting layout, added-state, TMDb score styling, card alignment, and update-button styling.
 
 # 3. Critical Context
 
-TMDb is metadata-only; adding content does not call Sonarr/Radarr. The key is stored in `C:\@delta\db\5011_tv_show\settings.json` as `tmdb_api_key`; requests run server-side. Movies use `movies.json`, shows use `data.json`, and catalogs are checked separately. Discover remembers type, sort, and per-page count in localStorage; count is capped at 100. App stars are whole-number 1–5; imported scores are rounded from 0–10 and preserved as `tmdb_rating`.
+TMDb is metadata-only; adding content does not call Sonarr/Radarr. TVmaze is free/no-key and supplies episode schedules; updates merge by season/episode number while preserving watched/file fields. TMDb key is stored in `C:\@delta\db\5011_tv_show\settings.json`; requests run server-side. Discover remembers type, sort, and per-page count (max 100). App stars are whole-number 1–5; imported scores are preserved as `tmdb_rating`.
 
 # 4. Pending Task
 
