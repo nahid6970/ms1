@@ -676,6 +676,8 @@ select.modal-input {
 .discover-add-button { margin-top: auto; }
 button.discover-add-button { width: 42px; height: 36px; padding: 0; border-radius: 0 !important; display: inline-flex; align-items: center; justify-content: center; }
 button.discover-add-button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.discover-loading-icon { animation: discover-spin 0.9s linear infinite; }
+@keyframes discover-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .discover-add-button:disabled { cursor: default; opacity: 1; }
 .discover-added { background: #4ade80 !important; color: #111 !important; }
 .discover-empty { grid-column: 1 / -1; text-align: center; color: #aab7c8; }

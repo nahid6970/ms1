@@ -108,7 +108,9 @@ discoverResults.addEventListener('click', async event => {
     const button = event.target.closest('.discover-add-button');
     if (!button) return;
     button.disabled = true;
-    button.textContent = 'Adding...';
+    button.innerHTML = '<svg class="discover-loading-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+    button.title = 'Adding...';
+    button.setAttribute('aria-label', 'Adding...');
     try {
         const response = await fetch('/api/discover/add', {
             method: 'POST',
