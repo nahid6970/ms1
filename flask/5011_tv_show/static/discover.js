@@ -43,7 +43,7 @@ function renderDiscoverResults(results) {
                 <div class="discover-card-topline">
                     <span class="discover-type">${item.media_type === 'movie' ? 'Movie' : 'TV Show'}</span>
                 </div>
-                <span class="discover-meta">${escapeHtml(item.year || 'Year unknown')} · ★ ${item.rating.toFixed(1)}</span>
+                <span class="discover-meta">${item.year ? `${escapeHtml(item.year)} · ` : ''}★ ${item.rating.toFixed(1)}</span>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
                 <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}" title="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}" aria-label="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}"${item.already_added ? ' disabled' : ''}>
                     ${item.already_added ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}

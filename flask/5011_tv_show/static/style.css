@@ -2038,6 +2038,8 @@ body::before {
 .show-card .card-info .last-episode-added { background: rgba(55, 65, 81, 0.96); }
 .show-card .card-info .show-status,
 .movie-card .card-info .movie-status { background: rgba(22, 101, 52, 0.94); border-color: rgba(74, 222, 128, 0.45); }
+.show-card .card-info .show-status.status-continuing { background: rgba(113, 79, 10, 0.96); border-color: rgba(250, 204, 21, 0.48); color: #facc15 !important; }
+.show-card .card-info .show-status.status-ended { background: rgba(55, 65, 81, 0.96); border-color: rgba(148, 163, 184, 0.35); }
 .show-card .card-info .episode-count.all-episodes-watched,
 .movie-card .card-info .movie-status.all-episodes-watched { background: #86efac; border-color: #4ade80; color: #111827 !important; }
 .movie-card .card-info .movie-status.no-episodes-watched { background: rgba(127, 29, 29, 0.94); border-color: rgba(248, 113, 113, 0.45); }
