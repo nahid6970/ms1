@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover | TV Shows & Movies</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="sticky-controls-wrapper">
+        <div class="app-header-inner">
+            <nav class="library-nav" aria-label="Library sections">
+                <a href="{{ url_for('index') }}" class="nav-link">Shows</a>
+                <a href="{{ url_for('movies_page') }}" class="nav-link">Movies</a>
+                <a href="{{ url_for('discover_page') }}" class="nav-link active">Discover</a>
+            </nav>
+        </div>
+    </div>
+
+    <main class="discover-page">
+        <div class="discover-heading">
+            <h1>Discover Shows & Movies</h1>
+            <p>Search TMDb and add metadata to your local library.</p>
+        </div>
+
+        <form id="discoverSearchForm" class="discover-search-form">
+            <input id="discoverQuery" type="search" placeholder="Search for a movie or TV show..." autocomplete="off" required>
+            <select id="discoverType" aria-label="Content type">
+                <option value="all">Movies & Shows</option>
+                <option value="movie">Movies</option>
+                <option value="tv">TV Shows</option>
+            </select>
+            <button type="submit" class="modal-btn modal-btn-blue">Search</button>
+        </form>
+
+        <div id="discoverStatus" class="discover-status"></div>
+        <section id="discoverResults" class="discover-results" aria-live="polite"></section>
+    </main>
+
+    <script src="{{ url_for('static', filename='discover.js') }}"></script>
+</body>
+</html>

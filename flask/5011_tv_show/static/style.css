@@ -646,11 +646,34 @@ select.modal-input {
 .settings-section h3 svg { flex-shrink: 0; }
 
 .section-general { --accent: #4ade80; background: linear-gradient(160deg, rgba(74, 222, 128, 0.10), rgba(255, 255, 255, 0.02)); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 26px rgba(74, 222, 128, 0.10); }
+.section-tmdb    { --accent: #90cea1; background: linear-gradient(160deg, rgba(144, 206, 161, 0.12), rgba(255, 255, 255, 0.02)); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 26px rgba(144, 206, 161, 0.12); }
 .section-sonarr  { --accent: #38bdf8; background: linear-gradient(160deg, rgba(56, 189, 248, 0.12), rgba(255, 255, 255, 0.02)); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 26px rgba(56, 189, 248, 0.12); }
 .section-radarr  { --accent: #fbbf24; background: linear-gradient(160deg, rgba(251, 191, 36, 0.10), rgba(255, 255, 255, 0.02)); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), 0 0 26px rgba(251, 191, 36, 0.10); }
 
 .section-sonarr .modal-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.20), 0 0 18px rgba(56, 189, 248, 0.28); }
+.section-tmdb .modal-input:focus { border-color: #90cea1; box-shadow: 0 0 0 3px rgba(144, 206, 161, 0.20), 0 0 18px rgba(144, 206, 161, 0.28); }
 .section-radarr .modal-input:focus { border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.20), 0 0 18px rgba(251, 191, 36, 0.28); }
+
+.discover-page { max-width: 1200px; margin: 0 auto; padding: 36px 24px 70px; }
+.discover-heading { text-align: center; margin-bottom: 24px; }
+.discover-heading h1 { margin: 0 0 8px; }
+.discover-heading p { color: #aab7c8; margin: 0; }
+.discover-search-form { display: flex; gap: 10px; max-width: 800px; margin: 0 auto 24px; }
+.discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 12px 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 6px; }
+.discover-search-form select { flex: 0 0 180px; }
+.discover-status { min-height: 22px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
+.discover-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.discover-card { display: flex; min-height: 220px; overflow: hidden; background: #1c1c1c; border: 1px solid #333; border-radius: 10px; }
+.discover-card > img { width: 130px; min-width: 130px; height: 195px; object-fit: cover; background: #252525; }
+.discover-card-content { padding: 15px; display: flex; flex-direction: column; align-items: flex-start; }
+.discover-type { color: #90cea1; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.discover-card h2 { font-size: 1.1rem; margin: 6px 0; }
+.discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 0 0 8px; }
+.discover-overview { color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.discover-add-button { margin-top: auto; }
+.discover-added { background: #4ade80 !important; color: #111 !important; }
+.discover-empty { grid-column: 1 / -1; text-align: center; color: #aab7c8; }
+@media (max-width: 600px) { .discover-search-form { flex-wrap: wrap; } .discover-search-form select { flex: 1 1 100%; } .discover-search-form button { flex: 1; } .discover-page { padding: 25px 14px 50px; } }
 
 .setting-row {
     display: flex;

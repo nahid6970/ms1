@@ -373,6 +373,7 @@ async function openSettingsModal() {
         const response = await fetch('/api/settings');
         const settings = await response.json();
         
+        const tmdbKeyInput = document.getElementById('tmdbApiKey');
         const sonarrUrlInput = document.getElementById('sonarrApiUrl');
         const sonarrKeyInput = document.getElementById('sonarrApiKey');
         const showsFolderInput = document.getElementById('rootShowsFolder');
@@ -380,6 +381,7 @@ async function openSettingsModal() {
         const radarrKeyInput = document.getElementById('radarrApiKey');
         const moviesFolderInput = document.getElementById('rootMoviesFolder');
         
+        if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
         if (sonarrUrlInput) sonarrUrlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
         if (sonarrKeyInput) sonarrKeyInput.value = settings.sonarr_api_key || '';
         if (showsFolderInput) showsFolderInput.value = settings.root_shows_folder || 'C:\\Users\\nahid\\Downloads\\@sonarr';
@@ -524,6 +526,7 @@ async function syncRadarrPaths(button) {
 }
 
 async function saveSettings() {
+    const tmdbApiKey = document.getElementById('tmdbApiKey').value.trim();
     const sonarrUrl = document.getElementById('sonarrApiUrl').value;
     const sonarrApiKey = document.getElementById('sonarrApiKey').value;
     const showsFolder = document.getElementById('rootShowsFolder').value;
@@ -538,6 +541,7 @@ async function saveSettings() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                tmdb_api_key: tmdbApiKey,
                 sonarr_url: sonarrUrl,
                 sonarr_api_key: sonarrApiKey,
                 root_shows_folder: showsFolder,

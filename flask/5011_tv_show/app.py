@@ -35,6 +35,7 @@ os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
 
 def load_settings():
     default_settings = {
+        "tmdb_api_key": "",
         "sonarr_url": "http://192.168.0.101:8989",
         "sonarr_api_key": "",
         "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr",
@@ -99,6 +100,35 @@ def save_movies(movies):
     os.makedirs(os.path.dirname(MOVIES_FILE), exist_ok=True)
     with open(MOVIES_FILE, 'w') as f:
         json.dump(movies, f, indent=4)
+
+def tmdb_request(path, params=None):
+    """Request data from TMDb using the key configured in Settings."""
+    api_key = load_settings().get('tmdb_api_key', '').strip()
+    if not api_key:
+        return None, 'TMDb API Key is not configured in Settings'
+
+    request_params = dict(params or {})
+    request_params['api_key'] = api_key
+    try:
+        response = requests.get(
+            f'https://api.themoviedb.org/3/{path.lstrip("/")}',
+            params=request_params,
+            timeout=15
+        )
+        if response.status_code != 200:
+            return None, f'TMDb returned HTTP {response.status_code}'
+        return response.json(), None
+    except requests.exceptions.RequestException as error:
+        return None, f'Unable to reach TMDb: {error}'
+
+def tmdb_poster_url(path):
+    return f'https://image.tmdb.org/t/p/w500{path}' if path else ''
+
+def tmdb_year(value):
+    return str(value or '')[:4]
+
+def tmdb_genres(details):
+    return [genre.get('name') for genre in details.get('genres', []) if genre.get('name')]
 
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
@@ -353,6 +383,108 @@ scheduler.start()
 @app.route('/cached_image/<filename>')
 def cached_image(filename):
     return send_from_directory(IMAGE_CACHE_DIR, filename)
+
+@app.route('/discover')
+def discover_page():
+    return render_template('discover.html')
+
+@app.route('/api/discover/search')
+def discover_search():
+    query = request.args.get('q', '').strip()
+    media_type = request.args.get('type', 'all').strip().lower()
+    if not query:
+        return jsonify({'success': False, 'message': 'Enter a title to search'}), 400
+
+    if media_type not in {'all', 'movie', 'tv'}:
+        return jsonify({'success': False, 'message': 'Invalid content type'}), 400
+
+    endpoint = 'search/multi' if media_type == 'all' else f'search/{media_type}'
+    results, error = tmdb_request(endpoint, {'query': query, 'include_adult': 'false', 'language': 'en-US', 'page': 1})
+    if error:
+        return jsonify({'success': False, 'message': error}), 502
+
+    normalized = []
+    for item in results.get('results', []):
+        item_type = item.get('media_type', media_type)
+        if item_type not in {'movie', 'tv'}:
+            continue
+        title = item.get('title') if item_type == 'movie' else item.get('name')
+        release_date = item.get('release_date') if item_type == 'movie' else item.get('first_air_date')
+        normalized.append({
+            'tmdb_id': item.get('id'),
+            'media_type': item_type,
+            'title': title or 'Untitled',
+            'year': tmdb_year(release_date),
+            'overview': item.get('overview') or 'No overview available.',
+            'poster_url': tmdb_poster_url(item.get('poster_path')),
+            'rating': round(float(item.get('vote_average') or 0), 1)
+        })
+
+    return jsonify({'success': True, 'results': normalized})
+
+@app.route('/api/discover/add', methods=['POST'])
+def discover_add():
+    payload = request.json or {}
+    media_type = payload.get('media_type')
+    tmdb_id = payload.get('tmdb_id')
+    if media_type not in {'movie', 'tv'} or not str(tmdb_id).isdigit():
+        return jsonify({'success': False, 'message': 'A valid movie or TV result is required'}), 400
+
+    details, error = tmdb_request(f'{media_type}/{int(tmdb_id)}', {'language': 'en-US'})
+    if error:
+        return jsonify({'success': False, 'message': error}), 502
+
+    title = (details.get('title') if media_type == 'movie' else details.get('name')) or 'Untitled'
+    year = tmdb_year(details.get('release_date') if media_type == 'movie' else details.get('first_air_date'))
+    poster = tmdb_poster_url(details.get('poster_path'))
+    rating = round(float(details.get('vote_average') or 0), 1)
+    external_ids = {'tmdb': int(tmdb_id)}
+    if details.get('imdb_id'):
+        external_ids['imdb'] = details['imdb_id']
+
+    if media_type == 'movie':
+        movies = load_movies()
+        if any(str(movie.get('tmdb_id')) == str(tmdb_id) for movie in movies):
+            return jsonify({'success': False, 'message': f'{title} is already in your movies'}), 409
+        movies.append({
+            'id': max([movie.get('id', 0) for movie in movies], default=0) + 1,
+            'tmdb_id': int(tmdb_id),
+            'external_ids': external_ids,
+            'radarr_id': None,
+            'title': title,
+            'year': year,
+            'overview': details.get('overview', ''),
+            'cover_image': poster,
+            'directory_path': '',
+            'genres': tmdb_genres(details),
+            'runtime': details.get('runtime'),
+            'rating': rating,
+            'status': 'Released' if details.get('status') == 'Released' else 'Missing',
+            'watched': False,
+            'added_date': datetime.now().isoformat()
+        })
+        save_movies(movies)
+    else:
+        shows = load_data()
+        if any(str(show.get('tmdb_id')) == str(tmdb_id) for show in shows):
+            return jsonify({'success': False, 'message': f'{title} is already in your shows'}), 409
+        shows.append({
+            'id': max([show.get('id', 0) for show in shows], default=0) + 1,
+            'tmdb_id': int(tmdb_id),
+            'external_ids': external_ids,
+            'title': title,
+            'year': year,
+            'overview': details.get('overview', ''),
+            'cover_image': poster,
+            'directory_path': '',
+            'genres': tmdb_genres(details),
+            'rating': rating,
+            'status': 'Ended' if details.get('status') == 'Ended' else 'Continuing',
+            'episodes': []
+        })
+        save_data(shows)
+
+    return jsonify({'success': True, 'message': f'{title} added to your {"movies" if media_type == "movie" else "shows"}'})
 
 @app.route('/')
 def index():
@@ -717,6 +849,7 @@ def api_settings():
     if request.method == 'POST':
         data = request.json or {}
         settings = load_settings()
+        settings['tmdb_api_key'] = data.get('tmdb_api_key', settings.get('tmdb_api_key', ''))
         settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
         settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
         settings['root_shows_folder'] = data.get('root_shows_folder', settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr"))
