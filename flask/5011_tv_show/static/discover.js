@@ -29,8 +29,8 @@ function renderDiscoverResults(results) {
                 </div>
                 <span class="discover-meta">${escapeHtml(item.year || 'Year unknown')} · ★ ${item.rating.toFixed(1)}</span>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
-                <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}"${item.already_added ? ' disabled' : ''}>
-                    ${item.already_added ? '✓ Already Added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}
+                <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}" title="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}" aria-label="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}"${item.already_added ? ' disabled' : ''}>
+                    ${item.already_added ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
                 </button>
                 </div>
             </div>
@@ -98,12 +98,16 @@ discoverResults.addEventListener('click', async event => {
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to add item');
-        button.textContent = '✓ Already Added';
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        button.title = 'Already added';
+        button.setAttribute('aria-label', 'Already added');
         button.classList.add('discover-added');
         discoverStatus.textContent = data.message;
     } catch (error) {
         button.disabled = false;
-        button.textContent = `Add to ${button.dataset.mediaType === 'movie' ? 'Movies' : 'Shows'}`;
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+        button.title = `Add to ${button.dataset.mediaType === 'movie' ? 'Movies' : 'Shows'}`;
+        button.setAttribute('aria-label', button.title);
         discoverStatus.textContent = error.message;
     }
 });
