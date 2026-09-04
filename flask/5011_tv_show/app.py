@@ -174,9 +174,24 @@ def tvmaze_request(path, params=None):
         return None, f'Unable to reach TVmaze: {error}'
 
 def tvmaze_show_for_catalog_item(show):
-    matches, error = tvmaze_request('search/shows', {'q': show.get('title', '')})
-    if error:
-        return None, error
+    title = str(show.get('title', '')).strip()
+    queries = [title]
+    for separator in (':', ' - ', ' – '):
+        if separator in title:
+            queries.append(title.split(separator, 1)[0].strip())
+    queries = list(dict.fromkeys(query for query in queries if query))
+
+    matches = []
+    last_error = None
+    for query in queries:
+        matches, error = tvmaze_request('search/shows', {'q': query})
+        if error:
+            last_error = error
+            continue
+        if matches:
+            break
+    if last_error and not matches:
+        return None, last_error
     target_title = str(show.get('title', '')).casefold().strip()
     target_year = str(show.get('year', ''))[:4]
     ranked = []
