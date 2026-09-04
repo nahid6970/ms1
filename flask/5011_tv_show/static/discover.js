@@ -1,8 +1,10 @@
 const discoverForm = document.getElementById('discoverSearchForm');
 const discoverQuery = document.getElementById('discoverQuery');
 const discoverType = document.getElementById('discoverType');
+const discoverSort = document.getElementById('discoverSort');
 const discoverResults = document.getElementById('discoverResults');
 const discoverStatus = document.getElementById('discoverStatus');
+let discoverItems = [];
 
 function escapeHtml(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -32,6 +34,23 @@ function renderDiscoverResults(results) {
     `).join('');
 }
 
+function sortDiscoverResults(results) {
+    const sorted = [...results];
+    if (discoverSort.value === 'relevance') return sorted;
+    sorted.sort((first, second) => {
+        const firstYear = Number.parseInt(first.year, 10);
+        const secondYear = Number.parseInt(second.year, 10);
+        const firstKnown = Number.isNaN(firstYear);
+        const secondKnown = Number.isNaN(secondYear);
+        if (firstKnown !== secondKnown) return firstKnown ? 1 : -1;
+        if (firstKnown && secondKnown) return 0;
+        return discoverSort.value === 'oldest' ? firstYear - secondYear : secondYear - firstYear;
+    });
+    return sorted;
+}
+
+discoverSort.addEventListener('change', () => renderDiscoverResults(sortDiscoverResults(discoverItems)));
+
 discoverForm.addEventListener('submit', async event => {
     event.preventDefault();
     const query = discoverQuery.value.trim();
@@ -42,8 +61,9 @@ discoverForm.addEventListener('submit', async event => {
         const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}`);
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Search failed');
+        discoverItems = data.results;
         discoverStatus.textContent = `${data.results.length} result${data.results.length === 1 ? '' : 's'} found`;
-        renderDiscoverResults(data.results);
+        renderDiscoverResults(sortDiscoverResults(discoverItems));
     } catch (error) {
         discoverStatus.textContent = error.message;
         discoverResults.innerHTML = '';
