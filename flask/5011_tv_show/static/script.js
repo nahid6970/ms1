@@ -183,6 +183,20 @@ function closeScanMissingModal() {
 let currentEpisodes = [];
 let currentShowIdForEpisodes = null;
 
+function escapeEpisodeText(value) {
+    return String(value || '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+}
+
+function formatEpisodeAirDate(airDate) {
+    if (!airDate) return '';
+    const date = new Date(`${airDate}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? airDate : date.toLocaleDateString(undefined, {
+        day: '2-digit', month: 'short', year: 'numeric'
+    });
+}
+
 function renderEpisodes(episodes, showId) {
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
@@ -208,10 +222,18 @@ function renderEpisodes(episodes, showId) {
         li.style.borderRadius = '8px';
         if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
 
+        const episodeNumber = ep.season_number != null && ep.episode_number != null
+            ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
+            : '';
+        const airDate = formatEpisodeAirDate(ep.air_date);
         li.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="episode-main-info">
                 <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
-                <span>${ep.title}</span>
+                <div class="episode-title-block">
+                    <span class="episode-number">${episodeNumber}</span>
+                    <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
+                    ${airDate ? `<span class="episode-airdate">Air date: ${airDate}</span>` : ''}
+                </div>
             </div>
             <div style="display: flex; gap: 8px;">
                 <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
