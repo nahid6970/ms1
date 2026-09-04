@@ -53,8 +53,7 @@ function sortDiscoverResults(results) {
 
 discoverSort.addEventListener('change', () => renderDiscoverResults(sortDiscoverResults(discoverItems)));
 
-discoverForm.addEventListener('submit', async event => {
-    event.preventDefault();
+async function performDiscoverSearch() {
     const query = discoverQuery.value.trim();
     if (!query) return;
     discoverStatus.textContent = 'Searching TMDb...';
@@ -70,6 +69,15 @@ discoverForm.addEventListener('submit', async event => {
         discoverStatus.textContent = error.message;
         discoverResults.innerHTML = '';
     }
+}
+
+discoverForm.addEventListener('submit', event => {
+    event.preventDefault();
+    performDiscoverSearch();
+});
+
+discoverType.addEventListener('change', () => {
+    if (discoverQuery.value.trim()) performDiscoverSearch();
 });
 
 discoverResults.addEventListener('click', async event => {
