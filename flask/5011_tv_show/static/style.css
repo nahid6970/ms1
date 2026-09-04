@@ -1118,11 +1118,12 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 html, body {
     min-height: 100%;
 }
+.episode-sort-select { width: auto; min-width: 120px; height: 36px; padding: 0 10px; }
 
-.episode-title-block { display: flex; align-items: center; gap: 9px; min-width: 0; flex-wrap: wrap; }
+.episode-title-block { width: 100%; display: flex; align-items: center; justify-content: flex-start; gap: 9px; min-width: 0; flex-wrap: wrap; text-align: left; }
 .episode-number { color: #90cea1; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
 .episode-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.episode-airdate { color: #aab7c8; font-size: 0.78rem; white-space: nowrap; }
+.episode-airdate { flex-basis: 100%; color: #aab7c8; font-size: 0.78rem; white-space: nowrap; text-align: left; }
 
 body {
     margin: 0;

@@ -246,10 +246,27 @@ def merge_tvmaze_episodes(show, tvmaze_show, episodes):
             existing_episodes.append(metadata)
             by_number[key] = metadata
             added += 1
-    existing_episodes.sort(key=lambda episode: (episode.get('season_number', 0), episode.get('episode_number', 0)))
+    sort_episode_list(show)
     show['episodes'] = existing_episodes
     show['tvmaze_id'] = tvmaze_show.get('id')
     return added, updated
+
+def sort_episode_list(show):
+    """Apply a persisted, deterministic sort to a show's episode list."""
+    episodes = show.get('episodes', [])
+    sort_type = show.get('episode_sort_type', 'default')
+    order = show.get('episode_sort_order', 'asc')
+    reverse = order == 'desc'
+    if sort_type == 'alphabetical':
+        episodes.sort(key=lambda episode: str(episode.get('title', '')).casefold(), reverse=reverse)
+    else:
+        def episode_key(episode):
+            season = episode.get('season_number')
+            number = episode.get('episode_number')
+            if season is not None and number is not None:
+                return (0, int(season), int(number), str(episode.get('title', '')).casefold())
+            return (1, int(episode.get('id', 0)), 0, str(episode.get('title', '')).casefold())
+        episodes.sort(key=episode_key, reverse=reverse)
 
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
@@ -830,6 +847,7 @@ def edit_show(show_id):
         save_data(shows)
         return redirect(url_for('index'))
     else:
+        sort_episode_list(show)
         return jsonify(show)
 
 @app.route('/delete_show/<int:show_id>')
@@ -903,11 +921,13 @@ def update_episode_sort(show_id):
     show['episode_sort_type'] = sort_type
     show['episode_sort_order'] = order
     
-    if sort_type == 'alphabetical':
-        show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-    elif sort_type == 'default':
-        # Default is usually by ID or added date, let's say ID descending (newest first)
-        show['episodes'].sort(key=lambda x: x['id'], reverse=True)
+    if sort_type not in {'alphabetical', 'default'}:
+        sort_type = 'default'
+        show['episode_sort_type'] = sort_type
+    if order not in {'asc', 'desc'}:
+        order = 'asc'
+        show['episode_sort_order'] = order
+    sort_episode_list(show)
         
     save_data(shows)
     return jsonify({'success': True, 'episodes': show['episodes']})

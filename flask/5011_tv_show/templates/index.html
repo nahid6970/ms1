@@ -246,10 +246,14 @@
             <span class="close" onclick="closeEpisodesModal()">&times;</span>
             <div class="modal-header" style="padding-right: 30px;">
                 <h2 id="episodesModalTitle" class="modal-title"></h2>
-                <button id="sortEpisodesDesc" class="modal-btn modal-btn-dark modal-btn-sm" title="Sort by Name DESC">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 16 7 20 11 16"></polyline><line x1="7" y1="20" x2="7" y2="4"></line><line x1="11" y1="4" x2="21" y2="4"></line><line x1="11" y1="8" x2="19" y2="8"></line><line x1="11" y1="12" x2="17" y2="12"></line></svg>
-                    Sort DESC
-                </button>
+                <select id="episodeSortType" class="modal-input episode-sort-select" title="Sort episodes by">
+                    <option value="default">Episode Order</option>
+                    <option value="alphabetical">Name</option>
+                </select>
+                <select id="episodeSortOrder" class="modal-input episode-sort-select" title="Sort direction">
+                    <option value="asc">ASC</option>
+                    <option value="desc">DESC</option>
+                </select>
             </div>
             <div id="episodesListContainer" class="episode-list">
                 <!-- Episodes will be populated here -->

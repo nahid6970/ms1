@@ -246,18 +246,10 @@ function renderEpisodes(episodes, showId) {
 }
 
 function updateSortButtonUI(sortType, sortOrder) {
-    const sortBtn = document.getElementById('sortEpisodesDesc');
-    if (sortBtn) {
-        if (sortType === 'alphabetical' && sortOrder === 'desc') {
-            sortBtn.classList.add('active-sort');
-            sortBtn.style.background = '#1db954';
-            sortBtn.style.color = 'white';
-        } else {
-            sortBtn.classList.remove('active-sort');
-            sortBtn.style.background = '';
-            sortBtn.style.color = '';
-        }
-    }
+    const sortTypeSelect = document.getElementById('episodeSortType');
+    const sortOrderSelect = document.getElementById('episodeSortOrder');
+    if (sortTypeSelect) sortTypeSelect.value = sortType || 'default';
+    if (sortOrderSelect) sortOrderSelect.value = sortOrder || 'asc';
 }
 
 function closeEpisodesModal() {
@@ -751,15 +743,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Episode sorting logic
-    const sortBtn = document.getElementById('sortEpisodesDesc');
-    if (sortBtn) {
-        sortBtn.addEventListener('click', async () => {
+    const sortTypeSelect = document.getElementById('episodeSortType');
+    const sortOrderSelect = document.getElementById('episodeSortOrder');
+    async function saveEpisodeSort() {
             if (!currentShowIdForEpisodes) return;
-            
-            const isActive = sortBtn.classList.contains('active-sort');
-            const newSortType = isActive ? 'default' : 'alphabetical';
-            const newOrder = isActive ? 'desc' : 'desc'; // We're specifically implementing name DESC
-            
+            const newSortType = sortTypeSelect.value;
+            const newOrder = sortOrderSelect.value;
             try {
                 const response = await fetch(`/update_episode_sort/${currentShowIdForEpisodes}`, {
                     method: 'POST',
@@ -776,7 +765,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Error updating episode sort:', error);
             }
-        });
+    }
+    if (sortTypeSelect && sortOrderSelect) {
+        sortTypeSelect.addEventListener('change', saveEpisodeSort);
+        sortOrderSelect.addEventListener('change', saveEpisodeSort);
     }
 
     // Helper functions for popup interactions
