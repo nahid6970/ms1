@@ -764,18 +764,21 @@ def index():
         def get_last_episode_time(show):
             episodes = show.get('episodes', [])
             if not episodes:
-                return datetime.min.isoformat()  # Shows with no episodes go to the end
-            
-            # Get the most recent episode (first in array since new episodes are inserted at index 0)
-            latest_episode = episodes[0]
-            
-            # Use added_date if available, otherwise fall back to a default time based on episode ID
-            if 'added_date' in latest_episode:
-                return latest_episode['added_date']
-            else:
-                # For older episodes without added_date, use episode ID as a proxy for recency
-                # Higher ID = more recent
-                return f"1970-01-01T00:00:{latest_episode['id']:06d}"
+                return (0, float('-inf'))
+
+            # Episode lists can be sorted either direction, so inspect every episode.
+            timestamps = []
+            for episode in episodes:
+                value = episode.get('added_date') or episode.get('air_datetime') or episode.get('air_date')
+                if value:
+                    try:
+                        parsed = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+                        timestamps.append((0, parsed.timestamp()))
+                    except (TypeError, ValueError):
+                        timestamps.append((1, str(value)))
+                elif episode.get('id') is not None:
+                    timestamps.append((0, int(episode['id'])))
+            return max(timestamps, default=(0, float('-inf')))
         
         shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
 

@@ -660,15 +660,10 @@ if (savedScrollPosition !== null) {
     localStorage.removeItem('scrollPosition');
 }
 
-// Toggle Default Home Page
+// Load the persisted visibility preference for hidden shows.
 document.addEventListener('DOMContentLoaded', () => {
-    const defaultHomePageSelect = document.getElementById('defaultHomePage');
     const showHiddenShowsToggle = document.getElementById('showHiddenShows');
     const html = document.documentElement;
-
-    // Load default home page preference from localStorage
-    const defaultHomePage = localStorage.getItem('defaultHomePage') || 'default';
-    defaultHomePageSelect.value = defaultHomePage;
 
     // Load show hidden shows preference from localStorage
     const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
@@ -682,11 +677,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showHiddenShowsToggle.checked = false;
         console.log('Removed show-hidden-shows class from HTML');
     }
-
-    // Save default home page preference to localStorage on change
-    defaultHomePageSelect.addEventListener('change', () => {
-        localStorage.setItem('defaultHomePage', defaultHomePageSelect.value);
-    });
 
     // Save show hidden shows preference to localStorage on change
     showHiddenShowsToggle.addEventListener('change', () => {

@@ -4,18 +4,14 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb helpers, paged search/import APIs, duplicate detection, rating conversion, and TVmaze episode/air-date merging.
-- `templates/discover.html`: Added unified discovery, per-page count, type/sort selectors, and Previous/Next controls.
-- `static/discover.js`: Added search rendering, local add actions, sorting, checkmarks, pagination, and remembered preferences.
-- `templates/index.html`: Added Discover and TVmaze episode-update buttons plus original TMDb score display.
-- `templates/movies.html`: Added Discover button and original TMDb score display.
-- `templates/_settings_modal.html`: Added the masked TMDb API-key field.
-- `static/script.js`: Added TMDb key loading/saving, TVmaze update feedback, and episode air-date rendering.
-- `static/style.css`: Added compact controls, sorting layout, added-state, TMDb score styling, card alignment, update-button, and episode metadata styling.
+- `app.py`: Added TMDb search/import, duplicate detection, rating conversion, TVmaze episode/air-date merging, and reliable library sorting.
+- `templates/discover.html`, `static/discover.js`: Added unified discovery, type/sort/count controls, pagination, remembered preferences, and duplicate checkmarks.
+- `templates/index.html`, `templates/movies.html`: Added Discover/TVmaze controls and TMDb score display; removed the conflicting home-page redirect.
+- `templates/_settings_modal.html`, `static/script.js`, `static/style.css`: Added TMDb settings, aligned General controls, episode metadata, and modern card/control styling.
 
 # 3. Critical Context
 
-TMDb is metadata-only; adding content does not call Sonarr/Radarr. TVmaze is free/no-key and supplies episode schedules; updates merge by season/episode number while preserving watched/file fields. The popup displays season/episode labels and air dates after update. TMDb key is stored in `C:\@delta\db\5011_tv_show\settings.json`; requests run server-side. Discover remembers type, sort, and per-page count (max 100). App stars are whole-number 1–5; imported scores are preserved as `tmdb_rating`.
+TMDb is metadata-only; imports do not call Sonarr/Radarr. TVmaze is free/no-key; episode updates merge by season/episode and preserve watched/file fields. The TMDb key is in `C:\@delta\db\5011_tv_show\settings.json`; requests are server-side. Discover remembers type, sort, and count (max 100). App stars are whole-number 1–5; original scores remain `tmdb_rating`. Library defaults are server-side; “Last Episode” scans all episodes.
 
 # 4. Pending Task
 

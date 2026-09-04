@@ -1644,6 +1644,26 @@ body::before {
     padding: 8px 0;
 }
 
+#settingsModal .settings-panel-general .setting-row {
+    display: grid;
+    grid-template-columns: minmax(132px, 1fr) minmax(0, 1.25fr);
+    align-items: center;
+    gap: 14px;
+}
+
+#settingsModal .settings-panel-general .setting-row > label:first-child {
+    min-width: 0;
+}
+
+#settingsModal .settings-panel-general .setting-row .modal-input {
+    width: 100%;
+    min-width: 0;
+}
+
+#settingsModal .settings-panel-general .setting-row > .switch {
+    justify-self: end;
+}
+
 #settingsModal .setting-row > label {
     color: #d0d7e2;
     font-size: 0.82rem;
@@ -1712,6 +1732,8 @@ body::before {
 
 @media (max-width: 540px) {
     #settingsModal .settings-modal-content { width: calc(100% - 20px); padding: 18px 14px 14px; }
+    #settingsModal .settings-panel-general .setting-row { grid-template-columns: 1fr; gap: 6px; }
+    #settingsModal .settings-panel-general .setting-row > .switch { justify-self: start; }
     #settingsModal .settings-panel-integrations .setting-row { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
     #settingsModal .setting-control-col { display: flex; align-items: stretch; flex-direction: column; }
 }
