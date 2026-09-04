@@ -671,7 +671,7 @@ select.modal-input {
 .discover-card-topline { width: 100%; min-height: 18px; display: flex; align-items: center; }
 .discover-type { color: #90cea1; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 .discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 5px 0 8px; white-space: nowrap; }
-.discover-overview { color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.discover-overview { color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; text-align: justify; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .discover-add-button { margin-top: auto; }
 .discover-add-button:disabled { cursor: default; opacity: 1; }
 .discover-added { background: #4ade80 !important; color: #111 !important; }
