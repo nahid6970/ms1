@@ -4,14 +4,14 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb search/import, duplicate detection, rating conversion, TVmaze episode/air-date merging, and reliable library sorting.
+- `app.py`: Added TMDb search/import with movie release dates, duplicate detection, rating conversion, TVmaze episode/air-date merging, and reliable library sorting.
 - `templates/discover.html`, `static/discover.js`: Added unified discovery, type/sort/count controls, pagination, remembered preferences, and duplicate checkmarks.
 - `templates/index.html`, `templates/movies.html`: Added Discover/TVmaze controls and TMDb score display; removed the conflicting home-page redirect.
 - `templates/_settings_modal.html`, `static/script.js`, `static/style.css`: Added TMDb settings, aligned General controls, episode metadata, and modern card/control styling.
 
 # 3. Critical Context
 
-TMDb is metadata-only; imports do not call Sonarr/Radarr. TVmaze is free/no-key; episode updates merge by season/episode and preserve watched/file fields. The TMDb key is in `C:\@delta\db\5011_tv_show\settings.json`; requests are server-side. Discover remembers type, sort, and count (max 100). App stars are whole-number 1–5; original scores remain `tmdb_rating`. Library defaults are server-side; “Last Episode” scans all episodes.
+TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain full TMDb `release_date` for same-year chronological sorting. TVmaze is free/no-key; episode updates merge by season/episode and preserve watched/file fields. The TMDb key is in `C:\@delta\db\5011_tv_show\settings.json`; requests are server-side. App stars are whole-number 1–5; original scores remain `tmdb_rating`. Library defaults are server-side; “Last Episode” scans all episodes.
 
 # 4. Pending Task
 

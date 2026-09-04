@@ -644,6 +644,7 @@ def discover_add():
             'radarr_id': None,
             'title': title,
             'year': year,
+            'release_date': details.get('release_date') or '',
             'overview': details.get('overview', ''),
             'cover_image': poster,
             'directory_path': '',
@@ -809,7 +810,13 @@ def movies_page():
     if sort_by == 'title':
         movies.sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
     elif sort_by == 'year':
-        movies.sort(key=lambda x: int(x['year']) if str(x.get('year', '')).isdigit() else 0, reverse=(order == 'desc'))
+        movies.sort(
+            key=lambda x: (
+                int(x.get('year')) if str(x.get('year', '')).isdigit() else 0,
+                str(x.get('release_date') or '')
+            ),
+            reverse=(order == 'desc')
+        )
     elif sort_by == 'rating':
         movies.sort(key=lambda x: float(x.get('rating', -1)) if x.get('rating') is not None and str(x.get('rating')).replace('.', '', 1).isdigit() else -1, reverse=(order == 'desc'))
     elif sort_by == 'added':
