@@ -2,9 +2,17 @@ const discoverForm = document.getElementById('discoverSearchForm');
 const discoverQuery = document.getElementById('discoverQuery');
 const discoverType = document.getElementById('discoverType');
 const discoverSort = document.getElementById('discoverSort');
+const discoverLimit = document.getElementById('discoverLimit');
 const discoverResults = document.getElementById('discoverResults');
 const discoverStatus = document.getElementById('discoverStatus');
 let discoverItems = [];
+
+const savedDiscoverType = localStorage.getItem('discoverType');
+const savedDiscoverSort = localStorage.getItem('discoverSort');
+const savedDiscoverLimit = localStorage.getItem('discoverLimit');
+if (savedDiscoverType) discoverType.value = savedDiscoverType;
+if (savedDiscoverSort) discoverSort.value = savedDiscoverSort;
+if (savedDiscoverLimit) discoverLimit.value = savedDiscoverLimit;
 
 function escapeHtml(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -53,7 +61,16 @@ function sortDiscoverResults(results) {
     return sorted;
 }
 
-discoverSort.addEventListener('change', () => renderDiscoverResults(sortDiscoverResults(discoverItems)));
+discoverSort.addEventListener('change', () => {
+    localStorage.setItem('discoverSort', discoverSort.value);
+    renderDiscoverResults(sortDiscoverResults(discoverItems));
+});
+
+discoverLimit.addEventListener('change', () => {
+    const limit = Math.max(1, Math.min(100, Number.parseInt(discoverLimit.value, 10) || 20));
+    discoverLimit.value = limit;
+    localStorage.setItem('discoverLimit', limit);
+});
 
 async function performDiscoverSearch() {
     const query = discoverQuery.value.trim();
@@ -61,7 +78,11 @@ async function performDiscoverSearch() {
     discoverStatus.textContent = 'Searching TMDb...';
     discoverResults.innerHTML = '';
     try {
-        const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}`);
+        const limit = Math.max(1, Math.min(100, Number.parseInt(discoverLimit.value, 10) || 20));
+        discoverLimit.value = limit;
+        localStorage.setItem('discoverLimit', limit);
+        localStorage.setItem('discoverType', discoverType.value);
+        const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}&limit=${limit}`);
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Search failed');
         discoverItems = data.results;
@@ -79,6 +100,7 @@ discoverForm.addEventListener('submit', event => {
 });
 
 discoverType.addEventListener('change', () => {
+    localStorage.setItem('discoverType', discoverType.value);
     if (discoverQuery.value.trim()) performDiscoverSearch();
 });
 

@@ -28,9 +28,10 @@
             </select>
             <select id="discoverSort" class="discover-sort" aria-label="Sort results">
                 <option value="relevance">Relevance</option>
-                <option value="oldest">Oldest → Latest</option>
-                <option value="latest">Latest → Oldest</option>
+                <option value="latest" selected>Latest First</option>
+                <option value="oldest">Oldest First</option>
             </select>
+            <input id="discoverLimit" class="discover-limit" type="number" min="1" max="100" value="20" aria-label="Number of results" title="Number of results" placeholder="20">
             <button type="submit" class="modal-btn modal-btn-blue">Search</button>
         </form>
 

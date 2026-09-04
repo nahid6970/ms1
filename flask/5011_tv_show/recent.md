@@ -4,17 +4,17 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb helpers, `/discover`, search/import APIs, duplicate detection, and whole-number TMDb 0–10 to app 1–5 rating conversion with legacy migration.
-- `templates/discover.html`: Added the unified movie/TV discovery page.
-- `static/discover.js`: Added search rendering, local add actions, sorting, and `Already Added` checkmarks.
+- `app.py`: Added TMDb helpers, `/discover`, paged search/import APIs, duplicate detection, and whole-number rating conversion.
+- `templates/discover.html`: Added unified discovery, result-count input, type selector, and sort selector.
+- `static/discover.js`: Added search rendering, local add actions, sorting, checkmarks, and remembered preferences.
 - `templates/index.html`, `templates/movies.html`: Added Discover buttons and original TMDb score display.
 - `templates/_settings_modal.html`: Added the masked TMDb API-key field.
 - `static/script.js`: Added TMDb key loading and saving through settings.
-- `static/style.css`: Added compact discovery controls, sorting layout, added-state, and TMDb score styling.
+- `static/style.css`: Added compact controls, sorting layout, added-state, TMDb score styling, and card alignment.
 
 # 3. Critical Context
 
-TMDb is metadata-only; adding content does not call Sonarr/Radarr. The key is stored in `C:\@delta\db\5011_tv_show\settings.json` as `tmdb_api_key`; requests run server-side. Movies use `movies.json`, shows use `data.json`, and catalogs are checked separately. Duplicate matching uses `tmdb_id`, then normalized title/year. App stars are whole-number 1–5; imported scores are rounded from 0–10 and preserved as `tmdb_rating`.
+TMDb is metadata-only; adding content does not call Sonarr/Radarr. The key is stored in `C:\@delta\db\5011_tv_show\settings.json` as `tmdb_api_key`; requests run server-side. Movies use `movies.json`, shows use `data.json`, and catalogs are checked separately. Discover remembers type, sort, and result count in localStorage; result count is capped at 100. App stars are whole-number 1–5; imported scores are rounded from 0–10 and preserved as `tmdb_rating`.
 
 # 4. Pending Task
 

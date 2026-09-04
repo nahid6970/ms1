@@ -422,6 +422,10 @@ def discover_page():
 def discover_search():
     query = request.args.get('q', '').strip()
     media_type = request.args.get('type', 'all').strip().lower()
+    try:
+        result_limit = max(1, min(100, int(request.args.get('limit', 20))))
+    except (TypeError, ValueError):
+        result_limit = 20
     if not query:
         return jsonify({'success': False, 'message': 'Enter a title to search'}), 400
 
@@ -429,9 +433,20 @@ def discover_search():
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
 
     endpoint = 'search/multi' if media_type == 'all' else f'search/{media_type}'
-    results, error = tmdb_request(endpoint, {'query': query, 'include_adult': 'false', 'language': 'en-US', 'page': 1})
-    if error:
-        return jsonify({'success': False, 'message': error}), 502
+    results = {'results': []}
+    pages_needed = (result_limit + 19) // 20
+    for page in range(1, pages_needed + 1):
+        page_results, error = tmdb_request(endpoint, {
+            'query': query,
+            'include_adult': 'false',
+            'language': 'en-US',
+            'page': page
+        })
+        if error:
+            return jsonify({'success': False, 'message': error}), 502
+        results['results'].extend(page_results.get('results', []))
+        if page >= page_results.get('total_pages', page) or len(results['results']) >= result_limit:
+            break
 
     normalized = []
     existing_catalog = {'movie': load_movies(), 'tv': load_data()}
@@ -443,7 +458,7 @@ def discover_search():
         item_type: {catalog_match_key(item.get('title'), item.get('year')) for item in items}
         for item_type, items in existing_catalog.items()
     }
-    for item in results.get('results', []):
+    for item in results.get('results', [])[:result_limit]:
         item_type = item.get('media_type', media_type)
         if item_type not in {'movie', 'tv'}:
             continue

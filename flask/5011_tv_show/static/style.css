@@ -660,6 +660,7 @@ select.modal-input {
 .discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 10px 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 0; }
 .discover-search-form input { flex: 1 1 auto; }
 .discover-search-form select { flex: 0 0 160px; }
+.discover-search-form .discover-limit { flex: 0 0 72px; padding-left: 10px; padding-right: 10px; }
 .discover-search-form button { flex: 0 0 92px; padding: 0 14px; border-radius: 0; }
 .discover-status { min-height: 22px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
 .discover-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
