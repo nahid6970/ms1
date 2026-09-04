@@ -24,7 +24,7 @@ Example links section (after table):
 
 ---
 
-## 3. Portals & Jobs Checked (Updated: 04 Sept 2026)
+## 3. Portals & Jobs Checked (Updated: 04 Sept 2026 — bdgovtjob.net checked)
 
 | Bank / Org | Post | Experience | Eligible? | Deadline |
 |---|---|---|---|---|
@@ -49,6 +49,10 @@ Example links section (after table):
 | Mutual Trust Bank | 5 posts | — | ❌ Expired | Expired |
 | National Bank | 1 post | — | ❌ Expired | Expired |
 | BRAC Bank | 7 posts | — | ❌ Expired | Expired |
+| BRRI | Scientific Officer / Scientific Assistant | Agri Science degree required | ❌ Not Finance | Sept 13, 2026 |
+| DC Office (various districts) | Support staff (clerk, office asst, etc.) | Not graduate officer posts | ❌ Below profile | Various Sept deadlines |
+| Zilla Parishad (Narsingdi, Tangail, Bhola etc.) | Various support posts | Not specified for Finance | ❌ Not suitable | Sept 6–23, 2026 |
+| Dhaka University | 6 posts (5 categories, post names unknown) | Unknown — need circular image | ⚠️ Need to check | Sept 13–15, Nov 2, 2026 |
 
 ---
 
@@ -69,3 +73,4 @@ Example links section (after table):
 | Check BIBM post details | Sept 23, 2026 | ⚠️ Verify eligibility |
 | Check EBL post details | Sept 12, 2026 | ⚠️ Verify eligibility |
 | Check Bangladesh Bank erecruitment for Finance/General Officer circular | Ongoing | 🔁 Periodic check |
+| Check Dhaka University post details (jobs.du.ac.bd) | Sept 13–15, Nov 2 | ⚠️ Verify post names |
