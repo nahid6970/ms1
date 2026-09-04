@@ -178,6 +178,19 @@ def tvmaze_request(path, params=None):
         return None, f'Unable to reach TVmaze: {error}'
 
 def tvmaze_show_for_catalog_item(show):
+    stored_tvmaze_id = show.get('tvmaze_id')
+    if stored_tvmaze_id:
+        candidate, error = tvmaze_request(f"shows/{int(stored_tvmaze_id)}")
+        if candidate and not error:
+            return candidate, None
+
+    for external_key in ('imdb', 'tvdb'):
+        external_id = (show.get('external_ids') or {}).get(external_key)
+        if external_id:
+            candidate, error = tvmaze_request('lookup/shows', {external_key: external_id})
+            if candidate and not error:
+                return candidate, None
+
     title = str(show.get('title', '')).strip()
     queries = [title]
     for separator in (':', ' - ', ' – '):
@@ -545,6 +558,14 @@ def run_scheduled_episode_updates():
         if error:
             continue
         merge_tvmaze_episodes(show, tvmaze_show, episodes)
+        tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+        if tmdb_details and not tmdb_error:
+            tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
+            if tmdb_image:
+                show['cover_image'] = tmdb_image
+            show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+        else:
+            show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
         show['episode_source'] = 'tvmaze'
         show['episodes_updated_at'] = now.isoformat()
         show['episode_update_last_run'] = today
@@ -750,6 +771,14 @@ def update_show_episodes(show_id):
         return jsonify({'success': False, 'message': error}), 502
 
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+    if tmdb_details and not tmdb_error:
+        tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
+        if tmdb_image:
+            show['cover_image'] = tmdb_image
+        show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+    else:
+        show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
     show['episode_source'] = 'tvmaze'
     show['episodes_updated_at'] = datetime.now().isoformat()
     save_data(shows)
