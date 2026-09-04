@@ -1433,6 +1433,48 @@ body::before {
     .show-grid { padding-top: 22px; }
 }
 
+/* Responsive library toolbar: wrap controls instead of creating a horizontal scrollbar. */
+@media (max-width: 1040px) {
+    .app-header-inner {
+        display: flex;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .top-center-controls {
+        display: flex;
+        flex: 1 1 100%;
+        width: 100%;
+        min-width: 0;
+        overflow: visible;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .top-center-controls .search-form {
+        flex: 1 1 180px;
+        min-width: 140px;
+    }
+
+    .top-center-controls .search-form input[type="text"] {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    .sticky-controls-wrapper { padding: 10px; }
+    .library-nav { width: 100%; justify-content: flex-start; }
+    .top-center-controls { gap: 6px; padding: 0; }
+    .top-center-controls .search-form {
+        order: -1;
+        flex: 1 1 100%;
+        min-width: 0;
+        margin: 0 0 2px;
+    }
+    .top-center-controls .search-form input[type="text"],
+    .top-center-controls .search-form input[type="text"]:focus { width: 100%; }
+}
+
 /* Missing episodes: a quiet, utility-style list instead of a glossy dashboard modal. */
 #scanMissingModal {
     background: rgba(0, 0, 0, 0.76);
