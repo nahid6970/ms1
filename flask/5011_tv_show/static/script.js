@@ -257,9 +257,10 @@ function isEpisodeCountedAsReleased(episode) {
 function updateShowProgressBadge(showCard, episodes) {
     const countEl = showCard?.querySelector('.episode-count');
     if (!countEl) return;
-    const total = episodes.length;
-    const watchedCount = episodes.filter(episode => episode.watched).length;
-    const releasedCount = episodes.filter(isEpisodeCountedAsReleased).length;
+    const releasedEpisodes = episodes.filter(isEpisodeCountedAsReleased);
+    const total = releasedEpisodes.length;
+    const watchedCount = releasedEpisodes.filter(episode => episode.watched).length;
+    const releasedCount = total;
     const releasedWatched = releasedCount > 0 && episodes
         .filter(isEpisodeCountedAsReleased)
         .every(episode => episode.watched);

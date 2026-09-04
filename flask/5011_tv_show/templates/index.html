@@ -118,7 +118,7 @@
                             {% endif %}
                         </div>
                         <div class="card-info">
-                            <p class="episode-count {% if show.watched_count == 0 %}no-episodes-watched{% elif show.watched_count >= show.released_count and show.released_count > 0 %}all-episodes-watched{% else %}some-episodes-watched{% endif %}">{{ show.watched_count }}/{{ show.total_count }}</p>
+                            <p class="episode-count {% if show.watched_count == 0 %}no-episodes-watched{% elif show.watched_count >= show.released_count and show.released_count > 0 %}all-episodes-watched{% else %}some-episodes-watched{% endif %}">{{ show.watched_count }}/{{ show.released_count }}</p>
                             <p class="last-episode-added">{{ show.last_episode_added }}</p>
                             {% if show.tmdb_rating %}<p class="tmdb-rating">TMDb {{ show.tmdb_rating }}/10</p>{% endif %}
                             <p class="show-status {% if show.status == 'Ended' %}status-ended{% else %}status-continuing{% endif %}">{{ show.status or 'Continuing' }}</p>
