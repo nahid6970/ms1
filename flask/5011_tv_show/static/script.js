@@ -197,6 +197,13 @@ function formatEpisodeAirDate(airDate) {
     });
 }
 
+function isReleasedAndUnwatched(episode) {
+    if (episode.watched || !episode.air_date) return false;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return String(episode.air_date) < today;
+}
+
 function renderEpisodes(episodes, showId) {
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
@@ -212,7 +219,7 @@ function renderEpisodes(episodes, showId) {
     
     episodes.forEach(ep => {
         const li = document.createElement('li');
-        li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
+        li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}${isReleasedAndUnwatched(ep) ? ' episode-released-unwatched' : ''}`;
 
         const episodeNumber = ep.season_number != null && ep.episode_number != null
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
