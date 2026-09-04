@@ -1790,6 +1790,8 @@ body::before {
     border-bottom: 1px solid #293a53;
     padding-bottom: 18px !important;
 }
+#episodesModal .episode-modal-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: nowrap; }
+#episodesModal .episode-modal-controls > * { margin: 0 !important; align-self: center; vertical-align: middle; }
 #episodesModal .modal-title {
     min-width: 0;
     margin: 0;
@@ -1821,6 +1823,20 @@ body::before {
     color: #dbeafe;
     font-size: 0.8rem;
 }
+#episodesModal .episode-bulk-btn {
+    height: 36px;
+    padding: 0 11px;
+    border: 1px solid #3b506c;
+    border-radius: 4px;
+    background: #172337;
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+#episodesModal .episode-bulk-btn:hover { background: #263d59; color: #fff; border-color: #5b7da4; }
+#episodesModal .episode-bulk-btn { width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+#episodesModal .episode-bulk-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #episodesModal .episodes-modal-content .episode-list {
     margin-top: 16px;
     padding: 8px;
@@ -1841,6 +1857,8 @@ body::before {
 }
 #episodesModal .episode-item:last-child { margin-bottom: 0; }
 #episodesModal .episode-item:hover { background: #1d3049; border-color: #3f5d80; }
+#episodesModal .episode-item.episode-watched { background: rgba(34, 197, 94, 0.2); border-color: rgba(74, 222, 128, 0.55); }
+#episodesModal .episode-item.episode-watched:hover { background: rgba(34, 197, 94, 0.28); }
 #episodesModal .episode-main-info { gap: 12px; }
 #episodesModal .episode-number { color: #7dd3fc; font-size: 0.75rem; }
 #episodesModal .episode-title { color: #e5edf8; font-size: 0.95rem; }

@@ -235,6 +235,18 @@ function renderEpisodes(episodes, showId) {
         ul.appendChild(li);
     });
     listContainer.appendChild(ul);
+    updateBulkEpisodeButton(episodes);
+}
+
+function updateBulkEpisodeButton(episodes) {
+    const button = document.getElementById('toggleAllEpisodes');
+    if (!button) return;
+    const allWatched = episodes.length > 0 && episodes.every(episode => episode.watched);
+    button.title = allWatched ? 'Mark all episodes as unwatched' : 'Mark all episodes as watched';
+    button.setAttribute('aria-label', button.title);
+    button.innerHTML = allWatched
+        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="8" y1="8" x2="16" y2="16"></line><line x1="16" y1="8" x2="8" y2="16"></line></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><polyline points="7 12 10 15 17 8"></polyline></svg>';
 }
 
 function updateSortButtonUI(sortType, sortOrder) {
@@ -763,6 +775,42 @@ document.addEventListener('DOMContentLoaded', () => {
         sortOrderSelect.addEventListener('change', saveEpisodeSort);
     }
 
+    async function setAllEpisodesWatched(watched) {
+        if (!currentShowIdForEpisodes) return;
+        try {
+            const response = await fetch(`/api/show/${currentShowIdForEpisodes}/episodes/watched`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ watched })
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update episodes');
+            currentEpisodes = data.episodes;
+            renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+
+            const showCard = document.querySelector(`.show-card[data-show-id="${currentShowIdForEpisodes}"]`);
+            const countEl = showCard?.querySelector('.episode-count');
+            if (countEl) {
+                const total = currentEpisodes.length;
+                const watchedCount = watched ? total : 0;
+                countEl.textContent = `${watchedCount}/${total}`;
+                countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
+                countEl.classList.add(watchedCount === 0 ? 'no-episodes-watched' : watchedCount === total && total > 0 ? 'all-episodes-watched' : 'some-episodes-watched');
+                showCard.classList.toggle('completed', watchedCount === total && total > 0);
+                showCard.classList.toggle('ended-completed', watchedCount === total && total > 0 && showCard.dataset.status === 'Ended');
+            }
+        } catch (error) {
+            console.error('Error updating all episodes:', error);
+            alert(error.message);
+        }
+    }
+
+    const toggleAllEpisodes = document.getElementById('toggleAllEpisodes');
+    if (toggleAllEpisodes) toggleAllEpisodes.addEventListener('click', () => {
+        const allWatched = currentEpisodes.length > 0 && currentEpisodes.every(episode => episode.watched);
+        setAllEpisodesWatched(!allWatched);
+    });
+
     // Helper functions for popup interactions
     window.toggleWatched = function(showId, episodeId, checkbox) {
         fetch(`/toggle_watched/${showId}/${episodeId}`)
@@ -772,15 +820,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Update global state
                     const ep = currentEpisodes.find(e => e.id === episodeId);
                     if (ep) ep.watched = data.watched;
+                    updateBulkEpisodeButton(currentEpisodes);
 
                     // 1. Update episode item in modal
                     const li = checkbox.closest('.episode-item');
                     if (data.watched) {
                         li.classList.add('episode-watched');
-                        li.style.background = 'rgba(29, 185, 84, 0.1)';
                     } else {
                         li.classList.remove('episode-watched');
-                        li.style.background = '#2a2a2a';
                     }
 
                     // 2. Update show card on main page

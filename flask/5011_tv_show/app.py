@@ -944,6 +944,19 @@ def toggle_watched(show_id, episode_id):
             return jsonify({'success': True, 'watched': episode['watched']})
     return jsonify({'success': False, 'message': 'Episode not found'}), 404
 
+@app.route('/api/show/<int:show_id>/episodes/watched', methods=['POST'])
+def set_all_episodes_watched(show_id):
+    data = request.get_json() or {}
+    watched = bool(data.get('watched'))
+    shows = load_data()
+    show = next((item for item in shows if item.get('id') == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+    for episode in show.get('episodes', []):
+        episode['watched'] = watched
+    save_data(shows)
+    return jsonify({'success': True, 'episodes': show.get('episodes', [])})
+
 @app.route('/scan_manual/<int:show_id>')
 def scan_manual(show_id):
     scan_and_update_episodes()
