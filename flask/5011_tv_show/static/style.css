@@ -186,7 +186,7 @@ body {
     width: 300px;
     background: #222;
     border: 1px solid #333;
-    border-radius: 15px;
+    border-radius: 0;
     overflow: hidden;
     transition: all 0.3s ease;
     cursor: pointer;
@@ -387,7 +387,7 @@ body {
 .episode-list {
     background: #222;
     padding: 30px;
-    border-radius: 15px;
+    border-radius: 0;
     border: 1px solid #333;
 }
 
