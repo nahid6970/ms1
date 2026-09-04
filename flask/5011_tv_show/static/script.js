@@ -77,6 +77,7 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowCoverImage').value = show.cover_image;
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
+    document.getElementById('editShowEpisodeUpdateTime').value = show.episode_update_time || '';
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
 
     // Set the rating radio button
@@ -187,6 +188,36 @@ function escapeEpisodeText(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[character]));
+}
+
+async function openScheduledUpdatesModal() {
+    const modal = document.getElementById('scheduledUpdatesModal');
+    const list = document.getElementById('scheduledUpdatesList');
+    if (!modal || !list) return;
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+    list.innerHTML = '<p class="schedule-empty">Loading schedules...</p>';
+    try {
+        const response = await fetch('/api/show-schedules');
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load schedules');
+        list.innerHTML = data.schedules.map(schedule => `
+            <div class="scheduled-update-row">
+                <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
+                ${schedule.update_time
+                    ? `<span class="scheduled-update-time">${schedule.update_time}</span>`
+                    : '<span class="scheduled-update-disabled">Not scheduled</span>'}
+            </div>
+        `).join('') || '<p class="schedule-empty">No shows found.</p>';
+    } catch (error) {
+        list.innerHTML = `<p class="schedule-empty">${escapeEpisodeText(error.message)}</p>`;
+    }
+}
+
+function closeScheduledUpdatesModal() {
+    const modal = document.getElementById('scheduledUpdatesModal');
+    if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
 }
 
 function formatEpisodeAirDate(airDate) {
@@ -1047,6 +1078,7 @@ window.onclick = function(event) {
     const hiddenShowsModal = document.getElementById('hiddenShowsModal');
     const scanMissingModal = document.getElementById('scanMissingModal');
     const episodesModal = document.getElementById('episodesModal');
+    const scheduledUpdatesModal = document.getElementById('scheduledUpdatesModal');
 
     if (event.target == addModal) {
         addModal.style.display = 'none';
@@ -1066,6 +1098,8 @@ window.onclick = function(event) {
     } else if (event.target == episodesModal) {
         episodesModal.style.display = 'none';
         document.body.classList.remove('modal-open');
+    } else if (event.target == scheduledUpdatesModal) {
+        closeScheduledUpdatesModal();
     }
 }
 

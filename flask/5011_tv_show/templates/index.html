@@ -18,6 +18,9 @@
             <button onclick="openAddShowModal()" class="add-button" title="Add Show">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
+            <button onclick="openScheduledUpdatesModal()" class="add-button schedule-button" title="Scheduled episode updates" aria-label="Scheduled episode updates">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><circle cx="12" cy="15" r="3"></circle><path d="M12 13.5v1.7l1.1.7"></path></svg>
+            </button>
             <a href="{{ url_for('discover_page') }}" class="add-button discover-button" title="Discover shows and movies">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></svg>
             </a>
@@ -194,6 +197,9 @@
                 <input type="text" id="editShowDirectoryPath" name="directory_path" class="modal-input">
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
                 <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
+                <label for="editShowEpisodeUpdateTime">Daily Episode Update:</label>
+                <input type="time" id="editShowEpisodeUpdateTime" name="episode_update_time" class="modal-input">
+                <small class="modal-help">Leave empty to disable automatic TVmaze updates.</small>
                 <label for="editShowStatus">Status:</label>
                 <select id="editShowStatus" name="status" class="modal-input">
                     <option value="Continuing">Continuing</option>
@@ -208,6 +214,17 @@
                 </div><br>
                 <button type="submit" class="modal-btn modal-btn-green modal-btn-block">Save Changes</button>
             </form>
+        </div>
+    </div>
+
+    <div id="scheduledUpdatesModal" class="modal">
+        <div class="modal-content scheduled-updates-content">
+            <span class="close" onclick="closeScheduledUpdatesModal()">&times;</span>
+            <h2 class="modal-title">Scheduled Episode Updates</h2>
+            <p class="modal-help">Shows are refreshed daily at their saved local time.</p>
+            <div id="scheduledUpdatesList" class="scheduled-updates-list">
+                <p>Loading schedules...</p>
+            </div>
         </div>
     </div>
 

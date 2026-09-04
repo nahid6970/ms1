@@ -517,9 +517,38 @@ def sync_radarr_movies():
     except requests.exceptions.RequestException as e:
         return 0, 0, f'Network error communicating with Radarr: {str(e)}'
 
+def run_scheduled_episode_updates():
+    """Refresh shows whose daily update time matches the local server time."""
+    now = datetime.now()
+    today = now.date().isoformat()
+    current_time = now.strftime('%H:%M')
+    shows = load_data()
+    changed = False
+
+    for show in shows:
+        if show.get('episode_update_time') != current_time:
+            continue
+        if show.get('episode_update_last_run') == today:
+            continue
+        tvmaze_show, error = tvmaze_show_for_catalog_item(show)
+        if error:
+            continue
+        episodes, error = tvmaze_request(f"shows/{tvmaze_show['id']}/episodes", {'specials': 1})
+        if error:
+            continue
+        merge_tvmaze_episodes(show, tvmaze_show, episodes)
+        show['episode_source'] = 'tvmaze'
+        show['episodes_updated_at'] = now.isoformat()
+        show['episode_update_last_run'] = today
+        changed = True
+
+    if changed:
+        save_data(shows)
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=scan_and_add_missing_shows, trigger="interval", hours=1)
 scheduler.add_job(func=sync_radarr_movies, trigger="interval", hours=1)
+scheduler.add_job(func=run_scheduled_episode_updates, trigger="interval", minutes=1, id='scheduled_episode_updates', replace_existing=True, max_instances=1)
 scheduler.start()
 
 @app.route('/cached_image/<filename>')
@@ -529,6 +558,17 @@ def cached_image(filename):
 @app.route('/discover')
 def discover_page():
     return render_template('discover.html')
+
+@app.route('/api/show-schedules')
+def show_schedules():
+    schedules = [{
+        'show_id': show.get('id'),
+        'title': show.get('title', 'Untitled'),
+        'update_time': show.get('episode_update_time') or '',
+        'last_run': show.get('episode_update_last_run') or ''
+    } for show in load_data()]
+    schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
+    return jsonify({'success': True, 'schedules': schedules})
 
 @app.route('/api/discover/search')
 def discover_search():
@@ -859,6 +899,7 @@ def edit_show(show_id):
         show['rating'] = request.form.get('rating', None) # Update rating field
         show['status'] = request.form.get('status', 'Continuing') # Update status field
         show['sonarr_url'] = request.form.get('sonarr_url', '')
+        show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
         save_data(shows)
         return redirect(url_for('index'))
     else:
