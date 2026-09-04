@@ -1828,6 +1828,7 @@ body::before {
     border: 1px solid #273951;
     border-radius: 4px;
 }
+#episodesModal .episode-list ul { margin: 0; }
 #episodesModal .episode-item {
     min-height: 58px;
     box-sizing: border-box;
