@@ -625,7 +625,35 @@ def discover_search():
     if preset == 'search':
         sources = [('search/multi' if media_type == 'all' else f'search/{media_type}', {}, None)]
     elif preset == 'trending_month':
-        sources = [(f'trending/{media_type}/month', {}, None)]
+        # TMDb's trending endpoint only supports day/week windows. Build a
+        # monthly view from this month's releases and air dates instead.
+        today = datetime.now().date()
+        month_params = {'sort_by': 'popularity.desc'}
+        if media_type == 'all':
+            sources = [
+                ('discover/movie', {
+                    **month_params,
+                    'primary_release_date.gte': today.replace(day=1).isoformat(),
+                    'primary_release_date.lte': today.isoformat()
+                }, 'movie'),
+                ('discover/tv', {
+                    **month_params,
+                    'first_air_date.gte': today.replace(day=1).isoformat(),
+                    'first_air_date.lte': today.isoformat()
+                }, 'tv')
+            ]
+        elif media_type == 'movie':
+            sources = [('discover/movie', {
+                **month_params,
+                'primary_release_date.gte': today.replace(day=1).isoformat(),
+                'primary_release_date.lte': today.isoformat()
+            }, 'movie')]
+        else:
+            sources = [('discover/tv', {
+                **month_params,
+                'first_air_date.gte': today.replace(day=1).isoformat(),
+                'first_air_date.lte': today.isoformat()
+            }, 'tv')]
     elif media_type == 'all':
         if preset == 'top_rated':
             sources = [('movie/top_rated', {}, 'movie'), ('tv/top_rated', {}, 'tv')]
