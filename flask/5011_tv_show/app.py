@@ -37,6 +37,10 @@ os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
 def load_settings():
     default_settings = {
         "tmdb_api_key": "",
+        "default_shows_sort": "title",
+        "default_shows_order": "asc",
+        "default_movies_sort": "title",
+        "default_movies_order": "asc",
         "sonarr_url": "http://192.168.0.101:8989",
         "sonarr_api_key": "",
         "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr",
@@ -706,8 +710,9 @@ def update_show_episodes(show_id):
 
 @app.route('/')
 def index():
-    sort_by = request.args.get('sort_by', 'title')
-    order = request.args.get('order', 'asc')
+    settings = load_settings()
+    sort_by = request.args.get('sort_by') or settings.get('default_shows_sort', 'title')
+    order = request.args.get('order') or settings.get('default_shows_order', 'asc')
     query = request.args.get('query')
 
     shows = load_data()
@@ -780,8 +785,9 @@ def index():
 
 @app.route('/movies')
 def movies_page():
-    sort_by = request.args.get('sort_by', 'title')
-    order = request.args.get('order', 'asc')
+    settings = load_settings()
+    sort_by = request.args.get('sort_by') or settings.get('default_movies_sort', 'title')
+    order = request.args.get('order') or settings.get('default_movies_order', 'asc')
     query = request.args.get('query')
 
     movies = load_movies()
@@ -806,7 +812,6 @@ def movies_page():
     elif sort_by == 'added':
         movies.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
 
-    settings = load_settings()
     next_order = 'desc' if order == 'asc' else 'asc'
 
     return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
@@ -1088,6 +1093,10 @@ def api_settings():
         data = request.json or {}
         settings = load_settings()
         settings['tmdb_api_key'] = data.get('tmdb_api_key', settings.get('tmdb_api_key', ''))
+        settings['default_shows_sort'] = data.get('default_shows_sort', settings.get('default_shows_sort', 'title'))
+        settings['default_shows_order'] = data.get('default_shows_order', settings.get('default_shows_order', 'asc'))
+        settings['default_movies_sort'] = data.get('default_movies_sort', settings.get('default_movies_sort', 'title'))
+        settings['default_movies_order'] = data.get('default_movies_order', settings.get('default_movies_order', 'asc'))
         settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
         settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
         settings['root_shows_folder'] = data.get('root_shows_folder', settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr"))

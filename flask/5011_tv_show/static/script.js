@@ -392,6 +392,10 @@ async function openSettingsModal() {
         const settings = await response.json();
         
         const tmdbKeyInput = document.getElementById('tmdbApiKey');
+        const defaultShowsSortInput = document.getElementById('defaultShowsSort');
+        const defaultShowsOrderInput = document.getElementById('defaultShowsOrder');
+        const defaultMoviesSortInput = document.getElementById('defaultMoviesSort');
+        const defaultMoviesOrderInput = document.getElementById('defaultMoviesOrder');
         const sonarrUrlInput = document.getElementById('sonarrApiUrl');
         const sonarrKeyInput = document.getElementById('sonarrApiKey');
         const showsFolderInput = document.getElementById('rootShowsFolder');
@@ -400,6 +404,10 @@ async function openSettingsModal() {
         const moviesFolderInput = document.getElementById('rootMoviesFolder');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
+        if (defaultShowsSortInput) defaultShowsSortInput.value = settings.default_shows_sort || 'title';
+        if (defaultShowsOrderInput) defaultShowsOrderInput.value = settings.default_shows_order || 'asc';
+        if (defaultMoviesSortInput) defaultMoviesSortInput.value = settings.default_movies_sort || 'title';
+        if (defaultMoviesOrderInput) defaultMoviesOrderInput.value = settings.default_movies_order || 'asc';
         if (sonarrUrlInput) sonarrUrlInput.value = settings.sonarr_url || 'http://192.168.0.101:8989';
         if (sonarrKeyInput) sonarrKeyInput.value = settings.sonarr_api_key || '';
         if (showsFolderInput) showsFolderInput.value = settings.root_shows_folder || 'C:\\Users\\nahid\\Downloads\\@sonarr';
@@ -545,6 +553,10 @@ async function syncRadarrPaths(button) {
 
 async function saveSettings() {
     const tmdbApiKey = document.getElementById('tmdbApiKey').value.trim();
+    const defaultShowsSort = document.getElementById('defaultShowsSort').value;
+    const defaultShowsOrder = document.getElementById('defaultShowsOrder').value;
+    const defaultMoviesSort = document.getElementById('defaultMoviesSort').value;
+    const defaultMoviesOrder = document.getElementById('defaultMoviesOrder').value;
     const sonarrUrl = document.getElementById('sonarrApiUrl').value;
     const sonarrApiKey = document.getElementById('sonarrApiKey').value;
     const showsFolder = document.getElementById('rootShowsFolder').value;
@@ -560,6 +572,10 @@ async function saveSettings() {
             },
             body: JSON.stringify({
                 tmdb_api_key: tmdbApiKey,
+                default_shows_sort: defaultShowsSort,
+                default_shows_order: defaultShowsOrder,
+                default_movies_sort: defaultMoviesSort,
+                default_movies_order: defaultMoviesOrder,
                 sonarr_url: sonarrUrl,
                 sonarr_api_key: sonarrApiKey,
                 root_shows_folder: showsFolder,
