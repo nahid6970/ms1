@@ -606,6 +606,7 @@ def show_schedules():
 def discover_search():
     query = request.args.get('q', '').strip()
     media_type = request.args.get('type', 'all').strip().lower()
+    preset = request.args.get('preset', 'search').strip().lower()
     try:
         result_limit = max(1, min(100, int(request.args.get('limit', 20))))
     except (TypeError, ValueError):
@@ -614,33 +615,57 @@ def discover_search():
         result_page = max(1, int(request.args.get('page', 1)))
     except (TypeError, ValueError):
         result_page = 1
-    if not query:
-        return jsonify({'success': False, 'message': 'Enter a title to search'}), 400
-
     if media_type not in {'all', 'movie', 'tv'}:
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
+    if preset not in {'search', 'popular', 'top_rated', 'trending_month'}:
+        return jsonify({'success': False, 'message': 'Invalid discovery mode'}), 400
+    if preset == 'search' and not query:
+        return jsonify({'success': False, 'message': 'Enter a title or choose a discovery mode'}), 400
 
-    endpoint = 'search/multi' if media_type == 'all' else f'search/{media_type}'
+    if preset == 'search':
+        sources = [('search/multi' if media_type == 'all' else f'search/{media_type}', {}, None)]
+    elif preset == 'trending_month':
+        sources = [(f'trending/{media_type}/month', {}, None)]
+    elif media_type == 'all':
+        if preset == 'top_rated':
+            sources = [('movie/top_rated', {}, 'movie'), ('tv/top_rated', {}, 'tv')]
+        else:
+            sources = [
+                ('discover/movie', {'sort_by': 'popularity.desc'}, 'movie'),
+                ('discover/tv', {'sort_by': 'popularity.desc'}, 'tv')
+            ]
+    elif preset == 'top_rated':
+        sources = [(f'{media_type}/top_rated', {}, media_type)]
+    else:
+        sources = [(f'discover/{media_type}', {'sort_by': 'popularity.desc'}, media_type)]
+
     results = {'results': [], 'total_results': 0, 'total_pages': 0}
     start_index = (result_page - 1) * result_limit
-    first_tmdb_page = (start_index // 20) + 1
-    last_tmdb_page = ((start_index + result_limit - 1) // 20) + 1
+    source_page_size = 20 * len(sources)
+    first_tmdb_page = (start_index // source_page_size) + 1
+    last_tmdb_page = ((start_index + result_limit - 1) // source_page_size) + 1
     for tmdb_page in range(first_tmdb_page, last_tmdb_page + 1):
-        page_results, error = tmdb_request(endpoint, {
-            'query': query,
-            'include_adult': 'false',
-            'language': 'en-US',
-            'page': tmdb_page
-        })
-        if error:
-            return jsonify({'success': False, 'message': error}), 502
-        results['results'].extend(page_results.get('results', []))
-        results['total_results'] = page_results.get('total_results', 0)
-        results['total_pages'] = page_results.get('total_pages', 0)
-        if tmdb_page >= page_results.get('total_pages', tmdb_page):
-            break
+        for endpoint, source_params, forced_type in sources:
+            params = {
+                **source_params,
+                'include_adult': 'false',
+                'language': 'en-US',
+                'page': tmdb_page
+            }
+            if preset == 'search':
+                params['query'] = query
+            page_results, error = tmdb_request(endpoint, params)
+            if error:
+                return jsonify({'success': False, 'message': error}), 502
+            for item in page_results.get('results', []):
+                if forced_type and 'media_type' not in item:
+                    item['media_type'] = forced_type
+            results['results'].extend(page_results.get('results', []))
+            if tmdb_page == first_tmdb_page:
+                results['total_results'] += page_results.get('total_results', 0)
+            results['total_pages'] = max(results['total_pages'], page_results.get('total_pages', 0))
 
-    local_start = start_index % 20
+    local_start = start_index % source_page_size
     page_items = results['results'][local_start:local_start + result_limit]
 
     normalized = []
