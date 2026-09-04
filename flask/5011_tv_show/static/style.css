@@ -1879,7 +1879,8 @@ body::before {
 }
 #episodesModal .close:hover { background: #22334a; color: #fff; }
 #episodesModal .episode-sort-select {
-    min-width: 116px;
+    width: 92px;
+    min-width: 0;
     height: 36px;
     border: 1px solid #3b506c;
     border-radius: 4px;
@@ -1887,6 +1888,7 @@ body::before {
     color: #dbeafe;
     font-size: 0.8rem;
 }
+#episodesModal #episodeSortOrder { width: 82px; }
 #episodesModal .episode-bulk-btn {
     height: 36px;
     padding: 0 11px;
