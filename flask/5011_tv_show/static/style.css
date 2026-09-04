@@ -1899,6 +1899,7 @@ body::before {
     white-space: nowrap;
 }
 #episodesModal .episode-bulk-btn:hover { background: #263d59; color: #fff; border-color: #5b7da4; }
+#episodesModal .episode-refresh-btn:hover { background: #1f7052; border-color: #4ade80; }
 #episodesModal .episode-bulk-btn { width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 #episodesModal .episode-bulk-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #episodesModal .episodes-modal-content .episode-list {

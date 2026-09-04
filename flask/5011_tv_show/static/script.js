@@ -824,6 +824,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setAllEpisodesWatched(!allWatched);
     });
 
+    const refreshOpenEpisodes = document.getElementById('refreshOpenEpisodes');
+    if (refreshOpenEpisodes) refreshOpenEpisodes.addEventListener('click', event => {
+        refreshEpisodesInModal(event, refreshOpenEpisodes);
+    });
+
     // Helper functions for popup interactions
     window.toggleWatched = function(showId, episodeId, checkbox) {
         fetch(`/toggle_watched/${showId}/${episodeId}`)
@@ -1067,6 +1072,34 @@ async function updateShowEpisodes(event, showId, btn) {
         if (!response.ok || !data.success) throw new Error(data.message || 'Episode update failed');
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
         alert(data.message);
+    } catch (error) {
+        btn.innerHTML = originalHTML;
+        alert(error.message);
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function refreshEpisodesInModal(event, btn) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    if (!currentShowIdForEpisodes) return;
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="discover-loading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>';
+    try {
+        const response = await fetch(`/api/show/${currentShowIdForEpisodes}/episodes/update`, {method: 'POST'});
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Episode update failed');
+        const showResponse = await fetch(`/edit_show/${currentShowIdForEpisodes}`);
+        const show = await showResponse.json();
+        currentEpisodes = show.episodes || [];
+        updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
+        renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        setTimeout(() => { if (btn.disabled) btn.innerHTML = originalHTML; }, 1400);
     } catch (error) {
         btn.innerHTML = originalHTML;
         alert(error.message);
