@@ -183,9 +183,12 @@ body {
 }
 
 .library-card-title {
+    position: static;
     display: -webkit-box;
-    min-height: 42px;
+    height: auto;
+    min-height: 0;
     box-sizing: border-box;
+    max-height: 58px;
     padding: 10px 12px 8px;
     align-items: center;
     justify-content: center;
@@ -198,6 +201,26 @@ body {
     text-overflow: ellipsis;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    background: #1c1c1c;
+}
+
+.show-card .stars-container,
+.movie-card .stars-container {
+    margin-top: 0;
+}
+
+.show-card,
+.movie-card {
+    display: flex;
+    flex-direction: column;
+    height: 508px;
+}
+
+.show-card .img-wrapper,
+.movie-card .img-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    aspect-ratio: auto;
 }
 
 .show-card {
