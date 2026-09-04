@@ -662,7 +662,10 @@ select.modal-input {
 .discover-search-form select { flex: 0 0 160px; }
 .discover-search-form .discover-limit { flex: 0 0 72px; padding-left: 10px; padding-right: 10px; }
 .discover-search-form button { flex: 0 0 92px; padding: 0 14px; border-radius: 0; }
-.discover-status { min-height: 22px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
+.discover-status { min-height: 22px; padding-top: 18px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
+.discover-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 6px; color: #aab7c8; }
+.discover-pagination[hidden] { display: none; }
+.discover-pagination .modal-btn { min-width: 88px; height: 36px; padding: 0 12px; border-radius: 0; }
 .discover-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
 .discover-card { display: flex; flex-direction: column; min-height: 0; padding-bottom: 10px; overflow: hidden; background: #1c1c1c; border: 1px solid #333; border-radius: 0; }
 .discover-card-title { width: 100%; min-height: 2.7em; box-sizing: border-box; padding: 10px 14px 4px; margin: 0; font-size: 1.1rem; line-height: 1.35; display: flex; align-items: center; justify-content: center; text-align: center; }

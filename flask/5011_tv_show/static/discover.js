@@ -5,7 +5,12 @@ const discoverSort = document.getElementById('discoverSort');
 const discoverLimit = document.getElementById('discoverLimit');
 const discoverResults = document.getElementById('discoverResults');
 const discoverStatus = document.getElementById('discoverStatus');
+const discoverPagination = document.getElementById('discoverPagination');
+const discoverPrevious = document.getElementById('discoverPrevious');
+const discoverNext = document.getElementById('discoverNext');
+const discoverPageLabel = document.getElementById('discoverPageLabel');
 let discoverItems = [];
+let discoverPage = 1;
 
 const savedDiscoverType = localStorage.getItem('discoverType');
 const savedDiscoverSort = localStorage.getItem('discoverSort');
@@ -61,6 +66,13 @@ function sortDiscoverResults(results) {
     return sorted;
 }
 
+function updateDiscoverPagination(data) {
+    discoverPagination.hidden = !(data.has_previous || data.has_next);
+    discoverPrevious.disabled = !data.has_previous;
+    discoverNext.disabled = !data.has_next;
+    discoverPageLabel.textContent = `Page ${data.page}`;
+}
+
 discoverSort.addEventListener('change', () => {
     localStorage.setItem('discoverSort', discoverSort.value);
     renderDiscoverResults(sortDiscoverResults(discoverItems));
@@ -72,7 +84,7 @@ discoverLimit.addEventListener('change', () => {
     localStorage.setItem('discoverLimit', limit);
 });
 
-async function performDiscoverSearch() {
+async function performDiscoverSearch(page = 1) {
     const query = discoverQuery.value.trim();
     if (!query) return;
     discoverStatus.textContent = 'Searching TMDb...';
@@ -82,15 +94,18 @@ async function performDiscoverSearch() {
         discoverLimit.value = limit;
         localStorage.setItem('discoverLimit', limit);
         localStorage.setItem('discoverType', discoverType.value);
-        const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}&limit=${limit}`);
+        discoverPage = page;
+        const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}&limit=${limit}&page=${page}`);
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Search failed');
         discoverItems = data.results;
-        discoverStatus.textContent = `${data.results.length} result${data.results.length === 1 ? '' : 's'} found`;
+        discoverStatus.textContent = `${data.results.length} result${data.results.length === 1 ? '' : 's'} shown of ${data.total_results} found`;
         renderDiscoverResults(sortDiscoverResults(discoverItems));
+        updateDiscoverPagination(data);
     } catch (error) {
         discoverStatus.textContent = error.message;
         discoverResults.innerHTML = '';
+        discoverPagination.hidden = true;
     }
 }
 
@@ -101,8 +116,11 @@ discoverForm.addEventListener('submit', event => {
 
 discoverType.addEventListener('change', () => {
     localStorage.setItem('discoverType', discoverType.value);
-    if (discoverQuery.value.trim()) performDiscoverSearch();
+    if (discoverQuery.value.trim()) performDiscoverSearch(1);
 });
+
+discoverPrevious.addEventListener('click', () => performDiscoverSearch(discoverPage - 1));
+discoverNext.addEventListener('click', () => performDiscoverSearch(discoverPage + 1));
 
 discoverResults.addEventListener('click', async event => {
     const button = event.target.closest('.discover-add-button');

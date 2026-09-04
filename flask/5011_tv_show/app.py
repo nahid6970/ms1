@@ -426,6 +426,10 @@ def discover_search():
         result_limit = max(1, min(100, int(request.args.get('limit', 20))))
     except (TypeError, ValueError):
         result_limit = 20
+    try:
+        result_page = max(1, int(request.args.get('page', 1)))
+    except (TypeError, ValueError):
+        result_page = 1
     if not query:
         return jsonify({'success': False, 'message': 'Enter a title to search'}), 400
 
@@ -433,20 +437,27 @@ def discover_search():
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
 
     endpoint = 'search/multi' if media_type == 'all' else f'search/{media_type}'
-    results = {'results': []}
-    pages_needed = (result_limit + 19) // 20
-    for page in range(1, pages_needed + 1):
+    results = {'results': [], 'total_results': 0, 'total_pages': 0}
+    start_index = (result_page - 1) * result_limit
+    first_tmdb_page = (start_index // 20) + 1
+    last_tmdb_page = ((start_index + result_limit - 1) // 20) + 1
+    for tmdb_page in range(first_tmdb_page, last_tmdb_page + 1):
         page_results, error = tmdb_request(endpoint, {
             'query': query,
             'include_adult': 'false',
             'language': 'en-US',
-            'page': page
+            'page': tmdb_page
         })
         if error:
             return jsonify({'success': False, 'message': error}), 502
         results['results'].extend(page_results.get('results', []))
-        if page >= page_results.get('total_pages', page) or len(results['results']) >= result_limit:
+        results['total_results'] = page_results.get('total_results', 0)
+        results['total_pages'] = page_results.get('total_pages', 0)
+        if tmdb_page >= page_results.get('total_pages', tmdb_page):
             break
+
+    local_start = start_index % 20
+    page_items = results['results'][local_start:local_start + result_limit]
 
     normalized = []
     existing_catalog = {'movie': load_movies(), 'tv': load_data()}
@@ -458,7 +469,7 @@ def discover_search():
         item_type: {catalog_match_key(item.get('title'), item.get('year')) for item in items}
         for item_type, items in existing_catalog.items()
     }
-    for item in results.get('results', [])[:result_limit]:
+    for item in page_items:
         item_type = item.get('media_type', media_type)
         if item_type not in {'movie', 'tv'}:
             continue
@@ -476,7 +487,14 @@ def discover_search():
             'already_added': str(item.get('id')) in existing_tmdb_ids[item_type] or catalog_match_key(title, normalized_year) in existing_match_keys[item_type]
         })
 
-    return jsonify({'success': True, 'results': normalized})
+    return jsonify({
+        'success': True,
+        'results': normalized,
+        'page': result_page,
+        'total_results': results['total_results'],
+        'has_previous': result_page > 1,
+        'has_next': result_page * result_limit < results['total_results']
+    })
 
 @app.route('/api/discover/add', methods=['POST'])
 def discover_add():

@@ -37,6 +37,11 @@
 
         <section id="discoverResults" class="discover-results" aria-live="polite"></section>
         <div id="discoverStatus" class="discover-status"></div>
+        <div id="discoverPagination" class="discover-pagination" hidden>
+            <button id="discoverPrevious" class="modal-btn modal-btn-dark" type="button">Previous</button>
+            <span id="discoverPageLabel"></span>
+            <button id="discoverNext" class="modal-btn modal-btn-dark" type="button">Next</button>
+        </div>
     </main>
 
     <script src="{{ url_for('static', filename='discover.js') }}"></script>
