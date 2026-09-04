@@ -874,23 +874,25 @@ def index():
         show['total_count'] = len(show.get('episodes', []))
         show['released_count'] = len(released_episode_list)
         
-        # Find the most recent episode added date
+        # Display the latest aired date from TVmaze; this remains useful for
+        # shows imported before the local added_date field existed.
         episodes = show.get('episodes', [])
         if episodes:
-            # Get the most recent added_date from all episodes
-            recent_dates = []
+            aired_dates = []
             for episode in episodes:
-                if 'added_date' in episode:
+                air_date = episode.get('air_date')
+                if air_date:
                     try:
-                        recent_dates.append(datetime.fromisoformat(episode['added_date']))
-                    except:
+                        parsed = datetime.strptime(str(air_date), '%Y-%m-%d').date()
+                        if parsed <= datetime.now().date():
+                            aired_dates.append(parsed)
+                    except (TypeError, ValueError):
                         pass
-            
-            if recent_dates:
-                latest_date = max(recent_dates)
-                show['last_episode_added'] = latest_date.strftime('%d %B, %Y')
+
+            if aired_dates:
+                show['last_episode_added'] = max(aired_dates).strftime('%d %B, %Y')
             else:
-                show['last_episode_added'] = 'Unknown'
+                show['last_episode_added'] = 'No aired episodes'
         else:
             show['last_episode_added'] = 'No episodes'
 
