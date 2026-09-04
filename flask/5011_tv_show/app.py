@@ -867,8 +867,14 @@ def index():
         show['cover_image'] = get_cached_image(show.get('cover_image', ''))
         watched_episodes = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
         total_episodes = len(show.get('episodes', []))
+        today = datetime.now().date().isoformat()
+        released_episodes = sum(
+            1 for episode in show.get('episodes', [])
+            if not episode.get('air_date') or str(episode.get('air_date')) <= today
+        )
         show['watched_count'] = watched_episodes
         show['total_count'] = total_episodes
+        show['released_count'] = released_episodes
         
         # Find the most recent episode added date
         episodes = show.get('episodes', [])

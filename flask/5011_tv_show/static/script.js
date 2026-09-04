@@ -247,6 +247,30 @@ function isReleasedAndUnwatched(episode) {
     return String(episode.air_date) < today;
 }
 
+function isEpisodeCountedAsReleased(episode) {
+    if (!episode.air_date) return true;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return String(episode.air_date) <= today;
+}
+
+function updateShowProgressBadge(showCard, episodes) {
+    const countEl = showCard?.querySelector('.episode-count');
+    if (!countEl) return;
+    const total = episodes.length;
+    const watchedCount = episodes.filter(episode => episode.watched).length;
+    const releasedCount = episodes.filter(isEpisodeCountedAsReleased).length;
+    const releasedWatched = releasedCount > 0 && episodes
+        .filter(isEpisodeCountedAsReleased)
+        .every(episode => episode.watched);
+    countEl.textContent = `${watchedCount}/${total}`;
+    countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
+    countEl.classList.add(watchedCount === 0 ? 'no-episodes-watched' : releasedWatched ? 'all-episodes-watched' : 'some-episodes-watched');
+    showCard.dataset.releasedCount = releasedCount;
+    showCard.classList.toggle('completed', releasedWatched);
+    showCard.classList.toggle('ended-completed', releasedWatched && showCard.dataset.status === 'Ended');
+}
+
 function renderEpisodes(episodes, showId) {
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
@@ -850,16 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
 
             const showCard = document.querySelector(`.show-card[data-show-id="${currentShowIdForEpisodes}"]`);
-            const countEl = showCard?.querySelector('.episode-count');
-            if (countEl) {
-                const total = currentEpisodes.length;
-                const watchedCount = watched ? total : 0;
-                countEl.textContent = `${watchedCount}/${total}`;
-                countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
-                countEl.classList.add(watchedCount === 0 ? 'no-episodes-watched' : watchedCount === total && total > 0 ? 'all-episodes-watched' : 'some-episodes-watched');
-                showCard.classList.toggle('completed', watchedCount === total && total > 0);
-                showCard.classList.toggle('ended-completed', watchedCount === total && total > 0 && showCard.dataset.status === 'Ended');
-            }
+            updateShowProgressBadge(showCard, currentEpisodes);
         } catch (error) {
             console.error('Error updating all episodes:', error);
             alert(error.message);
@@ -909,33 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 2. Update show card on main page
                     const showCard = document.querySelector(`.show-card[data-show-id="${showId}"]`);
-                    if (showCard) {
-                        const countEl = showCard.querySelector('.episode-count');
-                        const [watched, total] = countEl.textContent.split('/').map(Number);
-                        const newWatched = data.watched ? watched + 1 : watched - 1;
-                        countEl.textContent = `${newWatched}/${total}`;
-
-                        // Update color class for count
-                        countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
-                        if (newWatched === 0) {
-                            countEl.classList.add('no-episodes-watched');
-                        } else if (newWatched < total) {
-                            countEl.classList.add('some-episodes-watched');
-                        } else {
-                            countEl.classList.add('all-episodes-watched');
-                        }
-
-                        // Update completed status classes
-                        const status = showCard.dataset.status;
-                        if (newWatched === total && total > 0) {
-                            showCard.classList.add('completed');
-                            if (status === 'Ended') {
-                                showCard.classList.add('ended-completed');
-                            }
-                        } else {
-                            showCard.classList.remove('completed', 'ended-completed');
-                        }
-                    }
+                    updateShowProgressBadge(showCard, currentEpisodes);
                 }
             });
     };
@@ -952,15 +941,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // For simplicity, we can let it be, but a full card update would be better.
                     // Let's just update the total count on the card.
                     const showCard = document.querySelector(`.show-card[data-show-id="${showId}"]`);
-                    if (showCard) {
-                        const countEl = showCard.querySelector('.episode-count');
-                        let [watched, total] = countEl.textContent.split('/').map(Number);
-                        // We don't know if the deleted one was watched or not without checking the state
-                        // But we already updated the global state, so we could recalculate.
-                        const newWatched = currentEpisodes.filter(e => e.watched).length;
-                        const newTotal = currentEpisodes.length;
-                        countEl.textContent = `${newWatched}/${newTotal}`;
-                    }
+                    updateShowProgressBadge(showCard, currentEpisodes);
                 }
             });
         }
