@@ -2043,3 +2043,12 @@ body::before {
 .movie-card .card-info .movie-status.no-episodes-watched { background: rgba(127, 29, 29, 0.94); border-color: rgba(248, 113, 113, 0.45); }
 .show-card .card-info .tmdb-rating,
 .movie-card .card-info .tmdb-rating { background: rgba(67, 56, 20, 0.96); border-color: rgba(251, 191, 36, 0.4); }
+
+/* Keep the primary watched/progress indicator visible in the poster's top-right corner. */
+.show-card .card-info .episode-count,
+.movie-card .card-info .movie-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+}
