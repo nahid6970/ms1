@@ -182,6 +182,24 @@ body {
     justify-content: center;
 }
 
+.library-card-title {
+    display: -webkit-box;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 10px 12px 8px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #edf4ff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
 .show-card {
     width: 300px;
     background: #222;
