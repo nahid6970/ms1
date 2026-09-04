@@ -21,6 +21,7 @@ async function openEditMovieModal(movieId) {
     document.getElementById('editMovieId').value = movie.id;
     document.getElementById('editMovieTitle').value = movie.title;
     document.getElementById('editMovieYear').value = movie.year || '';
+    document.getElementById('editMovieReleaseDate').value = movie.release_date || '';
     document.getElementById('editMovieCoverImage').value = movie.cover_image || '';
     document.getElementById('editMovieDirectoryPath').value = movie.directory_path || '';
     document.getElementById('editMovieStatus').value = movie.status || 'Downloaded';

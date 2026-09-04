@@ -1444,6 +1444,7 @@ def api_movie(movie_id):
     if request.method == 'POST':
         movie['title'] = request.form.get('title', movie['title'])
         movie['year'] = request.form.get('year', movie.get('year', ''))
+        movie['release_date'] = request.form.get('release_date', movie.get('release_date', ''))
         movie['cover_image'] = request.form.get('cover_image', movie.get('cover_image', ''))
         movie['directory_path'] = request.form.get('directory_path', movie.get('directory_path', ''))
         movie['status'] = request.form.get('status', movie.get('status', ''))
