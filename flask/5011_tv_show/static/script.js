@@ -847,6 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         li.classList.remove('episode-watched');
                     }
+                    li.classList.toggle('episode-released-unwatched', ep ? isReleasedAndUnwatched(ep) : false);
 
                     // 2. Update show card on main page
                     const showCard = document.querySelector(`.show-card[data-show-id="${showId}"]`);
