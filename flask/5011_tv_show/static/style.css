@@ -1158,6 +1158,8 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 
 html, body {
     min-height: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 .episode-sort-select { width: auto; min-width: 120px; height: 36px; padding: 0 10px; }
 
