@@ -6,13 +6,21 @@ BBA/MBA in Finance. Looking for fresher or no-experience-required jobs in Bangla
 ---
 
 ## 2. Presentation Rule (Permanent)
-When showing job options, always use a table with ✅ / ❌ / ⚠️ in an "Eligible?" column AND an "Apply Link" column. Example format:
+When showing job options:
+1. Use a clean table with ✅ / ❌ / ⚠️ in an "Eligible?" column. NO links in the table.
+2. After the table, list apply links separately — only for ✅ and ⚠️ jobs.
 
-| Bank / Org | Post | Experience | Eligible? | Deadline | Apply Link |
-|---|---|---|---|---|---|
-| Dutch-Bangla Bank | MTO | Fresher | ✅ Finance/MBA | Sept 13, 2026 | [Apply](https://www.dutchbanglabank.com) |
-| Jamuna Bank | Chief HR Officer | 20 yrs exp | ❌ Senior post | Sept 16, 2026 | [Link](https://bdgovtjob.net/jamuna-bank-limited-job-circular/) |
-| Agrani Bank | Unknown post | TBC | ⚠️ Need to check | Sept 10, 2026 | — |
+Example table format:
+
+| Bank / Org | Post | Experience | Eligible? | Deadline |
+|---|---|---|---|---|
+| Dutch-Bangla Bank | MTO | Fresher | ✅ Finance/MBA | Sept 13, 2026 |
+| Jamuna Bank | Chief HR Officer | 20 yrs exp | ❌ Senior post | Sept 16, 2026 |
+| Agrani Bank | Unknown post | TBC | ⚠️ Need to check | Sept 10, 2026 |
+
+Example links section (after table):
+- **Dutch-Bangla Bank MTO** → [Apply](https://www.dutchbanglabank.com/career/career.html)
+- **Agrani Bank** → [Details](https://bdgovtjob.net/agrani-bank-limited-job-circular/)
 
 ---
 
@@ -30,9 +38,9 @@ When showing job options, always use a table with ✅ / ❌ / ⚠️ in an "Elig
 | Dutch-Bangla Bank | MTO | Fresher, CGPA 3.00+ | ✅ Best pick (BDT 70k) | Sept 13, 2026 |
 | Dutch-Bangla Bank | Assistant Officer | Fresher | ✅ Suitable (BDT 40k) | Sept 13, 2026 |
 | Dutch-Bangla Bank | Trainee Cash Officer | Fresher | ✅ Suitable (BDT 26k) | Sept 13, 2026 |
-| Bangladesh Bank (erecruitment) | Medical Officer | MBBS required | ❌ Not applicable | Sept 27, 2026 |
-| Bangladesh Bank (erecruitment) | Asst. Director (Law) | Law degree required | ❌ Not applicable | Sept 20, 2026 |
-| Bangladesh Bank (erecruitment) | General Officer / Finance | No active circular | ⚠️ Check periodically | — |
+| Bangladesh Bank | Medical Officer | MBBS required | ❌ Not applicable | Sept 27, 2026 |
+| Bangladesh Bank | Asst. Director (Law) | Law degree required | ❌ Not applicable | Sept 20, 2026 |
+| Bangladesh Bank | General Officer / Finance | No active circular | ⚠️ Check periodically | — |
 | BHTPA | Asst. Director (Investment) | Finance/MBA | ✅ Suitable | Sept 26, 2026 |
 | Agrani Bank | 1 post (unknown) | TBC | ⚠️ Need to check | Sept 10, 2026 |
 | BIBM | 7 categories, 8 posts | TBC | ⚠️ Need to check | Sept 23, 2026 |
