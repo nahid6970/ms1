@@ -213,14 +213,6 @@ function renderEpisodes(episodes, showId) {
     episodes.forEach(ep => {
         const li = document.createElement('li');
         li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}`;
-        li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
-        li.style.padding = '12px 15px';
-        li.style.marginBottom = '8px';
-        li.style.background = '#2a2a2a';
-        li.style.borderRadius = '8px';
-        if (ep.watched) li.style.background = 'rgba(29, 185, 84, 0.1)';
 
         const episodeNumber = ep.season_number != null && ep.episode_number != null
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`

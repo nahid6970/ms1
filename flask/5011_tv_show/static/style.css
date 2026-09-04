@@ -1773,3 +1773,81 @@ body::before {
 .modal-content > .modal-title::after {
     width: 100%;
 }
+
+/* Refined episode modal */
+#episodesModal .episodes-modal-content {
+    width: min(680px, calc(100% - 28px));
+    max-width: none;
+    padding: 28px;
+    background: #111a29;
+    border: 1px solid #30435f;
+    border-radius: 6px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+#episodesModal .modal-header {
+    gap: 14px;
+    align-items: center;
+    border-bottom: 1px solid #293a53;
+    padding-bottom: 18px !important;
+}
+#episodesModal .modal-title {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #edf4ff;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+}
+#episodesModal .close {
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #3b506c;
+    border-radius: 4px;
+    color: #9fb2ca;
+    line-height: 27px;
+    font-size: 18px;
+}
+#episodesModal .close:hover { background: #22334a; color: #fff; }
+#episodesModal .episode-sort-select {
+    min-width: 116px;
+    height: 36px;
+    border: 1px solid #3b506c;
+    border-radius: 4px;
+    background: #172337;
+    color: #dbeafe;
+    font-size: 0.8rem;
+}
+#episodesModal .episodes-modal-content .episode-list {
+    margin-top: 16px;
+    padding: 8px;
+    background: #0d1522;
+    border: 1px solid #273951;
+    border-radius: 4px;
+}
+#episodesModal .episode-item {
+    min-height: 58px;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 11px 14px;
+    background: #182538;
+    border: 1px solid #263b56;
+    border-radius: 4px;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+#episodesModal .episode-item:last-child { margin-bottom: 0; }
+#episodesModal .episode-item:hover { background: #1d3049; border-color: #3f5d80; }
+#episodesModal .episode-main-info { gap: 12px; }
+#episodesModal .episode-number { color: #7dd3fc; font-size: 0.75rem; }
+#episodesModal .episode-title { color: #e5edf8; font-size: 0.95rem; }
+#episodesModal .episode-airdate { color: #91a7c2; font-size: 0.76rem; }
+#episodesModal .edit-dot, #episodesModal .delete-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 2px !important;
+    opacity: 0.8;
+}
