@@ -1908,8 +1908,9 @@ body::before {
 .schedule-time-row > label { flex: 0 0 auto; margin: 0; }
 .schedule-time-controls { display: flex; flex: 1 1 auto; gap: 8px; min-width: 0; }
 .schedule-time-controls .modal-input { flex: 1 1 0; min-width: 0; width: auto; }
-.schedule-option-row { display: contents; }
-.schedule-option-row[hidden] { display: none; }
+.schedule-inline-option { display: flex; flex: 1 1 0; min-width: 0; }
+.schedule-inline-option[hidden] { display: none; }
+.schedule-inline-option .modal-input { width: 100%; }
 .schedule-button { color: #8dd3ff; }
 .scheduled-updates-content { width: min(560px, calc(100% - 28px)); max-width: none; }
 .scheduled-updates-content > .modal-help { margin: -8px 0 16px; }
