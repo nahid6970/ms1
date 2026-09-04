@@ -665,10 +665,11 @@ select.modal-input {
 .discover-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
 .discover-card { display: flex; min-height: 220px; overflow: hidden; background: #1c1c1c; border: 1px solid #333; border-radius: 10px; }
 .discover-card > img { width: 130px; min-width: 130px; height: 195px; object-fit: cover; background: #252525; }
-.discover-card-content { padding: 15px; display: flex; flex-direction: column; align-items: flex-start; }
+.discover-card-content { padding: 15px; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.discover-card-topline { width: 100%; min-height: 18px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .discover-type { color: #90cea1; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-.discover-card h2 { font-size: 1.1rem; margin: 6px 0; }
-.discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 0 0 8px; }
+.discover-card h2 { width: 100%; min-height: 2.7em; font-size: 1.1rem; line-height: 1.35; margin: 6px 0 8px; display: flex; align-items: flex-start; }
+.discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 0; white-space: nowrap; }
 .discover-overview { color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .discover-add-button { margin-top: auto; }
 .discover-add-button:disabled { cursor: default; opacity: 1; }

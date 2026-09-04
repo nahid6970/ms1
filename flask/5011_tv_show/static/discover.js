@@ -22,9 +22,11 @@ function renderDiscoverResults(results) {
         <article class="discover-card">
             <img src="${escapeHtml(item.poster_url)}" alt="${escapeHtml(item.title)} poster" onerror="this.style.visibility='hidden'">
             <div class="discover-card-content">
-                <span class="discover-type">${item.media_type === 'movie' ? 'Movie' : 'TV Show'}</span>
+                <div class="discover-card-topline">
+                    <span class="discover-type">${item.media_type === 'movie' ? 'Movie' : 'TV Show'}</span>
+                    <span class="discover-meta">${escapeHtml(item.year || 'Year unknown')} · ★ ${item.rating.toFixed(1)}</span>
+                </div>
                 <h2>${escapeHtml(item.title)}</h2>
-                <p class="discover-meta">${escapeHtml(item.year || 'Year unknown')} · ★ ${item.rating.toFixed(1)}</p>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
                 <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}"${item.already_added ? ' disabled' : ''}>
                     ${item.already_added ? '✓ Already Added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}
