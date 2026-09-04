@@ -26,8 +26,8 @@ function renderDiscoverResults(results) {
                 <h2>${escapeHtml(item.title)}</h2>
                 <p class="discover-meta">${escapeHtml(item.year || 'Year unknown')} · ★ ${item.rating.toFixed(1)}</p>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
-                <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}">
-                    Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}
+                <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}"${item.already_added ? ' disabled' : ''}>
+                    ${item.already_added ? '✓ Already Added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}
                 </button>
             </div>
         </article>
@@ -86,7 +86,7 @@ discoverResults.addEventListener('click', async event => {
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to add item');
-        button.textContent = 'Added';
+        button.textContent = '✓ Already Added';
         button.classList.add('discover-added');
         discoverStatus.textContent = data.message;
     } catch (error) {

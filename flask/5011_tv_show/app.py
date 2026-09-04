@@ -9,6 +9,7 @@ install_deps.bootstrap(__file__)
 
 import json
 import os
+import re
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import requests
@@ -129,6 +130,11 @@ def tmdb_year(value):
 
 def tmdb_genres(details):
     return [genre.get('name') for genre in details.get('genres', []) if genre.get('name')]
+
+def catalog_match_key(title, year):
+    normalized_title = re.sub(r'[^a-z0-9]+', '', str(title or '').casefold())
+    normalized_year = str(year or '')[:4]
+    return f'{normalized_title}:{normalized_year}'
 
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
@@ -404,20 +410,31 @@ def discover_search():
         return jsonify({'success': False, 'message': error}), 502
 
     normalized = []
+    existing_catalog = {'movie': load_movies(), 'tv': load_data()}
+    existing_tmdb_ids = {
+        item_type: {str(item.get('tmdb_id')) for item in items if item.get('tmdb_id') is not None}
+        for item_type, items in existing_catalog.items()
+    }
+    existing_match_keys = {
+        item_type: {catalog_match_key(item.get('title'), item.get('year')) for item in items}
+        for item_type, items in existing_catalog.items()
+    }
     for item in results.get('results', []):
         item_type = item.get('media_type', media_type)
         if item_type not in {'movie', 'tv'}:
             continue
         title = item.get('title') if item_type == 'movie' else item.get('name')
         release_date = item.get('release_date') if item_type == 'movie' else item.get('first_air_date')
+        normalized_year = tmdb_year(release_date)
         normalized.append({
             'tmdb_id': item.get('id'),
             'media_type': item_type,
             'title': title or 'Untitled',
-            'year': tmdb_year(release_date),
+            'year': normalized_year,
             'overview': item.get('overview') or 'No overview available.',
             'poster_url': tmdb_poster_url(item.get('poster_path')),
-            'rating': round(float(item.get('vote_average') or 0), 1)
+            'rating': round(float(item.get('vote_average') or 0), 1),
+            'already_added': str(item.get('id')) in existing_tmdb_ids[item_type] or catalog_match_key(title, normalized_year) in existing_match_keys[item_type]
         })
 
     return jsonify({'success': True, 'results': normalized})
@@ -444,7 +461,11 @@ def discover_add():
 
     if media_type == 'movie':
         movies = load_movies()
-        if any(str(movie.get('tmdb_id')) == str(tmdb_id) for movie in movies):
+        if any(
+            str(movie.get('tmdb_id')) == str(tmdb_id)
+            or catalog_match_key(movie.get('title'), movie.get('year')) == catalog_match_key(title, year)
+            for movie in movies
+        ):
             return jsonify({'success': False, 'message': f'{title} is already in your movies'}), 409
         movies.append({
             'id': max([movie.get('id', 0) for movie in movies], default=0) + 1,
@@ -466,7 +487,11 @@ def discover_add():
         save_movies(movies)
     else:
         shows = load_data()
-        if any(str(show.get('tmdb_id')) == str(tmdb_id) for show in shows):
+        if any(
+            str(show.get('tmdb_id')) == str(tmdb_id)
+            or catalog_match_key(show.get('title'), show.get('year')) == catalog_match_key(title, year)
+            for show in shows
+        ):
             return jsonify({'success': False, 'message': f'{title} is already in your shows'}), 409
         shows.append({
             'id': max([show.get('id', 0) for show in shows], default=0) + 1,

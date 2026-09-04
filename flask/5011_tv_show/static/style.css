@@ -671,6 +671,7 @@ select.modal-input {
 .discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 0 0 8px; }
 .discover-overview { color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .discover-add-button { margin-top: auto; }
+.discover-add-button:disabled { cursor: default; opacity: 1; }
 .discover-added { background: #4ade80 !important; color: #111 !important; }
 .discover-empty { grid-column: 1 / -1; text-align: center; color: #aab7c8; }
 @media (max-width: 600px) { .discover-search-form { flex-wrap: wrap; } .discover-search-form select { flex: 1 1 100%; } .discover-search-form button { flex: 1; } .discover-page { padding: 25px 14px 50px; } }
