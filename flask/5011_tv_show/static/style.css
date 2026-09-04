@@ -657,13 +657,13 @@ select.modal-input {
 .discover-page { max-width: 1200px; margin: 0 auto; padding: 24px 24px 70px; }
 .discover-search-form { display: flex; align-items: stretch; gap: 10px; max-width: 880px; margin: 0 auto 24px; }
 .discover-search-form input, .discover-search-form select, .discover-search-form button { height: 44px; box-sizing: border-box; }
-.discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 10px 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 6px; }
+.discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 10px 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 0; }
 .discover-search-form input { flex: 1 1 auto; }
 .discover-search-form select { flex: 0 0 160px; }
-.discover-search-form button { flex: 0 0 92px; padding: 0 14px; }
+.discover-search-form button { flex: 0 0 92px; padding: 0 14px; border-radius: 0; }
 .discover-status { min-height: 22px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
 .discover-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-.discover-card { display: flex; flex-direction: column; min-height: 280px; overflow: hidden; background: #1c1c1c; border: 1px solid #333; border-radius: 10px; }
+.discover-card { display: flex; flex-direction: column; min-height: 0; padding-bottom: 10px; overflow: hidden; background: #1c1c1c; border: 1px solid #333; border-radius: 0; }
 .discover-card-title { width: 100%; min-height: 2.7em; box-sizing: border-box; padding: 10px 14px 4px; margin: 0; font-size: 1.1rem; line-height: 1.35; display: flex; align-items: center; justify-content: center; text-align: center; }
 .discover-card-body { display: flex; flex: 0 0 195px; height: 195px; overflow: hidden; }
 .discover-card-body > img { width: 130px; min-width: 130px; height: 195px; object-fit: cover; background: #252525; }
@@ -673,6 +673,7 @@ select.modal-input {
 .discover-meta { color: #fbbf24; font-size: 0.85rem; margin: 5px 0 8px; white-space: nowrap; }
 .discover-overview { flex: 1 1 auto; min-height: 0; color: #b8c1cc; font-size: 0.85rem; line-height: 1.4; margin: 0 0 12px; text-align: justify; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 .discover-add-button { margin-top: auto; }
+button.discover-add-button { border-radius: 0 !important; }
 .discover-add-button:disabled { cursor: default; opacity: 1; }
 .discover-added { background: #4ade80 !important; color: #111 !important; }
 .discover-empty { grid-column: 1 / -1; text-align: center; color: #aab7c8; }
