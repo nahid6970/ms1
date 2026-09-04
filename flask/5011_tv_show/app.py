@@ -1452,6 +1452,36 @@ def api_movie(movie_id):
         return jsonify({'success': True})
     return jsonify(movie)
 
+@app.route('/api/movie/<int:movie_id>/refresh-metadata', methods=['POST'])
+def refresh_movie_metadata(movie_id):
+    movies = load_movies()
+    movie = next((m for m in movies if m.get('id') == movie_id), None)
+    if not movie:
+        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+    if not movie.get('tmdb_id'):
+        return jsonify({'success': False, 'message': 'This movie has no TMDb ID'}), 400
+
+    details, error = tmdb_request(f"movie/{int(movie['tmdb_id'])}", {'language': 'en-US'})
+    if error:
+        return jsonify({'success': False, 'message': error}), 502
+
+    release_date = details.get('release_date') or ''
+    tmdb_rating = round(float(details.get('vote_average') or 0), 1)
+    movie.update({
+        'title': details.get('title') or movie.get('title', 'Untitled'),
+        'year': tmdb_year(release_date),
+        'release_date': release_date,
+        'overview': details.get('overview') or '',
+        'cover_image': tmdb_poster_url(details.get('poster_path')) or movie.get('cover_image', ''),
+        'genres': tmdb_genres(details),
+        'runtime': details.get('runtime'),
+        'rating': tmdb_five_star_rating(tmdb_rating),
+        'tmdb_rating': tmdb_rating,
+        'status': 'Released' if details.get('status') == 'Released' else 'Missing'
+    })
+    save_movies(movies)
+    return jsonify({'success': True, 'movie': movie})
+
 @app.route('/api/movies/add', methods=['POST'])
 def api_movies_add():
     movies = load_movies()

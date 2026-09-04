@@ -4,10 +4,10 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb search/import with movie release dates, duplicate detection, rating conversion, TVmaze episode/air-date merging, and reliable library sorting.
+- `app.py`: Added TMDb search/import with movie release dates, movie metadata refresh, duplicate detection, rating conversion, TVmaze episode/air-date merging, and reliable library sorting.
 - `templates/discover.html`, `static/discover.js`: Added unified discovery, type/sort/count controls, pagination, remembered preferences, and duplicate checkmarks.
 - `templates/index.html`, `templates/movies.html`: Added Discover/TVmaze controls and TMDb score display; removed the conflicting home-page redirect.
-- `templates/_settings_modal.html`, `static/script.js`, `static/style.css`: Added TMDb settings, aligned General controls, episode metadata, and modern card/control styling.
+- `templates/_settings_modal.html`, `static/script.js`, `static/movies.js`, `static/style.css`: Added TMDb settings, aligned General controls, movie refresh action, episode metadata, and modern card/control styling.
 
 # 3. Critical Context
 

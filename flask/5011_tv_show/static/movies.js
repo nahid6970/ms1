@@ -72,6 +72,26 @@ async function syncRadarrMovies(event) {
     }
 }
 
+async function refreshMovieMetadata(event, movieId, btn) {
+    if (event) event.stopPropagation();
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="spin"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
+    btn.title = 'Updating metadata...';
+    try {
+        const response = await fetch(`/api/movie/${movieId}/refresh-metadata`, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update metadata');
+        location.reload();
+    } catch (error) {
+        console.error('Error refreshing movie metadata:', error);
+        alert(error.message || 'Error updating movie metadata');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        btn.title = 'Update metadata from TMDb';
+    }
+}
+
 async function toggleMovieWatched(movieId, btn) {
     try {
         const response = await fetch(`/api/movie/${movieId}/watched`, { method: 'POST' });
