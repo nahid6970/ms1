@@ -829,6 +829,16 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshEpisodesInModal(event, refreshOpenEpisodes);
     });
 
+    const episodesListContainer = document.getElementById('episodesListContainer');
+    if (episodesListContainer) episodesListContainer.addEventListener('mouseover', event => {
+        if (!event.shiftKey) return;
+        const episodeItem = event.target.closest('.episode-item');
+        if (!episodeItem || !episodesListContainer.contains(episodeItem)) return;
+        if (event.relatedTarget && episodeItem.contains(event.relatedTarget)) return;
+        const checkbox = episodeItem.querySelector('input[type="checkbox"]');
+        if (checkbox && !checkbox.checked) checkbox.click();
+    });
+
     // Helper functions for popup interactions
     window.toggleWatched = function(showId, episodeId, checkbox) {
         fetch(`/toggle_watched/${showId}/${episodeId}`)
