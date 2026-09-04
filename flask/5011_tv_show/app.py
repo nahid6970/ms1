@@ -131,6 +131,30 @@ def tmdb_year(value):
 def tmdb_genres(details):
     return [genre.get('name') for genre in details.get('genres', []) if genre.get('name')]
 
+def tmdb_five_star_rating(score):
+    """Convert TMDb's 0-10 score to the app's whole-number 1-5 scale."""
+    numeric_score = float(score or 0)
+    if numeric_score <= 0:
+        return None
+    return max(1, min(5, int((numeric_score / 2) + 0.5)))
+
+def migrate_tmdb_ratings(items):
+    """Convert older imported TMDb scores that were stored as app ratings."""
+    changed = False
+    for item in items:
+        rating = item.get('rating')
+        if not item.get('tmdb_id') or item.get('tmdb_rating') is not None or rating is None:
+            continue
+        try:
+            numeric_rating = float(rating)
+        except (TypeError, ValueError):
+            continue
+        if numeric_rating > 5:
+            item['tmdb_rating'] = numeric_rating
+            item['rating'] = tmdb_five_star_rating(numeric_rating)
+            changed = True
+    return changed
+
 def catalog_match_key(title, year):
     normalized_title = re.sub(r'[^a-z0-9]+', '', str(title or '').casefold())
     normalized_year = str(year or '')[:4]
@@ -454,7 +478,8 @@ def discover_add():
     title = (details.get('title') if media_type == 'movie' else details.get('name')) or 'Untitled'
     year = tmdb_year(details.get('release_date') if media_type == 'movie' else details.get('first_air_date'))
     poster = tmdb_poster_url(details.get('poster_path'))
-    rating = round(float(details.get('vote_average') or 0), 1)
+    tmdb_rating = round(float(details.get('vote_average') or 0), 1)
+    rating = tmdb_five_star_rating(tmdb_rating)
     external_ids = {'tmdb': int(tmdb_id)}
     if details.get('imdb_id'):
         external_ids['imdb'] = details['imdb_id']
@@ -480,6 +505,7 @@ def discover_add():
             'genres': tmdb_genres(details),
             'runtime': details.get('runtime'),
             'rating': rating,
+            'tmdb_rating': tmdb_rating,
             'status': 'Released' if details.get('status') == 'Released' else 'Missing',
             'watched': False,
             'added_date': datetime.now().isoformat()
@@ -504,6 +530,7 @@ def discover_add():
             'directory_path': '',
             'genres': tmdb_genres(details),
             'rating': rating,
+            'tmdb_rating': tmdb_rating,
             'status': 'Ended' if details.get('status') == 'Ended' else 'Continuing',
             'episodes': []
         })
@@ -518,6 +545,8 @@ def index():
     query = request.args.get('query')
 
     shows = load_data()
+    if migrate_tmdb_ratings(shows):
+        save_data(shows)
 
     # Filter shows based on query
     if query:
@@ -590,6 +619,8 @@ def movies_page():
     query = request.args.get('query')
 
     movies = load_movies()
+    if migrate_tmdb_ratings(movies):
+        save_movies(movies)
 
     # Filter movies based on query
     if query:

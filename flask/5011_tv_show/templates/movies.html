@@ -105,6 +105,7 @@
                         </div>
                         <div class="card-info">
                             <p class="movie-year">{{ movie.year }}</p>
+                            {% if movie.tmdb_rating %}<p class="tmdb-rating">TMDb {{ movie.tmdb_rating }}/10</p>{% endif %}
                             <p class="movie-status {% if movie.watched %}all-episodes-watched{% else %}no-episodes-watched{% endif %}">{{ 'Watched' if movie.watched else 'Unwatched' }}</p>
                         </div>
                     </div>

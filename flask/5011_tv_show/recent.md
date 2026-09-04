@@ -1,20 +1,20 @@
 # 1. Project DNA (Permanent)
 
-Flask/Python app with server-rendered HTML/Jinja templates, vanilla JavaScript, CSS, and JSON-backed local catalogs. Its goal is to manage and display a personal TV-show and movie library, including watched state, episode/file scans, metadata, and discovery.
+Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, and JSON-backed catalogs. It manages a personal TV-show and movie library with watched state, file scans, metadata, and discovery.
 
 # 2. Latest Implementation
 
-- `app.py`: Added TMDb request helpers, `/discover`, TMDb search, local movie/show import APIs, and duplicate detection by TMDb ID or normalized title/year.
+- `app.py`: Added TMDb helpers, `/discover`, search/import APIs, duplicate detection, and whole-number TMDb 0–10 to app 1–5 rating conversion with legacy migration.
 - `templates/discover.html`: Added the unified movie/TV discovery page.
-- `static/discover.js`: Added TMDb search rendering, local add actions, result sorting, and `Already Added` checkmarks.
-- `templates/index.html`, `templates/movies.html`: Added Discover buttons to both library toolbars.
+- `static/discover.js`: Added search rendering, local add actions, sorting, and `Already Added` checkmarks.
+- `templates/index.html`, `templates/movies.html`: Added Discover buttons and original TMDb score display.
 - `templates/_settings_modal.html`: Added the masked TMDb API-key field.
 - `static/script.js`: Added TMDb key loading and saving through settings.
-- `static/style.css`: Added TMDb settings styling, compact discovery controls, result sorting layout, and added-state styling.
+- `static/style.css`: Added compact discovery controls, sorting layout, added-state, and TMDb score styling.
 
 # 3. Critical Context
 
-TMDb is used only for metadata; adding content does not call Sonarr/Radarr. The key is stored in `C:\@delta\db\5011_tv_show\settings.json` as `tmdb_api_key`, and all TMDb requests run server-side. Movies save to `movies.json`; shows save to `data.json`; catalogs are checked separately. Duplicate matching uses `tmdb_id`, then normalized title/year for manually added records. Existing JSON schemas and Sonarr/Radarr sync behavior must remain compatible.
+TMDb is metadata-only; adding content does not call Sonarr/Radarr. The key is stored in `C:\@delta\db\5011_tv_show\settings.json` as `tmdb_api_key`; requests run server-side. Movies use `movies.json`, shows use `data.json`, and catalogs are checked separately. Duplicate matching uses `tmdb_id`, then normalized title/year. App stars are whole-number 1–5; imported scores are rounded from 0–10 and preserved as `tmdb_rating`.
 
 # 4. Pending Task
 
