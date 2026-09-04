@@ -530,6 +530,14 @@ def run_scheduled_episode_updates():
             continue
         if show.get('episode_update_last_run') == today:
             continue
+        frequency = show.get('episode_update_frequency', 'daily')
+        try:
+            if frequency == 'weekly' and now.weekday() != int(show.get('episode_update_weekday', now.weekday())):
+                continue
+            if frequency == 'monthly' and now.day != int(show.get('episode_update_month_day', now.day)):
+                continue
+        except (TypeError, ValueError):
+            continue
         tvmaze_show, error = tvmaze_show_for_catalog_item(show)
         if error:
             continue
@@ -565,6 +573,9 @@ def show_schedules():
         'show_id': show.get('id'),
         'title': show.get('title', 'Untitled'),
         'update_time': show.get('episode_update_time') or '',
+        'frequency': show.get('episode_update_frequency', 'daily'),
+        'weekday': show.get('episode_update_weekday', 0),
+        'month_day': show.get('episode_update_month_day', 1),
         'last_run': show.get('episode_update_last_run') or ''
     } for show in load_data()]
     schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
@@ -900,6 +911,16 @@ def edit_show(show_id):
         show['status'] = request.form.get('status', 'Continuing') # Update status field
         show['sonarr_url'] = request.form.get('sonarr_url', '')
         show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
+        frequency = request.form.get('episode_update_frequency', 'daily')
+        show['episode_update_frequency'] = frequency if frequency in {'daily', 'weekly', 'monthly'} else 'daily'
+        try:
+            show['episode_update_weekday'] = max(0, min(6, int(request.form.get('episode_update_weekday', datetime.now().weekday()))))
+        except (TypeError, ValueError):
+            show['episode_update_weekday'] = datetime.now().weekday()
+        try:
+            show['episode_update_month_day'] = max(1, min(31, int(request.form.get('episode_update_month_day', datetime.now().day))))
+        except (TypeError, ValueError):
+            show['episode_update_month_day'] = datetime.now().day
         save_data(shows)
         return redirect(url_for('index'))
     else:

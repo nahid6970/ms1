@@ -200,6 +200,23 @@
                 <label for="editShowEpisodeUpdateTime">Daily Episode Update:</label>
                 <input type="time" id="editShowEpisodeUpdateTime" name="episode_update_time" class="modal-input">
                 <small class="modal-help">Leave empty to disable automatic TVmaze updates.</small>
+                <label for="editShowEpisodeUpdateFrequency">Update Frequency:</label>
+                <select id="editShowEpisodeUpdateFrequency" name="episode_update_frequency" class="modal-input">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+                <div id="weeklyUpdateDayRow" class="schedule-option-row">
+                    <label for="editShowEpisodeUpdateWeekday">Weekly Day:</label>
+                    <select id="editShowEpisodeUpdateWeekday" name="episode_update_weekday" class="modal-input">
+                        <option value="0">Monday</option><option value="1">Tuesday</option><option value="2">Wednesday</option>
+                        <option value="3">Thursday</option><option value="4">Friday</option><option value="5">Saturday</option><option value="6">Sunday</option>
+                    </select>
+                </div>
+                <div id="monthlyUpdateDayRow" class="schedule-option-row">
+                    <label for="editShowEpisodeUpdateMonthDay">Monthly Day:</label>
+                    <input type="number" id="editShowEpisodeUpdateMonthDay" name="episode_update_month_day" class="modal-input" min="1" max="31" value="1">
+                </div>
                 <label for="editShowStatus">Status:</label>
                 <select id="editShowStatus" name="status" class="modal-input">
                     <option value="Continuing">Continuing</option>

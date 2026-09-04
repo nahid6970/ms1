@@ -1904,6 +1904,8 @@ body::before {
 #episodesModal .episode-refresh-btn:hover { background: #1f7052; border-color: #4ade80; }
 
 .modal-help { display: block; color: #91a0b5; font-size: 0.78rem; line-height: 1.4; }
+.schedule-option-row { display: contents; }
+.schedule-option-row[hidden] { display: none; }
 .schedule-button { color: #8dd3ff; }
 .scheduled-updates-content { width: min(560px, calc(100% - 28px)); max-width: none; }
 .scheduled-updates-content > .modal-help { margin: -8px 0 16px; }

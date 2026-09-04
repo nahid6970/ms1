@@ -78,6 +78,10 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowEpisodeUpdateTime').value = show.episode_update_time || '';
+    document.getElementById('editShowEpisodeUpdateFrequency').value = show.episode_update_frequency || 'daily';
+    document.getElementById('editShowEpisodeUpdateWeekday').value = String(show.episode_update_weekday ?? ((new Date().getDay() + 6) % 7));
+    document.getElementById('editShowEpisodeUpdateMonthDay').value = show.episode_update_month_day || new Date().getDate();
+    updateScheduleOptionVisibility();
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
 
     // Set the rating radio button
@@ -190,6 +194,14 @@ function escapeEpisodeText(value) {
     }[character]));
 }
 
+function updateScheduleOptionVisibility() {
+    const frequency = document.getElementById('editShowEpisodeUpdateFrequency')?.value;
+    const weeklyRow = document.getElementById('weeklyUpdateDayRow');
+    const monthlyRow = document.getElementById('monthlyUpdateDayRow');
+    if (weeklyRow) weeklyRow.hidden = frequency !== 'weekly';
+    if (monthlyRow) monthlyRow.hidden = frequency !== 'monthly';
+}
+
 async function openScheduledUpdatesModal() {
     const modal = document.getElementById('scheduledUpdatesModal');
     const list = document.getElementById('scheduledUpdatesList');
@@ -205,7 +217,7 @@ async function openScheduledUpdatesModal() {
             <div class="scheduled-update-row">
                 <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
                 ${schedule.update_time
-                    ? `<span class="scheduled-update-time">${schedule.update_time}</span>`
+                    ? `<span class="scheduled-update-time">${schedule.frequency === 'weekly' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][schedule.weekday] + ' · ' : schedule.frequency === 'monthly' ? 'Day ' + schedule.month_day + ' · ' : ''}${schedule.update_time}</span>`
                     : '<span class="scheduled-update-disabled">Not scheduled</span>'}
             </div>
         `).join('') || '<p class="schedule-empty">No shows found.</p>';
@@ -702,6 +714,11 @@ if (savedScrollPosition !== null) {
 document.addEventListener('DOMContentLoaded', () => {
     const showHiddenShowsToggle = document.getElementById('showHiddenShows');
     const html = document.documentElement;
+    const scheduleFrequency = document.getElementById('editShowEpisodeUpdateFrequency');
+    if (scheduleFrequency) {
+        scheduleFrequency.addEventListener('change', updateScheduleOptionVisibility);
+        updateScheduleOptionVisibility();
+    }
 
     // Load show hidden shows preference from localStorage
     const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
