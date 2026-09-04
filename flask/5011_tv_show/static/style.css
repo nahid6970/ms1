@@ -1904,6 +1904,10 @@ body::before {
 #episodesModal .episode-refresh-btn:hover { background: #1f7052; border-color: #4ade80; }
 
 .modal-help { display: block; color: #91a0b5; font-size: 0.78rem; line-height: 1.4; }
+.schedule-time-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.schedule-time-row > label { flex: 0 0 auto; margin: 0; }
+.schedule-time-controls { display: flex; flex: 1 1 auto; gap: 8px; min-width: 0; }
+.schedule-time-controls .modal-input { flex: 1 1 0; min-width: 0; width: auto; }
 .schedule-option-row { display: contents; }
 .schedule-option-row[hidden] { display: none; }
 .schedule-button { color: #8dd3ff; }
@@ -1915,6 +1919,10 @@ body::before {
 .scheduled-update-time { flex: 0 0 auto; color: #86efac; font-variant-numeric: tabular-nums; font-weight: 700; }
 .scheduled-update-disabled { flex: 0 0 auto; color: #8492a6; font-size: 0.8rem; }
 .schedule-empty { color: #91a0b5; text-align: center; }
+@media (max-width: 540px) {
+    .schedule-time-row { align-items: stretch; flex-direction: column; gap: 6px; }
+    .schedule-time-controls { width: 100%; }
+}
 #episodesModal .episode-bulk-btn { width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 #episodesModal .episode-bulk-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #episodesModal .episodes-modal-content .episode-list {

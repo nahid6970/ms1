@@ -197,15 +197,18 @@
                 <input type="text" id="editShowDirectoryPath" name="directory_path" class="modal-input">
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
                 <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
-                <label for="editShowEpisodeUpdateTime">Daily Episode Update:</label>
-                <input type="time" id="editShowEpisodeUpdateTime" name="episode_update_time" class="modal-input">
+                <div class="schedule-time-row">
+                    <label for="editShowEpisodeUpdateTime">Episode Update:</label>
+                    <div class="schedule-time-controls">
+                        <input type="time" id="editShowEpisodeUpdateTime" name="episode_update_time" class="modal-input">
+                        <select id="editShowEpisodeUpdateFrequency" name="episode_update_frequency" class="modal-input" aria-label="Update frequency">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </div>
                 <small class="modal-help">Leave empty to disable automatic TVmaze updates.</small>
-                <label for="editShowEpisodeUpdateFrequency">Update Frequency:</label>
-                <select id="editShowEpisodeUpdateFrequency" name="episode_update_frequency" class="modal-input">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                </select>
                 <div id="weeklyUpdateDayRow" class="schedule-option-row">
                     <label for="editShowEpisodeUpdateWeekday">Weekly Day:</label>
                     <select id="editShowEpisodeUpdateWeekday" name="episode_update_weekday" class="modal-input">
