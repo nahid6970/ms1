@@ -1160,7 +1160,7 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 html, body {
     min-height: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 .episode-sort-select { width: auto; min-width: 120px; height: 36px; padding: 0 10px; }
 
@@ -1462,7 +1462,7 @@ body::before {
 
     .top-center-controls {
         grid-column: 1 / -1;
-        justify-content: flex-start;
+        justify-content: center;
         overflow-x: auto;
         padding-bottom: 2px;
     }
@@ -1485,6 +1485,11 @@ body::before {
         justify-content: flex-start;
     }
 
+    .library-nav {
+        width: 100%;
+        justify-content: center;
+    }
+
     .top-center-controls {
         display: flex;
         flex: 1 1 100%;
@@ -1492,7 +1497,7 @@ body::before {
         min-width: 0;
         overflow: visible;
         flex-wrap: wrap;
-        justify-content: flex-start;
+        justify-content: center;
     }
 
     .top-center-controls .search-form {
@@ -1506,9 +1511,9 @@ body::before {
 }
 
 @media (max-width: 600px) {
-    .sticky-controls-wrapper { padding: 10px; }
-    .library-nav { width: 100%; justify-content: flex-start; }
-    .top-center-controls { gap: 6px; padding: 0; }
+    .sticky-controls-wrapper { position: sticky; top: 0; padding: 10px; }
+    .library-nav { width: 100%; justify-content: center; }
+    .top-center-controls { gap: 6px; padding: 0; justify-content: center; }
     .top-center-controls .search-form {
         order: -1;
         flex: 1 1 100%;
