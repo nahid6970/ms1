@@ -4,7 +4,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`, `templates/index.html`, `static/script.js`: TV card progress now displays watched released episodes / total released episodes; future episodes remain available in the episode list, and live actions recalculate the released-only badge.
+- `app.py`, `templates/index.html`, `static/script.js`: TV cards show released-only progress while future episodes remain in the list. Bottom-up Shift-click range marking is restored, with sequential requests preventing JSON save races.
 - `app.py`: Added preset TMDb discovery modes for Popular, Top Rated, and monthly release/air-date trending; combined media results are ranked before pagination so high-rated TV shows are not hidden.
 - `templates/discover.html`, `static/discover.js`: Added automatic preset loading without a query, remembered discovery mode, and compact labels: Search, Media, and Trending Month.
 - `static/style.css`: Moved TV episode progress and movie watched/unwatched badges to the poster top-right; made metadata badges square, fully watched badges light green with black text, and rating stars left-aligned.
@@ -15,4 +15,4 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Pending Task
 
-Run an end-to-end browser test at desktop and mobile widths: verify TMDb search/import, movie metadata refresh, release-date sorting, TVmaze updates, and responsive toolbar behavior.
+Run an end-to-end browser test at desktop/mobile widths for discovery, imports, refresh, sorting, TVmaze updates, and responsive layout.
