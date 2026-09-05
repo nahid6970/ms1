@@ -2112,3 +2112,28 @@ body::before {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
+
+/* Contain scroll inside edit/add/settings modals — no double scrollbar, no background scroll bleed. */
+#editShowModal,
+#addShowModal,
+#settingsModal,
+#hiddenShowsModal,
+#scanMissingModal,
+#scheduledUpdatesModal {
+    overflow: hidden;
+    overscroll-behavior: contain;
+}
+#editShowModal .modal-content,
+#addShowModal .modal-content,
+#settingsModal .modal-content,
+#hiddenShowsModal .modal-content,
+#scanMissingModal .modal-content,
+#scheduledUpdatesModal .modal-content {
+    max-height: calc(100vh - 8vh);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
