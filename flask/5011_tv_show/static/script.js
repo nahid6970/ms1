@@ -239,7 +239,7 @@ async function loadScheduledUpdatesList(list) {
             const lr = schedule.last_run_result;
             let lastRunHtml = '';
             if (lr) {
-                const ts = new Date(lr.timestamp).toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+                const ts = new Date(lr.timestamp).toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
                 if (lr.error) {
                     lastRunHtml = `<span class="schedule-last-run error" title="${escapeEpisodeText(lr.error)}">✗ ${ts}</span>`;
                 } else {
@@ -283,7 +283,7 @@ async function runScheduledNow(showId, btn) {
     try {
         const res = await fetch(`/api/show/${showId}/episodes/run_scheduled`, { method: 'POST' });
         const data = await res.json();
-        const ts = new Date().toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+        const ts = new Date().toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
         if (data.success) {
             if (infoEl) {
                 const old = infoEl.querySelector('.schedule-last-run');
