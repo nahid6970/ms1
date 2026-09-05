@@ -4,10 +4,11 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`, `templates/index.html`, `static/script.js`: TV cards show released-only progress while future episodes remain in the list. Bottom-up Shift-click range marking is restored, with sequential requests preventing JSON save races.
-- `app.py`: Added preset TMDb discovery modes for Popular, Top Rated, and monthly release/air-date trending; combined media results are ranked before pagination so high-rated TV shows are not hidden.
-- `templates/discover.html`, `static/discover.js`: Added automatic preset loading without a query, remembered discovery mode, and compact labels: Search, Media, and Trending Month.
-- `templates/index.html`, `templates/movies.html`, `static/style.css`: Fixed second toolbar layout — sort/settings/eye buttons wrapped in `.toolbar-right` with `margin-left: auto` to pin them to the right edge; `.top-center-controls` set to `flex-start` and `width: 100%`; search form given `flex: 1` with no max-width so it expands to fill all space between left buttons and right buttons.
+- `app.py`, `templates/index.html`, `static/script.js`, `static/style.css`: Edit modal status checkbox is now locked (disabled) when the scheduler is active for a show, preventing the scheduler from overwriting a manually-set status; lock icon and tooltip added via CSS/JS.
+- `app.py`, `static/script.js`, `static/style.css`: Added per-show "Clear Stats" button and a "Clear All" button in the Scheduled Updates modal to reset last-run result and timestamp for one or all shows.
+- `app.py`, `static/script.js`, `static/style.css`: Improved scheduler — grace window skips update if show was manually refreshed recently; manual "Run Now" button triggers immediate update for a show; last run result (success/fail/skipped) displayed in the modal.
+- `app.py`, `static/script.js`: Edit show form now submits via `fetch` instead of a full page reload, preserving the client-side search filter state after saving.
+- `templates/index.html`, `templates/movies.html`: Discover is now a nav tab alongside Shows and Movies on all three pages; the toolbar icon button for Discover is removed.
 - `static/script.js`: Blue dot beside each episode in the episodes modal now copies the full label (e.g. "Jujutsu Kaisen S03E05 Episode Title") to clipboard using `navigator.clipboard` with `execCommand` fallback; dot flashes green on success.
 
 # 3. Critical Context
