@@ -1016,7 +1016,10 @@ def edit_show(show_id):
         except (TypeError, ValueError):
             show['episode_update_month_day'] = datetime.now().day
         save_data(shows)
-        return redirect(url_for('index'))
+        query = request.args.get('query', '').strip()
+        if request.headers.get('Accept') == 'application/json':
+            return jsonify({'success': True})
+        return redirect(url_for('index', query=query) if query else url_for('index'))
     else:
         sort_episode_list(show)
         return jsonify(show)

@@ -102,7 +102,9 @@ async function openEditShowModal(showId) {
         });
     }
 
-    document.getElementById('editShowForm').action = `/edit_show/${show.id}`;
+    const currentQuery = new URLSearchParams(window.location.search).get('query') || '';
+    const queryParam = currentQuery ? `?query=${encodeURIComponent(currentQuery)}` : '';
+    document.getElementById('editShowForm').action = `/edit_show/${show.id}${queryParam}`;
 
     // Save scroll position before opening modal
     localStorage.setItem('scrollPosition', window.scrollY);
@@ -1105,6 +1107,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.style.display = 'none';
                 }
             });
+        });
+    }
+
+    // Intercept edit show form submit — use fetch so the search filter is preserved
+    const editShowForm = document.getElementById('editShowForm');
+    if (editShowForm) {
+        editShowForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const res = await fetch(this.action, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: formData,
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeEditShowModal();
+                } else {
+                    alert('Failed to save show.');
+                }
+            } catch (err) {
+                alert('Error saving show.');
+            }
         });
     }
 });
