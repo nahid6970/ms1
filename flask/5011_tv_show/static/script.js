@@ -228,12 +228,18 @@ async function loadScheduledUpdatesList(list) {
             : '';
 
         const rows = data.schedules.map(schedule => {
+            const fmt12 = t => {
+                const [h, m] = t.split(':').map(Number);
+                const ampm = h >= 12 ? 'PM' : 'AM';
+                const h12 = h % 12 || 12;
+                return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+            };
             const freqLabel = schedule.update_time
                 ? (schedule.frequency === 'weekly'
                     ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][schedule.weekday] + ' · '
                     : schedule.frequency === 'monthly'
                     ? 'Day ' + schedule.month_day + ' · '
-                    : '') + schedule.update_time
+                    : '') + fmt12(schedule.update_time)
                 : null;
 
             const lr = schedule.last_run_result;
