@@ -83,6 +83,8 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowEpisodeUpdateMonthDay').value = show.episode_update_month_day || new Date().getDate();
     updateScheduleOptionVisibility();
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
+    const lockEl = document.getElementById('editShowLockStatus');
+    if (lockEl) lockEl.checked = !!show.lock_status;
 
     // Set the rating radio button
     const ratingRadios = document.querySelectorAll('#editShowModal input[name="rating"]');

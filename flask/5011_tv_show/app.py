@@ -543,14 +543,15 @@ def run_show_episode_update(show, now=None):
     if error:
         return 0, 0, error
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
-    tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
-    if tmdb_details and not tmdb_error:
-        tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
-        if tmdb_image:
-            show['cover_image'] = tmdb_image
-        show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
-    else:
-        show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
+    if not show.get('lock_status'):
+        tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+        if tmdb_details and not tmdb_error:
+            tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
+            if tmdb_image:
+                show['cover_image'] = tmdb_image
+            show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+        else:
+            show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
     show['episodes_updated_at'] = now.isoformat()
     show['last_run_result'] = {
         'timestamp': now.isoformat(),
@@ -1078,6 +1079,7 @@ def edit_show(show_id):
         show['directory_path'] = request.form.get('directory_path', '')
         show['rating'] = request.form.get('rating', None) # Update rating field
         show['status'] = request.form.get('status', 'Continuing') # Update status field
+        show['lock_status'] = request.form.get('lock_status') == '1'
         show['sonarr_url'] = request.form.get('sonarr_url', '')
         show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
         frequency = request.form.get('episode_update_frequency', 'daily')

@@ -872,6 +872,12 @@ button.discover-add-button svg { width: 19px; height: 19px; fill: none; stroke: 
     margin: 15px 0 25px;
 }
 
+.status-lock-row { display: flex; align-items: center; gap: 10px; }
+.status-lock-row .modal-input { flex: 1; }
+.lock-status-label { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: #8e9bb0; cursor: pointer; white-space: nowrap; user-select: none; }
+.lock-status-label input[type="checkbox"] { accent-color: #34d399; width: 14px; height: 14px; cursor: pointer; }
+.lock-status-label:has(input:checked) { color: #34d399; }
+
 .rating-group label {
     cursor: pointer;
 }
