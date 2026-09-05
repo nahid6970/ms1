@@ -220,6 +220,11 @@ async function loadScheduledUpdatesList(list) {
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load schedules');
 
+        const hasAnyResult = data.schedules.some(s => s.last_run_result || s.last_run);
+        const clearAllBtn = hasAnyResult
+            ? `<button class="schedule-clear-all-btn" onclick="clearAllRunStats(this)" title="Clear all run stats">Clear All Stats</button>`
+            : '';
+
         const rows = data.schedules.map(schedule => {
             const freqLabel = schedule.update_time
                 ? (schedule.frequency === 'weekly'
@@ -242,6 +247,8 @@ async function loadScheduledUpdatesList(list) {
                 lastRunHtml = `<span class="schedule-last-run ok">Last: ${schedule.last_run}</span>`;
             }
 
+            const hasStat = !!(lr || schedule.last_run);
+
             return `
             <div class="scheduled-update-row" id="sched-row-${schedule.show_id}">
                 <div class="scheduled-update-info">
@@ -251,13 +258,16 @@ async function loadScheduledUpdatesList(list) {
                         : '<span class="scheduled-update-disabled">Not scheduled</span>'}
                     ${lastRunHtml}
                 </div>
-                <button class="schedule-run-btn" onclick="runScheduledNow(${schedule.show_id}, this)" title="Run now">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                </button>
+                <div class="schedule-row-actions">
+                    ${hasStat ? `<button class="schedule-clear-btn" onclick="clearRunStats(${schedule.show_id}, this)" title="Clear run stats">✕</button>` : ''}
+                    <button class="schedule-run-btn" onclick="runScheduledNow(${schedule.show_id}, this)" title="Run now">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </button>
+                </div>
             </div>`;
         }).join('') || '<p class="schedule-empty">No shows found.</p>';
 
-        list.innerHTML = rows;
+        list.innerHTML = (clearAllBtn ? `<div class="schedule-clear-all-row">${clearAllBtn}</div>` : '') + rows;
     } catch (error) {
         list.innerHTML = `<p class="schedule-empty">${escapeEpisodeText(error.message)}</p>`;
     }
@@ -299,6 +309,32 @@ async function runScheduledNow(showId, btn) {
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
     }
+}
+
+async function clearRunStats(showId, btn) {
+    btn.disabled = true;
+    try {
+        await fetch(`/api/show/${showId}/episodes/clear_run_stats`, { method: 'POST' });
+        const row = document.getElementById(`sched-row-${showId}`);
+        if (row) {
+            row.querySelector('.schedule-last-run')?.remove();
+            btn.remove();
+        }
+        // hide Clear All if no stats remain
+        if (!document.querySelector('.schedule-last-run')) {
+            document.querySelector('.schedule-clear-all-row')?.remove();
+        }
+    } catch(e) { btn.disabled = false; }
+}
+
+async function clearAllRunStats(btn) {
+    btn.disabled = true;
+    try {
+        await fetch('/api/shows/clear_all_run_stats', { method: 'POST' });
+        document.querySelectorAll('.schedule-last-run').forEach(el => el.remove());
+        document.querySelectorAll('.schedule-clear-btn').forEach(el => el.remove());
+        btn.closest('.schedule-clear-all-row')?.remove();
+    } catch(e) { btn.disabled = false; }
 }
 
 function closeScheduledUpdatesModal() {

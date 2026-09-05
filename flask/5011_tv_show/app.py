@@ -657,6 +657,26 @@ def run_scheduled_now(show_id):
         'timestamp': now.isoformat(),
     })
 
+@app.route('/api/show/<int:show_id>/episodes/clear_run_stats', methods=['POST'])
+def clear_run_stats(show_id):
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+    show.pop('last_run_result', None)
+    show.pop('episode_update_last_run', None)
+    save_data(shows)
+    return jsonify({'success': True})
+
+@app.route('/api/shows/clear_all_run_stats', methods=['POST'])
+def clear_all_run_stats():
+    shows = load_data()
+    for show in shows:
+        show.pop('last_run_result', None)
+        show.pop('episode_update_last_run', None)
+    save_data(shows)
+    return jsonify({'success': True})
+
 @app.route('/api/discover/search')
 def discover_search():
     query = request.args.get('q', '').strip()

@@ -1986,6 +1986,12 @@ body::before {
 .schedule-run-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #34d399; border-radius: 6px; background: transparent; color: #34d399; cursor: pointer; transition: background 0.15s; }
 .schedule-run-btn:hover { background: rgba(52,211,153,0.15); }
 .schedule-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.schedule-row-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.schedule-clear-btn { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid #4b637f; border-radius: 5px; background: transparent; color: #8e9bb0; cursor: pointer; font-size: 11px; transition: background 0.15s, color 0.15s; }
+.schedule-clear-btn:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: #f87171; }
+.schedule-clear-all-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.schedule-clear-all-btn { font-size: 0.75rem; padding: 4px 10px; border: 1px solid #4b637f; border-radius: 5px; background: transparent; color: #8e9bb0; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.schedule-clear-all-btn:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: #f87171; }
 .schedule-empty { color: #91a0b5; text-align: center; }
 @media (max-width: 540px) {
     .schedule-time-row { align-items: stretch; flex-direction: column; gap: 6px; }
