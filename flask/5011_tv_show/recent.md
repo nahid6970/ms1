@@ -7,7 +7,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`, `templates/index.html`, `static/script.js`: TV cards show released-only progress while future episodes remain in the list. Bottom-up Shift-click range marking is restored, with sequential requests preventing JSON save races.
 - `app.py`: Added preset TMDb discovery modes for Popular, Top Rated, and monthly release/air-date trending; combined media results are ranked before pagination so high-rated TV shows are not hidden.
 - `templates/discover.html`, `static/discover.js`: Added automatic preset loading without a query, remembered discovery mode, and compact labels: Search, Media, and Trending Month.
-- `static/style.css`: Moved progress/status badges top-right, made badges square, used light-green watched styling, left-aligned stars, and fixed centered responsive sticky toolbars.
+- `templates/index.html`, `templates/movies.html`, `static/style.css`: Fixed second toolbar layout — sort/settings/eye buttons wrapped in `.toolbar-right` with `margin-left: auto` to pin them to the right edge; `.top-center-controls` set to `flex-start` and `width: 100%`; search form given `flex: 1` with no max-width so it expands to fill all space between left buttons and right buttons.
 
 # 3. Critical Context
 

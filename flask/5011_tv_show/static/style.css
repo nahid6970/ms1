@@ -1320,7 +1320,6 @@ body::before {
     margin: 0 4px 0 8px;
     flex: 1;
     min-width: 140px;
-    max-width: 340px;
 }
 
 .search-wrapper { height: 36px; width: 100%; }
