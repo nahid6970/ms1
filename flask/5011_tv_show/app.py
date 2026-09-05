@@ -871,6 +871,7 @@ def index():
             if not episode.get('air_date') or str(episode.get('air_date')) <= today
         ]
         show['watched_count'] = sum(1 for episode in released_episode_list if episode.get('watched'))
+        show['watched_total_count'] = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))
         show['total_count'] = len(show.get('episodes', []))
         show['released_count'] = len(released_episode_list)
         

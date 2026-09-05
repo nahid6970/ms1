@@ -369,6 +369,16 @@
             "kind": "Exe",
             "id": "Freebuff.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Task Manager.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Class",
+            "id": "TMOG.TaskManager.MainWindow",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -481,6 +491,16 @@
             "kind": "Exe",
             "id": "Freebuff.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "Task Manager.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Class",
+            "id": "TMOG.TaskManager.MainWindow",
+            "matching_strategy": "Legacy"
         }
     ],
     "gui_settings": {

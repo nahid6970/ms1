@@ -264,12 +264,13 @@ function updateShowProgressBadge(showCard, episodes) {
     const releasedWatched = releasedCount > 0 && episodes
         .filter(isEpisodeCountedAsReleased)
         .every(episode => episode.watched);
+    const allEpisodesWatched = episodes.length > 0 && episodes.every(episode => episode.watched);
     countEl.textContent = `${watchedCount}/${total}`;
     countEl.classList.remove('no-episodes-watched', 'some-episodes-watched', 'all-episodes-watched');
     countEl.classList.add(watchedCount === 0 ? 'no-episodes-watched' : releasedWatched ? 'all-episodes-watched' : 'some-episodes-watched');
     showCard.dataset.releasedCount = releasedCount;
     showCard.classList.toggle('completed', releasedWatched);
-    showCard.classList.toggle('ended-completed', releasedWatched && showCard.dataset.status === 'Ended');
+    showCard.classList.toggle('ended-completed', allEpisodesWatched && showCard.dataset.status === 'Ended');
 }
 
 function renderEpisodes(episodes, showId) {
@@ -288,6 +289,7 @@ function renderEpisodes(episodes, showId) {
     episodes.forEach(ep => {
         const li = document.createElement('li');
         li.className = `episode-item ${ep.watched ? 'episode-watched' : ''}${isReleasedAndUnwatched(ep) ? ' episode-released-unwatched' : ''}`;
+        li.dataset.episodeId = ep.id;
 
         const episodeNumber = ep.season_number != null && ep.episode_number != null
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
@@ -295,7 +297,7 @@ function renderEpisodes(episodes, showId) {
         const airDate = formatEpisodeAirDate(ep.air_date);
         li.innerHTML = `
             <div class="episode-main-info">
-                <input type="checkbox" ${ep.watched ? 'checked' : ''} onchange="toggleWatched(${showId}, ${ep.id}, this)">
+                <input type="checkbox" ${ep.watched ? 'checked' : ''} onclick="handleEpisodeCheckboxClick(event, ${showId}, ${ep.id}, this)">
                 <div class="episode-title-block">
                     <span class="episode-number">${episodeNumber}</span>
                     <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
@@ -893,17 +895,41 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshEpisodesInModal(event, refreshOpenEpisodes);
     });
 
-    const episodesListContainer = document.getElementById('episodesListContainer');
-    if (episodesListContainer) episodesListContainer.addEventListener('mouseover', event => {
-        if (!event.shiftKey) return;
-        const episodeItem = event.target.closest('.episode-item');
-        if (!episodeItem || !episodesListContainer.contains(episodeItem)) return;
-        if (event.relatedTarget && episodeItem.contains(event.relatedTarget)) return;
-        const checkbox = episodeItem.querySelector('input[type="checkbox"]');
-        if (checkbox && !checkbox.checked) checkbox.click();
-    });
-
     // Helper functions for popup interactions
+    window.handleEpisodeCheckboxClick = async function(event, showId, episodeId, checkbox) {
+        event.preventDefault();
+        const clickedIndex = currentEpisodes.findIndex(episode => episode.id === episodeId);
+        if (clickedIndex < 0) return;
+
+        const targetWatched = !currentEpisodes[clickedIndex].watched;
+        const selectedEpisodes = event.shiftKey
+            ? currentEpisodes.slice(clickedIndex)
+            : [currentEpisodes[clickedIndex]];
+        const changes = selectedEpisodes.filter(episode => Boolean(episode.watched) !== targetWatched);
+
+        selectedEpisodes.forEach(episode => {
+            const item = document.querySelector(`#episodesListContainer .episode-item[data-episode-id="${episode.id}"]`);
+            const itemCheckbox = item?.querySelector('input[type="checkbox"]');
+            if (itemCheckbox) itemCheckbox.checked = targetWatched;
+        });
+
+        try {
+            for (const episode of changes) {
+                const response = await fetch(`/toggle_watched/${showId}/${episode.id}`);
+                const data = await response.json();
+                if (!response.ok || !data.success || data.watched !== targetWatched) {
+                    throw new Error('Unable to update episode status');
+                }
+                episode.watched = targetWatched;
+            }
+            renderEpisodes(currentEpisodes, showId);
+            updateShowProgressBadge(document.querySelector(`.show-card[data-show-id="${showId}"]`), currentEpisodes);
+        } catch (error) {
+            renderEpisodes(currentEpisodes, showId);
+            alert(error.message);
+        }
+    };
+
     window.toggleWatched = function(showId, episodeId, checkbox) {
         fetch(`/toggle_watched/${showId}/${episodeId}`)
             .then(response => response.json())
