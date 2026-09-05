@@ -8,6 +8,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`: Added preset TMDb discovery modes for Popular, Top Rated, and monthly release/air-date trending; combined media results are ranked before pagination so high-rated TV shows are not hidden.
 - `templates/discover.html`, `static/discover.js`: Added automatic preset loading without a query, remembered discovery mode, and compact labels: Search, Media, and Trending Month.
 - `templates/index.html`, `templates/movies.html`, `static/style.css`: Fixed second toolbar layout — sort/settings/eye buttons wrapped in `.toolbar-right` with `margin-left: auto` to pin them to the right edge; `.top-center-controls` set to `flex-start` and `width: 100%`; search form given `flex: 1` with no max-width so it expands to fill all space between left buttons and right buttons.
+- `static/script.js`: Blue dot beside each episode in the episodes modal now copies the full label (e.g. "Jujutsu Kaisen S03E05 Episode Title") to clipboard using `navigator.clipboard` with `execCommand` fallback; dot flashes green on success.
 
 # 3. Critical Context
 

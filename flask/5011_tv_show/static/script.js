@@ -273,6 +273,42 @@ function updateShowProgressBadge(showCard, episodes) {
     showCard.classList.toggle('ended-completed', allEpisodesWatched && showCard.dataset.status === 'Ended');
 }
 
+function copyEpisodeLabel(showId, episodeId, dotEl) {
+    const ep = currentEpisodes.find(e => e.id === episodeId);
+    if (!ep) return;
+    const showTitle = document.getElementById('episodesModalTitle').textContent.trim();
+    const code = ep.season_number != null && ep.episode_number != null
+        ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
+        : '';
+    const label = [showTitle, code, ep.title].filter(Boolean).join(' ');
+
+    // try modern clipboard API first, fall back to execCommand
+    const flash = () => {
+        if (!dotEl) return;
+        dotEl.style.background = '#27ae60';
+        dotEl.title = 'Copied!';
+        setTimeout(() => { dotEl.style.background = '#3498db'; dotEl.title = 'Copy episode label'; }, 1200);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(label).then(flash).catch(() => fallbackCopy(label, flash));
+    } else {
+        fallbackCopy(label, flash);
+    }
+}
+
+function fallbackCopy(text, callback) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    if (callback) callback();
+}
+
 function renderEpisodes(episodes, showId) {
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
@@ -305,7 +341,7 @@ function renderEpisodes(episodes, showId) {
                 </div>
             </div>
             <div style="display: flex; gap: 8px;">
-                <div class="edit-dot" onclick="openEditEpisodeModal(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
+                <div class="edit-dot" onclick="copyEpisodeLabel(${showId}, ${ep.id}, this)" title="Copy episode label" style="width: 10px; height: 10px; border-radius: 50%; background: #3498db; cursor: pointer;"></div>
                 <div class="delete-dot" onclick="deleteEpisode(${showId}, ${ep.id})" style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; cursor: pointer;"></div>
             </div>
         `;
