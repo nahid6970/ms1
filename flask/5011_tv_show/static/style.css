@@ -1975,10 +1975,17 @@ body::before {
 .scheduled-updates-content { width: min(560px, calc(100% - 28px)); max-width: none; }
 .scheduled-updates-content > .modal-help { margin: -8px 0 16px; }
 .scheduled-updates-list { display: grid; gap: 8px; max-height: 55vh; overflow-y: auto; padding: 2px; }
-.scheduled-update-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; background: #172337; border: 1px solid #2d425e; border-radius: 4px; }
+.scheduled-update-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: #172337; border: 1px solid #2d425e; border-radius: 4px; }
+.scheduled-update-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; flex-wrap: wrap; }
 .scheduled-update-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5edf8; }
 .scheduled-update-time { flex: 0 0 auto; color: #86efac; font-variant-numeric: tabular-nums; font-weight: 700; }
 .scheduled-update-disabled { flex: 0 0 auto; color: #8492a6; font-size: 0.8rem; }
+.schedule-last-run { flex: 0 0 auto; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.schedule-last-run.ok { color: #60a5fa; }
+.schedule-last-run.error { color: #f87171; }
+.schedule-run-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #34d399; border-radius: 6px; background: transparent; color: #34d399; cursor: pointer; transition: background 0.15s; }
+.schedule-run-btn:hover { background: rgba(52,211,153,0.15); }
+.schedule-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .schedule-empty { color: #91a0b5; text-align: center; }
 @media (max-width: 540px) {
     .schedule-time-row { align-items: stretch; flex-direction: column; gap: 6px; }

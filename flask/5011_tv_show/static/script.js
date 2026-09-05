@@ -210,21 +210,94 @@ async function openScheduledUpdatesModal() {
     if (!modal || !list) return;
     modal.style.display = 'block';
     document.body.classList.add('modal-open');
+    await loadScheduledUpdatesList(list);
+}
+
+async function loadScheduledUpdatesList(list) {
     list.innerHTML = '<p class="schedule-empty">Loading schedules...</p>';
     try {
         const response = await fetch('/api/show-schedules');
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load schedules');
-        list.innerHTML = data.schedules.map(schedule => `
-            <div class="scheduled-update-row">
-                <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
-                ${schedule.update_time
-                    ? `<span class="scheduled-update-time">${schedule.frequency === 'weekly' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][schedule.weekday] + ' · ' : schedule.frequency === 'monthly' ? 'Day ' + schedule.month_day + ' · ' : ''}${schedule.update_time}</span>`
-                    : '<span class="scheduled-update-disabled">Not scheduled</span>'}
-            </div>
-        `).join('') || '<p class="schedule-empty">No shows found.</p>';
+
+        const rows = data.schedules.map(schedule => {
+            const freqLabel = schedule.update_time
+                ? (schedule.frequency === 'weekly'
+                    ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][schedule.weekday] + ' · '
+                    : schedule.frequency === 'monthly'
+                    ? 'Day ' + schedule.month_day + ' · '
+                    : '') + schedule.update_time
+                : null;
+
+            const lr = schedule.last_run_result;
+            let lastRunHtml = '';
+            if (lr) {
+                const ts = new Date(lr.timestamp).toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+                if (lr.error) {
+                    lastRunHtml = `<span class="schedule-last-run error" title="${escapeEpisodeText(lr.error)}">✗ ${ts}</span>`;
+                } else {
+                    lastRunHtml = `<span class="schedule-last-run ok" title="${lr.added} added, ${lr.updated} updated">✓ ${ts} · +${lr.added} ~${lr.updated}</span>`;
+                }
+            } else if (schedule.last_run) {
+                lastRunHtml = `<span class="schedule-last-run ok">Last: ${schedule.last_run}</span>`;
+            }
+
+            return `
+            <div class="scheduled-update-row" id="sched-row-${schedule.show_id}">
+                <div class="scheduled-update-info">
+                    <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
+                    ${freqLabel
+                        ? `<span class="scheduled-update-time">${freqLabel}</span>`
+                        : '<span class="scheduled-update-disabled">Not scheduled</span>'}
+                    ${lastRunHtml}
+                </div>
+                <button class="schedule-run-btn" onclick="runScheduledNow(${schedule.show_id}, this)" title="Run now">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+            </div>`;
+        }).join('') || '<p class="schedule-empty">No shows found.</p>';
+
+        list.innerHTML = rows;
     } catch (error) {
         list.innerHTML = `<p class="schedule-empty">${escapeEpisodeText(error.message)}</p>`;
+    }
+}
+
+async function runScheduledNow(showId, btn) {
+    const row = document.getElementById(`sched-row-${showId}`);
+    const infoEl = row ? row.querySelector('.scheduled-update-info') : null;
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
+    try {
+        const res = await fetch(`/api/show/${showId}/episodes/run_scheduled`, { method: 'POST' });
+        const data = await res.json();
+        const ts = new Date().toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+        if (data.success) {
+            if (infoEl) {
+                const old = infoEl.querySelector('.schedule-last-run');
+                if (old) old.remove();
+                const span = document.createElement('span');
+                span.className = 'schedule-last-run ok';
+                span.title = `${data.added} added, ${data.updated} updated`;
+                span.textContent = `✓ ${ts} · +${data.added} ~${data.updated}`;
+                infoEl.appendChild(span);
+            }
+        } else {
+            if (infoEl) {
+                const old = infoEl.querySelector('.schedule-last-run');
+                if (old) old.remove();
+                const span = document.createElement('span');
+                span.className = 'schedule-last-run error';
+                span.title = data.message || 'Error';
+                span.textContent = `✗ ${ts}`;
+                infoEl.appendChild(span);
+            }
+        }
+    } catch (err) {
+        // silently restore button
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
     }
 }
 

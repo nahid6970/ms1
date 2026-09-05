@@ -532,16 +532,59 @@ def sync_radarr_movies():
 
 def run_scheduled_episode_updates():
     """Refresh shows whose daily update time matches the local server time."""
+def run_show_episode_update(show, now=None):
+    """Run episode update for a single show. Returns (added, updated, error_message)."""
+    if now is None:
+        now = datetime.now()
+    tvmaze_show, error = tvmaze_show_for_catalog_item(show)
+    if error:
+        return 0, 0, error
+    episodes, error = tvmaze_request(f"shows/{tvmaze_show['id']}/episodes", {'specials': 1})
+    if error:
+        return 0, 0, error
+    added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+    if tmdb_details and not tmdb_error:
+        tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
+        if tmdb_image:
+            show['cover_image'] = tmdb_image
+        show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+    else:
+        show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
+    show['episodes_updated_at'] = now.isoformat()
+    show['last_run_result'] = {
+        'timestamp': now.isoformat(),
+        'added': added,
+        'updated': updated,
+        'error': None,
+    }
+    return added, updated, None
+
+
+def run_scheduled_episode_updates():
+    """Refresh shows whose scheduled update time has passed today (with up to 1hr grace window)."""
     now = datetime.now()
     today = now.date().isoformat()
-    current_time = now.strftime('%H:%M')
     shows = load_data()
     changed = False
 
     for show in shows:
-        if show.get('episode_update_time') != current_time:
+        update_time_str = show.get('episode_update_time', '').strip()
+        if not update_time_str:
             continue
         if show.get('episode_update_last_run') == today:
+            continue
+        try:
+            scheduled = now.replace(
+                hour=int(update_time_str.split(':')[0]),
+                minute=int(update_time_str.split(':')[1]),
+                second=0, microsecond=0
+            )
+        except (ValueError, IndexError):
+            continue
+        # run if scheduled time has passed but not more than 1 hour ago
+        delta = (now - scheduled).total_seconds()
+        if delta < 0 or delta > 3600:
             continue
         frequency = show.get('episode_update_frequency', 'daily')
         try:
@@ -551,23 +594,10 @@ def run_scheduled_episode_updates():
                 continue
         except (TypeError, ValueError):
             continue
-        tvmaze_show, error = tvmaze_show_for_catalog_item(show)
+
+        added, updated, error = run_show_episode_update(show, now)
         if error:
-            continue
-        episodes, error = tvmaze_request(f"shows/{tvmaze_show['id']}/episodes", {'specials': 1})
-        if error:
-            continue
-        merge_tvmaze_episodes(show, tvmaze_show, episodes)
-        tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
-        if tmdb_details and not tmdb_error:
-            tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
-            if tmdb_image:
-                show['cover_image'] = tmdb_image
-            show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
-        else:
-            show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
-        show['episode_source'] = 'tvmaze'
-        show['episodes_updated_at'] = now.isoformat()
+            show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
         show['episode_update_last_run'] = today
         changed = True
 
@@ -597,10 +627,35 @@ def show_schedules():
         'frequency': show.get('episode_update_frequency', 'daily'),
         'weekday': show.get('episode_update_weekday', 0),
         'month_day': show.get('episode_update_month_day', 1),
-        'last_run': show.get('episode_update_last_run') or ''
+        'last_run': show.get('episode_update_last_run') or '',
+        'last_run_result': show.get('last_run_result') or None,
     } for show in load_data()]
     schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
+
+
+@app.route('/api/show/<int:show_id>/episodes/run_scheduled', methods=['POST'])
+def run_scheduled_now(show_id):
+    """Manually trigger a scheduled episode update for a single show."""
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+    now = datetime.now()
+    added, updated, error = run_show_episode_update(show, now)
+    if error:
+        show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
+        save_data(shows)
+        return jsonify({'success': False, 'message': error}), 502
+    show['episode_update_last_run'] = now.date().isoformat()
+    save_data(shows)
+    return jsonify({
+        'success': True,
+        'message': f'{added} added, {updated} updated.',
+        'added': added,
+        'updated': updated,
+        'timestamp': now.isoformat(),
+    })
 
 @app.route('/api/discover/search')
 def discover_search():
