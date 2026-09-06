@@ -334,6 +334,13 @@ body {
 .btn-sonarr          { background: #06b6d4; color: white; }
 .btn-delete          { background: #ef4444; color: white; }
 
+/* First two buttons side by side */
+.hover-btn-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
 /* Hover darkens each button */
 .btn-list:hover            { background: #17a046; transform: scale(1.1); }
 .btn-sync:hover            { background: #2563eb; transform: scale(1.1); }
