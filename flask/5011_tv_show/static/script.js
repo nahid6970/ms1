@@ -490,7 +490,7 @@ function renderEpisodes(episodes, showId, fileSet, scanMode) {
                     <span class="episode-number">${episodeNumber}</span>
                     <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
                     ${fileIconHtml}
-                    ${airDate ? `<span class="episode-airdate"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${airDate}${airTime ? ' · ' + airTime : ''}</span>` : ''}
+                    ${airDate ? `<span class="episode-airdate"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:relative;top:1px;flex-shrink:0;margin-right:3px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${airDate}${airTime ? ' · ' + airTime : ''}</span>` : ''}
                 </div>
             </div>
             <div style="display: flex; gap: 8px;">
