@@ -18,6 +18,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`: Default `last_episode` show sorting now uses the displayed Bangladesh `air_date` + `airtime` together, preventing incorrect ordering for episodes airing at different times on the same date.
 - `static/style.css`: Hidden Shows modal uses a fixed viewport-height, scrollable max-content grid that preserves 2:3 poster thumbnails; cards use square corners and omit the redundant `Ended` status label.
 - `app.py`: The hourly whole-Sonarr-storage scan now hydrates newly discovered shows from TVmaze before attaching files, preventing raw filename episodes from duplicating TVmaze episodes.
+- `app.py`: The hourly combined scan now runs the full storage scan after auto-adding folders on every interval run, matching the Scan Storage button consistently.
 
 # 3. Critical Context
 

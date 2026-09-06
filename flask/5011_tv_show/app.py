@@ -494,10 +494,7 @@ def scan_and_update_episodes():
 def scan_and_add_missing_shows():
     """Combined function: scan existing shows for new episodes AND auto-add missing shows"""
     print("Starting combined scan: episodes + missing shows...")
-    
-    # First, scan existing shows for new episodes
-    scan_and_update_episodes()
-    
+
     # Then, auto-add any missing shows
     missing_shows = scan_for_missing_shows()
     shows = load_data()
@@ -554,12 +551,13 @@ def scan_and_add_missing_shows():
     
     if added_count > 0:
         save_data(shows)
-        # Match files for newly added folders against the TVmaze episodes
-        # created above, using the same logic as the manual sync button.
-        scan_and_update_episodes()
         print(f"Auto-added {added_count} missing shows.")
     else:
         print("No missing shows found to add.")
+
+    # Always run the same complete storage scan used by the Scan Storage
+    # button, after newly discovered folders have been added.
+    scan_and_update_episodes()
     
     print("Combined scan completed.")
 
