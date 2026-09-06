@@ -469,8 +469,8 @@ function renderEpisodes(episodes, showId, fileSet) {
                 <input type="checkbox" ${ep.watched ? 'checked' : ''} onclick="handleEpisodeCheckboxClick(event, ${showId}, ${ep.id}, this)">
                 <div class="episode-title-block">
                     <span class="episode-number">${episodeNumber}</span>
-                    ${fileIconHtml}
                     <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
+                    ${fileIconHtml}
                     ${airDate ? `<span class="episode-airdate">Air date: ${airDate}</span>` : ''}
                 </div>
             </div>
