@@ -990,7 +990,7 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 .hidden-show-item {
     background: #222;
     border: 1px solid #333;
-    border-radius: 12px;
+    border-radius: 0;
     overflow: hidden;
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
@@ -1044,12 +1044,7 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 }
 
 .hidden-show-item p.status {
-    color: #1db954;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: bold;
-    margin-top: 6px;
+    display: none;
 }
 
 /* Missing Episodes Modal */
