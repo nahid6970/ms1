@@ -2158,3 +2158,22 @@ body::before {
 
 /* Wider edit-show modal */
 #editShowModal > div { max-width: 620px; }
+
+/* Side-by-side fields in modal forms */
+.modal-form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+.modal-form-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+.modal-form-col label {
+    margin-bottom: 4px;
+}
+.modal-form-col-narrow {
+    flex: 0 0 100px;
+}

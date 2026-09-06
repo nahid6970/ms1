@@ -190,10 +190,16 @@
             <h2 class="modal-title">Edit Show</h2>
             <form id="editShowForm" action="/edit_show" method="post" class="modal-form">
                 <input type="hidden" id="editShowId" name="id">
-                <label for="editShowTitle">Title:</label>
-                <input type="text" id="editShowTitle" name="title" class="modal-input" required>
-                <label for="editShowYear">Year:</label>
-                <input type="number" id="editShowYear" name="year" class="modal-input">
+                <div class="modal-form-row">
+                    <div class="modal-form-col">
+                        <label for="editShowTitle">Title:</label>
+                        <input type="text" id="editShowTitle" name="title" class="modal-input" required>
+                    </div>
+                    <div class="modal-form-col modal-form-col-narrow">
+                        <label for="editShowYear">Year:</label>
+                        <input type="number" id="editShowYear" name="year" class="modal-input">
+                    </div>
+                </div>
                 <label for="editShowCoverImage">Cover Image URL:</label>
                 <input type="url" id="editShowCoverImage" name="cover_image" class="modal-input">
                 <label for="editShowDirectoryPath">Directory Path (Optional):</label>
