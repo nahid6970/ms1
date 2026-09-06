@@ -78,6 +78,8 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
     const filePatternEl = document.getElementById('editShowFilePattern');
     if (filePatternEl) filePatternEl.value = show.episode_file_pattern || '';
+    const scanModeEl = document.getElementById('editShowScanMode');
+    if (scanModeEl) scanModeEl.value = show.scan_mode || 'sxxexx';
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowEpisodeUpdateTime').value = show.episode_update_time || '';
     document.getElementById('editShowEpisodeUpdateFrequency').value = show.episode_update_frequency || 'daily';

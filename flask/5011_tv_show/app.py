@@ -347,35 +347,85 @@ def scan_and_update_episodes():
     print("Scanning for new episodes...")
     shows = load_data()
     updated_shows = False
+    VIDEO_EXTS = {'.mp4', '.mkv', '.avi', '.mov', '.webm', '.m4v', '.ts'}
+    SXXEXX = re.compile(r'[Ss](\d{1,2})[Ee](\d{1,2})')
+
     for show in shows:
         if 'directory_path' in show and show['directory_path']:
             dir_path = show['directory_path']
-            if os.path.isdir(dir_path):
-                existing_episode_titles = {e['title'] for e in show['episodes']}
-                episodes_added = False
-                for root, _, files in os.walk(dir_path):
-                    for filename in files:
-                        name, ext = os.path.splitext(filename)
-                        if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                            if name not in existing_episode_titles:
-                                new_episode = {
-                                    'id': len(show['episodes']) + 1,
+            if not os.path.isdir(dir_path):
+                print(f"Directory not found for {show['title']}: {dir_path}")
+                continue
+
+            # Build lookup: (season, episode) -> episode object
+            by_number = {
+                (int(ep['season_number']), int(ep['episode_number'])): ep
+                for ep in show['episodes']
+                if ep.get('season_number') is not None and ep.get('episode_number') is not None
+            }
+            existing_titles = {ep['title'] for ep in show['episodes']}
+            episodes_added = False
+
+            for root, _, files in os.walk(dir_path):
+                for filename in files:
+                    name, ext = os.path.splitext(filename)
+                    if ext.lower() not in VIDEO_EXTS:
+                        continue
+
+                    matched = False
+                    scan_mode = show.get('scan_mode', 'sxxexx')
+
+                    # --- Try SxxExx match first (unless show is in title-match mode) ---
+                    if scan_mode != 'title':
+                        m = SXXEXX.search(name)
+                        if m:
+                            key = (int(m.group(1)), int(m.group(2)))
+                            if key in by_number:
+                                ep = by_number[key]
+                                if not ep.get('has_file'):
+                                    ep['has_file'] = True
+                                    ep['file_name'] = name
+                                    updated_shows = True
+                                matched = True
+                            else:
+                                new_ep = {
+                                    'id': max((ep.get('id', 0) for ep in show['episodes']), default=0) + 1,
                                     'title': name,
+                                    'season_number': key[0],
+                                    'episode_number': key[1],
+                                    'has_file': True,
+                                    'file_name': name,
                                     'watched': False,
                                     'added_date': datetime.now().isoformat(),
                                     'notify': 'unseen'
                                 }
-                                show['episodes'].insert(0, new_episode)
-                                existing_episode_titles.add(name)
+                                show['episodes'].insert(0, new_ep)
+                                by_number[key] = new_ep
+                                existing_titles.add(name)
                                 updated_shows = True
                                 episodes_added = True
-                
-                # Re-apply current sort order if episodes were added and sort is alphabetical
-                if episodes_added and show.get('episode_sort_type') == 'alphabetical':
-                    order = show.get('episode_sort_order', 'asc')
-                    show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
-            else:
-                print(f"Directory not found for {show['title']}: {dir_path}")
+                                matched = True
+
+                    # --- Fall back to exact title match ---
+                    if not matched and name not in existing_titles:
+                        new_ep = {
+                            'id': max((ep.get('id', 0) for ep in show['episodes']), default=0) + 1,
+                            'title': name,
+                            'has_file': True,
+                            'file_name': name,
+                            'watched': False,
+                            'added_date': datetime.now().isoformat(),
+                            'notify': 'unseen'
+                        }
+                        show['episodes'].insert(0, new_ep)
+                        existing_titles.add(name)
+                        updated_shows = True
+                        episodes_added = True
+
+            if episodes_added and show.get('episode_sort_type') == 'alphabetical':
+                order = show.get('episode_sort_order', 'asc')
+                show['episodes'].sort(key=lambda x: x['title'].lower(), reverse=(order == 'desc'))
+
     if updated_shows:
         save_data(shows)
         print("New episodes found and updated.")
@@ -1084,6 +1134,7 @@ def edit_show(show_id):
         show['sonarr_url'] = request.form.get('sonarr_url', '')
         show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
         show['episode_file_pattern'] = request.form.get('episode_file_pattern', '').strip()
+        show['scan_mode'] = request.form.get('scan_mode', 'sxxexx')
         frequency = request.form.get('episode_update_frequency', 'daily')
         show['episode_update_frequency'] = frequency if frequency in {'daily', 'weekly', 'monthly'} else 'daily'
         try:
