@@ -11,6 +11,8 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`, `templates/index.html`, `static/script.js`: Fixed file sync duplicates — `scan_and_update_episodes` extracts `SxxExx` or `YYYY-MM-DD` (per `scan_mode`) from filenames, matches existing TVmaze episodes by `(season, episode)` or `air_date`, sets `has_file=True`/`file_name` instead of creating duplicates. Title-match fallback for non-standard shows.
 - `app.py`, `static/script.js`: TVmaze episode refresh (`refreshEpisodesInModal`, `updateShowEpisodes`) now calls `patchShowCard` to live-update cover, status, and TMDb rating badge without reload. New `resolve_tmdb_for_show` helper auto-discovers `tmdb_id` via TVmaze `externals.thetvdb` → TMDb `/find` (then `imdb` fallback) for manually added shows; also refreshes `tmdb_rating` from TMDb `vote_average`; falls back to TVmaze `image.original` for cover when no TMDb available.
 - `app.py`: `last_episode` sort now skips future-dated episodes — only episodes with `air_date` ≤ today are considered, preventing upcoming episodes from inflating a show's sort position.
+- `templates/index.html`, `static/style.css`: Title and Year fields shown side by side in Edit Show modal via `.modal-form-row` / `.modal-form-col` flex layout.
+- `app.py`: Scheduler overhauled — replaced same-day window check with `get_last_due_date()` helper that computes the most recent due date per frequency (daily/weekly/monthly); missed runs (PC was off) are caught up on next startup regardless of how much time has passed. Due shows are processed one-by-one with a 3-second stagger between API calls to avoid rate-limit bursts; each show is saved immediately after update so progress survives a mid-batch restart.
 
 # 3. Critical Context
 

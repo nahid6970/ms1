@@ -11,6 +11,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta
+import time
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import requests
 import hashlib
@@ -723,37 +724,46 @@ def get_last_due_date(show, now):
 
 
 def run_scheduled_episode_updates():
-    """Refresh shows whose scheduled update time has passed — catches up missed runs."""
+    """Refresh shows whose scheduled update time has passed — catches up missed runs.
+    Shows are processed one at a time with a short delay to avoid hammering APIs."""
     now = datetime.now()
     shows = load_data()
-    changed = False
 
+    # Collect IDs of shows that are due — don't run yet
+    due_show_ids = []
     for show in shows:
         update_time_str = show.get('episode_update_time', '').strip()
         if not update_time_str:
             continue
-
         last_due = get_last_due_date(show, now)
         if last_due is None:
             continue
-
         last_run_str = show.get('episode_update_last_run', '')
         if last_run_str:
             try:
-                last_run_date = datetime.strptime(last_run_str, '%Y-%m-%d').date()
-                if last_run_date >= last_due:
-                    continue  # Already ran on or after the last due date
+                if datetime.strptime(last_run_str, '%Y-%m-%d').date() >= last_due:
+                    continue
             except ValueError:
                 pass
+        due_show_ids.append(show['id'])
 
+    if not due_show_ids:
+        return
+
+    # Process due shows one by one with a delay between each
+    for i, show_id in enumerate(due_show_ids):
+        if i > 0:
+            time.sleep(3)  # 3-second gap between shows — keeps API rate limits happy
+        # Reload fresh data each iteration so we always write the latest state
+        shows = load_data()
+        show = next((s for s in shows if s['id'] == show_id), None)
+        if not show:
+            continue
         added, updated, error = run_show_episode_update(show, now)
         if error:
             show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
         show['episode_update_last_run'] = now.date().isoformat()
-        changed = True
-
-    if changed:
-        save_data(shows)
+        save_data(shows)  # Save after each show so progress survives a restart
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=scan_and_add_missing_shows, trigger="interval", hours=1)
