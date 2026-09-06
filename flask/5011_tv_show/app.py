@@ -44,6 +44,7 @@ def load_settings():
         "default_shows_order": "asc",
         "default_movies_sort": "title",
         "default_movies_order": "asc",
+        "storage_scan_interval_minutes": 60,
         "sonarr_url": "http://192.168.0.101:8989",
         "sonarr_api_key": "",
         "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr",
@@ -794,7 +795,13 @@ def run_scheduled_episode_updates():
         save_data(shows)  # Save after each show so progress survives a restart
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=scan_and_add_missing_shows, trigger="interval", hours=1)
+scheduler.add_job(
+    func=scan_and_add_missing_shows,
+    trigger="interval",
+    minutes=load_settings().get('storage_scan_interval_minutes', 60),
+    id='storage_scan',
+    replace_existing=True
+)
 scheduler.add_job(func=sync_radarr_movies, trigger="interval", hours=1)
 scheduler.add_job(func=run_scheduled_episode_updates, trigger="interval", minutes=1, id='scheduled_episode_updates', replace_existing=True, max_instances=1)
 scheduler.start()
@@ -1692,6 +1699,11 @@ def api_settings():
         settings['default_shows_order'] = data.get('default_shows_order', settings.get('default_shows_order', 'asc'))
         settings['default_movies_sort'] = data.get('default_movies_sort', settings.get('default_movies_sort', 'title'))
         settings['default_movies_order'] = data.get('default_movies_order', settings.get('default_movies_order', 'asc'))
+        try:
+            scan_interval = int(data.get('storage_scan_interval_minutes', settings.get('storage_scan_interval_minutes', 60)))
+        except (TypeError, ValueError):
+            scan_interval = 60
+        settings['storage_scan_interval_minutes'] = max(1, min(scan_interval, 10080))
         settings['sonarr_url'] = data.get('sonarr_url', settings.get('sonarr_url', 'http://192.168.0.101:8989'))
         settings['sonarr_api_key'] = data.get('sonarr_api_key', settings.get('sonarr_api_key', ''))
         settings['root_shows_folder'] = data.get('root_shows_folder', settings.get('root_shows_folder', r"C:\Users\nahid\Downloads\@sonarr"))
@@ -1700,6 +1712,8 @@ def api_settings():
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
         save_settings(settings)
+        if 'scheduler' in globals():
+            scheduler.reschedule_job('storage_scan', trigger='interval', minutes=settings['storage_scan_interval_minutes'])
         return jsonify({'success': True})
     return jsonify(load_settings())
 

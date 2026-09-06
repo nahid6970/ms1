@@ -738,6 +738,7 @@ async function openSettingsModal() {
         const radarrUrlInput = document.getElementById('radarrApiUrl');
         const radarrKeyInput = document.getElementById('radarrApiKey');
         const moviesFolderInput = document.getElementById('rootMoviesFolder');
+        const storageScanIntervalInput = document.getElementById('storageScanInterval');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
         if (defaultShowsSortInput) defaultShowsSortInput.value = settings.default_shows_sort || 'title';
@@ -750,6 +751,7 @@ async function openSettingsModal() {
         if (radarrUrlInput) radarrUrlInput.value = settings.radarr_url || 'http://192.168.0.101:7878';
         if (radarrKeyInput) radarrKeyInput.value = settings.radarr_api_key || '';
         if (moviesFolderInput) moviesFolderInput.value = settings.root_movies_folder || 'C:\\Users\\nahid\\Downloads\\@radarr';
+        if (storageScanIntervalInput) storageScanIntervalInput.value = settings.storage_scan_interval_minutes || 60;
 
         const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
         if (fileIconsToggle) fileIconsToggle.checked = settings.episode_file_icons_enabled !== false;
@@ -903,6 +905,7 @@ async function saveSettings() {
     const radarrApiKey = document.getElementById('radarrApiKey').value;
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
     const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
+    const storageScanInterval = document.getElementById('storageScanInterval')?.value || 60;
     
     try {
         const response = await fetch('/api/settings', {
@@ -922,7 +925,8 @@ async function saveSettings() {
                 radarr_url: radarrUrl,
                 radarr_api_key: radarrApiKey,
                 root_movies_folder: moviesFolder,
-                episode_file_icons_enabled: fileIconsEnabled
+                episode_file_icons_enabled: fileIconsEnabled,
+                storage_scan_interval_minutes: storageScanInterval
             })
         });
         const data = await response.json();
