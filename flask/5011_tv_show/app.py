@@ -1225,7 +1225,7 @@ def index():
     elif sort_by == 'added': # Sort by ID for 'added' order
         shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
     elif sort_by == 'last_episode': # Sort by most recent episode
-        today = datetime.now().date()
+        now_local = datetime.now(BANGLADESH_TZ).replace(tzinfo=None)
         def get_last_episode_time(show):
             episodes = show.get('episodes', [])
             if not episodes:
@@ -1233,25 +1233,36 @@ def index():
 
             timestamps = []
             for episode in episodes:
-                # Skip future episodes — only count ones that have aired
                 air_date_str = episode.get('air_date')
-                if air_date_str:
+                airtime_str = episode.get('airtime') or ''
+                local_air_datetime = None
+                if air_date_str and airtime_str:
                     try:
-                        if datetime.strptime(str(air_date_str), '%Y-%m-%d').date() > today:
-                            continue
+                        local_air_datetime = datetime.strptime(
+                            f'{air_date_str} {airtime_str}', '%Y-%m-%d %H:%M'
+                        )
                     except (TypeError, ValueError):
                         pass
 
-                value = episode.get('added_date') or episode.get('air_datetime') or episode.get('air_date')
-                if value:
+                # Sort by the same Bangladesh date/time shown in the UI.
+                # This also prevents a late-night source-time episode from
+                # being ordered ahead of an earlier Bangladesh-time episode.
+                if local_air_datetime:
+                    if local_air_datetime > now_local:
+                        continue
+                    timestamps.append((0, local_air_datetime.timestamp()))
+                    continue
+
+                if air_date_str:
                     try:
-                        parsed = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
-                        timestamps.append((0, parsed.timestamp()))
+                        local_air_date = datetime.strptime(str(air_date_str), '%Y-%m-%d')
+                        if local_air_date.date() > now_local.date():
+                            continue
+                        timestamps.append((0, local_air_date.timestamp()))
                     except (TypeError, ValueError):
-                        timestamps.append((1, str(value)))
+                        timestamps.append((1, str(air_date_str)))
                 elif episode.get('id') is not None:
                     timestamps.append((0, int(episode['id'])))
-            return max(timestamps, default=(0, float('-inf')))
             return max(timestamps, default=(0, float('-inf')))
         
         shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
