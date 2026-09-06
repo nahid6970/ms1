@@ -1095,7 +1095,17 @@ def edit_show(show_id):
         save_data(shows)
         query = request.args.get('query', '').strip()
         if request.headers.get('Accept') == 'application/json':
-            return jsonify({'success': True})
+            return jsonify({
+                'success': True,
+                'show': {
+                    'id':          show['id'],
+                    'title':       show['title'],
+                    'year':        show.get('year', ''),
+                    'cover_image': show.get('cover_image', ''),
+                    'status':      show.get('status', 'Continuing'),
+                    'rating':      show.get('rating'),
+                }
+            })
         return redirect(url_for('index', query=query) if query else url_for('index'))
     else:
         sort_episode_list(show)

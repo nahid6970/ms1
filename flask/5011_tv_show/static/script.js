@@ -1245,6 +1245,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.success) {
                     closeEditShowModal();
+                    // Patch the card in-place so the page doesn't need a reload
+                    if (data.show) {
+                        const s = data.show;
+                        const card = document.querySelector(`.show-card[data-show-id="${s.id}"]`);
+                        if (card) {
+                            // data attributes (used by search/filter)
+                            card.dataset.title  = s.title;
+                            card.dataset.year   = s.year || '';
+                            card.dataset.status = s.status || 'Continuing';
+
+                            // Title text
+                            const titleEl = card.querySelector('.library-card-title');
+                            if (titleEl) {
+                                titleEl.textContent = s.title;
+                                titleEl.title = s.title;
+                            }
+
+                            // Cover image
+                            const imgEl = card.querySelector('.img-wrapper img');
+                            if (imgEl && s.cover_image) {
+                                imgEl.src = s.cover_image;
+                                imgEl.alt = s.title;
+                            }
+
+                            // Status badge
+                            const statusEl = card.querySelector('.show-status');
+                            if (statusEl) {
+                                statusEl.textContent = s.status || 'Continuing';
+                                statusEl.classList.toggle('status-ended',      s.status === 'Ended');
+                                statusEl.classList.toggle('status-continuing', s.status !== 'Ended');
+                            }
+
+                            // Rating stars
+                            const starsContainer = card.querySelector('.stars-container');
+                            if (starsContainer) {
+                                // Remove old rating-N class and add new one
+                                starsContainer.className = starsContainer.className
+                                    .replace(/\brating-\d\b/g, '').trim();
+                                const rating = s.rating ? parseInt(s.rating, 10) : 0;
+                                if (rating) starsContainer.classList.add(`rating-${rating}`);
+
+                                // Re-render star SVGs
+                                if (rating) {
+                                    starsContainer.innerHTML = Array.from({ length: rating }, () =>
+                                        `<svg viewBox="0 0 24 24" class="star-svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26" /></svg>`
+                                    ).join('');
+                                } else {
+                                    starsContainer.innerHTML = '&nbsp;';
+                                }
+                            }
+                        }
+                    }
                 } else {
                     alert('Failed to save show.');
                 }
