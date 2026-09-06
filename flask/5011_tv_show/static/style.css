@@ -2137,3 +2137,6 @@ body::before {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
+
+/* Wider edit-show modal */
+#editShowModal > div { max-width: 620px; }

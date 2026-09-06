@@ -858,18 +858,32 @@
       "raw_data": "/model\\r"
     },
     {
-      "label": "",
-      "data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\r",
-      "raw_data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\\r",
       "bg": "#ffffff",
+      "bold": true,
+      "borderColor": "#ffffff",
+      "borderRadius": "5",
+      "borderWidth": "0",
+      "data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\r",
       "fg": "#000000",
       "fontFamily": "'JetBrainsMono NFP Regular', monospace",
       "fontSize": "15",
-      "bold": true,
       "italic": false,
-      "borderColor": "#ffffff",
-      "borderWidth": "0",
-      "borderRadius": "5"
+      "label": "",
+      "raw_data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\\r"
+    },
+    {
+      "label": "Recent.md",
+      "data": "here read recent.md",
+      "raw_data": "here read recent.md",
+      "bg": "#ffffff",
+      "fg": "#000000",
+      "fontFamily": "",
+      "fontSize": "",
+      "bold": false,
+      "italic": false,
+      "borderColor": "#334155",
+      "borderWidth": "",
+      "borderRadius": ""
     }
   ],
   "snippets": [
