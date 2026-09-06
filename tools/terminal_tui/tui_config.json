@@ -872,9 +872,23 @@
       "raw_data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\\r"
     },
     {
-      "label": "Recent.md",
+      "bg": "#ffffff",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
       "data": "here read recent.md",
-      "raw_data": "here read recent.md",
+      "fg": "#000000",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "Recent.md",
+      "raw_data": "here read recent.md"
+    },
+    {
+      "label": "Update",
+      "data": "here see the last changes commit with the current one and tell me do we need to update the recent.md",
+      "raw_data": "here see the last changes commit with the current one and tell me do we need to update the recent.md",
       "bg": "#ffffff",
       "fg": "#000000",
       "fontFamily": "",

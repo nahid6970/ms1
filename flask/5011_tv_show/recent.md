@@ -4,12 +4,9 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `app.py`, `templates/index.html`, `static/script.js`, `static/style.css`: Edit modal status checkbox is now locked (disabled) when the scheduler is active for a show, preventing the scheduler from overwriting a manually-set status; lock icon and tooltip added via CSS/JS.
-- `app.py`, `static/script.js`, `static/style.css`: Added per-show "Clear Stats" button and a "Clear All" button in the Scheduled Updates modal to reset last-run result and timestamp for one or all shows.
-- `app.py`, `static/script.js`, `static/style.css`: Improved scheduler — grace window skips update if show was manually refreshed recently; manual "Run Now" button triggers immediate update for a show; last run result (success/fail/skipped) displayed in the modal.
-- `app.py`, `static/script.js`: Edit show form now submits via `fetch` instead of a full page reload, preserving the client-side search filter state after saving.
-- `templates/index.html`, `templates/movies.html`: Discover is now a nav tab alongside Shows and Movies on all three pages; the toolbar icon button for Discover is removed.
-- `static/script.js`: Blue dot beside each episode in the episodes modal now copies the full label (e.g. "Jujutsu Kaisen S03E05 Episode Title") to clipboard using `navigator.clipboard` with `execCommand` fallback; dot flashes green on success.
+- `static/style.css`: Increased `#editShowModal > div` max-width from 450px to 620px for a wider edit modal.
+- `app.py`, `static/script.js`: Edit show save now live-updates the card in-place (title, cover image, status badge, rating stars, and `data-*` filter attributes) without a page reload; `edit_show` POST JSON response now returns updated show fields.
+- `static/style.css`: Show card hover buttons now have permanent per-button colors (sync → blue `#3b82f6`, episodes-update → emerald `#10b981`, folder → amber `#f59e0b`, list → green `#1db954`, edit → blue `#3b82f6`, sonarr → cyan `#06b6d4`, delete → red `#ef4444`); hover darkens each button slightly; overlay fades in on card hover, hidden by default.
 
 # 3. Critical Context
 
