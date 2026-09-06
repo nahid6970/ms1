@@ -1302,6 +1302,55 @@ def index():
         
         shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
 
+    elif sort_by == 'next_episode': # Sort by next upcoming episode after last released
+        now_local = datetime.now(BANGLADESH_TZ).replace(tzinfo=None)
+        def get_next_episode_time(show):
+            episodes = show.get('episodes', [])
+            future_timestamps = []
+            for episode in episodes:
+                local_air_datetime = None
+
+                air_datetime_str = episode.get('air_datetime') or ''
+                if air_datetime_str:
+                    try:
+                        parsed_utc = datetime.fromisoformat(
+                            str(air_datetime_str).replace('Z', '+00:00')
+                        )
+                        if parsed_utc.tzinfo is not None:
+                            local_air_datetime = parsed_utc.astimezone(BANGLADESH_TZ).replace(tzinfo=None)
+                    except (TypeError, ValueError):
+                        pass
+
+                if local_air_datetime is None:
+                    air_date_str = episode.get('air_date')
+                    airtime_str = episode.get('airtime') or ''
+                    if air_date_str and airtime_str:
+                        try:
+                            local_air_datetime = datetime.strptime(
+                                f'{air_date_str} {airtime_str}', '%Y-%m-%d %H:%M'
+                            )
+                        except (TypeError, ValueError):
+                            pass
+
+                if local_air_datetime is not None:
+                    if local_air_datetime > now_local:
+                        future_timestamps.append((0, local_air_datetime.timestamp()))
+                    continue
+
+                air_date_str = episode.get('air_date')
+                if air_date_str:
+                    try:
+                        local_air_date = datetime.strptime(str(air_date_str), '%Y-%m-%d')
+                        if local_air_date.date() > now_local.date():
+                            future_timestamps.append((0, local_air_date.timestamp()))
+                    except (TypeError, ValueError):
+                        pass
+
+            # Shows with no upcoming episodes sort to the end
+            return min(future_timestamps, default=(1, float('inf')))
+
+        shows.sort(key=get_next_episode_time, reverse=(order == 'desc'))
+
     next_order = 'desc' if order == 'asc' else 'asc'
 
     return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
