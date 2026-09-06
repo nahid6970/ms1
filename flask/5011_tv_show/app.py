@@ -800,7 +800,9 @@ scheduler.add_job(
     trigger="interval",
     minutes=load_settings().get('storage_scan_interval_minutes', 60),
     id='storage_scan',
-    replace_existing=True
+    replace_existing=True,
+    coalesce=True,
+    max_instances=1
 )
 scheduler.add_job(func=sync_radarr_movies, trigger="interval", hours=1)
 scheduler.add_job(func=run_scheduled_episode_updates, trigger="interval", minutes=1, id='scheduled_episode_updates', replace_existing=True, max_instances=1)
@@ -1713,7 +1715,15 @@ def api_settings():
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
         save_settings(settings)
         if 'scheduler' in globals():
-            scheduler.reschedule_job('storage_scan', trigger='interval', minutes=settings['storage_scan_interval_minutes'])
+            scheduler.reschedule_job(
+                'storage_scan',
+                trigger='interval',
+                minutes=settings['storage_scan_interval_minutes']
+            )
+            scheduler.modify_job(
+                'storage_scan',
+                next_run_time=datetime.now() + timedelta(minutes=settings['storage_scan_interval_minutes'])
+            )
         return jsonify({'success': True})
     return jsonify(load_settings())
 
