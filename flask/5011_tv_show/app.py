@@ -1139,14 +1139,23 @@ def index():
     elif sort_by == 'added': # Sort by ID for 'added' order
         shows.sort(key=lambda x: x['id'], reverse=(order == 'desc'))
     elif sort_by == 'last_episode': # Sort by most recent episode
+        today = datetime.now().date()
         def get_last_episode_time(show):
             episodes = show.get('episodes', [])
             if not episodes:
                 return (0, float('-inf'))
 
-            # Episode lists can be sorted either direction, so inspect every episode.
             timestamps = []
             for episode in episodes:
+                # Skip future episodes — only count ones that have aired
+                air_date_str = episode.get('air_date')
+                if air_date_str:
+                    try:
+                        if datetime.strptime(str(air_date_str), '%Y-%m-%d').date() > today:
+                            continue
+                    except (TypeError, ValueError):
+                        pass
+
                 value = episode.get('added_date') or episode.get('air_datetime') or episode.get('air_date')
                 if value:
                     try:
@@ -1156,6 +1165,7 @@ def index():
                         timestamps.append((1, str(value)))
                 elif episode.get('id') is not None:
                     timestamps.append((0, int(episode['id'])))
+            return max(timestamps, default=(0, float('-inf')))
             return max(timestamps, default=(0, float('-inf')))
         
         shows.sort(key=get_last_episode_time, reverse=(order == 'desc'))
