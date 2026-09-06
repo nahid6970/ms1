@@ -76,6 +76,8 @@ async function openEditShowModal(showId) {
     document.getElementById('editShowYear').value = show.year;
     document.getElementById('editShowCoverImage').value = show.cover_image;
     document.getElementById('editShowDirectoryPath').value = show.directory_path || '';
+    const filePatternEl = document.getElementById('editShowFilePattern');
+    if (filePatternEl) filePatternEl.value = show.episode_file_pattern || '';
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowEpisodeUpdateTime').value = show.episode_update_time || '';
     document.getElementById('editShowEpisodeUpdateFrequency').value = show.episode_update_frequency || 'daily';
@@ -191,6 +193,7 @@ function closeScanMissingModal() {
 // Global variables for episodes modal
 let currentEpisodes = [];
 let currentShowIdForEpisodes = null;
+let currentEpisodeFileSet = new Set();
 
 function escapeEpisodeText(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -431,7 +434,9 @@ function fallbackCopy(text, callback) {
     if (callback) callback();
 }
 
-function renderEpisodes(episodes, showId) {
+function renderEpisodes(episodes, showId, fileSet) {
+    // fileSet: Set of SxxExx strings for files that exist on disk (optional)
+    const hasFileIcons = fileSet && fileSet.size > 0;
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
     
@@ -453,11 +458,18 @@ function renderEpisodes(episodes, showId) {
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
             : '';
         const airDate = formatEpisodeAirDate(ep.air_date);
+        const fileExists = hasFileIcons && episodeNumber && fileSet.has(episodeNumber);
+        const fileIconHtml = fileExists
+            ? `<span class="episode-file-icon" title="File exists on disk">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><path d="M20 6H12l-2-2H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
+               </span>`
+            : '';
         li.innerHTML = `
             <div class="episode-main-info">
                 <input type="checkbox" ${ep.watched ? 'checked' : ''} onclick="handleEpisodeCheckboxClick(event, ${showId}, ${ep.id}, this)">
                 <div class="episode-title-block">
                     <span class="episode-number">${episodeNumber}</span>
+                    ${fileIconHtml}
                     <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
                     ${airDate ? `<span class="episode-airdate">Air date: ${airDate}</span>` : ''}
                 </div>
@@ -496,6 +508,7 @@ function closeEpisodesModal() {
     document.body.classList.remove('modal-open');
     currentEpisodes = [];
     currentShowIdForEpisodes = null;
+    currentEpisodeFileSet = new Set();
 }
 
 async function openEpisodesPopup(event, showId, showTitle) {
@@ -521,7 +534,21 @@ async function openEpisodesPopup(event, showId, showTitle) {
         currentShowIdForEpisodes = showId;
         
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
-        renderEpisodes(currentEpisodes, showId);
+
+        // Fetch file-existence data if the feature is enabled in settings
+        let fileSet = new Set();
+        try {
+            const settingsResp = await fetch('/api/settings');
+            const settings = await settingsResp.json();
+            if (settings.episode_file_icons_enabled !== false && show.directory_path) {
+                const fileResp = await fetch(`/api/episode_file_check/${showId}`);
+                const fileData = await fileResp.json();
+                fileSet = new Set(fileData.found || []);
+            }
+        } catch (_) { /* file check is best-effort */ }
+
+        currentEpisodeFileSet = fileSet;
+        renderEpisodes(currentEpisodes, showId, fileSet);
     } catch (error) {
         console.error('Error fetching episodes:', error);
         listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
@@ -649,6 +676,9 @@ async function openSettingsModal() {
         if (radarrUrlInput) radarrUrlInput.value = settings.radarr_url || 'http://192.168.0.101:7878';
         if (radarrKeyInput) radarrKeyInput.value = settings.radarr_api_key || '';
         if (moviesFolderInput) moviesFolderInput.value = settings.root_movies_folder || 'C:\\Users\\nahid\\Downloads\\@radarr';
+
+        const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
+        if (fileIconsToggle) fileIconsToggle.checked = settings.episode_file_icons_enabled !== false;
     } catch (e) {
         console.error('Error loading settings:', e);
     }
@@ -798,6 +828,7 @@ async function saveSettings() {
     const radarrUrl = document.getElementById('radarrApiUrl').value;
     const radarrApiKey = document.getElementById('radarrApiKey').value;
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
+    const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
     
     try {
         const response = await fetch('/api/settings', {
@@ -816,7 +847,8 @@ async function saveSettings() {
                 root_shows_folder: showsFolder,
                 radarr_url: radarrUrl,
                 radarr_api_key: radarrApiKey,
-                root_movies_folder: moviesFolder
+                root_movies_folder: moviesFolder,
+                episode_file_icons_enabled: fileIconsEnabled
             })
         });
         const data = await response.json();
@@ -1010,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     currentEpisodes = data.episodes;
                     updateSortButtonUI(newSortType, newOrder);
-                    renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+                    renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
                 }
             } catch (error) {
                 console.error('Error updating episode sort:', error);
@@ -1032,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update episodes');
             currentEpisodes = data.episodes;
-            renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+            renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
 
             const showCard = document.querySelector(`.show-card[data-show-id="${currentShowIdForEpisodes}"]`);
             updateShowProgressBadge(showCard, currentEpisodes);
@@ -1080,10 +1112,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 episode.watched = targetWatched;
             }
-            renderEpisodes(currentEpisodes, showId);
+            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
             updateShowProgressBadge(document.querySelector(`.show-card[data-show-id="${showId}"]`), currentEpisodes);
         } catch (error) {
-            renderEpisodes(currentEpisodes, showId);
+            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
             alert(error.message);
         }
     };
@@ -1120,7 +1152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     // Update global state and re-render
                     currentEpisodes = currentEpisodes.filter(e => e.id !== episodeId);
-                    renderEpisodes(currentEpisodes, showId);
+                    renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
                     
                     // Update show card count (simple reload for now or manual update)
                     // For simplicity, we can let it be, but a full card update would be better.
@@ -1401,7 +1433,7 @@ async function refreshEpisodesInModal(event, btn) {
         const show = await showResponse.json();
         currentEpisodes = show.episodes || [];
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
-        renderEpisodes(currentEpisodes, currentShowIdForEpisodes);
+        renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
         btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
         setTimeout(() => { if (btn.disabled) btn.innerHTML = originalHTML; }, 1400);
     } catch (error) {

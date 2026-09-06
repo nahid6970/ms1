@@ -484,6 +484,15 @@ body {
 .edit-dot { background: #3498db; }
 .delete-dot { background: #e74c3c; }
 
+/* Episode file-exists icon */
+.episode-file-icon {
+    display: inline-flex;
+    align-items: center;
+    color: #34d399;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
 /* Modals */
 .modal {
     display: none;

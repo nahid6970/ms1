@@ -46,7 +46,8 @@ def load_settings():
         "root_shows_folder": r"C:\Users\nahid\Downloads\@sonarr",
         "radarr_url": "http://192.168.0.101:7878",
         "radarr_api_key": "",
-        "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr"
+        "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr",
+        "episode_file_icons_enabled": True
     }
     if os.path.exists(SETTINGS_FILE):
         try:
@@ -1082,6 +1083,7 @@ def edit_show(show_id):
         show['lock_status'] = request.form.get('lock_status') == '1'
         show['sonarr_url'] = request.form.get('sonarr_url', '')
         show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
+        show['episode_file_pattern'] = request.form.get('episode_file_pattern', '').strip()
         frequency = request.form.get('episode_update_frequency', 'daily')
         show['episode_update_frequency'] = frequency if frequency in {'daily', 'weekly', 'monthly'} else 'daily'
         try:
@@ -1273,6 +1275,60 @@ def get_unseen_count():
     
     return jsonify({'unseen_count': unseen_count})
 
+@app.route('/api/episode_file_check/<int:show_id>')
+def api_episode_file_check(show_id):
+    """
+    Scan the show's directory_path for video files and return a set of
+    SxxExx tokens found in filenames. Uses the show's episode_file_pattern
+    (a regex) if set, otherwise falls back to the default SxxExx pattern.
+    Returns: { "found": ["S01E01", "S01E02", ...], "has_directory": bool }
+    """
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if not show:
+        return jsonify({'found': [], 'has_directory': False}), 404
+
+    dir_path = show.get('directory_path', '')
+    if not dir_path or not os.path.isdir(dir_path):
+        return jsonify({'found': [], 'has_directory': False})
+
+    # Build the pattern used to extract a "key" from each filename.
+    # Default: SxxExx (case-insensitive).  Per-show custom pattern can be any
+    # valid regex with one capturing group that produces a unique episode key.
+    custom_pattern = show.get('episode_file_pattern', '').strip()
+    if custom_pattern:
+        try:
+            re.compile(custom_pattern)
+            pattern = custom_pattern
+        except re.error:
+            pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
+    else:
+        pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
+
+    VIDEO_EXTS = {'.mp4', '.mkv', '.avi', '.mov', '.webm', '.m4v', '.ts'}
+    found = set()
+
+    for root, _, files in os.walk(dir_path):
+        for filename in files:
+            ext = os.path.splitext(filename)[1].lower()
+            if ext not in VIDEO_EXTS:
+                continue
+            for m in re.finditer(pattern, filename, re.IGNORECASE):
+                if m.lastindex and m.lastindex >= 2:
+                    # Standard SxxExx pattern — normalise to uppercase S01E01
+                    s_num = int(m.group(1))
+                    e_num = int(m.group(2))
+                    found.add(f"S{s_num:02d}E{e_num:02d}")
+                elif m.lastindex == 1:
+                    # Custom single-group pattern — use the captured text as-is
+                    found.add(m.group(1).upper())
+                else:
+                    # Full match, no groups
+                    found.add(m.group(0).upper())
+
+    return jsonify({'found': sorted(found), 'has_directory': True})
+
+
 @app.route('/api/scan_missing_episodes')
 def api_scan_missing_episodes():
     shows = load_data()
@@ -1359,6 +1415,7 @@ def api_settings():
         settings['radarr_url'] = data.get('radarr_url', settings.get('radarr_url', 'http://192.168.0.101:7878'))
         settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
+        settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
         save_settings(settings)
         return jsonify({'success': True})
     return jsonify(load_settings())
