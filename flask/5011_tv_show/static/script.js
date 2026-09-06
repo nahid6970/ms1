@@ -196,6 +196,7 @@ function closeScanMissingModal() {
 let currentEpisodes = [];
 let currentShowIdForEpisodes = null;
 let currentEpisodeFileSet = new Set();
+let currentEpisodeFileScanMode = 'sxxexx';
 
 function escapeEpisodeText(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -436,8 +437,9 @@ function fallbackCopy(text, callback) {
     if (callback) callback();
 }
 
-function renderEpisodes(episodes, showId, fileSet) {
-    // fileSet: Set of SxxExx strings for files that exist on disk (optional)
+function renderEpisodes(episodes, showId, fileSet, scanMode) {
+    // fileSet: Set of keys for files that exist on disk (optional)
+    // scanMode: 'sxxexx' | 'date' | 'title' — determines how to match
     const hasFileIcons = fileSet && fileSet.size > 0;
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
@@ -460,7 +462,11 @@ function renderEpisodes(episodes, showId, fileSet) {
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
             : '';
         const airDate = formatEpisodeAirDate(ep.air_date);
-        const fileExists = hasFileIcons && episodeNumber && fileSet.has(episodeNumber);
+        const fileExists = hasFileIcons && (() => {
+            if (scanMode === 'date') return ep.air_date && fileSet.has(ep.air_date);
+            if (scanMode === 'title') return fileSet.has(ep.title);
+            return episodeNumber && fileSet.has(episodeNumber); // sxxexx default
+        })();
         const fileIconHtml = fileExists
             ? `<span class="episode-file-icon" title="File exists on disk">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none"><path d="M20 6H12l-2-2H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>
@@ -511,6 +517,7 @@ function closeEpisodesModal() {
     currentEpisodes = [];
     currentShowIdForEpisodes = null;
     currentEpisodeFileSet = new Set();
+    currentEpisodeFileScanMode = 'sxxexx';
 }
 
 async function openEpisodesPopup(event, showId, showTitle) {
@@ -539,6 +546,7 @@ async function openEpisodesPopup(event, showId, showTitle) {
 
         // Fetch file-existence data if the feature is enabled in settings
         let fileSet = new Set();
+        let fileScanMode = 'sxxexx';
         try {
             const settingsResp = await fetch('/api/settings');
             const settings = await settingsResp.json();
@@ -546,11 +554,13 @@ async function openEpisodesPopup(event, showId, showTitle) {
                 const fileResp = await fetch(`/api/episode_file_check/${showId}`);
                 const fileData = await fileResp.json();
                 fileSet = new Set(fileData.found || []);
+                fileScanMode = fileData.scan_mode || 'sxxexx';
             }
         } catch (_) { /* file check is best-effort */ }
 
         currentEpisodeFileSet = fileSet;
-        renderEpisodes(currentEpisodes, showId, fileSet);
+        currentEpisodeFileScanMode = fileScanMode;
+        renderEpisodes(currentEpisodes, showId, fileSet, fileScanMode);
     } catch (error) {
         console.error('Error fetching episodes:', error);
         listContainer.innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error loading episodes.</p>';
@@ -1044,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     currentEpisodes = data.episodes;
                     updateSortButtonUI(newSortType, newOrder);
-                    renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
+                    renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
                 }
             } catch (error) {
                 console.error('Error updating episode sort:', error);
@@ -1066,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update episodes');
             currentEpisodes = data.episodes;
-            renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
+            renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
 
             const showCard = document.querySelector(`.show-card[data-show-id="${currentShowIdForEpisodes}"]`);
             updateShowProgressBadge(showCard, currentEpisodes);
@@ -1114,10 +1124,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 episode.watched = targetWatched;
             }
-            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
+            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet, currentEpisodeFileScanMode);
             updateShowProgressBadge(document.querySelector(`.show-card[data-show-id="${showId}"]`), currentEpisodes);
         } catch (error) {
-            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
+            renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet, currentEpisodeFileScanMode);
             alert(error.message);
         }
     };
@@ -1154,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     // Update global state and re-render
                     currentEpisodes = currentEpisodes.filter(e => e.id !== episodeId);
-                    renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet);
+                    renderEpisodes(currentEpisodes, showId, currentEpisodeFileSet, currentEpisodeFileScanMode);
                     
                     // Update show card count (simple reload for now or manual update)
                     // For simplicity, we can let it be, but a full card update would be better.
@@ -1435,7 +1445,7 @@ async function refreshEpisodesInModal(event, btn) {
         const show = await showResponse.json();
         currentEpisodes = show.episodes || [];
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
-        renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet);
+        renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
         btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
         setTimeout(() => { if (btn.disabled) btn.innerHTML = originalHTML; }, 1400);
     } catch (error) {

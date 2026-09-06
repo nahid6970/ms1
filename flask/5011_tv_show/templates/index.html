@@ -204,9 +204,10 @@
                 <label for="editShowScanMode">File Scan Mode:</label>
                 <select id="editShowScanMode" name="scan_mode" class="modal-input" title="How episode files are matched when syncing storage">
                     <option value="sxxexx">SxxExx pattern (default)</option>
+                    <option value="date">Air date match (YYYY-MM-DD in filename)</option>
                     <option value="title">Title match (raw filename)</option>
                 </select>
-                <small class="modal-help" style="margin-top:-8px;">Use "Title match" for shows whose files don't follow S01E02 naming.</small>
+                <small class="modal-help" style="margin-top:-8px;">Use "Air date" for shows like WWE where files are named with a date. Use "Title match" for other non-standard naming.</small>
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
                 <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
                 <div class="schedule-time-row">

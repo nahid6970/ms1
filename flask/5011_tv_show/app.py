@@ -349,6 +349,7 @@ def scan_and_update_episodes():
     updated_shows = False
     VIDEO_EXTS = {'.mp4', '.mkv', '.avi', '.mov', '.webm', '.m4v', '.ts'}
     SXXEXX = re.compile(r'[Ss](\d{1,2})[Ee](\d{1,2})')
+    DATE_PAT = re.compile(r'(\d{4}-\d{2}-\d{2})')
 
     for show in shows:
         if 'directory_path' in show and show['directory_path']:
@@ -363,6 +364,12 @@ def scan_and_update_episodes():
                 for ep in show['episodes']
                 if ep.get('season_number') is not None and ep.get('episode_number') is not None
             }
+            # Build lookup: air_date string -> episode object (for date-match mode)
+            by_date = {
+                ep['air_date']: ep
+                for ep in show['episodes']
+                if ep.get('air_date')
+            }
             existing_titles = {ep['title'] for ep in show['episodes']}
             episodes_added = False
 
@@ -375,8 +382,39 @@ def scan_and_update_episodes():
                     matched = False
                     scan_mode = show.get('scan_mode', 'sxxexx')
 
-                    # --- Try SxxExx match first (unless show is in title-match mode) ---
-                    if scan_mode != 'title':
+                    # --- Date match (YYYY-MM-DD in filename) ---
+                    if scan_mode == 'date':
+                        dm = DATE_PAT.search(name)
+                        if dm:
+                            date_key = dm.group(1)
+                            if date_key in by_date:
+                                ep = by_date[date_key]
+                                if not ep.get('has_file'):
+                                    ep['has_file'] = True
+                                    ep['file_name'] = name
+                                    updated_shows = True
+                                matched = True
+                            else:
+                                # Date found but no TVmaze episode yet — add as raw
+                                new_ep = {
+                                    'id': max((ep.get('id', 0) for ep in show['episodes']), default=0) + 1,
+                                    'title': name,
+                                    'air_date': date_key,
+                                    'has_file': True,
+                                    'file_name': name,
+                                    'watched': False,
+                                    'added_date': datetime.now().isoformat(),
+                                    'notify': 'unseen'
+                                }
+                                show['episodes'].insert(0, new_ep)
+                                by_date[date_key] = new_ep
+                                existing_titles.add(name)
+                                updated_shows = True
+                                episodes_added = True
+                                matched = True
+
+                    # --- Try SxxExx match (default mode) ---
+                    elif scan_mode != 'title':
                         m = SXXEXX.search(name)
                         if m:
                             key = (int(m.group(1)), int(m.group(2)))
@@ -1329,55 +1367,66 @@ def get_unseen_count():
 @app.route('/api/episode_file_check/<int:show_id>')
 def api_episode_file_check(show_id):
     """
-    Scan the show's directory_path for video files and return a set of
-    SxxExx tokens found in filenames. Uses the show's episode_file_pattern
-    (a regex) if set, otherwise falls back to the default SxxExx pattern.
-    Returns: { "found": ["S01E01", "S01E02", ...], "has_directory": bool }
+    Scan the show's directory_path for video files and return keys found.
+    - sxxexx mode (default): returns SxxExx tokens e.g. ["S01E01", ...]
+    - date mode: returns YYYY-MM-DD strings e.g. ["2026-09-04", ...]
+    - title mode: returns normalised filenames (no ext)
+    Also returns the scan_mode so the client knows how to match.
     """
     shows = load_data()
     show = next((s for s in shows if s['id'] == show_id), None)
     if not show:
-        return jsonify({'found': [], 'has_directory': False}), 404
+        return jsonify({'found': [], 'has_directory': False, 'scan_mode': 'sxxexx'}), 404
 
     dir_path = show.get('directory_path', '')
     if not dir_path or not os.path.isdir(dir_path):
-        return jsonify({'found': [], 'has_directory': False})
+        return jsonify({'found': [], 'has_directory': False, 'scan_mode': 'sxxexx'})
 
-    # Build the pattern used to extract a "key" from each filename.
-    # Default: SxxExx (case-insensitive).  Per-show custom pattern can be any
-    # valid regex with one capturing group that produces a unique episode key.
-    custom_pattern = show.get('episode_file_pattern', '').strip()
-    if custom_pattern:
-        try:
-            re.compile(custom_pattern)
-            pattern = custom_pattern
-        except re.error:
-            pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
-    else:
-        pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
-
+    scan_mode = show.get('scan_mode', 'sxxexx')
     VIDEO_EXTS = {'.mp4', '.mkv', '.avi', '.mov', '.webm', '.m4v', '.ts'}
     found = set()
 
-    for root, _, files in os.walk(dir_path):
-        for filename in files:
-            ext = os.path.splitext(filename)[1].lower()
-            if ext not in VIDEO_EXTS:
-                continue
-            for m in re.finditer(pattern, filename, re.IGNORECASE):
-                if m.lastindex and m.lastindex >= 2:
-                    # Standard SxxExx pattern — normalise to uppercase S01E01
-                    s_num = int(m.group(1))
-                    e_num = int(m.group(2))
-                    found.add(f"S{s_num:02d}E{e_num:02d}")
-                elif m.lastindex == 1:
-                    # Custom single-group pattern — use the captured text as-is
-                    found.add(m.group(1).upper())
-                else:
-                    # Full match, no groups
-                    found.add(m.group(0).upper())
+    if scan_mode == 'date':
+        date_pat = re.compile(r'(\d{4}-\d{2}-\d{2})')
+        for root, _, files in os.walk(dir_path):
+            for filename in files:
+                if os.path.splitext(filename)[1].lower() not in VIDEO_EXTS:
+                    continue
+                m = date_pat.search(filename)
+                if m:
+                    found.add(m.group(1))
 
-    return jsonify({'found': sorted(found), 'has_directory': True})
+    elif scan_mode == 'title':
+        for root, _, files in os.walk(dir_path):
+            for filename in files:
+                name, ext = os.path.splitext(filename)
+                if ext.lower() in VIDEO_EXTS:
+                    found.add(name)
+
+    else:  # sxxexx (default or custom pattern)
+        custom_pattern = show.get('episode_file_pattern', '').strip()
+        if custom_pattern:
+            try:
+                re.compile(custom_pattern)
+                pattern = custom_pattern
+            except re.error:
+                pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
+        else:
+            pattern = r'[Ss](\d{1,2})[Ee](\d{1,2})'
+
+        for root, _, files in os.walk(dir_path):
+            for filename in files:
+                if os.path.splitext(filename)[1].lower() not in VIDEO_EXTS:
+                    continue
+                for m in re.finditer(pattern, filename, re.IGNORECASE):
+                    if m.lastindex and m.lastindex >= 2:
+                        found.add(f"S{int(m.group(1)):02d}E{int(m.group(2)):02d}")
+                    elif m.lastindex == 1:
+                        found.add(m.group(1).upper())
+                    else:
+                        found.add(m.group(0).upper())
+
+    return jsonify({'found': sorted(found), 'has_directory': True, 'scan_mode': scan_mode})
 
 
 @app.route('/api/scan_missing_episodes')
