@@ -521,31 +521,42 @@ def scan_and_add_missing_shows():
                 'episodes': []
             }
             
-            # Scan for episodes in this directory
-            existing_episode_titles = set()
-            for root, _, files in os.walk(full_path):
-                for filename in files:
-                    name, ext = os.path.splitext(filename)
-                    if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-                        if name not in existing_episode_titles:
-                            episode = {
+            # Populate TVmaze episodes first so the later storage scan can
+            # attach matching files instead of creating raw duplicate episodes.
+            tvmaze_show, tvmaze_error = tvmaze_show_for_catalog_item(new_show)
+            if tvmaze_show and not tvmaze_error:
+                tvmaze_episodes, episodes_error = tvmaze_request(
+                    f"shows/{tvmaze_show['id']}/episodes", {'specials': 1}
+                )
+                if tvmaze_episodes and not episodes_error:
+                    merge_tvmaze_episodes(new_show, tvmaze_show, tvmaze_episodes)
+
+            # If TVmaze cannot identify the folder, retain the old raw-file
+            # fallback so the show is still visible and can be matched later.
+            if not new_show['episodes']:
+                existing_episode_titles = set()
+                for root, _, files in os.walk(full_path):
+                    for filename in files:
+                        name, ext = os.path.splitext(filename)
+                        if ext.lower() in ['.mp4', '.mkv', '.avi', '.mov', '.webm'] and name not in existing_episode_titles:
+                            new_show['episodes'].append({
                                 'id': len(new_show['episodes']) + 1,
                                 'title': name,
                                 'watched': False,
                                 'added_date': datetime.now().isoformat(),
                                 'notify': 'unseen'
-                            }
-                            new_show['episodes'].append(episode)
+                            })
                             existing_episode_titles.add(name)
-            
-            # Sort episodes by title (newest first by default)
-            new_show['episodes'].reverse()
+                new_show['episodes'].reverse()
             
             shows.append(new_show)
             added_count += 1
     
     if added_count > 0:
         save_data(shows)
+        # Match files for newly added folders against the TVmaze episodes
+        # created above, using the same logic as the manual sync button.
+        scan_and_update_episodes()
         print(f"Auto-added {added_count} missing shows.")
     else:
         print("No missing shows found to add.")

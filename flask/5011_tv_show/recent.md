@@ -16,6 +16,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`: TVmaze is now authoritative for TV-show lifecycle status during discovery adds and episode refreshes; TMDb remains available for show posters and ratings.
 - `app.py`: Episode airtimes from TVmaze are converted from the timezone-aware `airstamp` to Bangladesh Standard Time (`Asia/Dhaka`) before storage/display; the UI continues formatting them as 12-hour AM/PM times.
 - `app.py`: Default `last_episode` show sorting now uses the displayed Bangladesh `air_date` + `airtime` together, preventing incorrect ordering for episodes airing at different times on the same date.
+- `app.py`: The hourly whole-Sonarr-storage scan now hydrates newly discovered shows from TVmaze before attaching files, preventing raw filename episodes from duplicating TVmaze episodes.
 
 # 3. Critical Context
 
