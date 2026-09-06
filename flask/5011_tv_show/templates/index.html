@@ -102,16 +102,16 @@
                         </button>
                         {% set sonarr_url = show.sonarr_url if show.sonarr_url else 'http://192.168.0.101:8989/series/' ~ show.title.lower().replace(' ', '-').replace(':', '').replace('!', '').replace('?', '').replace(',', '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('&', 'and').replace('.', '') %}
                         <div class="hover-btn-row">
-                        <a href="{{ sonarr_url }}" target="_blank" class="hover-btn btn-sonarr" title="Open in Sonarr">
+                        <a href="{{ sonarr_url }}" target="_blank" class="hover-btn btn-sonarr" title="Sonarr">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </a>
                         {% if show.tmdb_id %}
-                        <a href="https://www.themoviedb.org/tv/{{ show.tmdb_id }}" target="_blank" class="hover-btn btn-tmdb" title="Open in TMDb">
+                        <a href="https://www.themoviedb.org/tv/{{ show.tmdb_id }}" target="_blank" class="hover-btn btn-tmdb" title="TMDb">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                         </a>
                         {% endif %}
                         {% if show.tvmaze_id %}
-                        <a href="https://www.tvmaze.com/shows/{{ show.tvmaze_id }}" target="_blank" class="hover-btn btn-tvmaze" title="Open in TVmaze">
+                        <a href="https://www.tvmaze.com/shows/{{ show.tvmaze_id }}" target="_blank" class="hover-btn btn-tvmaze" title="TVmaze">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
                         </a>
                         {% endif %}
