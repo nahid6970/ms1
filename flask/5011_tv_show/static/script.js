@@ -462,6 +462,17 @@ function renderEpisodes(episodes, showId, fileSet, scanMode) {
             ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
             : '';
         const airDate = formatEpisodeAirDate(ep.air_date);
+        const airTime = (() => {
+            const t = ep.airtime;
+            if (!t) return '';
+            const [hStr, mStr] = t.split(':');
+            const h = parseInt(hStr, 10);
+            const m = mStr || '00';
+            if (isNaN(h)) return '';
+            const suffix = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            return `${h12}:${m} ${suffix}`;
+        })();
         const fileExists = hasFileIcons && (() => {
             if (scanMode === 'date') return ep.air_date && fileSet.has(ep.air_date);
             if (scanMode === 'title') return fileSet.has(ep.title);
@@ -479,7 +490,7 @@ function renderEpisodes(episodes, showId, fileSet, scanMode) {
                     <span class="episode-number">${episodeNumber}</span>
                     <span class="episode-title">${escapeEpisodeText(ep.title)}</span>
                     ${fileIconHtml}
-                    ${airDate ? `<span class="episode-airdate">Air date: ${airDate}</span>` : ''}
+                    ${airDate ? `<span class="episode-airdate"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${airDate}${airTime ? ' · ' + airTime : ''}</span>` : ''}
                 </div>
             </div>
             <div style="display: flex; gap: 8px;">
