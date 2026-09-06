@@ -15,7 +15,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`: Scheduler overhauled — replaced same-day window check with `get_last_due_date()` helper that computes the most recent due date per frequency (daily/weekly/monthly); missed runs (PC was off) are caught up on next startup regardless of how much time has passed. Due shows are processed one-by-one with a 3-second stagger between API calls to avoid rate-limit bursts; each show is saved immediately after update so progress survives a mid-batch restart.
 - `app.py`: TVmaze is now authoritative for TV-show lifecycle status during discovery adds and episode refreshes; TMDb remains available for show posters and ratings.
 - `app.py`: Episode airtimes from TVmaze are converted from the timezone-aware `airstamp` to Bangladesh Standard Time (`Asia/Dhaka`) before storage/display; the UI continues formatting them as 12-hour AM/PM times.
-- `app.py`: Default `last_episode` show sorting now uses the displayed Bangladesh `air_date` + `airtime` together, preventing incorrect ordering for episodes airing at different times on the same date.
+- `app.py`: `last_episode` sort now uses `air_datetime` (UTC airstamp) converted to Bangladesh time as the primary sort key, with `air_date`+`airtime` and date-only as fallbacks. This fixes incorrect ordering caused by `air_date` being the US-local TVmaze date (which can be a day behind the Bangladesh date for late-night US shows like WWE SmackDown).
 - `static/style.css`: Hidden Shows modal uses a fixed viewport-height, scrollable max-content grid that preserves 2:3 poster thumbnails; cards use square corners and omit the redundant `Ended` status label.
 - `app.py`: The hourly whole-Sonarr-storage scan now hydrates newly discovered shows from TVmaze before attaching files, preventing raw filename episodes from duplicating TVmaze episodes.
 - `app.py`: The hourly combined scan now runs the full storage scan after auto-adding folders on every interval run, matching the Scan Storage button consistently.
@@ -26,6 +26,8 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 # 3. Critical Context
 
 TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain full TMDb `release_date`. TVmaze updates merge by season/episode, preserve watched/file fields, and refresh show poster/status. Per-show `episode_update_time` is local `HH:MM`; cadence supports daily, weekly weekday, or monthly day; blank disables it. APScheduler checks once per minute. The TMDb key is in `C:\@delta\db\5011_tv_show\settings.json`; requests are server-side. Stars are whole-number 1–5; original scores remain `tmdb_rating`.
+
+- `static/script.js`: `isReleasedAndUnwatched` now includes today's episodes in the red-highlight logic — episodes with `air_date < today` are always red; episodes with `air_date === today` are red only if their `airtime` has already passed (time-aware check).
 
 # 4. Pending Task
 

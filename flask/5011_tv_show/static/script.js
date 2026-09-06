@@ -372,7 +372,19 @@ function isReleasedAndUnwatched(episode) {
     if (episode.watched || !episode.air_date) return false;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    return String(episode.air_date) < today;
+    const airDateStr = String(episode.air_date);
+    if (airDateStr > today) return false;
+    if (airDateStr < today) return true;
+    // Same day — only mark red if the airtime has already passed
+    const airtime = episode.airtime || '';
+    if (!airtime) return true; // no time info, assume aired
+    const [hStr, mStr] = airtime.split(':');
+    const h = parseInt(hStr, 10);
+    const m = parseInt(mStr || '0', 10);
+    if (isNaN(h)) return true;
+    const airMs = h * 3600000 + m * 60000;
+    const nowMs = now.getHours() * 3600000 + now.getMinutes() * 60000;
+    return nowMs >= airMs;
 }
 
 function isEpisodeCountedAsReleased(episode) {

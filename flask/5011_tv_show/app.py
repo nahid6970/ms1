@@ -1251,26 +1251,43 @@ def index():
 
             timestamps = []
             for episode in episodes:
-                air_date_str = episode.get('air_date')
-                airtime_str = episode.get('airtime') or ''
                 local_air_datetime = None
-                if air_date_str and airtime_str:
+
+                # Priority 1: use air_datetime (UTC airstamp) → convert to Bangladesh.
+                # This is the authoritative source — air_date alone is the US-local
+                # date from TVmaze and can be a day behind the Bangladesh date.
+                air_datetime_str = episode.get('air_datetime') or ''
+                if air_datetime_str:
                     try:
-                        local_air_datetime = datetime.strptime(
-                            f'{air_date_str} {airtime_str}', '%Y-%m-%d %H:%M'
+                        parsed_utc = datetime.fromisoformat(
+                            str(air_datetime_str).replace('Z', '+00:00')
                         )
+                        if parsed_utc.tzinfo is not None:
+                            local_air_datetime = parsed_utc.astimezone(BANGLADESH_TZ).replace(tzinfo=None)
                     except (TypeError, ValueError):
                         pass
 
-                # Sort by the same Bangladesh date/time shown in the UI.
-                # This also prevents a late-night source-time episode from
-                # being ordered ahead of an earlier Bangladesh-time episode.
-                if local_air_datetime:
+                # Priority 2: fall back to combining air_date + airtime (both already
+                # stored as Bangladesh values for newer episodes, or date-only).
+                if local_air_datetime is None:
+                    air_date_str = episode.get('air_date')
+                    airtime_str = episode.get('airtime') or ''
+                    if air_date_str and airtime_str:
+                        try:
+                            local_air_datetime = datetime.strptime(
+                                f'{air_date_str} {airtime_str}', '%Y-%m-%d %H:%M'
+                            )
+                        except (TypeError, ValueError):
+                            pass
+
+                if local_air_datetime is not None:
                     if local_air_datetime > now_local:
                         continue
                     timestamps.append((0, local_air_datetime.timestamp()))
                     continue
 
+                # Priority 3: date-only fallback
+                air_date_str = episode.get('air_date')
                 if air_date_str:
                     try:
                         local_air_date = datetime.strptime(str(air_date_str), '%Y-%m-%d')
