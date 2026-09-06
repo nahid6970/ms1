@@ -10,7 +10,7 @@ install_deps.bootstrap(__file__)
 import json
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import requests
 import hashlib
@@ -659,10 +659,72 @@ def run_show_episode_update(show, now=None):
     return added, updated, None
 
 
+def get_last_due_date(show, now):
+    """
+    Return the most recent date on which this show's update was due,
+    or None if it isn't due yet today.
+    """
+    update_time_str = show.get('episode_update_time', '').strip()
+    if not update_time_str:
+        return None
+    try:
+        h, m = int(update_time_str.split(':')[0]), int(update_time_str.split(':')[1])
+    except (ValueError, IndexError):
+        return None
+
+    frequency = show.get('episode_update_frequency', 'daily')
+    today = now.date()
+    scheduled_today = now.replace(hour=h, minute=m, second=0, microsecond=0)
+
+    if frequency == 'daily':
+        # Due every day — last due date is today if time has passed, else yesterday
+        if now >= scheduled_today:
+            return today
+        return today - timedelta(days=1)
+
+    elif frequency == 'weekly':
+        try:
+            target_weekday = int(show.get('episode_update_weekday', now.weekday()))
+        except (TypeError, ValueError):
+            target_weekday = now.weekday()
+        # Walk back to find the most recent occurrence of target_weekday
+        days_back = (today.weekday() - target_weekday) % 7
+        candidate = today - timedelta(days=days_back)
+        candidate_dt = now.replace(year=candidate.year, month=candidate.month, day=candidate.day,
+                                   hour=h, minute=m, second=0, microsecond=0)
+        if now >= candidate_dt:
+            return candidate
+        # Time hasn't passed yet on this week's day — go back one more week
+        return candidate - timedelta(weeks=1)
+
+    elif frequency == 'monthly':
+        try:
+            target_day = max(1, min(28, int(show.get('episode_update_month_day', now.day))))
+        except (TypeError, ValueError):
+            target_day = now.day
+        # Try this month first
+        try:
+            candidate = today.replace(day=target_day)
+        except ValueError:
+            candidate = today.replace(day=28)
+        candidate_dt = now.replace(year=candidate.year, month=candidate.month, day=candidate.day,
+                                   hour=h, minute=m, second=0, microsecond=0)
+        if now >= candidate_dt:
+            return candidate
+        # Time hasn't passed yet — go back one month
+        first_of_month = today.replace(day=1)
+        prev_month_last = first_of_month - timedelta(days=1)
+        try:
+            return prev_month_last.replace(day=target_day)
+        except ValueError:
+            return prev_month_last
+
+    return None
+
+
 def run_scheduled_episode_updates():
-    """Refresh shows whose scheduled update time has passed today (with up to 1hr grace window)."""
+    """Refresh shows whose scheduled update time has passed — catches up missed runs."""
     now = datetime.now()
-    today = now.date().isoformat()
     shows = load_data()
     changed = False
 
@@ -670,33 +732,24 @@ def run_scheduled_episode_updates():
         update_time_str = show.get('episode_update_time', '').strip()
         if not update_time_str:
             continue
-        if show.get('episode_update_last_run') == today:
+
+        last_due = get_last_due_date(show, now)
+        if last_due is None:
             continue
-        try:
-            scheduled = now.replace(
-                hour=int(update_time_str.split(':')[0]),
-                minute=int(update_time_str.split(':')[1]),
-                second=0, microsecond=0
-            )
-        except (ValueError, IndexError):
-            continue
-        # run if scheduled time has passed but not more than 1 hour ago
-        delta = (now - scheduled).total_seconds()
-        if delta < 0 or delta > 3600:
-            continue
-        frequency = show.get('episode_update_frequency', 'daily')
-        try:
-            if frequency == 'weekly' and now.weekday() != int(show.get('episode_update_weekday', now.weekday())):
-                continue
-            if frequency == 'monthly' and now.day != int(show.get('episode_update_month_day', now.day)):
-                continue
-        except (TypeError, ValueError):
-            continue
+
+        last_run_str = show.get('episode_update_last_run', '')
+        if last_run_str:
+            try:
+                last_run_date = datetime.strptime(last_run_str, '%Y-%m-%d').date()
+                if last_run_date >= last_due:
+                    continue  # Already ran on or after the last due date
+            except ValueError:
+                pass
 
         added, updated, error = run_show_episode_update(show, now)
         if error:
             show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
-        show['episode_update_last_run'] = today
+        show['episode_update_last_run'] = now.date().isoformat()
         changed = True
 
     if changed:
