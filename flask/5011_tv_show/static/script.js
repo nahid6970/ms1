@@ -532,6 +532,23 @@ function patchShowCard(s) {
         statusEl.classList.toggle('status-continuing', s.status !== 'Ended');
     }
 
+    // TMDb rating badge
+    const tmdbEl = card.querySelector('.tmdb-rating');
+    if (s.tmdb_rating) {
+        if (tmdbEl) {
+            tmdbEl.textContent = `TMDb ${s.tmdb_rating}/10`;
+        } else {
+            // Badge doesn't exist yet — create it inside .card-info
+            const cardInfo = card.querySelector('.card-info');
+            if (cardInfo) {
+                const p = document.createElement('p');
+                p.className = 'tmdb-rating';
+                p.textContent = `TMDb ${s.tmdb_rating}/10`;
+                cardInfo.appendChild(p);
+            }
+        }
+    }
+
     const starsContainer = card.querySelector('.stars-container');
     if (starsContainer) {
         starsContainer.className = starsContainer.className.replace(/\brating-\d\b/g, '').trim();

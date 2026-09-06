@@ -633,12 +633,15 @@ def run_show_episode_update(show, now=None):
         return 0, 0, error
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
     if not show.get('lock_status'):
-        tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+        tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
         if tmdb_details and not tmdb_error:
             tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
             if tmdb_image:
                 show['cover_image'] = tmdb_image
             show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+            tmdb_score = round(float(tmdb_details.get('vote_average') or 0), 1)
+            if tmdb_score > 0:
+                show['tmdb_rating'] = tmdb_score
         else:
             show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
             if not show.get('cover_image'):
@@ -984,6 +987,47 @@ def discover_add():
 
     return jsonify({'success': True, 'message': f'{title} added to your {"movies" if media_type == "movie" else "shows"}'})
 
+
+def resolve_tmdb_for_show(show, tvmaze_show):
+    """
+    Fetch TMDb details for a show.
+    Uses show['tmdb_id'] if present; otherwise tries to find it via
+    TVmaze externals (thetvdb → TMDb /find, then imdb → TMDb /find).
+    Updates show['tmdb_id'] in-place if discovered.
+    Returns (tmdb_details_dict_or_None, error_str_or_None).
+    """
+    tmdb_id = show.get('tmdb_id')
+
+    # Try to discover tmdb_id via TVmaze externals if not already stored
+    if not tmdb_id and tvmaze_show:
+        externals = tvmaze_show.get('externals') or {}
+        tvdb_id = externals.get('thetvdb')
+        imdb_id = externals.get('imdb')
+
+        if tvdb_id:
+            result, err = tmdb_request('find/' + str(tvdb_id), {'external_source': 'tvdb_id'})
+            if not err and result:
+                tv_results = result.get('tv_results') or []
+                if tv_results:
+                    tmdb_id = tv_results[0].get('id')
+
+        if not tmdb_id and imdb_id:
+            result, err = tmdb_request('find/' + str(imdb_id), {'external_source': 'imdb_id'})
+            if not err and result:
+                tv_results = result.get('tv_results') or []
+                if tv_results:
+                    tmdb_id = tv_results[0].get('id')
+
+        if tmdb_id:
+            show['tmdb_id'] = tmdb_id
+
+    if not tmdb_id:
+        return None, None  # No TMDb ID available — not an error
+
+    details, error = tmdb_request(f'tv/{int(tmdb_id)}', {'language': 'en-US'})
+    return details, error
+
+
 @app.route('/api/show/<int:show_id>/episodes/update', methods=['POST'])
 def update_show_episodes(show_id):
     shows = load_data()
@@ -999,15 +1043,18 @@ def update_show_episodes(show_id):
         return jsonify({'success': False, 'message': error}), 502
 
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
-    tmdb_details, tmdb_error = tmdb_request(f"tv/{int(show['tmdb_id'])}", {'language': 'en-US'}) if show.get('tmdb_id') else (None, None)
+    tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
     if tmdb_details and not tmdb_error:
         tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
         if tmdb_image:
             show['cover_image'] = tmdb_image
         show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
+        tmdb_score = round(float(tmdb_details.get('vote_average') or 0), 1)
+        if tmdb_score > 0:
+            show['tmdb_rating'] = tmdb_score
     else:
         show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
-        # Pull poster from TVmaze if show has no cover image yet
+        # Fall back to TVmaze poster if no cover yet
         if not show.get('cover_image'):
             tvmaze_img = (tvmaze_show.get('image') or {})
             tvmaze_poster = tvmaze_img.get('original') or tvmaze_img.get('medium')
@@ -1028,6 +1075,7 @@ def update_show_episodes(show_id):
             'cover_image': show.get('cover_image', ''),
             'status':      show.get('status', 'Continuing'),
             'rating':      show.get('rating'),
+            'tmdb_rating': show.get('tmdb_rating'),
         }
     })
 
