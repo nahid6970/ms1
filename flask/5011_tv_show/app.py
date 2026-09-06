@@ -11,6 +11,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 import time
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 import requests
@@ -32,6 +33,7 @@ DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
 MOVIES_FILE = r"C:\@delta\db\5011_tv_show\movies.json"
 IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
 SETTINGS_FILE = r"C:\@delta\db\5011_tv_show\settings.json"
+BANGLADESH_TZ = ZoneInfo('Asia/Dhaka')
 
 os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
 
@@ -230,6 +232,20 @@ def tvmaze_status(tvmaze_show):
     """Map TVmaze's show status to the app's continuing/ended labels."""
     return 'Ended' if str((tvmaze_show or {}).get('status', '')).casefold() == 'ended' else 'Continuing'
 
+def bangladesh_airtime(source_episode):
+    """Return an episode's TVmaze air time converted to Bangladesh time."""
+    source_airtime = source_episode.get('airtime') or ''
+    airstamp = source_episode.get('airstamp')
+    if not airstamp:
+        return source_airtime
+    try:
+        parsed = datetime.fromisoformat(str(airstamp).replace('Z', '+00:00'))
+        if parsed.tzinfo is None:
+            return source_airtime
+        return parsed.astimezone(BANGLADESH_TZ).strftime('%H:%M')
+    except (TypeError, ValueError):
+        return source_airtime
+
 def merge_tvmaze_episodes(show, tvmaze_show, episodes):
     existing_episodes = show.get('episodes', [])
     by_number = {
@@ -251,7 +267,7 @@ def merge_tvmaze_episodes(show, tvmaze_show, episodes):
             'episode_number': episode_number,
             'title': source_episode.get('name') or f'S{season_number:02d}E{episode_number:02d}',
             'air_date': source_episode.get('airdate') or '',
-            'airtime': source_episode.get('airtime') or '',
+            'airtime': bangladesh_airtime(source_episode),
             'air_datetime': source_episode.get('airstamp') or '',
             'overview': re.sub(r'<[^>]+>', '', source_episode.get('summary') or '').strip(),
             'still_image': (source_episode.get('image') or {}).get('original') or (source_episode.get('image') or {}).get('medium') or '',

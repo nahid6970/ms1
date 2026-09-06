@@ -14,6 +14,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `templates/index.html`, `static/style.css`: Title and Year fields shown side by side in Edit Show modal via `.modal-form-row` / `.modal-form-col` flex layout.
 - `app.py`: Scheduler overhauled — replaced same-day window check with `get_last_due_date()` helper that computes the most recent due date per frequency (daily/weekly/monthly); missed runs (PC was off) are caught up on next startup regardless of how much time has passed. Due shows are processed one-by-one with a 3-second stagger between API calls to avoid rate-limit bursts; each show is saved immediately after update so progress survives a mid-batch restart.
 - `app.py`: TVmaze is now authoritative for TV-show lifecycle status during discovery adds and episode refreshes; TMDb remains available for show posters and ratings.
+- `app.py`: Episode airtimes from TVmaze are converted from `airstamp` to Bangladesh Standard Time (`Asia/Dhaka`) before storage/display.
 
 # 3. Critical Context
 
