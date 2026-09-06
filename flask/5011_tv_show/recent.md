@@ -16,6 +16,8 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 - `app.py`: TVmaze is now authoritative for TV-show lifecycle status during discovery adds and episode refreshes; TMDb remains available for show posters and ratings.
 - `app.py`: Episode airtimes from TVmaze are converted from the timezone-aware `airstamp` to Bangladesh Standard Time (`Asia/Dhaka`) before storage/display; the UI continues formatting them as 12-hour AM/PM times.
 - `app.py`: Default `last_episode` show sorting now uses the displayed Bangladesh `air_date` + `airtime` together, preventing incorrect ordering for episodes airing at different times on the same date.
+- `static/style.css`: Fixed Hidden Shows poster thumbnails collapsing into thin strips by preventing grid/flex shrinking while preserving the 2:3 poster ratio.
+- `static/style.css`: Constrained `#hiddenShowsModal > div` to a fixed viewport-height flex layout with max-content grid rows, so the poster grid scrolls instead of compressing its cards.
 - `app.py`: The hourly whole-Sonarr-storage scan now hydrates newly discovered shows from TVmaze before attaching files, preventing raw filename episodes from duplicating TVmaze episodes.
 
 # 3. Critical Context
