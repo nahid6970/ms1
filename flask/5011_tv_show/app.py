@@ -226,6 +226,10 @@ def tvmaze_show_for_catalog_item(show):
     ranked.sort(key=lambda item: item[:3])
     return ranked[0][3], None
 
+def tvmaze_status(tvmaze_show):
+    """Map TVmaze's show status to the app's continuing/ended labels."""
+    return 'Ended' if str((tvmaze_show or {}).get('status', '')).casefold() == 'ended' else 'Continuing'
+
 def merge_tvmaze_episodes(show, tvmaze_show, episodes):
     existing_episodes = show.get('episodes', [])
     by_number = {
@@ -634,17 +638,16 @@ def run_show_episode_update(show, now=None):
         return 0, 0, error
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
     if not show.get('lock_status'):
+        show['status'] = tvmaze_status(tvmaze_show)
         tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
         if tmdb_details and not tmdb_error:
             tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
             if tmdb_image:
                 show['cover_image'] = tmdb_image
-            show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
             tmdb_score = round(float(tmdb_details.get('vote_average') or 0), 1)
             if tmdb_score > 0:
                 show['tmdb_rating'] = tmdb_score
         else:
-            show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
             if not show.get('cover_image'):
                 tvmaze_img = (tvmaze_show.get('image') or {})
                 tvmaze_poster = tvmaze_img.get('original') or tvmaze_img.get('medium')
@@ -1031,7 +1034,7 @@ def discover_add():
             for show in shows
         ):
             return jsonify({'success': False, 'message': f'{title} is already in your shows'}), 409
-        shows.append({
+        new_show = {
             'id': max([show.get('id', 0) for show in shows], default=0) + 1,
             'tmdb_id': int(tmdb_id),
             'external_ids': external_ids,
@@ -1045,7 +1048,12 @@ def discover_add():
             'tmdb_rating': tmdb_rating,
             'status': 'Ended' if details.get('status') == 'Ended' else 'Continuing',
             'episodes': []
-        })
+        }
+        tvmaze_show, tvmaze_error = tvmaze_show_for_catalog_item(new_show)
+        if tvmaze_show and not tvmaze_error:
+            new_show['status'] = tvmaze_status(tvmaze_show)
+            new_show['tvmaze_id'] = tvmaze_show.get('id')
+        shows.append(new_show)
         save_data(shows)
 
     return jsonify({'success': True, 'message': f'{title} added to your {"movies" if media_type == "movie" else "shows"}'})
@@ -1106,17 +1114,16 @@ def update_show_episodes(show_id):
         return jsonify({'success': False, 'message': error}), 502
 
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    show['status'] = tvmaze_status(tvmaze_show)
     tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
     if tmdb_details and not tmdb_error:
         tmdb_image = tmdb_poster_url(tmdb_details.get('poster_path'))
         if tmdb_image:
             show['cover_image'] = tmdb_image
-        show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
         tmdb_score = round(float(tmdb_details.get('vote_average') or 0), 1)
         if tmdb_score > 0:
             show['tmdb_rating'] = tmdb_score
     else:
-        show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
         # Fall back to TVmaze poster if no cover yet
         if not show.get('cover_image'):
             tvmaze_img = (tvmaze_show.get('image') or {})
