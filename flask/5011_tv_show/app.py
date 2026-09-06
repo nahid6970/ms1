@@ -641,6 +641,11 @@ def run_show_episode_update(show, now=None):
             show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
         else:
             show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
+            if not show.get('cover_image'):
+                tvmaze_img = (tvmaze_show.get('image') or {})
+                tvmaze_poster = tvmaze_img.get('original') or tvmaze_img.get('medium')
+                if tvmaze_poster:
+                    show['cover_image'] = tvmaze_poster
     show['episodes_updated_at'] = now.isoformat()
     show['last_run_result'] = {
         'timestamp': now.isoformat(),
@@ -1002,6 +1007,12 @@ def update_show_episodes(show_id):
         show['status'] = 'Ended' if tmdb_details.get('status') in {'Ended', 'Canceled'} else 'Continuing'
     else:
         show['status'] = 'Ended' if tvmaze_show.get('status') == 'Ended' else 'Continuing'
+        # Pull poster from TVmaze if show has no cover image yet
+        if not show.get('cover_image'):
+            tvmaze_img = (tvmaze_show.get('image') or {})
+            tvmaze_poster = tvmaze_img.get('original') or tvmaze_img.get('medium')
+            if tvmaze_poster:
+                show['cover_image'] = tvmaze_poster
     show['episode_source'] = 'tvmaze'
     show['episodes_updated_at'] = datetime.now().isoformat()
     save_data(shows)
@@ -1009,7 +1020,15 @@ def update_show_episodes(show_id):
         'success': True,
         'message': f'Updated {show["title"]}: {added} episodes added, {updated} updated.',
         'added': added,
-        'updated': updated
+        'updated': updated,
+        'show': {
+            'id':          show['id'],
+            'title':       show.get('title', ''),
+            'year':        show.get('year', ''),
+            'cover_image': show.get('cover_image', ''),
+            'status':      show.get('status', 'Continuing'),
+            'rating':      show.get('rating'),
+        }
     })
 
 @app.route('/')
