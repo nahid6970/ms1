@@ -40,7 +40,8 @@ chrome.storage.local.get(['excludedDomains'], (result) => {
 
 function runExtension() {
     let checkingMode = false;
-    let seenItems = new Set(); // Local cache of seen IDs
+    let seenItems = new Set(); // Backward-compatible cache of checked IDs
+    let itemStatuses = {}; // ID -> 'check' | 'cross'
     let currentSettings = {
         checkmarkSize: 15,
         checkmarkColor: '#4CAF50',
@@ -80,9 +81,14 @@ function runExtension() {
 
         // Listen for storage changes to sync seenItems across tabs
         chrome.storage.onChanged.addListener((changes, areaName) => {
-            if (areaName === 'local' && changes.seenItems) {
-                const newSeenItems = changes.seenItems.newValue || {};
-                seenItems = new Set(Object.keys(newSeenItems));
+            if (areaName === 'local' && (changes.itemStatuses || changes.seenItems)) {
+                itemStatuses = { ...(changes.itemStatuses?.newValue || {}) };
+                if (!changes.itemStatuses && changes.seenItems) {
+                    Object.keys(changes.seenItems.newValue || {}).forEach(id => {
+                        itemStatuses[id] = 'check';
+                    });
+                }
+                seenItems = new Set(Object.keys(itemStatuses));
                 // Update all existing checkmarks to reflect new state
                 syncAllCheckmarks();
             }
@@ -97,10 +103,12 @@ function runExtension() {
 
     function loadSeenItems() {
         return new Promise((resolve) => {
-            chrome.storage.local.get(['seenItems'], function (result) {
-                if (result.seenItems) {
-                    seenItems = new Set(Object.keys(result.seenItems));
-                }
+            chrome.storage.local.get(['seenItems', 'itemStatuses'], function (result) {
+                itemStatuses = { ...(result.itemStatuses || {}) };
+                Object.keys(result.seenItems || {}).forEach(id => {
+                    if (!itemStatuses[id]) itemStatuses[id] = 'check';
+                });
+                seenItems = new Set(Object.keys(itemStatuses));
                 resolve();
             });
         });
@@ -125,36 +133,27 @@ function runExtension() {
         }
     }
 
-    function markAsSeen(id) {
+    function setItemStatus(id, status) {
         if (!id) return;
-        if (seenItems.has(id)) return; // Already seen
 
-        seenItems.add(id);
+        if (status === 'off') {
+            delete itemStatuses[id];
+            seenItems.delete(id);
+        } else {
+            itemStatuses[id] = status;
+            seenItems.add(id);
+        }
 
-        chrome.storage.local.get(['seenItems'], function (result) {
-            const store = result.seenItems || {};
-            store[id] = Date.now();
-            chrome.storage.local.set({ seenItems: store });
-        });
+        const legacySeenItems = {};
+        seenItems.forEach(seenId => { legacySeenItems[seenId] = Date.now(); });
+        chrome.storage.local.set({ itemStatuses, seenItems: legacySeenItems });
 
-        // Visually update immediately
-        applyCheckmarksToMatching(id);
+        removeCheckmarksMatching(id);
+        if (status !== 'off') applyCheckmarksToMatching(id);
     }
 
-    function markAsUnseen(id) {
-        if (!id) return;
-        if (!seenItems.has(id)) return; // Already unseen
-
-        seenItems.delete(id);
-
-        chrome.storage.local.get(['seenItems'], function (result) {
-            const store = result.seenItems || {};
-            delete store[id];
-            chrome.storage.local.set({ seenItems: store });
-        });
-
-        // Visually remove immediately
-        removeCheckmarksMatching(id);
+    function getItemStatus(id) {
+        return itemStatuses[id] || 'off';
     }
 
     // --- Identification Logic ---
@@ -283,18 +282,18 @@ function runExtension() {
             element.dataset.icListenersAdded = 'true';
         }
 
-        if (seenItems.has(id)) {
+        if (getItemStatus(id) !== 'off') {
             renderCheckmark(element);
         }
     }
 
     function syncElementCheckmark(element, id) {
-        const isSeen = seenItems.has(id);
+        const isMarked = getItemStatus(id) !== 'off';
         const hasCheck = element.dataset.hasCheckmark === 'true';
 
-        if (isSeen && !hasCheck) {
+        if (isMarked && !hasCheck) {
             renderCheckmark(element);
-        } else if (!isSeen && hasCheck) {
+        } else if (!isMarked && hasCheck) {
             removeCheckmarksFromElement(element);
         }
     }
@@ -333,7 +332,7 @@ function runExtension() {
         document.querySelectorAll('[data-ic-processed="true"]').forEach(el => {
             delete el.dataset.hasCheckmark;
             const id = el.dataset.icContentId;
-            if (id && seenItems.has(id)) {
+            if (id && getItemStatus(id) !== 'off') {
                 renderCheckmark(el);
             }
         });
@@ -353,11 +352,10 @@ function runExtension() {
         const id = element?.dataset?.icContentId;
         if (!id) return;
 
-        if (seenItems.has(id)) {
-            markAsUnseen(id);
-        } else {
-            markAsSeen(id);
-        }
+        const currentStatus = getItemStatus(id);
+        const nextStatus = currentStatus === 'off' ? 'check' :
+            currentStatus === 'check' ? 'cross' : 'off';
+        setItemStatus(id, nextStatus);
         refreshEditButtons();
     }
 
@@ -395,7 +393,9 @@ function runExtension() {
 
         const checkmark = document.createElement('div');
         checkmark.className = 'ic-checkmark';
-        checkmark.innerHTML = '✓';
+        const status = getItemStatus(id);
+        checkmark.innerHTML = status === 'cross' ? '✕' : '✓';
+        checkmark.classList.toggle('ic-cross', status === 'cross');
         checkmark.dataset.forId = id;
         checkmark.dataset.ownerId = id; // Reference to owner
 
@@ -423,7 +423,7 @@ function runExtension() {
             zIndex: '2147483646',
             width: `${calculatedSize}px`,
             height: `${calculatedSize}px`,
-            backgroundColor: s.checkmarkColor,
+            backgroundColor: status === 'cross' ? '#e53935' : s.checkmarkColor,
             color: s.textColor,
             borderRadius: '50%',
             display: 'flex',
@@ -533,8 +533,10 @@ function runExtension() {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'ic-toggle-button';
-        button.textContent = seenItems.has(id) ? '✓' : '';
-        button.title = seenItems.has(id) ? 'Unmark item' : 'Mark item';
+        const status = getItemStatus(id);
+        button.textContent = status === 'check' ? '✓' : status === 'cross' ? '✕' : '';
+        button.title = status === 'off' ? 'Mark item' :
+            status === 'check' ? 'Mark as cross' : 'Clear status';
         button.dataset.forId = id;
 
         Object.assign(button.style, {
@@ -544,9 +546,10 @@ function runExtension() {
             zIndex: '2147483647',
             width: '30px',
             height: '30px',
-            border: `2px solid ${currentSettings.checkmarkColor}`,
+            border: `2px solid ${status === 'cross' ? '#e53935' : currentSettings.checkmarkColor}`,
             borderRadius: '6px',
-            background: seenItems.has(id) ? currentSettings.checkmarkColor : 'rgba(0, 0, 0, 0.65)',
+            background: status === 'check' ? currentSettings.checkmarkColor :
+                status === 'cross' ? '#e53935' : 'rgba(0, 0, 0, 0.65)',
             color: currentSettings.textColor,
             fontSize: '20px',
             fontWeight: '700',
@@ -656,7 +659,8 @@ function runExtension() {
             refreshAllCheckmarks();
         } else if (message.action === 'clearAllCheckmarks') {
             seenItems.clear();
-            chrome.storage.local.remove('seenItems');
+            itemStatuses = {};
+            chrome.storage.local.remove(['seenItems', 'itemStatuses']);
             refreshAllCheckmarks();
             showNotification('All checkmarks cleared!');
         }

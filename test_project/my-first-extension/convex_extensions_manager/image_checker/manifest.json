@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Image Checker",
   "version": "1.0",
-  "description": "Mark images with green checkmarks on any website",
+  "description": "Mark images with green checkmarks or red crosses on any website",
   "permissions": [
     "storage",
     "scripting",

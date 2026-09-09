@@ -1,11 +1,11 @@
 # Image Checker Chrome Extension
 
-A Chrome extension that allows you to mark images with green checkmarks on any website.
+A Chrome extension that allows you to mark images with checkmarks or red crosses on any website.
 
 ## Features
 
 - Click the extension icon to toggle "checking mode"
-- When active, click on any image to add/remove a green checkmark
+- When active, click repeatedly on any image to cycle through off, green check, and red cross
 - Works on all images, videos, and elements with background images
 - Clear all checkmarks with one button
 - Visual feedback and notifications
@@ -16,10 +16,11 @@ A Chrome extension that allows you to mark images with green checkmarks on any w
 2. Navigate to any website (like YouTube)
 3. Click the Image Checker extension icon
 4. Click "Start Checking Mode"
-5. Click on any image/video to mark it with a green checkmark
-6. Click again to remove the checkmark
-7. Use "Clear All Checkmarks" to remove all marks
-8. Click "Stop Checking Mode" when done
+5. Click on any image/video to add a green checkmark
+6. Click again to change it to a red cross
+7. Click a third time to clear the status
+8. Use "Clear All Checkmarks" to remove all marks
+9. Click "Stop Checking Mode" when done
 
 ## Installation
 
