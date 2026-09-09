@@ -81,13 +81,8 @@ function runExtension() {
 
         // Listen for storage changes to sync seenItems across tabs
         chrome.storage.onChanged.addListener((changes, areaName) => {
-            if (areaName === 'local' && (changes.itemStatuses || changes.seenItems)) {
-                itemStatuses = { ...(changes.itemStatuses?.newValue || {}) };
-                if (!changes.itemStatuses && changes.seenItems) {
-                    Object.keys(changes.seenItems.newValue || {}).forEach(id => {
-                        itemStatuses[id] = 'check';
-                    });
-                }
+            if (areaName === 'local' && changes.itemStatuses) {
+                itemStatuses = { ...(changes.itemStatuses.newValue || {}) };
                 seenItems = new Set(Object.keys(itemStatuses));
                 // Update all existing checkmarks to reflect new state
                 syncAllCheckmarks();
@@ -144,9 +139,7 @@ function runExtension() {
             seenItems.add(id);
         }
 
-        const legacySeenItems = {};
-        seenItems.forEach(seenId => { legacySeenItems[seenId] = Date.now(); });
-        chrome.storage.local.set({ itemStatuses, seenItems: legacySeenItems });
+        chrome.storage.local.set({ itemStatuses });
 
         removeCheckmarksMatching(id);
         if (status !== 'off') applyCheckmarksToMatching(id);
