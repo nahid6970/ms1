@@ -24,7 +24,7 @@ Example links section (after table):
 
 ---
 
-## 3. Portals & Jobs Checked (Updated: 04 Sept 2026 — bdgovtjob.net checked)
+## 3. Portals & Jobs Checked (Updated: 09 Sept 2026 — erecruitment.bb.org.bd checked)
 
 | Bank / Org | Post | Experience | Eligible? | Deadline |
 |---|---|---|---|---|
@@ -38,9 +38,10 @@ Example links section (after table):
 | Dutch-Bangla Bank | MTO | Fresher, CGPA 3.00+ | ✅ Best pick (BDT 70k) | Sept 13, 2026 |
 | Dutch-Bangla Bank | Assistant Officer | Fresher | ✅ Suitable (BDT 40k) | Sept 13, 2026 |
 | Dutch-Bangla Bank | Trainee Cash Officer | Fresher | ✅ Suitable (BDT 26k) | Sept 13, 2026 |
-| Bangladesh Bank | Medical Officer | MBBS required | ❌ Not applicable | Sept 27, 2026 |
-| Bangladesh Bank | Asst. Director (Law) | Law degree required | ❌ Not applicable | Sept 20, 2026 |
-| Bangladesh Bank | General Officer / Finance | No active circular | ⚠️ Check periodically | — |
+| Bangladesh Bank | Medical Officer (Job ID-331) | MBBS required | ❌ Not applicable | Sept 27, 2026 |
+| Bangladesh Bank | Asst. Director (Law) (Job ID-330) | Law degree required | ❌ Not applicable | Sept 20, 2026 |
+| BSCS Combined Bank | Senior Officer (G) Grade-9 (Job ID-26101) | Fresher — admit card stage | ⚠️ Already in exam stage | — |
+| BSCS Combined Bank | Officer (G) / Officer (Cash) (Job ID-26102/26103) | Fresher expected | ⚠️ Not published yet — watch closely | — |
 | BHTPA | Asst. Director (Investment) | Finance/MBA | ✅ Suitable | Sept 26, 2026 |
 | Agrani Bank | 1 post (unknown) | TBC | ⚠️ Need to check | Sept 10, 2026 |
 | BIBM | 7 categories, 8 posts | TBC | ⚠️ Need to check | Sept 23, 2026 |
@@ -60,6 +61,7 @@ Example links section (after table):
 - BEZA + BIDA are being merged into "Invest Bangladesh" — no active circular right now.
 - For Dutch-Bangla Bank, **MTO is the best pick** if CGPA is 3.00+/4.00. Can only apply to ONE DBBL post — exam held same day for all.
 - BHTPA application portal: bhtpa.teletalk.com.bd
+- **BSCS 261xx series (Base Year 2026):** Job ID 26101 = Senior Officer (G) Grade-9 — admit card stage (applied earlier). Job IDs **26102** (Officer G, Grade-10) and **26103** (Officer Cash / other) are NOT published yet. These are Finance-eligible fresher posts — check `erecruitment.bb.org.bd/career/jobopportunity_bscs.php` regularly. Pattern from 2025 batch: 25101=Sr Officer G, 25102=Officer G, 25103=Officer Cash.
 
 ---
 
@@ -73,4 +75,5 @@ Example links section (after table):
 | Check BIBM post details | Sept 23, 2026 | ⚠️ Verify eligibility |
 | Check EBL post details | Sept 12, 2026 | ⚠️ Verify eligibility |
 | Check Bangladesh Bank erecruitment for Finance/General Officer circular | Ongoing | 🔁 Periodic check |
+| Watch BSCS for Job ID 26102 & 26103 (Officer G / Officer Cash) | Ongoing | 🔴 High priority — new batch expected |
 | Check Dhaka University post details (jobs.du.ac.bd) | Sept 13–15, Nov 2 | ⚠️ Verify post names |
