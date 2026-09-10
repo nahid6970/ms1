@@ -11,7 +11,13 @@
     <div class="sticky-controls-wrapper">
         <div class="app-header-inner">
             <nav class="library-nav" aria-label="Library sections">
-                <a href="{{ url_for('index') }}" class="nav-link active">Shows</a>
+                <div class="nav-dropdown-container" id="showsNavDropdown">
+                    <a href="javascript:void(0)" class="nav-link active" id="navShows" onclick="toggleShowsNavDropdown(event)">Shows ▾</a>
+                    <div class="nav-dropdown" id="showsNavMenu">
+                        <a href="{{ url_for('index') }}" class="nav-dropdown-item" onclick="closeShowsNavDropdown()">Shows</a>
+                        <a href="javascript:void(0)" class="nav-dropdown-item" id="navShowsCompleted" onclick="closeShowsNavDropdown(); toggleCompletedView()">Shows ✅</a>
+                    </div>
+                </div>
                 <a href="{{ url_for('movies_page') }}" class="nav-link">Movies</a>
                 <a href="{{ url_for('discover_page') }}" class="nav-link">Discover</a>
             </nav>

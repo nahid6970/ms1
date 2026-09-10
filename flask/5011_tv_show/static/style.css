@@ -962,9 +962,14 @@ input:checked + .slider:before { transform: translateX(22px); }
 .show-card.ended-completed { display: none; }
 html.show-hidden-shows .show-card.ended-completed { display: flex; }
 
+/* Shows ✅ tab — completed view */
+body.view-completed .show-card:not(.ended-completed) { display: none !important; }
+body.view-completed .show-card.ended-completed { display: flex !important; }
+
 .hidden-shows-modal-content {
-    max-width: 800px;
-    max-height: 85vh;
+    max-width: 1400px;
+    width: 95vw;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden !important;
@@ -976,15 +981,21 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 }
 
 .hidden-shows-list { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
-    grid-auto-rows: max-content;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     align-content: start;
-    gap: 20px; 
+    justify-content: center;
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding: 10px;
+    padding: 16px;
+}
+
+/* Cloned show-cards inside the hidden shows modal must be visible */
+.hidden-shows-list .show-card {
+    display: flex !important;
+    flex-shrink: 0;
 }
 
 .hidden-show-item {
@@ -1293,6 +1304,51 @@ body::before {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+/* Shows nav dropdown */
+.nav-dropdown-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 140px;
+    background: #282828;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 1100;
+    overflow: hidden;
+}
+
+.nav-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-dropdown-item {
+    display: block;
+    padding: 10px 16px;
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.nav-dropdown-item:hover {
+    background: #333;
+    color: #fff;
 }
 
 .nav-link {
@@ -2218,8 +2274,10 @@ body::before {
 }
 
 #hiddenShowsModal > div.hidden-shows-modal-content {
-    height: calc(100vh - 12vh);
-    max-height: calc(100vh - 12vh);
+    width: 95vw;
+    max-width: 1400px;
+    height: calc(100vh - 10vh);
+    max-height: calc(100vh - 10vh);
 }
 
 #hiddenShowsModal > div.hidden-shows-modal-content > .hidden-shows-list {

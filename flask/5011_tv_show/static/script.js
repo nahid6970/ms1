@@ -8,6 +8,21 @@ function closeAddShowModal() {
     document.body.classList.remove('modal-open');
 }
 
+function toggleShowsNavDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('showsNavMenu').classList.toggle('show');
+}
+
+function closeShowsNavDropdown() {
+    document.getElementById('showsNavMenu').classList.remove('show');
+}
+
+function toggleCompletedView() {
+    const isActive = document.body.classList.toggle('view-completed');
+    const navLink = document.getElementById('navShows');
+    navLink.textContent = isActive ? 'Shows ✅ ▾' : 'Shows ▾';
+}
+
 function showHiddenShows() {
     console.log('Show hidden shows button clicked');
     
@@ -26,40 +41,19 @@ function showHiddenShows() {
     hiddenShowsList.innerHTML = '';
     
     if (hiddenShows.length === 0) {
-        hiddenShowsList.innerHTML = '<p>No hidden shows found.</p>';
+        hiddenShowsList.innerHTML = '<p style="color:#aaa;text-align:center;grid-column:1/-1;">No hidden shows found.</p>';
     } else {
         hiddenShows.forEach(card => {
-            const title = card.dataset.title || 'Unknown Title';
-            const year = card.dataset.year || 'Unknown Year';
-            const status = card.dataset.status || 'Unknown Status';
-            
-            const imgElement = card.querySelector('img');
-            const coverImage = imgElement ? imgElement.src : '';
-            
-            console.log('Show info:', {title, year, status, coverImage});
-            
-            const showItem = document.createElement('div');
-            showItem.className = 'hidden-show-item';
-            showItem.innerHTML = `
-                <img src="${coverImage}" alt="${title}">
-                <div class="hidden-show-item-info">
-                    <h4>${title}</h4>
-                    <p>${year}</p>
-                    <p class="status">${status}</p>
-                </div>
-            `;
-            
-            hiddenShowsList.appendChild(showItem);
+            // Clone the real show card so it looks identical to the home page
+            const clone = card.cloneNode(true);
+            // Force display so the card is visible inside the modal
+            clone.style.display = 'flex';
+            hiddenShowsList.appendChild(clone);
         });
     }
     
     hiddenShowsModal.style.display = 'block';
     document.body.classList.add('modal-open');
-}
-
-function closeHiddenShowsModal() {
-    document.getElementById('hiddenShowsModal').style.display = 'none';
-    document.body.classList.remove('modal-open');
 }
 
 function closeHiddenShowsModal() {
@@ -1475,6 +1469,11 @@ document.addEventListener('click', function(event) {
             dropdown.classList.remove('show');
             button.classList.remove('active');
         }
+    }
+    // Close shows nav dropdown on outside click
+    const showsNavDropdown = document.getElementById('showsNavDropdown');
+    if (showsNavDropdown && !showsNavDropdown.contains(event.target)) {
+        closeShowsNavDropdown();
     }
 });
 
