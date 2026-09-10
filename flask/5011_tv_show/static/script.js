@@ -1107,9 +1107,14 @@ document.addEventListener('DOMContentLoaded', () => {
         showCards.forEach(card => {
             const title = (card.getAttribute('data-title') || "").toLowerCase();
             const year = (card.getAttribute('data-year') || "").toLowerCase();
-            
-            if (title.includes(query) || year.includes(query)) {
-                card.style.display = ''; 
+            const matches = title.includes(query) || year.includes(query);
+
+            if (query === '') {
+                // Empty search — let CSS rules take over
+                card.style.display = '';
+            } else if (matches) {
+                // Force show matching cards regardless of archived/hidden/completed status
+                card.style.display = 'flex';
             } else {
                 card.style.display = 'none';
             }
