@@ -1038,6 +1038,16 @@ def discover_search():
         item_type: {catalog_match_key(item.get('title'), item.get('year')) for item in items}
         for item_type, items in existing_catalog.items()
     }
+    existing_tvmaze_ids = {
+        str(item.get('tmdb_id')): item.get('tvmaze_id')
+        for item in existing_catalog['tv']
+        if item.get('tmdb_id') is not None and item.get('tvmaze_id')
+    }
+    existing_tvmaze_match_ids = {
+        catalog_match_key(item.get('title'), item.get('year')): item.get('tvmaze_id')
+        for item in existing_catalog['tv']
+        if item.get('tvmaze_id')
+    }
     for item in page_items:
         item_type = item.get('media_type', media_type)
         if item_type not in {'movie', 'tv'}:
@@ -1045,6 +1055,7 @@ def discover_search():
         title = item.get('title') if item_type == 'movie' else item.get('name')
         release_date = item.get('release_date') if item_type == 'movie' else item.get('first_air_date')
         normalized_year = tmdb_year(release_date)
+        catalog_key = catalog_match_key(title, normalized_year)
         normalized.append({
             'tmdb_id': item.get('id'),
             'media_type': item_type,
@@ -1053,7 +1064,8 @@ def discover_search():
             'overview': item.get('overview') or 'No overview available.',
             'poster_url': tmdb_poster_url(item.get('poster_path')),
             'rating': round(float(item.get('vote_average') or 0), 1),
-            'already_added': str(item.get('id')) in existing_tmdb_ids[item_type] or catalog_match_key(title, normalized_year) in existing_match_keys[item_type]
+            'already_added': str(item.get('id')) in existing_tmdb_ids[item_type] or catalog_key in existing_match_keys[item_type],
+            'tvmaze_id': (existing_tvmaze_ids.get(str(item.get('id'))) or existing_tvmaze_match_ids.get(catalog_key)) if item_type == 'tv' else None
         })
 
     return jsonify({
