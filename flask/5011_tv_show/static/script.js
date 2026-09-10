@@ -35,44 +35,6 @@ function toggleArchivedView() {
     document.getElementById('navShowsArchived').classList.toggle('active-item', isArchived);
 }
 
-function showHiddenShows() {
-    console.log('Show hidden shows button clicked');
-    
-    // Get all hidden shows (ended and completed)
-    const hiddenShows = document.querySelectorAll('.show-card.ended-completed');
-    console.log('Found hidden shows:', hiddenShows.length);
-    
-    const hiddenShowsList = document.getElementById('hiddenShowsList');
-    const hiddenShowsModal = document.getElementById('hiddenShowsModal');
-    
-    if (!hiddenShowsList || !hiddenShowsModal) {
-        console.error('Hidden shows modal elements not found');
-        return;
-    }
-    
-    hiddenShowsList.innerHTML = '';
-    
-    if (hiddenShows.length === 0) {
-        hiddenShowsList.innerHTML = '<p style="color:#aaa;text-align:center;grid-column:1/-1;">No hidden shows found.</p>';
-    } else {
-        hiddenShows.forEach(card => {
-            // Clone the real show card so it looks identical to the home page
-            const clone = card.cloneNode(true);
-            // Force display so the card is visible inside the modal
-            clone.style.display = 'flex';
-            hiddenShowsList.appendChild(clone);
-        });
-    }
-    
-    hiddenShowsModal.style.display = 'block';
-    document.body.classList.add('modal-open');
-}
-
-function closeHiddenShowsModal() {
-    document.getElementById('hiddenShowsModal').style.display = 'none';
-    document.body.classList.remove('modal-open');
-}
-
 async function openEditShowModal(showId) {
     const response = await fetch(`/edit_show/${showId}`);
     const show = await response.json();
@@ -1062,43 +1024,12 @@ if (savedScrollPosition !== null) {
     localStorage.removeItem('scrollPosition');
 }
 
-// Load the persisted visibility preference for hidden shows.
 document.addEventListener('DOMContentLoaded', () => {
-    const showHiddenShowsToggle = document.getElementById('showHiddenShows');
-    const html = document.documentElement;
     const scheduleFrequency = document.getElementById('editShowEpisodeUpdateFrequency');
     if (scheduleFrequency) {
         scheduleFrequency.addEventListener('change', updateScheduleOptionVisibility);
         updateScheduleOptionVisibility();
     }
-
-    // Load show hidden shows preference from localStorage
-    const showHiddenShows = localStorage.getItem('showHiddenShows') === 'true';
-    console.log('Loaded showHiddenShows setting:', showHiddenShows);
-    if (showHiddenShows) {
-        html.classList.add('show-hidden-shows');
-        showHiddenShowsToggle.checked = true;
-        console.log('Added show-hidden-shows class to HTML');
-    } else {
-        html.classList.remove('show-hidden-shows');
-        showHiddenShowsToggle.checked = false;
-        console.log('Removed show-hidden-shows class from HTML');
-    }
-
-    // Save show hidden shows preference to localStorage on change
-    showHiddenShowsToggle.addEventListener('change', () => {
-        if (showHiddenShowsToggle.checked) {
-            html.classList.add('show-hidden-shows');
-            localStorage.setItem('showHiddenShows', 'true');
-            console.log('Enabled show-hidden-shows');
-        } else {
-            html.classList.remove('show-hidden-shows');
-            localStorage.setItem('showHiddenShows', 'false');
-            console.log('Disabled show-hidden-shows');
-        }
-    });
-
-
 
     // Live Search Functionality
     const searchInput = document.querySelector('.search-form input[name="query"]');
@@ -1534,7 +1465,6 @@ window.onclick = function(event) {
     const addModal = document.getElementById('addShowModal');
     const editShowModal = document.getElementById('editShowModal');
     const settingsModal = document.getElementById('settingsModal');
-    const hiddenShowsModal = document.getElementById('hiddenShowsModal');
     const scanMissingModal = document.getElementById('scanMissingModal');
     const episodesModal = document.getElementById('episodesModal');
     const scheduledUpdatesModal = document.getElementById('scheduledUpdatesModal');
@@ -1547,9 +1477,6 @@ window.onclick = function(event) {
         document.body.classList.remove('modal-open');
     } else if (event.target == settingsModal) {
         settingsModal.style.display = 'none';
-        document.body.classList.remove('modal-open');
-    } else if (event.target == hiddenShowsModal) {
-        hiddenShowsModal.style.display = 'none';
         document.body.classList.remove('modal-open');
     } else if (event.target == scanMissingModal) {
         scanMissingModal.style.display = 'none';

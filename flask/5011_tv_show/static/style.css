@@ -1017,7 +1017,6 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 /* Hidden Shows functionality */
 .show-card.ended-completed { display: none; }
-html.show-hidden-shows .show-card.ended-completed { display: flex; }
 
 /* Shows ✅ tab — completed view */
 body.view-completed .show-card:not(.ended-completed) { display: none !important; }
@@ -1027,38 +1026,6 @@ body.view-completed .show-card.ended-completed { display: flex !important; }
 .show-card.archived { display: none; }
 body.view-archived .show-card:not(.archived) { display: none !important; }
 body.view-archived .show-card.archived { display: flex !important; }
-
-.hidden-shows-modal-content {
-    max-width: 1400px;
-    width: 95vw;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden !important;
-}
-
-.hidden-shows-modal-content h2 {
-    text-align: center;
-    margin-top: 0;
-}
-
-.hidden-shows-list { 
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-content: start;
-    justify-content: center;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 16px;
-}
-
-/* Cloned show-cards inside the hidden shows modal must be visible */
-.hidden-shows-list .show-card {
-    display: flex !important;
-    flex-shrink: 0;
-}
 
 .hidden-show-item {
     background: #222;
@@ -2324,7 +2291,6 @@ body::before {
 #editShowModal,
 #addShowModal,
 #settingsModal,
-#hiddenShowsModal,
 #scanMissingModal,
 #scheduledUpdatesModal {
     overflow: hidden;
@@ -2333,7 +2299,6 @@ body::before {
 #editShowModal .modal-content,
 #addShowModal .modal-content,
 #settingsModal .modal-content,
-#hiddenShowsModal .modal-content,
 #scanMissingModal .modal-content,
 #scheduledUpdatesModal .modal-content {
     max-height: calc(100vh - 8vh);
@@ -2343,17 +2308,6 @@ body::before {
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
-}
-
-#hiddenShowsModal > div.hidden-shows-modal-content {
-    width: 95vw;
-    max-width: 1400px;
-    height: calc(100vh - 10vh);
-    max-height: calc(100vh - 10vh);
-}
-
-#hiddenShowsModal > div.hidden-shows-modal-content > .hidden-shows-list {
-    overflow-y: auto;
 }
 
 /* Wider edit-show modal */
