@@ -17,11 +17,6 @@ function closeShowsNavDropdown() {
     document.getElementById('showsNavMenu').classList.remove('show');
 }
 
-function resetShowsView() {
-    localStorage.setItem('showsView', 'default');
-    closeShowsNavDropdown();
-}
-
 function toggleCompletedView() {
     const isCompleted = document.body.classList.toggle('view-completed');
     if (isCompleted) document.body.classList.remove('view-archived');
@@ -29,7 +24,6 @@ function toggleCompletedView() {
     document.getElementById('navDropdownShows').classList.toggle('active-item', !isCompleted && !document.body.classList.contains('view-archived'));
     document.getElementById('navShowsCompleted').classList.toggle('active-item', isCompleted);
     document.getElementById('navShowsArchived').classList.remove('active-item');
-    localStorage.setItem('showsView', isCompleted ? 'completed' : 'default');
 }
 
 function toggleArchivedView() {
@@ -39,7 +33,6 @@ function toggleArchivedView() {
     document.getElementById('navDropdownShows').classList.toggle('active-item', !isArchived && !document.body.classList.contains('view-completed'));
     document.getElementById('navShowsCompleted').classList.remove('active-item');
     document.getElementById('navShowsArchived').classList.toggle('active-item', isArchived);
-    localStorage.setItem('showsView', isArchived ? 'archived' : 'default');
 }
 
 function showHiddenShows() {
@@ -1086,20 +1079,6 @@ document.addEventListener('DOMContentLoaded', () => {
         html.classList.remove('show-hidden-shows');
         showHiddenShowsToggle.checked = false;
         console.log('Removed show-hidden-shows class from HTML');
-    }
-
-    // Restore shows view (default / completed / archived) from localStorage
-    const savedView = localStorage.getItem('showsView');
-    if (savedView === 'completed') {
-        document.body.classList.add('view-completed');
-        document.getElementById('navShows').textContent = 'Shows ✅ ▾';
-        document.getElementById('navDropdownShows').classList.remove('active-item');
-        document.getElementById('navShowsCompleted').classList.add('active-item');
-    } else if (savedView === 'archived') {
-        document.body.classList.add('view-archived');
-        document.getElementById('navShows').textContent = 'Archived 📦 ▾';
-        document.getElementById('navDropdownShows').classList.remove('active-item');
-        document.getElementById('navShowsArchived').classList.add('active-item');
     }
 
     // Save show hidden shows preference to localStorage on change

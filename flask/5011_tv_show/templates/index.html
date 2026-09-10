@@ -14,7 +14,7 @@
                 <div class="nav-dropdown-container" id="showsNavDropdown">
                     <a href="javascript:void(0)" class="nav-link active" id="navShows" onclick="toggleShowsNavDropdown(event)">Shows ▾</a>
                     <div class="nav-dropdown" id="showsNavMenu">
-                        <a href="{{ url_for('index') }}" class="nav-dropdown-item active-item" id="navDropdownShows" onclick="resetShowsView()">Shows</a>
+                        <a href="{{ url_for('index') }}" class="nav-dropdown-item active-item" id="navDropdownShows" onclick="closeShowsNavDropdown()">Shows</a>
                         <a href="javascript:void(0)" class="nav-dropdown-item" id="navShowsCompleted" onclick="closeShowsNavDropdown(); toggleCompletedView()">Shows ✅</a>
                         <a href="javascript:void(0)" class="nav-dropdown-item" id="navShowsArchived" onclick="closeShowsNavDropdown(); toggleArchivedView()">Archived 📦</a>
                     </div>
