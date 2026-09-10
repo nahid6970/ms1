@@ -1,31 +1,114 @@
-const discoverForm = document.getElementById('discoverSearchForm');
-const discoverQuery = document.getElementById('discoverQuery');
-const discoverType = document.getElementById('discoverType');
-const discoverPreset = document.getElementById('discoverPreset');
-const discoverSort = document.getElementById('discoverSort');
-const discoverLimit = document.getElementById('discoverLimit');
-const discoverResults = document.getElementById('discoverResults');
-const discoverStatus = document.getElementById('discoverStatus');
+const discoverForm       = document.getElementById('discoverSearchForm');
+const discoverQuery      = document.getElementById('discoverQuery');
+const discoverType       = document.getElementById('discoverType');
+const discoverPreset     = document.getElementById('discoverPreset');
+const discoverRegion     = document.getElementById('discoverRegion');
+const discoverSort       = document.getElementById('discoverSort');
+const discoverLimit      = document.getElementById('discoverLimit');
+const discoverResults    = document.getElementById('discoverResults');
+const discoverStatus     = document.getElementById('discoverStatus');
 const discoverPagination = document.getElementById('discoverPagination');
-const discoverPrevious = document.getElementById('discoverPrevious');
-const discoverNext = document.getElementById('discoverNext');
-const discoverPageLabel = document.getElementById('discoverPageLabel');
+const discoverPrevious   = document.getElementById('discoverPrevious');
+const discoverNext       = document.getElementById('discoverNext');
+const discoverPageLabel  = document.getElementById('discoverPageLabel');
+const dcPresetBtn        = document.getElementById('dcPresetBtn');
+const dcPresetMenu       = document.getElementById('dcPresetMenu');
+const dcPresetLabel      = document.getElementById('dcPresetLabel');
 let discoverItems = [];
-let discoverPage = 1;
+let discoverPage  = 1;
 
-const savedDiscoverType = localStorage.getItem('discoverType');
-const savedDiscoverPreset = localStorage.getItem('discoverPreset');
-const savedDiscoverSort = localStorage.getItem('discoverSort');
-const savedDiscoverLimit = localStorage.getItem('discoverLimit');
-if (savedDiscoverType) discoverType.value = savedDiscoverType;
-if (savedDiscoverPreset) discoverPreset.value = savedDiscoverPreset;
-if (savedDiscoverSort) discoverSort.value = savedDiscoverSort;
-if (savedDiscoverLimit) discoverLimit.value = savedDiscoverLimit;
+// Restore saved state
+const savedType   = localStorage.getItem('discoverType');
+const savedPreset = localStorage.getItem('discoverPreset');
+const savedRegion = localStorage.getItem('discoverRegion');
+const savedSort   = localStorage.getItem('discoverSort');
+const savedLimit  = localStorage.getItem('discoverLimit');
+if (savedType)   discoverType.value   = savedType;
+if (savedPreset) discoverPreset.value = savedPreset;
+if (savedRegion) discoverRegion.value = savedRegion;
+if (savedSort)   discoverSort.value   = savedSort;
+if (savedLimit)  discoverLimit.value  = savedLimit;
+
+// Label shown on the button — mode + region summary
+const modeLabelMap = {
+    search: 'Search', popular: 'Popular', top_rated: 'Top Rated', trending_month: 'Trending'
+};
+const regionLabelMap = {
+    none: '', hollywood: 'Hollywood', bollywood: 'Bollywood',
+    tamil_telugu: 'Tamil+Telugu', anime: 'Anime'
+};
+
+function syncPresetPanel() {
+    const modeVal   = discoverPreset.value;
+    const regionVal = discoverRegion.value;
+
+    // Update button label: "Popular · Bollywood" or just "Search"
+    const modeText   = modeLabelMap[modeVal]   || modeVal;
+    const regionText = regionLabelMap[regionVal] || '';
+    if (dcPresetLabel) dcPresetLabel.textContent = regionText ? `${modeText} · ${regionText}` : modeText;
+
+    // Highlight active rows per group independently
+    dcPresetMenu.querySelectorAll('.dc-preset-row').forEach(row => {
+        const group = row.dataset.group;
+        const val   = row.dataset.value;
+        row.classList.toggle('active',
+            (group === 'mode'   && val === modeVal) ||
+            (group === 'region' && val === regionVal)
+        );
+    });
+}
+syncPresetPanel();
+
+// Panel open/close
+if (dcPresetBtn && dcPresetMenu) {
+    dcPresetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dcPresetMenu.classList.toggle('open');
+        dcPresetBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    dcPresetMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = e.target.closest('.dc-preset-row');
+        if (!row) return;
+        const group = row.dataset.group;
+        const val   = row.dataset.value;
+
+        if (group === 'mode') {
+            discoverPreset.value = val;
+            localStorage.setItem('discoverPreset', val);
+        } else {
+            discoverRegion.value = val;
+            localStorage.setItem('discoverRegion', val);
+        }
+        syncPresetPanel();
+
+        // Don't close — let user pick from both groups, then click outside
+        // Trigger search immediately if not in search mode (or region changed)
+        const isSearchMode = discoverPreset.value === 'search';
+        if (!isSearchMode) {
+            performDiscoverSearch(1);
+        } else if (group === 'region' && discoverQuery.value.trim()) {
+            performDiscoverSearch(1);
+        } else if (isSearchMode && !discoverQuery.value.trim()) {
+            discoverResults.innerHTML = '';
+            discoverStatus.textContent = '';
+            discoverPagination.hidden = true;
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#dcPresetDropdown')) {
+            dcPresetMenu.classList.remove('open');
+            dcPresetBtn.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
 
 function escapeHtml(value) {
-    return String(value || '').replace(/[&<>'"]/g, character => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-    }[character]));
+    return String(value || '').replace(/[&<>'"]/g, c => (
+        {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[c]
+    ));
 }
 
 function renderDiscoverResults(results) {
@@ -33,7 +116,6 @@ function renderDiscoverResults(results) {
         discoverResults.innerHTML = '<p class="discover-empty">No movies or shows found.</p>';
         return;
     }
-
     discoverResults.innerHTML = results.map(item => `
         <article class="discover-card">
             <h2 class="discover-card-title">${escapeHtml(item.title)}</h2>
@@ -46,7 +128,9 @@ function renderDiscoverResults(results) {
                 <span class="discover-meta">${item.year ? `${escapeHtml(item.year)} · ` : ''}★ ${item.rating.toFixed(1)}</span>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
                 <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}" title="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}" aria-label="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}"${item.already_added ? ' disabled' : ''}>
-                    ${item.already_added ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+                    ${item.already_added
+                        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                        : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
                 </button>
                 </div>
             </div>
@@ -57,14 +141,14 @@ function renderDiscoverResults(results) {
 function sortDiscoverResults(results) {
     const sorted = [...results];
     if (discoverSort.value === 'relevance') return sorted;
-    sorted.sort((first, second) => {
-        const firstYear = Number.parseInt(first.year, 10);
-        const secondYear = Number.parseInt(second.year, 10);
-        const firstKnown = Number.isNaN(firstYear);
-        const secondKnown = Number.isNaN(secondYear);
-        if (firstKnown !== secondKnown) return firstKnown ? 1 : -1;
-        if (firstKnown && secondKnown) return 0;
-        return discoverSort.value === 'oldest' ? firstYear - secondYear : secondYear - firstYear;
+    sorted.sort((a, b) => {
+        const ay = Number.parseInt(a.year, 10);
+        const by = Number.parseInt(b.year, 10);
+        const aNaN = Number.isNaN(ay);
+        const bNaN = Number.isNaN(by);
+        if (aNaN !== bNaN) return aNaN ? 1 : -1;
+        if (aNaN && bNaN) return 0;
+        return discoverSort.value === 'oldest' ? ay - by : by - ay;
     });
     return sorted;
 }
@@ -72,7 +156,7 @@ function sortDiscoverResults(results) {
 function updateDiscoverPagination(data) {
     discoverPagination.hidden = !(data.has_previous || data.has_next);
     discoverPrevious.disabled = !data.has_previous;
-    discoverNext.disabled = !data.has_next;
+    discoverNext.disabled     = !data.has_next;
     discoverPageLabel.textContent = `Page ${data.page}`;
 }
 
@@ -99,10 +183,12 @@ async function performDiscoverSearch(page = 1) {
         const limit = Math.max(1, Math.min(100, Number.parseInt(discoverLimit.value, 10) || 20));
         discoverLimit.value = limit;
         localStorage.setItem('discoverLimit', limit);
-        localStorage.setItem('discoverType', discoverType.value);
+        localStorage.setItem('discoverType',   discoverType.value);
         localStorage.setItem('discoverPreset', discoverPreset.value);
+        localStorage.setItem('discoverRegion', discoverRegion.value);
         discoverPage = page;
-        const response = await fetch(`/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}&preset=${discoverPreset.value}&limit=${limit}&page=${page}`);
+        const url = `/api/discover/search?q=${encodeURIComponent(query)}&type=${discoverType.value}&preset=${discoverPreset.value}&region=${discoverRegion.value}&limit=${limit}&page=${page}`;
+        const response = await fetch(url);
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Search failed');
         discoverItems = data.results;
@@ -126,19 +212,8 @@ discoverType.addEventListener('change', () => {
     if (discoverQuery.value.trim() || discoverPreset.value !== 'search') performDiscoverSearch(1);
 });
 
-discoverPreset.addEventListener('change', () => {
-    localStorage.setItem('discoverPreset', discoverPreset.value);
-    if (discoverPreset.value !== 'search') {
-        performDiscoverSearch(1);
-    } else if (!discoverQuery.value.trim()) {
-        discoverResults.innerHTML = '';
-        discoverStatus.textContent = '';
-        discoverPagination.hidden = true;
-    }
-});
-
 discoverPrevious.addEventListener('click', () => performDiscoverSearch(discoverPage - 1));
-discoverNext.addEventListener('click', () => performDiscoverSearch(discoverPage + 1));
+discoverNext.addEventListener('click',     () => performDiscoverSearch(discoverPage + 1));
 
 discoverResults.addEventListener('click', async event => {
     const button = event.target.closest('.discover-add-button');
@@ -151,10 +226,7 @@ discoverResults.addEventListener('click', async event => {
         const response = await fetch('/api/discover/add', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                tmdb_id: button.dataset.tmdbId,
-                media_type: button.dataset.mediaType
-            })
+            body: JSON.stringify({ tmdb_id: button.dataset.tmdbId, media_type: button.dataset.mediaType })
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to add item');

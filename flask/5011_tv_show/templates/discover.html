@@ -26,12 +26,39 @@
                 <option value="movie">Movies</option>
                 <option value="tv">TV Shows</option>
             </select>
-            <select id="discoverPreset" aria-label="Discovery mode">
+            <select id="discoverPreset" aria-label="Discovery mode" hidden>
                 <option value="search">Search Titles</option>
                 <option value="popular">Popular</option>
                 <option value="top_rated">Top Rated</option>
                 <option value="trending_month">Trending Month</option>
             </select>
+            <select id="discoverRegion" aria-label="Region filter" hidden>
+                <option value="none">No Region</option>
+                <option value="hollywood">Hollywood</option>
+                <option value="bollywood">Bollywood</option>
+                <option value="tamil_telugu">Tamil + Telugu</option>
+                <option value="anime">Anime</option>
+            </select>
+            <div class="dc-preset-dropdown" id="dcPresetDropdown">
+                <button class="dc-preset-btn" id="dcPresetBtn" type="button" title="Discovery mode" aria-haspopup="listbox" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span id="dcPresetLabel">Search</span>
+                </button>
+                <div class="dc-preset-menu" id="dcPresetMenu" aria-label="Discovery mode">
+                    <button class="dc-preset-row active" data-group="mode" data-value="search"         type="button"><span>Search</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="mode" data-value="popular"        type="button"><span>Popular</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="mode" data-value="top_rated"      type="button"><span>Top Rated</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="mode" data-value="trending_month" type="button"><span>Trending</span><span class="dc-radio"></span></button>
+                    <div class="dc-preset-divider"></div>
+                    <button class="dc-preset-row"        data-group="region" data-value="none"         type="button"><span>All Regions</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="region" data-value="hollywood"    type="button"><span>Hollywood</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="region" data-value="bollywood"    type="button"><span>Bollywood</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="region" data-value="tamil_telugu" type="button"><span>Tamil + Telugu</span><span class="dc-radio"></span></button>
+                    <button class="dc-preset-row"        data-group="region" data-value="anime"        type="button"><span>Anime</span><span class="dc-radio"></span></button>
+                </div>
+            </div>
             <select id="discoverSort" class="discover-sort" aria-label="Sort results">
                 <option value="relevance">Relevance</option>
                 <option value="latest" selected>Latest First</option>

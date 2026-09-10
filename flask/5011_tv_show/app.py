@@ -913,6 +913,7 @@ def discover_search():
     query = request.args.get('q', '').strip()
     media_type = request.args.get('type', 'all').strip().lower()
     preset = request.args.get('preset', 'search').strip().lower()
+    region = request.args.get('region', 'none').strip().lower()
     try:
         result_limit = max(1, min(100, int(request.args.get('limit', 20))))
     except (TypeError, ValueError):
@@ -925,53 +926,72 @@ def discover_search():
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
     if preset not in {'search', 'popular', 'top_rated', 'trending_month'}:
         return jsonify({'success': False, 'message': 'Invalid discovery mode'}), 400
+    if region not in {'none', 'hollywood', 'bollywood', 'tamil_telugu', 'anime'}:
+        return jsonify({'success': False, 'message': 'Invalid region'}), 400
     if preset == 'search' and not query:
         return jsonify({'success': False, 'message': 'Enter a title or choose a discovery mode'}), 400
 
+    # Language/genre filter derived from region param
+    region_lang_map = {
+        'none':        [],
+        'hollywood':   [{'with_original_language': 'en'}],
+        'bollywood':   [{'with_original_language': 'hi'}],
+        'tamil_telugu':[{'with_original_language': 'ta'}, {'with_original_language': 'te'}],
+        'anime':       [{'with_original_language': 'ja', 'with_genres': '16'}],
+    }
+    region_filters = region_lang_map[region]  # list of extra param dicts (1 or 2 for tamil_telugu)
+
+    def make_sources(endpoint_movie, endpoint_tv, base_params):
+        """Expand endpoints × region filters into a sources list."""
+        srcs = []
+        filters = region_filters if region_filters else [{}]
+        if media_type in ('all', 'movie'):
+            for rf in filters:
+                srcs.append((endpoint_movie, {**base_params, **rf}, 'movie'))
+        if media_type in ('all', 'tv'):
+            for rf in filters:
+                srcs.append((endpoint_tv, {**base_params, **rf}, 'tv'))
+        return srcs
+
     if preset == 'search':
+        # Search ignores region (TMDb search doesn't support language filter meaningfully)
         sources = [('search/multi' if media_type == 'all' else f'search/{media_type}', {}, None)]
     elif preset == 'trending_month':
-        # TMDb's trending endpoint only supports day/week windows. Build a
-        # monthly view from this month's releases and air dates instead.
         today = datetime.now().date()
-        month_params = {'sort_by': 'popularity.desc'}
-        if media_type == 'all':
-            sources = [
-                ('discover/movie', {
-                    **month_params,
-                    'primary_release_date.gte': today.replace(day=1).isoformat(),
-                    'primary_release_date.lte': today.isoformat()
-                }, 'movie'),
-                ('discover/tv', {
-                    **month_params,
-                    'first_air_date.gte': today.replace(day=1).isoformat(),
-                    'first_air_date.lte': today.isoformat()
-                }, 'tv')
-            ]
-        elif media_type == 'movie':
-            sources = [('discover/movie', {
-                **month_params,
-                'primary_release_date.gte': today.replace(day=1).isoformat(),
-                'primary_release_date.lte': today.isoformat()
-            }, 'movie')]
-        else:
-            sources = [('discover/tv', {
-                **month_params,
-                'first_air_date.gte': today.replace(day=1).isoformat(),
-                'first_air_date.lte': today.isoformat()
-            }, 'tv')]
-    elif media_type == 'all':
-        if preset == 'top_rated':
-            sources = [('movie/top_rated', {}, 'movie'), ('tv/top_rated', {}, 'tv')]
-        else:
-            sources = [
-                ('discover/movie', {'sort_by': 'popularity.desc'}, 'movie'),
-                ('discover/tv', {'sort_by': 'popularity.desc'}, 'tv')
-            ]
+        month_start = today.replace(day=1).isoformat()
+        month_end   = today.isoformat()
+        sources = make_sources(
+            'discover/movie',
+            'discover/tv',
+            {'sort_by': 'popularity.desc',
+             'primary_release_date.gte': month_start, 'primary_release_date.lte': month_end,
+             'first_air_date.gte': month_start,        'first_air_date.lte': month_end}
+        )
+        # movie and tv need different date keys — rebuild properly
+        sources = []
+        filters = region_filters if region_filters else [{}]
+        if media_type in ('all', 'movie'):
+            for rf in filters:
+                sources.append(('discover/movie', {'sort_by': 'popularity.desc',
+                    'primary_release_date.gte': month_start,
+                    'primary_release_date.lte': month_end, **rf}, 'movie'))
+        if media_type in ('all', 'tv'):
+            for rf in filters:
+                sources.append(('discover/tv', {'sort_by': 'popularity.desc',
+                    'first_air_date.gte': month_start,
+                    'first_air_date.lte': month_end, **rf}, 'tv'))
     elif preset == 'top_rated':
-        sources = [(f'{media_type}/top_rated', {}, media_type)]
-    else:
-        sources = [(f'discover/{media_type}', {'sort_by': 'popularity.desc'}, media_type)]
+        if region == 'none':
+            # Use dedicated top_rated endpoints when no region filter
+            if media_type == 'all':
+                sources = [('movie/top_rated', {}, 'movie'), ('tv/top_rated', {}, 'tv')]
+            else:
+                sources = [(f'{media_type}/top_rated', {}, media_type)]
+        else:
+            sources = make_sources('discover/movie', 'discover/tv',
+                                   {'sort_by': 'vote_average.desc', 'vote_count.gte': '100'})
+    else:  # popular
+        sources = make_sources('discover/movie', 'discover/tv', {'sort_by': 'popularity.desc'})
 
     results = {'results': [], 'total_results': 0, 'total_pages': 0}
     start_index = (result_page - 1) * result_limit
