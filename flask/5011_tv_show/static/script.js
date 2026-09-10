@@ -532,6 +532,15 @@ function updateSortButtonUI(sortType, sortOrder) {
     const sortOrderSelect = document.getElementById('episodeSortOrder');
     if (sortTypeSelect) sortTypeSelect.value = sortType || 'default';
     if (sortOrderSelect) sortOrderSelect.value = sortOrder || 'asc';
+
+    // Sync chip active states in the dropdown panel
+    const menu = document.getElementById('epSortMenu');
+    if (menu) {
+        menu.querySelectorAll('.ep-sort-chip[data-group="type"]').forEach(c =>
+            c.classList.toggle('active', c.dataset.value === (sortType || 'default')));
+        menu.querySelectorAll('.ep-sort-chip[data-group="order"]').forEach(c =>
+            c.classList.toggle('active', c.dataset.value === (sortOrder || 'asc')));
+    }
 }
 
 function patchShowCard(s) {
@@ -1141,6 +1150,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sortTypeSelect && sortOrderSelect) {
         sortTypeSelect.addEventListener('change', saveEpisodeSort);
         sortOrderSelect.addEventListener('change', saveEpisodeSort);
+    }
+
+    // Combined sort dropdown — two independent chip groups, stays open until click outside
+    const epSortBtn  = document.getElementById('epSortBtn');
+    const epSortMenu = document.getElementById('epSortMenu');
+    if (epSortBtn && epSortMenu) {
+        epSortBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = epSortMenu.classList.toggle('open');
+            epSortBtn.setAttribute('aria-expanded', String(isOpen));
+        });
+        epSortMenu.addEventListener('click', (e) => {
+            e.stopPropagation(); // keep panel open
+            const chip = e.target.closest('.ep-sort-chip');
+            if (!chip) return;
+            const group = chip.dataset.group;
+            const value = chip.dataset.value;
+            // Highlight the clicked chip in its group
+            epSortMenu.querySelectorAll(`.ep-sort-chip[data-group="${group}"]`)
+                .forEach(c => c.classList.toggle('active', c === chip));
+            // Update the matching hidden select and trigger save
+            if (group === 'type') {
+                sortTypeSelect.value = value;
+                sortTypeSelect.dispatchEvent(new Event('change'));
+            } else {
+                sortOrderSelect.value = value;
+                sortOrderSelect.dispatchEvent(new Event('change'));
+            }
+        });
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#epSortDropdown')) {
+                epSortMenu.classList.remove('open');
+                epSortBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 
     async function setAllEpisodesWatched(watched) {

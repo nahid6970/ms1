@@ -1981,6 +1981,55 @@ body::before {
     font-size: 0.8rem;
 }
 #episodesModal #episodeSortOrder { width: 82px; }
+
+/* Combined sort dropdown */
+.ep-sort-dropdown { position: relative; }
+.ep-sort-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 10px; height: 36px;
+    white-space: nowrap; font-size: 0.78rem;
+    border: 1px solid #3b506c; border-radius: 4px;
+    background: #172337; color: #dbeafe; cursor: pointer;
+}
+.ep-sort-btn:hover { background: #1e3050; border-color: #5b7da4; color: #fff; }
+.ep-sort-btn[aria-expanded="true"] {
+    background: #1e3050; border-color: #5b8dd9; color: #fff;
+}
+.ep-sort-menu {
+    display: none;
+    position: absolute; right: 0; top: calc(100% + 5px);
+    background: #162032; border: 1px solid #3b506c;
+    border-radius: 8px; padding: 12px;
+    min-width: 180px; z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+.ep-sort-menu.open { display: block; }
+.ep-sort-section-label {
+    font-size: 0.68rem; text-transform: uppercase;
+    letter-spacing: 0.07em; color: #4e6a8a;
+    margin-bottom: 7px; padding: 0 2px;
+}
+.ep-sort-divider {
+    border: none; border-top: 1px solid #243550;
+    margin: 10px 0;
+}
+.ep-sort-chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+}
+.ep-sort-chip {
+    flex: 1; padding: 6px 10px;
+    border: 1px solid #2d4160; border-radius: 5px;
+    background: #1a2d45; color: #7a9cbf;
+    font-size: 0.78rem; cursor: pointer;
+    text-align: center; transition: background 0.12s, color 0.12s, border-color 0.12s;
+    white-space: nowrap;
+}
+.ep-sort-chip:hover { background: #1e3557; color: #c0d6ef; border-color: #3d5a82; }
+.ep-sort-chip.active {
+    background: #1a3d6e; color: #60a5fa;
+    border-color: #3b7dd8; font-weight: 600;
+}
+.ep-sort-menu li { display: none; } /* legacy — hidden */
 #episodesModal .episode-bulk-btn {
     height: 36px;
     padding: 0 11px;
