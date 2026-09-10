@@ -340,17 +340,11 @@
                             </svg>
                         </button>
                         <div class="ep-sort-menu" id="epSortMenu" aria-label="Sort episodes">
-                            <div class="ep-sort-section-label">Sort by</div>
-                            <div class="ep-sort-chips" id="epSortTypeChips">
-                                <button class="ep-sort-chip" data-group="type" data-value="default" type="button">Order</button>
-                                <button class="ep-sort-chip" data-group="type" data-value="alphabetical" type="button">Name</button>
-                            </div>
-                            <div class="ep-sort-divider"></div>
-                            <div class="ep-sort-section-label">Direction</div>
-                            <div class="ep-sort-chips" id="epSortOrderChips">
-                                <button class="ep-sort-chip" data-group="order" data-value="asc" type="button">ASC ↑</button>
-                                <button class="ep-sort-chip" data-group="order" data-value="desc" type="button">DESC ↓</button>
-                            </div>
+                            <button class="dc-preset-row active" data-group="type"  data-value="default"      type="button"><span>Order</span><span class="dc-radio"></span></button>
+                            <button class="dc-preset-row"        data-group="type"  data-value="alphabetical" type="button"><span>Name</span><span class="dc-radio"></span></button>
+                            <div class="dc-preset-divider"></div>
+                            <button class="dc-preset-row active" data-group="order" data-value="asc"          type="button"><span>ASC</span><span class="dc-radio"></span></button>
+                            <button class="dc-preset-row"        data-group="order" data-value="desc"         type="button"><span>DSC</span><span class="dc-radio"></span></button>
                         </div>
                     </div>
                     <button id="toggleAllEpisodes" class="episode-bulk-btn" type="button" title="Mark all episodes as watched" aria-label="Mark all episodes as watched">

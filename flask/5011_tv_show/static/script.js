@@ -554,12 +554,12 @@ function updateSortButtonUI(sortType, sortOrder) {
     if (sortTypeSelect) sortTypeSelect.value = sortType || 'default';
     if (sortOrderSelect) sortOrderSelect.value = sortOrder || 'asc';
 
-    // Sync chip active states in the dropdown panel
+    // Sync radio row active states in the dropdown panel
     const menu = document.getElementById('epSortMenu');
     if (menu) {
-        menu.querySelectorAll('.ep-sort-chip[data-group="type"]').forEach(c =>
+        menu.querySelectorAll('.dc-preset-row[data-group="type"]').forEach(c =>
             c.classList.toggle('active', c.dataset.value === (sortType || 'default')));
-        menu.querySelectorAll('.ep-sort-chip[data-group="order"]').forEach(c =>
+        menu.querySelectorAll('.dc-preset-row[data-group="order"]').forEach(c =>
             c.classList.toggle('active', c.dataset.value === (sortOrder || 'asc')));
     }
 }
@@ -1224,12 +1224,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         epSortMenu.addEventListener('click', (e) => {
             e.stopPropagation(); // keep panel open
-            const chip = e.target.closest('.ep-sort-chip');
+            const chip = e.target.closest('.dc-preset-row');
             if (!chip) return;
             const group = chip.dataset.group;
             const value = chip.dataset.value;
-            // Highlight the clicked chip in its group
-            epSortMenu.querySelectorAll(`.ep-sort-chip[data-group="${group}"]`)
+            // Highlight the clicked row in its group
+            epSortMenu.querySelectorAll(`.dc-preset-row[data-group="${group}"]`)
                 .forEach(c => c.classList.toggle('active', c === chip));
             // Update the matching hidden select and trigger save
             if (group === 'type') {
