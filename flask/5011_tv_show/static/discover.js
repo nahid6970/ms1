@@ -127,11 +127,19 @@ function renderDiscoverResults(results) {
                 </div>
                 <span class="discover-meta">${item.year ? `${escapeHtml(item.year)} · ` : ''}★ ${item.rating.toFixed(1)}</span>
                 <p class="discover-overview">${escapeHtml(item.overview)}</p>
-                <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}" title="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}" aria-label="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}"${item.already_added ? ' disabled' : ''}>
-                    ${item.already_added
-                        ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
-                        : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
-                </button>
+                <div class="discover-card-actions">
+                    <button class="modal-btn ${item.media_type === 'movie' ? 'modal-btn-orange' : 'modal-btn-blue'} discover-add-button${item.already_added ? ' discover-added' : ''}" data-tmdb-id="${item.tmdb_id}" data-media-type="${item.media_type}" title="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}" aria-label="${item.already_added ? 'Already added' : `Add to ${item.media_type === 'movie' ? 'Movies' : 'Shows'}`}"${item.already_added ? ' disabled' : ''}>
+                        ${item.already_added
+                            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+                            : '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'}
+                    </button>
+                    <a class="modal-btn modal-btn-dark discover-external-button" href="${item.media_type === 'movie' ? `https://www.themoviedb.org/movie/${encodeURIComponent(item.tmdb_id)}` : `https://www.tvmaze.com/search?q=${encodeURIComponent(item.title)}`}" target="_blank" rel="noopener noreferrer" title="Open ${item.media_type === 'movie' ? 'on TMDb' : 'on TVMaze'}" aria-label="Open ${item.media_type === 'movie' ? 'on TMDb' : 'on TVMaze'}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>
+                    </a>
+                    <a class="modal-btn modal-btn-red discover-external-button" href="https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.title} Trailer`)}" target="_blank" rel="noopener noreferrer" title="Search YouTube for ${escapeHtml(item.title)} Trailer" aria-label="Search YouTube for ${escapeHtml(item.title)} Trailer">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33Z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                    </a>
+                </div>
                 </div>
             </div>
         </article>
