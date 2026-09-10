@@ -1103,24 +1103,27 @@ document.addEventListener('DOMContentLoaded', () => {
     function filterShows(query) {
         const showCards = document.querySelectorAll('.show-card');
         query = query.toLowerCase().trim();
-        
+
+        // Normalize: strip punctuation, split into words
+        const normalize = str => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+        const words = normalize(query).split(/\s+/).filter(Boolean);
+
         showCards.forEach(card => {
-            const title = (card.getAttribute('data-title') || "").toLowerCase();
-            const year = (card.getAttribute('data-year') || "").toLowerCase();
-            const matches = title.includes(query) || year.includes(query);
+            const title = normalize(card.getAttribute('data-title') || '');
+            const year = normalize(card.getAttribute('data-year') || '');
+            const haystack = title + ' ' + year;
+
+            const matches = query === '' || words.every(w => haystack.includes(w));
 
             if (query === '') {
-                // Empty search — let CSS rules take over
                 card.style.display = '';
             } else if (matches) {
-                // Force show matching cards regardless of archived/hidden/completed status
                 card.style.display = 'flex';
             } else {
                 card.style.display = 'none';
             }
         });
 
-        // Show/hide clear button
         if (searchClear) {
             searchClear.style.display = query.length > 0 ? 'block' : 'none';
         }
