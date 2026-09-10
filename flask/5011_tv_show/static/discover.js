@@ -35,7 +35,7 @@ const modeLabelMap = {
 };
 const regionLabelMap = {
     none: '', hollywood: 'Hollywood', bollywood: 'Bollywood',
-    tamil_telugu: 'Tamil+Telugu', anime: 'Anime'
+    tamil_telugu: 'South', anime: 'Anime'
 };
 
 function syncPresetPanel() {
