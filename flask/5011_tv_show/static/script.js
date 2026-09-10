@@ -1477,7 +1477,7 @@ async function refreshEpisodesInModal(event, btn) {
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
         renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
         btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        setTimeout(() => { if (btn.disabled) btn.innerHTML = originalHTML; }, 1400);
+        setTimeout(() => { btn.innerHTML = originalHTML; }, 1400);
     } catch (error) {
         btn.innerHTML = originalHTML;
         alert(error.message);
