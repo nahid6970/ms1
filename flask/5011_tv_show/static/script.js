@@ -19,8 +19,9 @@ function closeShowsNavDropdown() {
 
 function toggleCompletedView() {
     const isActive = document.body.classList.toggle('view-completed');
-    const navLink = document.getElementById('navShows');
-    navLink.textContent = isActive ? 'Shows ✅ ▾' : 'Shows ▾';
+    document.getElementById('navShows').textContent = isActive ? 'Shows ✅ ▾' : 'Shows ▾';
+    document.getElementById('navDropdownShows').classList.toggle('active-item', !isActive);
+    document.getElementById('navShowsCompleted').classList.toggle('active-item', isActive);
 }
 
 function showHiddenShows() {

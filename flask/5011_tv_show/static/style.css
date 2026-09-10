@@ -1315,40 +1315,66 @@ body::before {
 
 .nav-dropdown {
     position: absolute;
-    top: calc(100% + 6px);
+    top: calc(100% + 8px);
     left: 0;
-    min-width: 140px;
-    background: #282828;
-    border-radius: 8px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    min-width: 148px;
+    background: #16202e;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-8px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    transform: translateY(-6px) scale(0.97);
+    transform-origin: top left;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
     z-index: 1100;
     overflow: hidden;
+    padding: 4px 0;
+}
+
+/* small arrow pointing up */
+.nav-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 16px;
+    width: 9px;
+    height: 9px;
+    background: #16202e;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    transform: rotate(45deg);
 }
 
 .nav-dropdown.show {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 .nav-dropdown-item {
-    display: block;
-    padding: 10px 16px;
-    color: #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    color: #b0bec8;
     text-decoration: none;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    transition: background 0.15s ease, color 0.15s ease;
+    letter-spacing: 0.01em;
+    transition: background 0.12s ease, color 0.12s ease;
     white-space: nowrap;
+    border-radius: 0;
 }
 
 .nav-dropdown-item:hover {
-    background: #333;
-    color: #fff;
+    background: rgba(255,255,255,0.06);
+    color: #eafff7;
+}
+
+.nav-dropdown-item.active-item {
+    color: #34d399;
+    background: rgba(52,211,153,0.08);
 }
 
 .nav-link {
