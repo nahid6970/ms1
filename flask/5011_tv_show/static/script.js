@@ -792,6 +792,7 @@ async function openSettingsModal() {
         const radarrKeyInput = document.getElementById('radarrApiKey');
         const moviesFolderInput = document.getElementById('rootMoviesFolder');
         const storageScanIntervalInput = document.getElementById('storageScanInterval');
+        const discoverImageScaleInput = document.getElementById('discoverImageScale');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
         if (defaultShowsSortInput) defaultShowsSortInput.value = settings.default_shows_sort || 'title';
@@ -805,6 +806,7 @@ async function openSettingsModal() {
         if (radarrKeyInput) radarrKeyInput.value = settings.radarr_api_key || '';
         if (moviesFolderInput) moviesFolderInput.value = settings.root_movies_folder || 'C:\\Users\\nahid\\Downloads\\@radarr';
         if (storageScanIntervalInput) storageScanIntervalInput.value = settings.storage_scan_interval_minutes || 60;
+        if (discoverImageScaleInput) discoverImageScaleInput.value = String(settings.discover_image_scale ?? 1);
 
         const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
         if (fileIconsToggle) fileIconsToggle.checked = settings.episode_file_icons_enabled !== false;
@@ -959,6 +961,7 @@ async function saveSettings() {
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
     const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
     const storageScanInterval = document.getElementById('storageScanInterval')?.value || 60;
+    const discoverImageScale = document.getElementById('discoverImageScale')?.value || '1';
     
     try {
         const response = await fetch('/api/settings', {
@@ -979,7 +982,8 @@ async function saveSettings() {
                 radarr_api_key: radarrApiKey,
                 root_movies_folder: moviesFolder,
                 episode_file_icons_enabled: fileIconsEnabled,
-                storage_scan_interval_minutes: storageScanInterval
+                storage_scan_interval_minutes: storageScanInterval,
+                discover_image_scale: discoverImageScale
             })
         });
         const data = await response.json();

@@ -17,6 +17,31 @@ const dcPresetLabel      = document.getElementById('dcPresetLabel');
 let discoverItems = [];
 let discoverPage  = 1;
 
+function applyDiscoverImageScale(scale) {
+    const cardMinWidths = {
+        '0.75': '270px',
+        '1': '300px',
+        '1.25': '360px',
+        '1.5': '420px',
+        '2': '480px'
+    };
+    const allowedScales = new Set(Object.keys(cardMinWidths));
+    const scaleValue = String(scale ?? '1');
+    document.documentElement.style.setProperty(
+        '--discover-image-scale',
+        allowedScales.has(scaleValue) ? scaleValue : '1'
+    );
+    document.documentElement.style.setProperty(
+        '--discover-card-min-width',
+        cardMinWidths[scaleValue] || cardMinWidths['1']
+    );
+}
+
+fetch('/api/settings')
+    .then(response => response.json())
+    .then(settings => applyDiscoverImageScale(settings.discover_image_scale))
+    .catch(() => applyDiscoverImageScale(1));
+
 // Restore saved state
 const savedType   = localStorage.getItem('discoverType');
 const savedPreset = localStorage.getItem('discoverPreset');

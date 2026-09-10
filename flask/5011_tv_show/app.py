@@ -52,7 +52,8 @@ def load_settings():
         "radarr_url": "http://192.168.0.101:7878",
         "radarr_api_key": "",
         "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr",
-        "episode_file_icons_enabled": True
+        "episode_file_icons_enabled": True,
+        "discover_image_scale": 1
     }
     if os.path.exists(SETTINGS_FILE):
         try:
@@ -1852,6 +1853,13 @@ def api_settings():
         settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
+        try:
+            discover_image_scale = float(data.get('discover_image_scale', settings.get('discover_image_scale', 1)))
+        except (TypeError, ValueError):
+            discover_image_scale = 1
+        if discover_image_scale not in {0.75, 1, 1.25, 1.5, 2}:
+            discover_image_scale = 1
+        settings['discover_image_scale'] = discover_image_scale
         save_settings(settings)
         if 'scheduler' in globals():
             scheduler.reschedule_job(
