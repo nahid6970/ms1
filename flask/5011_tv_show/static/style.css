@@ -2043,6 +2043,10 @@ body::before {
 }
 #episodesModal .episode-bulk-btn:hover { background: #263d59; color: #fff; border-color: #5b7da4; }
 #episodesModal .episode-refresh-btn:hover { background: #1f7052; border-color: #4ade80; }
+#episodesModal #hideFutureEpisodesBtn[aria-pressed="true"] {
+    background: #1a3d6e; color: #60a5fa; border-color: #3b7dd8;
+}
+#episodesModal #hideFutureEpisodesBtn[aria-pressed="true"] svg { stroke: #60a5fa; }
 
 .modal-help { display: block; color: #91a0b5; font-size: 0.78rem; line-height: 1.4; }
 .schedule-time-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

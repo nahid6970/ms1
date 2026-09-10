@@ -1575,6 +1575,16 @@ def update_episode_sort(show_id):
     save_data(shows)
     return jsonify({'success': True, 'episodes': show['episodes']})
 
+@app.route('/api/show/<int:show_id>/hide_future_episodes', methods=['POST'])
+def toggle_hide_future_episodes(show_id):
+    shows = load_data()
+    show = next((s for s in shows if s['id'] == show_id), None)
+    if not show:
+        return jsonify({'success': False, 'message': 'Show not found'}), 404
+    show['hide_future_episodes'] = not bool(show.get('hide_future_episodes', False))
+    save_data(shows)
+    return jsonify({'success': True, 'hide_future_episodes': show['hide_future_episodes']})
+
 @app.route('/toggle_watched/<int:show_id>/<int:episode_id>')
 def toggle_watched(show_id, episode_id):
     shows = load_data()

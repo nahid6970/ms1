@@ -197,6 +197,7 @@ let currentEpisodes = [];
 let currentShowIdForEpisodes = null;
 let currentEpisodeFileSet = new Set();
 let currentEpisodeFileScanMode = 'sxxexx';
+let hideFutureEpisodes = false;
 
 function escapeEpisodeText(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -455,7 +456,14 @@ function renderEpisodes(episodes, showId, fileSet, scanMode) {
     const hasFileIcons = fileSet && fileSet.size > 0;
     const listContainer = document.getElementById('episodesListContainer');
     listContainer.innerHTML = '';
-    
+
+    // Filter out future episodes if the toggle is active
+    if (hideFutureEpisodes) {
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        episodes = episodes.filter(ep => !ep.air_date || String(ep.air_date) <= today);
+    }
+
     if (!episodes || episodes.length === 0) {
         listContainer.innerHTML = '<p style="text-align: center;">No episodes found.</p>';
         return;
@@ -601,6 +609,7 @@ function closeEpisodesModal() {
     currentShowIdForEpisodes = null;
     currentEpisodeFileSet = new Set();
     currentEpisodeFileScanMode = 'sxxexx';
+    hideFutureEpisodes = false;
 }
 
 async function openEpisodesPopup(event, showId, showTitle) {
@@ -624,7 +633,15 @@ async function openEpisodesPopup(event, showId, showTitle) {
         
         currentEpisodes = show.episodes || [];
         currentShowIdForEpisodes = showId;
-        
+
+        // Sync hide-future state from persisted show setting
+        hideFutureEpisodes = !!show.hide_future_episodes;
+        const hfBtn = document.getElementById('hideFutureEpisodesBtn');
+        if (hfBtn) {
+            hfBtn.setAttribute('aria-pressed', String(hideFutureEpisodes));
+            hfBtn.title = hideFutureEpisodes ? 'Show future episodes' : 'Hide future episodes';
+        }
+
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
 
         // Fetch file-existence data if the feature is enabled in settings
@@ -1220,6 +1237,22 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshEpisodesInModal(event, refreshOpenEpisodes);
     });
 
+    const hideFutureBtn = document.getElementById('hideFutureEpisodesBtn');
+    if (hideFutureBtn) hideFutureBtn.addEventListener('click', async () => {
+        if (!currentShowIdForEpisodes) return;
+        try {
+            const res = await fetch(`/api/show/${currentShowIdForEpisodes}/hide_future_episodes`, { method: 'POST' });
+            const data = await res.json();
+            if (!data.success) return;
+            hideFutureEpisodes = data.hide_future_episodes;
+        } catch (_) {
+            hideFutureEpisodes = !hideFutureEpisodes; // optimistic fallback
+        }
+        hideFutureBtn.setAttribute('aria-pressed', String(hideFutureEpisodes));
+        hideFutureBtn.title = hideFutureEpisodes ? 'Show future episodes' : 'Hide future episodes';
+        renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
+    });
+
     // Helper functions for popup interactions
     window.handleEpisodeCheckboxClick = async function(event, showId, episodeId, checkbox) {
         event.preventDefault();
@@ -1519,6 +1552,12 @@ async function refreshEpisodesInModal(event, btn) {
         const showResponse = await fetch(`/edit_show/${currentShowIdForEpisodes}`);
         const show = await showResponse.json();
         currentEpisodes = show.episodes || [];
+        hideFutureEpisodes = !!show.hide_future_episodes;
+        const hfBtn2 = document.getElementById('hideFutureEpisodesBtn');
+        if (hfBtn2) {
+            hfBtn2.setAttribute('aria-pressed', String(hideFutureEpisodes));
+            hfBtn2.title = hideFutureEpisodes ? 'Show future episodes' : 'Hide future episodes';
+        }
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
         renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
         btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>';
