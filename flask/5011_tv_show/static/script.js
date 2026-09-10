@@ -18,10 +18,21 @@ function closeShowsNavDropdown() {
 }
 
 function toggleCompletedView() {
-    const isActive = document.body.classList.toggle('view-completed');
-    document.getElementById('navShows').textContent = isActive ? 'Shows ✅ ▾' : 'Shows ▾';
-    document.getElementById('navDropdownShows').classList.toggle('active-item', !isActive);
-    document.getElementById('navShowsCompleted').classList.toggle('active-item', isActive);
+    const isCompleted = document.body.classList.toggle('view-completed');
+    if (isCompleted) document.body.classList.remove('view-archived');
+    document.getElementById('navShows').textContent = isCompleted ? 'Shows ✅ ▾' : 'Shows ▾';
+    document.getElementById('navDropdownShows').classList.toggle('active-item', !isCompleted && !document.body.classList.contains('view-archived'));
+    document.getElementById('navShowsCompleted').classList.toggle('active-item', isCompleted);
+    document.getElementById('navShowsArchived').classList.remove('active-item');
+}
+
+function toggleArchivedView() {
+    const isArchived = document.body.classList.toggle('view-archived');
+    if (isArchived) document.body.classList.remove('view-completed');
+    document.getElementById('navShows').textContent = isArchived ? 'Archived 📦 ▾' : 'Shows ▾';
+    document.getElementById('navDropdownShows').classList.toggle('active-item', !isArchived && !document.body.classList.contains('view-completed'));
+    document.getElementById('navShowsCompleted').classList.remove('active-item');
+    document.getElementById('navShowsArchived').classList.toggle('active-item', isArchived);
 }
 
 function showHiddenShows() {
@@ -637,6 +648,15 @@ async function openEpisodesPopup(event, showId, showTitle) {
             hfBtn.title = hideFutureEpisodes ? 'Show future episodes' : 'Hide future episodes';
         }
 
+        // Sync archive state
+        const archiveBtn = document.getElementById('archiveShowBtn');
+        if (archiveBtn) {
+            const isArchived = !!show.archived;
+            archiveBtn.setAttribute('aria-pressed', String(isArchived));
+            archiveBtn.title = isArchived ? 'Unarchive show' : 'Archive show';
+            archiveBtn.classList.toggle('active', isArchived);
+        }
+
         updateSortButtonUI(show.episode_sort_type, show.episode_sort_order);
 
         // Fetch file-existence data if the feature is enabled in settings
@@ -1246,6 +1266,25 @@ document.addEventListener('DOMContentLoaded', () => {
         hideFutureBtn.setAttribute('aria-pressed', String(hideFutureEpisodes));
         hideFutureBtn.title = hideFutureEpisodes ? 'Show future episodes' : 'Hide future episodes';
         renderEpisodes(currentEpisodes, currentShowIdForEpisodes, currentEpisodeFileSet, currentEpisodeFileScanMode);
+    });
+
+    const archiveBtn = document.getElementById('archiveShowBtn');
+    if (archiveBtn) archiveBtn.addEventListener('click', async () => {
+        if (!currentShowIdForEpisodes) return;
+        try {
+            const res = await fetch(`/api/show/${currentShowIdForEpisodes}/archive`, { method: 'POST' });
+            const data = await res.json();
+            if (!data.success) return;
+            const isArchived = data.archived;
+            archiveBtn.setAttribute('aria-pressed', String(isArchived));
+            archiveBtn.title = isArchived ? 'Unarchive show' : 'Archive show';
+            archiveBtn.classList.toggle('active', isArchived);
+            // Update the card in the DOM instantly
+            const card = document.querySelector(`.show-card[data-show-id="${currentShowIdForEpisodes}"]`);
+            if (card) card.classList.toggle('archived', isArchived);
+        } catch (err) {
+            console.error('Archive toggle failed', err);
+        }
     });
 
     // Helper functions for popup interactions

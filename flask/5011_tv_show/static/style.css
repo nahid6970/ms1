@@ -966,6 +966,11 @@ html.show-hidden-shows .show-card.ended-completed { display: flex; }
 body.view-completed .show-card:not(.ended-completed) { display: none !important; }
 body.view-completed .show-card.ended-completed { display: flex !important; }
 
+/* Archived view */
+.show-card.archived { display: none; }
+body.view-archived .show-card:not(.archived) { display: none !important; }
+body.view-archived .show-card.archived { display: flex !important; }
+
 .hidden-shows-modal-content {
     max-width: 1400px;
     width: 95vw;
