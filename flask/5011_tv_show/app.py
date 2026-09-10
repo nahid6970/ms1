@@ -30,6 +30,7 @@ def add_header(response):
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATA_FILE = r"C:\@delta\db\5011_tv_show\data.json"
+TIMESTAMPS_FILE = r"C:\@delta\db\5011_tv_show\timestamps.json"
 MOVIES_FILE = r"C:\@delta\db\5011_tv_show\movies.json"
 IMAGE_CACHE_DIR = r"C:\@delta\output\sonarr_img"
 SETTINGS_FILE = r"C:\@delta\db\5011_tv_show\settings.json"
@@ -98,6 +99,33 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f, indent=4)
+
+def load_timestamps():
+    """Load per-show volatile timestamps (episodes_updated_at, last_run_result,
+    episode_update_last_run) from a separate file that is NOT git-tracked."""
+    try:
+        with open(TIMESTAMPS_FILE, 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+def save_timestamps(ts):
+    os.makedirs(os.path.dirname(TIMESTAMPS_FILE), exist_ok=True)
+    with open(TIMESTAMPS_FILE, 'w') as f:
+        json.dump(ts, f, indent=4)
+
+def get_show_ts(show_id):
+    """Return the timestamp entry for a single show (or empty dict)."""
+    return load_timestamps().get(str(show_id), {})
+
+def set_show_ts(show_id, **kwargs):
+    """Merge kwargs into the timestamp entry for show_id and persist."""
+    ts = load_timestamps()
+    key = str(show_id)
+    entry = ts.get(key, {})
+    entry.update(kwargs)
+    ts[key] = entry
+    save_timestamps(ts)
 
 def load_movies():
     try:
@@ -679,13 +707,14 @@ def run_show_episode_update(show, now=None):
                 tvmaze_poster = tvmaze_img.get('original') or tvmaze_img.get('medium')
                 if tvmaze_poster:
                     show['cover_image'] = tvmaze_poster
-    show['episodes_updated_at'] = now.isoformat()
-    show['last_run_result'] = {
-        'timestamp': now.isoformat(),
-        'added': added,
-        'updated': updated,
-        'error': None,
-    }
+    set_show_ts(show['id'],
+                episodes_updated_at=now.isoformat(),
+                last_run_result={
+                    'timestamp': now.isoformat(),
+                    'added': added,
+                    'updated': updated,
+                    'error': None,
+                })
     return added, updated, None
 
 
@@ -767,7 +796,7 @@ def run_scheduled_episode_updates():
         last_due = get_last_due_date(show, now)
         if last_due is None:
             continue
-        last_run_str = show.get('episode_update_last_run', '')
+        last_run_str = get_show_ts(show['id']).get('episode_update_last_run', '')
         if last_run_str:
             try:
                 if datetime.strptime(last_run_str, '%Y-%m-%d').date() >= last_due:
@@ -790,8 +819,8 @@ def run_scheduled_episode_updates():
             continue
         added, updated, error = run_show_episode_update(show, now)
         if error:
-            show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
-        show['episode_update_last_run'] = now.date().isoformat()
+            set_show_ts(show_id, last_run_result={'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error})
+        set_show_ts(show_id, episode_update_last_run=now.date().isoformat())
         save_data(shows)  # Save after each show so progress survives a restart
 
 scheduler = BackgroundScheduler()
@@ -818,6 +847,7 @@ def discover_page():
 
 @app.route('/api/show-schedules')
 def show_schedules():
+    ts = load_timestamps()
     schedules = [{
         'show_id': show.get('id'),
         'title': show.get('title', 'Untitled'),
@@ -825,8 +855,8 @@ def show_schedules():
         'frequency': show.get('episode_update_frequency', 'daily'),
         'weekday': show.get('episode_update_weekday', 0),
         'month_day': show.get('episode_update_month_day', 1),
-        'last_run': show.get('episode_update_last_run') or '',
-        'last_run_result': show.get('last_run_result') or None,
+        'last_run': (ts.get(str(show.get('id')), {}).get('episode_update_last_run') or ''),
+        'last_run_result': (ts.get(str(show.get('id')), {}).get('last_run_result') or None),
     } for show in load_data()]
     schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
@@ -842,10 +872,10 @@ def run_scheduled_now(show_id):
     now = datetime.now()
     added, updated, error = run_show_episode_update(show, now)
     if error:
-        show['last_run_result'] = {'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error}
+        set_show_ts(show_id, last_run_result={'timestamp': now.isoformat(), 'added': 0, 'updated': 0, 'error': error})
         save_data(shows)
         return jsonify({'success': False, 'message': error}), 502
-    show['episode_update_last_run'] = now.date().isoformat()
+    set_show_ts(show_id, episode_update_last_run=now.date().isoformat())
     save_data(shows)
     return jsonify({
         'success': True,
@@ -861,18 +891,21 @@ def clear_run_stats(show_id):
     show = next((s for s in shows if s['id'] == show_id), None)
     if not show:
         return jsonify({'success': False, 'message': 'Show not found'}), 404
-    show.pop('last_run_result', None)
-    show.pop('episode_update_last_run', None)
-    save_data(shows)
+    ts = load_timestamps()
+    entry = ts.get(str(show_id), {})
+    entry.pop('last_run_result', None)
+    entry.pop('episode_update_last_run', None)
+    ts[str(show_id)] = entry
+    save_timestamps(ts)
     return jsonify({'success': True})
 
 @app.route('/api/shows/clear_all_run_stats', methods=['POST'])
 def clear_all_run_stats():
-    shows = load_data()
-    for show in shows:
-        show.pop('last_run_result', None)
-        show.pop('episode_update_last_run', None)
-    save_data(shows)
+    ts = load_timestamps()
+    for key in list(ts.keys()):
+        ts[key].pop('last_run_result', None)
+        ts[key].pop('episode_update_last_run', None)
+    save_timestamps(ts)
     return jsonify({'success': True})
 
 @app.route('/api/discover/search')
@@ -1165,7 +1198,7 @@ def update_show_episodes(show_id):
             if tvmaze_poster:
                 show['cover_image'] = tvmaze_poster
     show['episode_source'] = 'tvmaze'
-    show['episodes_updated_at'] = datetime.now().isoformat()
+    set_show_ts(show['id'], episodes_updated_at=datetime.now().isoformat())
     save_data(shows)
     return jsonify({
         'success': True,
