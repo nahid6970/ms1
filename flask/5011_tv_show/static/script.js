@@ -49,11 +49,6 @@ async function openEditShowModal(showId) {
     const scanModeEl = document.getElementById('editShowScanMode');
     if (scanModeEl) scanModeEl.value = show.scan_mode || 'sxxexx';
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
-    document.getElementById('editShowEpisodeUpdateTime').value = show.episode_update_time || '';
-    document.getElementById('editShowEpisodeUpdateFrequency').value = show.episode_update_frequency || 'daily';
-    document.getElementById('editShowEpisodeUpdateWeekday').value = String(show.episode_update_weekday ?? ((new Date().getDay() + 6) % 7));
-    document.getElementById('editShowEpisodeUpdateMonthDay').value = show.episode_update_month_day || new Date().getDate();
-    updateScheduleOptionVisibility();
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
     const lockEl = document.getElementById('editShowLockStatus');
     if (lockEl) lockEl.checked = !!show.lock_status;
@@ -171,14 +166,6 @@ function escapeEpisodeText(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
     }[character]));
-}
-
-function updateScheduleOptionVisibility() {
-    const frequency = document.getElementById('editShowEpisodeUpdateFrequency')?.value;
-    const weeklyRow = document.getElementById('weeklyUpdateDayRow');
-    const monthlyRow = document.getElementById('monthlyUpdateDayRow');
-    if (weeklyRow) weeklyRow.hidden = frequency !== 'weekly';
-    if (monthlyRow) monthlyRow.hidden = frequency !== 'monthly';
 }
 
 async function applyBulkSchedule() {
@@ -1069,12 +1056,6 @@ if (savedScrollPosition !== null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const scheduleFrequency = document.getElementById('editShowEpisodeUpdateFrequency');
-    if (scheduleFrequency) {
-        scheduleFrequency.addEventListener('change', updateScheduleOptionVisibility);
-        updateScheduleOptionVisibility();
-    }
-
     // Live Search Functionality
     const searchInput = document.querySelector('.search-form input[name="query"]');
     const searchClear = document.getElementById('searchClear');

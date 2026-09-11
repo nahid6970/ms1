@@ -1536,19 +1536,8 @@ def edit_show(show_id):
         show['status'] = request.form.get('status', 'Continuing') # Update status field
         show['lock_status'] = request.form.get('lock_status') == '1'
         show['sonarr_url'] = request.form.get('sonarr_url', '')
-        show['episode_update_time'] = request.form.get('episode_update_time', '').strip()
         show['episode_file_pattern'] = request.form.get('episode_file_pattern', '').strip()
         show['scan_mode'] = request.form.get('scan_mode', 'sxxexx')
-        frequency = request.form.get('episode_update_frequency', 'daily')
-        show['episode_update_frequency'] = frequency if frequency in {'daily', 'weekly', 'monthly'} else 'daily'
-        try:
-            show['episode_update_weekday'] = max(0, min(6, int(request.form.get('episode_update_weekday', datetime.now().weekday()))))
-        except (TypeError, ValueError):
-            show['episode_update_weekday'] = datetime.now().weekday()
-        try:
-            show['episode_update_month_day'] = max(1, min(31, int(request.form.get('episode_update_month_day', datetime.now().day))))
-        except (TypeError, ValueError):
-            show['episode_update_month_day'] = datetime.now().day
         save_data(shows)
         query = request.args.get('query', '').strip()
         if request.headers.get('Accept') == 'application/json':
