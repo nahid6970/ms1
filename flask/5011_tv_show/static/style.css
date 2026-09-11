@@ -2192,6 +2192,7 @@ body::before {
 .schedule-row-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; min-width: 0; }
 .schedule-clear-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 36px; border: 1px solid #d94b63; border-radius: 0; background: #15171d; color: #ff5b73; cursor: pointer; font-family: Consolas, "Courier New", monospace; font-size: 12px; transition: background 0.15s, box-shadow 0.15s; }
 .schedule-clear-btn:hover { background: rgba(248,113,113,0.12); color: #ff8a9b; border-color: #ff5b73; box-shadow: 0 0 10px rgba(248,113,113,0.35); }
+.schedule-clear-placeholder { display: block; flex: 0 0 32px; width: 32px; height: 36px; }
 .schedule-clear-all-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .schedule-clear-all-btn { font-size: 0.75rem; padding: 4px 10px; border: 1px solid #4b637f; border-radius: 5px; background: transparent; color: #8e9bb0; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .schedule-clear-all-btn:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: #f87171; }

@@ -4,6 +4,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
+- `templates/index.html`, `static/script.js`, `static/style.css`: Scheduled Episode Updates received the neon reference UI, compact header `SAVE` / `CLEAR` / `SORT` controls, default `Cadence` sorting (Daily → Weekly → Monthly → unscheduled), and aligned per-show action controls even when a row has no clear-stats button.
 - `templates/index.html`, `static/script.js`, `static/style.css`, `app.py`: Scheduled Episode Updates modal now manages per-show `None` / `Daily` / `Weekly` / `Monthly` frequency choices in-row; bulk save preserves existing schedule values and auto-fills missing time/day/date values. Scheduling controls were removed from Edit Show, and editing show metadata no longer overwrites schedules. Edit Show now uses the neon reference styling with a vertical `SAVE` button.
 - `static/style.css`: Increased `#editShowModal > div` max-width from 450px to 620px for a wider edit modal.
 - `app.py`, `static/script.js`: Edit show save now live-updates the card in-place (title, cover image, status badge, rating stars, and `data-*` filter attributes) without a page reload; `edit_show` POST JSON response now returns updated show fields. Card patch extracted into reusable `patchShowCard(s)` helper.

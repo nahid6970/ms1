@@ -297,7 +297,7 @@ async function loadScheduledUpdatesList(list) {
                         <option value="weekly" ${schedule.update_time && schedule.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
                         <option value="monthly" ${schedule.update_time && schedule.frequency === 'monthly' ? 'selected' : ''}>Monthly</option>
                     </select>
-                    ${hasStat ? `<button class="schedule-clear-btn" onclick="clearRunStats(${schedule.show_id}, this)" title="Clear run stats">✕</button>` : ''}
+                    ${hasStat ? `<button class="schedule-clear-btn" onclick="clearRunStats(${schedule.show_id}, this)" title="Clear run stats">✕</button>` : '<span class="schedule-clear-placeholder" aria-hidden="true"></span>'}
                     <button class="schedule-edit-btn" onclick="closeScheduledUpdatesModal();openEditShowModal(${schedule.show_id})" title="Edit schedule">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     </button>
@@ -359,7 +359,10 @@ async function clearRunStats(showId, btn) {
         const row = document.getElementById(`sched-row-${showId}`);
         if (row) {
             row.querySelector('.schedule-last-run')?.remove();
-            btn.remove();
+            const placeholder = document.createElement('span');
+            placeholder.className = 'schedule-clear-placeholder';
+            placeholder.setAttribute('aria-hidden', 'true');
+            btn.replaceWith(placeholder);
         }
         // hide Clear All if no stats remain
         if (!document.querySelector('.schedule-last-run')) {
