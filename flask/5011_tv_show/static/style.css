@@ -755,8 +755,8 @@ select.modal-input {
     background: #252525; color: #c8d8ee; cursor: pointer;
     transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-.dc-preset-mode-icon { display: inline-flex; width: 15px; height: 15px; flex: 0 0 15px; align-items: center; justify-content: center; color: currentColor; }
-.dc-preset-mode-icon svg { width: 15px; height: 15px; }
+.dc-preset-mode-icon { display: inline-flex; width: 19px; height: 19px; flex: 0 0 19px; align-items: center; justify-content: center; color: currentColor; }
+.dc-preset-mode-icon svg { width: 19px; height: 19px; opacity: 1 !important; stroke-width: 2.5; }
 .dc-preset-mode-label { display: none; }
 .dc-preset-plus { color: #64748b; font-weight: 700; }
 .dc-preset-btn svg { opacity: 0.6; flex-shrink: 0; }
