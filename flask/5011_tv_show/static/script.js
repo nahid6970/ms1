@@ -229,6 +229,21 @@ async function openScheduledUpdatesModal() {
     await loadScheduledUpdatesList(list);
 }
 
+function formatScheduleElapsed(timestamp) {
+    const elapsedMs = Date.now() - new Date(timestamp).getTime();
+    if (!Number.isFinite(elapsedMs) || elapsedMs < 60000) return 'just now';
+
+    const totalMinutes = Math.floor(elapsedMs / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    const parts = [];
+    if (days) parts.push(`${days}d`);
+    if (hours) parts.push(`${hours}h`);
+    if (minutes || !parts.length) parts.push(`${minutes}m`);
+    return `${parts.join(' ')} ago`;
+}
+
 async function loadScheduledUpdatesList(list) {
     list.innerHTML = '<p class="schedule-empty">Loading schedules...</p>';
     try {
@@ -267,7 +282,7 @@ async function loadScheduledUpdatesList(list) {
             const lr = schedule.last_run_result;
             let lastRunHtml = '';
             if (lr) {
-                const ts = new Date(lr.timestamp).toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
+                const ts = formatScheduleElapsed(lr.timestamp);
                 if (lr.error) {
                     lastRunHtml = `<span class="schedule-last-run error" title="${escapeEpisodeText(lr.error)}">✗ ${ts}</span>`;
                 } else {
@@ -322,7 +337,7 @@ async function runScheduledNow(showId, btn) {
     try {
         const res = await fetch(`/api/show/${showId}/episodes/run_scheduled`, { method: 'POST' });
         const data = await res.json();
-        const ts = new Date().toLocaleString(undefined, {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
+        const ts = formatScheduleElapsed(new Date().toISOString());
         if (data.success) {
             if (infoEl) {
                 const old = infoEl.querySelector('.schedule-last-run');

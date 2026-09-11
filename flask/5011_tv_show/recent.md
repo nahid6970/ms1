@@ -4,6 +4,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
+- `templates/_settings_modal.html`, `static/script.js`, `app.py`: Added configurable Auto Schedule Start/End times. The Scheduled Episode Updates header action is now `RESCHEDULE`, which redistributes every active show across that time window, assigns Weekly weekdays and Monthly dates, and preserves `None` shows.
 - `templates/discover.html`, `static/discover.js`, `static/style.css`: Discover search controls are sticky and use the neon UI. Non-search modes hide the query box; browse-mode controls shrink and center. The preset button now uses mode-specific icons plus a compact region label, with the mode text hidden.
 - `templates/discover.html`, `static/discover.js`, `app.py`: Discovery region filters now include Korean, Chinese, Japanese Live Action, Cartoons / Animation, and Documentary / Reality. General animation excludes Japanese-original animation so Anime remains a separate filter.
 - `templates/index.html`, `static/script.js`, `static/style.css`: Scheduled Episode Updates received the neon reference UI, compact header `SAVE` / `CLEAR` / `SORT` controls, default `Cadence` sorting (Daily → Weekly → Monthly → unscheduled), and aligned per-show action controls even when a row has no clear-stats button.
