@@ -2319,10 +2319,42 @@ body::before {
 /* Wider edit-show modal */
 #editShowModal > div { max-width: 620px; }
 #editShowModal .modal-content {
+    background: #080b10;
+    border: 2px solid #00ff4c;
+    border-radius: 0;
+    box-shadow: 0 0 18px rgba(0, 255, 76, 0.62), inset 0 0 26px rgba(0, 255, 76, 0.05);
     padding-bottom: 16px;
     padding-left: 72px;
     scrollbar-width: none;
 }
+#editShowModal .modal-title {
+    color: #00ff4c;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 1.25rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 255, 76, 0.45);
+}
+#editShowModal .modal-title::after { background: #00ff4c; box-shadow: 0 0 8px rgba(0, 255, 76, 0.7); }
+#editShowModal .close {
+    color: #ff1744;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-family: Consolas, "Courier New", monospace;
+    font-weight: 800;
+    font-size: 1.45rem;
+}
+#editShowModal .close:hover { color: #ff4d6d; background: transparent; box-shadow: none; }
+#editShowModal .modal-form label { color: #a9b3c1; font-family: Consolas, "Courier New", monospace; }
+#editShowModal .modal-input {
+    background: #15171d;
+    border: 1px solid #343840;
+    border-radius: 0;
+    color: #f1f5f9;
+    font-family: Consolas, "Courier New", monospace;
+}
+#editShowModal .modal-input:focus { border-color: #00ff4c; box-shadow: 0 0 0 2px rgba(0, 255, 76, 0.16); }
 #editShowModal .modal-content::-webkit-scrollbar { width: 0; height: 0; }
 #editShowModal .rating-group { margin: 9px 0 14px; }
 #editShowModal .modal-btn-block {
