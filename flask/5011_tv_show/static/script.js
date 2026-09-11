@@ -181,6 +181,42 @@ function updateScheduleOptionVisibility() {
     if (monthlyRow) monthlyRow.hidden = frequency !== 'monthly';
 }
 
+async function applyBulkSchedule() {
+    const btn = document.getElementById('applyBulkScheduleBtn');
+    const status = document.getElementById('bulkScheduleStatus');
+    const schedules = [...document.querySelectorAll('.schedule-row-frequency')].map(select => ({
+        show_id: Number(select.dataset.showId),
+        frequency: select.value
+    }));
+    if (!schedules.length) return;
+
+    const originalText = btn?.textContent;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Applying...';
+    }
+    if (status) status.textContent = '';
+    try {
+        const response = await fetch('/api/show-schedules/bulk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({schedules})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to apply schedule');
+        if (status) status.textContent = `Saved ${data.updated} show${data.updated === 1 ? '' : 's'}. Missing schedule values were assigned automatically.`;
+        const list = document.getElementById('scheduledUpdatesList');
+        if (list) await loadScheduledUpdatesList(list);
+    } catch (error) {
+        if (status) status.textContent = error.message;
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText || 'Apply to all';
+        }
+    }
+}
+
 async function openScheduledUpdatesModal() {
     const modal = document.getElementById('scheduledUpdatesModal');
     const list = document.getElementById('scheduledUpdatesList');
@@ -236,12 +272,20 @@ async function loadScheduledUpdatesList(list) {
             <div class="scheduled-update-row" id="sched-row-${schedule.show_id}">
                 <div class="scheduled-update-info">
                     <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
-                    ${freqLabel
-                        ? `<span class="scheduled-update-time">${freqLabel}</span>`
-                        : '<span class="scheduled-update-disabled">Not scheduled</span>'}
-                    ${lastRunHtml}
+                    <div class="scheduled-update-meta">
+                        ${freqLabel
+                            ? `<span class="scheduled-update-time">${freqLabel}</span>`
+                            : '<span class="scheduled-update-disabled">Not scheduled</span>'}
+                        ${lastRunHtml}
+                    </div>
                 </div>
                 <div class="schedule-row-actions">
+                    <select class="schedule-row-frequency" data-show-id="${schedule.show_id}" aria-label="Update frequency for ${escapeEpisodeText(schedule.title)}">
+                        <option value="none" ${!schedule.update_time ? 'selected' : ''}>None</option>
+                        <option value="daily" ${schedule.update_time && schedule.frequency === 'daily' ? 'selected' : ''}>Daily</option>
+                        <option value="weekly" ${schedule.update_time && schedule.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                        <option value="monthly" ${schedule.update_time && schedule.frequency === 'monthly' ? 'selected' : ''}>Monthly</option>
+                    </select>
                     ${hasStat ? `<button class="schedule-clear-btn" onclick="clearRunStats(${schedule.show_id}, this)" title="Clear run stats">✕</button>` : ''}
                     <button class="schedule-edit-btn" onclick="closeScheduledUpdatesModal();openEditShowModal(${schedule.show_id})" title="Edit schedule">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>

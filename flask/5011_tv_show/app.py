@@ -10,6 +10,7 @@ install_deps.bootstrap(__file__)
 import json
 import os
 import re
+import calendar
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import time
@@ -759,14 +760,12 @@ def get_last_due_date(show, now):
 
     elif frequency == 'monthly':
         try:
-            target_day = max(1, min(28, int(show.get('episode_update_month_day', now.day))))
+            target_day = max(1, min(31, int(show.get('episode_update_month_day', now.day))))
         except (TypeError, ValueError):
             target_day = now.day
         # Try this month first
-        try:
-            candidate = today.replace(day=target_day)
-        except ValueError:
-            candidate = today.replace(day=28)
+        current_month_last_day = calendar.monthrange(today.year, today.month)[1]
+        candidate = today.replace(day=min(target_day, current_month_last_day))
         candidate_dt = now.replace(year=candidate.year, month=candidate.month, day=candidate.day,
                                    hour=h, minute=m, second=0, microsecond=0)
         if now >= candidate_dt:
@@ -774,10 +773,8 @@ def get_last_due_date(show, now):
         # Time hasn't passed yet — go back one month
         first_of_month = today.replace(day=1)
         prev_month_last = first_of_month - timedelta(days=1)
-        try:
-            return prev_month_last.replace(day=target_day)
-        except ValueError:
-            return prev_month_last
+        previous_month_last_day = calendar.monthrange(prev_month_last.year, prev_month_last.month)[1]
+        return prev_month_last.replace(day=min(target_day, previous_month_last_day))
 
     return None
 
@@ -861,6 +858,51 @@ def show_schedules():
     } for show in load_data()]
     schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
+
+
+@app.route('/api/show-schedules/bulk', methods=['POST'])
+def update_all_show_schedules():
+    """Save per-show frequencies and auto-fill missing schedule values."""
+    payload = request.get_json(silent=True) or {}
+    requested = payload.get('schedules')
+    if not isinstance(requested, list):
+        return jsonify({'success': False, 'message': 'Schedule choices are required'}), 400
+    frequency_by_id = {}
+    for item in requested:
+        try:
+            show_id = int(item.get('show_id'))
+        except (TypeError, ValueError, AttributeError):
+            continue
+        frequency = str(item.get('frequency', 'daily')).strip().lower()
+        if frequency in {'none', 'daily', 'weekly', 'monthly'}:
+            frequency_by_id[show_id] = frequency
+
+    shows = load_data()
+    auto_index = 0
+    updated = 0
+    for show in shows:
+        show_id = show.get('id')
+        if show_id not in frequency_by_id:
+            continue
+        slot_index = auto_index
+        auto_index += 1
+        if frequency_by_id[show_id] == 'none':
+            show['episode_update_time'] = ''
+            show['episode_update_frequency'] = 'daily'
+            updated += 1
+            continue
+        show['episode_update_frequency'] = frequency_by_id[show_id]
+        if not str(show.get('episode_update_time') or '').strip():
+            # Spread newly scheduled shows into predictable three-minute slots.
+            slot_minutes = 60 + (slot_index * 3)
+            show['episode_update_time'] = f'{(slot_minutes // 60) % 24:02d}:{slot_minutes % 60:02d}'
+        if ('episode_update_weekday' not in show or show.get('episode_update_weekday') is None) and show['episode_update_frequency'] == 'weekly':
+            show['episode_update_weekday'] = slot_index % 7
+        if ('episode_update_month_day' not in show or show.get('episode_update_month_day') is None) and show['episode_update_frequency'] == 'monthly':
+            show['episode_update_month_day'] = (slot_index % 28) + 1
+        updated += 1
+    save_data(shows)
+    return jsonify({'success': True, 'updated': updated})
 
 
 @app.route('/api/show/<int:show_id>/episodes/run_scheduled', methods=['POST'])
