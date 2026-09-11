@@ -2152,31 +2152,37 @@ body::before {
 .schedule-inline-option[hidden] { display: none; }
 .schedule-inline-option .modal-input { width: 100%; }
 .schedule-button { color: #8dd3ff; }
-.scheduled-updates-content { width: min(680px, calc(100% - 24px)); max-width: none; box-sizing: border-box; padding: 22px 20px; }
-.scheduled-updates-content > .modal-help { margin: -8px 0 16px; }
+.scheduled-updates-content { width: min(680px, calc(100% - 24px)); max-width: none; box-sizing: border-box; padding: 22px 20px; background: #080b10; border: 2px solid #00ff4c; border-radius: 0; box-shadow: 0 0 18px rgba(0, 255, 76, 0.62), inset 0 0 26px rgba(0, 255, 76, 0.05); }
+.scheduled-updates-content > .modal-title { color: #00ff4c; font-family: Consolas, "Courier New", monospace; font-size: 1.25rem; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0, 255, 76, 0.45); }
+.scheduled-updates-content > .modal-title::after { background: #00ff4c; box-shadow: 0 0 8px rgba(0, 255, 76, 0.7); }
+.scheduled-updates-content > .modal-help { margin: -8px 0 12px; font-family: Consolas, "Courier New", monospace; }
+.scheduled-updates-content > .close { color: #ff1744; background: transparent; border: 0; border-radius: 0; font-family: Consolas, "Courier New", monospace; font-weight: 800; font-size: 1.45rem; }
+.scheduled-updates-content > .close:hover { color: #ff4d6d; background: transparent; box-shadow: none; transform: none; }
+.schedule-top-save { position: absolute; top: 14px; right: 54px; width: 58px; height: 30px; padding: 0; color: #07140b; background: #22c55e; border: 1px solid #4ade80; border-radius: 0; box-shadow: 0 0 12px rgba(34, 197, 94, 0.45); cursor: pointer; font-family: Consolas, "Courier New", monospace; font-size: 0.78rem; font-weight: 800; letter-spacing: 1px; }
+.schedule-top-save:hover { background: #4ade80; box-shadow: 0 0 18px rgba(74, 222, 128, 0.62); }
 .schedule-bulk-panel { margin-bottom: 12px; padding: 12px; background: #172337; border: 1px solid #35618b; border-radius: 6px; }
 .schedule-bulk-heading { margin-bottom: 9px; color: #dbeafe; font-size: 0.82rem; font-weight: 700; }
 .schedule-bulk-apply { min-height: 38px; padding: 8px 12px; white-space: nowrap; }
-.schedule-bulk-status { min-height: 1em; margin: 8px 0 0; color: #86efac; font-size: 0.75rem; }
+.schedule-bulk-status { min-height: 1em; margin: 0 0 10px; color: #86efac; font-size: 0.75rem; font-family: Consolas, "Courier New", monospace; }
 .scheduled-updates-list { display: grid; gap: 8px; max-height: 55vh; overflow-x: hidden; overflow-y: auto; padding: 2px; }
-.scheduled-update-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; background: #172337; border: 1px solid #2d425e; border-radius: 4px; }
+.scheduled-update-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; background: #15171d; border: 1px solid #343840; border-radius: 0; }
 .scheduled-update-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 auto; text-align: left; }
 .scheduled-update-title { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5edf8; text-align: left; }
 .scheduled-update-meta { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; text-align: left; }
-.schedule-row-frequency { flex: 0 0 92px; width: 92px; min-width: 0; padding: 4px 5px; border: 1px solid #416487; border-radius: 4px; background: #101b2b; color: #dbeafe; font-size: 0.75rem; }
+.schedule-row-frequency { flex: 0 0 104px; width: 104px; height: 36px; min-width: 0; margin: 0; padding: 4px 7px; border: 1px solid #526174; border-radius: 0; background: #15171d; color: #e5edf8; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; font-weight: 700; }
 .scheduled-update-time { flex: 0 0 auto; color: #86efac; font-variant-numeric: tabular-nums; font-weight: 700; }
 .scheduled-update-disabled { flex: 0 0 auto; color: #8492a6; font-size: 0.8rem; }
 .schedule-last-run { flex: 0 0 auto; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 .schedule-last-run.ok { color: #60a5fa; }
 .schedule-last-run.error { color: #f87171; }
-.schedule-run-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #34d399; border-radius: 6px; background: transparent; color: #34d399; cursor: pointer; transition: background 0.15s; }
-.schedule-run-btn:hover { background: rgba(52,211,153,0.15); }
+.schedule-run-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 32px; height: 36px; border: 1px solid #34d399; border-radius: 0; background: #15171d; color: #34d399; cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
+.schedule-run-btn:hover { background: rgba(52,211,153,0.15); box-shadow: 0 0 10px rgba(52,211,153,0.35); }
 .schedule-run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.schedule-edit-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid #4b8fd4; border-radius: 6px; background: transparent; color: #4b8fd4; cursor: pointer; transition: background 0.15s; }
-.schedule-edit-btn:hover { background: rgba(75,143,212,0.15); }
+.schedule-edit-btn { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 32px; height: 36px; border: 1px solid #4b8fd4; border-radius: 0; background: #15171d; color: #4b8fd4; cursor: pointer; transition: background 0.15s, box-shadow 0.15s; }
+.schedule-edit-btn:hover { background: rgba(75,143,212,0.15); box-shadow: 0 0 10px rgba(75,143,212,0.35); }
 .schedule-row-actions { display: flex; align-items: center; gap: 4px; flex: 0 0 auto; min-width: 0; }
-.schedule-clear-btn { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border: 1px solid #4b637f; border-radius: 5px; background: transparent; color: #8e9bb0; cursor: pointer; font-size: 11px; transition: background 0.15s, color 0.15s; }
-.schedule-clear-btn:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: #f87171; }
+.schedule-clear-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 36px; border: 1px solid #d94b63; border-radius: 0; background: #15171d; color: #ff5b73; cursor: pointer; font-family: Consolas, "Courier New", monospace; font-size: 12px; transition: background 0.15s, box-shadow 0.15s; }
+.schedule-clear-btn:hover { background: rgba(248,113,113,0.12); color: #ff8a9b; border-color: #ff5b73; box-shadow: 0 0 10px rgba(248,113,113,0.35); }
 .schedule-clear-all-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .schedule-clear-all-btn { font-size: 0.75rem; padding: 4px 10px; border: 1px solid #4b637f; border-radius: 5px; background: transparent; color: #8e9bb0; cursor: pointer; transition: background 0.15s, color 0.15s; }
 .schedule-clear-all-btn:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: #f87171; }

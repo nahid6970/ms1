@@ -250,13 +250,10 @@
     <div id="scheduledUpdatesModal" class="modal">
         <div class="modal-content scheduled-updates-content">
             <span class="close" onclick="closeScheduledUpdatesModal()">&times;</span>
+            <button id="applyBulkScheduleBtn" class="schedule-top-save" type="button" onclick="applyBulkSchedule()">SAVE</button>
             <h2 class="modal-title">Scheduled Episode Updates</h2>
             <p class="modal-help">Choose a frequency beside each show. Save once to apply the choices; missing times, weekdays, and dates are assigned automatically.</p>
-            <div class="schedule-bulk-panel">
-                <div class="schedule-bulk-heading">Save frequency choices</div>
-                <button id="applyBulkScheduleBtn" class="modal-btn modal-btn-green schedule-bulk-apply" type="button" onclick="applyBulkSchedule()">Save all frequencies</button>
-                <p id="bulkScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
-            </div>
+            <p id="bulkScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
             <div id="scheduledUpdatesList" class="scheduled-updates-list">
                 <p>Loading schedules...</p>
             </div>
