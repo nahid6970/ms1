@@ -730,13 +730,15 @@ select.modal-input {
 .section-radarr .modal-input:focus { border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.20), 0 0 18px rgba(251, 191, 36, 0.28); }
 
 .discover-page { max-width: 1600px; margin: 0 auto; padding: 24px 24px 70px; }
-.discover-search-form { display: flex; align-items: stretch; gap: 10px; max-width: 880px; margin: 0 auto 24px; }
+.discover-search-form { position: sticky; top: 72px; z-index: 900; display: flex; align-items: stretch; gap: 10px; width: min(880px, 100%); max-width: none; box-sizing: border-box; margin: 0 auto 24px; padding: 10px; background: #080b10; border: 2px solid #00ff4c; border-radius: 0; box-shadow: 0 0 18px rgba(0, 255, 76, 0.48), inset 0 0 20px rgba(0, 255, 76, 0.04); }
 .discover-search-form input, .discover-search-form select, .discover-search-form button { height: 44px; box-sizing: border-box; }
-.discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 10px 14px; background: #252525; border: 1px solid #333; color: white; border-radius: 0; }
+.discover-search-form input, .discover-search-form select { flex: 1; min-width: 0; padding: 10px 14px; background: #15171d; border: 1px solid #343840; color: #f1f5f9; border-radius: 0; font-family: Consolas, "Courier New", monospace; }
+.discover-search-form input:focus, .discover-search-form select:focus { outline: none; border-color: #00ff4c; box-shadow: 0 0 0 2px rgba(0, 255, 76, 0.15); }
 .discover-search-form input { flex: 1 1 auto; }
 .discover-search-form select { flex: 0 0 160px; }
 .discover-search-form .discover-limit { flex: 0 0 72px; padding-left: 10px; padding-right: 10px; }
-.discover-search-form button { flex: 0 0 92px; padding: 0 14px; border-radius: 0; }
+.discover-search-form > button[type="submit"] { flex: 0 0 92px; padding: 0 14px; border-radius: 0; background: #22c55e; border: 1px solid #4ade80; color: #07140b; font-family: Consolas, "Courier New", monospace; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(34, 197, 94, 0.35); }
+.discover-search-form > button[type="submit"]:hover { background: #4ade80; box-shadow: 0 0 18px rgba(74, 222, 128, 0.55); }
 .discover-status { min-height: 22px; padding-top: 18px; text-align: center; color: #aab7c8; margin-bottom: 18px; }
 .discover-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 6px; color: #aab7c8; }
 .discover-pagination[hidden] { display: none; }
