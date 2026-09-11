@@ -244,6 +244,11 @@ function formatScheduleElapsed(timestamp) {
     return parts.join(' ');
 }
 
+function formatScheduleAddedCount(added) {
+    const count = Number(added) || 0;
+    return count > 0 ? ` · +${count}` : '';
+}
+
 async function loadScheduledUpdatesList(list) {
     list.innerHTML = '<p class="schedule-empty">Loading schedules...</p>';
     try {
@@ -286,7 +291,7 @@ async function loadScheduledUpdatesList(list) {
                 if (lr.error) {
                     lastRunHtml = `<span class="schedule-last-run error" title="${escapeEpisodeText(lr.error)}">✗ ${ts}</span>`;
                 } else {
-                    lastRunHtml = `<span class="schedule-last-run ok" title="${lr.added} added, ${lr.updated} updated">✓ ${ts} · +${lr.added} ~${lr.updated}</span>`;
+                    lastRunHtml = `<span class="schedule-last-run ok" title="${lr.added} added, ${lr.updated} updated">✓ ${ts}${formatScheduleAddedCount(lr.added)}</span>`;
                 }
             } else if (schedule.last_run) {
                 lastRunHtml = `<span class="schedule-last-run ok">Last: ${schedule.last_run}</span>`;
@@ -345,7 +350,7 @@ async function runScheduledNow(showId, btn) {
                 const span = document.createElement('span');
                 span.className = 'schedule-last-run ok';
                 span.title = `${data.added} added, ${data.updated} updated`;
-                span.textContent = `✓ ${ts} · +${data.added} ~${data.updated}`;
+                span.textContent = `✓ ${ts}${formatScheduleAddedCount(data.added)}`;
                 infoEl.appendChild(span);
             }
         } else {
