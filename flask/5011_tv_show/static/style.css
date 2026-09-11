@@ -2398,6 +2398,42 @@ body::before {
     #editShowModal .modal-btn-block { left: 8px; width: 38px; height: 136px; }
 }
 
+/* Match the neon reference styling for the episodes modal. */
+#episodesModal .episodes-modal-content {
+    background: #080b10;
+    border: 2px solid #00ff4c;
+    border-radius: 0;
+    box-shadow: 0 0 18px rgba(0, 255, 76, 0.62), inset 0 0 26px rgba(0, 255, 76, 0.05);
+}
+#episodesModal .modal-title {
+    color: #00ff4c;
+    font-family: Consolas, "Courier New", monospace;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 255, 76, 0.45);
+}
+#episodesModal .modal-title::after { background: #00ff4c; box-shadow: 0 0 8px rgba(0, 255, 76, 0.7); }
+#episodesModal .close {
+    color: #ff1744;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-family: Consolas, "Courier New", monospace;
+    font-weight: 800;
+    font-size: 1.45rem;
+}
+#episodesModal .close:hover { color: #ff4d6d; background: transparent; box-shadow: none; transform: none; }
+#episodesModal .episode-modal-controls .episode-bulk-btn,
+#episodesModal .ep-sort-menu,
+#episodesModal .episode-list {
+    background: #15171d;
+    border-color: #343840;
+    border-radius: 0;
+}
+#episodesModal .episode-modal-controls .episode-bulk-btn { color: #b9c4d2; }
+#episodesModal .episode-modal-controls .episode-bulk-btn:hover { color: #00ff4c; border-color: #00ff4c; box-shadow: 0 0 10px rgba(0, 255, 76, 0.3); }
+#episodesModal .episodes-modal-content .episode-list { background: #080b10; border-color: #343840; }
+
 /* Side-by-side fields in modal forms */
 .modal-form-row {
     display: flex;
