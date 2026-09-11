@@ -58,13 +58,14 @@ if (savedLimit)  discoverLimit.value  = savedLimit;
 
 // Label shown on the button — mode + region summary
 const modeLabelMap = {
-    search: 'Search', popular: 'Popular', top_rated: 'Top Rated', trending_month: 'Trending'
+    search: 'Search', popular: 'Popular', top_rated: 'Top Rated', trending_month: 'Trending', recent_releases: 'Recent'
 };
 const modeIconMap = {
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>',
     popular: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4.2 0 7-2.7 7-6.3 0-2.7-1.4-4.5-3.7-6.2.2 2-1 3.1-2.2 3.8.3-3.5-1.6-6.5-4.4-8.3.1 3.1-2.7 5.2-2.7 9 0 4.5 2.7 8 6 8z"></path></svg>',
     top_rated: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4v2a4 4 0 0 0 4 4"></path><path d="M17 6h3v2a4 4 0 0 1-4 4"></path></svg>',
-    trending_month: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="15 7 21 7 21 13"></polyline></svg>'
+    trending_month: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="15 7 21 7 21 13"></polyline></svg>',
+    recent_releases: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="12 13 12 16 14 17"></polyline></svg>'
 };
 const regionLabelMap = {
     none: 'All', hollywood: 'Hollywood', bollywood: 'Bollywood',
@@ -194,6 +195,14 @@ function renderDiscoverResults(results) {
 function sortDiscoverResults(results) {
     const sorted = [...results];
     if (discoverSort.value === 'relevance') return sorted;
+    const dateSorted = sorted.every(item => item.release_date);
+    if (dateSorted) {
+        sorted.sort((a, b) => {
+            const difference = Date.parse(b.release_date) - Date.parse(a.release_date);
+            return discoverSort.value === 'oldest' ? -difference : difference;
+        });
+        return sorted;
+    }
     sorted.sort((a, b) => {
         const ay = Number.parseInt(a.year, 10);
         const by = Number.parseInt(b.year, 10);

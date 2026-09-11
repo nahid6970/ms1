@@ -967,7 +967,7 @@ def discover_search():
         result_page = 1
     if media_type not in {'all', 'movie', 'tv'}:
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
-    if preset not in {'search', 'popular', 'top_rated', 'trending_month'}:
+    if preset not in {'search', 'popular', 'top_rated', 'trending_month', 'recent_releases'}:
         return jsonify({'success': False, 'message': 'Invalid discovery mode'}), 400
     if region not in {'none', 'hollywood', 'bollywood', 'tamil_telugu', 'anime', 'korean', 'chinese', 'japanese_live', 'animation', 'documentary_reality'}:
         return jsonify({'success': False, 'message': 'Invalid region'}), 400
@@ -1004,9 +1004,9 @@ def discover_search():
     if preset == 'search':
         # Search ignores region (TMDb search doesn't support language filter meaningfully)
         sources = [('search/multi' if media_type == 'all' else f'search/{media_type}', {}, None)]
-    elif preset == 'trending_month':
+    elif preset in {'trending_month', 'recent_releases'}:
         today = datetime.now().date()
-        month_start = today.replace(day=1).isoformat()
+        month_start = (today.replace(day=1) if preset == 'trending_month' else today - timedelta(days=90)).isoformat()
         month_end   = today.isoformat()
         sources = make_sources(
             'discover/movie',
@@ -1074,7 +1074,7 @@ def discover_search():
 
     if preset == 'top_rated':
         results['results'].sort(key=lambda item: float(item.get('vote_average') or 0), reverse=True)
-    elif preset in {'popular', 'trending_month'}:
+    elif preset in {'popular', 'trending_month', 'recent_releases'}:
         results['results'].sort(key=lambda item: float(item.get('popularity') or 0), reverse=True)
 
     local_start = start_index % source_page_size
@@ -1113,6 +1113,7 @@ def discover_search():
             'media_type': item_type,
             'title': title or 'Untitled',
             'year': normalized_year,
+            'release_date': release_date or '',
             'overview': item.get('overview') or 'No overview available.',
             'poster_url': tmdb_poster_url(item.get('poster_path')),
             'rating': round(float(item.get('vote_average') or 0), 1),
