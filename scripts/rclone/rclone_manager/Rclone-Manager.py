@@ -546,6 +546,7 @@ class RcloneApp(QMainWindow):
             ("Stats Oneline",           "--stats-one-line",                  False),
             ("Trashed Only",            "--drive-trashed-only",              False),
             ("Shared With Me",          "--drive-shared-with-me",            False),
+            ("Skip Google Docs",         "--drive-skip-gdocs",                False),
             ("Skip Dangling Shortcuts", "--drive-skip-dangling-shortcuts",   False),
             ("Skip Shortcuts",          "--drive-skip-shortcuts",            False),
             ("Date **tree",             "-D",                                False),
