@@ -1004,9 +1004,9 @@ def discover_search():
     if preset == 'search':
         # Search ignores region (TMDb search doesn't support language filter meaningfully)
         sources = [('search/multi' if media_type == 'all' else f'search/{media_type}', {}, None)]
-    elif preset in {'trending_month', 'recent_releases'}:
+    elif preset == 'trending_month':
         today = datetime.now().date()
-        month_start = (today.replace(day=1) if preset == 'trending_month' else today - timedelta(days=90)).isoformat()
+        month_start = today.replace(day=1).isoformat()
         month_end   = today.isoformat()
         sources = make_sources(
             'discover/movie',
@@ -1028,6 +1028,15 @@ def discover_search():
                 sources.append(('discover/tv', {'sort_by': 'popularity.desc',
                     'first_air_date.gte': month_start,
                     'first_air_date.lte': month_end, **rf}, 'tv'))
+    elif preset == 'recent_releases':
+        sources = []
+        filters = region_filters if region_filters else [{}]
+        if media_type in ('all', 'movie'):
+            for rf in filters:
+                sources.append(('discover/movie', {'sort_by': 'primary_release_date.desc', **rf}, 'movie'))
+        if media_type in ('all', 'tv'):
+            for rf in filters:
+                sources.append(('discover/tv', {'sort_by': 'first_air_date.desc', **rf}, 'tv'))
     elif preset == 'top_rated':
         if region == 'none':
             # Use dedicated top_rated endpoints when no region filter
@@ -1075,7 +1084,10 @@ def discover_search():
     if preset == 'top_rated':
         results['results'].sort(key=lambda item: float(item.get('vote_average') or 0), reverse=True)
     elif preset in {'popular', 'trending_month', 'recent_releases'}:
-        results['results'].sort(key=lambda item: float(item.get('popularity') or 0), reverse=True)
+        if preset == 'recent_releases':
+            results['results'].sort(key=lambda item: item.get('release_date') or item.get('first_air_date') or '', reverse=True)
+        else:
+            results['results'].sort(key=lambda item: float(item.get('popularity') or 0), reverse=True)
 
     local_start = start_index % source_page_size
     page_items = results['results'][local_start:local_start + result_limit]
