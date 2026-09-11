@@ -586,6 +586,7 @@ class RcloneApp(QMainWindow):
             ("Min Age",   "--min-age",   "1d"),
             ("Max Size",  "--max-size",  "100M"),
             ("Min Size",  "--min-size",  "100M"),
+            ("File Name", "--include",   ""),
         ]
         self.filter_defs = filter_defs
         self.filter_labels = []
@@ -595,7 +596,9 @@ class RcloneApp(QMainWindow):
             state = saved_filters[i] if i < len(saved_filters) else False
             lbl = ToggleLabel(name, state, on_change=self._save_toggles)
             entry = QLineEdit()
-            if name in ("Include", "Exclude"):
+            if name == "File Name":
+                entry.setPlaceholderText("e.g. invoice, photo_2026 (contains)")
+            elif name in ("Include", "Exclude"):
                 entry.setPlaceholderText("e.g. *.jpg, dir/**")
                 # Don't set default text so placeholder is visible if empty
             else:
@@ -700,6 +703,23 @@ class RcloneApp(QMainWindow):
         btn = self.cmd_group_btn.checkedButton()
         return btn.text() if btn else "ls"
 
+    def _filter_arguments(self):
+        """Build rclone filter arguments, including simple filename matching."""
+        arguments = []
+        for i, (name, prefix, _) in enumerate(self.filter_defs):
+            if not self.filter_labels[i].active:
+                continue
+
+            values = [x.strip() for x in self.filter_entries[i].text().split(',') if x.strip()]
+            if name == "File Name":
+                # The filename filter is intentionally substring-based. Rclone
+                # filters use glob patterns, so make each entered term match
+                # anywhere in the remote path/name.
+                values = [f"*{value}*" for value in values]
+
+            arguments.extend(f'{prefix}="{value}"' for value in values)
+        return arguments
+
     def execute_command(self):
         cmd   = self._selected_command()
         stor  = self._selected_storage()
@@ -724,11 +744,7 @@ class RcloneApp(QMainWindow):
             if self.flag_labels[i].active:
                 parts.append(flag)
 
-        for i, (_, prefix, _) in enumerate(self.filter_defs):
-            if self.filter_labels[i].active:
-                val = self.filter_entries[i].text()
-                for v in [x.strip() for x in val.split(',') if x.strip()]:
-                    parts.append(f'{prefix}="{v}"')
+        parts.extend(self._filter_arguments())
 
         grep = self.grep_entry.text().strip()
         if grep:
@@ -748,10 +764,7 @@ class RcloneApp(QMainWindow):
             for i, (_, f, _) in enumerate(self.flag_defs):
                 if self.flag_labels[i].active and ("drive" in f or "list" in f):
                     s_parts.append(f)
-            for i, (_, pref, _) in enumerate(self.filter_defs):
-                if self.filter_labels[i].active:
-                    for v in [x.strip() for x in self.filter_entries[i].text().split(',') if x.strip()]:
-                        s_parts.append(f'{pref}="{v}"')
+            s_parts.extend(self._filter_arguments())
             s_cmd = " ".join(p for p in s_parts if p)
             final += f' & echo. & powershell -NoProfile -Command "Write-Host \'── SIZE SUMMARY ──\' -ForegroundColor Yellow" & {s_cmd}'
 
