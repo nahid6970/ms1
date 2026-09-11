@@ -69,6 +69,14 @@ function syncPresetPanel() {
     const modeVal   = discoverPreset.value;
     const regionVal = discoverRegion.value;
 
+    const isSearchMode = modeVal === 'search';
+    if (discoverForm) discoverForm.classList.toggle('discover-browse-mode', !isSearchMode);
+    if (discoverQuery) {
+        discoverQuery.hidden = !isSearchMode;
+        discoverQuery.required = isSearchMode;
+        discoverQuery.setAttribute('aria-hidden', String(!isSearchMode));
+    }
+
     // Update button label: "Popular · Bollywood" or just "Search"
     const modeText   = modeLabelMap[modeVal]   || modeVal;
     const regionText = regionLabelMap[regionVal] || '';
