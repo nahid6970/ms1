@@ -241,7 +241,7 @@ function formatScheduleElapsed(timestamp) {
     if (days) parts.push(`${days}d`);
     if (hours) parts.push(`${hours}h`);
     if (minutes || !parts.length) parts.push(`${minutes}m`);
-    return `${parts.join(' ')} ago`;
+    return parts.join(' ');
 }
 
 async function loadScheduledUpdatesList(list) {
