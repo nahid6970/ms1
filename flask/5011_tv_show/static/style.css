@@ -2320,11 +2320,43 @@ body::before {
 #editShowModal > div { max-width: 620px; }
 #editShowModal .modal-content {
     padding-bottom: 16px;
+    padding-left: 72px;
     scrollbar-width: none;
 }
 #editShowModal .modal-content::-webkit-scrollbar { width: 0; height: 0; }
 #editShowModal .rating-group { margin: 9px 0 14px; }
-#editShowModal .modal-btn-block { margin-top: -5px; }
+#editShowModal .modal-btn-block {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 46px;
+    height: 158px;
+    min-height: 0;
+    margin: 0;
+    padding: 10px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%) rotate(180deg);
+    letter-spacing: 1.5px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #07140b;
+    background: #22c55e;
+    border: 1px solid #4ade80;
+    border-radius: 0;
+    box-shadow: 0 0 18px rgba(34, 197, 94, 0.45);
+    z-index: 2;
+}
+#editShowModal .modal-btn-block:hover {
+    background: #4ade80;
+    box-shadow: 0 0 24px rgba(74, 222, 128, 0.62);
+}
+@media (max-width: 600px) {
+    #editShowModal .modal-content { padding-left: 58px; }
+    #editShowModal .modal-btn-block { left: 8px; width: 38px; height: 136px; }
+}
 
 /* Side-by-side fields in modal forms */
 .modal-form-row {
