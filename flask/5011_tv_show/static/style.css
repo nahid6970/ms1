@@ -2342,6 +2342,8 @@ body::before {
     letter-spacing: 1.5px;
     font-size: 0.9rem;
     font-weight: 800;
+    font-family: Consolas, "Courier New", monospace;
+    text-transform: uppercase;
     color: #07140b;
     background: #22c55e;
     border: 1px solid #4ade80;
