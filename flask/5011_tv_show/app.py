@@ -851,6 +851,7 @@ def show_schedules():
     schedules = [{
         'show_id': show.get('id'),
         'title': show.get('title', 'Untitled'),
+        'status': show.get('status', 'Continuing'),
         'update_time': show.get('episode_update_time') or '',
         'frequency': show.get('episode_update_frequency', 'daily'),
         'weekday': show.get('episode_update_weekday', 0),

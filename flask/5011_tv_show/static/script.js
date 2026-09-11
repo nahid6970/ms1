@@ -283,6 +283,11 @@ async function loadScheduledUpdatesList(list) {
                     ? 'Day ' + schedule.month_day + ' · '
                     : '') + fmt12(schedule.update_time)
                 : null;
+            const isEnded = String(schedule.status || '').toLowerCase() === 'ended';
+            const statusIcon = isEnded
+                ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg>'
+                : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg>';
+            const statusLabel = isEnded ? 'Ended' : 'Continuing';
 
             const lr = schedule.last_run_result;
             let lastRunHtml = '';
@@ -302,7 +307,7 @@ async function loadScheduledUpdatesList(list) {
             return `
             <div class="scheduled-update-row" id="sched-row-${schedule.show_id}">
                 <div class="scheduled-update-info">
-                    <span class="scheduled-update-title">${escapeEpisodeText(schedule.title)}</span>
+                    <span class="scheduled-update-title"><span class="scheduled-update-status ${isEnded ? 'status-ended' : 'status-continuing'}" title="${statusLabel}" aria-label="${statusLabel}">${statusIcon}</span>${escapeEpisodeText(schedule.title)}</span>
                     <div class="scheduled-update-meta">
                         ${freqLabel
                             ? `<span class="scheduled-update-time">${freqLabel}</span>`

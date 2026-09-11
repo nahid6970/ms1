@@ -2186,7 +2186,11 @@ body::before {
 .scheduled-updates-list { display: grid; gap: 8px; max-height: calc(100vh - 250px); overflow-x: hidden; overflow-y: auto; padding: 2px; }
 .scheduled-update-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; background: #15171d; border: 1px solid #343840; border-radius: 0; }
 .scheduled-update-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 auto; text-align: left; }
-.scheduled-update-title { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5edf8; text-align: left; }
+.scheduled-update-title { display: flex; align-items: center; gap: 7px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5edf8; text-align: left; }
+.scheduled-update-status { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; align-items: center; justify-content: center; }
+.scheduled-update-status svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.scheduled-update-status.status-continuing { color: #38bdf8; }
+.scheduled-update-status.status-ended { color: #a78bfa; }
 .scheduled-update-meta { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; text-align: left; }
 .schedule-row-frequency { flex: 0 0 104px; width: 104px; height: 36px; min-width: 0; margin: 0; padding: 4px 7px; border: 1px solid #526174; border-radius: 0; background: #15171d; color: #e5edf8; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; font-weight: 700; }
 .scheduled-update-time { flex: 0 0 auto; color: #7cff9b; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; line-height: 1.2; letter-spacing: 0.15px; font-variant-numeric: tabular-nums; font-weight: 700; text-shadow: 0 0 7px rgba(124, 255, 155, 0.25); }
