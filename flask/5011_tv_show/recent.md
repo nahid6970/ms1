@@ -4,6 +4,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
+- `templates/discover.html`, `static/discover.js`, `static/style.css`: Discover search controls are sticky and use the neon UI. Non-search modes hide the query box; browse-mode controls shrink and center. The preset button now uses mode-specific icons plus a compact region label, with the mode text hidden.
 - `templates/discover.html`, `static/discover.js`, `app.py`: Discovery region filters now include Korean, Chinese, Japanese Live Action, Cartoons / Animation, and Documentary / Reality. General animation excludes Japanese-original animation so Anime remains a separate filter.
 - `templates/index.html`, `static/script.js`, `static/style.css`: Scheduled Episode Updates received the neon reference UI, compact header `SAVE` / `CLEAR` / `SORT` controls, default `Cadence` sorting (Daily → Weekly → Monthly → unscheduled), and aligned per-show action controls even when a row has no clear-stats button.
 - `templates/index.html`, `static/script.js`, `static/style.css`, `app.py`: Scheduled Episode Updates modal now manages per-show `None` / `Daily` / `Weekly` / `Monthly` frequency choices in-row; bulk save preserves existing schedule values and auto-fills missing time/day/date values. Scheduling controls were removed from Edit Show, and editing show metadata no longer overwrites schedules. Edit Show now uses the neon reference styling with a vertical `SAVE` button.

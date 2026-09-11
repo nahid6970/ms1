@@ -14,6 +14,8 @@ const discoverPageLabel  = document.getElementById('discoverPageLabel');
 const dcPresetBtn        = document.getElementById('dcPresetBtn');
 const dcPresetMenu       = document.getElementById('dcPresetMenu');
 const dcPresetLabel      = document.getElementById('dcPresetLabel');
+const dcPresetModeIcon   = document.getElementById('dcPresetModeIcon');
+const dcPresetRegionLabel = document.getElementById('dcPresetRegionLabel');
 let discoverItems = [];
 let discoverPage  = 1;
 
@@ -58,8 +60,14 @@ if (savedLimit)  discoverLimit.value  = savedLimit;
 const modeLabelMap = {
     search: 'Search', popular: 'Popular', top_rated: 'Top Rated', trending_month: 'Trending'
 };
+const modeIconMap = {
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>',
+    popular: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4.2 0 7-2.7 7-6.3 0-2.7-1.4-4.5-3.7-6.2.2 2-1 3.1-2.2 3.8.3-3.5-1.6-6.5-4.4-8.3.1 3.1-2.7 5.2-2.7 9 0 4.5 2.7 8 6 8z"></path></svg>',
+    top_rated: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"></path><path d="M7 6H4v2a4 4 0 0 0 4 4"></path><path d="M17 6h3v2a4 4 0 0 1-4 4"></path></svg>',
+    trending_month: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"></polyline><polyline points="15 7 21 7 21 13"></polyline></svg>'
+};
 const regionLabelMap = {
-    none: '', hollywood: 'Hollywood', bollywood: 'Bollywood',
+    none: 'All', hollywood: 'Hollywood', bollywood: 'Bollywood',
     tamil_telugu: 'South', anime: 'Anime', korean: 'Korean',
     chinese: 'Chinese', japanese_live: 'Japanese Live Action',
     animation: 'Cartoons / Animation', documentary_reality: 'Documentary / Reality'
@@ -79,8 +87,10 @@ function syncPresetPanel() {
 
     // Update button label: "Popular · Bollywood" or just "Search"
     const modeText   = modeLabelMap[modeVal]   || modeVal;
-    const regionText = regionLabelMap[regionVal] || '';
-    if (dcPresetLabel) dcPresetLabel.textContent = regionText ? `${modeText} · ${regionText}` : modeText;
+    const regionText = regionLabelMap[regionVal] || 'All';
+    if (dcPresetModeIcon) dcPresetModeIcon.innerHTML = modeIconMap[modeVal] || modeIconMap.search;
+    if (dcPresetLabel) dcPresetLabel.textContent = modeText;
+    if (dcPresetRegionLabel) dcPresetRegionLabel.textContent = regionText;
 
     // Highlight active rows per group independently
     dcPresetMenu.querySelectorAll('.dc-preset-row').forEach(row => {
