@@ -2318,6 +2318,13 @@ body::before {
 
 /* Wider edit-show modal */
 #editShowModal > div { max-width: 620px; }
+#editShowModal .modal-content {
+    padding-bottom: 16px;
+    scrollbar-width: none;
+}
+#editShowModal .modal-content::-webkit-scrollbar { width: 0; height: 0; }
+#editShowModal .rating-group { margin: 9px 0 14px; }
+#editShowModal .modal-btn-block { margin-top: -5px; }
 
 /* Side-by-side fields in modal forms */
 .modal-form-row {
