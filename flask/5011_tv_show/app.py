@@ -1059,10 +1059,15 @@ def discover_search():
             page_results, error = tmdb_request(endpoint, params)
             if error:
                 return jsonify({'success': False, 'message': error}), 502
+            filtered_page_results = []
             for item in page_results.get('results', []):
+                # Keep Japanese-original animation in the dedicated Anime filter.
+                if region == 'animation' and item.get('original_language') == 'ja':
+                    continue
                 if forced_type and 'media_type' not in item:
                     item['media_type'] = forced_type
-            results['results'].extend(page_results.get('results', []))
+                filtered_page_results.append(item)
+            results['results'].extend(filtered_page_results)
             if tmdb_page == first_tmdb_page:
                 results['total_results'] += page_results.get('total_results', 0)
             results['total_pages'] = max(results['total_pages'], page_results.get('total_pages', 0))
