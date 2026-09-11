@@ -54,6 +54,8 @@ def load_settings():
         "radarr_api_key": "",
         "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr",
         "episode_file_icons_enabled": True,
+        "auto_schedule_start_time": "01:00",
+        "auto_schedule_end_time": "23:00",
         "discover_image_scale": 1
     }
     if os.path.exists(SETTINGS_FILE):
@@ -878,27 +880,39 @@ def update_all_show_schedules():
             frequency_by_id[show_id] = frequency
 
     shows = load_data()
-    auto_index = 0
+    settings = load_settings()
+    try:
+        start_minutes = datetime.strptime(settings.get('auto_schedule_start_time', '01:00'), '%H:%M').hour * 60 + datetime.strptime(settings.get('auto_schedule_start_time', '01:00'), '%H:%M').minute
+        end_minutes = datetime.strptime(settings.get('auto_schedule_end_time', '23:00'), '%H:%M').hour * 60 + datetime.strptime(settings.get('auto_schedule_end_time', '23:00'), '%H:%M').minute
+        if start_minutes >= end_minutes:
+            raise ValueError
+    except (TypeError, ValueError):
+        start_minutes, end_minutes = 60, 23 * 60
+    active_targets = [
+        show for show in shows
+        if show.get('id') in frequency_by_id
+        and frequency_by_id[show.get('id')] != 'none'
+    ]
+    active_target_index = {show.get('id'): index for index, show in enumerate(active_targets)}
+    active_target_span = max(1, len(active_targets) - 1)
     updated = 0
     for show in shows:
         show_id = show.get('id')
         if show_id not in frequency_by_id:
             continue
-        slot_index = auto_index
-        auto_index += 1
+        slot_index = active_target_index.get(show_id, 0)
         if frequency_by_id[show_id] == 'none':
             show['episode_update_time'] = ''
             show['episode_update_frequency'] = 'daily'
             updated += 1
             continue
         show['episode_update_frequency'] = frequency_by_id[show_id]
-        if not str(show.get('episode_update_time') or '').strip():
-            # Spread newly scheduled shows into predictable three-minute slots.
-            slot_minutes = 60 + (slot_index * 3)
-            show['episode_update_time'] = f'{(slot_minutes // 60) % 24:02d}:{slot_minutes % 60:02d}'
-        if ('episode_update_weekday' not in show or show.get('episode_update_weekday') is None) and show['episode_update_frequency'] == 'weekly':
+        # Reschedule every active show evenly across the configured window.
+        slot_minutes = round(start_minutes + ((end_minutes - start_minutes) * slot_index / active_target_span))
+        show['episode_update_time'] = f'{(slot_minutes // 60) % 24:02d}:{slot_minutes % 60:02d}'
+        if show['episode_update_frequency'] == 'weekly':
             show['episode_update_weekday'] = slot_index % 7
-        if ('episode_update_month_day' not in show or show.get('episode_update_month_day') is None) and show['episode_update_frequency'] == 'monthly':
+        if show['episode_update_frequency'] == 'monthly':
             show['episode_update_month_day'] = (slot_index % 28) + 1
         updated += 1
     save_data(shows)
@@ -1919,6 +1933,19 @@ def api_settings():
         settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
+        default_start = settings.get('auto_schedule_start_time', '01:00')
+        default_end = settings.get('auto_schedule_end_time', '23:00')
+        start_time = str(data.get('auto_schedule_start_time', default_start)).strip()
+        end_time = str(data.get('auto_schedule_end_time', default_end)).strip()
+        try:
+            start_value = datetime.strptime(start_time, '%H:%M')
+            end_value = datetime.strptime(end_time, '%H:%M')
+            if start_value >= end_value:
+                raise ValueError
+        except (TypeError, ValueError):
+            start_time, end_time = default_start, default_end
+        settings['auto_schedule_start_time'] = start_time
+        settings['auto_schedule_end_time'] = end_time
         try:
             discover_image_scale = float(data.get('discover_image_scale', settings.get('discover_image_scale', 1)))
         except (TypeError, ValueError):

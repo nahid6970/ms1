@@ -191,7 +191,7 @@ async function applyBulkSchedule() {
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to apply schedule');
-        if (status) status.textContent = `Saved ${data.updated} show${data.updated === 1 ? '' : 's'}. Missing schedule values were assigned automatically.`;
+        if (status) status.textContent = `Rescheduled ${data.updated} show${data.updated === 1 ? '' : 's'} across the configured time window.`;
         const list = document.getElementById('scheduledUpdatesList');
         if (list) await loadScheduledUpdatesList(list);
     } catch (error) {
@@ -199,7 +199,7 @@ async function applyBulkSchedule() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.textContent = originalText || 'Apply to all';
+            btn.textContent = originalText || 'RESCHEDULE';
         }
     }
 }
@@ -814,6 +814,8 @@ async function openSettingsModal() {
         const radarrKeyInput = document.getElementById('radarrApiKey');
         const moviesFolderInput = document.getElementById('rootMoviesFolder');
         const storageScanIntervalInput = document.getElementById('storageScanInterval');
+        const autoScheduleStartInput = document.getElementById('autoScheduleStartTime');
+        const autoScheduleEndInput = document.getElementById('autoScheduleEndTime');
         const discoverImageScaleInput = document.getElementById('discoverImageScale');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
@@ -828,6 +830,8 @@ async function openSettingsModal() {
         if (radarrKeyInput) radarrKeyInput.value = settings.radarr_api_key || '';
         if (moviesFolderInput) moviesFolderInput.value = settings.root_movies_folder || 'C:\\Users\\nahid\\Downloads\\@radarr';
         if (storageScanIntervalInput) storageScanIntervalInput.value = settings.storage_scan_interval_minutes || 60;
+        if (autoScheduleStartInput) autoScheduleStartInput.value = settings.auto_schedule_start_time || '01:00';
+        if (autoScheduleEndInput) autoScheduleEndInput.value = settings.auto_schedule_end_time || '23:00';
         if (discoverImageScaleInput) discoverImageScaleInput.value = String(settings.discover_image_scale ?? 1);
 
         const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
@@ -983,6 +987,8 @@ async function saveSettings() {
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
     const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
     const storageScanInterval = document.getElementById('storageScanInterval')?.value || 60;
+    const autoScheduleStart = document.getElementById('autoScheduleStartTime')?.value || '01:00';
+    const autoScheduleEnd = document.getElementById('autoScheduleEndTime')?.value || '23:00';
     const discoverImageScale = document.getElementById('discoverImageScale')?.value || '1';
     
     try {
@@ -1005,6 +1011,8 @@ async function saveSettings() {
                 root_movies_folder: moviesFolder,
                 episode_file_icons_enabled: fileIconsEnabled,
                 storage_scan_interval_minutes: storageScanInterval,
+                auto_schedule_start_time: autoScheduleStart,
+                auto_schedule_end_time: autoScheduleEnd,
                 discover_image_scale: discoverImageScale
             })
         });
