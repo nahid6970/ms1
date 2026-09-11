@@ -60,7 +60,9 @@ const modeLabelMap = {
 };
 const regionLabelMap = {
     none: '', hollywood: 'Hollywood', bollywood: 'Bollywood',
-    tamil_telugu: 'South', anime: 'Anime'
+    tamil_telugu: 'South', anime: 'Anime', korean: 'Korean',
+    chinese: 'Chinese', japanese_live: 'Japanese Live Action',
+    animation: 'Cartoons / Animation', documentary_reality: 'Documentary / Reality'
 };
 
 function syncPresetPanel() {

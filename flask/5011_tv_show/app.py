@@ -969,7 +969,7 @@ def discover_search():
         return jsonify({'success': False, 'message': 'Invalid content type'}), 400
     if preset not in {'search', 'popular', 'top_rated', 'trending_month'}:
         return jsonify({'success': False, 'message': 'Invalid discovery mode'}), 400
-    if region not in {'none', 'hollywood', 'bollywood', 'tamil_telugu', 'anime'}:
+    if region not in {'none', 'hollywood', 'bollywood', 'tamil_telugu', 'anime', 'korean', 'chinese', 'japanese_live', 'animation', 'documentary_reality'}:
         return jsonify({'success': False, 'message': 'Invalid region'}), 400
     if preset == 'search' and not query:
         return jsonify({'success': False, 'message': 'Enter a title or choose a discovery mode'}), 400
@@ -981,6 +981,11 @@ def discover_search():
         'bollywood':   [{'with_original_language': 'hi'}],
         'tamil_telugu':[{'with_original_language': 'ta'}, {'with_original_language': 'te'}],
         'anime':       [{'with_original_language': 'ja', 'with_genres': '16'}],
+        'korean':      [{'with_original_language': 'ko'}],
+        'chinese':     [{'with_original_language': 'zh'}],
+        'japanese_live':[{'with_original_language': 'ja', 'without_genres': '16'}],
+        'animation':   [{'with_genres': '16', 'without_original_language': 'ja'}],
+        'documentary_reality': [{'with_genres': '99'}, {'with_genres': '10764'}],
     }
     region_filters = region_lang_map[region]  # list of extra param dicts (1 or 2 for tamil_telugu)
 

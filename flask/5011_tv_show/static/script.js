@@ -180,7 +180,7 @@ async function applyBulkSchedule() {
     const originalText = btn?.textContent;
     if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Applying...';
+        btn.textContent = 'SAVING';
     }
     if (status) status.textContent = '';
     try {
