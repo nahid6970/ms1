@@ -204,6 +204,22 @@ async function applyBulkSchedule() {
     }
 }
 
+let scheduledSortMode = 'period';
+
+function toggleScheduledSortMenu(event) {
+    event?.stopPropagation();
+    const menu = document.getElementById('scheduledSortMenu');
+    if (menu) menu.hidden = !menu.hidden;
+}
+
+async function setScheduledSort(mode) {
+    scheduledSortMode = ['name', 'period'].includes(mode) ? mode : 'name';
+    const menu = document.getElementById('scheduledSortMenu');
+    if (menu) menu.hidden = true;
+    const list = document.getElementById('scheduledUpdatesList');
+    if (list) await loadScheduledUpdatesList(list);
+}
+
 async function openScheduledUpdatesModal() {
     const modal = document.getElementById('scheduledUpdatesModal');
     const list = document.getElementById('scheduledUpdatesList');
@@ -220,11 +236,20 @@ async function loadScheduledUpdatesList(list) {
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load schedules');
 
-        const hasAnyResult = data.schedules.some(s => s.last_run_result || s.last_run);
+        const schedules = [...data.schedules].sort((a, b) => {
+            if (scheduledSortMode === 'name') return a.title.localeCompare(b.title, undefined, {sensitivity: 'base'});
+            const periodRank = schedule => !schedule.update_time
+                ? 3
+                : ({daily: 0, weekly: 1, monthly: 2}[schedule.frequency] ?? 3);
+            const periodDifference = periodRank(a) - periodRank(b);
+            if (periodDifference) return periodDifference;
+            return a.title.localeCompare(b.title, undefined, {sensitivity: 'base'});
+        });
+        const hasAnyResult = schedules.some(s => s.last_run_result || s.last_run);
         const clearAllTop = document.getElementById('clearAllRunStatsTop');
         if (clearAllTop) clearAllTop.hidden = !hasAnyResult;
 
-        const rows = data.schedules.map(schedule => {
+        const rows = schedules.map(schedule => {
             const fmt12 = t => {
                 const [h, m] = t.split(':').map(Number);
                 const ampm = h >= 12 ? 'PM' : 'AM';

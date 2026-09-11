@@ -252,6 +252,13 @@
             <span class="close" onclick="closeScheduledUpdatesModal()">&times;</span>
             <button id="applyBulkScheduleBtn" class="schedule-top-save" type="button" onclick="applyBulkSchedule()">SAVE</button>
             <button id="clearAllRunStatsTop" class="schedule-top-clear" type="button" onclick="clearAllRunStats(this)" hidden>CLEAR</button>
+            <div class="schedule-sort-wrap">
+                <button id="scheduledSortBtn" class="schedule-top-sort" type="button" onclick="toggleScheduledSortMenu(event)">SORT</button>
+                <div id="scheduledSortMenu" class="schedule-sort-menu" hidden>
+                    <button type="button" data-sort="name" onclick="setScheduledSort('name')">Name</button>
+                    <button type="button" data-sort="period" onclick="setScheduledSort('period')">Cadence</button>
+                </div>
+            </div>
             <h2 class="modal-title">Scheduled Episode Updates</h2>
             <p id="bulkScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
             <div id="scheduledUpdatesList" class="scheduled-updates-list">
