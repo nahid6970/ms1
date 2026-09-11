@@ -2160,6 +2160,8 @@ body::before {
 .scheduled-updates-content > .close:hover { color: #ff4d6d; background: transparent; box-shadow: none; transform: none; }
 .schedule-top-save { position: absolute; top: 14px; right: 54px; width: 58px; height: 30px; padding: 0; color: #07140b; background: #22c55e; border: 1px solid #4ade80; border-radius: 0; box-shadow: 0 0 12px rgba(34, 197, 94, 0.45); cursor: pointer; font-family: Consolas, "Courier New", monospace; font-size: 0.78rem; font-weight: 800; letter-spacing: 1px; }
 .schedule-top-save:hover { background: #4ade80; box-shadow: 0 0 18px rgba(74, 222, 128, 0.62); }
+.schedule-top-clear { position: absolute; top: 14px; right: 118px; width: 64px; height: 30px; padding: 0; color: #ff6b81; background: #15171d; border: 1px solid #d94b63; border-radius: 0; box-shadow: 0 0 10px rgba(217, 75, 99, 0.25); cursor: pointer; font-family: Consolas, "Courier New", monospace; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.7px; }
+.schedule-top-clear:hover { color: #ff9aaa; background: rgba(217, 75, 99, 0.14); box-shadow: 0 0 16px rgba(217, 75, 99, 0.45); }
 .schedule-bulk-panel { margin-bottom: 12px; padding: 12px; background: #172337; border: 1px solid #35618b; border-radius: 6px; }
 .schedule-bulk-heading { margin-bottom: 9px; color: #dbeafe; font-size: 0.82rem; font-weight: 700; }
 .schedule-bulk-apply { min-height: 38px; padding: 8px 12px; white-space: nowrap; }

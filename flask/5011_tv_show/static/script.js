@@ -221,9 +221,8 @@ async function loadScheduledUpdatesList(list) {
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load schedules');
 
         const hasAnyResult = data.schedules.some(s => s.last_run_result || s.last_run);
-        const clearAllBtn = hasAnyResult
-            ? `<button class="schedule-clear-all-btn" onclick="clearAllRunStats(this)" title="Clear all run stats">Clear All Stats</button>`
-            : '';
+        const clearAllTop = document.getElementById('clearAllRunStatsTop');
+        if (clearAllTop) clearAllTop.hidden = !hasAnyResult;
 
         const rows = data.schedules.map(schedule => {
             const fmt12 = t => {
@@ -284,7 +283,7 @@ async function loadScheduledUpdatesList(list) {
             </div>`;
         }).join('') || '<p class="schedule-empty">No shows found.</p>';
 
-        list.innerHTML = (clearAllBtn ? `<div class="schedule-clear-all-row">${clearAllBtn}</div>` : '') + rows;
+        list.innerHTML = rows;
     } catch (error) {
         list.innerHTML = `<p class="schedule-empty">${escapeEpisodeText(error.message)}</p>`;
     }
@@ -339,7 +338,8 @@ async function clearRunStats(showId, btn) {
         }
         // hide Clear All if no stats remain
         if (!document.querySelector('.schedule-last-run')) {
-            document.querySelector('.schedule-clear-all-row')?.remove();
+            const top = document.getElementById('clearAllRunStatsTop');
+            if (top) top.hidden = true;
         }
     } catch(e) { btn.disabled = false; }
 }
@@ -350,7 +350,8 @@ async function clearAllRunStats(btn) {
         await fetch('/api/shows/clear_all_run_stats', { method: 'POST' });
         document.querySelectorAll('.schedule-last-run').forEach(el => el.remove());
         document.querySelectorAll('.schedule-clear-btn').forEach(el => el.remove());
-        btn.closest('.schedule-clear-all-row')?.remove();
+        btn.hidden = true;
+        btn.disabled = false;
     } catch(e) { btn.disabled = false; }
 }
 
