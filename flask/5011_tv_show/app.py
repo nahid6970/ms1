@@ -1024,6 +1024,53 @@ def get_next_movie_run(movie, now=None):
         return next_month.replace(day=min(month_day, next_last_day), hour=hour, minute=minute, second=0, microsecond=0)
     return None
 
+def get_next_show_run(show, now=None):
+    """Return the next local scheduled episode-update datetime, or None."""
+    if now is None:
+        now = datetime.now()
+    update_time_str = str(show.get('episode_update_time') or '').strip()
+    if not update_time_str:
+        return None
+    try:
+        hour, minute = [int(part) for part in update_time_str.split(':')[:2]]
+    except (ValueError, IndexError):
+        return None
+    frequency = show.get('episode_update_frequency', 'daily')
+    if frequency == 'daily':
+        candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        return candidate if candidate > now else candidate + timedelta(days=1)
+    if frequency == 'weekly':
+        try:
+            weekday = int(show.get('episode_update_weekday', now.weekday()))
+        except (TypeError, ValueError):
+            weekday = now.weekday()
+        candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0) + timedelta(days=(weekday - now.weekday()) % 7)
+        return candidate if candidate > now else candidate + timedelta(days=7)
+    if frequency == 'monthly':
+        try:
+            month_day = max(1, min(31, int(show.get('episode_update_month_day', now.day))))
+        except (TypeError, ValueError):
+            month_day = now.day
+        last_day = calendar.monthrange(now.year, now.month)[1]
+        candidate = now.replace(day=min(month_day, last_day), hour=hour, minute=minute, second=0, microsecond=0)
+        if candidate > now:
+            return candidate
+        next_month = (now.replace(day=1) + timedelta(days=32)).replace(day=1)
+        next_last_day = calendar.monthrange(next_month.year, next_month.month)[1]
+        return next_month.replace(day=min(month_day, next_last_day), hour=hour, minute=minute, second=0, microsecond=0)
+    return None
+
+def get_next_episode_release(show, now=None):
+    """Return the next unreleased episode's local release datetime."""
+    if now is None:
+        now = datetime.now(BANGLADESH_TZ)
+    upcoming = []
+    for episode in show.get('episodes', []):
+        release_time = episode_release_datetime(episode)
+        if release_time and release_time > now:
+            upcoming.append(release_time)
+    return min(upcoming) if upcoming else None
+
 def run_scheduled_movie_metadata_updates():
     """Refresh due movies until TMDb supplies a digital release date."""
     now = datetime.now()
@@ -1122,6 +1169,50 @@ def movie_schedules():
         })
     schedules.sort(key=lambda item: (item['completed'], not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
+
+@app.route('/agenda')
+def agenda_page():
+    return render_template('agenda.html')
+
+@app.route('/api/agenda')
+def agenda_data():
+    now = datetime.now()
+    now_bd = datetime.now(BANGLADESH_TZ)
+    ts = load_timestamps()
+    items = []
+    for show in load_data():
+        next_run = get_next_show_run(show, now)
+        if next_run:
+            show_ts = ts.get(str(show.get('id')), {})
+            result = show_ts.get('last_run_result') or {}
+            items.append({
+                'id': show.get('id'), 'title': show.get('title', 'Untitled'), 'type': 'TV',
+                'task': 'Episode update', 'cadence': show.get('episode_update_frequency', 'daily').title(),
+                'next_run': next_run.isoformat(), 'release_date': (get_next_episode_release(show, now_bd) or '').isoformat() if get_next_episode_release(show, now_bd) else '',
+                'status': 'Scheduled',
+                'details': f"Next update: {next_run.strftime('%d %b, %I:%M %p')} · {show.get('status', 'Continuing')}",
+                'last_result': result, 'completed': False
+            })
+    for movie in load_movies():
+        if movie.get('digital_release_date'):
+            items.append({
+                'id': movie.get('id'), 'title': movie.get('title', 'Untitled'), 'type': 'Movie',
+                'task': 'Metadata complete', 'cadence': 'Complete', 'next_run': '', 'release_date': movie.get('digital_release_date') or '',
+                'status': 'Complete', 'details': f"Digital: {movie.get('digital_release_date')}",
+                'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': True
+            })
+        else:
+            next_run = get_next_movie_run(movie, now)
+            if next_run:
+                items.append({
+                    'id': movie.get('id'), 'title': movie.get('title', 'Untitled'), 'type': 'Movie',
+                    'task': 'Metadata check', 'cadence': movie.get('metadata_update_frequency', 'daily').title(),
+                    'next_run': next_run.isoformat(), 'release_date': '', 'status': 'Scheduled',
+                    'details': f"Next check: {next_run.strftime('%d %b, %I:%M %p')} · Waiting for digital release date",
+                    'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': False
+                })
+    items.sort(key=lambda item: (not bool(item.get('release_date')), item.get('release_date') or '9999', item['title'].casefold()))
+    return jsonify({'success': True, 'items': items})
 
 @app.route('/api/movie-schedules/bulk', methods=['POST'])
 def update_all_movie_schedules():

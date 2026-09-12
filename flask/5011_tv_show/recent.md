@@ -37,6 +37,12 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`: Agenda items are now sorted ascending by the `NEXT RELEASE` column, with unavailable dates last and titles used as a tie-breaker.
+
+- `app.py`, `templates/agenda.html`, `static/agenda.js`: Agenda’s first column now shows the next TV episode release date or the movie digital-release date. Scheduler timing remains shown in the Details column.
+
+- `app.py`, `templates/agenda.html`, `static/agenda.js`, `static/style.css`, `templates/index.html`, `templates/movies.html`, `templates/discover.html`: Added a unified Agenda tab before Shows/Movies/Discover. It combines TV episode updates and movie metadata checks in a searchable, filterable table with date/time, type, task, cadence, status, details, and Run Now actions.
+
 - `templates/movies.html`, `static/movies.js`: Added a read-only Category field to the Edit Movie modal, populated from stored TMDb-derived metadata.
 
 - `app.py`, `templates/movies.html`, `static/style.css`: Movie TMDb metadata now derives and stores a category such as Hollywood, Bollywood, Anime, Korean, Chinese, Japanese Live Action, Tamil/Telugu, or International, and displays it as a movie-card badge.
