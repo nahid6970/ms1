@@ -4,6 +4,7 @@
     let filter = savedState.filter || 'all';
     let timeFilters = new Set(Array.isArray(savedState.timeFilters) && savedState.timeFilters.length ? savedState.timeFilters : ['all']);
     let skipComplete = !!savedState.skipComplete;
+    let countdownEnabled = false;
     const body = document.getElementById('agendaTableBody');
     const search = document.getElementById('agendaSearch');
     if (savedState.search) search.value = savedState.search;
@@ -27,6 +28,34 @@
         const date = new Date(value);
         return Number.isNaN(date.getTime()) ? value : `${date.toLocaleDateString(undefined, {day:'2-digit', month:'short', year:'numeric'})} · ${date.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}`;
     };
+
+    function formatCountdown(value) {
+        const target = new Date(value);
+        const now = new Date();
+        if (Number.isNaN(target.getTime())) return value;
+        if (target <= now) return 'Released';
+        let months = (target.getFullYear() - now.getFullYear()) * 12 + target.getMonth() - now.getMonth();
+        const monthAnchor = new Date(now);
+        monthAnchor.setMonth(monthAnchor.getMonth() + months);
+        if (monthAnchor > target) months -= 1;
+        const remainderAnchor = new Date(now);
+        remainderAnchor.setMonth(remainderAnchor.getMonth() + months);
+        let remaining = target.getTime() - remainderAnchor.getTime();
+        const day = 24 * 60 * 60 * 1000;
+        const hour = 60 * 60 * 1000;
+        const minute = 60 * 1000;
+        const days = Math.floor(remaining / day); remaining -= days * day;
+        const hours = Math.floor(remaining / hour); remaining -= hours * hour;
+        const minutes = Math.floor(remaining / minute);
+        const parts = [];
+        if (months) parts.push(`${months}M`);
+        if (days) parts.push(`${days}d`);
+        if (hours) parts.push(`${hours}h`);
+        if (minutes || !parts.length) parts.push(`${minutes}m`);
+        return parts.join(' ');
+    }
+
+    const formatRelease = value => countdownEnabled ? formatCountdown(value) : formatDate(value);
 
     function isToday(value) {
         if (!value) return false;
@@ -88,7 +117,7 @@
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span></td>
                 <td class="agenda-icon-cell">${titleIcons}</td>
-                <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
+                <td class="agenda-date">${item.release_date ? formatRelease(item.release_date) : 'Not available'}</td>
                 <td class="agenda-details">${renderDetails(item)}</td>
             </tr>`;
         }).join('');
@@ -100,6 +129,11 @@
             const response = await fetch('/api/agenda');
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load agenda');
+            const settingsResponse = await fetch('/api/settings');
+            if (settingsResponse.ok) {
+                const settings = await settingsResponse.json();
+                countdownEnabled = settings.agenda_countdown_enabled === true;
+            }
             items = data.items || [];
             render();
         } catch (error) { body.innerHTML = `<tr><td colspan="4" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }

@@ -861,6 +861,7 @@ async function openSettingsModal() {
         const autoScheduleStartInput = document.getElementById('autoScheduleStartTime');
         const autoScheduleEndInput = document.getElementById('autoScheduleEndTime');
         const discoverImageScaleInput = document.getElementById('discoverImageScale');
+        const agendaCountdownToggle = document.getElementById('agendaCountdownEnabled');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
         if (defaultShowsSortInput) defaultShowsSortInput.value = settings.default_shows_sort || 'title';
@@ -880,6 +881,7 @@ async function openSettingsModal() {
 
         const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
         if (fileIconsToggle) fileIconsToggle.checked = settings.episode_file_icons_enabled !== false;
+        if (agendaCountdownToggle) agendaCountdownToggle.checked = settings.agenda_countdown_enabled === true;
     } catch (e) {
         console.error('Error loading settings:', e);
     }
@@ -1030,6 +1032,7 @@ async function saveSettings() {
     const radarrApiKey = document.getElementById('radarrApiKey').value;
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
     const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
+    const agendaCountdownEnabled = document.getElementById('agendaCountdownEnabled')?.checked ?? false;
     const storageScanInterval = document.getElementById('storageScanInterval')?.value || 60;
     const autoScheduleStart = document.getElementById('autoScheduleStartTime')?.value || '01:00';
     const autoScheduleEnd = document.getElementById('autoScheduleEndTime')?.value || '23:00';
@@ -1054,6 +1057,7 @@ async function saveSettings() {
                 radarr_api_key: radarrApiKey,
                 root_movies_folder: moviesFolder,
                 episode_file_icons_enabled: fileIconsEnabled,
+                agenda_countdown_enabled: agendaCountdownEnabled,
                 storage_scan_interval_minutes: storageScanInterval,
                 auto_schedule_start_time: autoScheduleStart,
                 auto_schedule_end_time: autoScheduleEnd,

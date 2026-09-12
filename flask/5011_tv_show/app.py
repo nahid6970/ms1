@@ -56,7 +56,8 @@ def load_settings():
         "episode_file_icons_enabled": True,
         "auto_schedule_start_time": "01:00",
         "auto_schedule_end_time": "23:00",
-        "discover_image_scale": 1
+        "discover_image_scale": 1,
+        "agenda_countdown_enabled": False
     }
     if os.path.exists(SETTINGS_FILE):
         try:
@@ -2381,6 +2382,7 @@ def api_settings():
         settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
+        settings['agenda_countdown_enabled'] = bool(data.get('agenda_countdown_enabled', settings.get('agenda_countdown_enabled', False)))
         default_start = settings.get('auto_schedule_start_time', '01:00')
         default_end = settings.get('auto_schedule_end_time', '23:00')
         start_time = str(data.get('auto_schedule_start_time', default_start)).strip()
