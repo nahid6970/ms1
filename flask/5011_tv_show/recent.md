@@ -110,6 +110,9 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`, `static/style.css`: Grouped the title-side status, cadence, and Run Now icons and prevented generic button rules from distorting the compact clock action.
+- `static/agenda.js`, `static/style.css`: Moved the clickable scheduled clock action beside each title; Details now shows only the aligned scheduled date/time text.
+- `static/agenda.js`, `static/style.css`: Moved Agenda status/cadence icons next to each title and left the Details column with only the clickable scheduled clock/date control, removing duplicate icons.
 - `static/style.css`: Reduced the desktop Next Release column to 22% and expanded Details to 33% so unused timestamp-column space is available to the icon/details column.
 - `static/style.css`: Removed the Agenda table’s forced 1000px minimum width and added narrow-screen sizing so unused space does not create a horizontal scrollbar.
 - `static/agenda.js`: Reordered Agenda Details so status/cadence icons appear before the scheduled clock/date control.

@@ -2459,8 +2459,13 @@ body::before {
 .agenda-table tbody tr:hover { background: rgba(59,130,246,.08); }
 .agenda-date { color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
 .agenda-title { display: table-cell; min-width: 0; color: #fff; font-weight: 700; text-align: left; vertical-align: middle; }
-.agenda-title > span:first-child { display: inline-block; width: calc(100% - 28px); min-width: 0; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
-.agenda-title .agenda-status-icon { display: inline-flex; margin-left: 7px; vertical-align: middle; }
+.agenda-title > span:first-child { display: inline-block; width: calc(100% - 72px); min-width: 0; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
+.agenda-title-icons { display: inline-flex; align-items: center; gap: 5px; margin-left: 7px; vertical-align: middle; }
+.agenda-title-icons .agenda-status-icon { display: inline-flex; margin: 0; }
+.agenda-table #agendaTableBody .agenda-title .agenda-title-run { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 16px; width: 16px; min-width: 16px; height: 16px; min-height: 16px; margin: 0; padding: 0; color: #34d399; background: transparent; border: 0; border-radius: 50%; cursor: pointer; vertical-align: middle; }
+.agenda-table #agendaTableBody .agenda-title .agenda-title-run svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.agenda-table #agendaTableBody .agenda-title .agenda-title-run:hover { color: #b7ffc7; background: rgba(52,211,153,.12); box-shadow: none; transform: none; }
+.agenda-scheduled-text { color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
 .agenda-title-tv { color: #86efac; }
 .agenda-title-movie { color: #93c5fd; }
 .agenda-status-icon { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; align-items: center; justify-content: center; }

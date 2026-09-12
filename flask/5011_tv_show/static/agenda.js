@@ -58,18 +58,13 @@
 
     function renderDetails(item) {
         if (item.completed) {
-            return `<span class="agenda-detail-icons"><span class="agenda-detail-cadence agenda-cadence-complete" title="Digital release: ${esc(item.details.replace('Digital: ', ''))}" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span></span>`;
+            return '';
         }
         const nextRun = item.next_run ? new Date(item.next_run) : null;
         const scheduledDate = nextRun && !Number.isNaN(nextRun.getTime())
             ? `${nextRun.toLocaleDateString(undefined, {day: '2-digit', month: 'short', year: 'numeric'})} · ${nextRun.toLocaleTimeString(undefined, {hour: 'numeric', minute: '2-digit'})}`
             : '';
-        const status = item.show_status || 'Waiting';
-        const statusTitle = status === 'Continuing' ? 'Continuing' : status === 'Ended' ? 'Ended' : 'Waiting for digital release';
-        const statusIcon = status === 'Waiting'
-            ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>'
-            : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg>';
-        return `<span class="agenda-detail-icons"><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span>${renderCadenceIcon(item)}<button class="agenda-detail-schedule agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled: ${scheduledDate} · Run now" aria-label="Scheduled: ${scheduledDate}. Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></button></span>`;
+        return `<span class="agenda-scheduled-text">${scheduledDate}</span>`;
     }
 
     function render() {
@@ -88,8 +83,10 @@
             const statusIcon = item.completed
                 ? '<span class="agenda-status-icon agenda-status-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>'
                 : '<span class="agenda-status-icon agenda-status-scheduled" title="Scheduled" aria-label="Scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg></span>';
+            const scheduleAction = item.completed ? '' : `<button class="agenda-title-run agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled run: ${esc(item.next_run || '')} · Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>`;
+            const titleIcons = `<span class="agenda-title-icons">${item.completed ? statusIcon : `${statusIcon}${renderCadenceIcon(item)}${scheduleAction}`}</span>`;
             return `<tr>
-                <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${statusIcon}</td>
+                <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${titleIcons}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
                 <td class="agenda-details">${renderDetails(item)}</td>
             </tr>`;
