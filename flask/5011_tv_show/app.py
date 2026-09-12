@@ -11,6 +11,7 @@ import json
 import os
 import re
 import calendar
+import tempfile
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 import time
@@ -39,6 +40,38 @@ BANGLADESH_TZ = ZoneInfo('Asia/Dhaka')
 
 os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
 
+def _atomic_json_save(path, payload):
+    """Write JSON through a temp file so readers never see a partial document."""
+    directory = os.path.dirname(path)
+    os.makedirs(directory, exist_ok=True)
+    temp_path = None
+    try:
+        fd, temp_path = tempfile.mkstemp(prefix='.json-', suffix='.tmp', dir=directory)
+        with os.fdopen(fd, 'w', encoding='utf-8') as handle:
+            json.dump(payload, handle, indent=4)
+            handle.flush()
+            os.fsync(handle.fileno())
+        backup_path = f'{path}.bak'
+        if os.path.exists(path):
+            os.replace(path, backup_path)
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except OSError:
+                pass
+
+def _load_json_with_backup(path, default):
+    for candidate in (path, f'{path}.bak'):
+        try:
+            with open(candidate, 'r', encoding='utf-8') as handle:
+                return json.load(handle)
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            continue
+    return default
+
 def load_settings():
     default_settings = {
         "tmdb_api_key": "",
@@ -59,20 +92,13 @@ def load_settings():
         "discover_image_scale": 1,
         "agenda_countdown_enabled": False
     }
-    if os.path.exists(SETTINGS_FILE):
-        try:
-            with open(SETTINGS_FILE, 'r') as f:
-                loaded = json.load(f)
-                default_settings.update(loaded)
-                return default_settings
-        except:
-            pass
+    loaded = _load_json_with_backup(SETTINGS_FILE, None)
+    if isinstance(loaded, dict):
+        default_settings.update(loaded)
     return default_settings
 
 def save_settings(settings):
-    os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-    with open(SETTINGS_FILE, 'w') as f:
-        json.dump(settings, f, indent=4)
+    _atomic_json_save(SETTINGS_FILE, settings)
 
 def get_cached_image(url):
     if not url:
@@ -95,15 +121,11 @@ def get_cached_image(url):
     return url
 
 def load_data():
-    try:
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+    loaded = _load_json_with_backup(DATA_FILE, [])
+    return loaded if isinstance(loaded, list) else []
 
 def save_data(data):
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, indent=4)
+    _atomic_json_save(DATA_FILE, data)
 
 def load_timestamps():
     """Load per-show volatile timestamps (episodes_updated_at, last_run_result,
@@ -144,16 +166,11 @@ def set_movie_ts(movie_id, **kwargs):
     save_timestamps(ts)
 
 def load_movies():
-    try:
-        with open(MOVIES_FILE, 'r') as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+    loaded = _load_json_with_backup(MOVIES_FILE, [])
+    return loaded if isinstance(loaded, list) else []
 
 def save_movies(movies):
-    os.makedirs(os.path.dirname(MOVIES_FILE), exist_ok=True)
-    with open(MOVIES_FILE, 'w') as f:
-        json.dump(movies, f, indent=4)
+    _atomic_json_save(MOVIES_FILE, movies)
 
 def tmdb_request(path, params=None):
     """Request data from TMDb using the key configured in Settings."""

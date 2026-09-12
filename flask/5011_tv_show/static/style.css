@@ -365,6 +365,11 @@ body {
     letter-spacing: -0.04em;
 }
 
+.context-menu { display: none; position: fixed; z-index: 2500; min-width: 120px; padding: 5px 0; color: #e5eefc; background: #111923; border: 1px solid #39506d; box-shadow: 0 8px 22px rgba(0,0,0,.45); }
+.context-menu-item { display: flex; align-items: center; gap: 7px; padding: 8px 12px; cursor: pointer; white-space: nowrap; }
+.context-menu-item:hover { background: #22324a; }
+.context-menu-delete:hover { color: #f87171; }
+
 /* Animations */
 @keyframes spin {
     from { transform: rotate(0deg); }
