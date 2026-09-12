@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `app.py`, `static/agenda.js`: Documented Agenda future TV episode handling: the nearest upcoming air time is shown first, then the next future episode is selected automatically after it passes.
 - `app.py`, `static/agenda.js`, `static/style.css`: Agenda now includes TV shows with future episode air dates even when per-show update scheduling is disabled. Such rows show Not scheduled and omit the Run Now/cadence controls; UPCOMING remains limited to scheduled items.
 - `static/style.css`: Updated Agenda Next Release dates/countdowns to clear yellow (`#fde047`).
 - `static/style.css`: Changed Agenda Next Release dates/countdowns from green to amber-orange for clearer column distinction.
