@@ -2450,10 +2450,9 @@ body::before {
 .agenda-filter:hover, .agenda-filter.active { color: #07140b; background: #22c55e; border-color: #4ade80; }
 .agenda-table-wrap { overflow-x: auto; background: #080b10; border: 1px solid #283447; box-shadow: 0 0 18px rgba(0,0,0,.25); }
 .agenda-table { width: 100%; table-layout: fixed; border-collapse: collapse; min-width: 1000px; color: #dbeafe; font-size: .8rem; }
-.agenda-table th:nth-child(1), .agenda-table td:nth-child(1) { width: 30%; }
-.agenda-table th:nth-child(2), .agenda-table td:nth-child(2) { width: 28%; }
-.agenda-table th:nth-child(3), .agenda-table td:nth-child(3) { width: 15%; }
-.agenda-table th:nth-child(4), .agenda-table td:nth-child(4) { width: 27%; }
+.agenda-table th:nth-child(1), .agenda-table td:nth-child(1) { width: 45%; }
+.agenda-table th:nth-child(2), .agenda-table td:nth-child(2) { width: 30%; }
+.agenda-table th:nth-child(3), .agenda-table td:nth-child(3) { width: 25%; }
 .agenda-table th { padding: 11px 12px; color: #7cff9b; background: #111923; border-bottom: 1px solid #39506d; text-align: left; font: 700 .7rem Consolas, "Courier New", monospace; letter-spacing: .5px; white-space: nowrap; }
 .agenda-table tbody tr { border-bottom: 1px solid #202a38; }
 .agenda-table td { padding: 11px 12px; border-bottom: 0; vertical-align: middle; text-align: left; white-space: nowrap; }
@@ -2472,6 +2471,11 @@ body::before {
 .agenda-detail-schedule svg, .agenda-detail-complete > svg, .agenda-detail-state svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .agenda-detail-state { display: inline-flex; color: #38bdf8; }
 .agenda-detail-complete { color: #4ade80; }
+.agenda-detail-cadence { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: #fbbf24; }
+.agenda-detail-cadence svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.agenda-cadence-weekly { color: #c084fc; }
+.agenda-cadence-monthly { color: #60a5fa; }
+.agenda-cadence-complete { color: #4ade80; }
 .agenda-badge { display: inline-block; padding: 4px 7px; border: 1px solid; font: 700 .68rem Consolas, "Courier New", monospace; }
 .agenda-type-tv { color: #a5f3fc; background: rgba(8,145,178,.2); border-color: #0891b2; }
 .agenda-type-movie { color: #e9d5ff; background: rgba(126,34,206,.2); border-color: #9333ea; }

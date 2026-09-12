@@ -110,6 +110,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Cadence column and added compact Daily, Weekly, Monthly, and Complete icons at the end of Details with hover labels.
+- `static/style.css`: Reduced Agenda Cadence column width from 15% to 12% and expanded the Title column from 30% to 40% for longer show/movie names.
 - `static/style.css`: Explicitly left-aligned every Agenda body column to match the Title column instead of inheriting the page’s centered text alignment.
 - `static/style.css`: Restored the Agenda title cell to table-cell layout after flex styling caused the first column to collapse; title truncation now stays within the correctly sized column.
 - `static/style.css`: Let Agenda title text fill the available first-column space before truncating, while reserving room for the completion/status icon.

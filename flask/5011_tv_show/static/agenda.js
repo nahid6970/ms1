@@ -42,9 +42,23 @@
         return !Number.isNaN(date.getTime()) && date > new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     }
 
+    function renderCadenceIcon(item) {
+        const cadence = String(item.cadence || '').toLowerCase();
+        if (cadence === 'complete') {
+            return '<span class="agenda-detail-cadence agenda-cadence-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>';
+        }
+        const label = cadence === 'weekly' ? 'Weekly' : cadence === 'monthly' ? 'Monthly' : 'Daily';
+        const svg = cadence === 'weekly'
+            ? '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="1"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>'
+            : cadence === 'monthly'
+                ? '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="1"></rect><path d="M8 3v4M16 3v4M4 10h16M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01"></path></svg>'
+                : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>';
+        return `<span class="agenda-detail-cadence agenda-cadence-${cadence}" title="${label}" aria-label="${label}">${svg}</span>`;
+    }
+
     function renderDetails(item) {
         if (item.completed) {
-            return `<span class="agenda-detail-complete" title="Digital release: ${esc(item.details.replace('Digital: ', ''))}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>`;
+            return `<span class="agenda-detail-icons"><span class="agenda-detail-cadence agenda-cadence-complete" title="Digital release: ${esc(item.details.replace('Digital: ', ''))}" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span></span>`;
         }
         const nextRun = item.next_run ? new Date(item.next_run) : null;
         const scheduledDate = nextRun && !Number.isNaN(nextRun.getTime())
@@ -55,7 +69,7 @@
         const statusIcon = status === 'Waiting'
             ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>'
             : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg>';
-        return `<span class="agenda-detail-icons"><button class="agenda-detail-schedule agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled: ${scheduledDate} · Run now" aria-label="Scheduled: ${scheduledDate}. Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></button><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span></span>`;
+        return `<span class="agenda-detail-icons"><button class="agenda-detail-schedule agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled: ${scheduledDate} · Run now" aria-label="Scheduled: ${scheduledDate}. Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></button><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span>${renderCadenceIcon(item)}</span>`;
     }
 
     function render() {
@@ -67,7 +81,7 @@
             return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {
-        body.innerHTML = '<tr><td colspan="4" class="agenda-empty">No matching scheduled items.</td></tr>';
+        body.innerHTML = '<tr><td colspan="3" class="agenda-empty">No matching scheduled items.</td></tr>';
             return;
         }
         body.innerHTML = visible.map(item => {
@@ -77,21 +91,20 @@
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${statusIcon}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
-                <td>${esc(item.cadence)}</td>
                 <td class="agenda-details">${renderDetails(item)}</td>
             </tr>`;
         }).join('');
     }
 
     async function load() {
-        body.innerHTML = '<tr><td colspan="4" class="agenda-empty">Loading agenda...</td></tr>';
+        body.innerHTML = '<tr><td colspan="3" class="agenda-empty">Loading agenda...</td></tr>';
         try {
             const response = await fetch('/api/agenda');
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load agenda');
             items = data.items || [];
             render();
-        } catch (error) { body.innerHTML = `<tr><td colspan="4" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
+        } catch (error) { body.innerHTML = `<tr><td colspan="3" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
     }
 
     document.querySelectorAll('.agenda-filter:not(.agenda-skip-complete)').forEach(button => button.addEventListener('click', () => {
