@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `templates/movies.html`, `static/style.css`: Movie TMDb metadata now derives and stores a category such as Hollywood, Bollywood, Anime, Korean, Chinese, Japanese Live Action, Tamil/Telugu, or International, and displays it as a movie-card badge.
+
 - `static/movies.js`, `static/style.css`: Movie schedule rows now use green TV-show-style next-run timestamps and omit the `Checked` label from completed-check results.
 
 - `static/movies.js`, `static/style.css`: Movie schedule next-run timestamps now use the TV-show green styling, and completed-check results no longer include the `Checked` label.

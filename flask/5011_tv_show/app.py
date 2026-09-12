@@ -183,6 +183,28 @@ def tmdb_year(value):
 def tmdb_genres(details):
     return [genre.get('name') for genre in details.get('genres', []) if genre.get('name')]
 
+def tmdb_movie_category(details):
+    """Classify a movie using TMDb language, countries, and genres."""
+    language = str(details.get('original_language') or '').lower()
+    countries = {str(item.get('iso_3166_1') or '').upper() for item in details.get('production_countries', [])}
+    genres = {str(item.get('name') or '').casefold() for item in details.get('genres', [])}
+
+    if language == 'ja' and 'animation' in genres:
+        return 'Anime'
+    if language == 'hi' or ('IN' in countries and language in {'hi', 'ur'}):
+        return 'Bollywood'
+    if language in {'ta', 'te'}:
+        return 'Tamil / Telugu'
+    if language == 'ko' or 'KR' in countries:
+        return 'Korean'
+    if language == 'zh' or countries.intersection({'CN', 'HK', 'TW'}):
+        return 'Chinese'
+    if language == 'ja':
+        return 'Japanese Live Action'
+    if 'US' in countries or language == 'en':
+        return 'Hollywood'
+    return 'International'
+
 def tmdb_digital_release_date(tmdb_id):
     """Return the earliest digital release date listed by TMDb, if any."""
     release_data, error = tmdb_request(f'movie/{int(tmdb_id)}/release_dates')
@@ -1509,6 +1531,7 @@ def discover_add():
             'year': year,
             'release_date': details.get('release_date') or '',
             'digital_release_date': tmdb_digital_release_date(tmdb_id),
+            'category': tmdb_movie_category(details),
             'overview': details.get('overview', ''),
             'cover_image': poster,
             'directory_path': '',
@@ -2651,7 +2674,8 @@ def refresh_movie_metadata_record(movie):
         'runtime': details.get('runtime'),
         'rating': tmdb_five_star_rating(tmdb_rating),
         'tmdb_rating': tmdb_rating,
-        'status': 'Released' if details.get('status') == 'Released' else 'Missing'
+        'status': 'Released' if details.get('status') == 'Released' else 'Missing',
+        'category': tmdb_movie_category(details)
     })
     movie['digital_release_date'] = tmdb_digital_release_date(movie['tmdb_id'])
     if details.get('imdb_id'):

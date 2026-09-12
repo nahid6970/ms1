@@ -127,6 +127,7 @@
                         </div>
                         <div class="card-info">
                             <p class="movie-year">{{ movie.year }}</p>
+                            {% if movie.category %}<p class="movie-category">{{ movie.category }}</p>{% endif %}
                             {% if movie.tmdb_rating %}<p class="tmdb-rating">TMDb {{ movie.tmdb_rating }}/10</p>{% endif %}
                             <p class="movie-status {% if movie.watched %}all-episodes-watched{% else %}no-episodes-watched{% endif %}">{{ 'Watched' if movie.watched else 'Unwatched' }}</p>
                             {% if movie.digital_release_date %}<p class="digital-release {% if movie.digital_release_date <= today %}digital-release-past{% else %}digital-release-future{% endif %}">Digital: {{ movie.digital_release_date }}</p>{% endif %}
