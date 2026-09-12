@@ -110,6 +110,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`, `static/style.css`: Made the scheduled clock/date control itself the Run Now action and removed the separate play button.
+- `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Integrated each Run Now action into its scheduled date control and removed the separate rightmost action column.
 - `static/agenda.js`: Made the header MOVIES PENDING filter toggle off when clicked again, returning the Agenda to ALL.
 - `templates/agenda.html`: Removed the descriptive subtitle beneath the Agenda heading.
 - `static/style.css`: Kept the Agenda header filters and Refresh button on one row at desktop widths; retained wrapping behavior for narrow/mobile layouts.

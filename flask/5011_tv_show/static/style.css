@@ -2473,6 +2473,9 @@ body::before {
 .agenda-table #agendaTableBody .agenda-run { display: inline-flex; flex: 0 0 20px; align-items: center; justify-content: center; width: 20px; min-width: 20px; height: 20px; min-height: 20px; margin: 0; padding: 0; color: #34d399; background: rgba(52,211,153,.06); border: 1px solid rgba(52,211,153,.75); border-radius: 50%; cursor: pointer; transition: background .15s, box-shadow .15s, transform .15s; }
 .agenda-table #agendaTableBody .agenda-run svg { display: block; width: 10px; height: 10px; fill: currentColor; stroke: none; }
 .agenda-table #agendaTableBody .agenda-run:hover { background: rgba(52,211,153,.18); box-shadow: 0 0 8px rgba(52,211,153,.35); transform: scale(1.08); }
+.agenda-table #agendaTableBody button.agenda-detail-schedule.agenda-run { flex: 0 0 auto; width: auto; min-width: 0; height: auto; min-height: 0; margin: 0; padding: 0; color: #7cff9b; background: transparent; border: 0; border-radius: 0; box-shadow: none; transform: none; font: inherit; }
+.agenda-table #agendaTableBody button.agenda-detail-schedule.agenda-run svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.agenda-table #agendaTableBody button.agenda-detail-schedule.agenda-run:hover { color: #b7ffc7; background: rgba(124,255,155,.08); box-shadow: none; transform: none; }
 .agenda-run:disabled { opacity: .4; cursor: not-allowed; }
 .agenda-empty { padding: 32px !important; color: #8492a6; text-align: center; }
 .agenda-error { color: #f87171; }
