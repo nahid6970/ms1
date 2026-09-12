@@ -182,7 +182,7 @@ async function loadMovieMetadataSchedules() {
                 ? `<span class="movie-schedule-release">✓ Digital: ${escapeMovieScheduleText(schedule.digital_release_date)}</span>`
                 : '<span class="scheduled-update-disabled">Waiting for digital release</span>';
             if (result && result.error) resultHtml = `<span class="schedule-last-run error">✗ ${escapeMovieScheduleText(result.error)}</span>`;
-            else if (result && result.timestamp && !schedule.completed) resultHtml = `<span class="schedule-last-run ok">✓ Checked ${formatMovieScheduleElapsed(result.timestamp)}</span>`;
+            else if (result && result.timestamp && !schedule.completed) resultHtml = `<span class="schedule-last-run ok">✓ ${formatMovieScheduleElapsed(result.timestamp)}</span>`;
             const nextRunHtml = !schedule.completed && schedule.next_run
                 ? `<span class="movie-schedule-next">${formatMovieNextRun(schedule.next_run)}</span>`
                 : '';
