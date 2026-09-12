@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `templates/movies.html`, `static/movies.js`, `static/style.css`: Added Scheduled Movie Metadata. Movies can be assigned Daily/Weekly/Monthly TMDb metadata checks, scheduled checks stop and show a completed digital-release date when TMDb supplies one, and the movie schedule modal includes search, reschedule, run-now, and result states.
+
 - `templates/index.html`, `static/style.css`: Improved the Edit Show episode settings layout with wider equal columns, single-line labels, and shorter scan-mode help text.
 
 - `templates/index.html`: Simplified the season-offset and retention labels to fit the side-by-side Edit Show fields and removed the explanatory text beneath them.

@@ -138,6 +138,121 @@ async function deleteMovie(movieId, btn) {
     }
 }
 
+function escapeMovieScheduleText(value) {
+    return String(value || '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+}
+
+function formatMovieScheduleElapsed(timestamp) {
+    const elapsed = Date.now() - new Date(timestamp).getTime();
+    if (!Number.isFinite(elapsed) || elapsed < 60000) return 'just now';
+    const minutes = Math.floor(elapsed / 60000);
+    const days = Math.floor(minutes / 1440);
+    const hours = Math.floor((minutes % 1440) / 60);
+    const rest = minutes % 60;
+    return [days ? `${days}d` : '', hours ? `${hours}h` : '', rest || (!days && !hours) ? `${rest}m` : ''].filter(Boolean).join(' ');
+}
+
+function filterMovieMetadataSchedules(query) {
+    const value = String(query || '').trim().toLocaleLowerCase();
+    document.querySelectorAll('#movieMetadataList .scheduled-update-row').forEach(row => {
+        row.hidden = !!value && !(row.dataset.searchTitle || '').includes(value);
+    });
+}
+
+async function loadMovieMetadataSchedules() {
+    const list = document.getElementById('movieMetadataList');
+    if (!list) return;
+    list.innerHTML = '<p class="schedule-empty">Loading movie schedules...</p>';
+    try {
+        const response = await fetch('/api/movie-schedules');
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load movie schedules');
+        const rows = data.schedules.map(schedule => {
+            const result = schedule.last_run_result;
+            let resultHtml = schedule.completed
+                ? `<span class="movie-schedule-release">✓ Digital: ${escapeMovieScheduleText(schedule.digital_release_date)}</span>`
+                : '<span class="scheduled-update-disabled">Waiting for digital release</span>';
+            if (result && result.error) resultHtml = `<span class="schedule-last-run error">✗ ${escapeMovieScheduleText(result.error)}</span>`;
+            else if (result && result.timestamp && !schedule.completed) resultHtml = `<span class="schedule-last-run ok">✓ Checked ${formatMovieScheduleElapsed(result.timestamp)}</span>`;
+            const disabled = schedule.completed || !schedule.tmdb_id ? 'disabled' : '';
+            return `
+            <div class="scheduled-update-row" data-search-title="${escapeMovieScheduleText(schedule.title).toLocaleLowerCase()}">
+                <div class="scheduled-update-info">
+                    <span class="scheduled-update-title">${escapeMovieScheduleText(schedule.title)}</span>
+                    <div class="scheduled-update-meta">${resultHtml}</div>
+                </div>
+                <div class="schedule-row-actions">
+                    <select class="schedule-row-frequency" data-movie-id="${schedule.movie_id}" aria-label="Metadata frequency for ${escapeMovieScheduleText(schedule.title)}" ${disabled}>
+                        <option value="none" ${!schedule.update_time ? 'selected' : ''}>None</option>
+                        <option value="daily" ${schedule.update_time && schedule.frequency === 'daily' ? 'selected' : ''}>Daily</option>
+                        <option value="weekly" ${schedule.update_time && schedule.frequency === 'weekly' ? 'selected' : ''}>Weekly</option>
+                        <option value="monthly" ${schedule.update_time && schedule.frequency === 'monthly' ? 'selected' : ''}>Monthly</option>
+                    </select>
+                    <button class="schedule-run-btn" onclick="runMovieMetadataNow(${schedule.movie_id}, this)" title="Check metadata now" ${disabled}>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </button>
+                </div>
+            </div>`;
+        }).join('') || '<p class="schedule-empty">No movies found.</p>';
+        list.innerHTML = rows;
+        const search = document.getElementById('movieMetadataSearch');
+        if (search) filterMovieMetadataSchedules(search.value);
+    } catch (error) {
+        list.innerHTML = `<p class="schedule-empty">${escapeMovieScheduleText(error.message)}</p>`;
+    }
+}
+
+async function openMovieMetadataModal() {
+    const modal = document.getElementById('movieMetadataModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+    await loadMovieMetadataSchedules();
+}
+
+function closeMovieMetadataModal() {
+    const modal = document.getElementById('movieMetadataModal');
+    if (modal) modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+async function applyMovieMetadataSchedule() {
+    const status = document.getElementById('movieMetadataStatus');
+    const button = document.getElementById('applyMovieMetadataScheduleBtn');
+    const schedules = [...document.querySelectorAll('#movieMetadataList .schedule-row-frequency:not(:disabled)')]
+        .map(select => ({movie_id: select.dataset.movieId, frequency: select.value}));
+    if (button) button.disabled = true;
+    if (status) status.textContent = '';
+    try {
+        const response = await fetch('/api/movie-schedules/bulk', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({schedules})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to save movie schedules');
+        if (status) status.textContent = `Rescheduled ${data.updated} movie${data.updated === 1 ? '' : 's'}.`;
+        await loadMovieMetadataSchedules();
+    } catch (error) {
+        if (status) status.textContent = error.message;
+    } finally {
+        if (button) button.disabled = false;
+    }
+}
+
+async function runMovieMetadataNow(movieId, button) {
+    if (button) button.disabled = true;
+    try {
+        const response = await fetch(`/api/movie/${movieId}/metadata/run_scheduled`, {method: 'POST'});
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Metadata update failed');
+        await loadMovieMetadataSchedules();
+    } catch (error) {
+        alert(error.message);
+        if (button) button.disabled = false;
+    }
+}
+
 function openMovieFolder(event, movieId) {
     event.preventDefault();
 
@@ -237,12 +352,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         const addMovieModal = document.getElementById('addMovieModal');
         const editMovieModal = document.getElementById('editMovieModal');
+        const movieMetadataModal = document.getElementById('movieMetadataModal');
         if (event.target == addMovieModal) {
             addMovieModal.style.display = 'none';
             document.body.classList.remove('modal-open');
         } else if (event.target == editMovieModal) {
             editMovieModal.style.display = 'none';
             document.body.classList.remove('modal-open');
+        } else if (event.target == movieMetadataModal) {
+            closeMovieMetadataModal();
         }
     });
+
+    const movieMetadataSearch = document.getElementById('movieMetadataSearch');
+    if (movieMetadataSearch) movieMetadataSearch.addEventListener('input', event => filterMovieMetadataSchedules(event.target.value));
 });

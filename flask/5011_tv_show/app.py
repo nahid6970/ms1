@@ -131,6 +131,17 @@ def set_show_ts(show_id, **kwargs):
     ts[key] = entry
     save_timestamps(ts)
 
+def get_movie_ts(movie_id):
+    return load_timestamps().get(f'movie:{movie_id}', {})
+
+def set_movie_ts(movie_id, **kwargs):
+    ts = load_timestamps()
+    key = f'movie:{movie_id}'
+    entry = ts.get(key, {})
+    entry.update(kwargs)
+    ts[key] = entry
+    save_timestamps(ts)
+
 def load_movies():
     try:
         with open(MOVIES_FILE, 'r') as f:
@@ -914,6 +925,83 @@ def run_scheduled_episode_updates():
         set_show_ts(show_id, episode_update_last_run=now.date().isoformat())
         save_data(shows)  # Save after each show so progress survives a restart
 
+def get_last_movie_due_date(movie, now):
+    """Return the most recent due date for a movie metadata schedule."""
+    update_time_str = str(movie.get('metadata_update_time') or '').strip()
+    if not update_time_str:
+        return None
+    try:
+        h, m = [int(part) for part in update_time_str.split(':')[:2]]
+    except (ValueError, IndexError):
+        return None
+
+    frequency = movie.get('metadata_update_frequency', 'daily')
+    today = now.date()
+    scheduled_today = now.replace(hour=h, minute=m, second=0, microsecond=0)
+    if frequency == 'daily':
+        return today if now >= scheduled_today else today - timedelta(days=1)
+    if frequency == 'weekly':
+        try:
+            target_weekday = int(movie.get('metadata_update_weekday', now.weekday()))
+        except (TypeError, ValueError):
+            target_weekday = now.weekday()
+        candidate = today - timedelta(days=(today.weekday() - target_weekday) % 7)
+        candidate_dt = now.replace(year=candidate.year, month=candidate.month, day=candidate.day,
+                                   hour=h, minute=m, second=0, microsecond=0)
+        return candidate if now >= candidate_dt else candidate - timedelta(weeks=1)
+    if frequency == 'monthly':
+        try:
+            target_day = max(1, min(31, int(movie.get('metadata_update_month_day', now.day))))
+        except (TypeError, ValueError):
+            target_day = now.day
+        month_last = calendar.monthrange(today.year, today.month)[1]
+        candidate = today.replace(day=min(target_day, month_last))
+        candidate_dt = now.replace(year=candidate.year, month=candidate.month, day=candidate.day,
+                                   hour=h, minute=m, second=0, microsecond=0)
+        if now >= candidate_dt:
+            return candidate
+        first = today.replace(day=1)
+        previous = first - timedelta(days=1)
+        previous_last = calendar.monthrange(previous.year, previous.month)[1]
+        return previous.replace(day=min(target_day, previous_last))
+    return None
+
+def run_scheduled_movie_metadata_updates():
+    """Refresh due movies until TMDb supplies a digital release date."""
+    now = datetime.now()
+    due_ids = []
+    for movie in load_movies():
+        if not movie.get('metadata_update_time') or movie.get('digital_release_date'):
+            continue
+        due_date = get_last_movie_due_date(movie, now)
+        if due_date is None:
+            continue
+        last_run = get_movie_ts(movie.get('id')).get('metadata_update_last_run', '')
+        if last_run:
+            try:
+                if datetime.strptime(last_run, '%Y-%m-%d').date() >= due_date:
+                    continue
+            except ValueError:
+                pass
+        due_ids.append(movie.get('id'))
+
+    for index, movie_id in enumerate(due_ids):
+        if index:
+            time.sleep(3)
+        movies = load_movies()
+        movie = next((item for item in movies if item.get('id') == movie_id), None)
+        if not movie or movie.get('digital_release_date'):
+            continue
+        success, error = refresh_movie_metadata_record(movie)
+        result = {
+            'timestamp': now.isoformat(),
+            'digital_release_date': movie.get('digital_release_date') or '',
+            'completed': bool(success and movie.get('digital_release_date')),
+            'error': error,
+        }
+        set_movie_ts(movie_id, metadata_update_last_run=now.date().isoformat(), last_run_result=result)
+        save_movies(movies)
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=scan_and_add_missing_shows,
@@ -926,6 +1014,7 @@ scheduler.add_job(
 )
 scheduler.add_job(func=sync_radarr_movies, trigger="interval", hours=1)
 scheduler.add_job(func=run_scheduled_episode_updates, trigger="interval", minutes=1, id='scheduled_episode_updates', replace_existing=True, max_instances=1)
+scheduler.add_job(func=run_scheduled_movie_metadata_updates, trigger="interval", minutes=1, id='scheduled_movie_metadata_updates', replace_existing=True, max_instances=1)
 scheduler.start()
 
 @app.route('/cached_image/<filename>')
@@ -952,6 +1041,102 @@ def show_schedules():
     } for show in load_data()]
     schedules.sort(key=lambda item: (not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
+
+@app.route('/api/movie-schedules')
+def movie_schedules():
+    schedules = []
+    for movie in load_movies():
+        result = get_movie_ts(movie.get('id')).get('last_run_result')
+        schedules.append({
+            'movie_id': movie.get('id'),
+            'title': movie.get('title', 'Untitled'),
+            'tmdb_id': movie.get('tmdb_id'),
+            'digital_release_date': movie.get('digital_release_date') or '',
+            'completed': bool(movie.get('digital_release_date')),
+            'update_time': movie.get('metadata_update_time') or '',
+            'frequency': movie.get('metadata_update_frequency', 'daily'),
+            'weekday': movie.get('metadata_update_weekday', 0),
+            'month_day': movie.get('metadata_update_month_day', 1),
+            'last_run': get_movie_ts(movie.get('id')).get('metadata_update_last_run') or '',
+            'last_run_result': result,
+        })
+    schedules.sort(key=lambda item: (item['completed'], not bool(item['update_time']), item['update_time'], item['title'].casefold()))
+    return jsonify({'success': True, 'schedules': schedules})
+
+@app.route('/api/movie-schedules/bulk', methods=['POST'])
+def update_all_movie_schedules():
+    payload = request.get_json(silent=True) or {}
+    requested = payload.get('schedules')
+    if not isinstance(requested, list):
+        return jsonify({'success': False, 'message': 'Schedule choices are required'}), 400
+
+    frequency_by_id = {}
+    for item in requested:
+        try:
+            movie_id = int(item.get('movie_id'))
+        except (TypeError, ValueError, AttributeError):
+            continue
+        frequency = str(item.get('frequency', 'daily')).strip().lower()
+        if frequency in {'none', 'daily', 'weekly', 'monthly'}:
+            frequency_by_id[movie_id] = frequency
+
+    settings = load_settings()
+    try:
+        start = datetime.strptime(settings.get('auto_schedule_start_time', '01:00'), '%H:%M')
+        end = datetime.strptime(settings.get('auto_schedule_end_time', '23:00'), '%H:%M')
+        start_minutes = start.hour * 60 + start.minute
+        end_minutes = end.hour * 60 + end.minute
+        if start_minutes >= end_minutes:
+            raise ValueError
+    except (TypeError, ValueError):
+        start_minutes, end_minutes = 60, 23 * 60
+
+    movies = load_movies()
+    active = [movie for movie in movies if movie.get('id') in frequency_by_id
+              and frequency_by_id[movie.get('id')] != 'none' and movie.get('tmdb_id')]
+    active_index = {movie.get('id'): index for index, movie in enumerate(active)}
+    span = max(1, len(active) - 1)
+    updated = 0
+    for movie in movies:
+        movie_id = movie.get('id')
+        if movie_id not in frequency_by_id:
+            continue
+        frequency = frequency_by_id[movie_id]
+        if frequency == 'none' or not movie.get('tmdb_id'):
+            movie['metadata_update_time'] = ''
+            movie['metadata_update_frequency'] = 'daily'
+            updated += 1
+            continue
+        slot = active_index.get(movie_id, 0)
+        minutes = round(start_minutes + ((end_minutes - start_minutes) * slot / span))
+        movie['metadata_update_time'] = f'{(minutes // 60) % 24:02d}:{minutes % 60:02d}'
+        movie['metadata_update_frequency'] = frequency
+        if frequency == 'weekly':
+            movie['metadata_update_weekday'] = slot % 7
+        if frequency == 'monthly':
+            movie['metadata_update_month_day'] = (slot % 28) + 1
+        updated += 1
+    save_movies(movies)
+    return jsonify({'success': True, 'updated': updated})
+
+@app.route('/api/movie/<int:movie_id>/metadata/run_scheduled', methods=['POST'])
+def run_movie_metadata_now(movie_id):
+    movies = load_movies()
+    movie = next((item for item in movies if item.get('id') == movie_id), None)
+    if not movie:
+        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+    success, error = refresh_movie_metadata_record(movie)
+    result = {
+        'timestamp': datetime.now().isoformat(),
+        'digital_release_date': movie.get('digital_release_date') or '',
+        'completed': bool(success and movie.get('digital_release_date')),
+        'error': error,
+    }
+    set_movie_ts(movie_id, metadata_update_last_run=datetime.now().date().isoformat(), last_run_result=result)
+    save_movies(movies)
+    if not success:
+        return jsonify({'success': False, 'message': error, 'result': result}), 502
+    return jsonify({'success': True, 'movie': movie, 'result': result})
 
 
 @app.route('/api/show-schedules/bulk', methods=['POST'])
@@ -2408,18 +2593,13 @@ def api_movie(movie_id):
         return jsonify({'success': True})
     return jsonify(movie)
 
-@app.route('/api/movie/<int:movie_id>/refresh-metadata', methods=['POST'])
-def refresh_movie_metadata(movie_id):
-    movies = load_movies()
-    movie = next((m for m in movies if m.get('id') == movie_id), None)
-    if not movie:
-        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+def refresh_movie_metadata_record(movie):
+    """Refresh one movie in-place and return (success, error_message)."""
     if not movie.get('tmdb_id'):
-        return jsonify({'success': False, 'message': 'This movie has no TMDb ID'}), 400
-
+        return False, 'This movie has no TMDb ID'
     details, error = tmdb_request(f"movie/{int(movie['tmdb_id'])}", {'language': 'en-US'})
     if error:
-        return jsonify({'success': False, 'message': error}), 502
+        return False, error
 
     release_date = details.get('release_date') or ''
     tmdb_rating = round(float(details.get('vote_average') or 0), 1)
@@ -2442,6 +2622,17 @@ def refresh_movie_metadata(movie_id):
             external_ids = {}
             movie['external_ids'] = external_ids
         external_ids['imdb'] = details['imdb_id']
+    return True, None
+
+@app.route('/api/movie/<int:movie_id>/refresh-metadata', methods=['POST'])
+def refresh_movie_metadata(movie_id):
+    movies = load_movies()
+    movie = next((m for m in movies if m.get('id') == movie_id), None)
+    if not movie:
+        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+    success, error = refresh_movie_metadata_record(movie)
+    if not success:
+        return jsonify({'success': False, 'message': error}), 400 if error == 'This movie has no TMDb ID' else 502
     save_movies(movies)
     return jsonify({'success': True, 'movie': movie})
 

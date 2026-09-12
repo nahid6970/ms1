@@ -2206,6 +2206,7 @@ body::before {
 .schedule-row-frequency { flex: 0 0 104px; width: 104px; height: 36px; min-width: 0; margin: 0; padding: 4px 7px; border: 1px solid #526174; border-radius: 0; background: #15171d; color: #e5edf8; font-family: Consolas, "Courier New", monospace; font-size: 0.75rem; font-weight: 700; }
 .scheduled-update-time { flex: 0 0 auto; color: #7cff9b; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; line-height: 1.2; letter-spacing: 0.15px; font-variant-numeric: tabular-nums; font-weight: 700; text-shadow: 0 0 7px rgba(124, 255, 155, 0.25); }
 .scheduled-update-disabled { flex: 0 0 auto; color: #8492a6; font-size: 0.8rem; }
+.movie-schedule-release { flex: 0 0 auto; color: #4ade80; font-family: Consolas, "Courier New", monospace; font-size: 0.8rem; font-weight: 700; text-shadow: 0 0 7px rgba(74, 222, 128, 0.25); }
 .schedule-last-run { flex: 0 0 auto; font-size: 0.75rem; font-variant-numeric: tabular-nums; }
 .schedule-last-run.ok { color: #60a5fa; }
 .schedule-last-run.error { color: #f87171; }

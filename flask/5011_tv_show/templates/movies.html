@@ -25,6 +25,9 @@
             <a href="javascript:void(0)" onclick="syncRadarrMovies(event)" class="add-button radarr-sync-button" title="Sync movies from Radarr">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 18 10"></polyline><polyline points="1 20 1 14 6 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
             </a>
+            <button onclick="openMovieMetadataModal()" class="add-button schedule-button" title="Scheduled movie metadata updates" aria-label="Scheduled movie metadata updates">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="m8 15 2 2 5-5"></path></svg>
+            </button>
 
             <form action="/movies" method="get" class="search-form" onsubmit="return false;">
                 <div class="search-wrapper">
@@ -204,6 +207,19 @@
     </div>
 
     {% include '_settings_modal.html' %}
+
+    <div id="movieMetadataModal" class="modal">
+        <div class="modal-content scheduled-updates-content movie-metadata-content">
+            <span class="close" onclick="closeMovieMetadataModal()">&times;</span>
+            <button id="applyMovieMetadataScheduleBtn" class="schedule-top-save" type="button" onclick="applyMovieMetadataSchedule()">RESCHEDULE</button>
+            <h2 class="modal-title">Scheduled Movie Metadata</h2>
+            <input id="movieMetadataSearch" class="schedule-search-input" type="search" placeholder="Search movies..." aria-label="Search scheduled movies">
+            <p id="movieMetadataStatus" class="schedule-bulk-status" aria-live="polite"></p>
+            <div id="movieMetadataList" class="scheduled-updates-list">
+                <p>Loading movie schedules...</p>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='movies.js') }}"></script>
