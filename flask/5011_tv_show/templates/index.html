@@ -222,6 +222,9 @@
                     <option value="title">Title match (raw filename)</option>
                 </select>
                 <small class="modal-help" style="margin-top:-8px;">Use "Air date" for shows like WWE where files are named with a date. Use "Title match" for other non-standard naming.</small>
+                <label for="editShowSeasonOffset">Filename Season Offset:</label>
+                <input type="number" id="editShowSeasonOffset" name="season_offset" class="modal-input" min="-20" max="20" step="1" value="0" placeholder="0">
+                <small class="modal-help" style="margin-top:-8px;">Enter the amount added to the TVmaze season in filenames. Example: 1 makes TVmaze S33 match filename S34.</small>
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
                 <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
                 <label for="editShowStatus">Status:</label>

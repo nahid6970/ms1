@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `templates/index.html`, `static/script.js`: Added a per-show Filename Season Offset setting. File scanning and file-existence icons normalize offset filename seasons to TVmaze seasons, while the episode copy button outputs the offset season used by torrent naming.
+
 - `static/style.css`: Fixed Scheduled Episode Updates search filtering by explicitly hiding nonmatching flex rows.
 
 - `templates/index.html`, `static/script.js`, `static/style.css`: Scheduled Episode Updates now has a live show-name search box that filters rows without affecting their schedule controls.

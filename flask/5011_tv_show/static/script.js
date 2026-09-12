@@ -48,6 +48,8 @@ async function openEditShowModal(showId) {
     if (filePatternEl) filePatternEl.value = show.episode_file_pattern || '';
     const scanModeEl = document.getElementById('editShowScanMode');
     if (scanModeEl) scanModeEl.value = show.scan_mode || 'sxxexx';
+    const seasonOffsetEl = document.getElementById('editShowSeasonOffset');
+    if (seasonOffsetEl) seasonOffsetEl.value = Number.isFinite(Number(show.season_offset)) ? Number(show.season_offset) : 0;
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
     const lockEl = document.getElementById('editShowLockStatus');
@@ -160,6 +162,7 @@ let currentEpisodes = [];
 let currentShowIdForEpisodes = null;
 let currentEpisodeFileSet = new Set();
 let currentEpisodeFileScanMode = 'sxxexx';
+let currentShowSeasonOffset = 0;
 let hideFutureEpisodes = false;
 
 function escapeEpisodeText(value) {
@@ -484,7 +487,7 @@ function copyEpisodeLabel(showId, episodeId, dotEl) {
     if (!ep) return;
     const showTitle = document.getElementById('episodesModalTitle').textContent.trim();
     const code = ep.season_number != null && ep.episode_number != null
-        ? `S${String(ep.season_number).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
+        ? `S${String(Number(ep.season_number) + Number(currentShowSeasonOffset || 0)).padStart(2, '0')}E${String(ep.episode_number).padStart(2, '0')}`
         : '';
     const label = [showTitle, code, ep.title].filter(Boolean).join(' ');
 
@@ -674,6 +677,7 @@ function closeEpisodesModal() {
     currentShowIdForEpisodes = null;
     currentEpisodeFileSet = new Set();
     currentEpisodeFileScanMode = 'sxxexx';
+    currentShowSeasonOffset = 0;
     hideFutureEpisodes = false;
 }
 
@@ -698,6 +702,7 @@ async function openEpisodesPopup(event, showId, showTitle) {
         
         currentEpisodes = show.episodes || [];
         currentShowIdForEpisodes = showId;
+        currentShowSeasonOffset = Number.isFinite(Number(show.season_offset)) ? Number(show.season_offset) : 0;
 
         // Sync hide-future state from persisted show setting
         hideFutureEpisodes = !!show.hide_future_episodes;

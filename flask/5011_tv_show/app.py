@@ -353,6 +353,13 @@ def sort_episode_list(show):
             return (1, int(episode.get('id', 0)), 0, str(episode.get('title', '')).casefold())
         episodes.sort(key=episode_key, reverse=reverse)
 
+def show_season_offset(show):
+    """Return the optional filename-season offset for a show."""
+    try:
+        return int(show.get('season_offset', 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
     settings = load_settings()
@@ -484,7 +491,7 @@ def scan_and_update_episodes():
                     elif scan_mode != 'title':
                         m = SXXEXX.search(name)
                         if m:
-                            key = (int(m.group(1)), int(m.group(2)))
+                            key = (int(m.group(1)) - show_season_offset(show), int(m.group(2)))
                             if key in by_number:
                                 ep = by_number[key]
                                 if not ep.get('has_file'):
@@ -1599,6 +1606,10 @@ def edit_show(show_id):
         show['sonarr_url'] = request.form.get('sonarr_url', '')
         show['episode_file_pattern'] = request.form.get('episode_file_pattern', '').strip()
         show['scan_mode'] = request.form.get('scan_mode', 'sxxexx')
+        try:
+            show['season_offset'] = max(-20, min(20, int(request.form.get('season_offset', '0') or 0)))
+        except (TypeError, ValueError):
+            show['season_offset'] = 0
         save_data(shows)
         query = request.args.get('query', '').strip()
         if request.headers.get('Accept') == 'application/json':
@@ -1856,7 +1867,8 @@ def api_episode_file_check(show_id):
                     continue
                 for m in re.finditer(pattern, filename, re.IGNORECASE):
                     if m.lastindex and m.lastindex >= 2:
-                        found.add(f"S{int(m.group(1)):02d}E{int(m.group(2)):02d}")
+                        season = int(m.group(1)) - show_season_offset(show)
+                        found.add(f"S{season:02d}E{int(m.group(2)):02d}")
                     elif m.lastindex == 1:
                         found.add(m.group(1).upper())
                     else:
