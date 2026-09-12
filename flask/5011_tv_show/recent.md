@@ -110,6 +110,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/style.css`: Reduced the desktop Next Release column to 22% and expanded Details to 33% so unused timestamp-column space is available to the icon/details column.
+- `static/style.css`: Removed the Agenda table’s forced 1000px minimum width and added narrow-screen sizing so unused space does not create a horizontal scrollbar.
 - `static/agenda.js`: Reordered Agenda Details so status/cadence icons appear before the scheduled clock/date control.
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Cadence column and added compact Daily, Weekly, Monthly, and Complete icons at the end of Details with hover labels.
 - `static/style.css`: Reduced Agenda Cadence column width from 15% to 12% and expanded the Title column from 30% to 40% for longer show/movie names.
