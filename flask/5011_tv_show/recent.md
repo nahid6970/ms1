@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`: Reordered ACTIONS icons so the clickable scheduled clock appears first, followed by status and cadence indicators.
 - `templates/agenda.html`: Named the dedicated icon column ACTIONS.
 - `templates/agenda.html`: Renamed the final Agenda column header from DETAILS to SCHEDULING.
 - `static/style.css`: Restored the compact 16px transparent Run Now icon styling for the new dedicated icon column so it does not inherit the larger generic button appearance.

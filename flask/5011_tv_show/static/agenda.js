@@ -84,7 +84,7 @@
                 ? '<span class="agenda-status-icon agenda-status-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>'
                 : '<span class="agenda-status-icon agenda-status-scheduled" title="Scheduled" aria-label="Scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg></span>';
             const scheduleAction = item.completed ? '' : `<button class="agenda-title-run agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled run: ${esc(item.next_run || '')} · Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>`;
-            const titleIcons = `<span class="agenda-title-icons">${item.completed ? statusIcon : `${statusIcon}${renderCadenceIcon(item)}${scheduleAction}`}</span>`;
+            const titleIcons = `<span class="agenda-title-icons">${item.completed ? statusIcon : `${scheduleAction}${statusIcon}${renderCadenceIcon(item)}`}</span>`;
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span></td>
                 <td class="agenda-icon-cell">${titleIcons}</td>
