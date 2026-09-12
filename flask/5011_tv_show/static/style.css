@@ -2449,12 +2449,19 @@ body::before {
 .agenda-filter { padding: 9px 12px; color: #aab7c8; background: #15171d; border: 1px solid #394557; font: 700 .7rem Consolas, "Courier New", monospace; cursor: pointer; }
 .agenda-filter:hover, .agenda-filter.active { color: #07140b; background: #22c55e; border-color: #4ade80; }
 .agenda-table-wrap { overflow-x: auto; background: #080b10; border: 1px solid #283447; box-shadow: 0 0 18px rgba(0,0,0,.25); }
-.agenda-table { width: 100%; border-collapse: collapse; min-width: 1000px; color: #dbeafe; font-size: .8rem; }
+.agenda-table { width: 100%; table-layout: fixed; border-collapse: collapse; min-width: 1000px; color: #dbeafe; font-size: .8rem; }
+.agenda-table th:nth-child(1), .agenda-table td:nth-child(1) { width: 30%; }
+.agenda-table th:nth-child(2), .agenda-table td:nth-child(2) { width: 28%; }
+.agenda-table th:nth-child(3), .agenda-table td:nth-child(3) { width: 15%; }
+.agenda-table th:nth-child(4), .agenda-table td:nth-child(4) { width: 27%; }
 .agenda-table th { padding: 11px 12px; color: #7cff9b; background: #111923; border-bottom: 1px solid #39506d; text-align: left; font: 700 .7rem Consolas, "Courier New", monospace; letter-spacing: .5px; white-space: nowrap; }
-.agenda-table td { padding: 11px 12px; border-bottom: 1px solid #202a38; white-space: nowrap; }
+.agenda-table tbody tr { border-bottom: 1px solid #202a38; }
+.agenda-table td { padding: 11px 12px; border-bottom: 0; vertical-align: middle; text-align: left; white-space: nowrap; }
 .agenda-table tbody tr:hover { background: rgba(59,130,246,.08); }
 .agenda-date { color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
-.agenda-title { display: flex; align-items: center; gap: 7px; min-width: 190px; color: #fff; font-weight: 700; text-align: left; }
+.agenda-title { display: table-cell; min-width: 0; color: #fff; font-weight: 700; text-align: left; vertical-align: middle; }
+.agenda-title > span:first-child { display: inline-block; width: calc(100% - 28px); min-width: 0; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
+.agenda-title .agenda-status-icon { display: inline-flex; margin-left: 7px; vertical-align: middle; }
 .agenda-title-tv { color: #86efac; }
 .agenda-title-movie { color: #93c5fd; }
 .agenda-status-icon { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; align-items: center; justify-content: center; }

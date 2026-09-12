@@ -110,7 +110,12 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
-- `app.py`, `static/agenda.js`: Corrected Agenda SKIP COMPLETE to hide watched movies and ended TV shows whose entire episode list is checked, while leaving digital-release completion separate.
+- `static/style.css`: Explicitly left-aligned every Agenda body column to match the Title column instead of inheriting the page’s centered text alignment.
+- `static/style.css`: Restored the Agenda title cell to table-cell layout after flex styling caused the first column to collapse; title truncation now stays within the correctly sized column.
+- `static/style.css`: Let Agenda title text fill the available first-column space before truncating, while reserving room for the completion/status icon.
+- `static/style.css`: Prevented long Agenda titles from overflowing into the Next Release column; titles now truncate with an ellipsis while status icons remain visible.
+- `static/style.css`: Fixed Agenda column sizing and moved row separators to the table rows so horizontal lines stay straight across every column.
+- `app.py`, `static/agenda.js`: Corrected Agenda SKIP COMPLETE to use watch state: watched movies and ended TV shows whose entire episode list is checked are hidden, while digital-release metadata completion remains separate.
 - `static/agenda.js`, `static/style.css`: Made the scheduled clock/date control itself the Run Now action and removed the separate play button.
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Integrated each Run Now action into its scheduled date control and removed the separate rightmost action column.
 - `static/agenda.js`: Made the header MOVIES PENDING filter toggle off when clicked again, returning the Agenda to ALL.
