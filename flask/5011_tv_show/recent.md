@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`: Reordered Agenda Details so status/cadence icons appear before the scheduled clock/date control.
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Cadence column and added compact Daily, Weekly, Monthly, and Complete icons at the end of Details with hover labels.
 - `static/style.css`: Reduced Agenda Cadence column width from 15% to 12% and expanded the Title column from 30% to 40% for longer show/movie names.
 - `static/style.css`: Explicitly left-aligned every Agenda body column to match the Title column instead of inheriting the page’s centered text alignment.

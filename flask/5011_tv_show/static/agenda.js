@@ -69,7 +69,7 @@
         const statusIcon = status === 'Waiting'
             ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>'
             : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg>';
-        return `<span class="agenda-detail-icons"><button class="agenda-detail-schedule agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled: ${scheduledDate} · Run now" aria-label="Scheduled: ${scheduledDate}. Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></button><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span>${renderCadenceIcon(item)}</span>`;
+        return `<span class="agenda-detail-icons"><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span>${renderCadenceIcon(item)}<button class="agenda-detail-schedule agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled: ${scheduledDate} · Run now" aria-label="Scheduled: ${scheduledDate}. Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></button></span>`;
     }
 
     function render() {
