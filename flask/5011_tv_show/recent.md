@@ -37,6 +37,12 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/agenda.js`: Agenda scheduled/completed status icons now appear after each show or movie name.
+
+- `static/agenda.js`: Moved the Agenda status icon to appear after each show or movie name.
+
+- `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Status column and moved its scheduled/completed icon beside each TV-show or movie title, matching the Scheduled Episode Updates visual pattern.
+
 - `static/agenda.js`: Agenda Today and Afterwards are now independent multi-select filters, so both can be active together. All Agenda filters and search text persist in local storage across refreshes.
 
 - `static/agenda.js`: Removed the `Episode:` and `Digital:` prefixes from Agenda’s `NEXT RELEASE` column.
