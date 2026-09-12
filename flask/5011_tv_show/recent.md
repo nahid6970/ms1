@@ -37,6 +37,10 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/agenda.js`: Removed the `Episode:` and `Digital:` prefixes from Agenda’s `NEXT RELEASE` column.
+
+- `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Added Agenda header filters for All Dates, Today, Afterwards, and Skip Complete. Date filters use the Next Release column and combine with the existing type/status filters and search.
+
 - `static/style.css`: Explicitly left-aligned Agenda show/movie titles.
 
 - `templates/agenda.html`, `static/agenda.js`: Reordered the Agenda columns to Title, Type, Next Release, Task, Cadence, Status, Details, and Actions while retaining next-release sorting.

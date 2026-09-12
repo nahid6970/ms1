@@ -24,7 +24,15 @@
                 <h1 class="modal-title">Agenda</h1>
                 <p>TV episode updates and movie metadata checks</p>
             </div>
-            <button id="agendaRefresh" class="modal-btn modal-btn-blue" type="button">REFRESH</button>
+            <div class="agenda-header-actions">
+                <div class="agenda-header-filters" role="group" aria-label="Date filters">
+                    <button class="agenda-filter agenda-time-filter active" data-time-filter="all">ALL DATES</button>
+                    <button class="agenda-filter agenda-time-filter" data-time-filter="today">TODAY</button>
+                    <button class="agenda-filter agenda-time-filter" data-time-filter="afterwards">AFTERWARDS</button>
+                    <button class="agenda-filter agenda-skip-complete" type="button" aria-pressed="false">SKIP COMPLETE</button>
+                </div>
+                <button id="agendaRefresh" class="modal-btn modal-btn-blue" type="button">REFRESH</button>
+            </div>
         </div>
         <div class="agenda-toolbar">
             <input id="agendaSearch" class="schedule-search-input" type="search" placeholder="Search title..." aria-label="Search agenda">

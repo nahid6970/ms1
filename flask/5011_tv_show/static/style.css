@@ -2439,6 +2439,8 @@ body::before {
 /* Unified TV and movie agenda */
 .agenda-shell { width: min(1500px, calc(100% - 32px)); margin: 32px auto 48px; }
 .agenda-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.agenda-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.agenda-header-filters { display: flex; flex-wrap: wrap; gap: 6px; }
 .agenda-heading .modal-title { margin: 0; color: #00ff4c; }
 .agenda-heading p { margin: 7px 0 0; color: #8492a6; font-family: Consolas, "Courier New", monospace; font-size: .8rem; }
 .agenda-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
@@ -2463,7 +2465,7 @@ body::before {
 .agenda-run:hover { background: rgba(52,211,153,.18); box-shadow: 0 0 10px rgba(52,211,153,.35); }
 .agenda-empty { padding: 32px !important; color: #8492a6; text-align: center; }
 .agenda-error { color: #f87171; }
-@media (max-width: 800px) { .agenda-toolbar { align-items: stretch; flex-direction: column; } .agenda-heading { align-items: flex-start; } }
+@media (max-width: 800px) { .agenda-toolbar { align-items: stretch; flex-direction: column; } .agenda-heading { align-items: flex-start; flex-direction: column; } .agenda-header-actions { justify-content: flex-start; } }
 #editShowModal .modal-btn-block:hover {
     background: #4ade80;
     box-shadow: 0 0 24px rgba(74, 222, 128, 0.62);
