@@ -172,6 +172,19 @@ def tmdb_year(value):
 def tmdb_genres(details):
     return [genre.get('name') for genre in details.get('genres', []) if genre.get('name')]
 
+def tmdb_digital_release_date(tmdb_id):
+    """Return the earliest digital release date listed by TMDb, if any."""
+    release_data, error = tmdb_request(f'movie/{int(tmdb_id)}/release_dates')
+    if error or not release_data:
+        return ''
+
+    digital_dates = []
+    for country in release_data.get('results', []):
+        for release in country.get('release_dates', []):
+            if str(release.get('type')) == '4' and release.get('release_date'):
+                digital_dates.append(release['release_date'][:10])
+    return min(digital_dates) if digital_dates else ''
+
 def tmdb_five_star_rating(score):
     """Convert TMDb's 0-10 score to the app's whole-number 1-5 scale."""
     numeric_score = float(score or 0)
@@ -1202,6 +1215,7 @@ def discover_add():
             'title': title,
             'year': year,
             'release_date': details.get('release_date') or '',
+            'digital_release_date': tmdb_digital_release_date(tmdb_id),
             'overview': details.get('overview', ''),
             'cover_image': poster,
             'directory_path': '',
@@ -2339,6 +2353,7 @@ def refresh_movie_metadata(movie_id):
         'tmdb_rating': tmdb_rating,
         'status': 'Released' if details.get('status') == 'Released' else 'Missing'
     })
+    movie['digital_release_date'] = tmdb_digital_release_date(movie['tmdb_id'])
     if details.get('imdb_id'):
         external_ids = movie.get('external_ids')
         if not isinstance(external_ids, dict):
