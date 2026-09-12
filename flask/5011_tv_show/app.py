@@ -1183,7 +1183,8 @@ def agenda_data():
     items = []
     for show in load_data():
         next_run = get_next_show_run(show, now)
-        if next_run:
+        next_episode_release = get_next_episode_release(show, now_bd)
+        if next_run or next_episode_release:
             show_ts = ts.get(str(show.get('id')), {})
             result = show_ts.get('last_run_result') or {}
             show_episodes = show.get('episodes', [])
@@ -1192,10 +1193,10 @@ def agenda_data():
                              and all(bool(episode.get('watched')) for episode in show_episodes))
             items.append({
                 'id': show.get('id'), 'title': show.get('title', 'Untitled'), 'type': 'TV',
-                'task': 'Episode update', 'cadence': show.get('episode_update_frequency', 'daily').title(),
-                'next_run': next_run.isoformat(), 'release_date': (get_next_episode_release(show, now_bd) or '').isoformat() if get_next_episode_release(show, now_bd) else '',
+                'task': 'Episode update', 'cadence': show.get('episode_update_frequency', 'daily').title() if next_run else 'Not scheduled',
+                'next_run': next_run.isoformat() if next_run else '', 'release_date': next_episode_release.isoformat() if next_episode_release else '',
                 'status': 'Scheduled',
-                'details': '', 'show_status': show.get('status', 'Continuing'),
+                'details': '', 'show_status': show.get('status', 'Continuing'), 'scheduled': bool(next_run),
                 'last_result': result, 'completed': False, 'skip_complete': skip_complete
             })
     for movie in load_movies():

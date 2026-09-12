@@ -110,6 +110,9 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `app.py`, `static/agenda.js`, `static/style.css`: Agenda now includes TV shows with future episode air dates even when per-show update scheduling is disabled. Such rows show Not scheduled and omit the Run Now/cadence controls; UPCOMING remains limited to scheduled items.
+- `static/style.css`: Updated Agenda Next Release dates/countdowns to clear yellow (`#fde047`).
+- `static/style.css`: Changed Agenda Next Release dates/countdowns from green to amber-orange for clearer column distinction.
 - `app.py`, `templates/_settings_modal.html`, `static/script.js`, `static/agenda.js`: Added a persisted Agenda Countdown toggle. When enabled, Next Release shows remaining time in compact month/day/hour/minute units instead of the exact date/time.
 - `static/agenda.js`: Reordered ACTIONS icons so the clickable scheduled clock appears first, followed by status and cadence indicators.
 - `templates/agenda.html`: Named the dedicated icon column ACTIONS.

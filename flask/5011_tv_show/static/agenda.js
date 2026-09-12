@@ -73,6 +73,7 @@
 
     function renderCadenceIcon(item) {
         const cadence = String(item.cadence || '').toLowerCase();
+        if (cadence === 'not scheduled') return '';
         if (cadence === 'complete') {
             return '<span class="agenda-detail-cadence agenda-cadence-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>';
         }
@@ -90,6 +91,7 @@
             return '';
         }
         const nextRun = item.next_run ? new Date(item.next_run) : null;
+        if (!nextRun) return '<span class="agenda-unscheduled">Not scheduled</span>';
         const scheduledDate = nextRun && !Number.isNaN(nextRun.getTime())
             ? `${nextRun.toLocaleDateString(undefined, {day: '2-digit', month: 'short', year: 'numeric'})} · ${nextRun.toLocaleTimeString(undefined, {hour: 'numeric', minute: '2-digit'})}`
             : '';
@@ -100,7 +102,7 @@
         const query = (search.value || '').trim().toLocaleLowerCase();
         const visible = items.filter(item => {
             const type = item.type.toLocaleLowerCase();
-            const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed) || (filter === 'complete' && item.completed);
+            const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed && !!item.next_run) || (filter === 'complete' && item.completed);
             const timeMatch = timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
             return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
@@ -111,8 +113,10 @@
         body.innerHTML = visible.map(item => {
             const statusIcon = item.completed
                 ? '<span class="agenda-status-icon agenda-status-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>'
-                : '<span class="agenda-status-icon agenda-status-scheduled" title="Scheduled" aria-label="Scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg></span>';
-            const scheduleAction = item.completed ? '' : `<button class="agenda-title-run agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled run: ${esc(item.next_run || '')} · Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>`;
+                : item.next_run
+                    ? '<span class="agenda-status-icon agenda-status-scheduled" title="Scheduled" aria-label="Scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg></span>'
+                    : '<span class="agenda-status-icon agenda-status-unscheduled" title="Not scheduled" aria-label="Not scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>';
+            const scheduleAction = item.completed || !item.next_run ? '' : `<button class="agenda-title-run agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled run: ${esc(item.next_run)} · Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>`;
             const titleIcons = `<span class="agenda-title-icons">${item.completed ? statusIcon : `${scheduleAction}${statusIcon}${renderCadenceIcon(item)}`}</span>`;
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span></td>
