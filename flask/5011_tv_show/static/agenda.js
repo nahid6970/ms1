@@ -1,10 +1,23 @@
 (() => {
     let items = [];
-    let filter = 'all';
-    let timeFilter = 'all';
-    let skipComplete = false;
+    const savedState = (() => { try { return JSON.parse(localStorage.getItem('agendaFilters') || '{}'); } catch (_) { return {}; } })();
+    let filter = savedState.filter || 'all';
+    let timeFilters = new Set(Array.isArray(savedState.timeFilters) && savedState.timeFilters.length ? savedState.timeFilters : ['all']);
+    let skipComplete = !!savedState.skipComplete;
     const body = document.getElementById('agendaTableBody');
     const search = document.getElementById('agendaSearch');
+    if (savedState.search) search.value = savedState.search;
+
+    function saveState() {
+        localStorage.setItem('agendaFilters', JSON.stringify({filter, timeFilters: [...timeFilters], skipComplete, search: search.value}));
+    }
+
+    function syncFilterButtons() {
+        document.querySelectorAll('.agenda-time-filter').forEach(button => button.classList.toggle('active', timeFilters.has(button.dataset.timeFilter)));
+        document.querySelectorAll('.agenda-filter:not(.agenda-time-filter):not(.agenda-skip-complete)').forEach(button => button.classList.toggle('active', button.dataset.filter === filter));
+        const skipButton = document.querySelector('.agenda-skip-complete');
+        if (skipButton) { skipButton.classList.toggle('active', skipComplete); skipButton.setAttribute('aria-pressed', String(skipComplete)); }
+    }
 
     const esc = value => String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     const formatDate = value => {
@@ -32,7 +45,7 @@
         const visible = items.filter(item => {
             const type = item.type.toLocaleLowerCase();
             const filterMatch = filter === 'all' || filter === type || (filter === 'scheduled' && !item.completed) || (filter === 'complete' && item.completed);
-            const timeMatch = timeFilter === 'all' || (timeFilter === 'today' && isToday(item.release_date)) || (timeFilter === 'afterwards' && isAfterwards(item.release_date));
+            const timeMatch = timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
             return filterMatch && timeMatch && (!skipComplete || !item.completed) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {
@@ -67,19 +80,27 @@
 
     document.querySelectorAll('.agenda-filter:not(.agenda-skip-complete)').forEach(button => button.addEventListener('click', () => {
         if (button.classList.contains('agenda-time-filter')) {
-            document.querySelectorAll('.agenda-time-filter').forEach(item => item.classList.remove('active'));
-            button.classList.add('active'); timeFilter = button.dataset.timeFilter; render(); return;
+            const selected = button.dataset.timeFilter;
+            if (selected === 'all') {
+                timeFilters = new Set(['all']);
+            } else {
+                timeFilters.delete('all');
+                timeFilters.has(selected) ? timeFilters.delete(selected) : timeFilters.add(selected);
+                if (!timeFilters.size) timeFilters.add('all');
+            }
+            saveState(); syncFilterButtons(); render(); return;
         }
         document.querySelectorAll('.agenda-filter:not(.agenda-time-filter):not(.agenda-skip-complete)').forEach(item => item.classList.remove('active'));
-        button.classList.add('active'); filter = button.dataset.filter; render();
+        button.classList.add('active'); filter = button.dataset.filter; saveState(); render();
     }));
     document.querySelector('.agenda-skip-complete').addEventListener('click', event => {
         skipComplete = !skipComplete;
+        saveState();
         event.currentTarget.classList.toggle('active', skipComplete);
         event.currentTarget.setAttribute('aria-pressed', String(skipComplete));
         render();
     });
-    search.addEventListener('input', render);
+    search.addEventListener('input', () => { saveState(); render(); });
     document.getElementById('agendaRefresh').addEventListener('click', load);
     body.addEventListener('click', async event => {
         const button = event.target.closest('.agenda-run');
@@ -88,5 +109,6 @@
         const endpoint = button.dataset.type === 'TV' ? `/api/show/${button.dataset.id}/episodes/run_scheduled` : `/api/movie/${button.dataset.id}/metadata/run_scheduled`;
         try { await fetch(endpoint, {method:'POST'}); await load(); } catch (_) { button.disabled = false; }
     });
+    syncFilterButtons();
     load();
 })();

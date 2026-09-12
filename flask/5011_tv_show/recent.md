@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/agenda.js`: Agenda Today and Afterwards are now independent multi-select filters, so both can be active together. All Agenda filters and search text persist in local storage across refreshes.
+
 - `static/agenda.js`: Removed the `Episode:` and `Digital:` prefixes from Agenda’s `NEXT RELEASE` column.
 
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Added Agenda header filters for All Dates, Today, Afterwards, and Skip Complete. Date filters use the Next Release column and combine with the existing type/status filters and search.
