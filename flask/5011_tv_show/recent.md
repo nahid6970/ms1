@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/movies.js`, `static/style.css`: Movie schedule rows now use green TV-show-style next-run timestamps and omit the `Checked` label from completed-check results.
+
 - `static/movies.js`, `static/style.css`: Movie schedule next-run timestamps now use the TV-show green styling, and completed-check results no longer include the `Checked` label.
 
 - `app.py`, `static/movies.js`, `static/style.css`: Scheduled Movie Metadata rows now display the next calculated run date/time for active Daily/Weekly/Monthly schedules.
