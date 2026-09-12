@@ -110,6 +110,12 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`: Made the header MOVIES PENDING filter toggle off when clicked again, returning the Agenda to ALL.
+- `templates/agenda.html`: Removed the descriptive subtitle beneath the Agenda heading.
+- `static/style.css`: Kept the Agenda header filters and Refresh button on one row at desktop widths; retained wrapping behavior for narrow/mobile layouts.
+- `templates/agenda.html`, `static/agenda.js`: Added the persistent `MOVIES PENDING` filter beside the Agenda header date filters; it shows movie metadata entries that are not yet complete and still have a scheduled run.
+- `templates/agenda.html`, `static/agenda.js`: Removed the redundant TASK column from the unified Agenda table and adjusted the loading row span.
+
 - `static/agenda.js`, `static/style.css`: Replaced the agenda Run Now rectangle with a compact circular play icon, including a smaller filled SVG and accessible tooltip/label.
 
 - Fix `data.json` corruption on power cut: replace `save_data` / `save_movies` / `save_settings` with atomic write (write to `.tmp`, rotate to `.bak`, then rename) and harden `load_data` to fall back to `.bak` automatically if main file is empty/corrupt.

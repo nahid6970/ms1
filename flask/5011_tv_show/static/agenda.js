@@ -17,6 +17,8 @@
         document.querySelectorAll('.agenda-filter:not(.agenda-time-filter):not(.agenda-skip-complete)').forEach(button => button.classList.toggle('active', button.dataset.filter === filter));
         const skipButton = document.querySelector('.agenda-skip-complete');
         if (skipButton) { skipButton.classList.toggle('active', skipComplete); skipButton.setAttribute('aria-pressed', String(skipComplete)); }
+        const moviePendingButton = document.querySelector('.agenda-movie-pending');
+        if (moviePendingButton) { moviePendingButton.classList.toggle('active', filter === 'movie-pending'); moviePendingButton.setAttribute('aria-pressed', String(filter === 'movie-pending')); }
     }
 
     const esc = value => String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -60,12 +62,12 @@
         const query = (search.value || '').trim().toLocaleLowerCase();
         const visible = items.filter(item => {
             const type = item.type.toLocaleLowerCase();
-            const filterMatch = filter === 'all' || filter === type || (filter === 'scheduled' && !item.completed) || (filter === 'complete' && item.completed);
+            const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed) || (filter === 'complete' && item.completed);
             const timeMatch = timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
             return filterMatch && timeMatch && (!skipComplete || !item.completed) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {
-            body.innerHTML = '<tr><td colspan="6" class="agenda-empty">No matching scheduled items.</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="agenda-empty">No matching scheduled items.</td></tr>';
             return;
         }
         body.innerHTML = visible.map(item => {
@@ -76,21 +78,21 @@
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${statusIcon}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
-                <td>${esc(item.task)}</td><td>${esc(item.cadence)}</td>
+                <td>${esc(item.cadence)}</td>
                 <td class="agenda-details">${renderDetails(item)}</td><td>${action}</td>
             </tr>`;
         }).join('');
     }
 
     async function load() {
-        body.innerHTML = '<tr><td colspan="6" class="agenda-empty">Loading agenda...</td></tr>';
+        body.innerHTML = '<tr><td colspan="5" class="agenda-empty">Loading agenda...</td></tr>';
         try {
             const response = await fetch('/api/agenda');
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load agenda');
             items = data.items || [];
             render();
-        } catch (error) { body.innerHTML = `<tr><td colspan="6" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
+        } catch (error) { body.innerHTML = `<tr><td colspan="5" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
     }
 
     document.querySelectorAll('.agenda-filter:not(.agenda-skip-complete)').forEach(button => button.addEventListener('click', () => {
@@ -106,7 +108,8 @@
             saveState(); syncFilterButtons(); render(); return;
         }
         document.querySelectorAll('.agenda-filter:not(.agenda-time-filter):not(.agenda-skip-complete)').forEach(item => item.classList.remove('active'));
-        button.classList.add('active'); filter = button.dataset.filter; saveState(); render();
+        filter = button.dataset.filter === 'movie-pending' && filter === 'movie-pending' ? 'all' : button.dataset.filter;
+        syncFilterButtons(); saveState(); render();
     }));
     document.querySelector('.agenda-skip-complete').addEventListener('click', event => {
         skipComplete = !skipComplete;

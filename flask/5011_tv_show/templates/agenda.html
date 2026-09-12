@@ -22,7 +22,6 @@
         <div class="agenda-heading">
             <div>
                 <h1 class="modal-title">Agenda</h1>
-                <p>TV episode updates and movie metadata checks</p>
             </div>
             <div class="agenda-header-actions">
                 <div class="agenda-header-filters" role="group" aria-label="Date filters">
@@ -30,6 +29,7 @@
                     <button class="agenda-filter agenda-time-filter" data-time-filter="today">TODAY</button>
                     <button class="agenda-filter agenda-time-filter" data-time-filter="afterwards">AFTERWARDS</button>
                     <button class="agenda-filter agenda-skip-complete" type="button" aria-pressed="false">SKIP COMPLETE</button>
+                    <button class="agenda-filter agenda-movie-pending" data-filter="movie-pending" type="button" aria-pressed="false">MOVIES PENDING</button>
                 </div>
                 <button id="agendaRefresh" class="modal-btn modal-btn-blue" type="button">REFRESH</button>
             </div>
@@ -46,8 +46,8 @@
         </div>
         <div class="agenda-table-wrap">
             <table class="agenda-table">
-            <thead><tr><th>TITLE</th><th>NEXT RELEASE</th><th>TASK</th><th>CADENCE</th><th>DETAILS</th><th></th></tr></thead>
-                <tbody id="agendaTableBody"><tr><td colspan="6" class="agenda-empty">Loading agenda...</td></tr></tbody>
+            <thead><tr><th>TITLE</th><th>NEXT RELEASE</th><th>CADENCE</th><th>DETAILS</th><th></th></tr></thead>
+                <tbody id="agendaTableBody"><tr><td colspan="5" class="agenda-empty">Loading agenda...</td></tr></tbody>
             </table>
         </div>
     </main>
