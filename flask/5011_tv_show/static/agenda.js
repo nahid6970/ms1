@@ -28,9 +28,9 @@
             const action = item.completed ? '' : `<button class="agenda-run" data-id="${item.id}" data-type="${item.type}" title="Run now">▶</button>`;
             const releaseLabel = item.type === 'TV' ? 'Episode: ' : 'Digital: ';
             return `<tr>
-                <td class="agenda-date">${item.release_date ? releaseLabel + formatDate(item.release_date) : 'Not available'}</td>
                 <td class="agenda-title">${esc(item.title)}</td>
                 <td><span class="agenda-badge ${typeClass}">${item.type}</span></td>
+                <td class="agenda-date">${item.release_date ? releaseLabel + formatDate(item.release_date) : 'Not available'}</td>
                 <td>${esc(item.task)}</td><td>${esc(item.cadence)}</td>
                 <td><span class="agenda-badge ${statusClass}">${esc(item.status)}</span></td>
                 <td class="agenda-details">${esc(item.details)}</td><td>${action}</td>

@@ -2452,7 +2452,7 @@ body::before {
 .agenda-table td { padding: 11px 12px; border-bottom: 1px solid #202a38; white-space: nowrap; }
 .agenda-table tbody tr:hover { background: rgba(59,130,246,.08); }
 .agenda-date { color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
-.agenda-title { min-width: 190px; color: #fff; font-weight: 700; }
+.agenda-title { min-width: 190px; color: #fff; font-weight: 700; text-align: left; }
 .agenda-details { color: #9eacc0; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
 .agenda-badge { display: inline-block; padding: 4px 7px; border: 1px solid; font: 700 .68rem Consolas, "Courier New", monospace; }
 .agenda-type-tv { color: #a5f3fc; background: rgba(8,145,178,.2); border-color: #0891b2; }

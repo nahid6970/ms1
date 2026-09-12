@@ -37,6 +37,10 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/style.css`: Explicitly left-aligned Agenda show/movie titles.
+
+- `templates/agenda.html`, `static/agenda.js`: Reordered the Agenda columns to Title, Type, Next Release, Task, Cadence, Status, Details, and Actions while retaining next-release sorting.
+
 - `app.py`: Agenda items are now sorted ascending by the `NEXT RELEASE` column, with unavailable dates last and titles used as a tie-breaker.
 
 - `app.py`, `templates/agenda.html`, `static/agenda.js`: Agenda’s first column now shows the next TV episode release date or the movie digital-release date. Scheduler timing remains shown in the Details column.
