@@ -154,6 +154,13 @@ function formatMovieScheduleElapsed(timestamp) {
     return [days ? `${days}d` : '', hours ? `${hours}h` : '', rest || (!days && !hours) ? `${rest}m` : ''].filter(Boolean).join(' ');
 }
 
+function formatMovieNextRun(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    if (Number.isNaN(date.getTime())) return '';
+    return `Next: ${date.toLocaleDateString(undefined, {day: '2-digit', month: 'short', year: 'numeric'})} ${date.toLocaleTimeString(undefined, {hour: 'numeric', minute: '2-digit'})}`;
+}
+
 function filterMovieMetadataSchedules(query) {
     const value = String(query || '').trim().toLocaleLowerCase();
     document.querySelectorAll('#movieMetadataList .scheduled-update-row').forEach(row => {
@@ -176,12 +183,15 @@ async function loadMovieMetadataSchedules() {
                 : '<span class="scheduled-update-disabled">Waiting for digital release</span>';
             if (result && result.error) resultHtml = `<span class="schedule-last-run error">✗ ${escapeMovieScheduleText(result.error)}</span>`;
             else if (result && result.timestamp && !schedule.completed) resultHtml = `<span class="schedule-last-run ok">✓ Checked ${formatMovieScheduleElapsed(result.timestamp)}</span>`;
+            const nextRunHtml = !schedule.completed && schedule.next_run
+                ? `<span class="movie-schedule-next">${formatMovieNextRun(schedule.next_run)}</span>`
+                : '';
             const disabled = schedule.completed || !schedule.tmdb_id ? 'disabled' : '';
             return `
             <div class="scheduled-update-row" data-search-title="${escapeMovieScheduleText(schedule.title).toLocaleLowerCase()}">
                 <div class="scheduled-update-info">
                     <span class="scheduled-update-title">${escapeMovieScheduleText(schedule.title)}</span>
-                    <div class="scheduled-update-meta">${resultHtml}</div>
+                    <div class="scheduled-update-meta">${nextRunHtml}${resultHtml}</div>
                 </div>
                 <div class="schedule-row-actions">
                     <select class="schedule-row-frequency" data-movie-id="${schedule.movie_id}" aria-label="Metadata frequency for ${escapeMovieScheduleText(schedule.title)}" ${disabled}>

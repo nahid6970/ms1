@@ -966,6 +966,42 @@ def get_last_movie_due_date(movie, now):
         return previous.replace(day=min(target_day, previous_last))
     return None
 
+def get_next_movie_run(movie, now=None):
+    """Return the next local scheduled metadata-run datetime, or None."""
+    if now is None:
+        now = datetime.now()
+    update_time_str = str(movie.get('metadata_update_time') or '').strip()
+    if not update_time_str:
+        return None
+    try:
+        hour, minute = [int(part) for part in update_time_str.split(':')[:2]]
+    except (ValueError, IndexError):
+        return None
+    frequency = movie.get('metadata_update_frequency', 'daily')
+    if frequency == 'daily':
+        candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        return candidate if candidate > now else candidate + timedelta(days=1)
+    if frequency == 'weekly':
+        try:
+            weekday = int(movie.get('metadata_update_weekday', now.weekday()))
+        except (TypeError, ValueError):
+            weekday = now.weekday()
+        candidate = now.replace(hour=hour, minute=minute, second=0, microsecond=0) + timedelta(days=(weekday - now.weekday()) % 7)
+        return candidate if candidate > now else candidate + timedelta(days=7)
+    if frequency == 'monthly':
+        try:
+            month_day = max(1, min(31, int(movie.get('metadata_update_month_day', now.day))))
+        except (TypeError, ValueError):
+            month_day = now.day
+        last_day = calendar.monthrange(now.year, now.month)[1]
+        candidate = now.replace(day=min(month_day, last_day), hour=hour, minute=minute, second=0, microsecond=0)
+        if candidate > now:
+            return candidate
+        next_month = (now.replace(day=1) + timedelta(days=32)).replace(day=1)
+        next_last_day = calendar.monthrange(next_month.year, next_month.month)[1]
+        return next_month.replace(day=min(month_day, next_last_day), hour=hour, minute=minute, second=0, microsecond=0)
+    return None
+
 def run_scheduled_movie_metadata_updates():
     """Refresh due movies until TMDb supplies a digital release date."""
     now = datetime.now()
@@ -1047,6 +1083,7 @@ def movie_schedules():
     schedules = []
     for movie in load_movies():
         result = get_movie_ts(movie.get('id')).get('last_run_result')
+        next_run = None if movie.get('digital_release_date') else get_next_movie_run(movie)
         schedules.append({
             'movie_id': movie.get('id'),
             'title': movie.get('title', 'Untitled'),
@@ -1059,6 +1096,7 @@ def movie_schedules():
             'month_day': movie.get('metadata_update_month_day', 1),
             'last_run': get_movie_ts(movie.get('id')).get('metadata_update_last_run') or '',
             'last_run_result': result,
+            'next_run': next_run.isoformat() if next_run else '',
         })
     schedules.sort(key=lambda item: (item['completed'], not bool(item['update_time']), item['update_time'], item['title'].casefold()))
     return jsonify({'success': True, 'schedules': schedules})
