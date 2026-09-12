@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Type column. TV-show titles are now greenish and movie titles are bluish; TV/movie filtering remains available.
+
 - `static/agenda.js`: Agenda scheduled/completed status icons now appear after each show or movie name.
 
 - `static/agenda.js`: Moved the Agenda status icon to appear after each show or movie name.

@@ -2455,6 +2455,8 @@ body::before {
 .agenda-table tbody tr:hover { background: rgba(59,130,246,.08); }
 .agenda-date { color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
 .agenda-title { display: flex; align-items: center; gap: 7px; min-width: 190px; color: #fff; font-weight: 700; text-align: left; }
+.agenda-title-tv { color: #86efac; }
+.agenda-title-movie { color: #93c5fd; }
 .agenda-status-icon { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; align-items: center; justify-content: center; }
 .agenda-status-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .agenda-details { color: #9eacc0; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
