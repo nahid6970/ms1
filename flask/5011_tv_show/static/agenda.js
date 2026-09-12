@@ -72,7 +72,7 @@
             const statusIcon = item.completed
                 ? '<span class="agenda-status-icon agenda-status-complete" title="Complete" aria-label="Complete"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>'
                 : '<span class="agenda-status-icon agenda-status-scheduled" title="Scheduled" aria-label="Scheduled"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg></span>';
-            const action = item.completed ? '' : `<button class="agenda-run" data-id="${item.id}" data-type="${item.type}" title="Run now">▶</button>`;
+            const action = item.completed ? '' : `<button class="agenda-run" data-id="${item.id}" data-type="${item.type}" title="Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.25 17 12l-9 6.75V5.25Z"></path></svg></button>`;
             return `<tr>
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${statusIcon}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>

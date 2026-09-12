@@ -37,6 +37,10 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/style.css`: Reduced the Agenda Run Now button to a compact 24×26 icon-sized control.
+
+- `static/agenda.js`, `static/style.css`: Restyled the Agenda Run Now action to match the existing compact schedule buttons, including the mini play SVG and matching hover/disabled states.
+
 - `static/agenda.js`, `static/style.css`: Agenda Details now visibly shows the complete scheduled date/time beside the clock icon, with independent clock and continuing/ended/waiting tooltips instead of applying one tooltip to both icons.
 
 - `app.py`, `static/agenda.js`, `static/style.css`: Replaced Agenda Details text such as next-update/continuing/waiting labels with compact clock, state, and completion icons with tooltips.
@@ -105,5 +109,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 - `static/script.js`: Search `filterShows` overhauled — normalizes both query and card title by stripping all punctuation (`/[^a-z0-9\s]/g`), splits query into individual words, and requires all words to match anywhere in the title+year (`words.every`). Fixes cases like `"dr stone"` not matching `"Dr. STONE"`. Matched cards are force-shown as `display:flex` even if archived/hidden/completed; clearing search restores CSS-driven visibility.
 
 # 5. Pending Task
+
+- `static/agenda.js`, `static/style.css`: Replaced the agenda Run Now rectangle with a compact circular play icon, including a smaller filled SVG and accessible tooltip/label.
 
 - Fix `data.json` corruption on power cut: replace `save_data` / `save_movies` / `save_settings` with atomic write (write to `.tmp`, rotate to `.bak`, then rename) and harden `load_data` to fall back to `.bak` automatically if main file is empty/corrupt.
