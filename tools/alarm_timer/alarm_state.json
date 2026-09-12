@@ -133,12 +133,12 @@
         {
           "id": "b8ccf04d",
           "label": "08",
-          "fires_at": 1786208760.0,
-          "created_at": 1783952065.2003613,
+          "fires_at": 1790580960.0,
+          "created_at": 1789204456.5318797,
           "input_mode": "custom_3",
-          "input_value": "23:06 on 8 Aug",
+          "input_value": "13:36 on 28 Sep",
           "use_custom_colors": false,
-          "toggled": true
+          "toggled": false
         },
         {
           "id": "523e5c0e",
