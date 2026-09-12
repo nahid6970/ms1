@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `templates/movies.html`, `static/style.css`, `app.py`: Movie cards now group Radarr, TMDb, and IMDb links in the right-side action row. IMDb IDs are retained from Radarr sync and TMDb metadata refresh, and the IMDb button is shown only when an exact IMDb ID is available.
+
 - `static/script.js`: Scheduled episode run results now show elapsed time (`just now`, `5m`, `3h 22m`, `2d 3h 55m`) instead of a locale timestamp. Only nonzero newly added episode counts are shown; zero-result runs omit the counters.
 - `app.py`: Volatile per-show fields (`episodes_updated_at`, `last_run_result`, `episode_update_last_run`) moved out of `data.json` into a separate `C:\@delta\db\5011_tv_show\timestamps.json` file (not git-tracked). Added `load_timestamps`, `save_timestamps`, `get_show_ts`, `set_show_ts` helpers. All scheduler, manual update, and schedule API routes updated to read/write from the timestamps file. Eliminates constant `git status` noise from the main data file.
 - `static/script.js`: Fixed `#refreshOpenEpisodes` button staying as a checkmark permanently after a successful update — the `setTimeout` restore was gated on `btn.disabled` which was already `false` by then; now always restores after 1.4s.

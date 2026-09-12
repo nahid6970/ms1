@@ -337,6 +337,7 @@ body {
 .btn-sonarr          { background: #06b6d4; color: white; }
 .btn-tmdb            { background: #01b4e4; color: white; }
 .btn-tvmaze          { background: #f5a623; color: white; }
+.btn-imdb            { background: #f5c518; color: #111827; }
 .btn-delete          { background: #ef4444; color: white; }
 
 /* First two buttons side by side */
@@ -355,7 +356,14 @@ body {
 .btn-sonarr:hover          { background: #0891b2; transform: scale(1.1); }
 .btn-tmdb:hover            { background: #0190c0; transform: scale(1.1); }
 .btn-tvmaze:hover          { background: #d4891a; transform: scale(1.1); }
+.btn-imdb:hover            { background: #d9aa00; color: #111827; transform: scale(1.1); }
 .btn-delete:hover          { background: #dc2626; transform: scale(1.1); }
+
+.imdb-mark {
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
 
 /* Animations */
 @keyframes spin {

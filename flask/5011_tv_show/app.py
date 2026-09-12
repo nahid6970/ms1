@@ -629,6 +629,7 @@ def sync_radarr_movies():
                 continue
 
             tmdb_id = rm.get('tmdbId')
+            imdb_id = rm.get('imdbId')
             year = rm.get('year')
             path = rm.get('path', '')
 
@@ -656,12 +657,19 @@ def sync_radarr_movies():
                 if path:
                     existing['directory_path'] = path
                 existing['radarr_id'] = rm.get('id')
+                if imdb_id:
+                    external_ids = existing.get('external_ids')
+                    if not isinstance(external_ids, dict):
+                        external_ids = {}
+                        existing['external_ids'] = external_ids
+                    external_ids['imdb'] = imdb_id
                 existing['status'] = rm.get('status', existing.get('status', ''))
                 updated += 1
             else:
                 movies.append({
                     'id': max([m.get('id', 0) for m in movies], default=0) + 1,
                     'tmdb_id': tmdb_id,
+                    'external_ids': {'imdb': imdb_id} if imdb_id else {},
                     'radarr_id': rm.get('id'),
                     'title': title,
                     'year': str(year) if year else '',
@@ -2331,6 +2339,12 @@ def refresh_movie_metadata(movie_id):
         'tmdb_rating': tmdb_rating,
         'status': 'Released' if details.get('status') == 'Released' else 'Missing'
     })
+    if details.get('imdb_id'):
+        external_ids = movie.get('external_ids')
+        if not isinstance(external_ids, dict):
+            external_ids = {}
+            movie['external_ids'] = external_ids
+        external_ids['imdb'] = details['imdb_id']
     save_movies(movies)
     return jsonify({'success': True, 'movie': movie})
 
