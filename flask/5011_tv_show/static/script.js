@@ -249,6 +249,16 @@ function formatScheduleAddedCount(added) {
     return count > 0 ? ` · +${count}` : '';
 }
 
+function filterScheduledUpdates(query) {
+    const normalizedQuery = String(query || '').trim().toLocaleLowerCase();
+    const list = document.getElementById('scheduledUpdatesList');
+    if (!list) return;
+    list.querySelectorAll('.scheduled-update-row').forEach(row => {
+        const title = (row.dataset.searchTitle || '').toLocaleLowerCase();
+        row.hidden = !!normalizedQuery && !title.includes(normalizedQuery);
+    });
+}
+
 async function loadScheduledUpdatesList(list) {
     list.innerHTML = '<p class="schedule-empty">Loading schedules...</p>';
     try {
@@ -305,7 +315,7 @@ async function loadScheduledUpdatesList(list) {
             const hasStat = !!(lr || schedule.last_run);
 
             return `
-            <div class="scheduled-update-row" id="sched-row-${schedule.show_id}">
+            <div class="scheduled-update-row" id="sched-row-${schedule.show_id}" data-search-title="${escapeEpisodeText(schedule.title)}">
                 <div class="scheduled-update-info">
                     <span class="scheduled-update-title"><span class="scheduled-update-status ${isEnded ? 'status-ended' : 'status-continuing'}" title="${statusLabel}" aria-label="${statusLabel}">${statusIcon}</span>${escapeEpisodeText(schedule.title)}</span>
                     <div class="scheduled-update-meta">
@@ -334,6 +344,8 @@ async function loadScheduledUpdatesList(list) {
         }).join('') || '<p class="schedule-empty">No shows found.</p>';
 
         list.innerHTML = rows;
+        const search = document.getElementById('scheduledUpdatesSearch');
+        if (search) filterScheduledUpdates(search.value);
     } catch (error) {
         list.innerHTML = `<p class="schedule-empty">${escapeEpisodeText(error.message)}</p>`;
     }

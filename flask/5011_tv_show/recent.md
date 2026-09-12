@@ -37,6 +37,10 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/style.css`: Fixed Scheduled Episode Updates search filtering by explicitly hiding nonmatching flex rows.
+
+- `templates/index.html`, `static/script.js`, `static/style.css`: Scheduled Episode Updates now has a live show-name search box that filters rows without affecting their schedule controls.
+
 - `app.py`, `templates/movies.html`, `static/style.css`: Digital release badges now use Bangladesh local time for date comparison: green for today/past releases and pink for future releases.
 
 - `app.py`, `templates/movies.html`, `static/style.css`: Movie metadata now reads TMDb digital release dates (release type 4), stores the earliest available date, and displays it as a `Digital: YYYY-MM-DD` badge below the Watched/Unwatched badge.
