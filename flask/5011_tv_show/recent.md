@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `templates/movies.html`, `static/style.css`: Digital release badges now use Bangladesh local time for date comparison: green for today/past releases and pink for future releases.
+
 - `app.py`, `templates/movies.html`, `static/style.css`: Movie metadata now reads TMDb digital release dates (release type 4), stores the earliest available date, and displays it as a `Digital: YYYY-MM-DD` badge below the Watched/Unwatched badge.
 
 - `templates/movies.html`, `static/style.css`, `app.py`: Movie cards now group Radarr, TMDb, and IMDb links in the right-side action row. IMDb IDs are retained from Radarr sync and TMDb metadata refresh, and the IMDb button is shown only when an exact IMDb ID is available.

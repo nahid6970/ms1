@@ -1560,7 +1560,8 @@ def movies_page():
 
     next_order = 'desc' if order == 'asc' else 'asc'
 
-    return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
+    today = datetime.now(BANGLADESH_TZ).date().isoformat()
+    return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, today=today, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
 
 @app.route('/add_show', methods=['GET', 'POST'])
 def add_show():
