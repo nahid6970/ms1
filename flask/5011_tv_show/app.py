@@ -1190,7 +1190,7 @@ def agenda_data():
                 'task': 'Episode update', 'cadence': show.get('episode_update_frequency', 'daily').title(),
                 'next_run': next_run.isoformat(), 'release_date': (get_next_episode_release(show, now_bd) or '').isoformat() if get_next_episode_release(show, now_bd) else '',
                 'status': 'Scheduled',
-                'details': f"Next update: {next_run.strftime('%d %b, %I:%M %p')} · {show.get('status', 'Continuing')}",
+                'details': '', 'show_status': show.get('status', 'Continuing'),
                 'last_result': result, 'completed': False
             })
     for movie in load_movies():
@@ -1198,7 +1198,7 @@ def agenda_data():
             items.append({
                 'id': movie.get('id'), 'title': movie.get('title', 'Untitled'), 'type': 'Movie',
                 'task': 'Metadata complete', 'cadence': 'Complete', 'next_run': '', 'release_date': movie.get('digital_release_date') or '',
-                'status': 'Complete', 'details': f"Digital: {movie.get('digital_release_date')}",
+                'status': 'Complete', 'details': f"Digital: {movie.get('digital_release_date')}", 'show_status': 'Complete',
                 'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': True
             })
         else:
@@ -1208,7 +1208,7 @@ def agenda_data():
                     'id': movie.get('id'), 'title': movie.get('title', 'Untitled'), 'type': 'Movie',
                     'task': 'Metadata check', 'cadence': movie.get('metadata_update_frequency', 'daily').title(),
                     'next_run': next_run.isoformat(), 'release_date': '', 'status': 'Scheduled',
-                    'details': f"Next check: {next_run.strftime('%d %b, %I:%M %p')} · Waiting for digital release date",
+                    'details': '', 'show_status': 'Waiting',
                     'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': False
                 })
     items.sort(key=lambda item: (not bool(item.get('release_date')), item.get('release_date') or '9999', item['title'].casefold()))

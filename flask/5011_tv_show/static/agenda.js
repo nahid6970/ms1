@@ -40,6 +40,22 @@
         return !Number.isNaN(date.getTime()) && date > new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     }
 
+    function renderDetails(item) {
+        if (item.completed) {
+            return `<span class="agenda-detail-complete" title="Digital release: ${esc(item.details.replace('Digital: ', ''))}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.5 2.5L16 9"></path></svg></span>`;
+        }
+        const nextRun = item.next_run ? new Date(item.next_run) : null;
+        const scheduledDate = nextRun && !Number.isNaN(nextRun.getTime())
+            ? `${nextRun.toLocaleDateString(undefined, {day: '2-digit', month: 'short', year: 'numeric'})} · ${nextRun.toLocaleTimeString(undefined, {hour: 'numeric', minute: '2-digit'})}`
+            : '';
+        const status = item.show_status || 'Waiting';
+        const statusTitle = status === 'Continuing' ? 'Continuing' : status === 'Ended' ? 'Ended' : 'Waiting for digital release';
+        const statusIcon = status === 'Waiting'
+            ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>'
+            : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M10 8.5v7l5-3.5z"></path></svg>';
+        return `<span class="agenda-detail-icons"><span class="agenda-detail-schedule" title="Scheduled: ${scheduledDate}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span>${scheduledDate}</span></span><span class="agenda-detail-state" title="${statusTitle}">${statusIcon}</span></span>`;
+    }
+
     function render() {
         const query = (search.value || '').trim().toLocaleLowerCase();
         const visible = items.filter(item => {
@@ -61,7 +77,7 @@
                 <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${statusIcon}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
                 <td>${esc(item.task)}</td><td>${esc(item.cadence)}</td>
-                <td class="agenda-details">${esc(item.details)}</td><td>${action}</td>
+                <td class="agenda-details">${renderDetails(item)}</td><td>${action}</td>
             </tr>`;
         }).join('');
     }

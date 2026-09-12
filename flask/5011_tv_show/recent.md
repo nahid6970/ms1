@@ -37,6 +37,10 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `static/agenda.js`, `static/style.css`: Agenda Details now visibly shows the complete scheduled date/time beside the clock icon, with independent clock and continuing/ended/waiting tooltips instead of applying one tooltip to both icons.
+
+- `app.py`, `static/agenda.js`, `static/style.css`: Replaced Agenda Details text such as next-update/continuing/waiting labels with compact clock, state, and completion icons with tooltips.
+
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Removed the Agenda Type column. TV-show titles are now greenish and movie titles are bluish; TV/movie filtering remains available.
 
 - `static/agenda.js`: Agenda scheduled/completed status icons now appear after each show or movie name.

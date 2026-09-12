@@ -2460,6 +2460,11 @@ body::before {
 .agenda-status-icon { display: inline-flex; flex: 0 0 auto; width: 16px; height: 16px; align-items: center; justify-content: center; }
 .agenda-status-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .agenda-details { color: #9eacc0; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.agenda-detail-icons, .agenda-detail-complete { display: inline-flex; align-items: center; gap: 8px; color: #7cff9b; font: 700 .78rem Consolas, "Courier New", monospace; }
+.agenda-detail-schedule, .agenda-detail-state { display: inline-flex; align-items: center; gap: 5px; }
+.agenda-detail-schedule svg, .agenda-detail-complete > svg, .agenda-detail-state svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.agenda-detail-state { display: inline-flex; color: #38bdf8; }
+.agenda-detail-complete { color: #4ade80; }
 .agenda-badge { display: inline-block; padding: 4px 7px; border: 1px solid; font: 700 .68rem Consolas, "Courier New", monospace; }
 .agenda-type-tv { color: #a5f3fc; background: rgba(8,145,178,.2); border-color: #0891b2; }
 .agenda-type-movie { color: #e9d5ff; background: rgba(126,34,206,.2); border-color: #9333ea; }
