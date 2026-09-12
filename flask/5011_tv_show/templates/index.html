@@ -221,10 +221,17 @@
                     <option value="date">Air date match (YYYY-MM-DD in filename)</option>
                     <option value="title">Title match (raw filename)</option>
                 </select>
-                <small class="modal-help" style="margin-top:-8px;">Use "Air date" for shows like WWE where files are named with a date. Use "Title match" for other non-standard naming.</small>
-                <label for="editShowSeasonOffset">Filename Season Offset:</label>
-                <input type="number" id="editShowSeasonOffset" name="season_offset" class="modal-input" min="-20" max="20" step="1" value="0" placeholder="0">
-                <small class="modal-help" style="margin-top:-8px;">Enter the amount added to the TVmaze season in filenames. Example: 1 makes TVmaze S33 match filename S34.</small>
+                <small class="modal-help" style="margin-top:-8px;">Date mode: YYYY-MM-DD filenames · Title mode: raw filenames</small>
+                <div class="modal-form-row edit-show-episode-settings-row">
+                    <div class="modal-form-col modal-form-col-narrow">
+                        <label for="editShowSeasonOffset">OFFSET SEASON:</label>
+                        <input type="number" id="editShowSeasonOffset" name="season_offset" class="modal-input" min="-20" max="20" step="1" value="0" placeholder="0">
+                    </div>
+                    <div class="modal-form-col modal-form-col-narrow">
+                        <label for="editShowKeepReleased">KEEP RELEASED:</label>
+                        <input type="number" id="editShowKeepReleased" name="keep_released_episodes" class="modal-input" min="0" max="10000" step="1" value="0" placeholder="0 = all">
+                    </div>
+                </div>
                 <label for="editShowSonarrUrl">Sonarr Link:</label>
                 <input type="url" id="editShowSonarrUrl" name="sonarr_url" class="modal-input">
                 <label for="editShowStatus">Status:</label>

@@ -50,6 +50,8 @@ async function openEditShowModal(showId) {
     if (scanModeEl) scanModeEl.value = show.scan_mode || 'sxxexx';
     const seasonOffsetEl = document.getElementById('editShowSeasonOffset');
     if (seasonOffsetEl) seasonOffsetEl.value = Number.isFinite(Number(show.season_offset)) ? Number(show.season_offset) : 0;
+    const keepReleasedEl = document.getElementById('editShowKeepReleased');
+    if (keepReleasedEl) keepReleasedEl.value = Number.isFinite(Number(show.keep_released_episodes)) ? Number(show.keep_released_episodes) : 0;
     document.getElementById('editShowSonarrUrl').value = show.sonarr_url || '';
     document.getElementById('editShowStatus').value = show.status || 'Continuing';
     const lockEl = document.getElementById('editShowLockStatus');

@@ -37,6 +37,12 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `templates/index.html`, `static/style.css`: Improved the Edit Show episode settings layout with wider equal columns, single-line labels, and shorter scan-mode help text.
+
+- `templates/index.html`: Simplified the season-offset and retention labels to fit the side-by-side Edit Show fields and removed the explanatory text beneath them.
+
+- `app.py`, `templates/index.html`, `static/script.js`: Added per-show `Keep Released Episodes` retention beside Filename Season Offset. Positive limits keep the newest released episodes, preserve future/undated episodes, prune on save and TVmaze refresh, and prevent storage scans from re-adding pruned raw episodes; `0` keeps all.
+
 - `app.py`, `templates/index.html`, `static/script.js`: Added a per-show Filename Season Offset setting. File scanning and file-existence icons normalize offset filename seasons to TVmaze seasons, while the episode copy button outputs the offset season used by torrent naming.
 
 - `static/style.css`: Fixed Scheduled Episode Updates search filtering by explicitly hiding nonmatching flex rows.

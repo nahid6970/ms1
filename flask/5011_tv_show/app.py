@@ -360,6 +360,62 @@ def show_season_offset(show):
     except (TypeError, ValueError):
         return 0
 
+def show_keep_released_limit(show):
+    """Return the per-show released-episode retention limit, or None for unlimited."""
+    try:
+        limit = int(show.get('keep_released_episodes', 0) or 0)
+    except (TypeError, ValueError):
+        return None
+    return limit if limit > 0 else None
+
+def episode_release_datetime(episode):
+    """Return an episode's release time in Bangladesh time when known."""
+    air_datetime = episode.get('air_datetime')
+    if air_datetime:
+        try:
+            parsed = datetime.fromisoformat(str(air_datetime).replace('Z', '+00:00'))
+            if parsed.tzinfo is not None:
+                return parsed.astimezone(BANGLADESH_TZ)
+        except (TypeError, ValueError):
+            pass
+
+    air_date = str(episode.get('air_date') or '').strip()
+    if not air_date:
+        return None
+    try:
+        airtime = str(episode.get('airtime') or '00:00')
+        hour, minute = [int(part) for part in airtime.split(':')[:2]]
+        return datetime.strptime(f'{air_date} {hour:02d}:{minute:02d}', '%Y-%m-%d %H:%M').replace(tzinfo=BANGLADESH_TZ)
+    except (TypeError, ValueError):
+        try:
+            return datetime.strptime(air_date, '%Y-%m-%d').replace(tzinfo=BANGLADESH_TZ)
+        except (TypeError, ValueError):
+            return None
+
+def prune_released_episodes(show):
+    """Keep only the newest configured released episodes; preserve future/undated ones."""
+    limit = show_keep_released_limit(show)
+    if limit is None:
+        return 0
+
+    now = datetime.now(BANGLADESH_TZ)
+    released = []
+    preserved = []
+    for episode in show.get('episodes', []):
+        release_time = episode_release_datetime(episode)
+        if release_time is not None and release_time <= now:
+            released.append((release_time, episode))
+        else:
+            preserved.append(episode)
+
+    released.sort(key=lambda item: item[0], reverse=True)
+    kept = [episode for _, episode in released[:limit]]
+    removed = len(released) - len(kept)
+    if removed:
+        show['episodes'] = preserved + kept
+        sort_episode_list(show)
+    return removed
+
 def scan_for_missing_shows():
     """Scan the root folder for TV show directories that aren't in the JSON file"""
     settings = load_settings()
@@ -469,6 +525,9 @@ def scan_and_update_episodes():
                                     updated_shows = True
                                 matched = True
                             else:
+                                if show_keep_released_limit(show) is not None:
+                                    matched = True
+                                    continue
                                 # Date found but no TVmaze episode yet — add as raw
                                 new_ep = {
                                     'id': max((ep.get('id', 0) for ep in show['episodes']), default=0) + 1,
@@ -500,6 +559,9 @@ def scan_and_update_episodes():
                                     updated_shows = True
                                 matched = True
                             else:
+                                if show_keep_released_limit(show) is not None:
+                                    matched = True
+                                    continue
                                 new_ep = {
                                     'id': max((ep.get('id', 0) for ep in show['episodes']), default=0) + 1,
                                     'title': name,
@@ -723,6 +785,7 @@ def run_show_episode_update(show, now=None):
     if error:
         return 0, 0, error
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    updated += prune_released_episodes(show)
     if not show.get('lock_status'):
         show['status'] = tvmaze_status(tvmaze_show)
         tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
@@ -1323,6 +1386,7 @@ def update_show_episodes(show_id):
         return jsonify({'success': False, 'message': error}), 502
 
     added, updated = merge_tvmaze_episodes(show, tvmaze_show, episodes)
+    updated += prune_released_episodes(show)
     show['status'] = tvmaze_status(tvmaze_show)
     tmdb_details, tmdb_error = resolve_tmdb_for_show(show, tvmaze_show)
     if tmdb_details and not tmdb_error:
@@ -1610,6 +1674,11 @@ def edit_show(show_id):
             show['season_offset'] = max(-20, min(20, int(request.form.get('season_offset', '0') or 0)))
         except (TypeError, ValueError):
             show['season_offset'] = 0
+        try:
+            show['keep_released_episodes'] = max(0, min(10000, int(request.form.get('keep_released_episodes', '0') or 0)))
+        except (TypeError, ValueError):
+            show['keep_released_episodes'] = 0
+        prune_released_episodes(show)
         save_data(shows)
         query = request.args.get('query', '').strip()
         if request.headers.get('Accept') == 'application/json':

@@ -2495,3 +2495,10 @@ body::before {
 .modal-form-col-narrow {
     flex: 0 0 100px;
 }
+.edit-show-episode-settings-row .modal-form-col-narrow {
+    flex: 1 1 0;
+}
+.edit-show-episode-settings-row label {
+    white-space: nowrap;
+    font-size: 0.7rem;
+}
