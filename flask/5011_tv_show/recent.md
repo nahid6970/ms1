@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/style.css`: Completed Agenda rows now reserve space for only their single completion icon, allowing longer movie names to remain visible; scheduled rows still reserve space for all three icons.
 - `static/agenda.js`, `static/style.css`: Grouped the title-side status, cadence, and Run Now icons and prevented generic button rules from distorting the compact clock action.
 - `static/agenda.js`, `static/style.css`: Moved the clickable scheduled clock action beside each title; Details now shows only the aligned scheduled date/time text.
 - `static/agenda.js`, `static/style.css`: Moved Agenda status/cadence icons next to each title and left the Details column with only the clickable scheduled clock/date control, removing duplicate icons.
