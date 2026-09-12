@@ -76,7 +76,7 @@
             return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {
-        body.innerHTML = '<tr><td colspan="3" class="agenda-empty">No matching scheduled items.</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" class="agenda-empty">No matching scheduled items.</td></tr>';
             return;
         }
         body.innerHTML = visible.map(item => {
@@ -86,7 +86,8 @@
             const scheduleAction = item.completed ? '' : `<button class="agenda-title-run agenda-run" data-id="${item.id}" data-type="${item.type}" title="Scheduled run: ${esc(item.next_run || '')} · Run now" aria-label="Run now"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></button>`;
             const titleIcons = `<span class="agenda-title-icons">${item.completed ? statusIcon : `${statusIcon}${renderCadenceIcon(item)}${scheduleAction}`}</span>`;
             return `<tr>
-                <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span>${titleIcons}</td>
+                <td class="agenda-title ${item.type === 'TV' ? 'agenda-title-tv' : 'agenda-title-movie'}"><span>${esc(item.title)}</span></td>
+                <td class="agenda-icon-cell">${titleIcons}</td>
                 <td class="agenda-date">${item.release_date ? formatDate(item.release_date) : 'Not available'}</td>
                 <td class="agenda-details">${renderDetails(item)}</td>
             </tr>`;
@@ -94,14 +95,14 @@
     }
 
     async function load() {
-        body.innerHTML = '<tr><td colspan="3" class="agenda-empty">Loading agenda...</td></tr>';
+        body.innerHTML = '<tr><td colspan="4" class="agenda-empty">Loading agenda...</td></tr>';
         try {
             const response = await fetch('/api/agenda');
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.message || 'Unable to load agenda');
             items = data.items || [];
             render();
-        } catch (error) { body.innerHTML = `<tr><td colspan="3" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
+        } catch (error) { body.innerHTML = `<tr><td colspan="4" class="agenda-empty agenda-error">${esc(error.message)}</td></tr>`; }
     }
 
     document.querySelectorAll('.agenda-filter:not(.agenda-skip-complete)').forEach(button => button.addEventListener('click', () => {
