@@ -1185,13 +1185,17 @@ def agenda_data():
         if next_run:
             show_ts = ts.get(str(show.get('id')), {})
             result = show_ts.get('last_run_result') or {}
+            show_episodes = show.get('episodes', [])
+            skip_complete = (str(show.get('status', '')).lower() == 'ended'
+                             and bool(show_episodes)
+                             and all(bool(episode.get('watched')) for episode in show_episodes))
             items.append({
                 'id': show.get('id'), 'title': show.get('title', 'Untitled'), 'type': 'TV',
                 'task': 'Episode update', 'cadence': show.get('episode_update_frequency', 'daily').title(),
                 'next_run': next_run.isoformat(), 'release_date': (get_next_episode_release(show, now_bd) or '').isoformat() if get_next_episode_release(show, now_bd) else '',
                 'status': 'Scheduled',
                 'details': '', 'show_status': show.get('status', 'Continuing'),
-                'last_result': result, 'completed': False
+                'last_result': result, 'completed': False, 'skip_complete': skip_complete
             })
     for movie in load_movies():
         if movie.get('digital_release_date'):
@@ -1199,7 +1203,8 @@ def agenda_data():
                 'id': movie.get('id'), 'title': movie.get('title', 'Untitled'), 'type': 'Movie',
                 'task': 'Metadata complete', 'cadence': 'Complete', 'next_run': '', 'release_date': movie.get('digital_release_date') or '',
                 'status': 'Complete', 'details': f"Digital: {movie.get('digital_release_date')}", 'show_status': 'Complete',
-                'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': True
+                'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': True,
+                'skip_complete': bool(movie.get('watched'))
             })
         else:
             next_run = get_next_movie_run(movie, now)
@@ -1209,7 +1214,8 @@ def agenda_data():
                     'task': 'Metadata check', 'cadence': movie.get('metadata_update_frequency', 'daily').title(),
                     'next_run': next_run.isoformat(), 'release_date': '', 'status': 'Scheduled',
                     'details': '', 'show_status': 'Waiting',
-                    'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': False
+                    'last_result': get_movie_ts(movie.get('id')).get('last_run_result') or {}, 'completed': False,
+                    'skip_complete': bool(movie.get('watched'))
                 })
     items.sort(key=lambda item: (not bool(item.get('release_date')), item.get('release_date') or '9999', item['title'].casefold()))
     return jsonify({'success': True, 'items': items})

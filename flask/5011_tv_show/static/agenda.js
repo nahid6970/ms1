@@ -64,7 +64,7 @@
             const type = item.type.toLocaleLowerCase();
             const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed) || (filter === 'complete' && item.completed);
             const timeMatch = timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
-            return filterMatch && timeMatch && (!skipComplete || !item.completed) && (!query || item.title.toLocaleLowerCase().includes(query));
+            return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {
         body.innerHTML = '<tr><td colspan="4" class="agenda-empty">No matching scheduled items.</td></tr>';

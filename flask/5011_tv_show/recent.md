@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `app.py`, `static/agenda.js`: Corrected Agenda SKIP COMPLETE to hide watched movies and ended TV shows whose entire episode list is checked, while leaving digital-release completion separate.
 - `static/agenda.js`, `static/style.css`: Made the scheduled clock/date control itself the Run Now action and removed the separate play button.
 - `templates/agenda.html`, `static/agenda.js`, `static/style.css`: Integrated each Run Now action into its scheduled date control and removed the separate rightmost action column.
 - `static/agenda.js`: Made the header MOVIES PENDING filter toggle off when clicked again, returning the Agenda to ALL.
