@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cyberpunk GUI for recovering damaged Git refs without touching user files."""
+"""PyQt6 cyberpunk GUI for recovering damaged Git refs safely."""
 
 from __future__ import annotations
 
@@ -9,16 +9,20 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import tkinter as tk
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from tkinter import filedialog, messagebox, ttk
-from tkinter.scrolledtext import ScrolledText
 from typing import Callable, Iterable, Optional
 
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QApplication, QDialog, QFileDialog, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+    QMainWindow, QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget,
+)
 
-# CYBERPUNK THEME PALETTE (translated from md/THEME_GUIDE.md for Tkinter)
+
+# Palette from md/THEME_GUIDE.md
 CP_BG = "#050505"
 CP_PANEL = "#111111"
 CP_YELLOW = "#FCEE0A"
@@ -29,8 +33,6 @@ CP_ORANGE = "#ff934b"
 CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
-FONT = ("Consolas", 10)
-FONT_BOLD = ("Consolas", 10, "bold")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 DEFAULT_REPO = Path(__file__).resolve().parents[3]
@@ -84,7 +86,7 @@ def read_ref_value(path: Path) -> Optional[str]:
 
 
 def atomic_write_text(path: Path, text: str) -> None:
-    """Atomically replace even a ref file containing NUL bytes."""
+    """Replace a ref atomically, including when its old contents are corrupted."""
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     try:
@@ -113,12 +115,11 @@ def packed_ref_value(repo: Path, refname: str) -> Optional[str]:
 
 
 def reflog_value(repo: Path, refname: str) -> Optional[str]:
-    log_path = git_dir(repo) / "logs" / Path(refname)
     try:
-        lines = [line for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines() if line]
+        lines = (git_dir(repo) / "logs" / Path(refname)).read_text(encoding="utf-8", errors="replace").splitlines()
     except OSError:
         return None
-    for line in reversed(lines):
+    for line in reversed([line for line in lines if line]):
         parts = line.split()
         if len(parts) >= 2 and is_valid_sha(parts[1]):
             return parts[1]
@@ -135,14 +136,9 @@ def object_exists(repo: Path, sha: str) -> bool:
 
 
 def current_branch(repo: Path) -> Optional[str]:
-    try:
-        result = run_git(repo, "symbolic-ref", "--quiet", "--short", "HEAD", timeout=5)
-    except Exception:
-        return None
-    if result.returncode != 0:
-        return None
+    result = run_git(repo, "symbolic-ref", "--quiet", "--short", "HEAD", timeout=5)
     branch = (result.stdout or "").strip()
-    return branch or None
+    return branch if result.returncode == 0 and branch else None
 
 
 def current_branch_refname(branch: str) -> str:
@@ -172,7 +168,6 @@ class CommitInfo:
     sha: str
     timestamp: int
     subject: str
-    parents: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -184,14 +179,12 @@ class RefRepair:
 
 
 def commit_info(repo: Path, sha: str) -> Optional[CommitInfo]:
-    result = run_git(repo, "show", "-s", "--format=%ct%x00%s%x00%P", sha, timeout=10)
-    if result.returncode != 0:
-        return None
+    result = run_git(repo, "show", "-s", "--format=%ct%x00%s", sha, timeout=10)
     parts = (result.stdout or "").strip().split("\x00")
-    if len(parts) != 3:
+    if result.returncode != 0 or len(parts) != 2:
         return None
     try:
-        return CommitInfo(sha, int(parts[0]), parts[1], tuple(p for p in parts[2].split() if is_valid_sha(p)))
+        return CommitInfo(sha, int(parts[0]), parts[1])
     except ValueError:
         return None
 
@@ -209,13 +202,13 @@ def unreachable_commits(repo: Path) -> list[CommitInfo]:
 
 
 def best_recovery_commit(repo: Path, branch: str) -> tuple[Optional[str], str]:
-    """Choose a newest normal commit, avoiding autostash/index/WIP snapshots."""
-    refname = current_branch_refname(branch)
-    direct = read_ref_value(ref_file(repo, refname))
+    """Find the newest normal valid commit, avoiding autostash/index/WIP snapshots."""
+    local_path = ref_file(repo, current_branch_refname(branch))
+    direct = read_ref_value(local_path)
     if direct and object_exists(repo, direct):
         return direct, "existing local ref"
     candidates: dict[str, tuple[str, Optional[CommitInfo]]] = {}
-    for source, sha in (("origin tracking ref", resolve_ref(repo, remote_branch_refname(branch))), ("local reflog", reflog_value(repo, refname)), ("ORIG_HEAD", read_ref_value(git_dir(repo) / "ORIG_HEAD"))):
+    for source, sha in (("origin tracking ref", resolve_ref(repo, remote_branch_refname(branch))), ("local reflog", reflog_value(repo, current_branch_refname(branch))), ("ORIG_HEAD", read_ref_value(git_dir(repo) / "ORIG_HEAD"))):
         if sha and object_exists(repo, sha):
             candidates[sha] = (source, commit_info(repo, sha))
     for info in unreachable_commits(repo):
@@ -249,102 +242,133 @@ def write_repaired_ref(repo: Path, refname: str, sha: str) -> RefRepair:
     return RefRepair(refname, before, sha, f"atomic repair; backup={backup}" if backup else "atomic repair")
 
 
-class SettingsDialog(tk.Toplevel):
-    def __init__(self, parent: tk.Misc) -> None:
+class SettingsDialog(QDialog):
+    def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
-        self.title("⚙ SETTINGS")
-        self.configure(bg=CP_BG)
-        self.resizable(False, False)
-        ttk.Label(self, text="SETTINGS MODULE READY", style="Cyber.TLabel").pack(padx=28, pady=(24, 8))
-        ttk.Label(self, text="Future recovery preferences can be added here.", style="Sub.TLabel").pack(padx=28, pady=8)
-        ttk.Button(self, text="CLOSE", command=self.destroy, style="Cyber.TButton").pack(pady=(8, 24))
+        self.setWindowTitle("⚙ SETTINGS")
+        self.setModal(True)
+        layout = QVBoxLayout(self)
+        title = QLabel("SETTINGS MODULE READY")
+        title.setObjectName("sectionTitle")
+        layout.addWidget(title)
+        layout.addWidget(QLabel("Future recovery preferences can be added here."))
+        close = QPushButton("CLOSE")
+        close.clicked.connect(self.accept)
+        layout.addWidget(close)
 
 
-class GitRefRescueApp(tk.Tk):
+class GitRefRescueApp(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
-        self.title("GIT REF RESCUE // CYBERPUNK")
-        self.geometry("1050x760")
-        self.minsize(900, 650)
-        self.configure(bg=CP_BG)
-        self.repo_var = tk.StringVar(value=str(DEFAULT_REPO))
-        self.branch_var = tk.StringVar(value="-")
-        self.head_var = tk.StringVar(value="-")
-        self.local_ref_var = tk.StringVar(value="-")
-        self.remote_ref_var = tk.StringVar(value="-")
-        self.state_var = tk.StringVar(value="READY")
-        self._configure_theme()
+        self.setWindowTitle("GIT REF RESCUE // CYBERPUNK")
+        self.resize(1120, 780)
+        self.setMinimumSize(900, 650)
+        self.repo_edit = QLineEdit(str(DEFAULT_REPO))
+        self.branch_label = QLabel("-")
+        self.head_label = QLabel("-")
+        self.local_label = QLabel("-")
+        self.remote_label = QLabel("-")
+        self.state_label = QLabel("READY")
+        self.log = QPlainTextEdit()
+        self._apply_theme()
         self._build_ui()
         self.refresh_status()
 
-    def _configure_theme(self) -> None:
-        style = ttk.Style(self)
-        style.theme_use("clam")
-        style.configure("Cyber.TFrame", background=CP_BG)
-        style.configure("Cyber.TLabel", background=CP_BG, foreground=CP_TEXT, font=FONT)
-        style.configure("Sub.TLabel", background=CP_BG, foreground=CP_SUBTEXT, font=("Consolas", 9))
-        style.configure("Title.TLabel", background=CP_BG, foreground=CP_YELLOW, font=("Consolas", 16, "bold"))
-        style.configure("Status.TLabel", background=CP_PANEL, foreground=CP_CYAN, font=FONT_BOLD)
-        style.configure("Cyber.TButton", background=CP_DIM, foreground="white", bordercolor=CP_DIM, padding=(10, 7), font=FONT_BOLD)
-        style.map("Cyber.TButton", background=[("active", "#2a2a2a"), ("pressed", CP_YELLOW)], foreground=[("active", CP_YELLOW), ("pressed", CP_BG)])
-        style.configure("Cyber.TEntry", fieldbackground=CP_PANEL, foreground=CP_CYAN, bordercolor=CP_DIM, insertcolor=CP_CYAN, padding=5, font=FONT)
-        style.configure("Cyber.TLabelframe", background=CP_PANEL, bordercolor=CP_DIM)
-        style.configure("Cyber.TLabelframe.Label", background=CP_PANEL, foreground=CP_YELLOW, font=FONT_BOLD)
+    def _apply_theme(self) -> None:
+        self.setStyleSheet(f"""
+            QMainWindow, QDialog, QWidget {{ background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas; font-size: 10pt; }}
+            QLineEdit, QPlainTextEdit {{ background-color: {CP_PANEL}; color: {CP_CYAN}; border: 1px solid {CP_DIM}; padding: 6px; selection-background-color: {CP_CYAN}; selection-color: {CP_BG}; }}
+            QLineEdit:focus, QPlainTextEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+            QPushButton {{ background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 7px 12px; font-weight: bold; }}
+            QPushButton:hover {{ background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW}; }}
+            QPushButton:pressed {{ background-color: {CP_YELLOW}; color: {CP_BG}; }}
+            QGroupBox {{ background-color: {CP_PANEL}; border: 1px solid {CP_DIM}; margin-top: 10px; padding-top: 12px; font-weight: bold; color: {CP_YELLOW}; }}
+            QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; padding: 0 6px; }}
+            QScrollBar:vertical {{ background: {CP_BG}; width: 10px; }}
+            QScrollBar::handle:vertical {{ background: {CP_CYAN}; min-height: 20px; border-radius: 5px; }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0px; }}
+            QLabel#title {{ color: {CP_YELLOW}; font-size: 18pt; font-weight: bold; }}
+            QLabel#subtitle {{ color: {CP_SUBTEXT}; font-size: 9pt; }}
+            QLabel#sectionTitle {{ color: {CP_YELLOW}; font-weight: bold; }}
+            QLabel.status {{ color: {CP_CYAN}; background: {CP_PANEL}; font-weight: bold; padding: 3px; }}
+        """)
 
     def _build_ui(self) -> None:
-        outer = ttk.Frame(self, style="Cyber.TFrame", padding=16)
-        outer.pack(fill="both", expand=True)
-        ttk.Label(outer, text="// GIT REF RESCUE", style="Title.TLabel").pack(anchor="w")
-        ttk.Label(outer, text="ATOMIC REF RECOVERY • INDEX/WORKTREE PRESERVED", style="Sub.TLabel").pack(anchor="w", pady=(0, 14))
-        repo_row = ttk.Frame(outer, style="Cyber.TFrame")
-        repo_row.pack(fill="x", pady=(0, 12))
-        ttk.Label(repo_row, text="REPOSITORY", style="Cyber.TLabel").pack(side="left")
-        ttk.Entry(repo_row, textvariable=self.repo_var, style="Cyber.TEntry").pack(side="left", fill="x", expand=True, padx=10)
-        ttk.Button(repo_row, text="BROWSE", command=self.choose_repo, style="Cyber.TButton").pack(side="left")
-        ttk.Button(repo_row, text="USE CURRENT", command=self.use_current_dir, style="Cyber.TButton").pack(side="left", padx=(8, 0))
-        status_frame = ttk.LabelFrame(outer, text=" SYSTEM STATUS ", style="Cyber.TLabelframe", padding=12)
-        status_frame.pack(fill="x", pady=(0, 12))
-        rows = [("BRANCH", self.branch_var), ("HEAD", self.head_var), ("LOCAL REF", self.local_ref_var), ("REMOTE REF", self.remote_ref_var), ("STATE", self.state_var)]
-        for row, (label, variable) in enumerate(rows):
-            ttk.Label(status_frame, text=label, style="Sub.TLabel", width=14).grid(row=row, column=0, sticky="w", pady=3)
-            ttk.Label(status_frame, textvariable=variable, style="Status.TLabel").grid(row=row, column=1, sticky="w", pady=3)
-        button_row = ttk.Frame(outer, style="Cyber.TFrame")
-        button_row.pack(fill="x", pady=(0, 12))
-        buttons = [("↻ REFRESH", self.refresh_status), ("SCAN BROKEN REFS", self.scan_and_repair_refs), ("REPAIR CURRENT BRANCH", self.repair_current_branch), ("FETCH ORIGIN", self.fetch_origin), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart)]
-        for index, (text, command) in enumerate(buttons):
-            ttk.Button(button_row, text=text, command=command, style="Cyber.TButton").pack(side="left", padx=(0 if index == 0 else 8, 0))
-        ttk.Label(outer, text="RECOVERY LOG", style="Cyber.TLabel").pack(anchor="w")
-        self.log = ScrolledText(outer, wrap="word", height=22, bg=CP_PANEL, fg=CP_CYAN, insertbackground=CP_CYAN, selectbackground=CP_CYAN, selectforeground=CP_BG, relief="flat", borderwidth=1, font=FONT)
-        self.log.pack(fill="both", expand=True, pady=(4, 0))
+        root = QWidget()
+        self.setCentralWidget(root)
+        outer = QVBoxLayout(root)
+        outer.setContentsMargins(16, 16, 16, 16)
+        title = QLabel("// GIT REF RESCUE")
+        title.setObjectName("title")
+        outer.addWidget(title)
+        subtitle = QLabel("ATOMIC REF RECOVERY • INDEX/WORKTREE PRESERVED")
+        subtitle.setObjectName("subtitle")
+        outer.addWidget(subtitle)
+
+        repo_row = QHBoxLayout()
+        repo_row.addWidget(QLabel("REPOSITORY"))
+        repo_row.addWidget(self.repo_edit, 1)
+        browse = QPushButton("BROWSE")
+        browse.clicked.connect(self.choose_repo)
+        repo_row.addWidget(browse)
+        current = QPushButton("USE CURRENT")
+        current.clicked.connect(self.use_current_dir)
+        repo_row.addWidget(current)
+        outer.addLayout(repo_row)
+
+        status = QGroupBox("SYSTEM STATUS")
+        status_layout = QVBoxLayout(status)
+        for name, label in (("BRANCH", self.branch_label), ("HEAD", self.head_label), ("LOCAL REF", self.local_label), ("REMOTE REF", self.remote_label), ("STATE", self.state_label)):
+            row = QHBoxLayout()
+            caption = QLabel(name)
+            caption.setFixedWidth(110)
+            label.setProperty("class", "status")
+            row.addWidget(caption)
+            row.addWidget(label, 1)
+            status_layout.addLayout(row)
+        outer.addWidget(status)
+
+        buttons = QHBoxLayout()
+        actions = (("↻ REFRESH", self.refresh_status), ("SCAN BROKEN REFS", self.scan_and_repair_refs), ("REPAIR CURRENT BRANCH", self.repair_current_branch), ("FETCH ORIGIN", self.fetch_origin), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart))
+        for text, handler in actions:
+            button = QPushButton(text)
+            button.clicked.connect(handler)
+            buttons.addWidget(button)
+        outer.addLayout(buttons)
+        outer.addWidget(QLabel("RECOVERY LOG"))
+        self.log.setReadOnly(True)
+        self.log.setFont(QFont("Consolas", 10))
+        outer.addWidget(self.log, 1)
 
     def append_log(self, text: str) -> None:
-        self.log.insert("end", text.rstrip() + "\n")
-        self.log.see("end")
+        self.log.appendPlainText(text.rstrip())
+        scrollbar = self.log.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
 
     def repo_path(self) -> Optional[Path]:
-        raw = self.repo_var.get().strip()
+        raw = self.repo_edit.text().strip()
         path = Path(raw).expanduser() if raw else Path.cwd()
         if not path.exists():
-            messagebox.showerror("Git Ref Rescue", f"Path does not exist:\n{path}")
+            QMessageBox.critical(self, "Git Ref Rescue", f"Path does not exist:\n{path}")
             return None
         root = git_root_from(path)
         if root is None:
-            messagebox.showerror("Git Ref Rescue", f"Not a Git repository:\n{path}")
+            QMessageBox.critical(self, "Git Ref Rescue", f"Not a Git repository:\n{path}")
             return None
-        self.repo_var.set(str(root))
+        self.repo_edit.setText(str(root))
         return root
 
     def choose_repo(self) -> None:
-        path = filedialog.askdirectory(initialdir=self.repo_var.get() or str(Path.cwd()))
+        path = QFileDialog.getExistingDirectory(self, "Select Git repository", self.repo_edit.text())
         if path:
-            self.repo_var.set(path)
+            self.repo_edit.setText(path)
             self.refresh_status()
 
     def use_current_dir(self) -> None:
-        self.repo_var.set(str(Path.cwd()))
+        self.repo_edit.setText(str(Path.cwd()))
         self.refresh_status()
 
-    def _git_output(self, repo: Path, *args: str, timeout: int = 10) -> str:
+    def git_output(self, repo: Path, *args: str, timeout: int = 10) -> str:
         try:
             result = run_git(repo, *args, timeout=timeout)
         except Exception:
@@ -356,17 +380,16 @@ class GitRefRescueApp(tk.Tk):
         if repo is None:
             return
         branch = current_branch(repo)
-        self.branch_var.set(branch or "(DETACHED / UNRESOLVED)")
-        self.head_var.set(self._git_output(repo, "rev-parse", "--short", "HEAD") or "(BROKEN)")
+        self.branch_label.setText(branch or "(DETACHED / UNRESOLVED)")
+        self.head_label.setText(self.git_output(repo, "rev-parse", "--short", "HEAD") or "(BROKEN)")
         if branch:
-            self.local_ref_var.set(resolve_ref(repo, current_branch_refname(branch)) or "(MISSING / BROKEN)")
-            self.remote_ref_var.set(resolve_ref(repo, remote_branch_refname(branch)) or "(MISSING / BROKEN)")
+            self.local_label.setText(resolve_ref(repo, current_branch_refname(branch)) or "(MISSING / BROKEN)")
+            self.remote_label.setText(resolve_ref(repo, remote_branch_refname(branch)) or "(MISSING / BROKEN)")
         else:
-            self.local_ref_var.set("(N/A)")
-            self.remote_ref_var.set("(N/A)")
-        status = self._git_output(repo, "status", "--short")
-        self.state_var.set("CLEAN" if not status else "DIRTY / PRESERVED")
-        self.append_log(f"[{datetime.now():%H:%M:%S}] branch={self.branch_var.get()} | state={self.state_var.get()}")
+            self.local_label.setText("(N/A)")
+            self.remote_label.setText("(N/A)")
+        self.state_label.setText("CLEAN" if not self.git_output(repo, "status", "--short") else "DIRTY / PRESERVED")
+        self.append_log(f"[{datetime.now():%H:%M:%S}] branch={self.branch_label.text()} | state={self.state_label.text()}")
 
     def run_action(self, title: str, func: Callable[[Path], None]) -> None:
         repo = self.repo_path()
@@ -375,10 +398,10 @@ class GitRefRescueApp(tk.Tk):
         self.append_log(f"\n>>> {title.upper()}")
         try:
             func(repo)
-            messagebox.showinfo("Git Ref Rescue", f"{title} completed.")
+            QMessageBox.information(self, "Git Ref Rescue", f"{title} completed.")
         except Exception as exc:
             self.append_log(f"ERROR: {exc}")
-            messagebox.showerror("Git Ref Rescue", f"{title} failed.\n\n{exc}")
+            QMessageBox.critical(self, "Git Ref Rescue", f"{title} failed.\n\n{exc}")
         finally:
             self.refresh_status()
 
@@ -386,11 +409,11 @@ class GitRefRescueApp(tk.Tk):
         def action(repo: Path) -> None:
             repaired = 0
             for refname in iter_loose_refs(repo):
-                if read_ref_value(ref_file(repo, refname)) and object_exists(repo, read_ref_value(ref_file(repo, refname)) or ""):
+                current = read_ref_value(ref_file(repo, refname))
+                if current and object_exists(repo, current):
                     continue
                 if refname.startswith("refs/heads/"):
-                    branch = refname.removeprefix("refs/heads/")
-                    sha, reason = best_recovery_commit(repo, branch)
+                    sha, reason = best_recovery_commit(repo, refname.removeprefix("refs/heads/"))
                     if sha:
                         repair = write_repaired_ref(repo, refname, sha)
                         repaired += 1
@@ -423,16 +446,19 @@ class GitRefRescueApp(tk.Tk):
         self.run_action("fetch origin --prune", action)
 
     def open_settings(self) -> None:
-        SettingsDialog(self)
+        SettingsDialog(self).exec()
 
     def restart(self) -> None:
         os.execv(sys.executable, [sys.executable, *sys.argv])
 
 
 def main() -> int:
-    app = GitRefRescueApp()
-    app.mainloop()
-    return 0
+    app = QApplication(sys.argv)
+    app.setApplicationName("Git Ref Rescue")
+    app.setStyle("Fusion")
+    window = GitRefRescueApp()
+    window.show()
+    return app.exec()
 
 
 if __name__ == "__main__":
