@@ -242,6 +242,38 @@ def write_repaired_ref(repo: Path, refname: str, sha: str) -> RefRepair:
     return RefRepair(refname, before, sha, f"atomic repair; backup={backup}" if backup else "atomic repair")
 
 
+def lock_files(repo: Path) -> list[Path]:
+    git_root = git_dir(repo)
+    if not git_root.exists():
+        return []
+    return sorted(path for path in git_root.rglob("*.lock") if path.is_file())
+
+
+def interrupted_operations(repo: Path) -> list[str]:
+    root = git_dir(repo)
+    markers = {
+        "MERGE_HEAD": root / "MERGE_HEAD",
+        "CHERRY_PICK_HEAD": root / "CHERRY_PICK_HEAD",
+        "REVERT_HEAD": root / "REVERT_HEAD",
+        "AUTO_MERGE": root / "AUTO_MERGE",
+        "rebase-merge": root / "rebase-merge",
+        "rebase-apply": root / "rebase-apply",
+        "sequencer": root / "sequencer",
+    }
+    return [name for name, path in markers.items() if path.exists()]
+
+
+def git_process_running() -> bool:
+    try:
+        if os.name == "nt":
+            result = subprocess.run(["tasklist", "/FI", "IMAGENAME eq git.exe", "/NH"], capture_output=True, text=True, timeout=5, creationflags=CREATE_NO_WINDOW)
+            return any(line.lower().startswith("git.exe") for line in result.stdout.splitlines())
+        result = subprocess.run(["pgrep", "-x", "git"], capture_output=True, text=True, timeout=5)
+        return result.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 class SettingsDialog(QDialog):
     def __init__(self, parent: QWidget) -> None:
         super().__init__(parent)
@@ -329,12 +361,19 @@ class GitRefRescueApp(QMainWindow):
         outer.addWidget(status)
 
         buttons = QHBoxLayout()
-        actions = (("↻ REFRESH", self.refresh_status), ("SCAN BROKEN REFS", self.scan_and_repair_refs), ("REPAIR CURRENT BRANCH", self.repair_current_branch), ("FETCH ORIGIN", self.fetch_origin), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart))
+        actions = (("↻ REFRESH", self.refresh_status), ("SCAN BROKEN REFS", self.scan_and_repair_refs), ("REPAIR CURRENT BRANCH", self.repair_current_branch), ("FETCH ORIGIN", self.fetch_origin))
         for text, handler in actions:
             button = QPushButton(text)
             button.clicked.connect(handler)
             buttons.addWidget(button)
         outer.addLayout(buttons)
+        repair_buttons = QHBoxLayout()
+        recovery_actions = (("CHECK REPO HEALTH", self.check_repo_health), ("MOVE STALE LOCKS", self.move_stale_locks), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart))
+        for text, handler in recovery_actions:
+            button = QPushButton(text)
+            button.clicked.connect(handler)
+            repair_buttons.addWidget(button)
+        outer.addLayout(repair_buttons)
         outer.addWidget(QLabel("RECOVERY LOG"))
         self.log.setReadOnly(True)
         self.log.setFont(QFont("Consolas", 10))
@@ -436,6 +475,53 @@ class GitRefRescueApp(QMainWindow):
             if not resolve_ref(repo, remote_branch_refname(branch)):
                 self.append_log("remote-tracking ref remains unchanged; use FETCH ORIGIN explicitly if desired")
         self.run_action("repair current branch", action)
+
+    def check_repo_health(self) -> None:
+        def action(repo: Path) -> None:
+            locks = lock_files(repo)
+            operations = interrupted_operations(repo)
+            self.append_log("health check: index/worktree are read-only during this operation")
+            self.append_log(f"lock files: {len(locks)}")
+            for path in locks:
+                self.append_log(f"  LOCK: {path.relative_to(git_dir(repo))}")
+            self.append_log(f"interrupted Git operations: {', '.join(operations) if operations else 'none'}")
+            status = run_git(repo, "status", "--short", timeout=15)
+            self.append_log("git status:")
+            self.append_log(status.stdout or status.stderr or "  (clean or no output)")
+            fsck = run_git(repo, "fsck", "--full", "--no-progress", timeout=60)
+            self.append_log("git fsck:")
+            self.append_log((fsck.stdout or "") + (fsck.stderr or "") or "  object database is healthy")
+            if operations:
+                self.append_log("An interrupted operation was detected. Resolve it manually with Git after reviewing conflicts; this tool will not run merge --abort or reset automatically.")
+        self.run_action("check repository health", action)
+
+    def move_stale_locks(self) -> None:
+        repo = self.repo_path()
+        if repo is None:
+            return
+        locks = lock_files(repo)
+        if not locks:
+            self.append_log("\n>>> MOVE STALE LOCKS\nno .lock files found")
+            QMessageBox.information(self, "Git Ref Rescue", "No Git lock files were found.")
+            return
+        if git_process_running():
+            QMessageBox.warning(self, "Git Ref Rescue", "A git.exe process is currently running. Close it and try again; lock files were not changed.")
+            return
+        names = "\n".join(str(path.relative_to(git_dir(repo))) for path in locks)
+        answer = QMessageBox.question(self, "Move stale Git locks", f"No active git process was detected. Move these lock files into a recoverable backup folder?\n\n{names}", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No)
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        backup_root = git_dir(repo) / "git-ref-rescue-backups" / stamp / "locks"
+        moved = 0
+        for path in locks:
+            destination = backup_root / path.relative_to(git_dir(repo))
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(path), str(destination))
+            moved += 1
+            self.append_log(f"moved stale lock: {path.relative_to(git_dir(repo))} -> {destination}")
+        self.append_log(f"moved {moved} lock file(s); backups are recoverable")
+        self.refresh_status()
 
     def fetch_origin(self) -> None:
         def action(repo: Path) -> None:
