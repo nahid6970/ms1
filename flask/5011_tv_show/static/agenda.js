@@ -103,7 +103,8 @@
         const visible = items.filter(item => {
             const type = item.type.toLocaleLowerCase();
             const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed && !!item.next_run) || (filter === 'complete' && item.completed);
-            const timeMatch = timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
+            const pendingMovieWithoutRelease = filter === 'movie-pending' && type === 'movie' && !item.release_date;
+            const timeMatch = pendingMovieWithoutRelease || timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
             return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {

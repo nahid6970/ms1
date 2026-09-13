@@ -110,6 +110,9 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `static/agenda.js`: Documented that MOVIES PENDING keeps movies without a digital release date visible even when TODAY or AFTERWARDS is active.
+- `static/agenda.js`: Restored MOVIES PENDING behavior so movies with no available digital release remain visible even when TODAY or AFTERWARDS is selected.
+- `static/agenda.js`: Restored Agenda TODAY/AFTERWARDS fallback matching so pending movies use their scheduled metadata run time when no digital release date exists.
 - `app.py`, `static/style.css`: Documented the refresh-stability fix: atomic JSON persistence with backup fallback prevents transient empty Shows pages, and the context menu remains hidden until opened.
 - `app.py`, `static/style.css`: Fixed intermittent empty Shows pages after refresh by using atomic JSON writes with `.bak` fallback loading, and restored hidden/default styling for the right-click Edit/Delete context menu.
 - `app.py`, `static/agenda.js`: Documented Agenda future TV episode handling: the nearest upcoming air time is shown first, then the next future episode is selected automatically after it passes.
