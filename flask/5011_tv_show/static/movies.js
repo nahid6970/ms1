@@ -1,4 +1,14 @@
 // Movies page functions
+function toggleMoviesNavDropdown(event) {
+    if (event) event.preventDefault();
+    const menu = document.getElementById('moviesNavMenu');
+    if (menu) menu.classList.toggle('show');
+}
+
+function closeMoviesNavDropdown() {
+    const menu = document.getElementById('moviesNavMenu');
+    if (menu) menu.classList.remove('show');
+}
 function openAddMovieModal() {
     document.getElementById('addMovieModal').style.display = 'block';
     document.body.classList.add('modal-open');
@@ -119,6 +129,22 @@ async function toggleMovieWatched(movieId, btn) {
         }
     } catch (error) {
         console.error('Error toggling movie watched:', error);
+    }
+}
+
+async function toggleMovieArchive(movieId, btn) {
+    try {
+        const response = await fetch(`/api/movie/${movieId}/archive`, { method: 'POST' });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update archive state');
+        const card = btn.closest('.movie-card');
+        if (!card) return;
+        btn.title = data.archived ? 'Unarchive movie' : 'Archive movie';
+        btn.setAttribute('aria-label', btn.title);
+        const view = new URLSearchParams(window.location.search).get('view') || 'all';
+        if ((data.archived && view !== 'archived') || (!data.archived && view === 'archived')) card.remove();
+    } catch (error) {
+        console.error('Error toggling movie archive:', error);
     }
 }
 
@@ -361,6 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close movie modals when clicking outside
     document.addEventListener('click', (event) => {
+        const moviesNav = document.getElementById('moviesNavDropdown');
+        if (moviesNav && !moviesNav.contains(event.target)) closeMoviesNavDropdown();
         const addMovieModal = document.getElementById('addMovieModal');
         const editMovieModal = document.getElementById('editMovieModal');
         const movieMetadataModal = document.getElementById('movieMetadataModal');

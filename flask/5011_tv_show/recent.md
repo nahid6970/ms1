@@ -110,6 +110,9 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `templates/movies.html`: Preserved the selected Movies/Unwatched/Archived view when using movie sort links.
+- `app.py`, `templates/movies.html`, `static/movies.js`, `static/style.css`: Added Movies, Unwatched, and Archived navigation views with a per-movie archive button and persistent archive API state.
+- `static/movies.js`, `static/style.css`: Added Movies dropdown behavior and archive-button interaction styling for Movies, Unwatched, and Archived views.
 - `static/agenda.js`: Documented that MOVIES PENDING keeps movies without a digital release date visible even when TODAY or AFTERWARDS is active.
 - `static/agenda.js`: Restored MOVIES PENDING behavior so movies with no available digital release remain visible even when TODAY or AFTERWARDS is selected.
 - `static/agenda.js`: Restored Agenda TODAY/AFTERWARDS fallback matching so pending movies use their scheduled metadata run time when no digital release date exists.

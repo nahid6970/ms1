@@ -1962,6 +1962,7 @@ def movies_page():
     sort_by = request.args.get('sort_by') or settings.get('default_movies_sort', 'title')
     order = request.args.get('order') or settings.get('default_movies_order', 'asc')
     query = request.args.get('query')
+    movie_view = request.args.get('view', 'all')
 
     movies = load_movies()
     if migrate_tmdb_ratings(movies):
@@ -1970,6 +1971,13 @@ def movies_page():
     # Filter movies based on query
     if query:
         movies = [movie for movie in movies if query.lower() in movie['title'].lower()]
+
+    if movie_view == 'unwatched':
+        movies = [movie for movie in movies if not movie.get('watched') and not movie.get('archived')]
+    elif movie_view == 'archived':
+        movies = [movie for movie in movies if movie.get('archived')]
+    else:
+        movies = [movie for movie in movies if not movie.get('archived')]
 
     # Cache cover images
     for movie in movies:
@@ -1994,7 +2002,7 @@ def movies_page():
     next_order = 'desc' if order == 'asc' else 'asc'
 
     today = datetime.now(BANGLADESH_TZ).date().isoformat()
-    return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, today=today, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
+    return render_template('movies.html', movies=movies, sort_by=sort_by, order=order, next_order=next_order, query=query, movie_view=movie_view, today=today, radarr_url=settings.get('radarr_url', 'http://192.168.0.101:7878').rstrip('/'))
 
 @app.route('/add_show', methods=['GET', 'POST'])
 def add_show():
@@ -2843,6 +2851,16 @@ def api_movie_watched(movie_id):
         save_movies(movies)
         return jsonify({'success': True, 'watched': movie['watched']})
     return jsonify({'success': False, 'message': 'Movie not found'}), 404
+
+@app.route('/api/movie/<int:movie_id>/archive', methods=['POST'])
+def api_movie_archive(movie_id):
+    movies = load_movies()
+    movie = next((m for m in movies if m['id'] == movie_id), None)
+    if not movie:
+        return jsonify({'success': False, 'message': 'Movie not found'}), 404
+    movie['archived'] = not bool(movie.get('archived', False))
+    save_movies(movies)
+    return jsonify({'success': True, 'archived': movie['archived']})
 
 @app.route('/api/movie/<int:movie_id>/delete', methods=['POST'])
 def api_movie_delete(movie_id):

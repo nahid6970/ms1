@@ -339,6 +339,7 @@ body {
 .btn-tvmaze          { background: #f5a623; color: white; }
 .btn-imdb            { background: #f5c518; color: #111827; }
 .btn-delete          { background: #ef4444; color: white; }
+.btn-archive         { background: #f59e0b; color: white; }
 
 /* First two buttons side by side */
 .hover-btn-row {
@@ -358,6 +359,7 @@ body {
 .btn-tvmaze:hover          { background: #d4891a; transform: scale(1.1); }
 .btn-imdb:hover            { background: #d9aa00; color: #111827; transform: scale(1.1); }
 .btn-delete:hover          { background: #dc2626; transform: scale(1.1); }
+.btn-archive:hover         { background: #d97706; transform: scale(1.1); }
 
 .imdb-mark {
     font-size: 0.68rem;
