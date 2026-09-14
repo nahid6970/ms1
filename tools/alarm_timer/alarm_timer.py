@@ -1387,8 +1387,9 @@ class TimerCard(QFrame):
             # Long day/hour/minute/second values must fit the existing card;
             # otherwise QLabel centers the text and clips its first digit.
             display_size = 26 if len(display_text) <= 8 else 12
+            display_color = CP_SUBTEXT if self.secondary_mode else CP_RED
             self._display.setStyleSheet(
-                f"color: {active_color}; font-size: {display_size}pt; font-weight: bold;"
+                f"color: {display_color}; font-size: {display_size}pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
             self._set_border(CP_GREEN)
