@@ -1780,8 +1780,12 @@ class ColumnWidget(QFrame):
         now = time.time()
         def sort_key(c):
             if isinstance(c, TextCard):
-                return (2, 0)  # text cards sink to the bottom
-            return (0 if c.fires_at <= now else 1, c.fires_at)
+                return (3, 0, 0)  # text cards sink to the bottom
+            if c.fires_at <= now:
+                return (0, 0, c.fires_at)  # 00:00 / finished timers first
+            if c.secondary_mode:
+                return (1, 0, c.fires_at)  # Usage timers next
+            return (2, 0, c.fires_at)  # other active timers last
         cards.sort(key=sort_key)
         for i, card in enumerate(cards):
             self._card_layout.removeWidget(card)

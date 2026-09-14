@@ -153,13 +153,13 @@
         {
           "id": "523e5c0e",
           "label": "BS-6970",
-          "fires_at": 1789228560.0,
-          "created_at": 1788257788.8987772,
+          "fires_at": 1791950700.0,
+          "created_at": 1789358799.6665027,
           "input_mode": "custom_3",
-          "input_value": "21:56 on 12 Sep",
+          "input_value": "10:05 on 14 Oct",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": false
+          "secondary_mode": true
         }
       ]
     },
