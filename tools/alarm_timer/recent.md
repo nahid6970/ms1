@@ -5,6 +5,7 @@ PyQt6 desktop GUI in a modular single-file Python architecture, with JSON persis
 # 2. Latest Implementation
 
 - `alarm_timer.py`: stabilized startup layout updates by placing the checkmark button in a fixed 22px slot, changing its visibility only when a timer changes between active and fired, and sorting loaded cards once per column instead of after every card.
+- `alarm_timer.py`: the compact Android-style usage switch marks the card as a usage timer by switching its main countdown, border, and progress bar to a muted gray; no additional countdown is shown.
 
 # 3. Critical Context
 

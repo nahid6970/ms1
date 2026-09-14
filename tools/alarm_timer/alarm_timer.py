@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
     QMessageBox, QDateTimeEdit, QRadioButton,
     QButtonGroup, QDialogButtonBox, QGridLayout, QColorDialog, QCheckBox,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize, QRectF
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
 from PyQt6.QtSvg import QSvgRenderer
 
@@ -86,6 +86,43 @@ CP_ORANGE  = "#ff934b"
 CP_DIM     = "#3a3a3a"
 CP_TEXT    = "#E0E0E0"
 CP_SUBTEXT = "#808080"
+
+
+class ToggleSwitch(QCheckBox):
+    """Compact platform-independent switch with a visible track and thumb."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(36, 22)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.stateChanged.connect(self.update)
+
+    def hitButton(self, pos):
+        """Make the entire compact switch clickable, not only the native indicator."""
+        return self.rect().contains(pos)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        if self.isChecked():
+            track = "#00A8B5"
+            border = CP_CYAN
+            thumb_x = 26
+        else:
+            track = "#2B2B2B"
+            border = "#666666"
+            thumb_x = 10
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="22">'
+            f'<rect x="1" y="3" width="34" height="16" rx="8" fill="{track}" stroke="{border}"/>'
+            f'<circle cx="{thumb_x}" cy="11" r="7" fill="#FFFFFF"/>'
+            '</svg>'
+        )
+        QSvgRenderer(QByteArray(svg.encode())).render(painter, QRectF(0, 0, 36, 22))
+
+        painter.end()
 
 # ── Global Stylesheet ──────────────────────────────────────
 GLOBAL_QSS = f"""
@@ -1080,7 +1117,7 @@ class TimerCard(QFrame):
     duplicated    = pyqtSignal(str)   # emits card_id — parent handles the clone
     state_changed = pyqtSignal()
 
-    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", use_custom_colors: bool = False, toggled: bool = False, parent=None):
+    def __init__(self, card_id: str, label: str, fires_at: float, created_at: float = 0.0, input_mode: str = "text", input_value: str = "", use_custom_colors: bool = False, toggled: bool = False, parent=None, secondary_mode: bool = False):
         super().__init__(parent)
         self.card_id  = card_id
         self.label    = label
@@ -1089,6 +1126,7 @@ class TimerCard(QFrame):
         self.input_value = input_value
         self.use_custom_colors = use_custom_colors
         self.toggled  = toggled
+        self.secondary_mode = secondary_mode
         self._toggle_available: bool | None = None
         
         now = time.time()
@@ -1096,7 +1134,7 @@ class TimerCard(QFrame):
             self.created_at = now
         else:
             self.created_at = created_at
-            
+
         self.fired    = False
 
         self.setFrameShape(QFrame.Shape.NoFrame)
@@ -1174,8 +1212,19 @@ class TimerCard(QFrame):
         del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         del_btn.setToolTip("Delete timer")
         del_btn.clicked.connect(self._on_delete)
+
+        self._secondary_btn = ToggleSwitch()
+        self._secondary_btn.setChecked(self.secondary_mode)
+        self._secondary_btn.setToolTip("Usage timer: toggle muted timer color")
+        self._secondary_btn.setAccessibleName("Usage timer toggle")
+        self._secondary_btn.stateChanged.connect(
+            lambda state: self._on_secondary_toggle(
+                state == Qt.CheckState.Checked.value
+            )
+        )
         
         top.addWidget(self._lbl, 1)
+        top.addWidget(self._secondary_btn, 0)
         top.addWidget(edit_btn, 0)
         top.addWidget(dup_btn, 0)
         top.addWidget(del_btn, 0)
@@ -1253,6 +1302,11 @@ class TimerCard(QFrame):
         self._apply_toggle_style()
         self.state_changed.emit()
 
+    def _on_secondary_toggle(self, checked: bool):
+        self.secondary_mode = checked
+        self._tick()
+        self.state_changed.emit()
+
     def _get_colors(self) -> tuple[str, str]:
         """Return (fired_color, active_color) — from settings if custom colors enabled."""
         if self.use_custom_colors:
@@ -1295,7 +1349,9 @@ class TimerCard(QFrame):
         
         # progress bar uses the active color when ratio is high,
         # blending toward orange/red as it nears expiry
-        if self.use_custom_colors:
+        if self.secondary_mode:
+            bar_color = CP_SUBTEXT
+        elif self.use_custom_colors:
             bar_color = active_color
         else:
             bar_color = CP_GREEN if ratio > 0.5 else (CP_ORANGE if ratio > 0.2 else CP_RED)
@@ -1304,6 +1360,8 @@ class TimerCard(QFrame):
     def _tick(self):
         now = time.time()
         fired_color, active_color = self._get_colors()
+        if self.secondary_mode:
+            fired_color = active_color = CP_SUBTEXT
         if now >= self.fires_at:
             self._display.setText("00:00")
             self._display.setStyleSheet(
@@ -1397,6 +1455,7 @@ class TimerCard(QFrame):
             "input_value": self.input_value,
             "use_custom_colors": self.use_custom_colors,
             "toggled": self.toggled,
+            "secondary_mode": self.secondary_mode,
         }
 
     @classmethod
@@ -1409,7 +1468,9 @@ class TimerCard(QFrame):
         input_value = d.get("input_value", "")
         use_custom_colors = d.get("use_custom_colors", False)
         toggled = d.get("toggled", False)
-        return cls(card_id, label, fires_at, created_at, input_mode, input_value, use_custom_colors, toggled, parent)
+        return cls(card_id, label, fires_at, created_at, input_mode, input_value,
+                   use_custom_colors, toggled, parent,
+                   d.get("secondary_mode", False))
 
 
 # ── TextCard ──────────────────────────────────────────────
@@ -1754,6 +1815,7 @@ class ColumnWidget(QFrame):
                 src.use_custom_colors,
                 False,   # toggled resets on duplicate
                 self,
+                src.secondary_mode,
             )
         self.add_card(new_card)
         QTimer.singleShot(50, lambda:
