@@ -1324,9 +1324,13 @@ class TimerCard(QFrame):
         else:
             self.fired = False
             rem = int(self.fires_at - now)
-            self._display.setText(fmt_secs(rem))
+            display_text = fmt_secs(rem)
+            self._display.setText(display_text)
+            # Long day/hour/minute/second values must fit the existing card;
+            # otherwise QLabel centers the text and clips its first digit.
+            display_size = 26 if len(display_text) <= 8 else 12
             self._display.setStyleSheet(
-                f"color: {active_color}; font-size: 26pt; font-weight: bold;"
+                f"color: {active_color}; font-size: {display_size}pt; font-weight: bold;"
                 " font-family: 'Consolas'; letter-spacing: 2px; background: transparent; border: none;"
             )
             self._set_border(CP_GREEN)
