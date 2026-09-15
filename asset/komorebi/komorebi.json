@@ -379,6 +379,11 @@
             "kind": "Class",
             "id": "TMOG.TaskManager.MainWindow",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "obs64.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -500,6 +505,11 @@
         {
             "kind": "Class",
             "id": "TMOG.TaskManager.MainWindow",
+            "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Exe",
+            "id": "obs64.exe",
             "matching_strategy": "Legacy"
         }
     ],
