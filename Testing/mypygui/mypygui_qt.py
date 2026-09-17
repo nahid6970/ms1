@@ -5980,21 +5980,28 @@ class TranscriptionDialog(QDialog):
             QPushButton#cancel {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
         """)
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(16, 12, 16, 12)
-        outer.setSpacing(8)
-        row = QHBoxLayout()
-        row.setSpacing(8)
+        outer.setContentsMargins(2, 2, 2, 2)
+        outer.setSpacing(0)
         editor = QPlainTextEdit(text or (f"⚠ {error}" if error else ""))
         editor.setFixedWidth(350)
         editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         # Fit the editor height to wrapped content while keeping short results compact.
-        editor.document().setTextWidth(330)
-        document_height = editor.document().documentLayout().documentSize().height()
-        editor.setFixedHeight(max(52, min(220, int(document_height) + 18)))
+        content = editor.toPlainText()
+        measure_doc = QTextDocument()
+        measure_doc.setDefaultFont(editor.font())
+        measure_doc.setPlainText(content)
+        measure_doc.setTextWidth(330)
+        wrapped_height = measure_doc.documentLayout().documentSize().height()
+        editor.setFixedHeight(max(34, min(600, int(wrapped_height) + 18)))
         self.editor = editor
-        row.addWidget(editor, 1)
+        outer.addWidget(editor)
+
+        action_row = QHBoxLayout()
+        action_row.setContentsMargins(0, 4, 0, 0)
+        action_row.setSpacing(4)
+        action_row.addStretch()
         for mode, icon, tip in (("search", "🔍", "Google search"),
                                 ("clipboard", "📋", "Copy/paste to active window"),
                                 ("gg", "⚡", "Run GG")):
@@ -6003,8 +6010,9 @@ class TranscriptionDialog(QDialog):
             button.setFixedSize(34, 34)
             button.setToolTip(tip)
             button.clicked.connect(lambda checked=False, m=mode: action_callback(m, self.editor.toPlainText()))
-            row.addWidget(button, 0, Qt.AlignmentFlag.AlignVCenter)
-        outer.addLayout(row)
+            action_row.addWidget(button)
+        action_row.addStretch()
+        outer.addLayout(action_row)
         self.adjustSize()
         # The caller positions this below the statusbar; keep construction
         # independent from the main window's center.

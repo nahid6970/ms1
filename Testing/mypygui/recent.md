@@ -102,6 +102,14 @@ All in `mypygui_qt.py`:
   - Hiding and showing pre-allocated rows allows Qt's native `adjustSize()` to calculate the exact, complete window bounds including bottom margins, eliminating bottom row text clipping.
   - Separate `_proc_container` and `_nic_container` toggle cleanly without layout shifts or extra spacing.
 
+- **NEW Voice transcription result windows**:
+  - Local voice recording now transcribes the same audio concurrently in English (`en-US`) and Bengali (`bn-BD`) using separate recognizers, so one language failure does not prevent the other result from appearing.
+  - Results open in two independent frameless windows, English first and বাংলা below, positioned below the voice/statusbar anchor.
+  - Each window contains only its editable transcription box and three icon-only actions below it: Google search (`🔍`), clipboard/paste (`📋`), and GG (`⚡`). Buttons act on the current edited text in that language's box.
+  - Text boxes are fixed at 350px wide and calculate their height from explicit newlines plus wrapped content using `QTextDocument`; short text stays compact and longer transcriptions expand up to 600px.
+  - Per-language transcription errors are shown inside the affected editor instead of silently dropping that result.
+  - Validation: `python -m py_compile mypygui_qt.py` and `git diff --check` pass.
+
 ## 4. Pending Task / Known Issue
 
 ### 🐛 Chrome black top bar on statusbar restart (UNSOLVED)
