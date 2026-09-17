@@ -120,13 +120,13 @@
         {
           "id": "92ab5510",
           "label": "06",
-          "fires_at": 1790845200.0,
-          "created_at": 1789357661.725437,
+          "fires_at": 1790845560.0,
+          "created_at": 1789616043.8393545,
           "input_mode": "custom_3",
-          "input_value": "15:00 on 1 Oct",
+          "input_value": "15:06 on 1 Oct",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": true
+          "secondary_mode": false
         },
         {
           "id": "3ca619ac",
