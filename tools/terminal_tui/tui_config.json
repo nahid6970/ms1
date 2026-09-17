@@ -854,10 +854,9 @@
       },
       "bookmarks": [],
       "layout": {
-        "layoutClass": "split-tabs",
+        "layoutClass": "split-right",
         "paneIds": [
-          "main",
-          "pane-1789615805405-1"
+          "main"
         ]
       }
     }

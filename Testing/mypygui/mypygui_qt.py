@@ -5963,6 +5963,60 @@ def paste_text(text, preserve_clipboard=False):
         logging.error(f"paste_text error: {e}")
 
 
+class DualTranscriptionDialog(QDialog):
+    """Show editable English and Bengali transcriptions with per-row actions."""
+    def __init__(self, english, bangla, action_callback, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Voice Transcription")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
+            QLabel {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP', Consolas; font-weight: bold; }}
+            QPlainTextEdit {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 6px; font-size: 10pt; }}
+            QPushButton {{ background: {CP_PANEL}; color: white; border: 1px solid {CP_DIM}; padding: 6px 10px; font-weight: bold; }}
+            QPushButton:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}
+            QPushButton#en {{ color: {CP_RED}; border-color: {CP_RED}; }}
+            QPushButton#bn {{ color: {CP_GREEN}; border-color: {CP_GREEN}; }}
+            QPushButton#cancel {{ color: {CP_YELLOW}; }}
+        """)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(16, 12, 16, 12)
+        outer.setSpacing(8)
+        title = QLabel("🎙️ Voice Transcription")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        outer.addWidget(title)
+
+        self.editors = {}
+        for key, label, value, obj_name in (
+                ("en-US", "ENGLISH", english, "en"),
+                ("bn-BD", "বাংলা", bangla, "bn")):
+            row = QHBoxLayout()
+            row.setSpacing(8)
+            caption = QLabel(label)
+            caption.setFixedWidth(76)
+            row.addWidget(caption, 0, Qt.AlignmentFlag.AlignTop)
+            editor = QPlainTextEdit(value or "")
+            editor.setMinimumSize(360, 68)
+            editor.setMaximumHeight(100)
+            self.editors[key] = editor
+            row.addWidget(editor, 1)
+            for mode, text in (("search", "Google"), ("clipboard", "Clipboard"), ("gg", "GG")):
+                button = QPushButton(text)
+                button.setObjectName(obj_name)
+                button.clicked.connect(lambda checked=False, lang=key, m=mode: action_callback(m, self.editors[lang].toPlainText()))
+                row.addWidget(button)
+            outer.addLayout(row)
+
+        cancel = QPushButton("✕ Cancel")
+        cancel.setObjectName("cancel")
+        cancel.clicked.connect(self.reject)
+        outer.addWidget(cancel, 0, Qt.AlignmentFlag.AlignRight)
+        self.adjustSize()
+        screen = QApplication.primaryScreen().availableGeometry()
+        self.move(screen.left() + (screen.width() - self.width()) // 2,
+                  screen.top() + (screen.height() - self.height()) // 2)
+
+
 class LanguageChoiceDialog(QDialog):
     """
     Sleek, centered popup to choose transcription language (EN / BN) with keyboard shortcuts.
@@ -6200,7 +6254,7 @@ class ContinuousThread(QThread):
 class VoiceApp(QMainWindow):
     toggle_record_requested = pyqtSignal()
     space_press_requested = pyqtSignal()
-    transcription_ready = pyqtSignal(int, str)
+    transcription_ready = pyqtSignal(int, str, str)
     transcription_error = pyqtSignal(int, str)
 
     def __init__(self):
@@ -6219,7 +6273,7 @@ class VoiceApp(QMainWindow):
         self.init_ui()
         self.toggle_record_requested.connect(self.toggle_record)
         self.space_press_requested.connect(self._handle_space_press)
-        self.transcription_ready.connect(self.on_result)
+        self.transcription_ready.connect(self.on_dual_transcription)
         self.transcription_error.connect(self.on_error)
         self.setup_global_hotkey()
 
@@ -7094,33 +7148,59 @@ class VoiceApp(QMainWindow):
         self._set_status(CP_YELLOW)
         self._reset_record_btn()
 
-        # Show popup in the center of the display to choose language
-        dlg = LanguageChoiceDialog(self)
-        if dlg.exec() == QDialog.DialogCode.Accepted:
-            chosen_lang = dlg.selected_lang
-            self._set_status(CP_YELLOW)
-            threading.Thread(
-                target=self._run_transcription_worker,
-                args=(session_id, recognizer, audio, chosen_lang),
-                daemon=True
-            ).start()
-        else:
-            self._set_status(CP_GREEN)
-            self._update_status_icon_mode()
-            self._recording_active = False
+        self._set_status(CP_YELLOW)
+        threading.Thread(
+            target=self._run_transcription_worker,
+            args=(session_id, recognizer, audio),
+            daemon=True
+        ).start()
 
-    def _run_transcription_worker(self, session_id, recognizer, audio, lang):
+    def _run_transcription_worker(self, session_id, recognizer, audio):
         try:
-            logging.info(f"Transcribing audio with Google Speech API ({lang})...")
-            text = recognizer.recognize_google(audio, language=lang)
-            logging.info(f"Transcription result: {text}")
-            if text:
-                self.transcription_ready.emit(session_id, text)
+            logging.info("Transcribing audio in English and Bengali...")
+            results = {}
+            errors = []
+            for lang in ("en-US", "bn-BD"):
+                try:
+                    results[lang] = recognizer.recognize_google(audio, language=lang)
+                except Exception as exc:
+                    logging.warning("%s transcription failed: %s", lang, exc)
+                    results[lang] = ""
+                    errors.append(str(exc))
+            if results.get("en-US") or results.get("bn-BD"):
+                self.transcription_ready.emit(session_id, results.get("en-US", ""), results.get("bn-BD", ""))
             else:
-                self.transcription_error.emit(session_id, "No speech detected")
+                self.transcription_error.emit(session_id, errors[-1] if errors else "No speech detected")
         except Exception as e:
             logging.error(f"Transcription error: {e}")
             self.transcription_error.emit(session_id, str(e))
+
+    def _run_voice_action(self, mode, text):
+        text = (text or "").strip()
+        if not text:
+            return
+        if mode == "search":
+            from urllib.parse import quote_plus
+            webbrowser.open(f"https://www.google.com/search?q={quote_plus(text)}")
+        elif mode == "gg":
+            safe_text = text.replace("'", "''")
+            subprocess.Popen(
+                ["pwsh", "-NoExit", "-Command", f"gg -gui '{safe_text}'"],
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                cwd=os.path.expanduser("~")
+            )
+        else:
+            paste_text(text, preserve_clipboard=False)
+
+    def on_dual_transcription(self, session_id, english, bangla):
+        if session_id != self._session_id:
+            return
+        self._set_status(CP_GREEN)
+        self._update_status_icon_mode()
+        self._reset_record_btn()
+        self._recording_active = False
+        dlg = DualTranscriptionDialog(english, bangla, self._run_voice_action, self)
+        dlg.exec()
 
     def _start_continuous(self):
         self._session_id += 1
