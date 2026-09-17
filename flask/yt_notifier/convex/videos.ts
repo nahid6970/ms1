@@ -602,7 +602,10 @@ export const addFromFeed = internalMutation({
         });
         newVideos += 1;
       } else {
-        const patch: { duration?: string; sourcePlaylistId?: string; sourcePlaylistTitle?: string } = {};
+        const patch: { title?: string; link?: string; published?: string; duration?: string; sourcePlaylistId?: string; sourcePlaylistTitle?: string } = {};
+        if (existing.title !== entry.title) patch.title = entry.title;
+        if (existing.link !== entry.link) patch.link = entry.link;
+        if (existing.published !== entry.published) patch.published = entry.published;
         if (!existing.duration && entry.duration) patch.duration = entry.duration;
         if (sourcePlaylistId && !existing.sourcePlaylistId) patch.sourcePlaylistId = sourcePlaylistId;
         if (sourcePlaylistTitle && !existing.sourcePlaylistTitle) patch.sourcePlaylistTitle = sourcePlaylistTitle;

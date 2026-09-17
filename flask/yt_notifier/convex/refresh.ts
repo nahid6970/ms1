@@ -8,6 +8,7 @@ import {
   fetchFeedViaApiPaginated,
   fetchPlaylistFeedWithApiKey,
   fetchVideoDurations,
+  fetchVideoTitles,
   parseRulesText,
   resolveChannelInfoWithApiKey,
 } from "./youtube";
@@ -45,6 +46,14 @@ export const refreshChannel = action({
       duration: e.duration,
       published: e.published ? new Date(e.published).toISOString() : "",
     }));
+
+    if (apiKey && entries.length > 0) {
+      const titles = await fetchVideoTitles(entries.map((entry) => entry.videoId), apiKey);
+      for (const entry of entries) {
+        const canonicalTitle = titles.get(entry.videoId);
+        if (canonicalTitle) entry.title = canonicalTitle;
+      }
+    }
 
     const rulesText = channel?.rulesText ?? "";
     const rules = parseRulesText(rulesText);

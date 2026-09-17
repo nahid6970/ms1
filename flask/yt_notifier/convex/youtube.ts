@@ -196,6 +196,7 @@ export async function fetchPlaylistFeedWithApiKey(
         .filter((id): id is string => Boolean(id));
 
       const durationsById = await fetchVideoDurations(videoIds, apiKey);
+      const titlesById = await fetchVideoTitles(videoIds, apiKey);
 
       for (const item of items) {
         const s = item.snippet ?? {};
@@ -203,7 +204,7 @@ export async function fetchPlaylistFeedWithApiKey(
         if (!videoId) continue;
         allEntries.push({
           videoId,
-          title: s.title ?? "",
+          title: titlesById.get(videoId) ?? s.title ?? "",
           link: `https://www.youtube.com/watch?v=${videoId}`,
           duration: durationsById.get(videoId),
           // videoPublishedAt = actual video upload date; publishedAt = date added to playlist
@@ -420,12 +421,13 @@ export async function fetchFeedViaApiPaginated(
       .filter((id): id is string => Boolean(id));
 
     const durationsById = await fetchVideoDurations(videoIds, apiKey);
+    const titlesById = await fetchVideoTitles(videoIds, apiKey);
     const entries: FeedEntry[] = items.map((item) => {
       const s = item.snippet ?? {};
       const videoId = s.resourceId?.videoId ?? "";
       return {
         videoId,
-        title: s.title ?? "",
+        title: titlesById.get(videoId) ?? s.title ?? "",
         link: `https://www.youtube.com/watch?v=${videoId}`,
         duration: durationsById.get(videoId),
         published: s.publishedAt ?? "",
@@ -478,6 +480,43 @@ export async function fetchVideoDurations(
   }
 
   return durations;
+}
+
+/**
+ * Fetch the current title for each video ID. Playlist-item metadata can be
+ * stale or malformed, so titles used for cards must be keyed by video ID.
+ */
+export async function fetchVideoTitles(
+  videoIds: string[],
+  apiKey: string,
+): Promise<Map<string, string>> {
+  const titles = new Map<string, string>();
+  if (videoIds.length === 0) return titles;
+
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos` +
+        `?part=snippet&id=${videoIds.join(",")}&key=${apiKey}`,
+    );
+    if (!res.ok) {
+      console.error(
+        `YouTube Data API video titles error (${res.status}):`,
+        (await res.text()).slice(0, 300),
+      );
+      return titles;
+    }
+    const data = (await res.json()) as {
+      items?: Array<{ id?: string; snippet?: { title?: string } }>;
+    };
+    for (const item of data.items ?? []) {
+      if (!item.id || !item.snippet?.title) continue;
+      titles.set(item.id, item.snippet.title);
+    }
+  } catch (err) {
+    console.error("YouTube Data API video title error:", err);
+  }
+
+  return titles;
 }
 
 function formatIsoDuration(value: string): string {
