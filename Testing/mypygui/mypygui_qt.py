@@ -5964,58 +5964,191 @@ def paste_text(text, preserve_clipboard=False):
 
 
 class TranscriptionDialog(QDialog):
-    """Independent editable transcription window for one language."""
+    """Independent editable transcription window for one language — redesigned UI."""
     def __init__(self, language, text, error, action_callback, parent=None):
         super().__init__(parent)
         self.language = language
+        self._drag_pos = None
         self.setWindowTitle(f"{language} Transcription")
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+
+        # Accent colour: cyan for English, green for Bengali/other
+        is_bn = "বাংলা" in language or "bn" in language.lower()
+        accent = CP_GREEN if is_bn else CP_CYAN
+        accent_dim = "#006644" if is_bn else "#004d55"
+        lang_icon = "🇧🇩" if is_bn else "🇬🇧"
+        lang_label_text = language
+
         self.setStyleSheet(f"""
-            QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP', Consolas; font-weight: bold; }}
-            QPlainTextEdit {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 6px; font-size: 10pt; }}
-            QPushButton {{ background: {CP_PANEL}; color: white; border: 1px solid {CP_DIM}; padding: 0px; font-weight: bold; }}
-            QPushButton:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}
-            QPushButton#action {{ color: {CP_CYAN}; border-color: {CP_CYAN}; }}
-            QPushButton#cancel {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
+            QDialog {{
+                background-color: #0d0d0d;
+                border: 1px solid {accent};
+            }}
+            QLabel#header_lang {{
+                color: {accent};
+                font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', sans-serif;
+                font-size: 9pt;
+                font-weight: bold;
+                letter-spacing: 1px;
+            }}
+            QLabel#header_icon {{
+                color: {CP_TEXT};
+                font-size: 10pt;
+            }}
+            QPlainTextEdit {{
+                background: #161616;
+                color: {CP_TEXT};
+                border: 1px solid #2a2a2a;
+                border-left: 2px solid {accent};
+                padding: 8px 10px;
+                font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', sans-serif;
+                font-size: 10pt;
+                selection-background-color: {accent_dim};
+                selection-color: white;
+            }}
+            QPushButton#close_btn {{
+                background: transparent;
+                color: #555555;
+                border: none;
+                font-size: 10pt;
+                padding: 0px;
+            }}
+            QPushButton#close_btn:hover {{
+                color: {CP_RED};
+            }}
+            QPushButton#action_btn {{
+                background: #181818;
+                color: #aaaaaa;
+                border: 1px solid #2e2e2e;
+                border-radius: 3px;
+                font-family: 'JetBrainsMono NFP', 'Consolas', sans-serif;
+                font-size: 8pt;
+                font-weight: bold;
+                padding: 4px 10px;
+            }}
+            QPushButton#action_btn:hover {{
+                background: {accent_dim};
+                border-color: {accent};
+                color: {accent};
+            }}
+            QPushButton#action_btn:pressed {{
+                background: {accent};
+                color: #000000;
+            }}
         """)
+
+        # ── Outer layout (no margin — border IS the chrome) ──────────────────
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(2, 2, 2, 2)
+        outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(0)
-        editor = QPlainTextEdit(text or (f"⚠ {error}" if error else ""))
-        editor.setFixedWidth(350)
+
+        # ── Accent top stripe ─────────────────────────────────────────────────
+        stripe = QWidget()
+        stripe.setFixedHeight(3)
+        stripe.setStyleSheet(f"background: {accent}; border: none;")
+        outer.addWidget(stripe)
+
+        # ── Header row ────────────────────────────────────────────────────────
+        header_widget = QWidget()
+        header_widget.setStyleSheet("background: #111111; border: none;")
+        header_row = QHBoxLayout(header_widget)
+        header_row.setContentsMargins(10, 5, 8, 5)
+        header_row.setSpacing(6)
+
+        icon_lbl = QLabel(lang_icon)
+        icon_lbl.setObjectName("header_icon")
+        header_row.addWidget(icon_lbl)
+
+        lang_lbl = QLabel(lang_label_text.upper())
+        lang_lbl.setObjectName("header_lang")
+        header_row.addWidget(lang_lbl)
+        header_row.addStretch()
+
+        close_btn = QPushButton("✕")
+        close_btn.setObjectName("close_btn")
+        close_btn.setFixedSize(22, 22)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.clicked.connect(self.close)
+        header_row.addWidget(close_btn)
+
+        outer.addWidget(header_widget)
+
+        # ── Divider ───────────────────────────────────────────────────────────
+        divider = QWidget()
+        divider.setFixedHeight(1)
+        divider.setStyleSheet(f"background: #1e1e1e; border: none;")
+        outer.addWidget(divider)
+
+        # ── Text editor ───────────────────────────────────────────────────────
+        body = QWidget()
+        body.setStyleSheet("background: #0d0d0d; border: none;")
+        body_layout = QVBoxLayout(body)
+        body_layout.setContentsMargins(10, 10, 10, 6)
+        body_layout.setSpacing(0)
+
+        editor = QPlainTextEdit(text or (f"⚠  {error}" if error else ""))
+        editor.setFixedWidth(360)
         editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        # Fit the editor height to wrapped content while keeping short results compact.
+
+        # Fit height to content
         content = editor.toPlainText()
         measure_doc = QTextDocument()
         measure_doc.setDefaultFont(editor.font())
         measure_doc.setPlainText(content)
-        measure_doc.setTextWidth(330)
+        measure_doc.setTextWidth(340)
         wrapped_height = measure_doc.documentLayout().documentSize().height()
-        editor.setFixedHeight(max(34, min(600, int(wrapped_height) + 18)))
+        editor.setFixedHeight(max(38, min(600, int(wrapped_height) + 22)))
         self.editor = editor
-        outer.addWidget(editor)
+        body_layout.addWidget(editor)
+        outer.addWidget(body)
 
-        action_row = QHBoxLayout()
-        action_row.setContentsMargins(0, 4, 0, 0)
-        action_row.setSpacing(4)
-        action_row.addStretch()
-        for mode, icon, tip in (("search", "🔍", "Google search"),
-                                ("clipboard", "📋", "Copy/paste to active window"),
-                                ("gg", "⚡", "Run GG")):
-            button = QPushButton(icon)
-            button.setObjectName("action")
-            button.setFixedSize(34, 34)
-            button.setToolTip(tip)
-            button.clicked.connect(lambda checked=False, m=mode: action_callback(m, self.editor.toPlainText()))
-            action_row.addWidget(button)
-        action_row.addStretch()
-        outer.addLayout(action_row)
+        # ── Action buttons row ────────────────────────────────────────────────
+        footer = QWidget()
+        footer.setStyleSheet("background: #0d0d0d; border: none;")
+        footer_layout = QHBoxLayout(footer)
+        footer_layout.setContentsMargins(10, 4, 10, 10)
+        footer_layout.setSpacing(6)
+
+        for mode, icon, label, tip in (
+            ("search",    "🔍", "Search",  "Google search"),
+            ("clipboard", "📋", "Paste",   "Copy/paste to active window"),
+            ("gg",        "⚡", "GG",      "Run GG"),
+        ):
+            btn = QPushButton(f"{icon}  {label}")
+            btn.setObjectName("action_btn")
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setToolTip(tip)
+            btn.clicked.connect(
+                lambda checked=False, m=mode: action_callback(m, self.editor.toPlainText())
+            )
+            footer_layout.addWidget(btn)
+
+        footer_layout.addStretch()
+        outer.addWidget(footer)
+
         self.adjustSize()
-        # The caller positions this below the statusbar; keep construction
-        # independent from the main window's center.
+        # Drag support for frameless window
+        header_widget.mousePressEvent   = self._hdr_press
+        header_widget.mouseMoveEvent    = self._hdr_move
+        header_widget.mouseReleaseEvent = self._hdr_release
+
+    def _hdr_press(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+
+    def _hdr_move(self, event):
+        if self._drag_pos is not None and event.buttons() == Qt.MouseButton.LeftButton:
+            self.move(event.globalPosition().toPoint() - self._drag_pos)
+
+    def _hdr_release(self, event):
+        self._drag_pos = None
 
 
 class LanguageChoiceDialog(QDialog):
