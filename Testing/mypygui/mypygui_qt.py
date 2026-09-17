@@ -85,7 +85,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem, QHeaderView, QListWidget, QSpinBox,
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QObject, QByteArray, QSize, QPoint, QEvent
-from PyQt6.QtGui import QFont, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction, QCursor
+from PyQt6.QtGui import QFont, QFontMetrics, QPainter, QColor, QPen, QPixmap, QTextDocument, QIcon, QFontDatabase, QAction, QCursor
 from PyQt6.QtSvg import QSvgRenderer
 
 sys.stderr = StreamToLogger(logging.ERROR)
@@ -5981,7 +5981,6 @@ class TranscriptionDialog(QDialog):
         is_bn = "বাংলা" in language or "bn" in language.lower()
         accent = CP_GREEN if is_bn else CP_CYAN
         accent_dim = "#006644" if is_bn else "#004d55"
-        lang_icon = "🇧🇩" if is_bn else "🇬🇧"
         lang_label_text = language
 
         self.setStyleSheet(f"""
@@ -6010,6 +6009,29 @@ class TranscriptionDialog(QDialog):
                 font-size: 10pt;
                 selection-background-color: {accent_dim};
                 selection-color: white;
+            }}
+            QPlainTextEdit QScrollBar:vertical {{
+                background: #111111;
+                width: 6px;
+                margin: 0px;
+                border: none;
+                border-radius: 3px;
+            }}
+            QPlainTextEdit QScrollBar::handle:vertical {{
+                background: {accent};
+                min-height: 20px;
+                border-radius: 3px;
+            }}
+            QPlainTextEdit QScrollBar::handle:vertical:hover {{
+                background: white;
+            }}
+            QPlainTextEdit QScrollBar::add-line:vertical,
+            QPlainTextEdit QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QPlainTextEdit QScrollBar::add-page:vertical,
+            QPlainTextEdit QScrollBar::sub-page:vertical {{
+                background: none;
             }}
             QPushButton#close_btn {{
                 background: transparent;
@@ -6060,10 +6082,6 @@ class TranscriptionDialog(QDialog):
         header_row.setContentsMargins(10, 5, 8, 5)
         header_row.setSpacing(6)
 
-        icon_lbl = QLabel(lang_icon)
-        icon_lbl.setObjectName("header_icon")
-        header_row.addWidget(icon_lbl)
-
         lang_lbl = QLabel(lang_label_text.upper())
         lang_lbl.setObjectName("header_lang")
         header_row.addWidget(lang_lbl)
@@ -6095,16 +6113,25 @@ class TranscriptionDialog(QDialog):
         editor.setFixedWidth(360)
         editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
-        # Fit height to content
+        # Fit height to content using QTextDocument with the correct font.
+        # We must use a font that matches the stylesheet (10pt Consolas/Segoe UI)
+        # and measure at the actual available text width, then add generous padding
+        # so neither English nor Bengali gets cut off.
         content = editor.toPlainText()
+        measure_font = QFont("Consolas", 10)
         measure_doc = QTextDocument()
-        measure_doc.setDefaultFont(editor.font())
+        measure_doc.setDefaultFont(measure_font)
         measure_doc.setPlainText(content)
-        measure_doc.setTextWidth(340)
-        wrapped_height = measure_doc.documentLayout().documentSize().height()
-        editor.setFixedHeight(max(38, min(600, int(wrapped_height) + 22)))
+        # Available text width: 360 (fixed editor width) - 20 (padding 10+10) - 2 (border) - 10 (safety)
+        measure_doc.setTextWidth(328)
+        doc_h = measure_doc.documentLayout().documentSize().height()
+        # Multiply by 1.35 to account for actual line-height being taller than
+        # the bare document height (leading, font substitution for Bengali, etc.)
+        # then add fixed vertical padding (top+bottom padding + border + spare)
+        height = max(40, min(600, int(doc_h * 1.35) + 28))
+        editor.setFixedHeight(height)
         self.editor = editor
         body_layout.addWidget(editor)
         outer.addWidget(body)
