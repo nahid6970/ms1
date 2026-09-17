@@ -5963,58 +5963,51 @@ def paste_text(text, preserve_clipboard=False):
         logging.error(f"paste_text error: {e}")
 
 
-class DualTranscriptionDialog(QDialog):
-    """Show editable English and Bengali transcriptions with per-row actions."""
-    def __init__(self, english, bangla, action_callback, parent=None):
+class TranscriptionDialog(QDialog):
+    """Independent editable transcription window for one language."""
+    def __init__(self, language, text, error, action_callback, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Voice Transcription")
+        self.language = language
+        self.setWindowTitle(f"{language} Transcription")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 2px solid {CP_CYAN}; }}
             QLabel {{ color: {CP_TEXT}; font-family: 'JetBrainsMono NFP', Consolas; font-weight: bold; }}
             QPlainTextEdit {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 6px; font-size: 10pt; }}
-            QPushButton {{ background: {CP_PANEL}; color: white; border: 1px solid {CP_DIM}; padding: 6px 10px; font-weight: bold; }}
+            QPushButton {{ background: {CP_PANEL}; color: white; border: 1px solid {CP_DIM}; padding: 0px; font-weight: bold; }}
             QPushButton:hover {{ border-color: {CP_YELLOW}; color: {CP_YELLOW}; }}
-            QPushButton#en {{ color: {CP_RED}; border-color: {CP_RED}; }}
-            QPushButton#bn {{ color: {CP_GREEN}; border-color: {CP_GREEN}; }}
-            QPushButton#cancel {{ color: {CP_YELLOW}; }}
+            QPushButton#action {{ color: {CP_CYAN}; border-color: {CP_CYAN}; }}
+            QPushButton#cancel {{ color: {CP_YELLOW}; border-color: {CP_YELLOW}; }}
         """)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(16, 12, 16, 12)
         outer.setSpacing(8)
-        title = QLabel("🎙️ Voice Transcription")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        outer.addWidget(title)
-
-        self.editors = {}
-        for key, label, value, obj_name in (
-                ("en-US", "ENGLISH", english, "en"),
-                ("bn-BD", "বাংলা", bangla, "bn")):
-            row = QHBoxLayout()
-            row.setSpacing(8)
-            caption = QLabel(label)
-            caption.setFixedWidth(76)
-            row.addWidget(caption, 0, Qt.AlignmentFlag.AlignTop)
-            editor = QPlainTextEdit(value or "")
-            editor.setMinimumSize(360, 68)
-            editor.setMaximumHeight(100)
-            self.editors[key] = editor
-            row.addWidget(editor, 1)
-            for mode, text in (("search", "Google"), ("clipboard", "Clipboard"), ("gg", "GG")):
-                button = QPushButton(text)
-                button.setObjectName(obj_name)
-                button.clicked.connect(lambda checked=False, lang=key, m=mode: action_callback(m, self.editors[lang].toPlainText()))
-                row.addWidget(button)
-            outer.addLayout(row)
-
-        cancel = QPushButton("✕ Cancel")
-        cancel.setObjectName("cancel")
-        cancel.clicked.connect(self.reject)
-        outer.addWidget(cancel, 0, Qt.AlignmentFlag.AlignRight)
+        row = QHBoxLayout()
+        row.setSpacing(8)
+        editor = QPlainTextEdit(text or (f"⚠ {error}" if error else ""))
+        editor.setFixedWidth(350)
+        editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # Fit the editor height to wrapped content while keeping short results compact.
+        editor.document().setTextWidth(330)
+        document_height = editor.document().documentLayout().documentSize().height()
+        editor.setFixedHeight(max(52, min(220, int(document_height) + 18)))
+        self.editor = editor
+        row.addWidget(editor, 1)
+        for mode, icon, tip in (("search", "🔍", "Google search"),
+                                ("clipboard", "📋", "Copy/paste to active window"),
+                                ("gg", "⚡", "Run GG")):
+            button = QPushButton(icon)
+            button.setObjectName("action")
+            button.setFixedSize(34, 34)
+            button.setToolTip(tip)
+            button.clicked.connect(lambda checked=False, m=mode: action_callback(m, self.editor.toPlainText()))
+            row.addWidget(button, 0, Qt.AlignmentFlag.AlignVCenter)
+        outer.addLayout(row)
         self.adjustSize()
-        screen = QApplication.primaryScreen().availableGeometry()
-        self.move(screen.left() + (screen.width() - self.width()) // 2,
-                  screen.top() + (screen.height() - self.height()) // 2)
+        # The caller positions this below the statusbar; keep construction
+        # independent from the main window's center.
 
 
 class LanguageChoiceDialog(QDialog):
@@ -6254,7 +6247,7 @@ class ContinuousThread(QThread):
 class VoiceApp(QMainWindow):
     toggle_record_requested = pyqtSignal()
     space_press_requested = pyqtSignal()
-    transcription_ready = pyqtSignal(int, str, str)
+    transcription_ready = pyqtSignal(int, str, str, str, str)
     transcription_error = pyqtSignal(int, str)
 
     def __init__(self):
@@ -7159,18 +7152,28 @@ class VoiceApp(QMainWindow):
         try:
             logging.info("Transcribing audio in English and Bengali...")
             results = {}
-            errors = []
-            for lang in ("en-US", "bn-BD"):
+            errors = {}
+
+            def transcribe(lang):
                 try:
-                    results[lang] = recognizer.recognize_google(audio, language=lang)
+                    # Each request gets its own recognizer so a failed request
+                    # cannot interfere with the other language.
+                    return recognizer.__class__().recognize_google(audio, language=lang), ""
                 except Exception as exc:
                     logging.warning("%s transcription failed: %s", lang, exc)
-                    results[lang] = ""
-                    errors.append(str(exc))
-            if results.get("en-US") or results.get("bn-BD"):
-                self.transcription_ready.emit(session_id, results.get("en-US", ""), results.get("bn-BD", ""))
-            else:
-                self.transcription_error.emit(session_id, errors[-1] if errors else "No speech detected")
+                    return "", str(exc)
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+                futures = {lang: pool.submit(transcribe, lang) for lang in ("en-US", "bn-BD")}
+                for lang, future in futures.items():
+                    results[lang], errors[lang] = future.result()
+            self.transcription_ready.emit(
+                session_id,
+                results.get("en-US", ""),
+                results.get("bn-BD", ""),
+                errors.get("en-US", ""),
+                errors.get("bn-BD", ""),
+            )
         except Exception as e:
             logging.error(f"Transcription error: {e}")
             self.transcription_error.emit(session_id, str(e))
@@ -7192,15 +7195,29 @@ class VoiceApp(QMainWindow):
         else:
             paste_text(text, preserve_clipboard=False)
 
-    def on_dual_transcription(self, session_id, english, bangla):
+    def on_dual_transcription(self, session_id, english, bangla, english_error, bangla_error):
         if session_id != self._session_id:
             return
         self._set_status(CP_GREEN)
         self._update_status_icon_mode()
         self._reset_record_btn()
         self._recording_active = False
-        dlg = DualTranscriptionDialog(english, bangla, self._run_voice_action, self)
-        dlg.exec()
+        self._transcription_dialogs = [
+            TranscriptionDialog("ENGLISH", english, english_error, self._run_voice_action, self),
+            TranscriptionDialog("বাংলা", bangla, bangla_error, self._run_voice_action, self),
+        ]
+        screen = QApplication.primaryScreen().availableGeometry()
+        anchor = self.status_btn.mapToGlobal(QPoint(0, self.status_btn.height() + 4))
+        gap = 8
+        total_width = max(dlg.width() for dlg in self._transcription_dialogs)
+        total_height = sum(dlg.height() for dlg in self._transcription_dialogs) + gap
+        start_x = max(screen.left() + 4, min(anchor.x(), screen.right() - total_width - 4))
+        start_y = min(anchor.y(), screen.bottom() - total_height - 4)
+        current_y = start_y
+        for index, dlg in enumerate(self._transcription_dialogs):
+            dlg.move(start_x, current_y)
+            dlg.show()
+            current_y += dlg.height() + gap
 
     def _start_continuous(self):
         self._session_id += 1
