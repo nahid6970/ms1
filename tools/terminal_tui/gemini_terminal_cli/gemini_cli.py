@@ -2948,6 +2948,13 @@ class GeminiUpstreamError(RuntimeError):
         super().__init__(str(message))
 
 
+def proxy_log(message: str) -> None:
+    """Write proxy diagnostics without credentials or request contents."""
+    timestamp = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    sys.stderr.write(f"[gemini-proxy] {timestamp} {message}\n")
+    sys.stderr.flush()
+
+
 class GeminiFailoverRouter:
     """Thread-safe router backed by this CLI's encrypted API accounts."""
 
@@ -2977,14 +2984,20 @@ class GeminiFailoverRouter:
 
         last_error: Optional[GeminiUpstreamError] = None
         for offset, name in enumerate(ordered):
+            if offset:
+                proxy_log(f"event=failover from={ordered[offset - 1]} to={name} model={model} mode=json")
+            else:
+                proxy_log(f"event=attempt account={name} model={model} mode=json")
             client = GeminiClient(self.accounts[name], model)
             try:
                 response = client.generate_raw(payload, model=model)
                 with self.lock:
                     self.index = self.names.index(name)
+                proxy_log(f"event=success account={name} model={model} mode=json")
                 return response, name
             except GeminiUpstreamError as exc:
                 last_error = exc
+                proxy_log(f"event=upstream_error account={name} model={model} status={exc.status} reason={str(exc)[:160]}")
                 if not self.is_retryable(str(exc)) or offset == len(ordered) - 1:
                     raise
 
@@ -2998,13 +3011,19 @@ class GeminiFailoverRouter:
             ordered = self.names[start:] + self.names[:start]
 
         for offset, name in enumerate(ordered):
+            if offset:
+                proxy_log(f"event=failover from={ordered[offset - 1]} to={name} model={model} mode=stream")
+            else:
+                proxy_log(f"event=attempt account={name} model={model} mode=stream")
             client = GeminiClient(self.accounts[name], model)
             try:
                 response = client.open_stream(payload, model=model)
                 with self.lock:
                     self.index = self.names.index(name)
+                proxy_log(f"event=success account={name} model={model} mode=stream")
                 return response, name
             except GeminiUpstreamError as exc:
+                proxy_log(f"event=upstream_error account={name} model={model} status={exc.status} reason={str(exc)[:160]}")
                 if not self.is_retryable(str(exc)) or offset == len(ordered) - 1:
                     raise
         raise RuntimeError("No Gemini account was available.")

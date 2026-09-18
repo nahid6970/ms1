@@ -193,5 +193,8 @@ controls for remote clients.
 When `/test` runs in this CLI, every passing Gemini model is also synchronized into Pi's
 `C:\Users\<user>\.pi\agent\models.json` and `settings.json` under `google-failover`. Run `/reload` in Pi after the test
 to refresh its model picker. If no models pass, the existing Pi failover catalog is left unchanged.
+
+The proxy prints safe diagnostics to its console, including `attempt`, `upstream_error`, `failover`, and `success` events
+with account names, model names, status codes, and mode. It never logs API keys or request contents.
 - `/test` is the model testing command; `/mm test` remains an alias.
 
