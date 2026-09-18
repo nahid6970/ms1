@@ -165,5 +165,29 @@ Disabled tools are stored in `model_prefs.json` under the `disabled_tools` array
 - The `/mm` picker shows cumulative model `Uses` counts.
 - The tool-loop limit is stored in `model_prefs.json` and can be overridden with `--max-tool-loops`.
 - `--password` or `--api-password` avoids interactive password prompts for locked API accounts.
+
+### Local Gemini failover proxy
+
+The CLI can expose its existing encrypted API-account rotation as a loopback-only Gemini-compatible proxy. It forwards
+the original `generateContent` JSON to Google and tries the next saved account when the upstream response is a quota or
+rate-limit error. No real Google key is exposed to the proxy client.
+
+Set the encrypted-account password and a local client key, then start it:
+
+```powershell
+$env:GEMINI_ACCOUNTS_PASSWORD = "your-api-accounts-password"
+$env:GEMINI_PROXY_KEY = "local-gemini-proxy-key"
+python .\gemini_cli.py --proxy --proxy-port 8765
+```
+
+The proxy accepts requests at:
+
+```text
+http://127.0.0.1:8765/v1beta/models/<model>:generateContent?key=local-gemini-proxy-key
+```
+
+Configure Pi's Google model/provider base URL as `http://127.0.0.1:8765` and its API key as
+`local-gemini-proxy-key`. Keep the bind address at `127.0.0.1` unless you intentionally add authentication and network
+controls for remote clients.
 - `/test` is the model testing command; `/mm test` remains an alias.
 

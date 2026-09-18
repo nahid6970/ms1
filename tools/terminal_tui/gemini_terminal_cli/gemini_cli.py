@@ -17,8 +17,10 @@ import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from threading import Lock
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 try:
     from Cryptodome.Cipher import AES
@@ -2844,6 +2846,58 @@ class GeminiClient:
         except Exception as exc:
             raise RuntimeError(str(exc)) from exc
 
+    def generate_raw(self, payload: Dict[str, Any], model: Optional[str] = None) -> Dict[str, Any]:
+        """Forward an already-formed Gemini generateContent payload unchanged."""
+        model_name = model or self.model
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{urllib.parse.quote(model_name, safe='')}:generateContent?key={urllib.parse.quote(self.api_key)}"
+        )
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                return json.loads(response.read().decode("utf-8", errors="replace"))
+        except urllib.error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            try:
+                body = json.loads(raw)
+            except Exception:
+                body = {"error": {"message": raw or str(exc)}}
+            raise GeminiUpstreamError(exc.code, body) from exc
+        except Exception as exc:
+            raise GeminiUpstreamError(502, {"error": {"message": str(exc)}}) from exc
+
+    def open_stream(self, payload: Dict[str, Any], model: Optional[str] = None):
+        """Open Google's SSE stream while preserving the upstream response body."""
+        model_name = model or self.model
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{urllib.parse.quote(model_name, safe='')}:streamGenerateContent"
+            f"?alt=sse&key={urllib.parse.quote(self.api_key)}"
+        )
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            return urllib.request.urlopen(request, timeout=120)
+        except urllib.error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            try:
+                body = json.loads(raw)
+            except Exception:
+                body = {"error": {"message": raw or str(exc)}}
+            raise GeminiUpstreamError(exc.code, body) from exc
+        except Exception as exc:
+            raise GeminiUpstreamError(502, {"error": {"message": str(exc)}}) from exc
+
     def list_models(self) -> List[Dict[str, Any]]:
         models: List[Dict[str, Any]] = []
         page_token: Optional[str] = None
@@ -2878,6 +2932,174 @@ class GeminiClient:
                 break
 
         return models
+
+
+class GeminiUpstreamError(RuntimeError):
+    def __init__(self, status: int, body: Dict[str, Any]) -> None:
+        self.status = int(status)
+        self.body = body
+        message = body.get("error", {}).get("message", "Gemini request failed")
+        super().__init__(str(message))
+
+
+class GeminiFailoverRouter:
+    """Thread-safe router backed by this CLI's encrypted API accounts."""
+
+    RETRYABLE_MARKERS = (
+        "quota", "429", "rate limit", "too many requests", "resource exhausted",
+        "resource has been exhausted", "limit exceeded", "exceeded your current quota",
+        "high demand", "503", "service unavailable", "overloaded", "temporarily unavailable",
+    )
+
+    def __init__(self, accounts: Dict[str, str]) -> None:
+        self.accounts = dict(sorted(accounts.items(), key=lambda item: item[0].lower()))
+        if not self.accounts:
+            raise RuntimeError("No saved Gemini API accounts were found.")
+        self.names = list(self.accounts)
+        self.index = 0
+        self.lock = Lock()
+
+    @classmethod
+    def is_retryable(cls, message: str) -> bool:
+        lowered = message.lower()
+        return any(marker in lowered for marker in cls.RETRYABLE_MARKERS)
+
+    def generate(self, model: str, payload: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
+        with self.lock:
+            start = self.index
+            ordered = self.names[start:] + self.names[:start]
+
+        last_error: Optional[GeminiUpstreamError] = None
+        for offset, name in enumerate(ordered):
+            client = GeminiClient(self.accounts[name], model)
+            try:
+                response = client.generate_raw(payload, model=model)
+                with self.lock:
+                    self.index = self.names.index(name)
+                return response, name
+            except GeminiUpstreamError as exc:
+                last_error = exc
+                if not self.is_retryable(str(exc)) or offset == len(ordered) - 1:
+                    raise
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("No Gemini account was available.")
+
+    def open_stream(self, model: str, payload: Dict[str, Any]):
+        with self.lock:
+            start = self.index
+            ordered = self.names[start:] + self.names[:start]
+
+        for offset, name in enumerate(ordered):
+            client = GeminiClient(self.accounts[name], model)
+            try:
+                response = client.open_stream(payload, model=model)
+                with self.lock:
+                    self.index = self.names.index(name)
+                return response, name
+            except GeminiUpstreamError as exc:
+                if not self.is_retryable(str(exc)) or offset == len(ordered) - 1:
+                    raise
+        raise RuntimeError("No Gemini account was available.")
+
+
+class GeminiProxyHandler(BaseHTTPRequestHandler):
+    router: GeminiFailoverRouter
+    proxy_key: str
+
+    def log_message(self, format: str, *args: Any) -> None:
+        sys.stderr.write("[gemini-proxy] " + (format % args) + "\n")
+
+    def _send_json(self, status: int, body: Dict[str, Any]) -> None:
+        encoded = json.dumps(body).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
+
+    def do_POST(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        query = urllib.parse.parse_qs(parsed.query)
+        supplied_key = query.get("key", [""])[0] or self.headers.get("x-goog-api-key", "")
+        if supplied_key != self.proxy_key:
+            self._send_json(401, {"error": {"message": "Invalid local proxy key", "status": "UNAUTHENTICATED"}})
+            return
+
+        match = re.fullmatch(r"/v1(?:beta)?/models/([^/:]+):(generateContent|streamGenerateContent)", parsed.path)
+        if not match:
+            self._send_json(404, {"error": {"message": "Unsupported Gemini proxy path"}})
+            return
+
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if length <= 0 or length > 20 * 1024 * 1024:
+                raise ValueError("Request body must be between 1 byte and 20 MB.")
+            payload = json.loads(self.rfile.read(length).decode("utf-8"))
+            if not isinstance(payload, dict):
+                raise ValueError("Request body must be a JSON object.")
+            model_name, action = match.group(1), match.group(2)
+            if action == "streamGenerateContent":
+                upstream, _account = self.router.open_stream(model_name, payload)
+                content_type = upstream.headers.get("Content-Type", "text/event-stream")
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Connection", "close")
+                self.end_headers()
+                self.close_connection = True
+                try:
+                    while True:
+                        chunk = upstream.read(8192)
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        self.wfile.flush()
+                finally:
+                    upstream.close()
+                return
+
+            response, _account = self.router.generate(model_name, payload)
+            self._send_json(200, response)
+        except GeminiUpstreamError as exc:
+            self._send_json(exc.status, exc.body)
+        except ValueError as exc:
+            self._send_json(400, {"error": {"message": str(exc), "status": "INVALID_ARGUMENT"}})
+        except Exception as exc:
+            self._send_json(500, {"error": {"message": str(exc), "status": "INTERNAL"}})
+
+
+def run_gemini_proxy(host: str, port: int, proxy_key: str, password: Optional[str]) -> int:
+    if not proxy_key:
+        print("Proxy key is required. Pass --proxy-key or set GEMINI_PROXY_KEY.", file=sys.stderr)
+        return 2
+    try:
+        stored = load_api_accounts(password=password)
+        router = GeminiFailoverRouter(dict(stored.get("accounts", {})))
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+
+    handler = type("ConfiguredGeminiProxyHandler", (GeminiProxyHandler,), {})
+    handler.router = router
+    handler.proxy_key = proxy_key
+    try:
+        server = ThreadingHTTPServer((host, port), handler)
+    except OSError as exc:
+        print(f"Could not start Gemini proxy on {host}:{port}: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"Gemini failover proxy listening on http://{host}:{port}")
+    print(f"Loaded {len(router.names)} API account(s): {', '.join(router.names)}")
+    print("Press Ctrl+C to stop.")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping Gemini failover proxy.")
+    finally:
+        server.server_close()
+    return 0
 
 
 def normalize_text(text: str) -> str:
@@ -5116,7 +5338,16 @@ def main() -> int:
     parser.add_argument("-r", "--resume", nargs="?", const="interactive", help="Resume a recent conversation session")
     parser.add_argument("--load-transcript", help="Load transcript JSON at startup")
     parser.add_argument("--save-transcript", help="Auto-save transcript on exit")
+    parser.add_argument("--proxy", action="store_true", help="Run a local Gemini-compatible failover proxy")
+    parser.add_argument("--proxy-host", default="127.0.0.1", help="Proxy bind address (default: loopback only)")
+    parser.add_argument("--proxy-port", type=int, default=8765, help="Proxy port (default: 8765)")
+    parser.add_argument("--proxy-key", default=None, help="Local key required by proxy clients")
     args = parser.parse_args()
+
+    if args.proxy:
+        proxy_password = args.api_password or os.environ.get("GEMINI_ACCOUNTS_PASSWORD")
+        proxy_key = args.proxy_key or os.environ.get("GEMINI_PROXY_KEY", "")
+        return run_gemini_proxy(args.proxy_host, args.proxy_port, proxy_key, proxy_password)
 
     cwd = resolve_path(args.project_root, Path.cwd())
     if not cwd.exists():
