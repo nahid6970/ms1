@@ -189,5 +189,9 @@ http://127.0.0.1:8765/v1beta/models/<model>:generateContent?key=local-gemini-pro
 Configure Pi's Google model/provider base URL as `http://127.0.0.1:8765` and its API key as
 `local-gemini-proxy-key`. Keep the bind address at `127.0.0.1` unless you intentionally add authentication and network
 controls for remote clients.
+
+When `/test` runs in this CLI, every passing Gemini model is also synchronized into Pi's
+`C:\Users\<user>\.pi\agent\models.json` and `settings.json` under `google-failover`. Run `/reload` in Pi after the test
+to refresh its model picker. If no models pass, the existing Pi failover catalog is left unchanged.
 - `/test` is the model testing command; `/mm test` remains an alias.
 

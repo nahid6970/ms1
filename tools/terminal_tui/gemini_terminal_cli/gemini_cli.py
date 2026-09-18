@@ -48,6 +48,12 @@ TRANSCRIPTS_DIR = Path(__file__).parent / "transcripts"
 MEMORY_DIR = Path(__file__).parent / "memory"
 MAIN_MEMORY_FILE = MEMORY_DIR / "main.json"
 SKILLS_DIR = Path(__file__).parent / "skills"
+PI_AGENT_DIR = Path.home() / ".pi" / "agent"
+PI_MODELS_FILE = PI_AGENT_DIR / "models.json"
+PI_SETTINGS_FILE = PI_AGENT_DIR / "settings.json"
+PI_FAILOVER_PROVIDER = "google-failover"
+PI_FAILOVER_BASE_URL = "http://127.0.0.1:8765/v1beta"
+PI_FAILOVER_API_KEY = "pi-local-secret"
 
 DEFAULT_SYSTEM = (
     "You are a terminal coding and OS automation assistant. "
@@ -4721,6 +4727,57 @@ def list_chat_models(client: GeminiClient) -> List[Dict[str, Any]]:
     return chat_models
 
 
+def sync_pi_failover_models(passed_models: List[Dict[str, Any]]) -> str:
+    """Publish /test's passing Gemini models to Pi's local failover provider."""
+    if not passed_models:
+        return "Pi failover catalog unchanged: no models passed testing."
+    try:
+        models_config = json.loads(PI_MODELS_FILE.read_text(encoding="utf-8"))
+        settings_config = json.loads(PI_SETTINGS_FILE.read_text(encoding="utf-8"))
+        providers = models_config.setdefault("providers", {})
+        provider = providers.setdefault(PI_FAILOVER_PROVIDER, {
+            "api": "google-generative-ai",
+            "baseUrl": PI_FAILOVER_BASE_URL,
+            "apiKey": PI_FAILOVER_API_KEY,
+            "models": [],
+        })
+
+        synced: List[Dict[str, Any]] = []
+        for source in passed_models:
+            model_id = model_name(source)
+            if not model_id:
+                continue
+            synced.append({
+                "id": model_id,
+                "name": str(source.get("displayName") or source.get("name") or model_id).removeprefix("models/"),
+                "api": "google-generative-ai",
+                "provider": PI_FAILOVER_PROVIDER,
+                "baseUrl": PI_FAILOVER_BASE_URL,
+                "reasoning": True,
+                "input": ["text", "image"],
+                "contextWindow": int(source.get("inputTokenLimit") or 131072),
+                "maxTokens": int(source.get("outputTokenLimit") or 8192),
+            })
+        if not synced:
+            return "Pi failover catalog unchanged: passing models had no valid IDs."
+
+        provider["api"] = "google-generative-ai"
+        provider["baseUrl"] = PI_FAILOVER_BASE_URL
+        provider["apiKey"] = PI_FAILOVER_API_KEY
+        provider["models"] = synced
+
+        enabled = list(settings_config.get("enabledModels", []))
+        enabled = [item for item in enabled if not str(item).startswith(f"{PI_FAILOVER_PROVIDER}/")]
+        enabled.extend(f"{PI_FAILOVER_PROVIDER}/{model['id']}" for model in synced)
+        settings_config["enabledModels"] = list(dict.fromkeys(enabled))
+
+        PI_MODELS_FILE.write_text(json.dumps(models_config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        PI_SETTINGS_FILE.write_text(json.dumps(settings_config, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return f"Synced {len(synced)} passing model(s) to Pi's {PI_FAILOVER_PROVIDER} provider. Run /reload in Pi."
+    except Exception as exc:
+        return f"Could not sync Pi failover catalog: {exc}"
+
+
 def filter_models_for_display(
     models: List[Dict[str, Any]],
     hidden_models: List[str],
@@ -6365,6 +6422,8 @@ def main() -> int:
                         for model_name_value in passed_models:
                             model_usage_counts[model_name_value] = int(model_usage_counts.get(model_name_value, 0) or 0) + 1
                         passed_set = set(passed_models)
+                        passing_model_defs = [m for m in model_cache if model_name(m) in passed_set]
+                        info(sync_pi_failover_models(passing_model_defs))
                         unhidden_count = sum(1 for m in hidden_models if m in passed_set)
                         if unhidden_count:
                             hidden_models = [m for m in hidden_models if m not in passed_set]
