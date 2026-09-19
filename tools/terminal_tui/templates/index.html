@@ -13285,9 +13285,9 @@
             const paneDiv = document.querySelector(`.terminal-pane[data-pane-id="${paneId}"]`);
             if (!paneDiv) return;
 
-            // Compute top offset: after the + button (216px) + 30px per custom button
+            // Compute top offset: after the scroll buttons & + button
             const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
-            const top = 246 + existingCustom * 30;
+            const top = 126 + existingCustom * 30;
 
             const bgStr = btnConfig.bg ? `background:${btnConfig.bg};` : 'background:rgba(15,23,42,0.9);';
             const fgStr = btnConfig.fg ? `color:${btnConfig.fg} !important;` : 'color:var(--text-secondary);';
@@ -13331,7 +13331,7 @@
 
             // Also push the + button down
             const addBtn = paneDiv.querySelector('.terminal-pane-add-btn');
-            if (addBtn) addBtn.style.top = `${top + 30}px`;
+            if (addBtn) addBtn.style.top = `${126 + (existingCustom + 1) * 30}px`;
         }
 
         function restoreCustomButtonsForPane(paneId) {
