@@ -3154,18 +3154,21 @@ class MainWindow(QMainWindow):
         return False
 
     def collect_all_tags(self, item_list, tag_set):
-        for item in item_list:
-            tags = item.get("tags", [])
-            if isinstance(tags, list):
-                for t in tags:
-                    if str(t).strip():
-                        tag_set.add(str(t).strip().lower().lstrip('#'))
-            elif isinstance(tags, str) and tags.strip():
-                for t in tags.split(','):
-                    if t.strip():
-                        tag_set.add(t.strip().lower().lstrip('#'))
-            if item.get("type") == "folder" and "scripts" in item:
-                self.collect_all_tags(item["scripts"], tag_set)
+        root_items = self.config.get("scripts", []) if hasattr(self, "config") else item_list
+        def _collect(items):
+            for item in items:
+                tags = item.get("tags", [])
+                if isinstance(tags, list):
+                    for t in tags:
+                        if str(t).strip():
+                            tag_set.add(str(t).strip().lower().lstrip('#'))
+                elif isinstance(tags, str) and tags.strip():
+                    for t in tags.split(','):
+                        if t.strip():
+                            tag_set.add(t.strip().lower().lstrip('#'))
+                if item.get("type") == "folder" and "scripts" in item:
+                    _collect(item["scripts"])
+        _collect(root_items)
 
     def set_tag_filter(self, tag):
         self.active_tag_filter = tag
@@ -3465,7 +3468,16 @@ class MainWindow(QMainWindow):
                 def_h = self.config.get("default_btn_height", 40)
 
             if self.active_tag_filter:
-                scripts = [s for s in scripts if self.item_has_tag(s, self.active_tag_filter)]
+                all_global_matching = []
+                def _collect_tag(items):
+                    for item in items:
+                        if item.get("type") != "folder":
+                            if self.item_has_tag(item, self.active_tag_filter):
+                                all_global_matching.append(item)
+                        if item.get("type") == "folder" and "scripts" in item:
+                            _collect_tag(item["scripts"])
+                _collect_tag(self.config.get("scripts", []))
+                scripts = all_global_matching
 
         # Default typography
         def_fs = self.config.get("default_font_size", 10)
