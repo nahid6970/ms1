@@ -13153,11 +13153,19 @@
             setTimeout(() => document.getElementById('custom-btn-label').focus(), 100);
         }
 
+        function refreshAllPaneCustomButtons() {
+            document.querySelectorAll('.terminal-pane').forEach(pane => {
+                pane.querySelectorAll('.terminal-pane-custom-btn').forEach(btn => btn.remove());
+                restoreCustomButtonsForPane(pane.dataset.paneId);
+            });
+        }
+
         function closeCustomButtonModal() {
             document.getElementById('custom-btn-modal').classList.remove('show');
             customBtnTargetPaneId = null;
             customBtnEditIndex = null;
         }
+
 
         async function deleteCustomButton() {
             if (customBtnEditIndex === null) return;
