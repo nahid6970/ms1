@@ -4127,18 +4127,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "pi-remember-model",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "pi install npm:@taterdoge/pi-remember-model",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FF5500"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "pi-multi-account",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "pi install npm:pi-multi-account",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FF5500"
                         }
                     ],
                     "edit_on_click": true,
