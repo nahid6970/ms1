@@ -3709,18 +3709,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install Codex CLI",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "npm install -g @openai/codex-cli",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#55FF7F"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Run Codex",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "codex",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#55FF7F"
                         }
                     ],
                     "edit_on_click": true,
@@ -3774,18 +3774,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install Kiro CLI",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "npm install -g kiro-cli",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#00FFFF"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Launch Kiro",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "kiro",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#00FFFF"
                         }
                     ],
                     "edit_on_click": true,
@@ -3839,18 +3839,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install AGY-CLI",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "npm install -g agy-cli",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FFFF00"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Run AGY",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "agy",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FFFF00"
                         }
                     ],
                     "edit_on_click": true,
@@ -4193,16 +4193,16 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install T3-Code",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "npm install -g t3-code",
                             "comment_size": 14,
                             "comment_color": "#00FF00"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Run T3",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "t3",
                             "comment_size": 14,
                             "comment_color": "#00FF00"
                         }
@@ -4259,18 +4259,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install Open-Code",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "npm install -g open-code",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#00FFFF"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Launch Open-Code",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "opencode",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#00FFFF"
                         }
                     ],
                     "edit_on_click": true,
@@ -4325,18 +4325,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install Claude Desktop",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "winget install Anthropic.ClaudeDesktop",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FF55FF"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Launch Claude Desktop",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "start claude",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FF55FF"
                         }
                     ],
                     "edit_on_click": true,
@@ -4391,18 +4391,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Install Ollama",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "winget install Ollama.Ollama",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#55FF7F"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Run Ollama Serve",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "ollama serve",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#55FF7F"
                         }
                     ],
                     "edit_on_click": true,
@@ -4457,18 +4457,18 @@
                     "use_multi_block": true,
                     "inline_blocks": [
                         {
-                            "comment": "CLI Installation",
+                            "comment": "Website & Download",
                             "type": "cmd",
-                            "code": "npm install -g freebuff",
+                            "code": "start https://lmstudio.ai/",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FFFF55"
                         },
                         {
-                            "comment": "Download Desktop App",
+                            "comment": "Install LM Studio",
                             "type": "cmd",
-                            "code": "start https://freebuff.com/desktop",
+                            "code": "winget install LMStudio.LMStudio",
                             "comment_size": 14,
-                            "comment_color": "#00FF00"
+                            "comment_color": "#FFFF55"
                         }
                     ],
                     "edit_on_click": true,

@@ -1122,6 +1122,8 @@ class CodeBlockWidget(QWidget):
         c = self.comment_color or CP_YELLOW
         s = self.comment_size_spn.value()
         self.comment_input.setStyleSheet(f"background-color: {CP_BG}; color: {c}; border: 1px solid {CP_DIM}; padding: 4px; font-size: {s}pt;")
+        # Adjust minimum height of comment input based on font size to prevent clipping
+        self.comment_input.setMinimumHeight(max(32, s + 14))
         lc = QColor(c).lightness() if QColor(c).isValid() else 255
         fg = 'black' if lc > 128 else 'white'
         self.btn_comment_color.setStyleSheet(f"background-color: {c}; color: {fg}; border: 1px solid {CP_DIM}; font-weight: bold; font-size: 10pt; padding: 0px; border-radius: 3px;")
