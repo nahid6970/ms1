@@ -62,7 +62,13 @@
           "windowTitle": ""
         }
       ],
-      "category": "Tool"
+      "category": "Tool",
+      "layout": {
+        "layoutClass": "split-right",
+        "paneIds": [
+          "main"
+        ]
+      }
     },
     {
       "name": "Default",
@@ -1106,34 +1112,6 @@
       "italic": false,
       "label": "→",
       "raw_data": "\\x1b[C"
-    },
-    {
-      "label": "PU",
-      "data": "\u001b[5~",
-      "raw_data": "\\x1b[5~",
-      "bg": "#0f172a",
-      "fg": "#94a3b8",
-      "fontFamily": "",
-      "fontSize": "",
-      "bold": false,
-      "italic": false,
-      "borderColor": "#334155",
-      "borderWidth": "",
-      "borderRadius": ""
-    },
-    {
-      "label": "PD",
-      "data": "\u001b[6~",
-      "raw_data": "\\x1b[6~",
-      "bg": "#0f172a",
-      "fg": "#94a3b8",
-      "fontFamily": "",
-      "fontSize": "",
-      "bold": false,
-      "italic": false,
-      "borderColor": "#334155",
-      "borderWidth": "",
-      "borderRadius": ""
     }
   ],
   "snippets": [

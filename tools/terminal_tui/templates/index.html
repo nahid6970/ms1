@@ -971,37 +971,17 @@
         }
 
         .terminal-pane-scroll-up {
-            top: 96px;
-        }
-
-        .terminal-pane-scroll-down {
-            top: 126px;
-        }
-
-        .terminal-pane-esc {
             top: 36px;
         }
 
-        .terminal-pane-ctrlc {
+        .terminal-pane-scroll-down {
             top: 66px;
         }
 
-        .terminal-pane-arrow-left {
-            top: 156px;
-        }
-
-        .terminal-pane-arrow-right {
-            top: 186px;
-        }
-
         .terminal-pane-add-btn {
-            top: 216px;
+            top: 96px;
         }
 
-        .terminal-pane-esc,
-        .terminal-pane-ctrlc,
-        .terminal-pane-arrow-left,
-        .terminal-pane-arrow-right,
         .terminal-pane-add-btn {
             position: absolute;
             right: 6px;
@@ -1024,22 +1004,12 @@
             touch-action: none;
         }
 
-        .terminal-pane-esc,
-        .terminal-pane-ctrlc {
-            color: #f87171;
-            border-color: rgba(248, 113, 113, 0.3);
-        }
-
         .terminal-pane-add-btn {
             color: #22c55e;
             border-color: rgba(34, 197, 94, 0.3);
             font-size: 0.9rem;
         }
 
-        .terminal-pane-esc:hover,
-        .terminal-pane-ctrlc:hover,
-        .terminal-pane-arrow-left:hover,
-        .terminal-pane-arrow-right:hover,
         .terminal-pane-add-btn:hover {
             background: rgba(31, 41, 55, 0.98);
             color: var(--text-primary);
@@ -4262,25 +4232,7 @@
 
             parent.appendChild(paneDiv);
 
-            // ── ESC button (below X, sends Escape key)
-            const escBtn = document.createElement('button');
-            escBtn.type = 'button';
-            escBtn.className = 'terminal-pane-esc';
-            escBtn.title = 'Send ESC (stop running command)';
-            escBtn.innerText = 'ESC';
-            escBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b' }); });
-            escBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b' }); });
-            paneDiv.appendChild(escBtn);
 
-            // ── Ctrl+C button (sends interrupt signal)
-            const ctrlCBtn = document.createElement('button');
-            ctrlCBtn.type = 'button';
-            ctrlCBtn.className = 'terminal-pane-ctrlc';
-            ctrlCBtn.title = 'Send Ctrl+C (interrupt/kill running command)';
-            ctrlCBtn.innerText = '^C';
-            ctrlCBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x03' }); });
-            ctrlCBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x03' }); });
-            paneDiv.appendChild(ctrlCBtn);
 
             const savedFont = localStorage.getItem('terminal-font-family') || '"Fira Code", Courier, monospace';
             paneDiv.style.fontFamily = savedFont;
@@ -4326,25 +4278,7 @@
             downBtn.innerText = '▼';
             paneDiv.appendChild(downBtn);
 
-            // ── Left arrow button (move cursor left)
-            const leftBtn = document.createElement('button');
-            leftBtn.type = 'button';
-            leftBtn.className = 'terminal-pane-arrow-left';
-            leftBtn.title = 'Move cursor left';
-            leftBtn.innerText = '◀';
-            leftBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[D' }); });
-            leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[D' }); });
-            paneDiv.appendChild(leftBtn);
 
-            // ── Right arrow button (move cursor right)
-            const rightBtn = document.createElement('button');
-            rightBtn.type = 'button';
-            rightBtn.className = 'terminal-pane-arrow-right';
-            rightBtn.title = 'Move cursor right';
-            rightBtn.innerText = '▶';
-            rightBtn.addEventListener('click', (e) => { e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
-            rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); if (socket && socket.connected) socket.emit('pty-input', { project: activeProject, paneId, data: '\x1b[C' }); });
-            paneDiv.appendChild(rightBtn);
 
             // ── Add custom button (+ button for adding custom shortcuts)
             const addBtn = document.createElement('button');
