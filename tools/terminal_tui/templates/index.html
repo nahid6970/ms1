@@ -948,38 +948,10 @@
             border-color: rgba(248, 113, 113, 0.4);
         }
 
-        .terminal-pane-scroll-up,
-        .terminal-pane-scroll-down {
-            position: absolute;
-            right: 6px;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 6px;
-            background: rgba(15, 23, 42, 0.9);
-            color: var(--text-secondary);
-            cursor: pointer;
-            z-index: 5;
-            font-size: 0.62rem;
-            line-height: 1;
-            transition: all 0.15s ease;
-            user-select: none;
-            touch-action: none;
-        }
 
-        .terminal-pane-scroll-up {
-            top: 36px;
-        }
-
-        .terminal-pane-scroll-down {
-            top: 66px;
-        }
 
         .terminal-pane-add-btn {
-            top: 96px;
+            top: 36px;
         }
 
         .terminal-pane-add-btn {
@@ -1016,12 +988,7 @@
             border-color: var(--accent-color);
         }
 
-        .terminal-pane-scroll-up:hover,
-        .terminal-pane-scroll-down:hover {
-            background: rgba(31, 41, 55, 0.98);
-            color: var(--text-primary);
-            border-color: var(--accent-color);
-        }
+
 
         .xterm-viewport {
             overflow-y: auto !important;
@@ -4263,20 +4230,7 @@
             paneTerm.loadAddon(paneFitAddon);
             paneTerm.open(paneDiv);
 
-            // Add Scroll Up/Down buttons for touchscreen displays
-            const upBtn = document.createElement('button');
-            upBtn.type = 'button';
-            upBtn.className = 'terminal-pane-scroll-up';
-            upBtn.title = 'Scroll Up';
-            upBtn.innerText = '▲';
-            paneDiv.appendChild(upBtn);
 
-            const downBtn = document.createElement('button');
-            downBtn.type = 'button';
-            downBtn.className = 'terminal-pane-scroll-down';
-            downBtn.title = 'Scroll Down';
-            downBtn.innerText = '▼';
-            paneDiv.appendChild(downBtn);
 
 
 
@@ -4296,33 +4250,9 @@
             // Restore any saved custom buttons for this project
             setTimeout(() => restoreCustomButtonsForPane(paneId), 200);
 
-            const setupContinuousScroll = (btn, direction) => {
-                let interval = null;
-                const startScrolling = () => {
-                    paneTerm.scrollLines(direction * 2);
-                    if (interval) clearInterval(interval);
-                    interval = setInterval(() => {
-                        paneTerm.scrollLines(direction * 2);
-                    }, 80);
-                };
-                const stopScrolling = () => {
-                    if (interval) {
-                        clearInterval(interval);
-                        interval = null;
-                    }
-                };
-                
-                btn.addEventListener('mousedown', (e) => { e.stopPropagation(); startScrolling(); });
-                btn.addEventListener('mouseup', stopScrolling);
-                btn.addEventListener('mouseleave', stopScrolling);
-                
-                btn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); startScrolling(); }, { passive: false });
-                btn.addEventListener('touchend', stopScrolling);
-                btn.addEventListener('touchcancel', stopScrolling);
-            };
+
             
-            setupContinuousScroll(upBtn, -1);
-            setupContinuousScroll(downBtn, 1);
+
 
             // Handle scrollbar idle fade-out after 2 seconds
             const viewport = paneDiv.querySelector('.xterm-viewport');
@@ -13285,9 +13215,9 @@
             const paneDiv = document.querySelector(`.terminal-pane[data-pane-id="${paneId}"]`);
             if (!paneDiv) return;
 
-            // Compute top offset: after the scroll buttons & + button
+            // Compute top offset: after the + button (36px) + 30px per custom button
             const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
-            const top = 126 + existingCustom * 30;
+            const top = 36 + existingCustom * 30;
 
             const bgStr = btnConfig.bg ? `background:${btnConfig.bg};` : 'background:rgba(15,23,42,0.9);';
             const fgStr = btnConfig.fg ? `color:${btnConfig.fg} !important;` : 'color:var(--text-secondary);';
@@ -13331,7 +13261,7 @@
 
             // Also push the + button down
             const addBtn = paneDiv.querySelector('.terminal-pane-add-btn');
-            if (addBtn) addBtn.style.top = `${126 + (existingCustom + 1) * 30}px`;
+            if (addBtn) addBtn.style.top = `${36 + (existingCustom + 1) * 30}px`;
         }
 
         function restoreCustomButtonsForPane(paneId) {
