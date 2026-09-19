@@ -1091,20 +1091,6 @@
       "borderColor": "#334155",
       "borderRadius": "",
       "borderWidth": "",
-      "data": "\u001b[D",
-      "fg": "#94a3b8",
-      "fontFamily": "",
-      "fontSize": "",
-      "italic": false,
-      "label": "←",
-      "raw_data": "\\x1b[D"
-    },
-    {
-      "bg": "#0f172a",
-      "bold": false,
-      "borderColor": "#334155",
-      "borderRadius": "",
-      "borderWidth": "",
       "data": "\u001b[C",
       "fg": "#94a3b8",
       "fontFamily": "",
@@ -1112,6 +1098,20 @@
       "italic": false,
       "label": "→",
       "raw_data": "\\x1b[C"
+    },
+    {
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "\u001b[D",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "←",
+      "raw_data": "\\x1b[D"
     }
   ],
   "snippets": [

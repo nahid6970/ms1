@@ -13256,6 +13256,53 @@
                 e.stopPropagation();
                 openCustomButtonModal(paneId, index);
             });
+
+            // Make draggable vertically to reorder
+            let isDragging = false;
+            let startY = 0;
+            let startTop = top;
+
+            btn.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return; // left click only for drag
+                isDragging = true;
+                startY = e.clientY;
+                startTop = parseInt(btn.style.top) || top;
+                btn.style.zIndex = '10';
+                e.stopPropagation();
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dy = e.clientY - startY;
+                let newTop = startTop + dy;
+                // Clamp within bounds
+                const minTop = 36;
+                const maxTop = paneDiv.clientHeight - 40;
+                if (newTop < minTop) newTop = minTop;
+                if (newTop > maxTop) newTop = maxTop;
+                btn.style.top = `${newTop}px`;
+                e.preventDefault();
+            });
+
+            window.addEventListener('mouseup', async () => {
+                if (!isDragging) return;
+                isDragging = false;
+                btn.style.zIndex = '5';
+
+                // Determine new index based on top position
+                const currentTop = parseInt(btn.style.top) || top;
+                const newIndex = Math.round((currentTop - 36) / 30);
+                
+                if (newIndex !== index && allCustomBtns && allCustomBtns[index]) {
+                    const movedItem = allCustomBtns.splice(index, 1)[0];
+                    let targetIndex = Math.max(0, Math.min(newIndex, allCustomBtns.length));
+                    allCustomBtns.splice(targetIndex, 0, movedItem);
+                    await saveCustomBtnsToServer();
+                    refreshAllPaneCustomButtons();
+                } else {
+                    refreshAllPaneCustomButtons();
+                }
+            });
             
             paneDiv.appendChild(btn);
 
