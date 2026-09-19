@@ -1013,7 +1013,7 @@ class CodeBlockWidget(QWidget):
         self.comment_input = QLineEdit()
         self.comment_input.setPlaceholderText("Comment / Header")
         self.comment_input.setText(comment)
-        self.comment_input.setFixedHeight(26)
+        self.comment_input.setMinimumHeight(32)
         
         self.type_cmb = QComboBox()
         self.type_cmb.addItems(["cmd", "powershell", "pwsh", "python"])
@@ -1111,11 +1111,11 @@ class CodeBlockWidget(QWidget):
             
         total_lines = max(doc.blockCount(), total_lines)
         
-        content_height = total_lines * line_height + 18
+        content_height = total_lines * line_height + 24
         content_height = max(45, content_height)
         
         self.txt_edit.setFixedHeight(content_height)
-        self.setFixedHeight(content_height + 42)
+        self.setFixedHeight(content_height + 48)
         self.updateGeometry()
 
     def update_comment_style(self):
