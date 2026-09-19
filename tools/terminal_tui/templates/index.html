@@ -13298,9 +13298,12 @@
                     let targetIndex = Math.max(0, Math.min(newIndex, allCustomBtns.length));
                     allCustomBtns.splice(targetIndex, 0, movedItem);
                     await saveCustomBtnsToServer();
-                    refreshAllPaneCustomButtons();
+                    // Instead of a global refresh, just re-render specifically for this pane
+                    paneDiv.querySelectorAll('.terminal-pane-custom-btn').forEach(b => b.remove());
+                    restoreCustomButtonsForPane(paneId);
                 } else {
-                    refreshAllPaneCustomButtons();
+                    // Reset position
+                    btn.style.top = `${top}px`;
                 }
             });
             
