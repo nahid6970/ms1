@@ -347,7 +347,9 @@ function runExtension() {
 
         const currentStatus = getItemStatus(id);
         const nextStatus = currentStatus === 'off' ? 'check' :
-            currentStatus === 'check' ? 'cross' : 'off';
+            currentStatus === 'check' ? 'cross' :
+            currentStatus === 'cross' ? 'youtube' :
+            currentStatus === 'youtube' ? 'waiting' : 'off';
         setItemStatus(id, nextStatus);
         refreshEditButtons();
     }
@@ -387,8 +389,13 @@ function runExtension() {
         const checkmark = document.createElement('div');
         checkmark.className = 'ic-checkmark';
         const status = getItemStatus(id);
-        checkmark.innerHTML = status === 'cross' ? '✕' : '✓';
+        checkmark.innerHTML = 
+            status === 'cross' ? '✕' : 
+            status === 'youtube' ? '▶' : 
+            status === 'waiting' ? '⏳' : '✓';
         checkmark.classList.toggle('ic-cross', status === 'cross');
+        checkmark.classList.toggle('ic-youtube', status === 'youtube');
+        checkmark.classList.toggle('ic-waiting', status === 'waiting');
         checkmark.dataset.forId = id;
         checkmark.dataset.ownerId = id; // Reference to owner
 
@@ -416,7 +423,11 @@ function runExtension() {
             zIndex: '2147483646',
             width: `${calculatedSize}px`,
             height: `${calculatedSize}px`,
-            backgroundColor: status === 'cross' ? '#e53935' : s.checkmarkColor,
+            backgroundColor: 
+                status === 'cross' ? '#e53935' : 
+                status === 'youtube' ? '#ff0000' : 
+                status === 'waiting' ? '#ff9800' : 
+                s.checkmarkColor,
             color: s.textColor,
             borderRadius: '50%',
             display: 'flex',
@@ -527,9 +538,16 @@ function runExtension() {
         button.type = 'button';
         button.className = 'ic-toggle-button';
         const status = getItemStatus(id);
-        button.textContent = status === 'check' ? '✓' : status === 'cross' ? '✕' : '';
-        button.title = status === 'off' ? 'Mark item' :
-            status === 'check' ? 'Mark as cross' : 'Clear status';
+        button.textContent = 
+            status === 'check' ? '✓' : 
+            status === 'cross' ? '✕' : 
+            status === 'youtube' ? '▶' : 
+            status === 'waiting' ? '⏳' : '';
+        button.title = 
+            status === 'off' ? 'Mark item' :
+            status === 'check' ? 'Mark as cross' : 
+            status === 'cross' ? 'Mark as YouTube' : 
+            status === 'youtube' ? 'Mark as waiting' : 'Clear status';
         button.dataset.forId = id;
 
         Object.assign(button.style, {
@@ -539,10 +557,19 @@ function runExtension() {
             zIndex: '2147483647',
             width: '30px',
             height: '30px',
-            border: `2px solid ${status === 'cross' ? '#e53935' : currentSettings.checkmarkColor}`,
+            border: `2px solid ${
+                status === 'cross' ? '#e53935' : 
+                status === 'youtube' ? '#ff0000' : 
+                status === 'waiting' ? '#ff9800' : 
+                currentSettings.checkmarkColor
+            }`,
             borderRadius: '6px',
-            background: status === 'check' ? currentSettings.checkmarkColor :
-                status === 'cross' ? '#e53935' : 'rgba(0, 0, 0, 0.65)',
+            background: 
+                status === 'check' ? currentSettings.checkmarkColor :
+                status === 'cross' ? '#e53935' : 
+                status === 'youtube' ? '#ff0000' : 
+                status === 'waiting' ? '#ff9800' : 
+                'rgba(0, 0, 0, 0.65)',
             color: currentSettings.textColor,
             fontSize: '20px',
             fontWeight: '700',

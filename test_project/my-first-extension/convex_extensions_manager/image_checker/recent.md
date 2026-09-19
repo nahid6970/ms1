@@ -4,9 +4,9 @@ Chrome extension using vanilla JavaScript, HTML, and CSS with popup/background/c
 
 # 2. Latest Implementation
 
-- `content.js`: Added the off → green check → red cross → off click cycle, status rendering, persistence, overlay-button labels/colors, and migration from legacy `seenItems`; fixed a sync race that could require two clicks.
-- `README.md`: Documented the three-state behavior.
-- `manifest.json`: Updated the description to mention red crosses.
+- `content.js`: Expanded the toggle cycle to 5 states (off → green check → red cross → YouTube icon → waiting → off), with corresponding icons, colors, and persistence.
+- `README.md`: Documented the behavior.
+- `manifest.json`: Updated the description.
 
 # 3. Critical Context
 
