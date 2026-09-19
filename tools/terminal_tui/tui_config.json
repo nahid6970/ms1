@@ -885,6 +885,32 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
+    },
+    {
+      "name": "Temporary",
+      "path": "C:\\@delta\\ms1\\temporary",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-right",
+        "paneIds": [
+          "main"
+        ]
+      }
     }
   ],
   "extension_icons": {
@@ -984,11 +1010,95 @@
       "raw_data": "here read recent.md"
     },
     {
-      "label": "Update",
-      "data": "here see the last changes commit with the current one and tell me do we need to update the recent.md",
-      "raw_data": "here see the last changes commit with the current one and tell me do we need to update the recent.md",
       "bg": "#ffffff",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "here see the last changes commit with the current one and tell me do we need to update the recent.md",
       "fg": "#000000",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "Update",
+      "raw_data": "here see the last changes commit with the current one and tell me do we need to update the recent.md"
+    },
+    {
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "\u001b",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "ESC",
+      "raw_data": "\\x1b"
+    },
+    {
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "\u0003",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "^C",
+      "raw_data": "\\x03"
+    },
+    {
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "\u001b[A",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "italic": false,
+      "label": "↑",
+      "raw_data": "\\x1b[A"
+    },
+    {
+      "label": "↓",
+      "data": "\u001b[B",
+      "raw_data": "\\x1b[B",
+      "bg": "#0f172a",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "bold": false,
+      "italic": false,
+      "borderColor": "#334155",
+      "borderWidth": "",
+      "borderRadius": ""
+    },
+    {
+      "label": "←",
+      "data": "\u001b[D",
+      "raw_data": "\\x1b[D",
+      "bg": "#0f172a",
+      "fg": "#94a3b8",
+      "fontFamily": "",
+      "fontSize": "",
+      "bold": false,
+      "italic": false,
+      "borderColor": "#334155",
+      "borderWidth": "",
+      "borderRadius": ""
+    },
+    {
+      "label": "→",
+      "data": "\u001b[C",
+      "raw_data": "\\x1b[C",
+      "bg": "#0f172a",
+      "fg": "#94a3b8",
       "fontFamily": "",
       "fontSize": "",
       "bold": false,
