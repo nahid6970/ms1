@@ -997,6 +997,8 @@ function applyF10RawEdit(replacement, newStart, newEnd) {
         input,
         start: newStart,
         end: newEnd,
+        visibleStart: undefined,
+        visibleEnd: undefined,
         rawText: ''
     };
 
@@ -1005,7 +1007,7 @@ function applyF10RawEdit(replacement, newStart, newEnd) {
         const rowIndex = parseInt(cell.dataset.row);
         const colIndex = parseInt(cell.dataset.col);
         if (!isNaN(rowIndex) && !isNaN(colIndex)) {
-            updateCell(rowIndex, colIndex, nextValue);
+            updateCell(rowIndex, colIndex, nextValue, input);
         } else {
             input.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -1017,27 +1019,119 @@ function applyF10RawEdit(replacement, newStart, newEnd) {
     return true;
 }
 
+function moveF10RawBoundary(rawValue, rawOffset, delta) {
+    const map = calculateVisibleToRawMap(rawValue);
+    if (map.length === 0) return 0;
+
+    const currentVisible = findVisibleOffsetFromRaw(rawValue, rawOffset);
+    const targetVisible = Math.max(0, Math.min(map.length - 1, currentVisible + delta));
+    return map[targetVisible];
+}
+
+function getF10VisibleSelectionOffsets(anchor, input) {
+    if (Number.isFinite(anchor.visibleStart) && Number.isFinite(anchor.visibleEnd)) {
+        return { start: anchor.visibleStart, end: anchor.visibleEnd };
+    }
+
+    const preview = input.closest('td[data-row][data-col]')?.querySelector('.markdown-preview');
+    const range = anchor.previewRange;
+    if (preview && range && range.startContainer.isConnected && range.endContainer.isConnected) {
+        return {
+            start: getRenderedTextOffset(preview, range.startContainer, range.startOffset),
+            end: getRenderedTextOffset(preview, range.endContainer, range.endOffset)
+        };
+    }
+
+    return {
+        start: findVisibleOffsetFromRaw(input.value, anchor.start),
+        end: findVisibleOffsetFromRaw(input.value, anchor.end)
+    };
+}
+
+function editF10Selection(replacement, collapsedAction = null) {
+    const anchor = f10FormatterAnchor;
+    const input = getF10CurrentInput(anchor);
+    if (!anchor || !input) return false;
+
+    let start = Math.max(0, Math.min(anchor.start, input.value.length));
+    let end = Math.max(start, Math.min(anchor.end, input.value.length));
+
+    // When the F3 range is already collapsed, make Backspace/Delete behave
+    // like a normal caret edit. A non-empty F3 range is replaced directly.
+    if (start === end && collapsedAction === 'backspace') {
+        if (start === 0) return true;
+        start--;
+    } else if (start === end && collapsedAction === 'delete') {
+        if (end >= input.value.length) return true;
+        end++;
+    }
+
+    f10FormatterAnchor = {
+        ...anchor,
+        input,
+        start,
+        end,
+        rawText: input.value.substring(start, end),
+        matches: null
+    };
+    delete f10FormatterAnchor.draftText;
+
+    const caret = start + replacement.length;
+    return applyF10RawEdit(replacement, caret, caret);
+}
+
 function moveF10Selection(delta, extend = false) {
     const input = getF10CurrentInput();
     if (!f10FormatterAnchor || !input) return false;
     f10FormatterAnchor.input = input;
-    const length = input.value.length;
+    const visible = getF10VisibleSelectionOffsets(f10FormatterAnchor, input);
+    let visibleStart = visible.start;
+    let visibleEnd = visible.end;
     let start = f10FormatterAnchor.start;
     let end = f10FormatterAnchor.end;
 
     if (extend) {
-        end = Math.max(0, Math.min(length, end + delta));
-        if (end < start) [start, end] = [end, start];
-    } else if (start !== end) {
-        const pos = delta < 0 ? start : end;
-        start = end = pos;
+        // Work in the rendered text first. This avoids stepping through
+        // hidden markdown markers and keeps the first Shift-arrow attached
+        // to the exact word selected by F3.
+        if (delta < 0) {
+            visibleStart = Math.max(0, visibleStart - 1);
+            start = moveF10RawBoundary(input.value, start, -1);
+        } else {
+            visibleEnd++;
+            end = moveF10RawBoundary(input.value, end, 1);
+        }
+    } else if (visibleStart !== visibleEnd) {
+        // Without Shift, remove one character from the inside-facing edge.
+        // This lets the user contract the highlighted range instead of
+        // collapsing it to a caret in one keypress.
+        if (delta < 0) {
+            visibleStart = Math.min(visibleEnd, visibleStart + 1);
+            start = moveF10RawBoundary(input.value, start, 1);
+        } else {
+            visibleEnd = Math.max(visibleStart, visibleEnd - 1);
+            end = moveF10RawBoundary(input.value, end, -1);
+        }
     } else {
-        start = end = Math.max(0, Math.min(length, start + delta));
+        visibleStart = visibleEnd = Math.max(0, visibleStart + delta);
+        start = end = moveF10RawBoundary(input.value, start, delta);
     }
 
-    f10FormatterAnchor = { ...f10FormatterAnchor, start, end };
-    f10FormatterAnchor.rawText = input.value.substring(start, end);
-    f10FormatterAnchor.previewRange = getPreviewRangeForRawSelection(f10FormatterAnchor.input, start, end);
+    const visibleLength = Math.max(0, calculateVisibleToRawMap(input.value).length - 1);
+    visibleStart = Math.min(visibleStart, visibleLength);
+    visibleEnd = Math.min(visibleEnd, visibleLength);
+    f10FormatterAnchor = {
+        ...f10FormatterAnchor,
+        start: Math.min(start, end),
+        end: Math.max(start, end),
+        visibleStart,
+        visibleEnd
+    };
+    f10FormatterAnchor.rawText = input.value.substring(f10FormatterAnchor.start, f10FormatterAnchor.end);
+    const preview = input.closest('td[data-row][data-col]')?.querySelector('.markdown-preview');
+    f10FormatterAnchor.previewRange = preview
+        ? createRangeFromVisibleOffsets(preview, visibleStart, visibleEnd)
+        : null;
     showF10SelectionHighlight(f10FormatterAnchor);
     updateF10ActiveIndicator();
     return true;
@@ -1113,14 +1207,7 @@ function handleF10ActiveKey(e) {
         return true;
     }
 
-    const hasDraft = f10FormatterAnchor.draftText !== undefined;
-
     if (e.key === 'Enter' && !e.shiftKey) {
-        consume();
-        return hasDraft ? commitF10Draft() : true;
-    }
-
-    if (hasDraft && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
         consume();
         return true;
     }
@@ -1145,27 +1232,24 @@ function handleF10ActiveKey(e) {
         return moveF10SelectionVertical(1, e.shiftKey);
     }
 
-    let draftText = hasDraft ? f10FormatterAnchor.draftText : '';
     if (e.key === 'Backspace') {
         consume();
-        draftText = hasDraft ? draftText.slice(0, -1) : '';
+        return editF10Selection('', 'backspace');
     } else if (e.key === 'Delete') {
         consume();
-        draftText = '';
+        return editF10Selection('', 'delete');
     } else if (e.key === 'Enter' && e.shiftKey) {
         consume();
-        draftText += '\n';
+        return editF10Selection('\n');
     } else if (e.key === 'Tab') {
         consume();
-        draftText += '\t';
+        return editF10Selection('\t');
     } else if (e.key.length === 1) {
         consume();
-        draftText += e.key;
+        return editF10Selection(e.key);
     } else {
         return false;
     }
-
-    return setF10DraftText(draftText);
 }
 
 function mergeF10PreviewRanges(anchorRange, hoverRange) {
@@ -2618,7 +2702,7 @@ async function deleteEmptyRows() {
     }
 }
 
-function updateCell(rowIndex, colIndex, value) {
+function updateCell(rowIndex, colIndex, value, inputElement = null) {
     const sheet = tableData.sheets[currentSheet];
     if (!sheet.cellStyles) {
         sheet.cellStyles = {};
@@ -2628,7 +2712,9 @@ function updateCell(rowIndex, colIndex, value) {
     sheet.rows[rowIndex][colIndex] = value;
 
     // Apply markdown-style formatting to the cell
-    applyMarkdownFormatting(rowIndex, colIndex, value);
+    // Keep the same live input used by F3 edits so the preview is rebuilt
+    // immediately against the updated source element.
+    applyMarkdownFormatting(rowIndex, colIndex, value, inputElement);
 
     // Auto-save after a short delay to preserve changes
     clearTimeout(window.autoSaveTimeout);
@@ -15701,19 +15787,18 @@ function getCaretClientPosition() {
 // Helper to map raw character offset to visible character offset
 function findVisibleOffsetFromRaw(rawInput, rawOffset) {
     const map = calculateVisibleToRawMap(rawInput);
-    let bestVisibleOffset = 0;
-    let minDiff = Infinity;
-    for (let vis = 0; vis < map.length; vis++) {
-        const raw = map[vis];
-        if (raw !== undefined) {
-            const diff = Math.abs(raw - rawOffset);
-            if (diff < minDiff) {
-                minDiff = diff;
-                bestVisibleOffset = vis;
-            }
-        }
+    const target = Math.max(0, Math.min(rawOffset, rawInput.length));
+
+    // `map` contains raw positions for each visible character boundary. Do
+    // not use the numerically closest position here: when the raw offset is
+    // inside a hidden markdown marker, that can jump the range to the wrong
+    // visible sentence. The first boundary at or after the raw offset is the
+    // stable preview position for both selection endpoints.
+    for (let visible = 0; visible < map.length; visible++) {
+        if (map[visible] >= target) return visible;
     }
-    return bestVisibleOffset;
+
+    return map.length;
 }
 
 function adjustCellHeightForMarkdown(cell, preserveScroll = true) {
