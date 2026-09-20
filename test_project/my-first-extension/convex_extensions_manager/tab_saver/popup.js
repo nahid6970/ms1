@@ -15,6 +15,7 @@ const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
 const editDeadlineDate = document.getElementById('editDeadlineDate');
+const editHeaderTitle = document.getElementById('editHeaderTitle');
 const editTag = document.getElementById('editTag');
 const addTagBtn = document.getElementById('addTagBtn');
 const newTagInputContainer = document.getElementById('newTagInputContainer');
@@ -294,10 +295,11 @@ function displayTabs(tabs) {
       deadlineHTML = `<div class="${badgeClass}" style="margin-left: 8px;">${text}</div>`;
     }
     
+    const headerTitle = tab.headerTitle || tab.title || tab.url;
     tabItem.innerHTML = `
       ${faviconHTML}
       <div class="tab-info" data-url="${tab.url}">
-        <div class="tab-title">${tab.title}</div>
+        <div class="tab-title">${headerTitle}</div>
         <div class="tab-url">${tab.url}</div>
       </div>
       ${tagHTML}
@@ -306,7 +308,7 @@ function displayTabs(tabs) {
     `;
     
     const tabInfo = tabItem.querySelector('.tab-info');
-    tabInfo.title = `${tab.title}\n${tab.url}`;
+    tabInfo.title = `${headerTitle}\n${tab.url}`;
     tabInfo.addEventListener('click', () => {
       chrome.tabs.create({ url: tab.url });
     });
@@ -333,6 +335,7 @@ function matchesSearch(tab, query) {
   const value = query.trim().toLowerCase();
   if (!value) return true;
   const haystack = [
+    tab.headerTitle || '',
     tab.title || '',
     tab.url || '',
     tab.tag || ''
@@ -367,12 +370,14 @@ tabSearch.addEventListener('input', (e) => {
 document.getElementById('menuSetDeadline').onclick = () => {
   editDeadlineDays.value = '';
   editDeadlineDate.value = '';
+  editHeaderTitle.value = '';
   
   // Set current tag and deadline
   chrome.storage.local.get(['savedTabs'], (result) => {
     const savedTabs = result.savedTabs || [];
     const tab = savedTabs.find(t => t.id === currentRightClickedTabId);
     if (tab) {
+      editHeaderTitle.value = tab.headerTitle || '';
       editTag.value = tab.tag || '';
       if (tab.deadline) {
         const date = new Date(tab.deadline);
@@ -393,6 +398,7 @@ document.getElementById('menuSetDeadline').onclick = () => {
 document.getElementById('saveDeadlineBtn').onclick = () => {
   const days = editDeadlineDays.value;
   const date = editDeadlineDate.value;
+  const headerTitle = editHeaderTitle.value.trim();
   const tag = editTag.value;
   let deadline = null;
   
@@ -413,7 +419,7 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
       if (tab.id === currentRightClickedTabId) {
         // Keep existing deadline if no new one provided
         const finalDeadline = (deadline !== null) ? deadline : tab.deadline;
-        return { ...tab, deadline: finalDeadline, tag: tag };
+        return { ...tab, headerTitle: headerTitle || null, deadline: finalDeadline, tag: tag };
       }
       return tab;
     });
@@ -466,6 +472,7 @@ document.getElementById('saveCurrentTab').addEventListener('click', (e) => {
         loadTabs();
         // Open deadline modal for the newly saved tab
         currentRightClickedTabId = newTab.id;
+        editHeaderTitle.value = '';
         editDeadlineDays.value = '';
         editDeadlineDate.value = '';
         editTag.value = '';

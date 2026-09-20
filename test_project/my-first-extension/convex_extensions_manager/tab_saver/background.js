@@ -135,6 +135,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             
             <div class="modal-theme-body">
               <div class="modal-field">
+                <label for="headerTitle">Header title (optional)</label>
+                <input type="text" id="headerTitle" placeholder="Use the tab title" class="modal-input">
+              </div>
+              <div class="modal-field">
                 <label for="deadlineDays">Days from today</label>
                 <input type="number" id="deadlineDays" min="1" class="modal-input">
               </div>
@@ -174,6 +178,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           const daysInput = modal.querySelector('#deadlineDays');
           const dateInput = modal.querySelector('#deadlineDate');
+          const headerTitleInput = modal.querySelector('#headerTitle');
           const tagSelect = modal.querySelector('#deadlineTag');
           const addTagBtn = modal.querySelector('#addTagBtn');
           const newTagContainer = modal.querySelector('#newTagContainer');
@@ -221,7 +226,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             }
           };
 
-          daysInput.focus();
+          headerTitleInput.focus();
 
           daysInput.addEventListener('input', () => { if (daysInput.value) dateInput.value = ''; });
           dateInput.addEventListener('input', () => { if (dateInput.value) daysInput.value = ''; });
@@ -231,8 +236,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             document.body.removeChild(overlay);
           };
 
-          const finish = (deadline, tag) => {
-            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline, tag: tag });
+          const finish = (deadline, tag, headerTitle) => {
+            chrome.runtime.sendMessage({ action: 'deadlineSelected', deadline: deadline, tag: tag, headerTitle: headerTitle });
             removeUI();
           };
           
@@ -244,17 +249,18 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             const days = daysInput.value;
             const date = dateInput.value;
             const tag = tagSelect.value;
+            const headerTitle = headerTitleInput.value.trim();
             if (date) {
               const d = new Date(date);
               d.setHours(23, 59, 59, 999);
-              finish(d.getTime(), tag);
+              finish(d.getTime(), tag, headerTitle);
             } else if (days) {
               const d = new Date();
               d.setDate(d.getDate() + parseInt(days));
               d.setHours(23, 59, 59, 999);
-              finish(d.getTime(), tag);
+              finish(d.getTime(), tag, headerTitle);
             } else {
-              finish(null, tag);
+              finish(null, tag, headerTitle);
             }
           };
 
@@ -278,7 +284,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 // Main function to handle tab saving logic
-function handleTabSaving(tab, deadline, tag) {
+function handleTabSaving(tab, deadline, tag, headerTitle = '') {
   chrome.storage.local.get(['savedTabs'], (result) => {
     const savedTabs = result.savedTabs || [];
     let favicon = tab.favIconUrl || '';
@@ -296,21 +302,22 @@ function handleTabSaving(tab, deadline, tag) {
         }
       }).then((results) => {
         const channelIcon = (results && results[0] && results[0].result) ? results[0].result : null;
-        saveTab(savedTabs, tab, favicon, channelIcon, deadline, tag);
+        saveTab(savedTabs, tab, favicon, channelIcon, deadline, tag, headerTitle);
       }).catch(() => {
-        saveTab(savedTabs, tab, favicon, null, deadline, tag);
+        saveTab(savedTabs, tab, favicon, null, deadline, tag, headerTitle);
       });
     } else {
-      saveTab(savedTabs, tab, favicon, null, deadline, tag);
+      saveTab(savedTabs, tab, favicon, null, deadline, tag, headerTitle);
     }
   });
 }
 
 // Helper function to save tab
-function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null, tag = null) {
+function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null, tag = null, headerTitle = '') {
   const newTab = {
     id: Date.now(),
     title: tab.title,
+    headerTitle: headerTitle.trim() || null,
     url: tab.url,
     favicon: favicon,
     channelIcon: channelIcon,
@@ -329,7 +336,7 @@ function saveTab(savedTabs, tab, favicon, channelIcon = null, deadline = null, t
 // Handle messages from injected scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'deadlineSelected') {
-    handleTabSaving(sender.tab, message.deadline, message.tag);
+    handleTabSaving(sender.tab, message.deadline, message.tag, message.headerTitle);
   }
   
   if (message.action === 'saveToConvex') {
