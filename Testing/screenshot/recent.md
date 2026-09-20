@@ -14,6 +14,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 - Startup no longer calls `install_deps.bootstrap()`; dependencies must already be installed.
 - Action results are represented by `FolderChooser.choice`; selecting a destination folder saves the in-memory crop directly.
 - Folder display names are stored as optional `name` fields; renaming does not change the actual filesystem path.
+- Google Lens copies a durable Windows CF_DIB bitmap before opening `https://lens.google.com/`, allowing manual Ctrl+V on the Lens page.
 
 # 4. Pending Task
 

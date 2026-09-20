@@ -1,6 +1,6 @@
 """Fast PyQt6 region screenshot tool with lazy OCR integrations."""
 from __future__ import annotations
-import json, os, subprocess, sys, tempfile
+import io, json, os, subprocess, sys, tempfile
 from datetime import datetime
 from pathlib import Path
 from PIL import ImageGrab, ImageQt
@@ -39,6 +39,21 @@ def send_to_clipboard(image,text_path=None):
     app.clipboard().setImage(ImageQt.toqimage(image.convert("RGBA")))
     if text_path: app.clipboard().setText(str(text_path))
     return True
+
+def copy_image_for_browser(image):
+    """Put a durable Windows bitmap on the clipboard before opening Chrome."""
+    clipboard_open=False
+    try:
+        import win32clipboard
+        output=io.BytesIO(); image.convert("RGB").save(output,"BMP"); data=output.getvalue()[14:]
+        win32clipboard.OpenClipboard(); clipboard_open=True; win32clipboard.EmptyClipboard(); win32clipboard.SetClipboardData(win32clipboard.CF_DIB,data)
+        return True
+    except Exception:
+        return send_to_clipboard(image)
+    finally:
+        if clipboard_open:
+            try: win32clipboard.CloseClipboard()
+            except Exception: pass
 
 GLOBAL_QSS=f"""QMainWindow,QDialog{{background:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:'{UI_FONT}';font-size:10pt;}}
 QPushButton,QToolButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:7px 12px;font-weight:bold;}}
@@ -160,7 +175,7 @@ class FolderChooser(QDialog):
     def open_browser(self):
         f=Path(tempfile.gettempdir())/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; self.image.save(f); subprocess.Popen(["cmd","/c","start","","chrome",str(f)]); self.accept()
     def google_images(self):
-        f=Path(tempfile.gettempdir())/"google_img_search.png"; self.image.save(f); send_to_clipboard(self.image); self.accept(); subprocess.Popen(["cmd","/c","start","","chrome","https://images.google.com/"])
+        f=Path(tempfile.gettempdir())/"google_img_search.png"; self.image.save(f); copy_image_for_browser(self.image); self.accept(); subprocess.Popen(["cmd","/c","start","","chrome","https://lens.google.com/"])
 
 class OCRWorker(QThread):
     done=pyqtSignal(str,str)
