@@ -8,7 +8,7 @@ from PyQt6.QtCore import QPoint, QRect, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout, QHBoxLayout,
     QLabel, QMessageBox, QPushButton, QScrollArea, QTextEdit, QToolButton, QVBoxLayout,
-    QWidget, QInputDialog,
+    QWidget, QInputDialog, QMenu,
     QColorDialog)
 
 # CYBERPUNK THEME PALETTE (THEME_GUIDE.md)
@@ -97,7 +97,7 @@ class FolderChooser(QDialog):
         while self.grid.count():
             item=self.grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
-        items=[(os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
+        items=[(f.get("name") or os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
         for i,item in enumerate(items): self.add_card(i//5,i%5,*item)
         self.add_card(len(items)//5,len(items)%5,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
     def add_card(self,row,col,label,color,icon,value):
@@ -113,12 +113,38 @@ class FolderChooser(QDialog):
         elif value=="BROWSER": b.clicked.connect(self.open_browser)
         elif value=="GOOGLE_IMG": b.clicked.connect(self.google_images)
         else: b.clicked.connect(lambda checked=False,v=value:self.choose(v))
+        if value in [f["path"] for f in self.folders]:
+            b.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            b.customContextMenuRequested.connect(lambda pos,v=value,button=b: self.folder_menu(button.mapToGlobal(pos),v))
         self.grid.addWidget(b,row,col)
     def choose(self,value): self.choice=value; self.accept()
     def move_to_folder(self):
         folder=QFileDialog.getExistingDirectory(self,"Move Screenshot To")
         if folder:
             self.choice=folder; self.accept()
+    def folder_menu(self,global_pos,path):
+        menu=QMenu(self); menu.setMinimumWidth(150); menu.setStyleSheet(f"QMenu{{background:{CP_PANEL};color:{CP_TEXT};border:1px solid {CP_CYAN};font-family:'{UI_FONT}';font-size:10pt;padding:4px;}} QMenu::item{{padding:6px 18px;}} QMenu::item:selected{{background:{CP_CYAN};color:{CP_BG};}} QMenu::separator{{height:1px;background:{CP_DIM};margin:4px 8px;}}")
+        rename=menu.addAction("Rename"); color=menu.addAction("Color"); icon=menu.addAction("Icon"); menu.addSeparator(); remove=menu.addAction("Remove")
+        action=menu.exec(global_pos)
+        if action==rename: self.rename_folder(path)
+        elif action==color: self.color_folder(path)
+        elif action==icon: self.icon_folder(path)
+        elif action==remove: self.remove_folder(path)
+    def folder_index(self,path): return next(i for i,f in enumerate(self.folders) if f["path"]==path)
+    def rename_folder(self,path):
+        i=self.folder_index(path); old=self.folders[i].get("name") or os.path.basename(path) or path
+        name,ok=QInputDialog.getText(self,"Rename Folder Button","Displayed name:",text=old)
+        if ok and name.strip(): self.folders[i]["name"]=name.strip(); save_folders(self.folders); self.render()
+    def color_folder(self,path):
+        i=self.folder_index(path); c=QColorDialog.getColor(QColor(self.folders[i].get("color",CP_GREEN)),self,"Choose Folder Color")
+        if c.isValid(): self.folders[i]["color"]=c.name(); save_folders(self.folders); self.render()
+    def icon_folder(self,path):
+        i=self.folder_index(path); icon,ok=QInputDialog.getText(self,"Folder Icon","Enter an emoji or Unicode glyph:",text=self.folders[i].get("icon","▣"))
+        if ok and icon.strip(): self.folders[i]["icon"]=icon.strip(); save_folders(self.folders); self.render()
+    def remove_folder(self,path):
+        i=self.folder_index(path)
+        if QMessageBox.question(self,"Remove Folder Button","Remove this folder button?",QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No)==QMessageBox.StandardButton.Yes:
+            self.folders.pop(i); save_folders(self.folders); self.render()
     def add_folder(self):
         path=QFileDialog.getExistingDirectory(self,"Select Folder to Add")
         if path:

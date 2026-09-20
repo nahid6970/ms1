@@ -4,7 +4,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 
 # 2. Latest Implementation
 
-- `region_screenshot.py` — Replaced Tkinter/bootstrap flow with PyQt6; added cyberpunk QSS, explicit screenshot action row, “MOVE TO FOLDER”, folder destinations, restart/settings controls, responsive OCR worker, visible dialog activation, and error reporting; fixed missing `QWidget` import.
+- `region_screenshot.py` — Replaced Tkinter/bootstrap flow with PyQt6; added cyberpunk QSS, explicit screenshot action row, “MOVE TO FOLDER”, folder destinations, restart/settings controls, responsive OCR worker, larger centered JetBrainsMono NFP icons, and right-click folder menus for Rename/Color/Icon/Remove.
 
 # 3. Critical Context
 
@@ -13,6 +13,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 - OCR imports remain lazy and run in `QThread`; EasyOCR is preferred with pytesseract fallback.
 - Startup no longer calls `install_deps.bootstrap()`; dependencies must already be installed.
 - Action results are represented by `FolderChooser.choice`; selecting a destination folder saves the in-memory crop directly.
+- Folder display names are stored as optional `name` fields; renaming does not change the actual filesystem path.
 
 # 4. Pending Task
 
