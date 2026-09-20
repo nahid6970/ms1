@@ -8,6 +8,7 @@ from PyQt6.QtCore import QPoint, QRect, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout, QHBoxLayout,
     QLabel, QMessageBox, QPushButton, QScrollArea, QTextEdit, QToolButton, QVBoxLayout,
+    QWidget,
     QColorDialog)
 
 # CYBERPUNK THEME PALETTE (THEME_GUIDE.md)
@@ -65,7 +66,7 @@ class RegionSelector(QDialog):
         if e.key()==Qt.Key.Key_Escape: self.reject()
     @classmethod
     def select(cls,image):
-        d=cls(image); return d.exec()==QDialog.DialogCode.Accepted and d.selection
+        d=cls(image); d.show(); d.raise_(); d.activateWindow(); return d.exec()==QDialog.DialogCode.Accepted and d.selection
 
 class SettingsDialog(QDialog):
     def __init__(self,parent=None):
@@ -75,6 +76,17 @@ class FolderChooser(QDialog):
     def __init__(self,folders,image,parent=None):
         super().__init__(parent); self.folders=folders; self.image=image; self.choice=None; self.edit_mode=False; self.setWindowTitle("DESTINATION SELECTOR"); self.setWindowFlags(Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint); self.setMinimumSize(760,420)
         root=QVBoxLayout(self); head=QHBoxLayout(); title=QLabel("DESTINATION SELECTOR"); title.setStyleSheet(f"color:{CP_GREEN};font-weight:bold;font-size:12pt;"); head.addWidget(title); head.addStretch(); self.edit_button=QPushButton("EDIT: OFF"); self.edit_button.clicked.connect(self.toggle_edit); head.addWidget(self.edit_button); settings=QPushButton("⚙ SETTINGS"); settings.clicked.connect(lambda:SettingsDialog(self).exec()); head.addWidget(settings); restart=QPushButton("↺ RESTART"); restart.clicked.connect(self.restart); head.addWidget(restart); root.addLayout(head)
+        action_label=QLabel("WHAT DO YOU WANT TO DO WITH THIS SCREENSHOT?"); action_label.setStyleSheet(f"color:{CP_YELLOW};font-weight:bold;"); root.addWidget(action_label)
+        actions=QHBoxLayout()
+        for text,value,color in (("📋 COPY","CLIPBOARD",CP_CYAN),("💾 COPY + PATH","CLIPBOARD_PATH",CP_GREEN),("📁 MOVE TO FOLDER","MOVE_TO_FOLDER",CP_YELLOW),("🌏 OPEN IN CHROME","BROWSER",CP_ORANGE),("🔍 GOOGLE LENS","GOOGLE_IMG","#4285f4"),("📝 EXTRACT TEXT","OCR","#e040fb")):
+            b=QPushButton(text); b.setStyleSheet(f"QPushButton{{color:{color};}}")
+            if value=="MOVE_TO_FOLDER": b.clicked.connect(self.move_to_folder)
+            elif value=="BROWSER": b.clicked.connect(self.open_browser)
+            elif value=="GOOGLE_IMG": b.clicked.connect(self.google_images)
+            else: b.clicked.connect(lambda checked=False,v=value:self.choose(v))
+            actions.addWidget(b)
+        root.addLayout(actions)
+        folder_label=QLabel("DESTINATIONS"); folder_label.setStyleSheet(f"color:{CP_SUBTEXT};font-weight:bold;"); root.addWidget(folder_label)
         self.scroll=QScrollArea(); self.scroll.setWidgetResizable(True); self.host=QWidget(); self.grid=QGridLayout(self.host); self.grid.setSpacing(8); self.scroll.setWidget(self.host); root.addWidget(self.scroll); close=QPushButton("EXIT [ESC]"); close.clicked.connect(self.reject); root.addWidget(close,alignment=Qt.AlignmentFlag.AlignCenter); self.render()
     def keyPressEvent(self,e):
         if e.key()==Qt.Key.Key_Escape: self.reject()
@@ -84,8 +96,7 @@ class FolderChooser(QDialog):
         while self.grid.count():
             item=self.grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
-        items=[("CLIPBOARD",CP_CYAN,"📋","CLIPBOARD"),("CLIP+PATH",CP_GREEN,"🔗","CLIPBOARD_PATH"),("CHROME",CP_ORANGE,"🌏","BROWSER"),("GOOGLE IMG","#4285f4","🔍","GOOGLE_IMG"),("EXTRACT TEXT","#e040fb","📝","OCR")]
-        items += [(os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
+        items=[(os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
         for i,item in enumerate(items): self.add_card(i//5,i%5,*item)
         self.add_card(len(items)//5,len(items)%5,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
     def add_card(self,row,col,label,color,icon,value):
@@ -97,6 +108,10 @@ class FolderChooser(QDialog):
         else: b.clicked.connect(lambda checked=False,v=value:self.choose(v))
         self.grid.addWidget(b,row,col)
     def choose(self,value): self.choice=value; self.accept()
+    def move_to_folder(self):
+        folder=QFileDialog.getExistingDirectory(self,"Move Screenshot To")
+        if folder:
+            self.choice=folder; self.accept()
     def add_folder(self):
         path=QFileDialog.getExistingDirectory(self,"Select Folder to Add")
         if path:
@@ -134,17 +149,24 @@ class OCRDialog(QDialog):
         self.title.setText(f"EXTRACTED TEXT ({mode})"); self.text.setPlainText(text); b=QPushButton("COPY TO CLIPBOARD"); b.clicked.connect(lambda:QApplication.clipboard().setText(self.text.toPlainText())); self.layout().addWidget(b)
 
 def main():
-    app=QApplication.instance() or QApplication(sys.argv); app.setStyleSheet(GLOBAL_QSS); app.setFont(QFont("Consolas",10)); screen=capture_screen(); selection=RegionSelector.select(screen)
-    if not selection: return 0
-    x1,y1,x2,y2=selection; image=screen.crop((x1,y1,x2,y2)); chooser=FolderChooser(load_folders(),image)
-    if chooser.exec()!=QDialog.DialogCode.Accepted or not chooser.choice: return 0
-    target=chooser.choice
-    if target=="CLIPBOARD": send_to_clipboard(image)
-    elif target=="CLIPBOARD_PATH":
-        d=Path(tempfile.gettempdir())/"screenshot_temp"; d.mkdir(exist_ok=True); f=d/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; image.save(f); send_to_clipboard(image,f)
-    elif target=="OCR": OCRDialog(image).exec()
-    else:
-        folder=Path(target); folder.mkdir(parents=True,exist_ok=True); image.save(folder/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png")
-    return 0
+    app=QApplication.instance() or QApplication(sys.argv)
+    app.setStyleSheet(GLOBAL_QSS); app.setFont(QFont("Consolas",10))
+    try:
+        screen=capture_screen(); selection=RegionSelector.select(screen)
+        if not selection: return 0
+        x1,y1,x2,y2=selection; image=screen.crop((x1,y1,x2,y2)); chooser=FolderChooser(load_folders(),image)
+        chooser.show(); chooser.raise_(); chooser.activateWindow()
+        if chooser.exec()!=QDialog.DialogCode.Accepted or not chooser.choice: return 0
+        target=chooser.choice
+        if target=="CLIPBOARD": send_to_clipboard(image)
+        elif target=="CLIPBOARD_PATH":
+            d=Path(tempfile.gettempdir())/"screenshot_temp"; d.mkdir(exist_ok=True); f=d/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; image.save(f); send_to_clipboard(image,f)
+        elif target=="OCR": OCRDialog(image).exec()
+        else:
+            folder=Path(target); folder.mkdir(parents=True,exist_ok=True); image.save(folder/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png")
+        return 0
+    except Exception as exc:
+        QMessageBox.critical(None,"Screenshot error",f"{type(exc).__name__}: {exc}")
+        return 1
 
 if __name__=="__main__": sys.exit(main())
