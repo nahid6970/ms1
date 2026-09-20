@@ -1,1032 +1,150 @@
-import sys, os
-# 1. Add the absolute path to the folder containing install_deps.py
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
-
-# 2. Import and run the bootstrap
-import install_deps
-install_deps.bootstrap(__file__)
-
-
-import tkinter as tk
-from tkinter import messagebox, filedialog, colorchooser
-from PIL import ImageGrab, Image, ImageTk
-import os
-import json
+"""Fast PyQt6 region screenshot tool with lazy OCR integrations."""
+from __future__ import annotations
+import json, os, subprocess, sys, tempfile
 from datetime import datetime
-import io
-import subprocess
-import base64
-import socket
-import struct
-import urllib.request
+from pathlib import Path
+from PIL import ImageGrab, ImageQt
+from PyQt6.QtCore import QPoint, QRect, Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
+from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout, QHBoxLayout,
+    QLabel, QMessageBox, QPushButton, QScrollArea, QTextEdit, QToolButton, QVBoxLayout,
+    QColorDialog)
 
-# Config file path
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), "folders.json")
+# CYBERPUNK THEME PALETTE (THEME_GUIDE.md)
+CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"; CP_RED="#FF003C"; CP_GREEN="#00ff21"; CP_ORANGE="#ff934b"; CP_DIM="#3a3a3a"; CP_TEXT="#E0E0E0"; CP_SUBTEXT="#808080"
+BASE_DIR=Path(__file__).resolve().parent; CONFIG_FILE=BASE_DIR / "folders.json"
 
 def load_folders():
     try:
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, 'r') as f:
-                data = json.load(f)
-                if not data:
-                    return []
-                if isinstance(data, list) and len(data) > 0 and isinstance(data[0], str):
-                    return [{"path": p, "color": "#00ff41"} for p in data]
-                return data
-    except Exception as e:
-        print(f"Error loading config: {e}")
-    
-    return []
+        data=json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        if isinstance(data,list) and (not data or isinstance(data[0],str)): return [{"path":p,"color":CP_GREEN} for p in data]
+        return data if isinstance(data,list) else []
+    except (OSError,ValueError): return []
 
 def save_folders(folders):
-    try:
-        with open(CONFIG_FILE, 'w') as f:
-            json.dump(folders, f, indent=4)
-    except Exception as e:
-        messagebox.showerror("Error", f"Could not save config: {e}")
+    try: CONFIG_FILE.write_text(json.dumps(folders,indent=4),encoding="utf-8")
+    except OSError as exc: QMessageBox.critical(None,"Save error",str(exc))
 
-class RegionSelector:
-    def __init__(self):
-        self.screen_img = self._capture_screen()
-        self.root = tk.Tk()
-        self.root.attributes('-fullscreen', True)
-        self.root.attributes('-topmost', True)
-        self.root.config(cursor="cross")
+def capture_screen():
+    try: return ImageGrab.grab(all_screens=True,include_layered_windows=True)
+    except TypeError: return ImageGrab.grab(all_screens=True)
 
-        self.canvas = tk.Canvas(self.root, cursor="cross", highlightthickness=0)
-        self.canvas.pack(fill="both", expand=True)
-        self._photo = ImageTk.PhotoImage(self.screen_img)
-        self.canvas.create_image(0, 0, image=self._photo, anchor="nw")
+def pil_to_pixmap(image): return QPixmap.fromImage(ImageQt.toqimage(image.convert("RGBA")))
 
-        self.start_x = None
-        self.start_y = None
-        self.rect = None
-        self.selection = None
-        
-        self.v_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
-        self.h_line = self.canvas.create_line(0, 0, 0, 0, fill="#ffffff", width=1)
+def send_to_clipboard(image,text_path=None):
+    app=QApplication.instance()
+    if not app: return False
+    app.clipboard().setImage(ImageQt.toqimage(image.convert("RGBA")))
+    if text_path: app.clipboard().setText(str(text_path))
+    return True
 
-        self.canvas.bind("<ButtonPress-1>", self.on_button_press)
-        self.canvas.bind("<B1-Motion>", self.on_move_press)
-        self.canvas.bind("<ButtonRelease-1>", self.on_button_release)
-        self.canvas.bind("<Motion>", self.on_mouse_move)
-        self.root.bind("<Escape>", lambda e: self.root.destroy())
+GLOBAL_QSS=f"""QMainWindow,QDialog{{background:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:Consolas,monospace;font-size:10pt;}}
+QPushButton,QToolButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:7px 12px;font-weight:bold;}}
+QPushButton:hover,QToolButton:hover{{background:#2a2a2a;border-color:{CP_YELLOW};color:{CP_YELLOW};}} QPushButton:pressed,QToolButton:checked{{background:{CP_YELLOW};color:#000;}}
+QTextEdit{{background:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:5px;selection-background-color:{CP_CYAN};selection-color:#000;}}
+QScrollArea{{background:transparent;border:none;}} QScrollBar:vertical{{background:{CP_BG};width:10px;}} QScrollBar::handle:vertical{{background:{CP_CYAN};min-height:20px;border-radius:5px;}} QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{{height:0;}}"""
 
-    def _capture_screen(self):
-        try:
-            return ImageGrab.grab(all_screens=True, include_layered_windows=True)
-        except TypeError:
-            # Older Pillow versions do not support include_layered_windows.
-            return ImageGrab.grab(all_screens=True)
+class RegionSelector(QDialog):
+    def __init__(self,image):
+        super().__init__(None,Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint); self.image=image; self.start=self.end=self.selection=None; self.setCursor(Qt.CursorShape.CrossCursor); self.setWindowState(Qt.WindowState.WindowFullScreen); self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+    def showEvent(self,event): self.pixmap=pil_to_pixmap(self.image).scaled(self.size(),Qt.AspectRatioMode.IgnoreAspectRatio,Qt.TransformationMode.FastTransformation); super().showEvent(event)
+    def paintEvent(self,event):
+        p=QPainter(self); p.drawPixmap(0,0,self.pixmap); p.fillRect(self.rect(),QColor(0,0,0,85))
+        if self.start and self.end:
+            r=QRect(self.start,self.end).normalized(); p.drawPixmap(r,self.pixmap,r); p.setPen(QPen(QColor(CP_CYAN),2)); p.drawRect(r); p.setPen(QPen(QColor(CP_YELLOW),1)); p.drawText(r.topLeft()+QPoint(8,-8),f"{r.width()} x {r.height()}")
+    def mousePressEvent(self,e):
+        if e.button()==Qt.MouseButton.LeftButton: self.start=self.end=e.position().toPoint(); self.update()
+    def mouseMoveEvent(self,e):
+        if self.start: self.end=e.position().toPoint(); self.update()
+    def mouseReleaseEvent(self,e):
+        if self.start and self.end:
+            r=QRect(self.start,self.end).normalized()
+            if r.width()>2 and r.height()>2: self.selection=(r.left(),r.top(),r.right()+1,r.bottom()+1)
+            self.accept()
+    def keyPressEvent(self,e):
+        if e.key()==Qt.Key.Key_Escape: self.reject()
+    @classmethod
+    def select(cls,image):
+        d=cls(image); return d.exec()==QDialog.DialogCode.Accepted and d.selection
 
-    def on_mouse_move(self, event):
-        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        self.canvas.coords(self.v_line, event.x, 0, event.x, h)
-        self.canvas.coords(self.h_line, 0, event.y, w, event.y)
+class SettingsDialog(QDialog):
+    def __init__(self,parent=None):
+        super().__init__(parent); self.setWindowTitle("SETTINGS"); self.setMinimumWidth(400); l=QVBoxLayout(self); l.addWidget(QLabel("SETTINGS SYSTEM\nReserved for future customizations.")); b=QPushButton("CLOSE"); b.clicked.connect(self.accept); l.addWidget(b)
 
-    def on_button_press(self, event):
-        self.start_x = event.x
-        self.start_y = event.y
-        self.rect = self.canvas.create_rectangle(
-            self.start_x, self.start_y, self.start_x, self.start_y, 
-            outline='#00ffff', width=2
-        )
-
-    def on_move_press(self, event):
-        cur_x, cur_y = (event.x, event.y)
-        self.canvas.coords(self.rect, self.start_x, self.start_y, cur_x, cur_y)
-        self.on_mouse_move(event)
-
-    def on_button_release(self, event):
-        end_x, end_y = (event.x, event.y)
-        x1 = min(self.start_x, end_x)
-        y1 = min(self.start_y, end_y)
-        x2 = max(self.start_x, end_x)
-        y2 = max(self.start_y, end_y)
-        
-        if x2 - x1 > 2 and y2 - y1 > 2:
-            self.selection = (x1, y1, x2, y2)
-        
-        self.root.destroy()
-
-    def get_selection(self):
-        self.root.mainloop()
-        return self.selection
-
-class FolderChooser:
-    def __init__(self, folders, screenshot_img):
-        self.root = tk.Tk()
-        self.root.overrideredirect(True)
-        self.root.attributes('-topmost', True)
-        self.choice = None
-        self.folders = folders
-        self.img = screenshot_img
-        self.edit_mode = False
-
-        # Colors & Theme
-        self.bg_color = "#0e0e0e"
-        self.fg_color = "#ffffff"
-        self.accent_main = "#00ff41" # Matrix Green
-        self.accent_edit = "#ffcc00" # Warning/Edit Color
-        
-        # Fonts - Force JetBrains Mono everywhere
-        self.font_name = "JetBrainsMono NFP"
-        self.font_main = (self.font_name, 10)
-        self.font_icon = (self.font_name, 36) # Increased size further
-        self.font_small = (self.font_name, 8)
-        self.font_title = (self.font_name + " Bold", 11)
-        
-        self.root.config(bg=self.accent_main)
-
-        # Main Container
-        self.container = tk.Frame(self.root, bg=self.bg_color)
-        self.container.pack(fill="both", expand=True, padx=1, pady=1)
-
-        # Header
-        self.header = tk.Frame(self.container, bg=self.bg_color, cursor="fleur")
-        self.header.pack(fill="x", padx=15, pady=(15, 5))
-        
-        self.label_title = tk.Label(self.header, text="DESTINATION SELECTOR", 
-                              font=self.font_title, bg=self.bg_color, fg=self.accent_main,
-                              cursor="arrow") # Standard cursor for text
-        self.label_title.pack(side="left")
-
-        # Edit Toggle Button
-        self.btn_edit_toggle = tk.Button(self.header, text="EDIT: OFF", command=self.toggle_edit_mode,
-                                       font=self.font_small, bg="#1a1a1a", fg="#666666",
-                                       activebackground=self.accent_edit, activeforeground="black",
-                                       relief="flat", bd=0, padx=10,
-                                       cursor="hand2") # Hand cursor for button
-        self.btn_edit_toggle.pack(side="right")
-        
-        self.header.bind("<ButtonPress-1>", self.start_move)
-        self.header.bind("<B1-Motion>", self.do_move)
-
-        # Folder List Container (Grid-like with rows of 5)
-        self.list_container = tk.Frame(self.container, bg=self.bg_color)
-        self.list_container.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        self.render_folders()
-
-        # Footer
-        self.footer = tk.Frame(self.container, bg=self.bg_color)
-        self.footer.pack(fill="x", pady=(0, 10))
-        
-        self.btn_close = tk.Button(self.footer, text="EXIT [ESC]", command=self.root.destroy,
-                                 font=self.font_small, bg=self.bg_color, fg="#555555",
-                                 activebackground="#ff0000", activeforeground="white",
-                                 relief="flat", bd=0, padx=20, cursor="hand2")
-        self.btn_close.pack()
-
-        # Update initial size
-        self.update_window_size()
-        
-        # Focus
-        self.root.bind("<Escape>", lambda e: self.root.destroy())
-        self.root.bind("<FocusOut>", self.on_focus_out)
-        self.root.after(100, self.force_focus)
-
-    def on_focus_out(self, event):
-        if getattr(self, 'is_dialog_open', False):
-            return
-        if self.root.focus_displayof() is None:
-             self.root.destroy()
-
-    def toggle_edit_mode(self):
-        self.edit_mode = not self.edit_mode
-        color = self.accent_edit if self.edit_mode else "#666666"
-        text = "EDIT: ON" if self.edit_mode else "EDIT: OFF"
-        self.btn_edit_toggle.config(fg=color, text=text)
-        self.render_folders()
-
-    def update_window_size(self):
-        self.list_container.update_idletasks()
-        # Increased dimensions for 36pt icons
-        width = 820 
-        total_items = len(self.folders) + 6 # CLIPBOARD, CLIP+PATH, CHROME, GOOGLE_IMG, EXTRACT TEXT, ADD
-        rows = (total_items + 4) // 5
-        height = 110 + (rows * 135)
-        
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        center_x = int(screen_width/2 - width/2)
-        center_y = int(screen_height/2 - height/2)
-        self.root.geometry(f"{width}x{height}+{center_x}+{center_y}")
-
-    def render_folders(self):
-        for widget in self.list_container.winfo_children():
-            widget.destroy()
-
-        all_items = []
-        # (path/label, color, icon, card_type, index)
-        all_items.append(("CLIPBOARD", "#00d4ff", "📋", "CLIPBOARD", -1))
-        all_items.append(("CLIP+PATH", "#00ffcc", "🔗", "CLIPBOARD_PATH", -3))
-        all_items.append(("CHROME", "#ff9900", "🌏", "BROWSER", -2))
-        all_items.append(("GOOGLE IMG", "#4285f4", "🔍", "GOOGLE_IMG", -4))
-        all_items.append(("EXTRACT TEXT", "#e040fb", "📝", "OCR", -5))
-        
-        for i, f_data in enumerate(self.folders):
-            icon = f_data.get("icon", "\ueaf7")
-            all_items.append((f_data["path"], f_data["color"], icon, "FOLDER", i))
-
-        for idx, (path, color, icon, card_type, f_idx) in enumerate(all_items):
-            row = idx // 5
-            col = idx % 5
-            self.create_folder_card(path, color, icon, row, col, f_idx, card_type)
-
-        next_idx = len(all_items)
-        self.create_add_button(next_idx // 5, next_idx % 5)
-
-    def create_folder_card(self, path, color, icon, row, col, index, card_type):
-        # Increased card size for 36pt icons
-        card = tk.Frame(self.list_container, bg="#1a1a1a", width=150, height=120)
-        card.grid(row=row, column=col, padx=5, pady=5)
-        card.pack_propagate(False)
-
-        name = path # Default to content of path argument
-        if card_type == "FOLDER":
-            name = os.path.basename(path)
-            if not name: name = path
-        
-        icon_label = tk.Label(card, text=icon, font=self.font_icon, bg="#1a1a1a", fg=color)
-        icon_label.pack(pady=(5, 0))
-
-        name_label = tk.Label(card, text=name.upper()[:16], font=self.font_main, bg="#1a1a1a", fg=self.fg_color)
-        name_label.pack()
-
-        if self.edit_mode and card_type == "FOLDER":
-            card.config(highlightbackground=self.accent_edit, highlightthickness=1)
-            
-            # Management Buttons at bottom
-            # Color
-            col_l = tk.Label(card, text="🎨", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
-            col_l.place(x=10, y=90)
-            col_l.bind("<Button-1>", lambda e, i=index: self.change_folder_color(i))
-            
-            # Icon 
-            ico_l = tk.Label(card, text="🔣", font=self.font_main, bg="#1a1a1a", fg=self.accent_edit, cursor="hand2")
-            ico_l.place(x=65, y=90)
-            ico_l.bind("<Button-1>", lambda e, i=index: self.change_folder_icon(i))
-
-            # Delete
-            del_l = tk.Label(card, text="✕", font=self.font_main, bg="#1a1a1a", fg="#ff4444", cursor="hand2")
-            del_l.place(x=125, y=90)
-            del_l.bind("<Button-1>", lambda e, i=index: self.remove_folder(i))
-
-        widgets = [card, icon_label, name_label]
-        for w in widgets:
-            if not self.edit_mode:
-                if card_type == "CLIPBOARD":
-                    w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD"))
-                elif card_type == "CLIPBOARD_PATH":
-                    w.bind("<Button-1>", lambda e: self.set_choice("CLIPBOARD_PATH"))
-                elif card_type == "BROWSER":
-                    w.bind("<Button-1>", lambda e: self.open_in_browser())
-                elif card_type == "GOOGLE_IMG":
-                    w.bind("<Button-1>", lambda e: self.google_image_search())
-                elif card_type == "OCR":
-                    w.bind("<Button-1>", lambda e: self.set_choice("OCR"))
-                else: # FOLDER
-                    w.bind("<Button-1>", lambda e, p=path: self.set_choice(p))
-                    w.bind("<Button-3>", lambda e, p=path: self.open_explorer(p))
-                w.config(cursor="hand2")
-            
-            w.bind("<Enter>", lambda e, c=card, col=color: self.on_hover(c, col))
-            w.bind("<Leave>", lambda e, c=card: self.on_leave(c))
-
-    def open_in_browser(self) -> None:
-        import tempfile
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            temp_dir = tempfile.gettempdir()
-            filename = f"screenshot_{timestamp}.png"
-            filepath = os.path.join(temp_dir, filename)
-            
-            self.img.save(filepath)
-            
-            # Open in Chrome (Windows)
-            subprocess.run(f"start chrome \"{filepath}\"", shell=True)
-            self.root.destroy()
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to open browser: {e}")
-
-    def google_image_search(self) -> None:
-        import tempfile
-        filepath = os.path.join(tempfile.gettempdir(), "google_img_search.png")
-        self.img.save(filepath)
-        send_to_clipboard(self.img)
-        self.root.destroy()
-        _open_google_images_existing_tab_and_paste(filepath)
-
-    def create_add_button(self, row, col):
-        # SYNCED SIZE: Must be 128x85 exactly like other cards
-        card = tk.Frame(self.list_container, bg="#121212", width=150, height=120)
-        card.grid(row=row, column=col, padx=5, pady=5)
-        card.pack_propagate(False)
-
-        icon_label = tk.Label(card, text="+", font=(self.font_name, 36), bg="#121212", fg="#444444")
-        icon_label.pack(expand=True)
-
-        # Bind explicitly to ensure click works
-        card.bind("<Button-1>", lambda e: self.add_new_folder())
-        icon_label.bind("<Button-1>", lambda e: self.add_new_folder())
-        
-        for w in [card, icon_label]:
-            w.bind("<Enter>", lambda e: self.on_add_hover(card, icon_label))
-            w.bind("<Leave>", lambda e: self.on_add_leave(card, icon_label))
-            w.config(cursor="hand2")
-
-    def on_add_hover(self, card, label):
-        card.config(bg="#1a1a1a")
-        label.config(bg="#1a1a1a")
-
-    def on_add_leave(self, card, label):
-        card.config(bg="#121212")
-        label.config(bg="#121212")
-
-    def on_hover(self, card, color):
-        if not self.edit_mode:
-            card.config(bg="#252525")
-            for w in card.winfo_children():
-                w.config(bg="#252525")
-
-    def on_leave(self, card):
-        if not self.edit_mode:
-            card.config(bg="#1a1a1a")
-            for w in card.winfo_children():
-                w.config(bg="#1a1a1a")
-
-    def open_explorer(self, path):
-        if os.path.exists(path):
-            subprocess.run(["explorer", os.path.normpath(path)])
-
-    def change_folder_color(self, index):
-        self.is_dialog_open = True
-        color = colorchooser.askcolor(title="Choose Folder Color", initialcolor=self.folders[index]["color"], parent=self.root)[1]
-        self.is_dialog_open = False
-        self.root.focus_force()
-        if color:
-            self.folders[index]["color"] = color
-            save_folders(self.folders)
-            self.render_folders()
-
-    def change_folder_icon(self, index):
-        from tkinter import simpledialog
-        self.is_dialog_open = True
-        # Added parent=self.root to ensure it doesn't get buried
-        new_icon = simpledialog.askstring("Folder Icon", "Paste new icon glyph:", 
-                                         initialvalue=self.folders[index].get("icon", "\ueaf7"),
-                                         parent=self.root)
-        self.is_dialog_open = False
-        self.root.focus_force()
-        if new_icon:
-            self.folders[index]["icon"] = new_icon
-            save_folders(self.folders)
-            self.render_folders()
-
-    def remove_folder(self, index):
-        self.is_dialog_open = True
-        confirm = messagebox.askyesno("Confirm", "Remove this folder from list?", parent=self.root)
-        self.is_dialog_open = False
-        self.root.focus_force()
-        if confirm:
-            self.folders.pop(index)
-            save_folders(self.folders)
-            self.render_folders()
-            self.update_window_size()
-
-    def add_new_folder(self):
-        self.is_dialog_open = True
-        path = filedialog.askdirectory(title="Select Folder to Add", parent=self.root)
-        self.is_dialog_open = False
-        self.root.focus_force()
+class FolderChooser(QDialog):
+    def __init__(self,folders,image,parent=None):
+        super().__init__(parent); self.folders=folders; self.image=image; self.choice=None; self.edit_mode=False; self.setWindowTitle("DESTINATION SELECTOR"); self.setWindowFlags(Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint); self.setMinimumSize(760,420)
+        root=QVBoxLayout(self); head=QHBoxLayout(); title=QLabel("DESTINATION SELECTOR"); title.setStyleSheet(f"color:{CP_GREEN};font-weight:bold;font-size:12pt;"); head.addWidget(title); head.addStretch(); self.edit_button=QPushButton("EDIT: OFF"); self.edit_button.clicked.connect(self.toggle_edit); head.addWidget(self.edit_button); settings=QPushButton("⚙ SETTINGS"); settings.clicked.connect(lambda:SettingsDialog(self).exec()); head.addWidget(settings); restart=QPushButton("↺ RESTART"); restart.clicked.connect(self.restart); head.addWidget(restart); root.addLayout(head)
+        self.scroll=QScrollArea(); self.scroll.setWidgetResizable(True); self.host=QWidget(); self.grid=QGridLayout(self.host); self.grid.setSpacing(8); self.scroll.setWidget(self.host); root.addWidget(self.scroll); close=QPushButton("EXIT [ESC]"); close.clicked.connect(self.reject); root.addWidget(close,alignment=Qt.AlignmentFlag.AlignCenter); self.render()
+    def keyPressEvent(self,e):
+        if e.key()==Qt.Key.Key_Escape: self.reject()
+    def restart(self): os.execv(sys.executable,[sys.executable]+sys.argv)
+    def toggle_edit(self): self.edit_mode=not self.edit_mode; self.edit_button.setText("EDIT: ON" if self.edit_mode else "EDIT: OFF"); self.render()
+    def render(self):
+        while self.grid.count():
+            item=self.grid.takeAt(0)
+            if item.widget(): item.widget().deleteLater()
+        items=[("CLIPBOARD",CP_CYAN,"📋","CLIPBOARD"),("CLIP+PATH",CP_GREEN,"🔗","CLIPBOARD_PATH"),("CHROME",CP_ORANGE,"🌏","BROWSER"),("GOOGLE IMG","#4285f4","🔍","GOOGLE_IMG"),("EXTRACT TEXT","#e040fb","📝","OCR")]
+        items += [(os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
+        for i,item in enumerate(items): self.add_card(i//5,i%5,*item)
+        self.add_card(len(items)//5,len(items)%5,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
+    def add_card(self,row,col,label,color,icon,value):
+        b=QToolButton(); b.setFixedSize(140,110); b.setText(f"{icon}\n{label.upper()[:16]}"); b.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly); border=color if self.edit_mode and value!="ADD" else CP_DIM; b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};color:{color};border:1px solid {border};font-family:Consolas;font-size:11pt;}} QToolButton:hover{{background:#252525;border-color:{CP_YELLOW};}}")
+        if value=="ADD": b.clicked.connect(self.add_folder)
+        elif self.edit_mode and value in [f["path"] for f in self.folders]: b.clicked.connect(lambda checked=False,v=value:self.edit_folder(v))
+        elif value=="BROWSER": b.clicked.connect(self.open_browser)
+        elif value=="GOOGLE_IMG": b.clicked.connect(self.google_images)
+        else: b.clicked.connect(lambda checked=False,v=value:self.choose(v))
+        self.grid.addWidget(b,row,col)
+    def choose(self,value): self.choice=value; self.accept()
+    def add_folder(self):
+        path=QFileDialog.getExistingDirectory(self,"Select Folder to Add")
         if path:
-            self.is_dialog_open = True
-            color = colorchooser.askcolor(title="Choose Folder Color", initialcolor="#00ff41", parent=self.root)[1]
-            self.is_dialog_open = False
-            self.root.focus_force()
-            if not color: color = "#00ff41"
-            self.folders.append({"path": path, "color": color})
-            save_folders(self.folders)
-            self.render_folders()
-            self.update_window_size()
+            c=QColorDialog.getColor(QColor(CP_GREEN),self,"Choose Folder Color"); self.folders.append({"path":path,"color":c.name() if c.isValid() else CP_GREEN}); save_folders(self.folders); self.render()
+    def edit_folder(self,path):
+        i=next(i for i,f in enumerate(self.folders) if f["path"]==path); c=QColorDialog.getColor(QColor(self.folders[i].get("color",CP_GREEN)),self,"Choose Folder Color")
+        if c.isValid(): self.folders[i]["color"]=c.name(); save_folders(self.folders); self.render()
+    def open_browser(self):
+        f=Path(tempfile.gettempdir())/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; self.image.save(f); subprocess.Popen(["cmd","/c","start","","chrome",str(f)]); self.accept()
+    def google_images(self):
+        f=Path(tempfile.gettempdir())/"google_img_search.png"; self.image.save(f); send_to_clipboard(self.image); self.accept(); subprocess.Popen(["cmd","/c","start","","chrome","https://images.google.com/"])
 
-    def force_focus(self):
-        self.root.focus_force()
-        self.root.lift()
-        self.root.focus_set()
-        try: self.root.grab_set()
-        except: pass
-
-    def start_move(self, event):
-        self.x = event.x
-        self.y = event.y
-
-    def do_move(self, event):
-        deltax = event.x - self.x
-        deltay = event.y - self.y
-        x = self.root.winfo_x() + deltax
-        y = self.root.winfo_y() + deltay
-        self.root.geometry(f"+{x}+{y}")
-
-    def set_choice(self, folder):
-        self.choice = folder
-        self.root.destroy()
-
-    def get_choice(self):
-        self.root.mainloop()
-        return self.choice
-
-def send_to_clipboard(img, text_path=None):
-    try:
-        import win32clipboard
-        output = io.BytesIO()
-        img.convert("RGB").save(output, "BMP")
-        data = output.getvalue()[14:]
-        output.close()
-        win32clipboard.OpenClipboard()
-        win32clipboard.EmptyClipboard()
-        win32clipboard.SetClipboardData(win32clipboard.CF_DIB, data)
-        if text_path:
-            win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT, text_path)
-        win32clipboard.CloseClipboard()
-        return True
-    except Exception as e:
-        print(f"Clipboard error: {e}")
-        return False
-
-def _open_google_images_existing_tab_and_paste(filepath):
-    """Open Google Images in the existing Chrome window, click Lens, then paste."""
-    import time
-
-    try:
-        import pyautogui
-    except Exception as e:
-        messagebox.showerror("Error", f"pyautogui is required for Google image search automation: {e}")
-        return
-
-    try:
-        subprocess.Popen(["cmd", "/c", "start", "", "chrome", "https://images.google.com/"])
-
-        # Existing Chrome opens a new tab; wait for the Google Images page to render.
-        time.sleep(2.0)
-        pyautogui.hotkey("ctrl", "l")
-        time.sleep(0.1)
-        pyautogui.press("esc")
-        time.sleep(0.2)
-
-        # From the focused search box, the tab order is mic then Lens.
-        pyautogui.press("tab", presses=2, interval=0.05)
-        pyautogui.press("enter")
-        time.sleep(0.8)
-        pyautogui.hotkey("ctrl", "v")
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to automate Google image search for {filepath}: {e}")
-
-
-def _open_google_images_debug_upload(filepath):
-    """Reliable fallback: open an automated Chrome window and upload via DevTools."""
-    import tempfile
-    import time
-
-    try:
-        import pyautogui
-    except Exception as e:
-        messagebox.showerror("Error", f"pyautogui is required for Google image search automation: {e}")
-        return
-
-    try:
-        port = _get_free_port()
-        debug_dir = os.path.join(tempfile.gettempdir(), f"google_images_debug_profile_{os.getpid()}_{int(time.time())}")
-        subprocess.Popen([
-            "cmd", "/c", "start", "", "chrome",
-            f"--remote-debugging-port={port}",
-            f"--user-data-dir={debug_dir}",
-            "--new-window", "https://images.google.com/"
-        ])
-
-        tab = _wait_for_chrome_tab(port, "images.google.com", timeout=8)
-        _click_lens_and_upload(tab["webSocketDebuggerUrl"], filepath)
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to automate Google image search for {filepath}: {e}")
-
-
-def _click_lens_and_upload(websocket_url, filepath):
-    cdp = _CDPSession(websocket_url)
-    try:
-        ready_result = _cdp_evaluate(cdp, """
-new Promise((resolve) => {
-  const ready = () => document.readyState === 'interactive' || document.readyState === 'complete';
-  if (ready()) {
-    resolve(true);
-    return;
-  }
-  window.addEventListener('DOMContentLoaded', () => resolve(true), { once: true });
-  setTimeout(() => resolve(false), 8000);
-})
-""", await_promise=True)
-        if not ready_result.get("result", {}).get("value"):
-            raise RuntimeError("Google Images did not finish loading in time.")
-
-        click_result = _cdp_evaluate(cdp, """
-new Promise((resolve) => {
-  const lensSelector = 'body > div.L3eUgb > div.o3j99.ikrT4e.KEY6ib > form > div:nth-child(1) > div > div.RNNXgb > div.SDkEP > div.fM33ce.dRYYxd > div.ywK6Rd > div.etxtjc > svg';
-  const fallbackSelectors = [
-    lensSelector,
-    'svg.hWdRGb',
-    'div.ywK6Rd svg',
-    'div[aria-label*="Search by image"]',
-    'div[aria-label*="Lens"]'
-  ];
-  const clickLens = () => {
-    const svg = fallbackSelectors.map((selector) => document.querySelector(selector)).find(Boolean);
-    if (!svg) return false;
-    const target = svg.closest('div[role="button"], button, div') || svg;
-    const rect = target.getBoundingClientRect();
-    const options = {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-      clientX: rect.left + rect.width / 2,
-      clientY: rect.top + rect.height / 2
-    };
-    target.dispatchEvent(new MouseEvent('mousedown', options));
-    target.dispatchEvent(new MouseEvent('mouseup', options));
-    target.dispatchEvent(new MouseEvent('click', options));
-    return true;
-  };
-  const startedAt = Date.now();
-  const timer = setInterval(() => {
-    if (clickLens()) {
-      clearInterval(timer);
-      resolve({ clicked: true });
-      return;
-    }
-    if (Date.now() - startedAt > 8000) {
-      clearInterval(timer);
-      resolve({
-        clicked: false,
-        url: location.href,
-        readyState: document.readyState,
-        svgCount: document.querySelectorAll('svg').length
-      });
-    }
-  }, 100);
-})
-""", await_promise=True)
-        click_value = click_result.get("result", {}).get("value", {})
-        if not click_value.get("clicked"):
-            raise RuntimeError(f"Lens icon was not found/clicked: {click_value}")
-
-        input_result = _cdp_evaluate(cdp, """
-new Promise((resolve) => {
-  const startedAt = Date.now();
-  const timer = setInterval(() => {
-    const input = document.querySelector('input[type="file"]');
-    if (input) {
-      clearInterval(timer);
-      resolve({ found: true });
-      return;
-    }
-    if (Date.now() - startedAt > 8000) {
-      clearInterval(timer);
-      resolve({ found: false, bodyText: document.body.innerText.slice(0, 500) });
-    }
-  }, 100);
-})
-""", await_promise=True)
-        input_value = input_result.get("result", {}).get("value", {})
-        if not input_value.get("found"):
-            raise RuntimeError(f"Google Lens file input did not appear: {input_value}")
-        document = cdp.command("DOM.getDocument")
-        input_node = cdp.command("DOM.querySelector", {
-            "nodeId": document["root"]["nodeId"],
-            "selector": "input[type='file']"
-        })
-        node_id = input_node.get("nodeId")
-        if not node_id:
-            raise RuntimeError("Google Lens file input was not found after clicking the Lens icon.")
-        cdp.command("DOM.setFileInputFiles", {
-            "nodeId": node_id,
-            "files": [os.path.abspath(filepath)]
-        })
-    finally:
-        cdp.close()
-
-
-def _cdp_evaluate(cdp, expression, await_promise=False, timeout=8):
-    import time
-
-    deadline = time.time() + timeout
-    last_error = None
-    while time.time() < deadline:
+class OCRWorker(QThread):
+    done=pyqtSignal(str,str)
+    def __init__(self,image,mode): super().__init__(); self.image=image; self.mode=mode
+    def run(self):
+        langs={"en":(["en"],"eng","ENGLISH"),"bn":(["bn"],"ben","BANGLA"),"mixed":(["bn","en"],"ben+eng","MIXED (EN/BN)")}[self.mode]
         try:
-            return cdp.command("Runtime.evaluate", {
-                "expression": expression,
-                "awaitPromise": await_promise,
-                "returnByValue": True
-            })
-        except RuntimeError as e:
-            last_error = e
-            if "Cannot find default execution context" not in str(e):
-                raise
-            time.sleep(0.25)
-    raise RuntimeError(f"Page JavaScript context was not ready: {last_error}")
-
-
-def _wait_for_chrome_tab(port, url_part, timeout=8):
-    import time
-
-    deadline = time.time() + timeout
-    last_error = None
-    while time.time() < deadline:
-        try:
-            with urllib.request.urlopen(f"http://127.0.0.1:{port}/json", timeout=1) as response:
-                tabs = json.loads(response.read().decode("utf-8"))
-            for tab in tabs:
-                if url_part in tab.get("url", "") and "webSocketDebuggerUrl" in tab:
-                    return tab
-        except Exception as e:
-            last_error = e
-        time.sleep(0.25)
-    raise RuntimeError(f"Chrome DevTools tab not found: {last_error}")
-
-
-def _get_free_port():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
-
-
-def _cdp_command(websocket_url, method, params=None):
-    cdp = _CDPSession(websocket_url)
-    try:
-        return cdp.command(method, params)
-    finally:
-        cdp.close()
-
-
-class _CDPSession:
-    def __init__(self, websocket_url):
-        host, port, path = _parse_websocket_url(websocket_url)
-        self.sock = socket.create_connection((host, port), timeout=20)
-        _websocket_handshake(self.sock, host, port, path)
-        self.next_id = 1
-
-    def command(self, method, params=None):
-        command_id = self.next_id
-        self.next_id += 1
-        payload = json.dumps({
-            "id": command_id,
-            "method": method,
-            "params": params or {}
-        })
-        _websocket_send_text(self.sock, payload)
-        while True:
-            message = json.loads(_websocket_recv_text(self.sock))
-            if message.get("id") == command_id:
-                if "error" in message:
-                    raise RuntimeError(message["error"])
-                return message.get("result")
-
-    def close(self):
-        self.sock.close()
-
-
-def _parse_websocket_url(url):
-    if not url.startswith("ws://"):
-        raise ValueError(f"Unsupported websocket URL: {url}")
-    rest = url[5:]
-    host_port, path = rest.split("/", 1)
-    if ":" in host_port:
-        host, port = host_port.split(":", 1)
-        return host, int(port), "/" + path
-    return host_port, 80, "/" + path
-
-
-def _websocket_handshake(sock, host, port, path):
-    key = base64.b64encode(os.urandom(16)).decode("ascii")
-    request = (
-        f"GET {path} HTTP/1.1\r\n"
-        f"Host: {host}:{port}\r\n"
-        "Upgrade: websocket\r\n"
-        "Connection: Upgrade\r\n"
-        f"Sec-WebSocket-Key: {key}\r\n"
-        "Sec-WebSocket-Version: 13\r\n\r\n"
-    )
-    sock.sendall(request.encode("ascii"))
-    response = sock.recv(4096)
-    if b" 101 " not in response.split(b"\r\n", 1)[0]:
-        raise RuntimeError(f"WebSocket handshake failed: {response[:120]!r}")
-
-
-def _websocket_send_text(sock, text):
-    data = text.encode("utf-8")
-    header = bytearray([0x81])
-    length = len(data)
-    if length < 126:
-        header.append(0x80 | length)
-    elif length < 65536:
-        header.append(0x80 | 126)
-        header.extend(struct.pack(">H", length))
-    else:
-        header.append(0x80 | 127)
-        header.extend(struct.pack(">Q", length))
-    mask = os.urandom(4)
-    header.extend(mask)
-    masked = bytes(byte ^ mask[i % 4] for i, byte in enumerate(data))
-    sock.sendall(header + masked)
-
-
-def _websocket_recv_text(sock):
-    first, second = _recv_exact(sock, 2)
-    opcode = first & 0x0F
-    length = second & 0x7F
-    if length == 126:
-        length = struct.unpack(">H", _recv_exact(sock, 2))[0]
-    elif length == 127:
-        length = struct.unpack(">Q", _recv_exact(sock, 8))[0]
-    if second & 0x80:
-        mask = _recv_exact(sock, 4)
-        payload = bytes(byte ^ mask[i % 4] for i, byte in enumerate(_recv_exact(sock, length)))
-    else:
-        payload = _recv_exact(sock, length)
-    if opcode == 8:
-        raise RuntimeError("WebSocket closed")
-    return payload.decode("utf-8")
-
-
-def _recv_exact(sock, length):
-    chunks = bytearray()
-    while len(chunks) < length:
-        chunk = sock.recv(length - len(chunks))
-        if not chunk:
-            raise RuntimeError("Socket closed")
-        chunks.extend(chunk)
-    return bytes(chunks)
-
-
-class LanguageSelectionDialog:
-    def __init__(self, parent):
-        self.root = tk.Toplevel(parent)
-        self.root.title("Select Language")
-        self.root.overrideredirect(True)
-        self.root.attributes('-topmost', True)
-        self.choice = None
-        
-        self.bg_color = "#0e0e0e"
-        self.fg_color = "#ffffff"
-        self.accent_color = "#e040fb"
-        self.font_name = "JetBrainsMono NFP"
-        
-        self.root.config(bg=self.accent_color)
-        
-        container = tk.Frame(self.root, bg=self.bg_color)
-        container.pack(fill="both", expand=True, padx=1, pady=1)
-        
-        width, height = 300, 180
-        ws = self.root.winfo_screenwidth()
-        hs = self.root.winfo_screenheight()
-        x = (ws/2) - (width/2)
-        y = (hs/2) - (height/2)
-        self.root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
-        
-        label = tk.Label(container, text="SELECT EXTRACTION MODE", font=(self.font_name + " Bold", 10), bg=self.bg_color, fg=self.accent_color)
-        label.pack(pady=(15, 10))
-        
-        btn_opts = [
-            ("ENGLISH ONLY", "en"),
-            ("BANGLA ONLY", "bn"),
-            ("MIXED (EN + BN)", "mixed")
-        ]
-        
-        for text, val in btn_opts:
-            btn = tk.Button(
-                container, text=text, font=(self.font_name, 9),
-                bg="#1a1a1a", fg=self.fg_color,
-                activebackground=self.accent_color, activeforeground="black",
-                relief="flat", bd=0, width=22, pady=4,
-                command=lambda v=val: self.set_choice(v)
-            )
-            btn.pack(pady=4)
-            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#252525"))
-            btn.bind("<Leave>", lambda e, b=btn: b.config(bg="#1a1a1a"))
-            
-        self.root.bind("<Escape>", lambda e: self.root.destroy())
-        self.root.focus_force()
-        self.root.grab_set()
-
-    def set_choice(self, val):
-        self.choice = val
-        self.root.destroy()
-
-    def get_choice(self):
-        self.root.wait_window(self.root)
-        return self.choice
-
-
-def _run_ocr_and_show(img):
-    import tkinter as tk
-    from tkinter import scrolledtext, messagebox
-
-    root = tk.Tk()
-    root.withdraw()
-
-    # Get language extraction preference
-    lang_dialog = LanguageSelectionDialog(root)
-    choice = lang_dialog.get_choice()
-    if not choice:
-        root.destroy()
-        return
-
-    # Determine configured languages
-    if choice == "en":
-        easyocr_langs = ['en']
-        tesseract_langs = 'eng'
-        mode_label = "ENGLISH"
-    elif choice == "bn":
-        easyocr_langs = ['bn']
-        tesseract_langs = 'ben'
-        mode_label = "BANGLA"
-    else:
-        easyocr_langs = ['bn', 'en']
-        tesseract_langs = 'ben+eng'
-        mode_label = "MIXED (EN/BN)"
-
-    loading = tk.Toplevel(root)
-    loading.title("OCR Processing")
-    loading.geometry("350x120")
-    loading.config(bg="#0e0e0e")
-    loading.attributes('-topmost', True)
-    
-    ws = loading.winfo_screenwidth()
-    hs = loading.winfo_screenheight()
-    x = (ws/2) - (350/2)
-    y = (hs/2) - (120/2)
-    loading.geometry(f"350x120+{int(x)}+{int(y)}")
-
-    font_name = "JetBrainsMono NFP"
-    lbl = tk.Label(loading, text=f"Extracting {mode_label} text...\nPlease wait.", 
-                   font=(font_name, 10), bg="#0e0e0e", fg="#e040fb")
-    lbl.pack(expand=True)
-    loading.update()
-
-    raw_text = ""
-    error = None
-
-    try:
-        import numpy as np
-        import easyocr
-        img_np = np.array(img)
-        reader = easyocr.Reader(easyocr_langs)
-        results = reader.readtext(img_np, detail=0)
-        raw_text = "\n".join(results)
-    except ImportError:
-        try:
-            import pytesseract
-            raw_text = pytesseract.image_to_string(img, lang=tesseract_langs)
+            import numpy as np, easyocr; text="\n".join(easyocr.Reader(langs[0]).readtext(np.array(self.image),detail=0))
         except ImportError:
-            error = "Could not import 'easyocr' or 'pytesseract'.\n\nPlease install easyocr with English and Bangla support:\npip install easyocr torch torchvision"
-        except Exception as pe:
-            error = f"Pytesseract error: {pe}\n\nPlease install easyocr:\npip install easyocr torch torchvision"
-    except Exception as e:
-        error = f"OCR Error: {e}"
+            try:
+                import pytesseract; text=pytesseract.image_to_string(self.image,lang=langs[1])
+            except Exception as exc: text=f"OCR dependency/error: {exc}"
+        except Exception as exc: text=f"OCR error: {exc}"
+        self.done.emit(langs[2],text)
 
-    loading.destroy()
-
-    root.title("OCR Extraction Results")
-    root.geometry("600x485")
-    root.config(bg="#0e0e0e")
-    root.attributes('-topmost', True)
-    
-    rx = (ws/2) - (600/2)
-    ry = (hs/2) - (485/2)
-    root.geometry(f"600x485+{int(rx)}+{int(ry)}")
-    root.deiconify()
-
-    title = tk.Label(root, text=f"EXTRACTED TEXT ({mode_label})", font=(font_name + " Bold", 12), bg="#0e0e0e", fg="#e040fb")
-    title.pack(pady=(10, 5))
-
-    # Format / Extraction Mode Toolbar
-    toolbar = tk.Frame(root, bg="#0e0e0e")
-    toolbar.pack(fill="x", padx=15, pady=(0, 5))
-
-    text_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, font=(font_name, 10), bg="#1a1a1a", fg="#ffffff", insertbackground="white")
-    text_area.pack(fill="both", expand=True, padx=15, pady=5)
-
-    if error:
-        text_area.insert(tk.END, f"Error/Status:\n{error}")
-        # Disable formatting options if error
-        for widget in toolbar.winfo_children():
-            widget.config(state="disabled")
-    else:
-        text_area.insert(tk.END, raw_text)
-
-    # Actions for Toolbar Buttons
-    def show_raw():
-        text_area.delete("1.0", tk.END)
-        text_area.insert(tk.END, raw_text)
-        set_active_btn(btn_raw)
-
-    def show_single_line():
-        import re
-        single_line = re.sub(r'\s+', ' ', raw_text).strip()
-        text_area.delete("1.0", tk.END)
-        text_area.insert(tk.END, single_line)
-        set_active_btn(btn_single)
-
-    def show_links_emails():
-        import re
-        emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', raw_text)
-        urls = re.findall(r'https?://[^\s]+', raw_text)
-        found = emails + urls
-        result_str = "\n".join(found) if found else "No links or emails found."
-        text_area.delete("1.0", tk.END)
-        text_area.insert(tk.END, result_str)
-        set_active_btn(btn_links)
-
-    def set_active_btn(active):
-        for btn in [btn_raw, btn_single, btn_links]:
-            if btn == active:
-                btn.config(bg="#e040fb", fg="black")
-            else:
-                btn.config(bg="#1a1a1a", fg="#ffffff")
-
-    btn_raw = tk.Button(toolbar, text="RAW TEXT", font=(font_name, 8), bg="#e040fb", fg="black", relief="flat", padx=10, pady=2, command=show_raw)
-    btn_raw.pack(side="left", padx=(0, 5))
-
-    btn_single = tk.Button(toolbar, text="SINGLE LINE", font=(font_name, 8), bg="#1a1a1a", fg="#ffffff", relief="flat", padx=10, pady=2, command=show_single_line)
-    btn_single.pack(side="left", padx=5)
-
-    btn_links = tk.Button(toolbar, text="EXTRACT LINKS/EMAILS", font=(font_name, 8), bg="#1a1a1a", fg="#ffffff", relief="flat", padx=10, pady=2, command=show_links_emails)
-    btn_links.pack(side="left", padx=5)
-
-    btn_frame = tk.Frame(root, bg="#0e0e0e")
-    btn_frame.pack(fill="x", pady=10)
-
-    def copy_to_clipboard():
-        content = text_area.get("1.0", tk.END).strip()
-        root.clipboard_clear()
-        root.clipboard_append(content)
-        root.update()
-        messagebox.showinfo("Success", "Copied to clipboard!", parent=root)
-
-    copy_btn = tk.Button(btn_frame, text="COPY TO CLIPBOARD", font=(font_name, 9), bg="#1a1a1a", fg="#e040fb", activebackground="#e040fb", activeforeground="black", relief="flat", padx=15, pady=5, command=copy_to_clipboard)
-    copy_btn.pack(side="left", padx=15)
-
-    close_btn = tk.Button(btn_frame, text="CLOSE", font=(font_name, 9), bg="#1a1a1a", fg="#666666", activebackground="#ff4444", activeforeground="white", relief="flat", padx=15, pady=5, command=root.destroy)
-    close_btn.pack(side="right", padx=15)
-
-    root.bind("<Escape>", lambda e: root.destroy())
-    root.mainloop()
-
+class OCRDialog(QDialog):
+    def __init__(self,image,parent=None):
+        super().__init__(parent); self.setWindowTitle("OCR EXTRACTION"); self.resize(650,500); l=QVBoxLayout(self); self.title=QLabel("SELECT EXTRACTION MODE"); self.title.setStyleSheet("color:#e040fb;font-weight:bold;"); l.addWidget(self.title); row=QHBoxLayout()
+        for text,mode in (("ENGLISH ONLY","en"),("BANGLA ONLY","bn"),("MIXED (EN + BN)","mixed")):
+            b=QPushButton(text); b.clicked.connect(lambda checked=False,m=mode:self.start(image,m)); row.addWidget(b)
+        l.addLayout(row); self.text=QTextEdit(); l.addWidget(self.text); self.worker=None
+    def start(self,image,mode): self.title.setText("EXTRACTING... PLEASE WAIT"); self.worker=OCRWorker(image,mode); self.worker.done.connect(self.show_result); self.worker.start()
+    def show_result(self,mode,text):
+        self.title.setText(f"EXTRACTED TEXT ({mode})"); self.text.setPlainText(text); b=QPushButton("COPY TO CLIPBOARD"); b.clicked.connect(lambda:QApplication.clipboard().setText(self.text.toPlainText())); self.layout().addWidget(b)
 
 def main():
-    try:
-        folders = load_folders()
-        selector = RegionSelector()
-        selection = selector.get_selection()
-        if not selection: return
+    app=QApplication.instance() or QApplication(sys.argv); app.setStyleSheet(GLOBAL_QSS); app.setFont(QFont("Consolas",10)); screen=capture_screen(); selection=RegionSelector.select(screen)
+    if not selection: return 0
+    x1,y1,x2,y2=selection; image=screen.crop((x1,y1,x2,y2)); chooser=FolderChooser(load_folders(),image)
+    if chooser.exec()!=QDialog.DialogCode.Accepted or not chooser.choice: return 0
+    target=chooser.choice
+    if target=="CLIPBOARD": send_to_clipboard(image)
+    elif target=="CLIPBOARD_PATH":
+        d=Path(tempfile.gettempdir())/"screenshot_temp"; d.mkdir(exist_ok=True); f=d/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; image.save(f); send_to_clipboard(image,f)
+    elif target=="OCR": OCRDialog(image).exec()
+    else:
+        folder=Path(target); folder.mkdir(parents=True,exist_ok=True); image.save(folder/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png")
+    return 0
 
-        img = selector.screen_img.crop(selection)
-
-        chooser = FolderChooser(folders, img)
-        folder = chooser.get_choice()
-        if not folder: return
-
-        if folder == "CLIPBOARD":
-            send_to_clipboard(img)
-        elif folder == "CLIPBOARD_PATH":
-            import tempfile
-            # Save to a dedicated subfolder in the system temp directory
-            save_dir = os.path.join(tempfile.gettempdir(), "screenshot_temp")
-            if not os.path.exists(save_dir):
-                os.makedirs(save_dir, exist_ok=True)
-            
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"screenshot_{timestamp}.png"
-            filepath = os.path.join(save_dir, filename)
-            img.save(filepath)
-            send_to_clipboard(img, filepath)
-        elif folder == "OCR":
-            _run_ocr_and_show(img)
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"screenshot_{timestamp}.png"
-            filepath = os.path.join(folder, filename)
-            if not os.path.exists(folder):
-                os.makedirs(folder, exist_ok=True)
-            img.save(filepath)
-            
-    except Exception as e:
-        import traceback
-        error_msg = traceback.format_exc()
-        temp_root = tk.Tk()
-        temp_root.withdraw()
-        messagebox.showerror("Script Error", f"{error_msg}")
-        temp_root.destroy()
-
-
-if __name__ == "__main__":
-    main()
+if __name__=="__main__": sys.exit(main())
