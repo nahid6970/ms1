@@ -1,6 +1,6 @@
 """Fast PyQt6 region screenshot tool with lazy OCR integrations."""
 from __future__ import annotations
-import io, json, os, subprocess, sys, tempfile
+import io, json, os, struct, subprocess, sys, tempfile
 from datetime import datetime
 from pathlib import Path
 from PIL import ImageGrab, ImageQt
@@ -34,26 +34,34 @@ def capture_screen():
 def pil_to_pixmap(image): return QPixmap.fromImage(ImageQt.toqimage(image.convert("RGBA")))
 
 def send_to_clipboard(image,text_path=None):
-    app=QApplication.instance()
-    if not app: return False
-    app.clipboard().setImage(ImageQt.toqimage(image.convert("RGBA")))
-    if text_path: app.clipboard().setText(str(text_path))
-    return True
+    """Copy both an image and a file item for editors and Windows Explorer."""
+    try:
+        import win32clipboard
+        if text_path:
+            file_path=Path(text_path)
+        else:
+            temp_dir=Path(tempfile.gettempdir())/"screenshot_temp"; temp_dir.mkdir(exist_ok=True)
+            file_path=temp_dir/f"clipboard_{datetime.now():%Y%m%d_%H%M%S_%f}.png"; image.save(file_path)
+        output=io.BytesIO(); image.convert("RGB").save(output,"BMP"); dib=output.getvalue()[14:]
+        dropfiles=struct.pack("IiiII",20,0,0,0,1)+(str(file_path)+"\0\0").encode("utf-16le")
+        win32clipboard.OpenClipboard()
+        try:
+            win32clipboard.EmptyClipboard()
+            win32clipboard.SetClipboardData(win32clipboard.CF_DIB,dib)
+            win32clipboard.SetClipboardData(win32clipboard.CF_HDROP,dropfiles)
+            if text_path: win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT,str(file_path))
+        finally: win32clipboard.CloseClipboard()
+        return True
+    except Exception:
+        app=QApplication.instance()
+        if not app: return False
+        app.clipboard().setImage(ImageQt.toqimage(image.convert("RGBA")))
+        if text_path: app.clipboard().setText(str(text_path))
+        return True
 
 def copy_image_for_browser(image):
     """Put a durable Windows bitmap on the clipboard before opening Chrome."""
-    clipboard_open=False
-    try:
-        import win32clipboard
-        output=io.BytesIO(); image.convert("RGB").save(output,"BMP"); data=output.getvalue()[14:]
-        win32clipboard.OpenClipboard(); clipboard_open=True; win32clipboard.EmptyClipboard(); win32clipboard.SetClipboardData(win32clipboard.CF_DIB,data)
-        return True
-    except Exception:
-        return send_to_clipboard(image)
-    finally:
-        if clipboard_open:
-            try: win32clipboard.CloseClipboard()
-            except Exception: pass
+    return send_to_clipboard(image)
 
 GLOBAL_QSS=f"""QMainWindow,QDialog{{background:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:'{UI_FONT}';font-size:10pt;}}
 QPushButton,QToolButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:7px 12px;font-weight:bold;}}
