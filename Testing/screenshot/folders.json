@@ -1,7 +1,8 @@
 [
     {
         "path": "C:/Users/nahid/Pictures",
-        "color": "#80ffff"
+        "color": "#aa55ff",
+        "icon": "\uf03e"
     },
     {
         "path": "C:/Users/nahid/Pictures/edu",
@@ -10,6 +11,7 @@
     },
     {
         "path": "C:/Users/nahid/Pictures/trash",
-        "color": "#00ff41"
+        "color": "#ff0000",
+        "icon": "\udb80\uddb4"
     }
 ]

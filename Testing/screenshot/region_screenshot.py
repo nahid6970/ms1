@@ -8,11 +8,12 @@ from PyQt6.QtCore import QPoint, QRect, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout, QHBoxLayout,
     QLabel, QMessageBox, QPushButton, QScrollArea, QTextEdit, QToolButton, QVBoxLayout,
-    QWidget,
+    QWidget, QInputDialog,
     QColorDialog)
 
 # CYBERPUNK THEME PALETTE (THEME_GUIDE.md)
 CP_BG="#050505"; CP_PANEL="#111111"; CP_YELLOW="#FCEE0A"; CP_CYAN="#00F0FF"; CP_RED="#FF003C"; CP_GREEN="#00ff21"; CP_ORANGE="#ff934b"; CP_DIM="#3a3a3a"; CP_TEXT="#E0E0E0"; CP_SUBTEXT="#808080"
+UI_FONT="JetBrainsMono NFP"
 BASE_DIR=Path(__file__).resolve().parent; CONFIG_FILE=BASE_DIR / "folders.json"
 
 def load_folders():
@@ -39,7 +40,7 @@ def send_to_clipboard(image,text_path=None):
     if text_path: app.clipboard().setText(str(text_path))
     return True
 
-GLOBAL_QSS=f"""QMainWindow,QDialog{{background:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:Consolas,monospace;font-size:10pt;}}
+GLOBAL_QSS=f"""QMainWindow,QDialog{{background:{CP_BG};}} QWidget{{color:{CP_TEXT};font-family:'{UI_FONT}';font-size:10pt;}}
 QPushButton,QToolButton{{background:{CP_DIM};border:1px solid {CP_DIM};color:white;padding:7px 12px;font-weight:bold;}}
 QPushButton:hover,QToolButton:hover{{background:#2a2a2a;border-color:{CP_YELLOW};color:{CP_YELLOW};}} QPushButton:pressed,QToolButton:checked{{background:{CP_YELLOW};color:#000;}}
 QTextEdit{{background:{CP_PANEL};color:{CP_CYAN};border:1px solid {CP_DIM};padding:5px;selection-background-color:{CP_CYAN};selection-color:#000;}}
@@ -100,7 +101,13 @@ class FolderChooser(QDialog):
         for i,item in enumerate(items): self.add_card(i//5,i%5,*item)
         self.add_card(len(items)//5,len(items)%5,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
     def add_card(self,row,col,label,color,icon,value):
-        b=QToolButton(); b.setFixedSize(140,110); b.setText(f"{icon}\n{label.upper()[:16]}"); b.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly); border=color if self.edit_mode and value!="ADD" else CP_DIM; b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};color:{color};border:1px solid {border};font-family:Consolas;font-size:11pt;}} QToolButton:hover{{background:#252525;border-color:{CP_YELLOW};}}")
+        b=QToolButton(); b.setFixedSize(140,110); border=color if self.edit_mode and value!="ADD" else CP_DIM
+        b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};border:1px solid {border};}} QToolButton:hover{{background:#252525;border-color:{CP_YELLOW};}}")
+        card_layout=QVBoxLayout(b); card_layout.setContentsMargins(4,6,4,5); card_layout.setSpacing(2)
+        icon_label=QLabel(icon); icon_label.setFixedHeight(48); icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter); icon_label.setStyleSheet(f"color:{color};font-family:'{UI_FONT}';font-size:25pt;border:none;")
+        name_label=QLabel(label.upper()[:16]); name_label.setAlignment(Qt.AlignmentFlag.AlignCenter); name_label.setStyleSheet(f"color:{CP_TEXT};font-family:'{UI_FONT}';font-size:9pt;border:none;")
+        for child in (icon_label,name_label): child.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        card_layout.addWidget(icon_label); card_layout.addWidget(name_label)
         if value=="ADD": b.clicked.connect(self.add_folder)
         elif self.edit_mode and value in [f["path"] for f in self.folders]: b.clicked.connect(lambda checked=False,v=value:self.edit_folder(v))
         elif value=="BROWSER": b.clicked.connect(self.open_browser)
@@ -117,8 +124,13 @@ class FolderChooser(QDialog):
         if path:
             c=QColorDialog.getColor(QColor(CP_GREEN),self,"Choose Folder Color"); self.folders.append({"path":path,"color":c.name() if c.isValid() else CP_GREEN}); save_folders(self.folders); self.render()
     def edit_folder(self,path):
-        i=next(i for i,f in enumerate(self.folders) if f["path"]==path); c=QColorDialog.getColor(QColor(self.folders[i].get("color",CP_GREEN)),self,"Choose Folder Color")
-        if c.isValid(): self.folders[i]["color"]=c.name(); save_folders(self.folders); self.render()
+        i=next(i for i,f in enumerate(self.folders) if f["path"]==path)
+        current=self.folders[i].get("icon","▣")
+        icon,ok=QInputDialog.getText(self,"Folder Icon","Enter an emoji or Unicode glyph:",text=current)
+        if ok and icon.strip(): self.folders[i]["icon"]=icon.strip()
+        c=QColorDialog.getColor(QColor(self.folders[i].get("color",CP_GREEN)),self,"Choose Folder Color")
+        if c.isValid(): self.folders[i]["color"]=c.name()
+        if (ok and icon.strip()) or c.isValid(): save_folders(self.folders); self.render()
     def open_browser(self):
         f=Path(tempfile.gettempdir())/f"screenshot_{datetime.now():%Y%m%d_%H%M%S}.png"; self.image.save(f); subprocess.Popen(["cmd","/c","start","","chrome",str(f)]); self.accept()
     def google_images(self):
@@ -150,7 +162,7 @@ class OCRDialog(QDialog):
 
 def main():
     app=QApplication.instance() or QApplication(sys.argv)
-    app.setStyleSheet(GLOBAL_QSS); app.setFont(QFont("Consolas",10))
+    app.setStyleSheet(GLOBAL_QSS); app.setFont(QFont(UI_FONT,10))
     try:
         screen=capture_screen(); selection=RegionSelector.select(screen)
         if not selection: return 0
