@@ -62,13 +62,7 @@
           "windowTitle": ""
         }
       ],
-      "category": "Tool",
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "category": "Tool"
     },
     {
       "name": "Default",
@@ -253,13 +247,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "mycell - 5018",
@@ -798,13 +786,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Rclone Manager",
@@ -864,13 +846,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Job Search",
@@ -910,13 +886,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     }
   ],
   "extension_icons": {
