@@ -147,6 +147,7 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 
 ### Quick Open Palette
 - F1 opens the keyboard-friendly Quick Open modal even when a terminal pane has focus.
+- The palette uses a centered, dark, rounded command-panel layout with a compact search/back row, grouped result area, and keyboard-hint footer.
 - Projects can be searched and selected directly.
 - Commands searches saved bookmarks available to the active workspace.
 - The New project action opens the existing workspace creation form.

@@ -18,6 +18,18 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-22] - Match F1 Palette to Quick-Open Reference
+**What We Accomplished:**
+- Restyled the F1 palette as a compact centered command panel with a dark rounded surface, search/back row, grouped results, and keyboard footer.
+- Added compact project rows, shortcut labels, project/command switching, and Ctrl/Cmd+number project selection.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/UI_UX.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-22] - Synchronize Keyboard and Quick Open Documentation
 **What We Accomplished:**
 - Documented F1 Quick Open, F5 refresh, terminal copy/paste behavior, and terminal-focus capture handling.

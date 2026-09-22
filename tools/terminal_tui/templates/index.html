@@ -1383,6 +1383,35 @@
             width: 10px !important;
             height: 10px !important;
         }
+        #manager-modal .quick-open-palette .project-card {
+            min-height: 48px !important;
+            padding: 7px 10px !important;
+            border: 1px solid transparent !important;
+            border-radius: 7px !important;
+            background: transparent !important;
+            cursor: pointer !important;
+        }
+        #manager-modal .quick-open-palette .project-card:hover,
+        #manager-modal .quick-open-palette .project-card.keyboard-active {
+            background: #1b1b1b !important;
+            border-color: transparent !important;
+        }
+        #manager-modal .quick-open-palette .project-path {
+            margin-top: 2px !important;
+            font-size: 0.68rem !important;
+            color: #737373 !important;
+        }
+        #manager-modal .quick-open-palette .project-title-text {
+            font-size: 0.86rem !important;
+            color: #e5e5e5 !important;
+        }
+        #manager-modal .quick-open-palette .manager-card-controls {
+            display: none !important;
+        }
+        #manager-modal .quick-open-palette #manager-project-list-container {
+            gap: 2px !important;
+            padding: 8px 10px 10px 10px !important;
+        }
 
         /* ── Status Bar Popovers ─────────────────────────────────────────────── */
         .statusbar-popover {
@@ -3117,29 +3146,25 @@
 
     <!-- Workspaces Manager Modal Dialog -->
     <div class="modal-overlay" id="manager-modal">
-        <div class="modal-content" style="width: 500px; max-width: 95%; max-height: 85vh; padding: 20px 24px; display: flex; flex-direction: column;">
-            <div class="modal-header" style="margin-bottom: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
-                <div>
-                    <h2 style="font-size: 1.1rem; font-weight: 600;">Quick Open</h2>
-                    <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">Select a project, run a saved command, or create a project</div>
-                </div>
-                <button onclick="closeManagerModal(); openAddModal();" title="Create a new project" style="display:flex; align-items:center; gap:5px; padding:6px 9px; border:1px solid var(--accent-color); border-radius:6px; background:rgba(59,130,246,0.12); color:var(--accent-color); cursor:pointer; font-size:0.72rem; white-space:nowrap;">＋ New project</button>
-                <button onclick="closeManagerModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">×</button>
+        <div class="modal-content quick-open-palette" style="width: 650px; max-width: 94vw; height: 480px; max-height: 82vh; padding: 0; display: flex; flex-direction: column; background: #0b0b0b; border: 1px solid #2b2b2b; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.7);">
+            <div style="display:flex; align-items:center; gap:8px; padding:13px 14px 11px; flex-shrink:0; border-bottom:1px solid rgba(255,255,255,0.07);">
+                <button onclick="closeManagerModal()" title="Back" aria-label="Back" style="width:25px; height:25px; padding:0; border:0; background:transparent; color:#d4d4d4; cursor:pointer; font-size:1.35rem; line-height:1;">‹</button>
+                <input type="text" id="manager-search-input" placeholder="Search..." oninput="renderManagerModalList()" style="flex:1; min-width:0; height:28px; padding:0; font-size:0.95rem; background:transparent; border:0; color:#f5f5f5; outline:none;" autocomplete="off">
+                <button onclick="closeManagerModal(); openAddModal();" title="Create a new project" aria-label="Create a new project" style="width:26px; height:26px; padding:0; border:1px solid #3b82f6; border-radius:6px; background:rgba(59,130,246,0.12); color:#60a5fa; cursor:pointer; font-size:1rem; line-height:1;">＋</button>
+                <button onclick="closeManagerModal()" title="Close" aria-label="Close" style="width:25px; height:25px; padding:0; border:0; background:transparent; color:#737373; cursor:pointer; font-size:1.1rem; line-height:1;">×</button>
             </div>
-            <!-- Search box inside manager modal -->
-            <div style="margin-bottom: 12px; flex-shrink: 0;">
-                <input type="text" id="manager-search-input" placeholder="Search workspaces..." oninput="renderManagerModalList()" style="width: 100%; height: 36px; padding: 6px 12px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 7px; color: var(--text-primary); outline: none;" autocomplete="off">
-            </div>
-            <div style="display:flex; gap:5px; margin-bottom:10px; flex-shrink:0;">
-                <button id="manager-view-projects" onclick="setManagerPaletteView('projects')" style="flex:1; padding:6px 8px; border:1px solid var(--accent-color); border-radius:6px; background:rgba(59,130,246,0.14); color:var(--text-primary); cursor:pointer; font-size:0.74rem;">Projects</button>
-                <button id="manager-view-commands" onclick="setManagerPaletteView('commands')" style="flex:1; padding:6px 8px; border:1px solid var(--border-color); border-radius:6px; background:transparent; color:var(--text-secondary); cursor:pointer; font-size:0.74rem;">Commands</button>
+            <div style="display:flex; align-items:center; gap:6px; padding:8px 16px 0; flex-shrink:0;">
+                <span id="manager-palette-section-label" style="font-size:0.68rem; color:#737373; margin-right:auto;">Projects</span>
+                <button id="manager-view-projects" onclick="setManagerPaletteView('projects')" style="padding:3px 8px; border:1px solid #3b82f6; border-radius:5px; background:rgba(59,130,246,0.14); color:#e5e7eb; cursor:pointer; font-size:0.68rem;">Projects</button>
+                <button id="manager-view-commands" onclick="setManagerPaletteView('commands')" style="padding:3px 8px; border:1px solid #333; border-radius:5px; background:transparent; color:#737373; cursor:pointer; font-size:0.68rem;">Commands</button>
             </div>
             <div id="manager-project-list-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-height: 0;">
                 <!-- Workspace cards will be rendered dynamically here -->
             </div>
-            <div class="form-actions" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; display: flex; justify-content: flex-end;">
-                <div style="font-size:0.68rem; color:var(--text-muted); margin-right:auto;">↑ ↓ Navigate · Enter Select · Esc Close</div>
-                <button class="btn btn-secondary" onclick="closeManagerModal()" style="padding: 6px 16px; font-size: 0.8rem;">Close</button>
+            <div style="display:flex; align-items:center; gap:9px; padding:9px 16px; flex-shrink:0; border-top:1px solid rgba(255,255,255,0.07); background:#101010; color:#737373; font-size:0.68rem;">
+                <span style="background:#2a2a2a; color:#d4d4d4; border-radius:4px; padding:2px 5px;">↑</span><span style="background:#2a2a2a; color:#d4d4d4; border-radius:4px; padding:2px 5px;">↓</span><span>Navigate</span>
+                <span style="background:#2a2a2a; color:#d4d4d4; border-radius:4px; padding:2px 6px; margin-left:4px;">Enter</span><span>Select</span>
+                <span style="background:#2a2a2a; color:#d4d4d4; border-radius:4px; padding:2px 6px; margin-left:4px;">Esc</span><span>Close</span>
             </div>
         </div>
     </div>
@@ -8055,6 +8080,8 @@
             if (commandsBtn) commandsBtn.style.cssText += view === 'commands' ? activeStyle : inactiveStyle;
             const search = document.getElementById('manager-search-input');
             if (search) search.placeholder = view === 'commands' ? 'Search saved commands...' : 'Search workspaces...';
+            const sectionLabel = document.getElementById('manager-palette-section-label');
+            if (sectionLabel) sectionLabel.textContent = view === 'commands' ? 'Commands' : 'Projects';
             renderManagerModalList();
         }
 
@@ -8270,6 +8297,13 @@
                     badge.style.flexShrink = '0';
                     titleContainer.appendChild(badge);
                 }
+
+                if (idx < 9) {
+                    const shortcut = document.createElement('span');
+                    shortcut.textContent = `⌘ ${idx + 1}`;
+                    shortcut.style.cssText = 'margin-left:auto; padding-left:8px; color:#666; font-size:0.68rem; flex-shrink:0;';
+                    titleContainer.appendChild(shortcut);
+                }
                 
                 card.appendChild(titleContainer);
                 
@@ -8289,6 +8323,7 @@
                 
                 // Repositioning and actions controls container (more compact)
                 const controlsRow = document.createElement('div');
+                controlsRow.className = 'manager-card-controls';
                 controlsRow.style = 'display: flex; align-items: center; justify-content: flex-end; margin-top: 4px; border-top: 1px dashed var(--border-color); padding-top: 4px;';
                 
                 // Card Action Dots container
@@ -14615,8 +14650,33 @@
                 refreshPage();
                 return;
             }
+            const manager = document.getElementById('manager-modal');
+            if (manager && manager.classList.contains('show')) {
+                const rows = Array.from(document.querySelectorAll('#manager-project-list-container .manager-palette-row'));
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (rows.length) {
+                        const direction = e.key === 'ArrowDown' ? 1 : -1;
+                        managerPaletteIndex = (managerPaletteIndex + direction + rows.length) % rows.length;
+                        updateManagerPaletteSelection();
+                    }
+                    return;
+                }
+                if (e.key === 'Enter' && managerPaletteIndex >= 0 && rows[managerPaletteIndex]) {
+                    e.preventDefault();
+                    rows[managerPaletteIndex].click();
+                    return;
+                }
+                if ((e.ctrlKey || e.metaKey) && /^[1-9]$/.test(e.key) && managerPaletteView === 'projects') {
+                    const index = Number(e.key) - 1;
+                    if (rows[index]) {
+                        e.preventDefault();
+                        rows[index].click();
+                        return;
+                    }
+                }
+            }
             if (e.key === 'Escape') {
-                const manager = document.getElementById('manager-modal');
                 if (manager && manager.classList.contains('show')) {
                     closeManagerModal();
                 }
