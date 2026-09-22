@@ -96,6 +96,16 @@ class SettingsDialog(QDialog):
     def __init__(self,parent=None):
         super().__init__(parent); self.setWindowTitle("SETTINGS"); self.setMinimumWidth(400); l=QVBoxLayout(self); l.addWidget(QLabel("SETTINGS SYSTEM\nReserved for future customizations.")); b=QPushButton("CLOSE"); b.clicked.connect(self.accept); l.addWidget(b)
 
+class FolderCardButton(QToolButton):
+    def __init__(self,parent=None):
+        super().__init__(parent); self.setProperty("cardHover",False)
+    def _set_hover(self,value):
+        self.setProperty("cardHover",value); self.style().unpolish(self); self.style().polish(self); self.update()
+    def enterEvent(self,event):
+        self._set_hover(True); super().enterEvent(event)
+    def leaveEvent(self,event):
+        self._set_hover(False); super().leaveEvent(event)
+
 class FolderChooser(QDialog):
     def __init__(self,folders,image,parent=None):
         super().__init__(parent); self.folders=folders; self.image=image; self.choice=None; self.edit_mode=False; self.setWindowTitle("DESTINATION SELECTOR"); self.setWindowFlags(Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint); self.setMinimumSize(760,420)
@@ -124,8 +134,8 @@ class FolderChooser(QDialog):
         for i,item in enumerate(items): self.add_card(i//4,i%4,*item)
         self.add_card(len(items)//4,len(items)%4,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
     def add_card(self,row,col,label,color,icon,value):
-        b=QToolButton(); b.setFixedSize(160,108); is_folder=value in [f["path"] for f in self.folders]
-        b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};border:none;border-radius:8px;}} QToolButton:hover{{background:#1c1c1c;border:none;}} QToolButton:pressed{{background:#252525;border:none;}}")
+        b=FolderCardButton(); b.setFixedSize(160,108); is_folder=value in [f["path"] for f in self.folders]
+        b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};border:none;border-radius:8px;}} QToolButton[cardHover=\"true\"]{{background:#1c1c1c;border:none;}} QToolButton:pressed{{background:#252525;border:none;}}")
         card_layout=QVBoxLayout(b); card_layout.setContentsMargins(4,0,4,0); card_layout.setSpacing(0)
         if value in [f["path"] for f in self.folders]:
             icon_pixmap=QApplication.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon).pixmap(QSize(32,32))
@@ -134,9 +144,9 @@ class FolderChooser(QDialog):
             icon_label=QLabel(); icon_label.setPixmap(tinted)
         else:
             icon_label=QLabel(icon)
-        icon_label.setFixedHeight(33); icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter); icon_label.setStyleSheet(f"color:{color};font-family:'{UI_FONT}';font-size:23pt;border:none;")
+        icon_label.setFixedHeight(29); icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter); icon_label.setStyleSheet(f"color:{color};font-family:'{UI_FONT}';font-size:23pt;border:none;")
         name_color=color if is_folder else CP_TEXT
-        name_label=QLabel(label.upper()[:16]); name_label.setFixedHeight(18); name_label.setAlignment(Qt.AlignmentFlag.AlignCenter); name_label.setStyleSheet(f"color:{name_color};font-family:'{UI_FONT}';font-size:9pt;border:none;")
+        name_label=QLabel(label.upper()[:16]); name_label.setFixedHeight(16); name_label.setAlignment(Qt.AlignmentFlag.AlignCenter); name_label.setStyleSheet(f"color:{name_color};font-family:'{UI_FONT}';font-size:9pt;border:none;")
         for child in (icon_label,name_label): child.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         card_layout.addWidget(icon_label); card_layout.addWidget(name_label)
         if value=="ADD": b.clicked.connect(self.add_folder)
