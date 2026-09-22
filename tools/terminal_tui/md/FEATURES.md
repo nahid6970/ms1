@@ -1,5 +1,10 @@
 # Feature Specifications
 
+## Global Restart and Page Refresh Controls
+**Status:** ✅ Complete
+**Description:** The global restart control offers separate actions for restarting the app and refreshing only the current page. F5 also refreshes the page.
+**Implementation:** `templates/index.html` — restart action menu and global F5 key handler.
+
 ## Workspace Management
 **Status:** ✅ Complete
 **Description:** Multi-workspace terminal sessions. Each workspace = project folder + persistent PowerShell session with custom profile.

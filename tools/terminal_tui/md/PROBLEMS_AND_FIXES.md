@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-09-22] - Missing Page Refresh Action and F5 Shortcut
+**Problem:** The global restart button immediately restarted the app, but there was no visible control for refreshing only the current page, and F5 did not refresh the SPA reliably.
+**Root Cause:** The restart control had only one action and the frontend did not handle the F5 key.
+**Solution:** Added a restart-options menu with separate “Restart app” and “Refresh page” actions, plus a global F5 handler that prevents the browser default and calls `window.location.reload()`.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-08-31] - Ctrl+C in Terminal Pane Accidentally Closes the Browser Tab
 **Problem:** Pressing Ctrl+C inside a workspace terminal pane (to cancel a running AI agent or command) would sometimes trigger the auto-close sequence, closing the entire browser tab unexpectedly.
 **Root Cause:** `startBackendHealthCheck()` polled `/api/projects` every 1 second with an 800ms abort timeout and a threshold of only 2 consecutive failures. When Ctrl+C caused a subprocess/PTY cleanup that briefly blocked Flask's event loop, the fetch timed out twice in a row — enough to satisfy the failure threshold and trigger `window.close()`.

@@ -5,6 +5,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-22] - Add Restart Menu and F5 Page Refresh
+**What We Accomplished:**
+- Changed the global restart icon to open separate “Restart app” and “Refresh page” actions.
+- Added a global F5 keyboard handler that refreshes the current page.
+- Kept the existing session reset and backend restart flow unchanged.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-08-31] - Remove Backend Health Check Auto-Close Feature
 **What We Accomplished:**
 - Identified a bug where pressing Ctrl+C in a workspace terminal pane (to cancel an AI agent or command) could accidentally close the browser tab.

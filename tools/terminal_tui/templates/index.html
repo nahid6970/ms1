@@ -1631,18 +1631,22 @@
                     </button>
                 </div>
                 <div id="header-toolbar-divider" style="width: 1px; height: 20px; background-color: var(--border-color);"></div>
-                <div id="global-header-actions" style="display: flex; align-items: center; gap: 4px;">
+                <div id="global-header-actions" style="display: flex; align-items: center; gap: 4px; position: relative;">
                     <button class="action-btn" onclick="openSettingsModal()" title="Settings" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                         </svg>
                     </button>
-                    <button class="action-btn" onclick="resetAllSessions()" title="Reset sessions and restart app" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary);">
+                    <button id="restart-action-toggle" class="action-btn" onclick="toggleRestartMenu(event)" title="Restart options" aria-label="Restart options" aria-expanded="false" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary);">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                         </svg>
                     </button>
+                    <div id="restart-action-menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 200; min-width: 170px; padding: 5px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+                        <button onclick="resetAllSessions(); closeRestartMenu();" title="Reset sessions and restart app" style="display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; font-size: 0.78rem;">↻ Restart app</button>
+                        <button onclick="refreshPage(); closeRestartMenu();" title="Refresh the current page" style="display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 5px; background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; font-size: 0.78rem;">⟳ Refresh page</button>
+                    </div>
                 </div>
         </div>
         </div>
@@ -5106,6 +5110,32 @@
 
             window.location.reload();
         }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        function toggleRestartMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('restart-action-menu');
+            const toggle = document.getElementById('restart-action-toggle');
+            const isOpen = menu.style.display === 'block';
+            menu.style.display = isOpen ? 'none' : 'block';
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+        }
+
+        function closeRestartMenu() {
+            const menu = document.getElementById('restart-action-menu');
+            const toggle = document.getElementById('restart-action-toggle');
+            if (menu) menu.style.display = 'none';
+            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('#restart-action-menu') && !event.target.closest('#restart-action-toggle')) {
+                closeRestartMenu();
+            }
+        });
 
         // Reset terminal sessions, then restart the Flask app so backend code changes load.
         async function resetAllSessions() {
@@ -14461,6 +14491,11 @@
         // ──────────────────────────────────────────────────────────────────────────
 
         window.addEventListener('keydown', (e) => {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                refreshPage();
+                return;
+            }
             if (e.key === 'Escape') {
                 const manager = document.getElementById('manager-modal');
                 if (manager && manager.classList.contains('show')) {
