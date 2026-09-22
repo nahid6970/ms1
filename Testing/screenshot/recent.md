@@ -18,6 +18,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 - Native folder icons are color-tinted with the saved color, and icon/name spacing is compact.
 - Destination cards use borderless dark rounded panels with compact icon/caption spacing; folder colors remain on the icon and caption.
 - The chooser header has `TEMP IMAGES`, Settings, and Restart; folder editing is exclusively through right-click context menus (no Edit toggle).
+- OCR now tries fast Tesseract first and falls back to cached EasyOCR readers for cases where Tesseract is unavailable or returns no text.
 - Google Lens copies a durable Windows CF_DIB bitmap before opening `https://lens.google.com/`, allowing manual Ctrl+V on the Lens page.
 - The Copy action publishes both CF_DIB and CF_HDROP, so image editors get pixels and Windows Explorer can paste a PNG file.
 

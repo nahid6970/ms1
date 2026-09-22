@@ -104,5 +104,19 @@ Convex Database I/O was at **6.09 GB / 6 GB** (free tier limit). Root cause: `co
 - **`listPlaylists`** — fetches videos per-channel via index loop; only reads video rows for channels that actually have playlist rules.
 - **New indexes** — `by_isNew`, `by_isWatchLater`, `by_isLong` available for future use to enable O(1) filtered queries without table scans.
 
-## 8. Pending Task
-Deploy to production. Verify playlist views load correctly end-to-end.
+## 8. Video Deletion & Title Repair (2026-09-22)
+
+| File | What changed |
+|---|---|
+| `convex/videos.ts` | Added the public `videos:remove` mutation, which permanently deletes a video record by ID. Existing video metadata updates now also repair changed titles, links, and publish dates. |
+| `public/js/app.js` | Added a trash-button hover action to every video card. The action confirms deletion, removes the record, shows a success message, and refreshes the current feed. |
+| `convex/youtube.ts` / `convex/refresh.ts` | Canonical video titles are fetched by exact YouTube video ID to prevent title/thumbnail mismatches, including the affected Turning Point Job Aid channel. |
+
+### Key Behavioral Notes
+
+- **Delete video** — removes the video from the database and therefore all feeds, Watch Later, Long Videos, favorites, blocked items, and playlist views.
+- Deletion is permanent unless the video is fetched again from YouTube during a later refresh.
+- Channel refreshes use canonical ID-to-title mapping and update existing records when metadata changes.
+
+## 9. Pending Task
+Deploy to production. Verify playlist views and video deletion load correctly end-to-end.

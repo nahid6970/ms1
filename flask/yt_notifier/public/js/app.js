@@ -773,6 +773,9 @@ function videoCard(video, categories = []) {
         <button onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
         </button>
+        <button onclick="removeVideo('${esc(video._id)}')" class="hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-300 shadow-lg backdrop-blur transition-all duration-200 hover:bg-rose-600 hover:text-white" title="Delete video from feeds" aria-label="Delete video from feeds">
+          <i class="fa-solid fa-trash text-sm"></i>
+        </button>
         <button onclick="toggleRead('${esc(video._id)}')" class="hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition-all duration-200 hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
@@ -831,6 +834,17 @@ window.changeChannelFolderFromCard = async function changeChannelFolderFromCard(
 window.toggleFavorite = async function toggleFavorite(id) {
   try {
     await callConvex("mutation", "videos:toggleFavorite", { id });
+    await renderFeed();
+  } catch (err) {
+    flash(err.message, "danger");
+  }
+};
+
+window.removeVideo = async function removeVideo(id) {
+  if (!confirm("Delete this video from all feeds? This removes it from the database.")) return;
+  try {
+    await callConvex("mutation", "videos:remove", { id });
+    flash("Video deleted.", "success");
     await renderFeed();
   } catch (err) {
     flash(err.message, "danger");

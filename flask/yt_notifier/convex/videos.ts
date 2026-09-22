@@ -185,6 +185,15 @@ export const toggleFavorite = mutation({
   },
 });
 
+export const remove = mutation({
+  args: { id: v.id("videos") },
+  handler: async (ctx, { id }) => {
+    const video = await ctx.db.get(id);
+    if (!video) return;
+    await ctx.db.delete(id);
+  },
+});
+
 export const toggleWatchLater = mutation({
   args: { id: v.id("videos") },
   handler: async (ctx, { id }) => {

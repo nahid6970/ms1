@@ -132,6 +132,8 @@ before deploying.
 - **Auto-refresh** — `convex/crons.ts` schedules the same refresh every 6 hours
   in production. Edit the interval there if you want a different cadence.
 - **Read/unread** is a simple `isNew` flag toggled from the feed page.
+- **Delete video** is available from each card's hover actions. It asks for
+  confirmation, permanently removes the video record, and refreshes the feed.
 
 ## Troubleshooting
 

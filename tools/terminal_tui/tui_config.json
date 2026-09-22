@@ -786,7 +786,15 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790058906676-1",
+          "pane-1790058960803-2"
+        ]
+      }
     },
     {
       "name": "Rclone Manager",
@@ -869,8 +877,14 @@
       "bookmarks": [
         {
           "command": "npm run deploy:pages",
-          "global": false,
+          "global": true,
           "name": "npm run deploy:pages",
+          "windowTitle": ""
+        },
+        {
+          "command": "npm run dev:pages",
+          "global": true,
+          "name": "npm run dev:pages",
           "windowTitle": ""
         }
       ]

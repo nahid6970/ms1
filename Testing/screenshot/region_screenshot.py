@@ -210,12 +210,19 @@ class OCRWorker(QThread):
     def run(self):
         langs={"en":(["en"],"eng","ENGLISH"),"bn":(["bn"],"ben","BANGLA"),"mixed":(["bn","en"],"ben+eng","MIXED (EN/BN)")}[self.mode]
         try:
-            import numpy as np, easyocr; text="\n".join(easyocr.Reader(langs[0]).readtext(np.array(self.image),detail=0))
-        except ImportError:
+            import pytesseract
+            text=pytesseract.image_to_string(self.image,lang=langs[1])
+            if not text.strip(): raise RuntimeError("Tesseract returned no text")
+        except Exception as tesseract_error:
             try:
-                import pytesseract; text=pytesseract.image_to_string(self.image,lang=langs[1])
-            except Exception as exc: text=f"OCR dependency/error: {exc}"
-        except Exception as exc: text=f"OCR error: {exc}"
+                import numpy as np, easyocr
+                if not hasattr(OCRWorker,"_readers"): OCRWorker._readers={}
+                reader=OCRWorker._readers.get(tuple(langs[0]))
+                if reader is None:
+                    reader=easyocr.Reader(langs[0]); OCRWorker._readers[tuple(langs[0])]=reader
+                text="\n".join(reader.readtext(np.array(self.image),detail=0))
+            except Exception as easyocr_error:
+                text=f"OCR failed. Tesseract: {tesseract_error}\nEasyOCR: {easyocr_error}"
         self.done.emit(langs[2],text)
 
 class OCRDialog(QDialog):
