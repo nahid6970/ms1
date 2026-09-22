@@ -17,7 +17,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 - Destination card colors now appear as consistent card borders; all destination icons intentionally use the native Windows folder icon.
 - Native folder icons are color-tinted with the saved color, and icon/name spacing is compact.
 - Destination cards use borderless dark rounded panels with compact icon/caption spacing; folder colors remain on the icon and caption.
-- The chooser header has a `TEMP IMAGES` button that opens the shared `%TEMP%\screenshot_temp` directory.
+- The chooser header has `TEMP IMAGES`, Settings, and Restart; folder editing is exclusively through right-click context menus (no Edit toggle).
 - Google Lens copies a durable Windows CF_DIB bitmap before opening `https://lens.google.com/`, allowing manual Ctrl+V on the Lens page.
 - The Copy action publishes both CF_DIB and CF_HDROP, so image editors get pixels and Windows Explorer can paste a PNG file.
 
