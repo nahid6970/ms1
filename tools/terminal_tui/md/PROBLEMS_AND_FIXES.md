@@ -10,6 +10,14 @@
 
 ---
 
+## [2026-09-22] - Terminal Focus Shortcuts and Clipboard Paste
+**Problem:** F1/F5 did not work when an xterm terminal pane had focus, and Ctrl+V was suppressed without inserting clipboard text. Ctrl+C selection copy also had no failure handling.
+**Root Cause:** xterm.js consumed function keys before the bubbling document handler, while the custom xterm key handler returned `false` for Ctrl+V without reading the clipboard.
+**Solution:** Added capture-phase F1/F5 handlers, implemented clipboard read/write for Ctrl+V/Ctrl+C, preserved Ctrl+C as terminal interrupt when there is no selection, and added Shift+Insert paste support.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-08-31] - Ctrl+C in Terminal Pane Accidentally Closes the Browser Tab
 **Problem:** Pressing Ctrl+C inside a workspace terminal pane (to cancel a running AI agent or command) would sometimes trigger the auto-close sequence, closing the entire browser tab unexpectedly.
 **Root Cause:** `startBackendHealthCheck()` polled `/api/projects` every 1 second with an 800ms abort timeout and a threshold of only 2 consecutive failures. When Ctrl+C caused a subprocess/PTY cleanup that briefly blocked Flask's event loop, the fetch timed out twice in a row — enough to satisfy the failure threshold and trigger `window.close()`.

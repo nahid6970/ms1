@@ -18,6 +18,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-22] - Fix Terminal-Focused Shortcuts and Clipboard Paste
+**What We Accomplished:**
+- Captured F1 and F5 before xterm.js so the Quick Open palette and page refresh work with terminal focus.
+- Added Ctrl+C copy for selected terminal text while preserving Ctrl+C interrupt behavior with no selection.
+- Added Ctrl+V and Shift+Insert clipboard paste into the active terminal pane.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/FEATURES.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-08-31] - Remove Backend Health Check Auto-Close Feature
 **What We Accomplished:**
 - Identified a bug where pressing Ctrl+C in a workspace terminal pane (to cancel an AI agent or command) could accidentally close the browser tab.

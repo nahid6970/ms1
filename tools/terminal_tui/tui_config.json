@@ -62,7 +62,13 @@
           "windowTitle": ""
         }
       ],
-      "category": "Tool"
+      "category": "Tool",
+      "layout": {
+        "layoutClass": "split-right",
+        "paneIds": [
+          "main"
+        ]
+      }
     },
     {
       "name": "Default",

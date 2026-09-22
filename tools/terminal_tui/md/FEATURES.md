@@ -5,6 +5,11 @@
 **Description:** The global restart control offers separate actions for restarting the app and refreshing only the current page. F5 also refreshes the page.
 **Implementation:** `templates/index.html` — restart action menu and global F5 key handler.
 
+## F1 Quick Open Palette
+**Status:** ✅ Complete
+**Description:** F1 opens a keyboard-friendly quick-open palette for selecting workspaces, searching saved commands, and creating a new workspace.
+**Implementation:** `templates/index.html` — Projects and Commands views, existing Add Workspace modal integration, and Arrow-key/Enter navigation.
+
 ## Workspace Management
 **Status:** ✅ Complete
 **Description:** Multi-workspace terminal sessions. Each workspace = project folder + persistent PowerShell session with custom profile.

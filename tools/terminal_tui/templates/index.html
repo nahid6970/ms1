@@ -3120,19 +3120,25 @@
         <div class="modal-content" style="width: 500px; max-width: 95%; max-height: 85vh; padding: 20px 24px; display: flex; flex-direction: column;">
             <div class="modal-header" style="margin-bottom: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;">
                 <div>
-                    <h2 style="font-size: 1.1rem; font-weight: 600;">Workspaces Manager</h2>
-                    <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">Drag to reorder, pin, customize, or control sessions</div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600;">Quick Open</h2>
+                    <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">Select a project, run a saved command, or create a project</div>
                 </div>
+                <button onclick="closeManagerModal(); openAddModal();" title="Create a new project" style="display:flex; align-items:center; gap:5px; padding:6px 9px; border:1px solid var(--accent-color); border-radius:6px; background:rgba(59,130,246,0.12); color:var(--accent-color); cursor:pointer; font-size:0.72rem; white-space:nowrap;">＋ New project</button>
                 <button onclick="closeManagerModal()" style="background: none; border: none; font-size: 1.5rem; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%;" onmouseenter="this.style.color='var(--text-primary)'; this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.color='var(--text-secondary)'; this.style.backgroundColor='transparent'">×</button>
             </div>
             <!-- Search box inside manager modal -->
             <div style="margin-bottom: 12px; flex-shrink: 0;">
-                <input type="text" id="manager-search-input" placeholder="Search workspaces..." oninput="renderManagerModalList()" style="width: 100%; height: 32px; padding: 6px 12px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;" autocomplete="off">
+                <input type="text" id="manager-search-input" placeholder="Search workspaces..." oninput="renderManagerModalList()" style="width: 100%; height: 36px; padding: 6px 12px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 7px; color: var(--text-primary); outline: none;" autocomplete="off">
+            </div>
+            <div style="display:flex; gap:5px; margin-bottom:10px; flex-shrink:0;">
+                <button id="manager-view-projects" onclick="setManagerPaletteView('projects')" style="flex:1; padding:6px 8px; border:1px solid var(--accent-color); border-radius:6px; background:rgba(59,130,246,0.14); color:var(--text-primary); cursor:pointer; font-size:0.74rem;">Projects</button>
+                <button id="manager-view-commands" onclick="setManagerPaletteView('commands')" style="flex:1; padding:6px 8px; border:1px solid var(--border-color); border-radius:6px; background:transparent; color:var(--text-secondary); cursor:pointer; font-size:0.74rem;">Commands</button>
             </div>
             <div id="manager-project-list-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; min-height: 0;">
                 <!-- Workspace cards will be rendered dynamically here -->
             </div>
             <div class="form-actions" style="margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 12px; flex-shrink: 0; display: flex; justify-content: flex-end;">
+                <div style="font-size:0.68rem; color:var(--text-muted); margin-right:auto;">↑ ↓ Navigate · Enter Select · Esc Close</div>
                 <button class="btn btn-secondary" onclick="closeManagerModal()" style="padding: 6px 16px; font-size: 0.8rem;">Close</button>
             </div>
         </div>
@@ -4433,11 +4439,21 @@
                 }
                 if (e.ctrlKey && (e.key === 'c' || e.code === 'KeyC')) {
                     if (paneTerm.hasSelection()) {
-                        navigator.clipboard.writeText(paneTerm.getSelection());
+                        const selectedText = paneTerm.getSelection();
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(selectedText).catch(err => console.warn('Terminal copy failed:', err));
+                        }
                         return false;
                     }
                 }
-                if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
+                if ((e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) || (e.shiftKey && e.key === 'Insert')) {
+                    if (navigator.clipboard && navigator.clipboard.readText) {
+                        navigator.clipboard.readText().then(text => {
+                            if (text && paneSocket && paneSocket.connected) {
+                                paneSocket.emit('pty-input', { project: projectName, paneId, data: text });
+                            }
+                        }).catch(err => console.warn('Terminal paste failed:', err));
+                    }
                     return false;
                 }
                 return true;
@@ -8025,12 +8041,87 @@
             } catch(e) { return hex; }
         }
 
+        let managerPaletteView = 'projects';
+        let managerPaletteIndex = -1;
+
+        function setManagerPaletteView(view) {
+            managerPaletteView = view;
+            managerPaletteIndex = -1;
+            const projectsBtn = document.getElementById('manager-view-projects');
+            const commandsBtn = document.getElementById('manager-view-commands');
+            const activeStyle = 'border-color:var(--accent-color); background:rgba(59,130,246,0.14); color:var(--text-primary);';
+            const inactiveStyle = 'border-color:var(--border-color); background:transparent; color:var(--text-secondary);';
+            if (projectsBtn) projectsBtn.style.cssText += view === 'projects' ? activeStyle : inactiveStyle;
+            if (commandsBtn) commandsBtn.style.cssText += view === 'commands' ? activeStyle : inactiveStyle;
+            const search = document.getElementById('manager-search-input');
+            if (search) search.placeholder = view === 'commands' ? 'Search saved commands...' : 'Search workspaces...';
+            renderManagerModalList();
+        }
+
+        function getManagerCommandItems() {
+            if (!activeProject) return [];
+            const items = [];
+            (projects || []).forEach(project => {
+                const isCurrent = project.name === activeProject;
+                (project.bookmarks || []).forEach(bookmark => {
+                    const command = typeof bookmark === 'string' ? bookmark : (bookmark.command || '');
+                    const isGlobal = typeof bookmark === 'object' && bookmark.global === true;
+                    if (command && (isCurrent || isGlobal)) {
+                        items.push({
+                            command,
+                            label: typeof bookmark === 'object' ? (bookmark.name || '') : '',
+                            project: project.name,
+                            windowTitle: typeof bookmark === 'object' ? (bookmark.windowTitle || '') : ''
+                        });
+                    }
+                });
+            });
+            return items.filter((item, index, list) => list.findIndex(other => other.command.toLowerCase() === item.command.toLowerCase()) === index);
+        }
+
+        function renderManagerCommandList(container, filterText) {
+            const commands = getManagerCommandItems().filter(item =>
+                item.command.toLowerCase().includes(filterText) ||
+                item.label.toLowerCase().includes(filterText) ||
+                item.project.toLowerCase().includes(filterText)
+            );
+            if (!commands.length) {
+                container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:30px 10px; font-size:0.82rem;">No saved commands found for this workspace.</div>';
+                return;
+            }
+            commands.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'manager-palette-row';
+                row.style.cssText = 'display:flex; align-items:center; gap:9px; padding:9px 10px; border:1px solid transparent; border-radius:7px; cursor:pointer; transition:background 0.12s, border-color 0.12s;';
+                row.innerHTML = '<span style="font-size:0.95rem; color:#fbbf24;">⌘</span>';
+                const info = document.createElement('div');
+                info.style.cssText = 'min-width:0; flex:1;';
+                const command = document.createElement('div');
+                command.textContent = item.label || item.command;
+                command.style.cssText = 'font-size:0.8rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;';
+                const detail = document.createElement('div');
+                detail.textContent = item.label ? `${item.command} · ${item.project}` : item.project;
+                detail.style.cssText = 'font-family:"Fira Code",monospace; font-size:0.66rem; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;';
+                info.append(command, detail);
+                row.appendChild(info);
+                row.onmouseenter = () => { row.style.background = 'var(--bg-card-hover)'; row.style.borderColor = 'var(--border-color)'; };
+                row.onmouseleave = () => { if (!row.classList.contains('keyboard-active')) { row.style.background = 'transparent'; row.style.borderColor = 'transparent'; } };
+                row.onclick = () => { runBookmarkedCommand(item.command, item.windowTitle); closeManagerModal(); };
+                container.appendChild(row);
+            });
+        }
+
         function renderManagerModalList() {
             const container = document.getElementById('manager-project-list-container');
             if (!container) return;
             container.innerHTML = '';
             
             const filterText = document.getElementById('manager-search-input').value.toLowerCase().trim();
+
+            if (managerPaletteView === 'commands') {
+                renderManagerCommandList(container, filterText);
+                return;
+            }
             
             // Bind drag events once
             if (!container.dataset.dragBound) {
@@ -8069,7 +8160,7 @@
             
             filtered.forEach((proj, idx) => {
                 const card = document.createElement('div');
-                card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
+                card.className = `project-card manager-palette-row ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
                 card.style.cursor = 'grab';
                 
                 // Drag and drop reordering
@@ -8258,7 +8349,10 @@
         }
         
         function openManagerModal() {
+            managerPaletteView = 'projects';
+            managerPaletteIndex = -1;
             document.getElementById('manager-search-input').value = '';
+            setManagerPaletteView('projects');
             renderManagerModalList();
             document.getElementById('manager-modal').classList.add('show');
             setTimeout(() => {
@@ -8268,6 +8362,17 @@
         
         function closeManagerModal() {
             document.getElementById('manager-modal').classList.remove('show');
+        }
+
+        function updateManagerPaletteSelection() {
+            const rows = Array.from(document.querySelectorAll('#manager-project-list-container .manager-palette-row'));
+            rows.forEach((row, index) => {
+                const selected = index === managerPaletteIndex;
+                row.classList.toggle('keyboard-active', selected);
+                row.style.background = selected ? 'var(--bg-card-hover)' : 'transparent';
+                row.style.borderColor = selected ? 'var(--accent-color)' : 'transparent';
+                if (selected) row.scrollIntoView({ block: 'nearest' });
+            });
         }
         
         function moveProjectPosition(projName, direction) {
@@ -8877,6 +8982,20 @@
         }
 
         // Also close popovers on Escape
+        // xterm.js can consume function keys before a normal bubbling listener sees them.
+        // Capture F1/F5 at the document level so they work while a terminal has focus.
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F5') {
+                e.preventDefault();
+                e.stopPropagation();
+                refreshPage();
+            } else if (e.key === 'F1') {
+                e.preventDefault();
+                e.stopPropagation();
+                openManagerModal();
+            }
+        }, true);
+
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const pop1 = document.getElementById('sched-popover');
