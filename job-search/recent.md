@@ -3,6 +3,12 @@
 ## 1. Profile & Goal (Permanent)
 BBA/MBA in Finance. Looking for fresher or no-experience-required jobs in Bangladesh — banking, financial institutions, and government investment authorities (like BEPZA, BEZA, BIDA). Prefers reputable organizations with growth potential.
 
+**Academic Scores:**
+- BBA CGPA: 3.30 / 4.00
+- MBA CGPA: 3.23 / 4.00
+- HSC GPA: 5.00 / 5.00
+- SSC GPA: 5.00 / 5.00
+
 ---
 
 ## 2. Presentation Rule (Permanent)
@@ -54,6 +60,8 @@ Example links section (after table):
 | DC Office (various districts) | Support staff (clerk, office asst, etc.) | Not graduate officer posts | ❌ Below profile | Various Sept deadlines |
 | Zilla Parishad (Narsingdi, Tangail, Bhola etc.) | Various support posts | Not specified for Finance | ❌ Not suitable | Sept 6–23, 2026 |
 | Dhaka University | 6 posts (5 categories, post names unknown) | Unknown — need circular image | ⚠️ Need to check | Sept 13–15, Nov 2, 2026 |
+| Midland Bank PLC | Probationary Officer | Fresher — CGPA ≥ 3.00, SSC/HSC GPA ≥ 4.50 | ✅ Suitable | Oct 20, 2026 |
+| Midland Bank PLC | Trainee Assistant Officer | Fresher — CGPA ≥ 2.75, SSC/HSC GPA ≥ 4.00 | ✅ Suitable | Oct 20, 2026 |
 
 ---
 
@@ -77,3 +85,4 @@ Example links section (after table):
 | Check Bangladesh Bank erecruitment for Finance/General Officer circular | Ongoing | 🔁 Periodic check |
 | Watch BSCS for Job ID 26102 & 26103 (Officer G / Officer Cash) | Ongoing | 🔴 High priority — new batch expected |
 | Check Dhaka University post details (jobs.du.ac.bd) | Sept 13–15, Nov 2 | ⚠️ Verify post names |
+| Apply Midland Bank PLC (Probationary Officer / TAO) via bdjobs.com/mdb | Oct 20, 2026 | 🟡 Apply |
