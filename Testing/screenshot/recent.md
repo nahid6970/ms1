@@ -4,7 +4,7 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 
 # 2. Latest Implementation
 
-- `region_screenshot.py` — Replaced Tkinter/bootstrap flow with PyQt6; added cyberpunk QSS, explicit screenshot action row, “MOVE TO FOLDER”, folder destinations, restart/settings controls, responsive OCR worker, larger centered JetBrainsMono NFP icons, and right-click folder menus for Rename/Color/Icon/Remove.
+- `region_screenshot.py` — Replaced Tkinter/bootstrap flow with PyQt6; added cyberpunk QSS, explicit screenshot action row, “MOVE TO FOLDER”, a four-column destination grid with native default folder icons, restart/settings controls, responsive OCR worker, and right-click folder menus for Rename/Color/Remove.
 
 # 3. Critical Context
 
@@ -14,6 +14,9 @@ Windows screenshot utility built with PyQt6 and Pillow, using a single Qt event 
 - Startup no longer calls `install_deps.bootstrap()`; dependencies must already be installed.
 - Action results are represented by `FolderChooser.choice`; selecting a destination folder saves the in-memory crop directly.
 - Folder display names are stored as optional `name` fields; renaming does not change the actual filesystem path.
+- Destination card colors now appear as consistent card borders; all destination icons intentionally use the native Windows folder icon.
+- Native folder icons are color-tinted with the saved color, and icon/name spacing is compact.
+- Destination cards use borderless dark rounded panels with compact icon/caption spacing; folder colors remain on the icon and caption.
 - Google Lens copies a durable Windows CF_DIB bitmap before opening `https://lens.google.com/`, allowing manual Ctrl+V on the Lens page.
 - The Copy action publishes both CF_DIB and CF_HDROP, so image editors get pixels and Windows Explorer can paste a PNG file.
 

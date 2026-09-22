@@ -4,11 +4,11 @@ import io, json, os, struct, subprocess, sys, tempfile
 from datetime import datetime
 from pathlib import Path
 from PIL import ImageGrab, ImageQt
-from PyQt6.QtCore import QPoint, QRect, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QPoint, QRect, QSize, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
 from PyQt6.QtWidgets import (QApplication, QDialog, QFileDialog, QGridLayout, QHBoxLayout,
     QLabel, QMessageBox, QPushButton, QScrollArea, QTextEdit, QToolButton, QVBoxLayout,
-    QWidget, QInputDialog, QMenu,
+    QWidget, QInputDialog, QMenu, QStyle,
     QColorDialog)
 
 # CYBERPUNK THEME PALETTE (THEME_GUIDE.md)
@@ -121,14 +121,22 @@ class FolderChooser(QDialog):
             item=self.grid.takeAt(0)
             if item.widget(): item.widget().deleteLater()
         items=[(f.get("name") or os.path.basename(f["path"]) or f["path"],f.get("color",CP_GREEN),f.get("icon","▣"),f["path"]) for f in self.folders]
-        for i,item in enumerate(items): self.add_card(i//5,i%5,*item)
-        self.add_card(len(items)//5,len(items)%5,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
+        for i,item in enumerate(items): self.add_card(i//4,i%4,*item)
+        self.add_card(len(items)//4,len(items)%4,"ADD FOLDER",CP_SUBTEXT,"+","ADD")
     def add_card(self,row,col,label,color,icon,value):
-        b=QToolButton(); b.setFixedSize(140,110); border=color if self.edit_mode and value!="ADD" else CP_DIM
-        b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};border:1px solid {border};}} QToolButton:hover{{background:#252525;border-color:{CP_YELLOW};}}")
-        card_layout=QVBoxLayout(b); card_layout.setContentsMargins(4,6,4,5); card_layout.setSpacing(2)
-        icon_label=QLabel(icon); icon_label.setFixedHeight(48); icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter); icon_label.setStyleSheet(f"color:{color};font-family:'{UI_FONT}';font-size:25pt;border:none;")
-        name_label=QLabel(label.upper()[:16]); name_label.setAlignment(Qt.AlignmentFlag.AlignCenter); name_label.setStyleSheet(f"color:{CP_TEXT};font-family:'{UI_FONT}';font-size:9pt;border:none;")
+        b=QToolButton(); b.setFixedSize(160,108); is_folder=value in [f["path"] for f in self.folders]
+        b.setStyleSheet(f"QToolButton{{background:{CP_PANEL};border:none;border-radius:8px;}} QToolButton:hover{{background:#1c1c1c;border:none;}} QToolButton:pressed{{background:#252525;border:none;}}")
+        card_layout=QVBoxLayout(b); card_layout.setContentsMargins(4,0,4,0); card_layout.setSpacing(0)
+        if value in [f["path"] for f in self.folders]:
+            icon_pixmap=QApplication.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon).pixmap(QSize(32,32))
+            tinted=QPixmap(icon_pixmap.size()); tinted.fill(Qt.GlobalColor.transparent)
+            icon_painter=QPainter(tinted); icon_painter.drawPixmap(0,0,icon_pixmap); icon_painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn); icon_painter.fillRect(tinted.rect(),QColor(color)); icon_painter.end()
+            icon_label=QLabel(); icon_label.setPixmap(tinted)
+        else:
+            icon_label=QLabel(icon)
+        icon_label.setFixedHeight(33); icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter); icon_label.setStyleSheet(f"color:{color};font-family:'{UI_FONT}';font-size:23pt;border:none;")
+        name_color=color if is_folder else CP_TEXT
+        name_label=QLabel(label.upper()[:16]); name_label.setFixedHeight(18); name_label.setAlignment(Qt.AlignmentFlag.AlignCenter); name_label.setStyleSheet(f"color:{name_color};font-family:'{UI_FONT}';font-size:9pt;border:none;")
         for child in (icon_label,name_label): child.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
         card_layout.addWidget(icon_label); card_layout.addWidget(name_label)
         if value=="ADD": b.clicked.connect(self.add_folder)
@@ -147,11 +155,10 @@ class FolderChooser(QDialog):
             self.choice=folder; self.accept()
     def folder_menu(self,global_pos,path):
         menu=QMenu(self); menu.setMinimumWidth(150); menu.setStyleSheet(f"QMenu{{background:{CP_PANEL};color:{CP_TEXT};border:1px solid {CP_CYAN};font-family:'{UI_FONT}';font-size:10pt;padding:4px;}} QMenu::item{{padding:6px 18px;}} QMenu::item:selected{{background:{CP_CYAN};color:{CP_BG};}} QMenu::separator{{height:1px;background:{CP_DIM};margin:4px 8px;}}")
-        rename=menu.addAction("Rename"); color=menu.addAction("Color"); icon=menu.addAction("Icon"); menu.addSeparator(); remove=menu.addAction("Remove")
+        rename=menu.addAction("Rename"); color=menu.addAction("Color"); menu.addSeparator(); remove=menu.addAction("Remove")
         action=menu.exec(global_pos)
         if action==rename: self.rename_folder(path)
         elif action==color: self.color_folder(path)
-        elif action==icon: self.icon_folder(path)
         elif action==remove: self.remove_folder(path)
     def folder_index(self,path): return next(i for i,f in enumerate(self.folders) if f["path"]==path)
     def rename_folder(self,path):
