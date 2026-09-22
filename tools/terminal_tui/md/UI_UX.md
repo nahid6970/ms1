@@ -143,4 +143,11 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - SVG icons use `stroke="currentColor"` to inherit text color
 - Focus states via `outline` or `border-color` change
 - High contrast text on dark backgrounds
-- Keyboard shortcuts: Ctrl+F (search), standard terminal keybindings
+- Keyboard shortcuts: F1 (Quick Open), F5 (page refresh), Ctrl+F (terminal search), Ctrl+C/Ctrl+V (terminal copy/paste behavior)
+
+### Quick Open Palette
+- F1 opens the keyboard-friendly Quick Open modal even when a terminal pane has focus.
+- Projects can be searched and selected directly.
+- Commands searches saved bookmarks available to the active workspace.
+- The New project action opens the existing workspace creation form.
+- Arrow keys navigate results and Enter activates the highlighted result.

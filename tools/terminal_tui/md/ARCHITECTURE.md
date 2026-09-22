@@ -38,7 +38,13 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 - **Font customization**: Per-workspace font family and size
 - **Theme customization**: Per-workspace terminal colors + workspace card colors
 - **Search in terminal**: Ctrl+F to search terminal output
-- **Copy/paste**: Context menu with copy/paste
+- **Copy/paste**: Ctrl+C copies selected terminal text; Ctrl+C with no selection remains the terminal interrupt; Ctrl+V and Shift+Insert paste clipboard text into the active pane
+
+### 2.1 Global Keyboard Shortcuts
+- **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
+- **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
+- **Ctrl+F**: Open terminal output search when a terminal pane is focused.
+- **Arrow Up/Down + Enter**: Navigate and select items in the F1 palette.
 
 ### 3. Mobile Controls (Right Side Buttons)
 Buttons appear on the right side of each terminal pane:

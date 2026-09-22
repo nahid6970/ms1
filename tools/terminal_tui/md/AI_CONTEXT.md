@@ -39,6 +39,7 @@ A **web-based multi-workspace terminal dashboard** for Windows. Each workspace m
 - **File paths**: Always use `os.path.normpath()` and validate with `.startswith(base_path)` to prevent path traversal.
 - **Frontend is one huge file**: `index.html` contains all HTML, CSS, and JS inline. Search by function name or HTML ID, not by file.
 - **Port 5577** is hardcoded in `app.py`.
+- **Terminal keyboard focus**: F1/F5 are handled in a document capture listener because xterm.js can consume function keys before bubbling listeners. Ctrl+C copies only when xterm has a selection; otherwise it must continue to send the interrupt signal.
 
 ## Preferred Workflow
 1. **New features**: Add HTML (modal/UI) → Add JS functions → Add backend API route if needed.

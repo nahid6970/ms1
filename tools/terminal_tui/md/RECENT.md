@@ -18,6 +18,21 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-22] - Synchronize Keyboard and Quick Open Documentation
+**What We Accomplished:**
+- Documented F1 Quick Open, F5 refresh, terminal copy/paste behavior, and terminal-focus capture handling.
+- Updated architecture, UI/UX, AI context, feature, problem/fix, and recent-session documentation.
+
+**Files Modified:**
+- `md/ARCHITECTURE.md`
+- `md/UI_UX.md`
+- `md/AI_CONTEXT.md`
+- `md/FEATURES.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-22] - Fix Terminal-Focused Shortcuts and Clipboard Paste
 **What We Accomplished:**
 - Captured F1 and F5 before xterm.js so the Quick Open palette and page refresh work with terminal focus.
