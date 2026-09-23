@@ -317,6 +317,11 @@ class TerminalSession:
 # Global project root path
 $global:PROJECT_ROOT_PATH = "{path_clean}"
 
+# Terminal color capability declarations so TUI apps (Codex, fzf, etc.) use full color
+$env:TERM = "xterm-256color"
+$env:COLORTERM = "truecolor"
+$env:TERM_PROGRAM = "xterm-256color"
+
 # Force import PSReadLine in case it is disabled due to screen reader detection in PTY
 Import-Module PSReadLine -ErrorAction SilentlyContinue
 # Set custom project command history file and enable partial history search
