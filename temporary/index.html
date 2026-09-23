@@ -26,6 +26,30 @@
             <button class="tool-card" data-tool="translate"><span class="tool-icon">✣</span><span>Move</span><kbd>W</kbd></button>
             <button class="tool-card" data-tool="rotate"><span class="tool-icon rotate-icon">⟳</span><span>Rotate</span><kbd>E</kbd></button>
             <button class="tool-card" data-tool="scale"><span class="tool-icon">⤢</span><span>Scale</span><kbd>R</kbd></button>
+            <button class="tool-card" data-tool="cut" style="grid-column:span 2"><span class="tool-icon">✂</span><span>Cut / Slice</span><kbd>T</kbd></button>
+          </div>
+          <div class="section-label">CUT / SLICE</div>
+          <div class="cut-panel">
+            <div class="cut-row">
+              <span class="cut-label">Axis</span>
+              <div class="axis-pills">
+                <button class="axis-pill active" data-axis="y">Y</button>
+                <button class="axis-pill" data-axis="x">X</button>
+                <button class="axis-pill" data-axis="z">Z</button>
+              </div>
+            </div>
+            <div class="cut-row">
+              <span class="cut-label">Position</span>
+              <input id="cut-position" type="number" step="0.1" value="0" class="cut-input" />
+            </div>
+            <div class="cut-row">
+              <span class="cut-label">Thickness</span>
+              <input id="cut-thickness" type="number" step="0.1" value="0.2" min="0.01" class="cut-input" />
+            </div>
+            <div class="cut-actions">
+              <button class="cut-btn" id="slice-half-btn" title="Split object into two pieces at the cut plane">⊟ Slice in half</button>
+              <button class="cut-btn" id="slice-band-btn" title="Remove a band of the given thickness — e.g. cylinder → 2 rings">⊠ Remove band</button>
+            </div>
           </div>
           <div class="section-label">ADD OBJECT</div>
           <div class="add-list">
@@ -47,6 +71,19 @@
         <section class="viewport-wrap">
           <div class="viewport-toolbar"><div class="toolbar-group"><button class="view-btn active" data-view="perspective">Perspective</button><button class="view-btn" data-view="top">Top</button><button class="view-btn" data-view="front">Front</button></div><div class="toolbar-group right"><button class="small-icon-btn" id="grid-btn" title="Toggle grid">▦</button><button class="small-icon-btn" id="focus-btn" title="Frame selection">⊙</button><button class="small-icon-btn" id="camera-btn" title="Download viewport image">⌁</button></div></div>
           <div id="viewport"><div class="viewport-empty" id="viewport-empty"><div class="empty-orbit">✦</div><strong>Start shaping your idea</strong><span>Add an object from the left panel</span></div></div>
+          <div class="cut-overlay hidden" id="cut-overlay">
+            <div class="cut-ov-axis">
+              <button class="cut-ov-pill active" data-cut-axis="y">Y</button>
+              <button class="cut-ov-pill" data-cut-axis="x">X</button>
+              <button class="cut-ov-pill" data-cut-axis="z">Z</button>
+            </div>
+            <span class="cut-ov-pos" id="cut-ov-pos">0.00</span>
+            <div class="cut-ov-actions">
+              <button class="cut-ov-btn" id="ov-slice-btn">⊟ Slice</button>
+              <button class="cut-ov-btn accent" id="ov-band-btn">⊠ Band</button>
+              <input id="ov-thickness" type="number" value="0.3" step="0.05" min="0.01" title="Band thickness" />
+            </div>
+          </div>
           <div class="viewport-status"><span><i class="axis-x">X</i> <i class="axis-y">Y</i> <i class="axis-z">Z</i></span><span id="object-count">0 objects</span><span class="mono">Three.js canvas</span></div>
         </section>
 
@@ -65,7 +102,7 @@
           </div>
         </aside>
       </main>
-      <footer class="bottombar"><span><kbd>Q</kbd> Select <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale <kbd>Ctrl+C</kbd> Copy <kbd>Ctrl+V</kbd> Paste</span><span id="save-status">Local workspace · Ready</span><span>v1.0.0</span></footer>
+      <footer class="bottombar"><span><kbd>Q</kbd> Select <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale <kbd>T</kbd> Cut <kbd>Ctrl+C</kbd> Copy <kbd>Ctrl+V</kbd> Paste</span><span id="save-status">Local workspace · Ready</span><span>v1.0.0</span></footer>
     </div>
     <div class="toast" id="toast"></div>
     <input type="file" id="load-input" accept="application/json,.json" hidden />

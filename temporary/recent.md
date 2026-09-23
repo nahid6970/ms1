@@ -1,30 +1,32 @@
 # recent.md — Forma Handoff
 
 ## 1. Project DNA
-Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio inspired by Blender. Three-column layout: left tools/primitives, center WebGL viewport, right scene tree + inspector. Run via `python -m http.server 8000`.
+Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Three-column layout: left tools/primitives, center WebGL viewport, right scene tree + inspector. Run via `python -m http.server 8000`.
 
 ## 2. Latest Implementation
 
-**`vendor/three/`** — Three.js vendored locally (was CDN); `three.module.js`, `OrbitControls.js`, `TransformControls.js` downloaded from unpkg@0.161.0.
+**`vendor/`** — Three.js r161, three-mesh-bvh@0.6.8, three-bvh-csg@0.0.17 all vendored locally.
 
 **`index.html`**
-- Import map updated from `unpkg.com` URLs → `./vendor/three/...` local paths
-- Footer hint updated to include `Ctrl+C` / `Ctrl+V` shortcuts
+- Import map: all three libs point to `./vendor/...`
+- Added CUT/SLICE section in left panel (axis pills Y/X/Z, position, thickness, two action buttons)
+- Added BOOLEAN OPS section (Subtract/Union/Intersect, requires Shift+click second object)
 
 **`app.js`**
-- Fixed crash: `transform.getHelper()` doesn't exist in r161 → replaced with `scene.add(transform)`
-- Fixed PNG export: `toDataURL()` result now used directly as anchor `href` (was incorrectly wrapped in `Blob`)
-- Added `clipboard` variable + `copySelected()` / `pasteObject()` functions
-- Ctrl+C copies selected object's full state; Ctrl+V pastes with +0.5 X/Z offset and a fresh name
+- Fixed `transform.getHelper()` crash (r161 API — use `scene.add(transform)` directly)
+- Fixed PNG export (data URL used directly, not wrapped in Blob)
+- `clipboard` + `copySelected()` / `pasteObject()` — Ctrl+C / Ctrl+V, pastes at exact position
+- `selected2` for second boolean operand; Shift+click to select B
+- `performBool(op)` — uses `Brush` instances (not `.clone()`), SUBTRACTION/ADDITION/INTERSECTION
+- `cutAxis`, `csgSubtractBox()` helper, `performSlice()` (splits into 2 halves), `performBand()` (removes a thickness band)
 
-**`style.css`**
-- `.top-actions` width `240px` → `auto` (buttons were wrapping to second line)
-- `.text-btn` changed from `float:right` to flexbox (Clear scene icon was dropping below text)
+**`style.css`** — cut panel styles, bool hint, top-actions width fix, text-btn flex fix
 
 ## 3. Critical Context
-- Three.js r161 API: `TransformControls` is added directly to scene — **no** `getHelper()` method (added in r169).
-- All Three.js files are local under `vendor/`; do NOT switch back to CDN.
-- `clipboard` is in-memory only (not persisted to localStorage).
+- `three-mesh-bvh` MUST be **0.6.8** — 0.7.x breaks `three-bvh-csg@0.0.17` (`prepareGeometry` API changed)
+- `TransformControls` r161: add to scene directly, NO `getHelper()` method
+- Boolean ops require `Brush` instances, NOT `mesh.clone()` — evaluator calls `a.prepareGeometry()`
+- All libs are local under `vendor/`; do NOT switch to CDN
 
 ## 4. Pending Task
-Test the full feature set in-browser (add, select, transform, copy/paste, save/load, export PNG) and fix any remaining runtime issues.
+Test cut/slice on a cylinder: select it, pick Y axis, set position to the center Y, click "Remove band" to get two rings. Verify boolean subtract still works after the three-mesh-bvh downgrade.
