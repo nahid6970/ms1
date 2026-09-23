@@ -110,6 +110,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 5. Pending Task
 
+- `templates/discover.html`, `static/discover.js`: Added a Rating option to Discover sorting; results are ordered from highest TMDb rating to lowest.
 - `templates/movies.html`: Preserved the selected Movies/Unwatched/Archived view when using movie sort links.
 - `app.py`, `templates/movies.html`, `static/movies.js`, `static/style.css`: Added Movies, Unwatched, and Archived navigation views with a per-movie archive button and persistent archive API state.
 - `static/movies.js`, `static/style.css`: Added Movies dropdown behavior and archive-button interaction styling for Movies, Unwatched, and Archived views.

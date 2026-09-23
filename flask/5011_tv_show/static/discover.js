@@ -195,6 +195,14 @@ function renderDiscoverResults(results) {
 function sortDiscoverResults(results) {
     const sorted = [...results];
     if (discoverSort.value === 'relevance') return sorted;
+    if (discoverSort.value === 'rating') {
+        sorted.sort((a, b) => {
+            const ar = Number(a.rating) || 0;
+            const br = Number(b.rating) || 0;
+            return br - ar;
+        });
+        return sorted;
+    }
     const dateSorted = sorted.every(item => item.release_date);
     if (dateSorted) {
         sorted.sort((a, b) => {
