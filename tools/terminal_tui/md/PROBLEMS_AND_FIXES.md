@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-09-23] - Quick Open Category Tags Shifted Position
+**Problem:** In the F1 Quick Open palette, category tags appeared beside the project name for the first nine projects but moved to the far right for later projects.
+**Root Cause:** The project title row used `justify-content: space-between`; the presence of the `⌘ 1–9` shortcut element changed the flex distribution.
+**Solution:** Changed the row to left-aligned flex layout, made the project-name group shrinkable, and kept shortcut labels right-aligned with `margin-left: auto`.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-09-22] - Missing Page Refresh Action and F5 Shortcut
 **Problem:** The global restart button immediately restarted the app, but there was no visible control for refreshing only the current page, and F5 did not refresh the SPA reliably.
 **Root Cause:** The restart control had only one action and the frontend did not handle the F5 key.

@@ -8250,7 +8250,7 @@
                 titleContainer.className = 'project-title-container';
                 titleContainer.style.display = 'flex';
                 titleContainer.style.alignItems = 'center';
-                titleContainer.style.justifyContent = 'space-between';
+                titleContainer.style.justifyContent = 'flex-start';
                 titleContainer.style.width = '100%';
                 
                 const leftSide = document.createElement('div');
@@ -8258,6 +8258,7 @@
                 leftSide.style.alignItems = 'center';
                 leftSide.style.gap = '6px';
                 leftSide.style.minWidth = '0';
+                leftSide.style.flex = '0 1 auto';
                 
                 // Running active dot
                 if (proj.is_active) {

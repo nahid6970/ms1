@@ -18,6 +18,18 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-23] - Fix Quick Open Category Tag Alignment
+**What We Accomplished:**
+- Fixed F1 palette category tags so they stay beside project names consistently.
+- Kept `⌘ 1–9` shortcut labels aligned to the right without affecting tag placement.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-23] - Refresh Documentation for F1 Palette
 **What We Accomplished:**
 - Updated feature, UI/UX, and problem/fix documentation to describe the reference-style F1 command palette.
