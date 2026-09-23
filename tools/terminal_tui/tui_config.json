@@ -893,7 +893,14 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790139912047-1"
+        ]
+      }
     }
   ],
   "extension_icons": {
