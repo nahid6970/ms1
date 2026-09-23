@@ -384,6 +384,11 @@
             "kind": "Exe",
             "id": "obs64.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Title",
+            "id": "Workspaces",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
