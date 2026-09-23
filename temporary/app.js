@@ -143,6 +143,7 @@ function pasteObject() {
 
 // ── Cut / Slice gizmo ────────────────────────────────────────────────────
 let cutAxis='y', cutMode='slice', cutPos=0, cutGap=0.3;
+let cutCenter=new THREE.Vector3();
 
 const cutMat  = new THREE.MeshBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false});
 const cutMatB = new THREE.MeshBasicMaterial({color:0xff7b58,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false});
@@ -165,25 +166,25 @@ cutTransform.addEventListener('objectChange', ()=>{
 });
 
 function applyGizmoPositions() {
+  const half = cutMode==='band' ? cutGap/2 : 0;
+  const cx=cutCenter.x, cy=cutCenter.y, cz=cutCenter.z;
   if(cutAxis==='y') {
-    cutPlaneA.rotation.set(0,0,0); cutPlaneA.position.set(0,cutPos,0);
-    cutHandle.position.set(0,cutPos,0);
+    cutPlaneA.rotation.set(0,0,0); cutPlaneA.position.set(cx,cutPos-half,cz);
+    cutHandle.position.set(cx,cutPos,cz);
     cutTransform.showX=false; cutTransform.showY=true; cutTransform.showZ=false;
-    cutPlaneB.rotation.set(0,0,0); cutPlaneB.position.set(0,cutPos+cutGap,0);
+    cutPlaneB.rotation.set(0,0,0); cutPlaneB.position.set(cx,cutPos+half,cz);
   } else if(cutAxis==='x') {
-    cutPlaneA.rotation.set(0,Math.PI/2,0); cutPlaneA.position.set(cutPos,0,0);
-    cutHandle.position.set(cutPos,0,0);
+    cutPlaneA.rotation.set(0,Math.PI/2,0); cutPlaneA.position.set(cutPos-half,cy,cz);
+    cutHandle.position.set(cutPos,cy,cz);
     cutTransform.showX=true; cutTransform.showY=false; cutTransform.showZ=false;
-    cutPlaneB.rotation.set(0,Math.PI/2,0); cutPlaneB.position.set(cutPos+cutGap,0,0);
+    cutPlaneB.rotation.set(0,Math.PI/2,0); cutPlaneB.position.set(cutPos+half,cy,cz);
   } else {
-    cutPlaneA.rotation.set(Math.PI/2,0,0); cutPlaneA.position.set(0,0,cutPos);
-    cutHandle.position.set(0,0,cutPos);
+    cutPlaneA.rotation.set(Math.PI/2,0,0); cutPlaneA.position.set(cx,cy,cutPos-half);
+    cutHandle.position.set(cx,cy,cutPos);
     cutTransform.showX=false; cutTransform.showY=false; cutTransform.showZ=true;
-    cutPlaneB.rotation.set(Math.PI/2,0,0); cutPlaneB.position.set(0,0,cutPos+cutGap);
+    cutPlaneB.rotation.set(Math.PI/2,0,0); cutPlaneB.position.set(cx,cy,cutPos+half);
   }
-  // second plane only visible in band mode
   if(cutMode==='band') scene.add(cutPlaneB); else scene.remove(cutPlaneB);
-  // gap row visibility
   const gr=document.getElementById('ov-thickness-row');
   if(gr) gr.style.display=cutMode==='band'?'flex':'none';
   document.getElementById('cut-ov-pos').textContent=cutPos.toFixed(2);
@@ -194,8 +195,8 @@ function showCutGizmo() {
   if(!selected) return;
   selected.updateMatrixWorld(true);
   const bbox=new THREE.Box3().setFromObject(selected);
-  const center=bbox.getCenter(new THREE.Vector3());
-  cutPos = cutAxis==='y'?center.y : cutAxis==='x'?center.x : center.z;
+  bbox.getCenter(cutCenter);
+  cutPos = cutAxis==='y'?cutCenter.y : cutAxis==='x'?cutCenter.x : cutCenter.z;
   scene.add(cutPlaneA);
   cutTransform.attach(cutHandle);
   applyGizmoPositions();
@@ -274,9 +275,9 @@ function performBand() {
   const center=bbox.getCenter(new THREE.Vector3());
   const pos=cutPos, gap=Math.max(0.01,cutGap), BIG=500;
   let result;
-  if(cutAxis==='y')      result=csgSubtractBox(selected,BIG,gap,BIG,center.x,pos+gap/2,center.z);
-  else if(cutAxis==='x') result=csgSubtractBox(selected,gap,BIG,BIG,pos+gap/2,center.y,center.z);
-  else                   result=csgSubtractBox(selected,BIG,BIG,gap,center.x,center.y,pos+gap/2);
+  if(cutAxis==='y')      result=csgSubtractBox(selected,BIG,gap,BIG,center.x,pos,center.z);
+  else if(cutAxis==='x') result=csgSubtractBox(selected,gap,BIG,BIG,pos,center.y,center.z);
+  else                   result=csgSubtractBox(selected,BIG,BIG,gap,center.x,center.y,pos);
   if(!result) return;
   result.name=selected.name+' (cut)'; result.userData.type='sliced';
   const old=selected; selected=null; hideCutGizmo(); removeObj(old);
