@@ -503,7 +503,8 @@ def load_projects_config():
                         "command": bm.get("command", ""),
                         "global": bm.get("global", False),
                         "name": bm.get("name", ""),
-                        "windowTitle": bm.get("windowTitle", "")
+                        "windowTitle": bm.get("windowTitle", ""),
+                        "displayOrder": bm.get("displayOrder")
                     })
             p["bookmarks"] = sanitized
     return projs
@@ -728,6 +729,32 @@ def api_edit_bookmark(project, index):
             except Exception as e:
                 print(f"Error reordering bookmark: {e}")
                 
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
+@app.route('/api/bookmarks/display-order', methods=['POST'])
+def api_reorder_bookmarks_display():
+    """Persist the order of the merged local/global bookmark dropdown."""
+    data = request.json or {}
+    items = data.get("items", [])
+    if not isinstance(items, list):
+        return jsonify({"error": "items must be a list"}), 400
+
+    projects = load_projects_config()
+    by_name = {p["name"].lower(): p for p in projects}
+    for order, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        project_name = str(item.get("project", "")).lower()
+        try:
+            bookmark_index = int(item.get("index"))
+        except (TypeError, ValueError):
+            continue
+        project = by_name.get(project_name)
+        if not project or not 0 <= bookmark_index < len(project.get("bookmarks", [])):
+            continue
+        project["bookmarks"][bookmark_index]["displayOrder"] = order
+
     save_projects_config(projects)
     return jsonify(scan_projects())
 

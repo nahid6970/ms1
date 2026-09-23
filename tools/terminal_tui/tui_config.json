@@ -23,43 +23,50 @@
           "command": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358",
           "global": true,
           "name": " myGG",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 0
         },
         {
           "command": "agy --dangerously-skip-permissions -c",
           "global": true,
           "name": " Antigravity",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 1
         },
         {
           "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
           "global": true,
           "name": " Codex",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 2
         },
         {
           "command": "kiro-cli chat --trust-all-tools --resume",
           "global": true,
           "name": " Kiro-Cli",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 3
         },
         {
           "command": "npx -y convex@latest dev",
           "global": true,
           "name": " convex",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 4
         },
         {
           "command": "net stop winnat",
           "global": true,
           "name": "󰖩 net stop winnat",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 6
         },
         {
           "command": "explorer .",
           "global": true,
           "name": " Explorer",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 7
         }
       ],
       "category": "Tool"
@@ -871,7 +878,8 @@
           "command": "npm run deploy:pages",
           "global": true,
           "name": " npm run deploy:pages",
-          "windowTitle": ""
+          "windowTitle": "",
+          "displayOrder": 5
         }
       ]
     },

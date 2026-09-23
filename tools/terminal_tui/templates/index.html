@@ -6172,6 +6172,7 @@
                             global: isGlobal,
                             name: bmName,
                             windowTitle: windowTitle,
+                            displayOrder: (typeof bm === 'object' && Number.isFinite(Number(bm.displayOrder))) ? Number(bm.displayOrder) : null,
                             project: p.name,
                             index: idx,
                             isOwned: isCurrent
@@ -6189,6 +6190,17 @@
                     seen.add(key);
                     uniqueList.push(item);
                 }
+            });
+
+            // Use the persisted merged-list order when available. Items without
+            // an order retain their existing workspace/configuration order.
+            uniqueList.sort((a, b) => {
+                const aHasOrder = Number.isFinite(a.displayOrder);
+                const bHasOrder = Number.isFinite(b.displayOrder);
+                if (aHasOrder && bHasOrder) return a.displayOrder - b.displayOrder;
+                if (aHasOrder) return -1;
+                if (bHasOrder) return 1;
+                return 0;
             });
             
             if (uniqueList.length === 0) {
@@ -6910,22 +6922,23 @@
         let _bmDragSrcIdx = null;
 
         async function reorderBookmark(uniqueList, fromDisplayIdx, toDisplayIdx) {
-            // Reorder bookmarks within their source workspace. Global bookmarks
-            // are visible elsewhere, but their saved order belongs to that source.
             const from = uniqueList[fromDisplayIdx];
             const to   = uniqueList[toDisplayIdx];
-            if (!from || !to || from.project !== to.project) return;
+            if (!from || !to || fromDisplayIdx === toDisplayIdx) return;
+
+            const reordered = uniqueList.slice();
+            const [moved] = reordered.splice(fromDisplayIdx, 1);
+            reordered.splice(toDisplayIdx, 0, moved);
 
             try {
-                const res = await fetch(`/api/projects/${encodeURIComponent(from.project)}/bookmarks/${from.index}/edit`, {
+                const res = await fetch('/api/bookmarks/display-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        command: from.command,
-                        name: from.name || '',
-                        windowTitle: from.windowTitle || '',
-                        newIndex: to.index
-                    })
+                    body: JSON.stringify({ items: reordered.map((bookmark, order) => ({
+                        project: bookmark.project,
+                        index: bookmark.index,
+                        order
+                    })) })
                 });
                 if (res.ok) {
                     projects = await res.json();

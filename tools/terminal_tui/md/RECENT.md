@@ -8,11 +8,12 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-09-24] - Allow Dragging Global Bookmarks
 **What We Accomplished:**
 - Added drag handles to global bookmarks in the merged bookmark list.
-- Enabled reordering for global bookmarks within their original workspace.
-- Kept cross-workspace bookmark movement disabled so saved ownership and ordering remain consistent.
+- Added a persisted merged display order so global and local bookmarks can be dragged across workspace boundaries.
+- Kept each bookmark's source workspace and ownership unchanged.
 
 **Files Modified:**
 - `templates/index.html`
+- `app.py`
 - `md/PROBLEMS_AND_FIXES.md`
 - `md/RECENT.md`
 

@@ -3,10 +3,10 @@
 ---
 
 ## [2026-09-24] - Global Bookmarks Could Not Be Dragged
-**Problem:** A global bookmark appeared in the merged bookmark list without the drag handle, while local bookmarks could be reordered.
-**Root Cause:** Both the drag listeners and drag-handle markup were guarded by `bm.isOwned`, so bookmarks visible globally were treated as read-only even though they still belonged to a source workspace.
-**Solution:** Allow local and global bookmarks to show the drag handle and be reordered within their source workspace. Cross-workspace movement is not performed because each bookmark's saved order belongs to its original workspace.
-**Files Modified:** `templates/index.html`
+**Problem:** A global bookmark appeared in the merged bookmark list without a usable drag operation. Drops onto bookmarks from another workspace did nothing.
+**Root Cause:** The drag handler required source and target bookmarks to belong to the same workspace, even though the visible list merges bookmarks from multiple workspaces.
+**Solution:** Persist a merged display order on bookmark records and reorder the complete visible list, allowing local and global bookmarks to be dragged across workspace boundaries.
+**Files Modified:** `app.py`, `templates/index.html`
 
 ---
 
