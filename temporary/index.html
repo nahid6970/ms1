@@ -34,6 +34,13 @@
             <button data-add="cylinder"><span class="object-glyph cylinder-glyph"></span>Cylinder <kbd>3</kbd></button>
             <button data-add="torus"><span class="object-glyph torus-glyph"></span>Torus <kbd>4</kbd></button>
           </div>
+          <div class="section-label">BOOLEAN OPS <span class="hint">A+B</span></div>
+          <div class="bool-hint" id="bool-hint">Select 2 objects</div>
+          <div class="add-list bool-ops" id="bool-ops">
+            <button id="bool-subtract" data-bool="subtract" disabled><span class="bool-glyph">A−B</span>Subtract</button>
+            <button id="bool-union" data-bool="union" disabled><span class="bool-glyph">A∪B</span>Union</button>
+            <button id="bool-intersect" data-bool="intersect" disabled><span class="bool-glyph">A∩B</span>Intersect</button>
+          </div>
           <div class="left-footer"><div class="tip-card"><span class="tip-star">✦</span><div><strong>Quick tip</strong><p>Drag to orbit · scroll to zoom · <kbd>F</kbd> frame selection</p></div></div><button class="text-btn" id="clear-btn">Clear scene <span>⌫</span></button></div>
         </aside>
 
@@ -62,7 +69,7 @@
     </div>
     <div class="toast" id="toast"></div>
     <input type="file" id="load-input" accept="application/json,.json" hidden />
-    <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+    <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","three-mesh-bvh":"./vendor/three-mesh-bvh/build/index.module.js","three-bvh-csg":"./vendor/three-bvh-csg/build/index.module.js"}}</script>
     <script>window.setTimeout(function(){if(!window.__formaStarted){document.getElementById('startup-error').hidden=false;}},1800);</script>
     <script type="module" src="app.js"></script>
   </body>
