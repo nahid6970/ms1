@@ -4395,16 +4395,27 @@
                 console.error("WebSocket error:", err);
             });
 
+            let lastTerminalPasteText = '';
+            let lastTerminalPasteAt = 0;
+            const sendTerminalPasteText = (text) => {
+                if (!text) return;
+                const now = Date.now();
+                if (text === lastTerminalPasteText && now - lastTerminalPasteAt < 250) return;
+                lastTerminalPasteText = text;
+                lastTerminalPasteAt = now;
+                if (paneSocket && paneSocket.connected) {
+                    paneSocket.emit('pty-input', { project: projectName, paneId, data: text });
+                }
+            };
+
             // Handle text paste once before xterm.js can process the same browser
-            // paste event. This prevents Ctrl+V from being inserted twice.
+            // paste event. This keeps Ctrl+V out of AI CLI image-paste shortcuts.
             paneDiv.addEventListener('paste', (e) => {
                 const text = e.clipboardData?.getData('text/plain');
                 if (!text || e.clipboardData?.files?.length) return;
                 e.preventDefault();
                 e.stopPropagation();
-                if (paneSocket && paneSocket.connected) {
-                    paneSocket.emit('pty-input', { project: projectName, paneId, data: text });
-                }
+                sendTerminalPasteText(text);
             }, true);
 
             setTimeout(() => {
@@ -4485,16 +4496,26 @@
                         return false;
                     }
                 }
-                if ((e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) || (e.shiftKey && e.key === 'Insert')) {
-                    if (e.shiftKey && e.key === 'Insert' && navigator.clipboard && navigator.clipboard.readText) {
+                if (e.ctrlKey && (e.key === 'v' || e.code === 'KeyV')) {
+                    // Do not pass Ctrl+V through to the PTY. The browser paste
+                    // event above normally sends the clipboard text exactly once.
+                    const pasteKeyPressedAt = Date.now();
+                    setTimeout(() => {
+                        if (lastTerminalPasteAt >= pasteKeyPressedAt) return;
+                        if (!navigator.clipboard || !navigator.clipboard.readText) return;
                         navigator.clipboard.readText().then(text => {
-                            if (text && paneSocket && paneSocket.connected) {
-                                paneSocket.emit('pty-input', { project: projectName, paneId, data: text });
-                            }
+                            sendTerminalPasteText(text);
+                        }).catch(err => console.warn('Terminal paste fallback failed:', err));
+                    }, 75);
+                    return false;
+                }
+                if (e.shiftKey && e.key === 'Insert') {
+                    if (navigator.clipboard && navigator.clipboard.readText) {
+                        navigator.clipboard.readText().then(text => {
+                            sendTerminalPasteText(text);
                         }).catch(err => console.warn('Terminal paste failed:', err));
                     }
-                    // Ctrl+V is handled by the capture-phase paste listener above.
-                    return e.ctrlKey ? true : false;
+                    return false;
                 }
                 return true;
             });

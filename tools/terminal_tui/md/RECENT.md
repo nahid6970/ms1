@@ -5,11 +5,35 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-24] - Stop Duplicate Ctrl+V Paste
+**What We Accomplished:**
+- Routed Ctrl+V terminal paste through the browser paste event with a delayed plain-text fallback.
+- Added a short same-text dedupe guard shared by Ctrl+V, fallback, and Shift+Insert paste paths.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-22] - Add Restart Menu and F5 Page Refresh
 **What We Accomplished:**
 - Changed the global restart icon to open separate “Restart app” and “Refresh page” actions.
 - Added a global F5 keyboard handler that refreshes the current page.
 - Kept the existing session reset and backend restart flow unchanged.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
+## [2026-09-24] - Fix Text Paste in AI CLI Terminals
+**What We Accomplished:**
+- Prevented Ctrl+V from reaching AI CLI tools as their image-paste shortcut.
+- Restored single plain-text clipboard insertion through the frontend PTY handler.
 
 **Files Modified:**
 - `templates/index.html`

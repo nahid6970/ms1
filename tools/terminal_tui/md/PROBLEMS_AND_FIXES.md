@@ -2,6 +2,22 @@
 
 ---
 
+## [2026-09-24] - Ctrl+V Text Paste Still Inserted Twice
+**Problem:** After blocking AI CLI image-paste shortcuts, Ctrl+V could still paste the same text twice in terminal panes.
+**Root Cause:** Ctrl+V was handled by both the xterm key handler and the browser paste event handler.
+**Solution:** Made the browser paste event the primary Ctrl+V text path, kept a delayed plain-text fallback when no paste event arrives, preserved Shift+Insert support, and added a short same-text dedupe guard shared by all paste paths.
+**Files Modified:** `templates/index.html`
+
+---
+
+## [2026-09-24] - Ctrl+V Triggered AI CLI Image Paste
+**Problem:** Pasting text into an AI CLI through the terminal produced repeated “Failed to paste image” errors instead of inserting the text.
+**Root Cause:** Ctrl+V was allowed through to the PTY after duplicate-paste handling was added. Some AI CLI tools interpret Ctrl+V as an image-paste command.
+**Solution:** Consume Ctrl+V in the frontend, read the plain clipboard text once, and send only that text to the PTY. Direct paste events continue to use the capture-phase text handler.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-09-23] - Terminal Clipboard Paste Inserted Twice
 **Problem:** Copying and pasting terminal text caused the pasted content to appear twice.
 **Root Cause:** Ctrl+V used a custom `navigator.clipboard.readText()` emission while xterm/browser also processed the native paste event.
