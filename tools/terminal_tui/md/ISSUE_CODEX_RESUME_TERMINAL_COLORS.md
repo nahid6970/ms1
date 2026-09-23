@@ -1,12 +1,12 @@
-# Unresolved Issue: Codex Resume Terminal Colors
+# Issue: Codex Resume Terminal Colors
 
-**Status:** Open — implementation reverted for later investigation
+**Status:** ✅ Resolved — 2026-09-24
 
 **Reported:** 2026-09-24
 
 ## Symptoms
 
-The issue only appears in the Codex main/resume terminal, especially the screen that lists conversations to resume. The resume list and bottom status line look much flatter and less colorful than they do in a normal Windows Terminal session.
+The issue only appeared in the Codex main/resume terminal, especially the screen that lists conversations to resume. The resume list and bottom status line looked much flatter and less colorful than they did in a normal Windows Terminal session.
 
 The affected bottom status area contains information such as:
 
@@ -14,48 +14,37 @@ The affected bottom status area contains information such as:
 GPT-5.5 medium · monthly 23% left · 841K used · 13.3M in · 55.8K out · warning · F2 to view
 ```
 
-Normal terminals still display the expected colored text. This suggests the problem is specific to how the embedded terminal renders the Codex TUI, rather than a general Windows color configuration problem.
+Normal terminals displayed the expected colored text. The problem was specific to how the embedded terminal rendered the Codex TUI, not a general Windows color configuration problem.
 
-## Expected behavior
+## Root Cause
 
-The embedded terminal should preserve the colors, emphasis, dim text, selection/reverse-video styling, and status colors produced by the Codex resume interface, as seen in Windows Terminal.
+The PTY session launched by `app.py` did not set terminal color capability environment variables. Codex (and other TUI apps like `fzf`, `bat`, `less`) interrogate the environment at startup to decide which color mode to use:
 
-## Current behavior
+- `COLORTERM=truecolor` → full 24-bit color
+- `TERM=xterm-256color` → 256-color fallback
+- Neither set → 16-color or monochrome fallback
 
-The Codex resume interface renders with muted or bland colors in Terminal TUI. Conversation rows, metadata, highlighted rows, and the bottom usage/status line do not visually match the normal Windows Terminal appearance.
+In a real Windows Terminal session, `WT_SESSION`, `COLORTERM=truecolor`, and `TERM=xterm-256color` are present. In the embedded winpty shell, none of these were set, so Codex fell back to a muted, low-color rendering mode.
 
-## Scope
+The xterm.js frontend was not the problem — it can render truecolor correctly. The issue was that Codex never emitted the right escape sequences because it didn't know the terminal supported them.
 
-- Affects: Codex main/resume terminal UI.
-- Does not appear to affect: ordinary terminal commands or normal Windows Terminal sessions.
-- The problem was still present after earlier frontend color changes, so those changes were reverted.
+## Fix Applied
 
-## Investigation notes
+Added the following to the top of the PowerShell profile template in `app.py` (`system_template`):
 
-Potential areas to inspect later:
+```powershell
+# Terminal color capability declarations so TUI apps (Codex, fzf, etc.) use full color
+$env:TERM = "xterm-256color"
+$env:COLORTERM = "truecolor"
+$env:TERM_PROGRAM = "xterm-256color"
+```
 
-1. Compare the PTY environment between Windows Terminal and the embedded terminal, especially `TERM`, `COLORTERM`, `TERM_PROGRAM`, `WT_SESSION`, and color-related variables.
-2. Check whether Codex chooses a different color mode when it detects the embedded PTY.
-3. Inspect xterm.js handling of SGR colors, bold, dim, inverse/reverse video, and 256-color or truecolor escape sequences.
-4. Compare the actual escape sequences emitted by the Codex resume screen in both terminals.
-5. Check whether CSS, opacity, contrast, or theme configuration is muting xterm rows after ANSI styling is applied.
-6. Verify whether the embedded terminal is using a different terminal type, font, or renderer than the normal Windows Terminal.
-7. Test with a minimal ANSI color/attribute script to separate PTY color negotiation from frontend rendering.
+These are written into every project's `profile.ps1` and loaded automatically when a terminal pane opens.
 
-## Reproduction checklist
+## Files Modified
 
-1. Open Terminal TUI.
-2. Start or open the Codex main terminal.
-3. Open the Codex resume-previous-session screen.
-4. Compare its project/conversation list and bottom usage/status line with the same screen in Windows Terminal.
-5. Record the PTY environment and capture the emitted ANSI sequences in both environments.
+- `app.py` — added `TERM`, `COLORTERM`, `TERM_PROGRAM` env vars to `system_template`
 
-## Related files to inspect
+## Verification
 
-- `templates/index.html` — embedded xterm.js initialization and terminal theme.
-- `app.py` — PTY/session creation and environment setup.
-- `tui_config.json` — saved workspace and terminal theme configuration.
-
-## Resolution criteria
-
-The issue can be closed when the Codex resume screen in the embedded terminal visibly matches the normal Windows Terminal colors and emphasis, while ordinary terminal output and existing terminal themes continue to work.
+Confirmed fixed after restarting the terminal and opening the Codex resume screen — colors and emphasis now match the normal Windows Terminal appearance.
