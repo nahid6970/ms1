@@ -5,18 +5,18 @@
       "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
       "pinned": false,
       "theme": {
-        "background": "#12080d",
-        "foreground": "#c8b6c0",
-        "cursor": "#43efbb",
-        "borderColor": "#525252",
+        "background": "#000000",
         "scrollbarColor": "#ffffff",
-        "scrollbarIdleColor": "#ffffff"
+        "borderColor": "#525252",
+        "cursor": "#3b82f6",
+        "scrollbarIdleColor": "#ffffff",
+        "foreground": "#d1d5db"
       },
       "cardTheme": {
-        "bgColor": "#000610",
-        "textColor": "#00ffcc",
+        "accentColor": "#ffe600",
         "pathColor": "#ff0055",
-        "accentColor": "#ffe600"
+        "bgColor": "#000610",
+        "textColor": "#00ffcc"
       },
       "bookmarks": [
         {
@@ -66,7 +66,7 @@
       "layout": {
         "layoutClass": "split-tabs",
         "paneIds": [
-          "main"
+          "pane-1790199769107-2"
         ]
       }
     },

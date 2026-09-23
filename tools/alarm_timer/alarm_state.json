@@ -82,7 +82,7 @@
           "input_value": "14:24 on 1 Oct",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": true
+          "secondary_mode": false
         },
         {
           "id": "6e33452c",
