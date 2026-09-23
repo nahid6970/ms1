@@ -4256,6 +4256,8 @@
             const paneTerm = new Terminal({
                 cursorBlink: true,
                 cursorStyle: 'bar',
+                // Preserve long AI/tool output when the page reconnects to a session.
+                scrollback: 20000,
                 fontSize: savedFontSize,
                 fontFamily: savedFont,
                 theme: getTerminalTheme(projectTheme)

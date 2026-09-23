@@ -420,8 +420,10 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                     idle_loops = 0
                     with self.history_lock:
                         self.history += data
-                        if len(self.history) > 100000:
-                            self.history = self.history[-100000:]
+                    # Keep enough scrollback to restore long AI/tool transcripts
+                    # when the browser reconnects after a page refresh.
+                    if len(self.history) > 500000:
+                        self.history = self.history[-500000:]
                     
                     self.output_queue.put(data)
                     

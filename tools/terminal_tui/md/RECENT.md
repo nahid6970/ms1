@@ -18,6 +18,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-23] - Preserve More Terminal Output Across Refresh
+**What We Accomplished:**
+- Increased server-side PTY history retention from 100,000 to 500,000 characters.
+- Increased xterm.js scrollback to 20,000 rows so long AI/tool transcripts remain available after browser refresh.
+
+**Files Modified:**
+- `app.py`
+- `templates/index.html`
+- `md/ARCHITECTURE.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-23] - Fix Quick Open Category Tag Alignment
 **What We Accomplished:**
 - Fixed F1 palette category tags so they stay beside project names consistently.

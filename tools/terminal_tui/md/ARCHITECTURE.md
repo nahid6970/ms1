@@ -39,6 +39,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 - **Theme customization**: Per-workspace terminal colors + workspace card colors
 - **Search in terminal**: Ctrl+F to search terminal output
 - **Copy/paste**: Ctrl+C copies selected terminal text; Ctrl+C with no selection remains the terminal interrupt; Ctrl+V and Shift+Insert paste clipboard text into the active pane
+- **Refresh recovery**: Terminal sessions retain up to 500,000 characters server-side and xterm panes restore up to 20,000 scrollback rows after browser reconnects.
 
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
