@@ -62,13 +62,7 @@
           "windowTitle": ""
         }
       ],
-      "category": "Tool",
-      "layout": {
-        "layoutClass": "split-right",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "category": "Tool"
     },
     {
       "name": "Default",
@@ -792,15 +786,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790058906676-1",
-          "pane-1790058960803-2"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Rclone Manager",
@@ -907,15 +893,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790137544342-2",
-          "pane-1790137998431-3"
-        ]
-      }
+      "bookmarks": []
     }
   ],
   "extension_icons": {

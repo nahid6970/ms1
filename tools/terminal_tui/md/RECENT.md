@@ -18,6 +18,32 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-23] - Document Clipboard and Refresh Behavior
+**What We Accomplished:**
+- Documented the single-event terminal paste path that prevents duplicate Ctrl+V insertion.
+- Documented Shift+Insert paste and the larger server/xterm scrollback limits used after refresh.
+
+**Files Modified:**
+- `md/FEATURES.md`
+- `md/ARCHITECTURE.md`
+- `md/UI_UX.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
+## [2026-09-23] - Prevent Duplicate Terminal Paste
+**What We Accomplished:**
+- Routed Ctrl+V through a single capture-phase paste handler before xterm.js.
+- Kept Shift+Insert clipboard support and prevented duplicate terminal input.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-23] - Preserve More Terminal Output Across Refresh
 **What We Accomplished:**
 - Increased server-side PTY history retention from 100,000 to 500,000 characters.

@@ -143,7 +143,7 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - SVG icons use `stroke="currentColor"` to inherit text color
 - Focus states via `outline` or `border-color` change
 - High contrast text on dark backgrounds
-- Keyboard shortcuts: F1 (Quick Open), F5 (page refresh), Ctrl+F (terminal search), Ctrl+C/Ctrl+V (terminal copy/paste behavior)
+- Keyboard shortcuts: F1 (Quick Open), F5 (page refresh), Ctrl+F (terminal search), Ctrl+C/Ctrl+V (terminal copy/paste behavior), Shift+Insert (paste)
 
 ### Quick Open Palette
 - F1 opens the keyboard-friendly Quick Open modal even when a terminal pane has focus.

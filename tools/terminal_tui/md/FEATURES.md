@@ -5,6 +5,11 @@
 **Description:** The global restart control offers separate actions for restarting the app and refreshing only the current page. F5 also refreshes the page.
 **Implementation:** `templates/index.html` — restart action menu and global F5 key handler.
 
+## Terminal Clipboard and Refresh Recovery
+**Status:** ✅ Complete
+**Description:** Terminal copy/paste works with standard shortcuts without duplicate insertion, and long AI/tool output is retained after browser refresh.
+**Implementation:** `templates/index.html` — capture-phase Ctrl+V paste handling, Ctrl+C selection copy, Shift+Insert paste, and 20,000-row xterm scrollback. `app.py` retains up to 500,000 characters per session.
+
 ## F1 Quick Open Palette
 **Status:** ✅ Complete
 **Description:** F1 opens a centered command-palette-style window for selecting workspaces, searching saved commands, and creating a new workspace.
