@@ -18,6 +18,13 @@
 
 ---
 
+## [2026-09-23] - F1 Palette Visual Alignment
+**Problem:** The F1 workspace window did not resemble the compact command palette shown in the reference design.
+**Solution:** Restyled it as a centered dark rounded palette with a compact search/back row, grouped project results, shortcut labels, command switching, and keyboard hints.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-08-31] - Ctrl+C in Terminal Pane Accidentally Closes the Browser Tab
 **Problem:** Pressing Ctrl+C inside a workspace terminal pane (to cancel a running AI agent or command) would sometimes trigger the auto-close sequence, closing the entire browser tab unexpectedly.
 **Root Cause:** `startBackendHealthCheck()` polled `/api/projects` every 1 second with an 800ms abort timeout and a threshold of only 2 consecutive failures. When Ctrl+C caused a subprocess/PTY cleanup that briefly blocked Flask's event loop, the fetch timed out twice in a row — enough to satisfy the failure threshold and trigger `window.close()`.

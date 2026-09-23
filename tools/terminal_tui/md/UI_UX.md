@@ -152,3 +152,4 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - Commands searches saved bookmarks available to the active workspace.
 - The New project action opens the existing workspace creation form.
 - Arrow keys navigate results and Enter activates the highlighted result.
+- Ctrl/Cmd+1–9 selects the corresponding visible project result.

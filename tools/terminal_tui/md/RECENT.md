@@ -18,6 +18,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-23] - Refresh Documentation for F1 Palette
+**What We Accomplished:**
+- Updated feature, UI/UX, and problem/fix documentation to describe the reference-style F1 command palette.
+- Documented project shortcut selection and the compact search/back/result/footer layout.
+
+**Files Modified:**
+- `md/FEATURES.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/UI_UX.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-22] - Match F1 Palette to Quick-Open Reference
 **What We Accomplished:**
 - Restyled the F1 palette as a compact centered command panel with a dark rounded surface, search/back row, grouped results, and keyboard footer.

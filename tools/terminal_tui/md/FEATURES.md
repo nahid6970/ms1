@@ -7,8 +7,8 @@
 
 ## F1 Quick Open Palette
 **Status:** ✅ Complete
-**Description:** F1 opens a keyboard-friendly quick-open palette for selecting workspaces, searching saved commands, and creating a new workspace.
-**Implementation:** `templates/index.html` — Projects and Commands views, existing Add Workspace modal integration, and Arrow-key/Enter navigation.
+**Description:** F1 opens a centered command-palette-style window for selecting workspaces, searching saved commands, and creating a new workspace.
+**Implementation:** `templates/index.html` — dark rounded palette layout, search/back row, Projects and Commands views, existing Add Workspace modal integration, Arrow-key/Enter navigation, and Ctrl/Cmd+1–9 project shortcuts.
 
 ## Workspace Management
 **Status:** ✅ Complete
