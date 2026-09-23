@@ -69,7 +69,14 @@
           "displayOrder": 7
         }
       ],
-      "category": "Tool"
+      "category": "Tool",
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790200657266-1"
+        ]
+      }
     },
     {
       "name": "Default",
