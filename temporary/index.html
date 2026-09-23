@@ -77,12 +77,26 @@
               <button class="cut-ov-pill" data-cut-axis="x">X</button>
               <button class="cut-ov-pill" data-cut-axis="z">Z</button>
             </div>
-            <span class="cut-ov-pos" id="cut-ov-pos">0.00</span>
-            <div class="cut-ov-actions">
-              <button class="cut-ov-btn" id="ov-slice-btn">⊟ Slice</button>
-              <button class="cut-ov-btn accent" id="ov-band-btn">⊠ Band</button>
-              <input id="ov-thickness" type="number" value="0.3" step="0.05" min="0.01" title="Band thickness" />
+            <div class="cut-ov-sep"></div>
+            <div class="cut-ov-mode">
+              <button class="cut-ov-mode-btn active" id="ov-mode-slice">⊟ Slice</button>
+              <button class="cut-ov-mode-btn" id="ov-mode-band">⊠ Band</button>
             </div>
+            <div class="cut-ov-sep"></div>
+            <div class="cut-ov-field">
+              <span class="cut-ov-lbl">Pos</span>
+              <button class="cut-ov-step" id="ov-pos-minus">−</button>
+              <span class="cut-ov-val" id="cut-ov-pos">0.00</span>
+              <button class="cut-ov-step" id="ov-pos-plus">+</button>
+            </div>
+            <div class="cut-ov-field" id="ov-thickness-row">
+              <span class="cut-ov-lbl">Gap</span>
+              <button class="cut-ov-step" id="ov-gap-minus">−</button>
+              <span class="cut-ov-val" id="cut-ov-gap">0.30</span>
+              <button class="cut-ov-step" id="ov-gap-plus">+</button>
+            </div>
+            <div class="cut-ov-sep"></div>
+            <button class="cut-ov-btn accent" id="ov-apply-btn">✓ Apply</button>
           </div>
           <div class="viewport-status"><span><i class="axis-x">X</i> <i class="axis-y">Y</i> <i class="axis-z">Z</i></span><span id="object-count">0 objects</span><span class="mono">Three.js canvas</span></div>
         </section>
