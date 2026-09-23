@@ -34,7 +34,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 2. Terminal Features
 - **Split panes**: Multiple terminal panes per workspace
-- **Layouts**: Save/restore split layouts (single, vertical, horizontal, quad)
+- **Layouts**: Save/restore split layouts (default tabs, vertical, horizontal, quad)
 - **Font customization**: Per-workspace font family and size
 - **Theme customization**: Per-workspace terminal colors + workspace card colors
 - **Search in terminal**: Ctrl+F to search terminal output
@@ -173,7 +173,7 @@ Stores all workspace metadata:
       }
     ],
     "layout": {
-      "layoutClass": "split-horizontal",
+      "layoutClass": "split-tabs",
       "paneIds": ["main", "pane-1"]
     }
   }

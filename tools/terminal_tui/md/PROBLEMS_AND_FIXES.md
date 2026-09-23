@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-09-24] - Terminal Tabs Hidden by Default
+**Problem:** The terminal could start as a plain single pane, so there was no visible Notepad++-style tab strip or `+` tab for opening more terminals.
+**Root Cause:** The default and single-pane fallback layout used `split-right`, while the tab bar only rendered for `split-tabs`.
+**Solution:** Made `split-tabs` the default single-terminal layout, normalized old one-pane `split-right` layouts to tabs, kept one remaining pane in tab mode after closes, and added a `+` terminal tab.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-09-24] - Ctrl+V Text Paste Still Inserted Twice
 **Problem:** After blocking AI CLI image-paste shortcuts, Ctrl+V could still paste the same text twice in terminal panes.
 **Root Cause:** Ctrl+V was handled by both the xterm key handler and the browser paste event handler.

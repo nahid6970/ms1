@@ -31,10 +31,10 @@
 
 ## Split Terminal Panes
 **Status:** ✅ Complete
-**Description:** Multiple terminal panes per workspace with various layouts.
-**Implementation:** `splitTerminal(layout, initialCmd)` creates new PTY sessions. Layouts: `right` (vertical), `bottom` (horizontal), `stacked` (quad), `tabs` (tabbed).
+**Description:** Multiple terminal panes per workspace with a tabbed terminal bar shown by default.
+**Implementation:** `splitTerminal(layout, initialCmd)` creates new PTY sessions. Layouts: `tabs` (default tabbed), `right` (vertical), `bottom` (horizontal), `stacked` (quad).
 **Files Involved:** `templates/index.html` (JS: `splitTerminal()`, `confirmSplitLayout()`), `app.py` (session keyed as `<project>::<pane-id>`)
-**Usage:** Click split button in toolbar → select layout from card-style modal.
+**Usage:** Click the `+` terminal tab to open another tab, or click split button in toolbar → select layout from card-style modal.
 
 ---
 

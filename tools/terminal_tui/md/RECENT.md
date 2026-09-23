@@ -5,6 +5,22 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-24] - Default Terminal Tabs With Plus Button
+**What We Accomplished:**
+- Made the tabbed terminal layout the default, including the single-terminal state.
+- Added a `+` tab that opens another terminal tab through the existing tabbed split flow.
+- Normalized old one-pane `split-right` layouts so they show the tab bar.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/FEATURES.md`
+- `md/UI_UX.md`
+- `md/ARCHITECTURE.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-24] - Stop Duplicate Ctrl+V Paste
 **What We Accomplished:**
 - Routed Ctrl+V terminal paste through the browser paste event with a delayed plain-text fallback.

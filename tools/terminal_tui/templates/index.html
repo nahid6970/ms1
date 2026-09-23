@@ -909,6 +909,19 @@
             color: #f87171;
         }
 
+        .terminal-tab-add {
+            min-width: 34px;
+            justify-content: center;
+            padding: 6px 11px;
+            font-size: 1rem;
+            line-height: 1;
+            color: var(--text-secondary);
+        }
+
+        .terminal-tab-add:hover {
+            color: var(--accent-color);
+        }
+
         #terminal-parent.split-tabs .terminal-pane .terminal-pane-close {
             display: flex !important;
         }
@@ -4144,6 +4157,15 @@
                     pane.element.style.display = 'none';
                 }
             });
+
+            const addTab = document.createElement('button');
+            addTab.type = 'button';
+            addTab.className = 'terminal-tab terminal-tab-add';
+            addTab.title = 'New terminal tab';
+            addTab.innerText = '+';
+            addTab.style.borderBottomColor = borderCol;
+            addTab.onclick = () => splitTerminal('tabs');
+            tabsContainer.appendChild(addTab);
         }
 
         function closeTerminalPane(paneId) {
@@ -4169,7 +4191,7 @@
 
             const parent = document.getElementById('terminal-parent');
             if (terminalPanes.length === 1) {
-                parent.className = 'split-right';
+                parent.className = 'split-tabs';
             }
 
             if (term === pane.term) {
@@ -4201,7 +4223,7 @@
             splitPaneCounter = 1;
             const parent = document.getElementById('terminal-parent');
             parent.innerHTML = '';
-            parent.className = 'split-right';
+            parent.className = 'split-tabs';
             createTerminalPane(projectName, 'main', projectTheme);
             updateTerminalTabs();
         }
@@ -7564,7 +7586,7 @@
                     return;
                 }
                 // If it is the default layout and project has no layout, don't POST to backend
-                if (hasNoSavedLayout && layoutClass === 'split-right' && paneIds.length === 1 && paneIds[0] === 'main') {
+                if (hasNoSavedLayout && layoutClass === 'split-tabs' && paneIds.length === 1 && paneIds[0] === 'main') {
                     return;
                 }
                 proj.layout = { layoutClass, paneIds };
@@ -7586,8 +7608,11 @@
                 const currentProjDetails = projects.find(p => p.name === projectName) || {};
                 const layoutConfig = currentProjDetails.layout || {};
                 
-                const savedLayoutClass = layoutConfig.layoutClass || 'split-right';
+                let savedLayoutClass = layoutConfig.layoutClass || 'split-tabs';
                 const savedPaneIds = layoutConfig.paneIds || ['main'];
+                if (savedPaneIds.length === 1 && savedPaneIds[0] === 'main' && savedLayoutClass === 'split-right') {
+                    savedLayoutClass = 'split-tabs';
+                }
                 
                 activeProject = projectName;
                 startStatsMonitoring();
@@ -7646,7 +7671,6 @@
                     }
                 }
                 
-                updateTerminalTabs();
                 updateBookmarksDropdown();
                 
                 if (terminalPanes.length > 0) {
@@ -7656,10 +7680,13 @@
                     socket = firstPane.socket;
                     document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
                     firstPane.element.classList.add('active-pane');
+                    updateTerminalTabs();
                     setTimeout(() => {
                         try { firstPane.fitAddon.fit(); } catch (e) {}
                         firstPane.term.focus();
                     }, 100);
+                } else {
+                    updateTerminalTabs();
                 }
                 
                 fetchProjects();

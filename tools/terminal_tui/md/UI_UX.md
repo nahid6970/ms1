@@ -49,8 +49,8 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 ┌──────────────────────────────────────────────┐
 │ Sidebar (left, collapsible)                  │
 │ ┌──────────┐ ┌─────────────────────────────┐ │
-│ │ Workspace│ │ Terminal Panes               │ │
-│ │ Cards    │ │ (split: vert/horiz/quad/tab) │ │
+│ │ Workspace│ │ Terminal Tabs + Panes         │ │
+│ │ Cards    │ │ (default tabs, split options) │ │
 │ │          │ │                               │ │
 │ └──────────┘ └─────────────────────────────┘ │
 │ Status Bar (bottom)                          │
@@ -66,6 +66,11 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - Anchored to bottom
 - Left: Git info badge (clickable → git modal)
 - Right: Screenshot, mobile keyboard, schedule, quick tools, snippets, project name, auto-scroll toggle
+
+### Terminal Tabs
+- Default terminal view shows a tab strip even for one terminal.
+- `+` tab creates a new terminal tab using the existing tabbed split path.
+- Closing tabs keeps the remaining single terminal in tabbed mode.
 
 ---
 
