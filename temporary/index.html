@@ -28,28 +28,27 @@
             <button class="tool-card" data-tool="scale"><span class="tool-icon">⤢</span><span>Scale</span><kbd>R</kbd></button>
             <button class="tool-card" data-tool="cut" style="grid-column:span 2"><span class="tool-icon">✂</span><span>Cut / Slice</span><kbd>T</kbd></button>
           </div>
-          <div class="section-label">CUT / SLICE</div>
-          <div class="cut-panel">
-            <div class="cut-row">
-              <span class="cut-label">Axis</span>
-              <div class="axis-pills">
-                <button class="axis-pill active" data-axis="y">Y</button>
-                <button class="axis-pill" data-axis="x">X</button>
-                <button class="axis-pill" data-axis="z">Z</button>
-              </div>
+          <!-- cut context panel — shown only when cut tool is active -->
+          <div id="cut-context" class="cut-context hidden">
+            <div class="cut-ctx-axis">
+              <button class="cut-ctx-pill active" data-cut-axis="y">Y</button>
+              <button class="cut-ctx-pill" data-cut-axis="x">X</button>
+              <button class="cut-ctx-pill" data-cut-axis="z">Z</button>
             </div>
-            <div class="cut-row">
-              <span class="cut-label">Position</span>
-              <input id="cut-position" type="number" step="0.1" value="0" class="cut-input" />
+            <div class="cut-ctx-modes">
+              <button class="cut-ctx-mode active" id="ctx-mode-slice">⊟ Slice</button>
+              <button class="cut-ctx-mode" id="ctx-mode-band">⊠ Band</button>
             </div>
-            <div class="cut-row">
-              <span class="cut-label">Thickness</span>
-              <input id="cut-thickness" type="number" step="0.1" value="0.2" min="0.01" class="cut-input" />
+            <div class="cut-slider-row">
+              <div class="cut-slider-lbl"><span>Position</span><span class="cut-ctx-val" id="cut-pos-val">0.00</span></div>
+              <input type="range" id="cut-pos-slider" class="cut-slider" min="0" max="1" step="0.01" value="0.5" />
             </div>
-            <div class="cut-actions">
-              <button class="cut-btn" id="slice-half-btn" title="Split object into two pieces at the cut plane">⊟ Slice in half</button>
-              <button class="cut-btn" id="slice-band-btn" title="Remove a band of the given thickness — e.g. cylinder → 2 rings">⊠ Remove band</button>
+            <div class="cut-slider-row hidden" id="cut-gap-row">
+              <div class="cut-slider-lbl"><span>Gap</span><span class="cut-ctx-val" id="cut-gap-val">0.30</span></div>
+              <input type="range" id="cut-gap-slider" class="cut-slider" min="0.02" max="2" step="0.01" value="0.3" />
             </div>
+            <button class="accent-btn cut-ctx-apply" id="ctx-apply-btn">✓ Apply cut</button>
+            <p class="cut-ctx-tip">Drag sliders to position · <kbd>Esc</kbd> cancel</p>
           </div>
           <div class="section-label">ADD OBJECT</div>
           <div class="add-list">
@@ -71,33 +70,7 @@
         <section class="viewport-wrap">
           <div class="viewport-toolbar"><div class="toolbar-group"><button class="view-btn active" data-view="perspective">Perspective</button><button class="view-btn" data-view="top">Top</button><button class="view-btn" data-view="front">Front</button></div><div class="toolbar-group right"><button class="small-icon-btn" id="grid-btn" title="Toggle grid">▦</button><button class="small-icon-btn" id="focus-btn" title="Frame selection">⊙</button><button class="small-icon-btn" id="camera-btn" title="Download viewport image">⌁</button></div></div>
           <div id="viewport"><div class="viewport-empty" id="viewport-empty"><div class="empty-orbit">✦</div><strong>Start shaping your idea</strong><span>Add an object from the left panel</span></div></div>
-          <div class="cut-overlay hidden" id="cut-overlay">
-            <div class="cut-ov-axis">
-              <button class="cut-ov-pill active" data-cut-axis="y">Y</button>
-              <button class="cut-ov-pill" data-cut-axis="x">X</button>
-              <button class="cut-ov-pill" data-cut-axis="z">Z</button>
-            </div>
-            <div class="cut-ov-sep"></div>
-            <div class="cut-ov-mode">
-              <button class="cut-ov-mode-btn active" id="ov-mode-slice">⊟ Slice</button>
-              <button class="cut-ov-mode-btn" id="ov-mode-band">⊠ Band</button>
-            </div>
-            <div class="cut-ov-sep"></div>
-            <div class="cut-ov-field">
-              <span class="cut-ov-lbl">Pos</span>
-              <button class="cut-ov-step" id="ov-pos-minus">−</button>
-              <span class="cut-ov-val" id="cut-ov-pos">0.00</span>
-              <button class="cut-ov-step" id="ov-pos-plus">+</button>
-            </div>
-            <div class="cut-ov-field" id="ov-thickness-row">
-              <span class="cut-ov-lbl">Gap</span>
-              <button class="cut-ov-step" id="ov-gap-minus">−</button>
-              <span class="cut-ov-val" id="cut-ov-gap">0.30</span>
-              <button class="cut-ov-step" id="ov-gap-plus">+</button>
-            </div>
-            <div class="cut-ov-sep"></div>
-            <button class="cut-ov-btn accent" id="ov-apply-btn">✓ Apply</button>
-          </div>
+
           <div class="viewport-status"><span><i class="axis-x">X</i> <i class="axis-y">Y</i> <i class="axis-z">Z</i></span><span id="object-count">0 objects</span><span class="mono">Three.js canvas</span></div>
         </section>
 

@@ -46,6 +46,7 @@ function select(obj, additive=false) {
   transform.detach();
   if(selected && tool!=='select' && tool!=='cut') transform.attach(selected);
   syncInspector(); updateScene(); updateBoolUI();
+  if(tool==='cut' && selected) initCutPanel();
 }
 
 function updateBoolUI() {
@@ -60,9 +61,10 @@ function setTool(next) {
   document.querySelectorAll('.tool-card').forEach(b=>b.classList.toggle('active',b.dataset.tool===next));
   if(next==='cut'){
     transform.detach();
-    if(selected) showCutGizmo(); else toast('Select an object first');
+    if(selected) initCutPanel(); else toast('Select an object first');
   } else {
-    hideCutGizmo();
+    hideCutPlane();
+    document.getElementById('cut-context').classList.add('hidden');
     if(selected&&next!=='select'){transform.setMode(next==='translate'?'translate':next==='rotate'?'rotate':'scale');transform.attach(selected);}
     else transform.detach();
   }
@@ -141,79 +143,100 @@ function pasteObject() {
   if(!clipboard) return; addObject(clipboard.type,{...clipboard,name:undefined}); toast('Pasted');
 }
 
-// ── Cut / Slice gizmo ────────────────────────────────────────────────────
+// ── Cut / Slice ───────────────────────────────────────────────────────────
 let cutAxis='y', cutMode='slice', cutPos=0, cutGap=0.3;
-let cutCenter=new THREE.Vector3();
+let cutBBox=null; // world bbox of selected when cut panel opened
 
-const cutMat  = new THREE.MeshBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false});
-const cutMatB = new THREE.MeshBasicMaterial({color:0xff7b58,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false});
-const cutGeo  = new THREE.PlaneGeometry(30,30);
-const cutPlaneA = new THREE.Mesh(cutGeo, cutMat);   // primary / bottom of band
-const cutPlaneB = new THREE.Mesh(cutGeo, cutMatB);  // top of band (orange tint)
+// Two semi-transparent planes as visual preview
+const cutMatA = new THREE.MeshBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false});
+const cutMatB = new THREE.MeshBasicMaterial({color:0xff7b58,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false});
+const cutPlaneA = new THREE.Mesh(new THREE.PlaneGeometry(40,40), cutMatA);
+const cutPlaneB = new THREE.Mesh(new THREE.PlaneGeometry(40,40), cutMatB);
 cutPlaneA.renderOrder = cutPlaneB.renderOrder = 999;
 
-const cutHandle = new THREE.Mesh(new THREE.BoxGeometry(0.01,0.01,0.01), new THREE.MeshBasicMaterial({visible:false}));
-scene.add(cutHandle);
-
-const cutTransform = new TransformControls(camera, renderer.domElement);
-cutTransform.setMode('translate'); cutTransform.setSpace('world');
-scene.add(cutTransform);
-cutTransform.addEventListener('dragging-changed', e=>{ controls.enabled=!e.value; });
-cutTransform.addEventListener('objectChange', ()=>{
-  cutPos = cutAxis==='y'?cutHandle.position.y : cutAxis==='x'?cutHandle.position.x : cutHandle.position.z;
-  applyGizmoPositions();
-  document.getElementById('cut-ov-pos').textContent = cutPos.toFixed(2);
-});
-
-function applyGizmoPositions() {
-  const half = cutMode==='band' ? cutGap/2 : 0;
-  const cx=cutCenter.x, cy=cutCenter.y, cz=cutCenter.z;
-  if(cutAxis==='y') {
-    cutPlaneA.rotation.set(0,0,0); cutPlaneA.position.set(cx,cutPos-half,cz);
-    cutHandle.position.set(cx,cutPos,cz);
-    cutTransform.showX=false; cutTransform.showY=true; cutTransform.showZ=false;
-    cutPlaneB.rotation.set(0,0,0); cutPlaneB.position.set(cx,cutPos+half,cz);
-  } else if(cutAxis==='x') {
-    cutPlaneA.rotation.set(0,Math.PI/2,0); cutPlaneA.position.set(cutPos-half,cy,cz);
-    cutHandle.position.set(cutPos,cy,cz);
-    cutTransform.showX=true; cutTransform.showY=false; cutTransform.showZ=false;
-    cutPlaneB.rotation.set(0,Math.PI/2,0); cutPlaneB.position.set(cutPos+half,cy,cz);
-  } else {
-    cutPlaneA.rotation.set(Math.PI/2,0,0); cutPlaneA.position.set(cx,cy,cutPos-half);
-    cutHandle.position.set(cx,cy,cutPos);
-    cutTransform.showX=false; cutTransform.showY=false; cutTransform.showZ=true;
-    cutPlaneB.rotation.set(Math.PI/2,0,0); cutPlaneB.position.set(cx,cy,cutPos+half);
-  }
-  if(cutMode==='band') scene.add(cutPlaneB); else scene.remove(cutPlaneB);
-  const gr=document.getElementById('ov-thickness-row');
-  if(gr) gr.style.display=cutMode==='band'?'flex':'none';
-  document.getElementById('cut-ov-pos').textContent=cutPos.toFixed(2);
-  document.getElementById('cut-ov-gap').textContent=cutGap.toFixed(2);
-}
-
-function showCutGizmo() {
+function initCutPanel() {
   if(!selected) return;
   selected.updateMatrixWorld(true);
-  const bbox=new THREE.Box3().setFromObject(selected);
-  bbox.getCenter(cutCenter);
-  cutPos = cutAxis==='y'?cutCenter.y : cutAxis==='x'?cutCenter.x : cutCenter.z;
-  scene.add(cutPlaneA);
-  cutTransform.attach(cutHandle);
-  applyGizmoPositions();
-  document.getElementById('cut-overlay').classList.remove('hidden');
+  cutBBox = new THREE.Box3().setFromObject(selected);
+  const size = cutBBox.getSize(new THREE.Vector3());
+  // auto-pick longest axis
+  cutAxis = size.x>=size.y&&size.x>=size.z ? 'x' : size.z>=size.y ? 'z' : 'y';
+
+  const min = cutAxis==='y'?cutBBox.min.y : cutAxis==='x'?cutBBox.min.x : cutBBox.min.z;
+  const max = cutAxis==='y'?cutBBox.max.y : cutAxis==='x'?cutBBox.max.x : cutBBox.max.z;
+  cutPos = (min+max)/2;
+
+  // update axis pills
+  document.querySelectorAll('[data-cut-axis]').forEach(b=>b.classList.toggle('active',b.dataset.cutAxis===cutAxis));
+
+  // configure slider range to match object extent with padding
+  const pad=(max-min)*0.1;
+  const slider=document.getElementById('cut-pos-slider');
+  slider.min=(min-pad).toFixed(3);
+  slider.max=(max+pad).toFixed(3);
+  slider.step=((max-min)/200).toFixed(4);
+  slider.value=cutPos.toFixed(3);
+
+  // gap slider
+  const gapSlider=document.getElementById('cut-gap-slider');
+  const objSize=max-min;
+  gapSlider.min='0.02';
+  gapSlider.max=(objSize*0.8).toFixed(3);
+  gapSlider.step=(objSize/200).toFixed(4);
+  gapSlider.value=Math.min(cutGap,objSize*0.5).toFixed(3);
+  cutGap=parseFloat(gapSlider.value);
+
+  updateCutReadouts();
+  updateCutPlanes();
+  document.getElementById('cut-context').classList.remove('hidden');
 }
 
-function hideCutGizmo() {
+function hideCutPlane() {
   scene.remove(cutPlaneA); scene.remove(cutPlaneB);
-  cutTransform.detach();
-  document.getElementById('cut-overlay').classList.add('hidden');
+}
+
+function updateCutPlanes() {
+  if(!cutBBox) return;
+  const center = cutBBox.getCenter(new THREE.Vector3());
+  const half = cutMode==='band' ? cutGap/2 : 0;
+
+  if(cutAxis==='y') {
+    cutPlaneA.rotation.set(0,0,0); cutPlaneA.position.set(center.x, cutPos-half, center.z);
+    cutPlaneB.rotation.set(0,0,0); cutPlaneB.position.set(center.x, cutPos+half, center.z);
+  } else if(cutAxis==='x') {
+    cutPlaneA.rotation.set(0,Math.PI/2,0); cutPlaneA.position.set(cutPos-half, center.y, center.z);
+    cutPlaneB.rotation.set(0,Math.PI/2,0); cutPlaneB.position.set(cutPos+half, center.y, center.z);
+  } else {
+    cutPlaneA.rotation.set(Math.PI/2,0,0); cutPlaneA.position.set(center.x, center.y, cutPos-half);
+    cutPlaneB.rotation.set(Math.PI/2,0,0); cutPlaneB.position.set(center.x, center.y, cutPos+half);
+  }
+
+  scene.add(cutPlaneA);
+  if(cutMode==='band') scene.add(cutPlaneB); else scene.remove(cutPlaneB);
+
+  // gap controls visibility
+  document.getElementById('cut-gap-row').classList.toggle('hidden', cutMode!=='band');
+  updateCutReadouts();
+}
+
+function updateCutReadouts() {
+  document.getElementById('cut-pos-val').textContent = cutPos.toFixed(2);
+  document.getElementById('cut-gap-val').textContent = cutGap.toFixed(2);
+  document.getElementById('cut-pos-slider').value = cutPos;
+  document.getElementById('cut-gap-slider').value = cutGap;
+}
+
+function setCutAxis(axis) {
+  cutAxis=axis;
+  document.querySelectorAll('[data-cut-axis]').forEach(b=>b.classList.toggle('active',b.dataset.cutAxis===axis));
+  if(selected) initCutPanel();
 }
 
 function setCutMode(m) {
   cutMode=m;
-  document.querySelectorAll('.cut-ov-mode-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(m==='slice'?'ov-mode-slice':'ov-mode-band').classList.add('active');
-  applyGizmoPositions();
+  document.querySelectorAll('.cut-ctx-mode').forEach(b=>b.classList.remove('active'));
+  document.getElementById(m==='slice'?'ctx-mode-slice':'ctx-mode-band').classList.add('active');
+  updateCutPlanes();
 }
 
 // ── CSG helpers ──────────────────────────────────────────────────────────
@@ -263,9 +286,11 @@ function performSlice() {
   const g=0.12;
   if(cutAxis==='y'){resA.position.y+=g;resB.position.y-=g;} else if(cutAxis==='x'){resA.position.x+=g;resB.position.x-=g;} else{resA.position.z+=g;resB.position.z-=g;}
   const nb=selected.name; resA.name=nb+' A'; resA.userData.type='sliced'; resB.name=nb+' B'; resB.userData.type='sliced';
-  const old=selected; selected=null; selected2=null; hideCutGizmo(); removeObj(old);
+  const old=selected; selected=null; selected2=null; hideCutPlane();
+  document.getElementById('cut-context').classList.add('hidden');
+  removeObj(old);
   scene.add(resA); objects.push(resA); scene.add(resB); objects.push(resB);
-  select(resA); updateScene(); toast('Sliced — W to move pieces apart');
+  select(resA); updateScene(); setTool('select'); toast('Sliced — W to move pieces apart');
 }
 
 function performBand() {
@@ -280,8 +305,10 @@ function performBand() {
   else                   result=csgSubtractBox(selected,BIG,BIG,gap,center.x,center.y,pos);
   if(!result) return;
   result.name=selected.name+' (cut)'; result.userData.type='sliced';
-  const old=selected; selected=null; hideCutGizmo(); removeObj(old);
-  scene.add(result); objects.push(result); select(result); updateScene(); toast('Band removed');
+  const old=selected; selected=null; hideCutPlane();
+  document.getElementById('cut-context').classList.add('hidden');
+  removeObj(old);
+  scene.add(result); objects.push(result); select(result); updateScene(); setTool('select'); toast('Band removed');
 }
 
 // ── Boolean ops ──────────────────────────────────────────────────────────
@@ -308,32 +335,23 @@ document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.data
 document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addObject(b.dataset.add));
 document.querySelectorAll('[data-bool]').forEach(b=>b.onclick=()=>performBool(b.dataset.bool));
 
-// Cut overlay — axis pills
-document.querySelectorAll('[data-cut-axis]').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('[data-cut-axis]').forEach(p=>p.classList.remove('active'));
-  b.classList.add('active'); cutAxis=b.dataset.cutAxis;
-  if(selected) showCutGizmo();
-});
-// Cut overlay — mode buttons
-document.getElementById('ov-mode-slice').onclick=()=>setCutMode('slice');
-document.getElementById('ov-mode-band').onclick=()=>setCutMode('band');
-// Cut overlay — position steppers
-document.getElementById('ov-pos-minus').onclick=()=>{ cutPos=parseFloat((cutPos-0.1).toFixed(2)); applyGizmoPositions(); };
-document.getElementById('ov-pos-plus').onclick=()=>{  cutPos=parseFloat((cutPos+0.1).toFixed(2)); applyGizmoPositions(); };
-// Cut overlay — gap steppers
-document.getElementById('ov-gap-minus').onclick=()=>{ cutGap=Math.max(0.05,parseFloat((cutGap-0.05).toFixed(2))); applyGizmoPositions(); };
-document.getElementById('ov-gap-plus').onclick=()=>{  cutGap=parseFloat((cutGap+0.05).toFixed(2)); applyGizmoPositions(); };
-// Cut overlay — apply
-document.getElementById('ov-apply-btn').onclick=performApply;
-
-// Sidebar legacy cut buttons
-const shb=$('#slice-half-btn'); if(shb) shb.onclick=performSlice;
-const sbb=$('#slice-band-btn'); if(sbb) sbb.onclick=performBand;
-// Sidebar axis pills
-document.querySelectorAll('.axis-pill').forEach(b=>b.onclick=()=>{
-  document.querySelectorAll('.axis-pill').forEach(p=>p.classList.remove('active'));
-  b.classList.add('active'); cutAxis=b.dataset.axis; if(tool==='cut'&&selected) showCutGizmo();
-});
+// Cut axis pills
+document.querySelectorAll('[data-cut-axis]').forEach(b=>b.onclick=()=>setCutAxis(b.dataset.cutAxis));
+// Cut mode
+document.getElementById('ctx-mode-slice').onclick=()=>setCutMode('slice');
+document.getElementById('ctx-mode-band').onclick=()=>setCutMode('band');
+// Cut position slider
+document.getElementById('cut-pos-slider').oninput=e=>{
+  cutPos=parseFloat(e.target.value);
+  updateCutPlanes();
+};
+// Cut gap slider
+document.getElementById('cut-gap-slider').oninput=e=>{
+  cutGap=parseFloat(e.target.value);
+  updateCutPlanes();
+};
+// Apply
+document.getElementById('ctx-apply-btn').onclick=performApply;
 
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active')); b.classList.add('active');

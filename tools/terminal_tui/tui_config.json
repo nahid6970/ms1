@@ -936,12 +936,8 @@
         "label": ""
       },
       {
-        "cmd": "kiro-cli logout",
-        "label": ""
-      },
-      {
-        "cmd": "kiro-cli login",
-        "label": ""
+        "cmd": "kiro-cli logout ; kiro-cli login",
+        "label": "logout && login"
       }
     ],
     "npm run deploy:pages": [
