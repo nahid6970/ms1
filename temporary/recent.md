@@ -1,32 +1,39 @@
 # recent.md — Forma Handoff
 
 ## 1. Project DNA
-Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Three-column layout: left tools/primitives, center WebGL viewport, right scene tree + inspector. Run via `python -m http.server 8000`.
+Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Three-column layout: left tools/primitives, center WebGL viewport, right scene tree + inspector. Run via `python -m http.server 8000`. All dependencies vendored locally under `vendor/`.
 
 ## 2. Latest Implementation
 
-**`vendor/`** — Three.js r161, three-mesh-bvh@0.6.8, three-bvh-csg@0.0.17 all vendored locally.
+**`vendor/`** — Three.js r161, three-mesh-bvh@0.6.8, three-bvh-csg@0.0.17 all local.
+
+**`app.js`** (full rewrite this session)
+- Fixed `transform.getHelper()` crash (r161 API)
+- Fixed PNG export (data URL direct, not in Blob)
+- `clipboard` + `copySelected()` / `pasteObject()` — Ctrl+C / Ctrl+V, pastes at exact position
+- `selected2` for boolean second operand; Shift+click to pick B
+- `performBool(op)` — SUBTRACTION/ADDITION/INTERSECTION using `Brush` instances with baked world matrix
+- **Cut/Slice tool (T)**: slider-based panel in left sidebar; no 3D gizmo
+  - `initCutPanel()` — auto-detects longest axis, sets slider range from bbox
+  - `updateCutPlanes()` — positions blue/orange preview planes from `cutPos` / `cutGap`
+  - `performSlice()` — splits into 2 pieces with 0.12 gap nudge; switches back to select tool
+  - `performBand()` — removes band of `cutGap` thickness centered on `cutPos`
+  - Both use `toBakedBrush()` (applies `matrixWorld` to geometry before CSG)
 
 **`index.html`**
-- Import map: all three libs point to `./vendor/...`
-- Added CUT/SLICE section in left panel (axis pills Y/X/Z, position, thickness, two action buttons)
-- Added BOOLEAN OPS section (Subtract/Union/Intersect, requires Shift+click second object)
+- Cut tool card (`T`) added to tool grid (full width)
+- `#cut-context` panel: Y/X/Z pills, Slice/Band mode, Position slider, Gap slider, Apply button
+- Import map includes `three-mesh-bvh` and `three-bvh-csg`
 
-**`app.js`**
-- Fixed `transform.getHelper()` crash (r161 API — use `scene.add(transform)` directly)
-- Fixed PNG export (data URL used directly, not wrapped in Blob)
-- `clipboard` + `copySelected()` / `pasteObject()` — Ctrl+C / Ctrl+V, pastes at exact position
-- `selected2` for second boolean operand; Shift+click to select B
-- `performBool(op)` — uses `Brush` instances (not `.clone()`), SUBTRACTION/ADDITION/INTERSECTION
-- `cutAxis`, `csgSubtractBox()` helper, `performSlice()` (splits into 2 halves), `performBand()` (removes a thickness band)
-
-**`style.css`** — cut panel styles, bool hint, top-actions width fix, text-btn flex fix
+**`style.css`** — cut-context panel styles, slider styles, bool hint, top-actions/text-btn fixes
 
 ## 3. Critical Context
-- `three-mesh-bvh` MUST be **0.6.8** — 0.7.x breaks `three-bvh-csg@0.0.17` (`prepareGeometry` API changed)
-- `TransformControls` r161: add to scene directly, NO `getHelper()` method
-- Boolean ops require `Brush` instances, NOT `mesh.clone()` — evaluator calls `a.prepareGeometry()`
-- All libs are local under `vendor/`; do NOT switch to CDN
+- `three-mesh-bvh` MUST be **0.6.8** — 0.7.x breaks `three-bvh-csg@0.0.17`
+- Boolean ops require `Brush` instances (not `mesh.clone()`) — evaluator calls `a.prepareGeometry()`
+- Cut CSG uses `toBakedBrush()`: applies `mesh.matrixWorld` to geometry so world-space box cutter aligns correctly
+- Cut panel auto-detects axis from longest bbox dimension on tool entry; axis pills override
+- `cutPos` is the world-space center of the cut; `cutGap` is full thickness of band (centered, so ±gap/2)
+- After apply, tool resets to `select` automatically
 
 ## 4. Pending Task
-Test cut/slice on a cylinder: select it, pick Y axis, set position to the center Y, click "Remove band" to get two rings. Verify boolean subtract still works after the three-mesh-bvh downgrade.
+Test cut/slice on a rotated cylinder: select → T → auto-axis should pick X or Z → drag Position slider to center → switch to Band → drag Gap slider → Apply. Verify two rings result with correct geometry.
