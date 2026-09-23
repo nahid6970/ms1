@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forma — Browser 3D Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="startup-error" id="startup-error" hidden><div class="startup-card"><div class="startup-symbol">!</div><h2>Forma could not start</h2><p>The 3D engine did not load. Start Forma through a local web server, then reload:</p><code>python -m http.server 8000</code><p class="startup-small">Open <strong>http://localhost:8000</strong> — do not double-click index.html.</p><button onclick="location.reload()">Reload Forma</button></div></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand"><div class="brand-mark">F</div><div><div class="brand-name">FORMA</div><div class="brand-subtitle">BROWSER 3D STUDIO</div></div></div>
+        <div class="project-title"><span class="status-dot"></span><input id="project-name" value="Untitled structure" aria-label="Project name" /></div>
+        <div class="top-actions"><button class="ghost-btn" id="save-btn"><span>⌘</span> Save</button><button class="ghost-btn" id="load-btn">Load</button><button class="accent-btn" id="export-btn">Export <span>↗</span></button><button class="icon-btn" title="Help">?</button></div>
+      </header>
+
+      <main class="workspace">
+        <aside class="left-panel panel">
+          <div class="panel-heading"><span>CREATE</span><span class="hint">A</span></div>
+          <div class="tool-grid">
+            <button class="tool-card active" data-tool="select"><span class="tool-icon cursor">↖</span><span>Select</span><kbd>Q</kbd></button>
+            <button class="tool-card" data-tool="translate"><span class="tool-icon">✣</span><span>Move</span><kbd>W</kbd></button>
+            <button class="tool-card" data-tool="rotate"><span class="tool-icon rotate-icon">⟳</span><span>Rotate</span><kbd>E</kbd></button>
+            <button class="tool-card" data-tool="scale"><span class="tool-icon">⤢</span><span>Scale</span><kbd>R</kbd></button>
+          </div>
+          <div class="section-label">ADD OBJECT</div>
+          <div class="add-list">
+            <button data-add="box"><span class="object-glyph cube-glyph"></span>Cube <kbd>1</kbd></button>
+            <button data-add="sphere"><span class="object-glyph sphere-glyph"></span>Sphere <kbd>2</kbd></button>
+            <button data-add="cylinder"><span class="object-glyph cylinder-glyph"></span>Cylinder <kbd>3</kbd></button>
+            <button data-add="torus"><span class="object-glyph torus-glyph"></span>Torus <kbd>4</kbd></button>
+          </div>
+          <div class="left-footer"><div class="tip-card"><span class="tip-star">✦</span><div><strong>Quick tip</strong><p>Drag to orbit · scroll to zoom · <kbd>F</kbd> frame selection</p></div></div><button class="text-btn" id="clear-btn">Clear scene <span>⌫</span></button></div>
+        </aside>
+
+        <section class="viewport-wrap">
+          <div class="viewport-toolbar"><div class="toolbar-group"><button class="view-btn active" data-view="perspective">Perspective</button><button class="view-btn" data-view="top">Top</button><button class="view-btn" data-view="front">Front</button></div><div class="toolbar-group right"><button class="small-icon-btn" id="grid-btn" title="Toggle grid">▦</button><button class="small-icon-btn" id="focus-btn" title="Frame selection">⊙</button><button class="small-icon-btn" id="camera-btn" title="Download viewport image">⌁</button></div></div>
+          <div id="viewport"><div class="viewport-empty" id="viewport-empty"><div class="empty-orbit">✦</div><strong>Start shaping your idea</strong><span>Add an object from the left panel</span></div></div>
+          <div class="viewport-status"><span><i class="axis-x">X</i> <i class="axis-y">Y</i> <i class="axis-z">Z</i></span><span id="object-count">0 objects</span><span class="mono">Three.js canvas</span></div>
+        </section>
+
+        <aside class="right-panel panel">
+          <div class="panel-heading"><span>SCENE</span><button class="mini-plus" data-add="box">+</button></div>
+          <div class="scene-tree" id="scene-tree"></div>
+          <div class="inspector" id="inspector">
+            <div class="panel-heading inspector-title"><span>INSPECTOR</span><span class="selection-label" id="selection-label">NONE SELECTED</span></div>
+            <div class="empty-inspector" id="empty-inspector"><div class="empty-lock">◇</div><span>Select an object to inspect</span></div>
+            <div id="inspector-content" class="hidden">
+              <div class="object-name-row"><span class="selected-shape" id="selected-shape"></span><input id="object-name" value="Cube" /></div>
+              <div class="inspector-section"><div class="field-label">TRANSFORM <span>LOCAL</span></div><div class="field-grid"><label>Position X<input data-transform="position.x" type="number" step="0.1" /></label><label>Y<input data-transform="position.y" type="number" step="0.1" /></label><label>Z<input data-transform="position.z" type="number" step="0.1" /></label></div><div class="field-grid"><label>Rotation X<input data-transform="rotation.x" type="number" step="1" /></label><label>Y<input data-transform="rotation.y" type="number" step="1" /></label><label>Z<input data-transform="rotation.z" type="number" step="1" /></label></div><div class="field-grid"><label>Scale X<input data-transform="scale.x" type="number" step="0.1" min="0.01" /></label><label>Y<input data-transform="scale.y" type="number" step="0.1" min="0.01" /></label><label>Z<input data-transform="scale.z" type="number" step="0.1" min="0.01" /></label></div></div>
+              <div class="inspector-section"><div class="field-label">APPEARANCE</div><label class="color-field">Color <span class="color-control"><input id="object-color" type="color" value="#6f6cff" /><span id="color-value">#6F6CFF</span></span></label><label class="range-field">Metalness <input id="object-metalness" type="range" min="0" max="1" step="0.01" /><span id="metalness-value">0.20</span></label><label class="range-field">Roughness <input id="object-roughness" type="range" min="0" max="1" step="0.01" /><span id="roughness-value">0.40</span></label></div>
+              <button class="danger-btn" id="delete-btn">Delete object <span>⌫</span></button>
+            </div>
+          </div>
+        </aside>
+      </main>
+      <footer class="bottombar"><span><kbd>Q</kbd> Select <kbd>W</kbd> Move <kbd>E</kbd> Rotate <kbd>R</kbd> Scale</span><span id="save-status">Local workspace · Ready</span><span>v1.0.0</span></footer>
+    </div>
+    <div class="toast" id="toast"></div>
+    <input type="file" id="load-input" accept="application/json,.json" hidden />
+    <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/"}}</script>
+    <script>window.setTimeout(function(){if(!window.__formaStarted){document.getElementById('startup-error').hidden=false;}},1800);</script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
