@@ -6238,8 +6238,9 @@
                         openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle);
                     };
 
-                    // Drag-to-reorder (only for owned bookmarks)
-                    if (bm.isOwned) {
+                    // Drag-to-reorder is available for local and global bookmarks.
+                    // A bookmark is still reordered only within its source workspace.
+                    {
                         row.draggable = true;
                         row.dataset.bmIdx = idx;
                         row.dataset.bmProject = bm.project;
@@ -6280,9 +6281,7 @@
                     const displayName = bm.name ? bm.name : bm.command;
                     row.title = `Right click to edit\nCommand: ${bm.command}${bm.windowTitle ? `\nWindow Title: ${bm.windowTitle}` : ''}`;
 
-                    const dragHandle = bm.isOwned
-                        ? `<span class="bm-drag-handle" title="Drag to reorder" style="color:var(--text-muted); cursor:grab; font-size:0.9rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.5;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">⠿</span>`
-                        : '';
+                    const dragHandle = `<span class="bm-drag-handle" title="Drag to reorder within ${bm.project}" style="color:var(--text-muted); cursor:grab; font-size:0.9rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.5;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">⠿</span>`;
 
                     row.innerHTML = `
                         ${dragHandle}
@@ -6911,10 +6910,11 @@
         let _bmDragSrcIdx = null;
 
         async function reorderBookmark(uniqueList, fromDisplayIdx, toDisplayIdx) {
-            // Only reorder owned bookmarks within the same project
+            // Reorder bookmarks within their source workspace. Global bookmarks
+            // are visible elsewhere, but their saved order belongs to that source.
             const from = uniqueList[fromDisplayIdx];
             const to   = uniqueList[toDisplayIdx];
-            if (!from || !to || !from.isOwned || from.project !== to.project) return;
+            if (!from || !to || from.project !== to.project) return;
 
             try {
                 const res = await fetch(`/api/projects/${encodeURIComponent(from.project)}/bookmarks/${from.index}/edit`, {

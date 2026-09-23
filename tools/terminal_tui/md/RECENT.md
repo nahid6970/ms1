@@ -5,6 +5,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-24] - Allow Dragging Global Bookmarks
+**What We Accomplished:**
+- Added drag handles to global bookmarks in the merged bookmark list.
+- Enabled reordering for global bookmarks within their original workspace.
+- Kept cross-workspace bookmark movement disabled so saved ownership and ordering remain consistent.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-24] - Default Terminal Tabs With Plus Button
 **What We Accomplished:**
 - Made the tabbed terminal layout the default, including the single-terminal state.

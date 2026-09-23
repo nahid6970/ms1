@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-09-24] - Global Bookmarks Could Not Be Dragged
+**Problem:** A global bookmark appeared in the merged bookmark list without the drag handle, while local bookmarks could be reordered.
+**Root Cause:** Both the drag listeners and drag-handle markup were guarded by `bm.isOwned`, so bookmarks visible globally were treated as read-only even though they still belonged to a source workspace.
+**Solution:** Allow local and global bookmarks to show the drag handle and be reordered within their source workspace. Cross-workspace movement is not performed because each bookmark's saved order belongs to its original workspace.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-09-24] - Terminal Tabs Hidden by Default
 **Problem:** The terminal could start as a plain single pane, so there was no visible Notepad++-style tab strip or `+` tab for opening more terminals.
 **Root Cause:** The default and single-pane fallback layout used `split-right`, while the tab bar only rendered for `split-tabs`.
