@@ -152,7 +152,8 @@ function pasteObject() {
 // ── Cut / Slice ───────────────────────────────────────────────────────────
 let cutAxis='y', cutMode='slice', cutPos=0, cutGap=0.3;
 let cutBBox=null; // world bbox of selected when cut panel opened
-let cutGizmoMode='translate', cutObjectCenter=new THREE.Vector3(), cutSliderMin=0, cutSliderMax=1;
+let cutGizmoMode='translate', cutObjectCenter=new THREE.Vector3(), cutSliderMin=0, cutSliderMax=1, cutBaseFootprint=1;
+const cutFootprint=new THREE.Vector2(1,1);
 const cutFrame=new THREE.Object3D(); cutFrame.name='Cut plane modifier'; scene.add(cutFrame);
 
 // Compact cutter box: the only cut preview shown in the viewport.
@@ -172,6 +173,7 @@ function initCutPanel() {
   setCutFrameAxis(cutAxis, false);
   const objectSize=cutBBox.getSize(new THREE.Vector3());
   const handleSize=Math.max(objectSize.x,objectSize.y,objectSize.z)*1.12;
+  cutBaseFootprint=handleSize;
   cutFrame.scale.set(1,1,1);
   cutHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
 
@@ -226,6 +228,7 @@ function setCutFrameAxis(axis, keepPosition=false) {
 
 function updateCutPlanes() {
   if(!cutBBox) return;
+  refreshCutFootprint();
   cutHandle.visible=true;
   const handleDepth=Math.max(0.04,cutMode==='band'?cutGap:cutHandle.scale.x*0.035);
   cutHandle.scale.z=handleDepth;
@@ -268,10 +271,22 @@ function setCutGizmoMode(mode) {
 }
 
 function getCutterSize() {
+  // CSG dimensions are local to the cutter frame. Using world-axis scale
+  // would swap the cutter footprint with its thin cutting depth when the
+  // plane is aligned to X or Z.
+  refreshCutFootprint();
   return new THREE.Vector3(
-    Math.abs(cutHandle.scale.x*cutFrame.scale.x),
-    Math.abs(cutHandle.scale.y*cutFrame.scale.y),
+    cutFootprint.x,
+    cutFootprint.y,
     Math.abs(cutHandle.scale.z*cutFrame.scale.z)
+  );
+}
+
+function refreshCutFootprint() {
+  cutFrame.updateMatrixWorld(true);
+  cutFootprint.set(
+    Math.abs(cutHandle.scale.x*cutFrame.scale.x),
+    Math.abs(cutHandle.scale.y*cutFrame.scale.y)
   );
 }
 
@@ -308,7 +323,7 @@ function performSlice() {
   const normal=new THREE.Vector3(0,0,1).applyQuaternion(cutFrame.quaternion).normalize();
   const plane=cutFrame.position.clone(), BIG=500;
   const cutterSize=getCutterSize();
-  const partial=Math.abs(cutFrame.scale.x-1)>0.001||Math.abs(cutFrame.scale.y-1)>0.001;
+  const partial=Math.abs(cutterSize.x-cutBaseFootprint)>0.001||Math.abs(cutterSize.y-cutBaseFootprint)>0.001;
   let resA, resB;
   if(partial){
     const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,BIG,plane.x,plane.y,plane.z,cutFrame.quaternion);
@@ -339,7 +354,9 @@ function performBand() {
   selected.updateMatrixWorld(true);
   const bbox=new THREE.Box3().setFromObject(selected);
   const cutterSize=getCutterSize();
-  const gap=Math.max(0.01,cutGap), plane=cutFrame.position;
+  // Use the cutter's final visible thickness, including any Scale gizmo
+  // adjustment, instead of only the raw Gap slider value.
+  const gap=Math.max(0.01,cutterSize.z), plane=cutFrame.position;
   const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,gap,plane.x,plane.y,plane.z,cutFrame.quaternion);
   if(!result) return;
   result.name=selected.name+' (cut)'; result.userData.type='sliced';

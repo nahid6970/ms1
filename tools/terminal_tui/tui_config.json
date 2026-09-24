@@ -920,7 +920,8 @@
       "layout": {
         "layoutClass": "split-tabs",
         "paneIds": [
-          "main"
+          "main",
+          "pane-1790233233434-1"
         ]
       }
     }
