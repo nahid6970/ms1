@@ -134,7 +134,7 @@ Do not open `index.html` with a `file://` URL, because browser module imports an
 
 ### Cut modifier implementation
 
-The Cut tool uses a compact, bounded cutter attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be Box or Round (cylindrical), and can be translated, rotated, or scaled independently of the selected object. Slice and Band CSG cutters inherit the modifier shape, position, quaternion, footprint, and final visible thickness, so the applied result matches the preview. Gap remains the Band thickness control. Angled or partial cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
+The Cut tool uses a compact, bounded cutter attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be Box or Round (cylindrical), and can be translated, rotated, or scaled independently of the selected object. Scale mode also exposes a Uniform size slider for reliable proportional shrinking or enlargement. Slice and Band CSG cutters inherit the modifier shape, position, quaternion, footprint, and final visible thickness, so the applied result matches the preview. Gap remains the Band thickness control. Angled or partial cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
 
 ## Known problem to investigate
 

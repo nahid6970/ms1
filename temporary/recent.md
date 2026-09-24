@@ -18,6 +18,7 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
   - Rotate plane mode uses rotation rings; `R` activates it while Cut is active
   - Scale cutter mode resizes the cutter footprint; `S` activates it while Cut is active
   - Shape selector supports Box and Round cylindrical cutters
+  - Scale cutter mode includes a Uniform size slider so the cutter can be shrunk below 1.00× as well as enlarged
   - Cutter rotation is independent of the selected object, allowing arbitrary-angle Slice and Band operations
   - A resized cutter limits Slice/Band to the covered portion of the object
   - Band CSG uses the cutter's final visible thickness, including Scale cutter adjustments, so it stays aligned with the preview instead of relying only on the raw Gap value

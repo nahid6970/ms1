@@ -33,6 +33,7 @@ Select an object, press `T`. The left panel shows:
 - **Move plane** — drag the colored arrows to position the cut
 - **Rotate plane** — drag the rotation rings, or press `R` while Cut is active, to cut at any angle
 - **Scale cutter** — resize the cutter box, or press `S` while Cut is active, to limit the operation to part of the object and adjust its visible thickness
+- **Uniform size** — when Scale cutter is active, use the proportional size slider to shrink below `1.00×` or enlarge above `1.00×`
 - **Shape: Box / Round** — use a rectangular cutter or a cylindrical round cutter
 - **Y / X / Z** — quickly align the cutter to a world axis (auto-picks the longest dimension initially)
 - **⊟ Slice** — splits object into two pieces at the cut position
