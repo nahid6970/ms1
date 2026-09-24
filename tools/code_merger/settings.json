@@ -16,6 +16,37 @@
   "extension_icon_size": 20,
   "projects": [
     {
+      "path": "C:\\@delta\\ms1\\temporary",
+      "name": "",
+      "category": "",
+      "icon": "",
+      "files": [
+        "C:\\@delta\\ms1\\temporary\\.gitignore",
+        "C:\\@delta\\ms1\\temporary\\app.js",
+        "C:\\@delta\\ms1\\temporary\\FORMA_HANDOFF.md",
+        "C:\\@delta\\ms1\\temporary\\gg.json",
+        "C:\\@delta\\ms1\\temporary\\index.html",
+        "C:\\@delta\\ms1\\temporary\\README.md",
+        "C:\\@delta\\ms1\\temporary\\recent.md",
+        "C:\\@delta\\ms1\\temporary\\style.css",
+        "C:\\@delta\\ms1\\temporary\\vendor\\three\\examples\\jsm\\controls\\OrbitControls.js",
+        "C:\\@delta\\ms1\\temporary\\vendor\\three\\examples\\jsm\\controls\\TransformControls.js"
+      ],
+      "disabled_files": [
+        "C:\\@delta\\ms1\\temporary\\gg.json"
+      ],
+      "extensions": [
+        ".js",
+        ".json",
+        "",
+        ".md",
+        ".css",
+        ".html"
+      ],
+      "pinned": false,
+      "pin_index": 0
+    },
+    {
       "path": "C:\\@delta\\ms1\\testing\\mypygui",
       "name": "",
       "category": "",
