@@ -184,6 +184,8 @@ function initCutPanel() {
   cutFrame.scale.set(1,1,1);
   cutHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
   roundHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
+  document.getElementById('cut-uniform-slider').value=1;
+  document.getElementById('cut-uniform-val').textContent='1.00×';
 
   const min = cutAxis==='y'?cutBBox.min.y : cutAxis==='x'?cutBBox.min.x : cutBBox.min.z;
   const max = cutAxis==='y'?cutBBox.max.y : cutAxis==='x'?cutBBox.max.x : cutBBox.max.z;
@@ -278,6 +280,7 @@ function setCutGizmoMode(mode) {
   cutGizmoMode=mode;
   const buttonId=mode==='translate'?'move':mode==='rotate'?'rotate':'scale';
   document.querySelectorAll('.cut-gizmo-mode').forEach(b=>b.classList.toggle('active',b.id===`cut-gizmo-${buttonId}`));
+  document.getElementById('cut-uniform-row').classList.toggle('hidden',mode!=='scale');
   if(tool==='cut' && selected){
     transform.enabled=true;
     transform.setSpace('world');
@@ -422,6 +425,12 @@ document.getElementById('cut-gizmo-rotate').onclick=()=>setCutGizmoMode('rotate'
 document.getElementById('cut-gizmo-scale').onclick=()=>setCutGizmoMode('scale');
 document.getElementById('cut-shape-box').onclick=()=>setCutShape('box');
 document.getElementById('cut-shape-round').onclick=()=>setCutShape('round');
+document.getElementById('cut-uniform-slider').oninput=e=>{
+  const value=parseFloat(e.target.value);
+  cutFrame.scale.set(value,value,value);
+  document.getElementById('cut-uniform-val').textContent=value.toFixed(2)+'×';
+  updateCutPlanes();
+};
 // Cut mode
 document.getElementById('ctx-mode-slice').onclick=()=>setCutMode('slice');
 document.getElementById('ctx-mode-band').onclick=()=>setCutMode('band');
