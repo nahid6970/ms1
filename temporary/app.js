@@ -15,7 +15,10 @@ viewport.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping=true; controls.target.set(0,1,0);
 const transform = new TransformControls(camera, renderer.domElement);
 scene.add(transform);
+let gizmoPointerDown=false;
 transform.addEventListener('dragging-changed', e => controls.enabled=!e.value);
+transform.addEventListener('mouseDown', () => { gizmoPointerDown=true; });
+transform.addEventListener('mouseUp', () => { gizmoPointerDown=false; });
 transform.addEventListener('objectChange', syncInspector);
 transform.addEventListener('objectChange', () => { if(tool==='cut') updateCutPlanes(); });
 
@@ -32,7 +35,9 @@ const geometryFor = type => ({box:new THREE.BoxGeometry(1.5,1.5,1.5),sphere:new 
 
 function addObject(type='box', data={}) {
   const material=new THREE.MeshStandardMaterial({color:data.color||colors[(objects.length)%colors.length],metalness:data.metalness??.2,roughness:data.roughness??.4});
-  const mesh=new THREE.Mesh(geometryFor(type),material);
+  const geometry=data.geometry ? new THREE.BufferGeometryLoader().parse(data.geometry) : geometryFor(type);
+  if(!geometry) throw new Error(`Unsupported object geometry: ${type}`);
+  const mesh=new THREE.Mesh(geometry,material);
   mesh.name=data.name||`${type[0].toUpperCase()+type.slice(1)} ${idCounter++}`;
   mesh.castShadow=true; mesh.receiveShadow=true; mesh.userData.type=type;
   mesh.position.set(...(data.position||[0,type==='box'?0.75:1,0]));
@@ -111,7 +116,7 @@ function removeSelected() {
 }
 
 function serialize() {
-  return {version:1,name:$('#project-name').value,objects:objects.map(o=>({name:o.name,type:o.userData.type,position:o.position.toArray(),rotation:[o.rotation.x,o.rotation.y,o.rotation.z].map(THREE.MathUtils.radToDeg),scale:o.scale.toArray(),color:'#'+o.material.color.getHexString(),metalness:o.material.metalness,roughness:o.material.roughness}))};
+  return {version:1,name:$('#project-name').value,objects:objects.map(o=>({name:o.name,type:o.userData.type,geometry:['sliced','boolean'].includes(o.userData.type)?o.geometry.toJSON():undefined,position:o.position.toArray(),rotation:[o.rotation.x,o.rotation.y,o.rotation.z].map(THREE.MathUtils.radToDeg),scale:o.scale.toArray(),color:'#'+o.material.color.getHexString(),metalness:o.material.metalness,roughness:o.material.roughness}))};
 }
 function download(filename,data,type='application/json') {
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type})); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500);
@@ -137,7 +142,7 @@ function frame() {
 }
 function copySelected() {
   if(!selected) return;
-  clipboard={type:selected.userData.type,position:selected.position.toArray(),rotation:[selected.rotation.x,selected.rotation.y,selected.rotation.z].map(THREE.MathUtils.radToDeg),scale:selected.scale.toArray(),color:'#'+selected.material.color.getHexString(),metalness:selected.material.metalness,roughness:selected.material.roughness};
+  clipboard={type:selected.userData.type,geometry:['sliced','boolean'].includes(selected.userData.type)?selected.geometry.toJSON():undefined,position:selected.position.toArray(),rotation:[selected.rotation.x,selected.rotation.y,selected.rotation.z].map(THREE.MathUtils.radToDeg),scale:selected.scale.toArray(),color:'#'+selected.material.color.getHexString(),metalness:selected.material.metalness,roughness:selected.material.roughness};
   toast('Copied — Ctrl+V to paste');
 }
 function pasteObject() {
@@ -398,7 +403,9 @@ $('#object-color').oninput=e=>{ if(selected){selected.material.color.set(e.targe
 });
 
 renderer.domElement.addEventListener('pointerdown', e=>{
-  if(tool!=='select') return;
+  // Objects remain selectable while using Move/Rotate/Scale so the gizmo
+  // always follows the object the user just clicked. Cut uses its own box.
+  if(tool==='cut' || gizmoPointerDown) return;
   const rect=renderer.domElement.getBoundingClientRect();
   const mouse=new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
   const ray=new THREE.Raycaster(); ray.setFromCamera(mouse,camera);
