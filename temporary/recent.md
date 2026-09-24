@@ -13,7 +13,11 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 - `clipboard` + `copySelected()` / `pasteObject()` — Ctrl+C / Ctrl+V, pastes at exact position
 - `selected2` for boolean second operand; Shift+click to pick B
 - `performBool(op)` — SUBTRACTION/ADDITION/INTERSECTION using `Brush` instances with baked world matrix
-- **Cut/Slice tool (T)**: slider-based panel in left sidebar; no 3D gizmo
+- **Cut/Slice tool (T)**: slider-based panel plus a compact cutter-box modifier with a 3D gizmo
+  - Move plane mode uses translation arrows to position the cutter
+  - Rotate plane mode uses rotation rings; `R` activates it while Cut is active
+  - Cutter rotation is independent of the selected object, allowing arbitrary-angle Slice and Band operations
+  - Legacy full-size preview planes were removed; only the bounded cutter box is shown
   - `initCutPanel()` — auto-detects longest axis, sets slider range from bbox
   - `updateCutPlanes()` — positions blue/orange preview planes from `cutPos` / `cutGap`
   - `performSlice()` — splits into 2 pieces with 0.12 gap nudge; switches back to select tool
@@ -35,5 +39,5 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 - `cutPos` is the world-space center of the cut; `cutGap` is full thickness of band (centered, so ±gap/2)
 - After apply, tool resets to `select` automatically
 
-## 4. Pending Task
-Test cut/slice on a rotated cylinder: select → T → auto-axis should pick X or Z → drag Position slider to center → switch to Band → drag Gap slider → Apply. Verify two rings result with correct geometry.
+## 4. Current verification task
+Test the cutter modifier on a cylinder: select → T → use Move plane to position the box → choose Rotate plane or press `R` → drag a rotation ring → switch to Band → set Gap → Apply. The source object should remain unrotated while the resulting cut follows the cutter angle.

@@ -38,6 +38,8 @@ Keyboard shortcuts should also work:
 - Move / `W`: use a 3D translation gizmo.
 - Rotate / `E`: use a 3D rotation gizmo.
 - Scale / `R`: use a 3D scale gizmo.
+- Cut / `T`: use the highlighted cutter modifier and apply a Slice or Band operation.
+- `R` while Cut is active: switch the cutter to rotate mode. Use the Move plane / Rotate plane buttons to switch gizmo modes.
 - `F`: frame the selected object with the camera.
 - Delete / Backspace: remove the selected object.
 
@@ -129,6 +131,10 @@ http://localhost:8000
 
 Do not open `index.html` with a `file://` URL, because browser module imports and CDN requests may be blocked.
 
+### Cut modifier implementation
+
+The Cut tool uses a compact, bounded cutter box attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be translated or rotated independently of the selected object. Slice and Band CSG cutters inherit the modifier box position and quaternion, so angled cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
+
 ## Known problem to investigate
 
 The user reports that every button appears static and no button action works, even after using a local server. This indicates that `app.js` is probably failing before event listeners are registered. The first thing to check in the browser DevTools Console is the first red error, especially:
@@ -150,4 +156,3 @@ The app now contains a startup diagnostic that reveals itself after about 1.8 se
 6. Verify save, export, load, delete, transform shortcuts, and viewport orbiting.
 
 If CDN loading is unreliable, replace the import-map approach with locally vendored Three.js files or rewrite the prototype around a single self-contained dependency bundle.
-

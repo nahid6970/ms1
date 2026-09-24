@@ -29,13 +29,18 @@ Then open `http://localhost:8000`. No package download or build required — Thr
 
 ### Cut / Slice tool (`T`)
 Select an object, press `T`. The left panel shows:
-- **Y / X / Z** — axis to cut along (auto-picks longest dimension)
+- **Cut modifier box** — a compact highlighted cutter with transform arrows in the viewport
+- **Move plane** — drag the colored arrows to position the cut
+- **Rotate plane** — drag the rotation rings, or press `R` while Cut is active, to cut at any angle
+- **Y / X / Z** — quickly align the cutter to a world axis (auto-picks the longest dimension initially)
 - **⊟ Slice** — splits object into two pieces at the cut position
 - **⊠ Band** — removes a band of chosen thickness (e.g. cylinder → two rings)
 - **Position slider** — drag to move the cut plane through the object
 - **Gap slider** (Band mode) — set how thick the removed section is
 - **✓ Apply cut** — executes the operation
 - `Esc` — cancel
+
+The object itself does not need to be rotated for angled cuts; rotate the cutter modifier instead.
 
 ### Boolean operations
 Select object A, then Shift+click object B. Three operations available:
