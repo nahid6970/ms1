@@ -172,6 +172,7 @@ function initCutPanel() {
   setCutFrameAxis(cutAxis, false);
   const objectSize=cutBBox.getSize(new THREE.Vector3());
   const handleSize=Math.max(objectSize.x,objectSize.y,objectSize.z)*1.12;
+  cutFrame.scale.set(1,1,1);
   cutHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
 
   const min = cutAxis==='y'?cutBBox.min.y : cutAxis==='x'?cutBBox.min.x : cutBBox.min.z;
@@ -255,14 +256,23 @@ function setCutMode(m) {
 
 function setCutGizmoMode(mode) {
   cutGizmoMode=mode;
-  document.querySelectorAll('.cut-gizmo-mode').forEach(b=>b.classList.toggle('active',b.id===`cut-gizmo-${mode==='translate'?'move':'rotate'}`));
+  const buttonId=mode==='translate'?'move':mode==='rotate'?'rotate':'scale';
+  document.querySelectorAll('.cut-gizmo-mode').forEach(b=>b.classList.toggle('active',b.id===`cut-gizmo-${buttonId}`));
   if(tool==='cut' && selected){
     transform.enabled=true;
     transform.setSpace('world');
     transform.setMode(mode);
     transform.attach(cutFrame);
-    toast(mode==='rotate'?'Rotate gizmo active — drag a colored ring':'Move gizmo active — drag an arrow');
+    toast(mode==='rotate'?'Rotate gizmo active — drag a colored ring':mode==='scale'?'Scale gizmo active — resize the cutter':'Move gizmo active — drag an arrow');
   }
+}
+
+function getCutterSize() {
+  return new THREE.Vector3(
+    Math.abs(cutHandle.scale.x*cutFrame.scale.x),
+    Math.abs(cutHandle.scale.y*cutFrame.scale.y),
+    Math.abs(cutHandle.scale.z*cutFrame.scale.z)
+  );
 }
 
 // ── CSG helpers ──────────────────────────────────────────────────────────
@@ -297,7 +307,18 @@ function performSlice() {
   const bbox=new THREE.Box3().setFromObject(selected);
   const normal=new THREE.Vector3(0,0,1).applyQuaternion(cutFrame.quaternion).normalize();
   const plane=cutFrame.position.clone(), BIG=500;
+  const cutterSize=getCutterSize();
+  const partial=Math.abs(cutFrame.scale.x-1)>0.001||Math.abs(cutFrame.scale.y-1)>0.001;
   let resA, resB;
+  if(partial){
+    const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,BIG,plane.x,plane.y,plane.z,cutFrame.quaternion);
+    if(!result) return;
+    result.name=selected.name+' (partial slice)'; result.userData.type='sliced';
+    const old=selected; selected=null; selected2=null; hideCutPlane();
+    document.getElementById('cut-context').classList.add('hidden');
+    removeObj(old); scene.add(result); objects.push(result); select(result); updateScene(); setTool('select');
+    toast('Partial slice applied'); return;
+  }
   const positive=plane.clone().addScaledVector(normal,BIG/2);
   const negative=plane.clone().addScaledVector(normal,-BIG/2);
   resA=csgSubtractBox(selected,BIG,BIG,BIG,positive.x,positive.y,positive.z,cutFrame.quaternion);
@@ -317,8 +338,9 @@ function performBand() {
   if(!selected){toast('Select an object first');return;}
   selected.updateMatrixWorld(true);
   const bbox=new THREE.Box3().setFromObject(selected);
-  const gap=Math.max(0.01,cutGap), BIG=500, plane=cutFrame.position;
-  const result=csgSubtractBox(selected,BIG,BIG,gap,plane.x,plane.y,plane.z,cutFrame.quaternion);
+  const cutterSize=getCutterSize();
+  const gap=Math.max(0.01,cutGap), plane=cutFrame.position;
+  const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,gap,plane.x,plane.y,plane.z,cutFrame.quaternion);
   if(!result) return;
   result.name=selected.name+' (cut)'; result.userData.type='sliced';
   const old=selected; selected=null; hideCutPlane();
@@ -355,6 +377,7 @@ document.querySelectorAll('[data-bool]').forEach(b=>b.onclick=()=>performBool(b.
 document.querySelectorAll('[data-cut-axis]').forEach(b=>b.onclick=()=>setCutAxis(b.dataset.cutAxis));
 document.getElementById('cut-gizmo-move').onclick=()=>setCutGizmoMode('translate');
 document.getElementById('cut-gizmo-rotate').onclick=()=>setCutGizmoMode('rotate');
+document.getElementById('cut-gizmo-scale').onclick=()=>setCutGizmoMode('scale');
 // Cut mode
 document.getElementById('ctx-mode-slice').onclick=()=>setCutMode('slice');
 document.getElementById('ctx-mode-band').onclick=()=>setCutMode('band');
@@ -418,6 +441,7 @@ document.addEventListener('keydown', e=>{
   if(e.ctrlKey&&e.key.toLowerCase()==='c'){copySelected();return;}
   if(e.ctrlKey&&e.key.toLowerCase()==='v'){pasteObject();return;}
   if(tool==='cut' && e.key.toLowerCase()==='r'){setCutGizmoMode('rotate');return;}
+  if(tool==='cut' && e.key.toLowerCase()==='s'){setCutGizmoMode('scale');return;}
   const map={q:'select',w:'translate',e:'rotate',r:'scale',t:'cut'};
   if(map[e.key.toLowerCase()]) setTool(map[e.key.toLowerCase()]);
   if(e.key==='Escape'&&tool==='cut') setTool('select');

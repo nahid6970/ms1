@@ -32,6 +32,7 @@ Select an object, press `T`. The left panel shows:
 - **Cut modifier box** — a compact highlighted cutter with transform arrows in the viewport
 - **Move plane** — drag the colored arrows to position the cut
 - **Rotate plane** — drag the rotation rings, or press `R` while Cut is active, to cut at any angle
+- **Scale cutter** — resize the cutter box, or press `S` while Cut is active, to limit the operation to part of the object
 - **Y / X / Z** — quickly align the cutter to a world axis (auto-picks the longest dimension initially)
 - **⊟ Slice** — splits object into two pieces at the cut position
 - **⊠ Band** — removes a band of chosen thickness (e.g. cylinder → two rings)
@@ -40,7 +41,7 @@ Select an object, press `T`. The left panel shows:
 - **✓ Apply cut** — executes the operation
 - `Esc` — cancel
 
-The object itself does not need to be rotated for angled cuts; rotate the cutter modifier instead.
+The object itself does not need to be rotated for angled cuts; rotate the cutter modifier instead. A resized cutter performs a partial slice or partial band removal within its footprint.
 
 ### Boolean operations
 Select object A, then Shift+click object B. Three operations available:

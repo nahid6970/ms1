@@ -40,6 +40,7 @@ Keyboard shortcuts should also work:
 - Scale / `R`: use a 3D scale gizmo.
 - Cut / `T`: use the highlighted cutter modifier and apply a Slice or Band operation.
 - `R` while Cut is active: switch the cutter to rotate mode. Use the Move plane / Rotate plane buttons to switch gizmo modes.
+- `S` while Cut is active: switch the cutter to scale mode and limit the cut to its resized footprint.
 - `F`: frame the selected object with the camera.
 - Delete / Backspace: remove the selected object.
 
@@ -133,7 +134,7 @@ Do not open `index.html` with a `file://` URL, because browser module imports an
 
 ### Cut modifier implementation
 
-The Cut tool uses a compact, bounded cutter box attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be translated or rotated independently of the selected object. Slice and Band CSG cutters inherit the modifier box position and quaternion, so angled cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
+The Cut tool uses a compact, bounded cutter box attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be translated, rotated, or scaled independently of the selected object. Slice and Band CSG cutters inherit the modifier box position, quaternion, and footprint, so angled or partial cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
 
 ## Known problem to investigate
 

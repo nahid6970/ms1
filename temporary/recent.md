@@ -16,7 +16,9 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 - **Cut/Slice tool (T)**: slider-based panel plus a compact cutter-box modifier with a 3D gizmo
   - Move plane mode uses translation arrows to position the cutter
   - Rotate plane mode uses rotation rings; `R` activates it while Cut is active
+  - Scale cutter mode resizes the cutter footprint; `S` activates it while Cut is active
   - Cutter rotation is independent of the selected object, allowing arbitrary-angle Slice and Band operations
+  - A resized cutter limits Slice/Band to the covered portion of the object
   - Legacy full-size preview planes were removed; only the bounded cutter box is shown
   - `initCutPanel()` — auto-detects longest axis, sets slider range from bbox
   - `updateCutPlanes()` — positions blue/orange preview planes from `cutPos` / `cutGap`
@@ -40,4 +42,4 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 - After apply, tool resets to `select` automatically
 
 ## 4. Current verification task
-Test the cutter modifier on a cylinder: select → T → use Move plane to position the box → choose Rotate plane or press `R` → drag a rotation ring → switch to Band → set Gap → Apply. The source object should remain unrotated while the resulting cut follows the cutter angle.
+Test the cutter modifier on a cylinder: select → T → use Move plane to position the box → choose Rotate plane or press `R` → drag a rotation ring → choose Scale cutter or press `S` → resize the footprint → switch to Band → set Gap → Apply. The source object should remain unrotated while only the covered portion is cut.
