@@ -44,6 +44,7 @@ Select an object, press `T`. The left panel shows:
 - `Esc` — cancel
 
 The object itself does not need to be rotated for angled cuts; rotate the cutter modifier instead. A resized cutter performs a partial slice or partial band removal within its footprint.
+Generated cut pieces keep their own transform origin, so Move/Rotate/Scale gizmos appear on the selected piece after cutting, saving, or loading.
 
 ### Boolean operations
 Select object A, then Shift+click object B. Three operations available:

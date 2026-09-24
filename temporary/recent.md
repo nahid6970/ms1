@@ -22,6 +22,7 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
   - Cutter rotation is independent of the selected object, allowing arbitrary-angle Slice and Band operations
   - A resized cutter limits Slice/Band to the covered portion of the object
   - Band CSG uses the cutter's final visible thickness, including Scale cutter adjustments, so it stays aligned with the preview instead of relying only on the raw Gap value
+  - Generated cut/boolean results are normalized around their own center on creation and load, keeping transform gizmos on the selected result
   - Legacy full-size preview planes were removed; only the bounded cutter box is shown
   - `initCutPanel()` — auto-detects longest axis, sets slider range from bbox
   - `updateCutPlanes()` — positions blue/orange preview planes from `cutPos` / `cutGap`
@@ -45,4 +46,4 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 - After apply, tool resets to `select` automatically
 
 ## 4. Current verification task
-Test the cutter modifier on a cylinder: select → T → choose Box or Round → use Move plane to position the cutter → choose Rotate plane or press `R` → drag a rotation ring → choose Scale cutter or press `S` → resize the footprint/thickness → switch to Band → set Gap → Apply. The source object should remain unrotated while only the covered portion is cut and the result matches the visible cutter.
+Test the cutter modifier on a cylinder: select → T → choose Box or Round → use Move plane to position the cutter → choose Rotate plane or press `R` → drag a rotation ring → choose Scale cutter or press `S` → resize the footprint/thickness → switch to Band → set Gap → Apply. Then save/reload and verify the result's Move/Rotate/Scale gizmo remains centered on the generated piece.

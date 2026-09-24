@@ -136,6 +136,8 @@ Do not open `index.html` with a `file://` URL, because browser module imports an
 
 The Cut tool uses a compact, bounded cutter attached to a `cutFrame` object and a Three.js `TransformControls` gizmo. The modifier can be Box or Round (cylindrical), and can be translated, rotated, or scaled independently of the selected object. Scale mode also exposes a Uniform size slider for reliable proportional shrinking or enlargement. Slice and Band CSG cutters inherit the modifier shape, position, quaternion, footprint, and final visible thickness, so the applied result matches the preview. Gap remains the Band thickness control. Angled or partial cuts do not require rotating the source object. The old full-size translucent preview planes are not used.
 
+Generated Slice, Band, and Boolean results are normalized around their own world-space center before being added to the scene. The same normalization runs when generated geometry is loaded from saved or exported projects, keeping transform gizmos attached to the selected result rather than the original source origin.
+
 ## Known problem to investigate
 
 The user reports that every button appears static and no button action works, even after using a local server. This indicates that `app.js` is probably failing before event listeners are registered. The first thing to check in the browser DevTools Console is the first red error, especially:
