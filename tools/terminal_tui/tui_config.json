@@ -33,7 +33,7 @@
           "name": " Antigravity",
           "windowTitle": "",
           "displayOrder": 1,
-          "color": ""
+          "color": "#f7fb32"
         },
         {
           "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
@@ -41,7 +41,7 @@
           "name": " Codex",
           "windowTitle": "",
           "displayOrder": 2,
-          "color": ""
+          "color": "#85c4ff"
         },
         {
           "command": "kiro-cli chat --trust-all-tools --resume",
@@ -49,7 +49,7 @@
           "name": " Kiro-Cli",
           "windowTitle": "",
           "displayOrder": 3,
-          "color": ""
+          "color": "#b576d6"
         },
         {
           "command": "npx -y convex@latest dev",
@@ -57,7 +57,7 @@
           "name": " convex",
           "windowTitle": "",
           "displayOrder": 4,
-          "color": ""
+          "color": "#ee342f"
         },
         {
           "command": "net stop winnat",
@@ -80,7 +80,8 @@
       "layout": {
         "layoutClass": "split-tabs",
         "paneIds": [
-          "pane-1790219337923-1"
+          "main",
+          "pane-1790220145276-1"
         ]
       }
     },
@@ -890,10 +891,10 @@
         {
           "command": "npm run deploy:pages",
           "global": true,
-          "name": " npm run deploy:pages",
+          "name": " Cloudflare deploy",
           "windowTitle": "",
           "displayOrder": 5,
-          "color": ""
+          "color": "#f78100"
         }
       ]
     },

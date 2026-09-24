@@ -8,6 +8,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-09-24] - Add Bookmark Command Colors
 **What We Accomplished:**
 - Added an optional color picker to the bookmark edit/add dialog.
+- Kept the controls on one line and added direct hex input such as `#ff55ff`.
 - Persisted validated six-digit hex colors with bookmark records.
 - Applied custom colors to bookmark display names while retaining the default theme color when disabled.
 

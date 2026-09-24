@@ -4,7 +4,7 @@
 
 ## [2026-09-24] - Add Colors to Bookmark Commands
 **Problem:** Bookmark commands had no per-command visual color, making it harder to distinguish frequently used tools in the merged command list.
-**Solution:** Added an optional custom hex color to the bookmark editor. The color is saved with the bookmark and applied to its display name; disabling the option restores the normal theme text color.
+**Solution:** Added an optional custom hex color to the bookmark editor, with a one-line color picker and direct six-digit hex input such as `#ff55ff`. The row uses a targeted flex-direction override so the shared vertical form layout cannot stack its controls. The color is saved with the bookmark and applied to its display name; disabling the option restores the normal theme text color.
 **Files Modified:** `app.py`, `templates/index.html`
 
 ---
