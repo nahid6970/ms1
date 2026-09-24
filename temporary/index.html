@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="style.css" />
     <style>
       .cut-modifier-head{display:flex;align-items:center;gap:8px;padding:7px 8px;margin-bottom:8px;background:#faf9ff;border:1px solid #e8e6ff;border-radius:6px;color:#6f6cff}.cut-modifier-icon{width:25px;height:25px;display:grid;place-items:center;background:#6f6cff;color:#fff;border-radius:5px;font-size:14px}.cut-modifier-head strong,.cut-modifier-head small{display:block}.cut-modifier-head strong{font-size:10px;color:#20222a}.cut-modifier-head small{margin-top:2px;font-size:8px;color:#a2a3ae}.cut-gizmo-modes{display:flex;gap:4px;margin-bottom:8px}.cut-gizmo-mode{height:27px;flex:1;border-radius:5px;border:1px solid #e8e9ee;background:#fafafd;font:600 9px Manrope,sans-serif;color:#6a6b76;cursor:pointer}.cut-gizmo-mode.active{background:#f0efff;border-color:#bcbaff;color:#6f6cff}
+      .cut-gizmo-modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}.cut-gizmo-mode{height:31px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 5px;line-height:1.1;white-space:normal}.cut-gizmo-mode:first-letter{font-size:12px}.cut-gizmo-mode:last-child{grid-column:1 / -1}.cut-modifier-head{padding:9px 10px;gap:9px}.cut-modifier-icon{width:28px;height:28px;font-size:15px}.cut-modifier-head strong{font-size:10px}.cut-modifier-head small{font-size:8px;line-height:1.25}
     </style>
   </head>
   <body>
@@ -35,8 +36,8 @@
           <div id="cut-context" class="cut-context hidden">
             <div class="cut-modifier-head"><span class="cut-modifier-icon">✂</span><div><strong>Cut modifier</strong><small>Manipulate the highlighted plane in the viewport</small></div></div>
             <div class="cut-gizmo-modes">
-              <button class="cut-gizmo-mode active" id="cut-gizmo-move">↔ Move plane</button>
-              <button class="cut-gizmo-mode" id="cut-gizmo-rotate">⟳ Rotate plane</button>
+              <button class="cut-gizmo-mode active" id="cut-gizmo-move">↔ Move</button>
+              <button class="cut-gizmo-mode" id="cut-gizmo-rotate">⟳ Rotate</button>
               <button class="cut-gizmo-mode" id="cut-gizmo-scale">⤢ Scale cutter</button>
             </div>
             <div class="cut-ctx-axis">
