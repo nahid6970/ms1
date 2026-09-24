@@ -32,12 +32,13 @@ Select an object, press `T`. The left panel shows:
 - **Cut modifier box** — a compact highlighted cutter with transform arrows in the viewport
 - **Move plane** — drag the colored arrows to position the cut
 - **Rotate plane** — drag the rotation rings, or press `R` while Cut is active, to cut at any angle
-- **Scale cutter** — resize the cutter box, or press `S` while Cut is active, to limit the operation to part of the object
+- **Scale cutter** — resize the cutter box, or press `S` while Cut is active, to limit the operation to part of the object and adjust its visible thickness
+- **Shape: Box / Round** — use a rectangular cutter or a cylindrical round cutter
 - **Y / X / Z** — quickly align the cutter to a world axis (auto-picks the longest dimension initially)
 - **⊟ Slice** — splits object into two pieces at the cut position
 - **⊠ Band** — removes a band of chosen thickness (e.g. cylinder → two rings)
 - **Position slider** — drag to move the cut plane through the object
-- **Gap slider** (Band mode) — set how thick the removed section is
+- **Gap slider** (Band mode) — set how thick the removed section is; the applied cut matches the cutter’s final visible thickness
 - **✓ Apply cut** — executes the operation
 - `Esc` — cancel
 

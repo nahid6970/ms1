@@ -152,7 +152,7 @@ function pasteObject() {
 // ── Cut / Slice ───────────────────────────────────────────────────────────
 let cutAxis='y', cutMode='slice', cutPos=0, cutGap=0.3;
 let cutBBox=null; // world bbox of selected when cut panel opened
-let cutGizmoMode='translate', cutObjectCenter=new THREE.Vector3(), cutSliderMin=0, cutSliderMax=1, cutBaseFootprint=1;
+let cutGizmoMode='translate', cutShape='box', cutObjectCenter=new THREE.Vector3(), cutSliderMin=0, cutSliderMax=1, cutBaseFootprint=1;
 const cutFootprint=new THREE.Vector2(1,1);
 const cutFrame=new THREE.Object3D(); cutFrame.name='Cut plane modifier'; scene.add(cutFrame);
 
@@ -161,6 +161,13 @@ const cutHandleMat = new THREE.MeshStandardMaterial({color:0x6f6cff,transparent:
 const cutHandle = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),cutHandleMat);
 const cutHandleEdges = new THREE.LineSegments(new THREE.EdgesGeometry(cutHandle.geometry),new THREE.LineBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.95}));
 cutHandle.add(cutHandleEdges); cutHandle.renderOrder=998; cutHandle.visible=false; cutFrame.add(cutHandle);
+const roundHandleGeometry = new THREE.CylinderGeometry(0.5,0.5,1,48);
+// Bake the cylinder's Y axis into local Z so X/Y remain the circular
+// footprint and Z remains the cutter depth when TransformControls scales it.
+roundHandleGeometry.rotateX(Math.PI/2);
+const roundHandle = new THREE.Mesh(roundHandleGeometry,cutHandleMat);
+const roundHandleEdges = new THREE.LineSegments(new THREE.EdgesGeometry(roundHandle.geometry),new THREE.LineBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.95}));
+roundHandle.add(roundHandleEdges); roundHandle.renderOrder=998; roundHandle.visible=false; cutFrame.add(roundHandle);
 
 function initCutPanel() {
   if(!selected) return;
@@ -176,6 +183,7 @@ function initCutPanel() {
   cutBaseFootprint=handleSize;
   cutFrame.scale.set(1,1,1);
   cutHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
+  roundHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
 
   const min = cutAxis==='y'?cutBBox.min.y : cutAxis==='x'?cutBBox.min.x : cutBBox.min.z;
   const max = cutAxis==='y'?cutBBox.max.y : cutAxis==='x'?cutBBox.max.x : cutBBox.max.z;
@@ -209,6 +217,7 @@ function initCutPanel() {
 
 function hideCutPlane() {
   cutHandle.visible=false;
+  roundHandle.visible=false;
   transform.detach();
 }
 
@@ -229,9 +238,11 @@ function setCutFrameAxis(axis, keepPosition=false) {
 function updateCutPlanes() {
   if(!cutBBox) return;
   refreshCutFootprint();
-  cutHandle.visible=true;
+  cutHandle.visible=cutShape==='box';
+  roundHandle.visible=cutShape==='round';
   const handleDepth=Math.max(0.04,cutMode==='band'?cutGap:cutHandle.scale.x*0.035);
   cutHandle.scale.z=handleDepth;
+  roundHandle.scale.z=handleDepth;
   // gap controls visibility
   document.getElementById('cut-gap-row').classList.toggle('hidden', cutMode!=='band');
   updateCutReadouts();
@@ -257,6 +268,12 @@ function setCutMode(m) {
   updateCutPlanes();
 }
 
+function setCutShape(shape) {
+  cutShape=shape;
+  document.querySelectorAll('.cut-shape-btn').forEach(b=>b.classList.toggle('active',b.id===`cut-shape-${shape}`));
+  updateCutPlanes();
+}
+
 function setCutGizmoMode(mode) {
   cutGizmoMode=mode;
   const buttonId=mode==='translate'?'move':mode==='rotate'?'rotate':'scale';
@@ -275,18 +292,20 @@ function getCutterSize() {
   // would swap the cutter footprint with its thin cutting depth when the
   // plane is aligned to X or Z.
   refreshCutFootprint();
+  const handle=cutShape==='round'?roundHandle:cutHandle;
   return new THREE.Vector3(
     cutFootprint.x,
     cutFootprint.y,
-    Math.abs(cutHandle.scale.z*cutFrame.scale.z)
+    Math.abs(handle.scale.z*cutFrame.scale.z)
   );
 }
 
 function refreshCutFootprint() {
   cutFrame.updateMatrixWorld(true);
+  const handle=cutShape==='round'?roundHandle:cutHandle;
   cutFootprint.set(
-    Math.abs(cutHandle.scale.x*cutFrame.scale.x),
-    Math.abs(cutHandle.scale.y*cutFrame.scale.y)
+    Math.abs(handle.scale.x*cutFrame.scale.x),
+    Math.abs(handle.scale.y*cutFrame.scale.y)
   );
 }
 
@@ -299,7 +318,13 @@ function toBakedBrush(mesh) {
 function csgSubtractBox(targetMesh, wx,wy,wz, cx,cy,cz, quaternion=null) {
   try {
     const brushA=toBakedBrush(targetMesh);
-    const brushB=new Brush(new THREE.BoxGeometry(wx,wy,wz), new THREE.MeshStandardMaterial());
+    let geometry;
+    if(cutShape==='round') {
+      geometry=new THREE.CylinderGeometry(1,1,1,48);
+      geometry.rotateX(Math.PI/2);
+      geometry.scale(wx/2,wy/2,wz);
+    } else geometry=new THREE.BoxGeometry(wx,wy,wz);
+    const brushB=new Brush(geometry, new THREE.MeshStandardMaterial());
     brushB.position.set(cx,cy,cz); if(quaternion) brushB.quaternion.copy(quaternion); brushB.updateMatrixWorld(true);
     const result=(new Evaluator()).evaluate(brushA,brushB,SUBTRACTION);
     result.castShadow=result.receiveShadow=true;
@@ -395,6 +420,8 @@ document.querySelectorAll('[data-cut-axis]').forEach(b=>b.onclick=()=>setCutAxis
 document.getElementById('cut-gizmo-move').onclick=()=>setCutGizmoMode('translate');
 document.getElementById('cut-gizmo-rotate').onclick=()=>setCutGizmoMode('rotate');
 document.getElementById('cut-gizmo-scale').onclick=()=>setCutGizmoMode('scale');
+document.getElementById('cut-shape-box').onclick=()=>setCutShape('box');
+document.getElementById('cut-shape-round').onclick=()=>setCutShape('round');
 // Cut mode
 document.getElementById('ctx-mode-slice').onclick=()=>setCutMode('slice');
 document.getElementById('ctx-mode-band').onclick=()=>setCutMode('band');
