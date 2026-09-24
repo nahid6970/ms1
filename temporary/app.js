@@ -43,6 +43,7 @@ function addObject(type='box', data={}) {
   mesh.position.set(...(data.position||[0,type==='box'?0.75:1,0]));
   if(data.rotation) mesh.rotation.set(...data.rotation.map(v=>THREE.MathUtils.degToRad(v)));
   if(data.scale) mesh.scale.set(...data.scale);
+  if(data.geometry && ['sliced','boolean'].includes(type)) normalizeGeneratedOrigin(mesh);
   scene.add(mesh); objects.push(mesh); select(mesh); updateScene(); return mesh;
 }
 
@@ -340,6 +341,19 @@ function removeObj(obj) {
   obj.geometry.dispose(); obj.material.dispose();
 }
 
+function normalizeGeneratedOrigin(mesh) {
+  mesh.geometry.computeBoundingBox();
+  const localCenter=mesh.geometry.boundingBox.getCenter(new THREE.Vector3());
+  // Preserve the rendered world position while moving the mesh origin to
+  // the generated result's actual center. This keeps TransformControls on
+  // the selected piece instead of at the source object's old origin.
+  mesh.updateMatrixWorld(true);
+  const worldCenter=mesh.localToWorld(localCenter.clone());
+  mesh.geometry.translate(-localCenter.x,-localCenter.y,-localCenter.z);
+  mesh.position.copy(worldCenter);
+  mesh.updateMatrixWorld(true);
+}
+
 function performApply() {
   if(cutMode==='slice') performSlice(); else performBand();
 }
@@ -356,6 +370,7 @@ function performSlice() {
   if(partial){
     const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,BIG,plane.x,plane.y,plane.z,cutFrame.quaternion);
     if(!result) return;
+    normalizeGeneratedOrigin(result);
     result.name=selected.name+' (partial slice)'; result.userData.type='sliced';
     const old=selected; selected=null; selected2=null; hideCutPlane();
     document.getElementById('cut-context').classList.add('hidden');
@@ -367,6 +382,7 @@ function performSlice() {
   resA=csgSubtractBox(selected,BIG,BIG,BIG,positive.x,positive.y,positive.z,cutFrame.quaternion);
   resB=csgSubtractBox(selected,BIG,BIG,BIG,negative.x,negative.y,negative.z,cutFrame.quaternion);
   if(!resA||!resB) return;
+  normalizeGeneratedOrigin(resA); normalizeGeneratedOrigin(resB);
   const g=0.12;
   resA.position.addScaledVector(normal,g); resB.position.addScaledVector(normal,-g);
   const nb=selected.name; resA.name=nb+' A'; resA.userData.type='sliced'; resB.name=nb+' B'; resB.userData.type='sliced';
@@ -387,6 +403,7 @@ function performBand() {
   const gap=Math.max(0.01,cutterSize.z), plane=cutFrame.position;
   const result=csgSubtractBox(selected,cutterSize.x,cutterSize.y,gap,plane.x,plane.y,plane.z,cutFrame.quaternion);
   if(!result) return;
+  normalizeGeneratedOrigin(result);
   result.name=selected.name+' (cut)'; result.userData.type='sliced';
   const old=selected; selected=null; hideCutPlane();
   document.getElementById('cut-context').classList.add('hidden');
@@ -404,6 +421,7 @@ function performBool(op) {
     const brushB=new Brush(selected2.geometry.clone(),selected2.material);
     brushB.position.copy(selected2.position); brushB.rotation.copy(selected2.rotation); brushB.scale.copy(selected2.scale); brushB.updateMatrixWorld(true);
     const result=(new Evaluator()).evaluate(brushA,brushB,opConst);
+    normalizeGeneratedOrigin(result);
     result.material=new THREE.MeshStandardMaterial({color:selected.material.color.getHex(),metalness:selected.material.metalness,roughness:selected.material.roughness});
     result.castShadow=result.receiveShadow=true;
     result.name=`${op[0].toUpperCase()+op.slice(1)} ${idCounter++}`; result.userData.type='boolean';
