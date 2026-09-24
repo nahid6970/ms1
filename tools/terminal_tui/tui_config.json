@@ -24,57 +24,63 @@
           "global": true,
           "name": " myGG",
           "windowTitle": "",
-          "displayOrder": 0
+          "displayOrder": 0,
+          "color": "#3be365"
         },
         {
           "command": "agy --dangerously-skip-permissions -c",
           "global": true,
           "name": " Antigravity",
           "windowTitle": "",
-          "displayOrder": 1
+          "displayOrder": 1,
+          "color": ""
         },
         {
           "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
           "global": true,
           "name": " Codex",
           "windowTitle": "",
-          "displayOrder": 2
+          "displayOrder": 2,
+          "color": ""
         },
         {
           "command": "kiro-cli chat --trust-all-tools --resume",
           "global": true,
           "name": " Kiro-Cli",
           "windowTitle": "",
-          "displayOrder": 3
+          "displayOrder": 3,
+          "color": ""
         },
         {
           "command": "npx -y convex@latest dev",
           "global": true,
           "name": " convex",
           "windowTitle": "",
-          "displayOrder": 4
+          "displayOrder": 4,
+          "color": ""
         },
         {
           "command": "net stop winnat",
           "global": true,
           "name": "󰖩 net stop winnat",
           "windowTitle": "",
-          "displayOrder": 6
+          "displayOrder": 6,
+          "color": ""
         },
         {
           "command": "explorer .",
           "global": true,
           "name": " Explorer",
           "windowTitle": "",
-          "displayOrder": 7
+          "displayOrder": 7,
+          "color": ""
         }
       ],
       "category": "Tool",
       "layout": {
         "layoutClass": "split-tabs",
         "paneIds": [
-          "main",
-          "pane-1790200888615-1"
+          "pane-1790219337923-1"
         ]
       }
     },
@@ -886,7 +892,8 @@
           "global": true,
           "name": " npm run deploy:pages",
           "windowTitle": "",
-          "displayOrder": 5
+          "displayOrder": 5,
+          "color": ""
         }
       ]
     },

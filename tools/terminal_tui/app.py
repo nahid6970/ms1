@@ -509,7 +509,8 @@ def load_projects_config():
                         "global": bm.get("global", False),
                         "name": bm.get("name", ""),
                         "windowTitle": bm.get("windowTitle", ""),
-                        "displayOrder": bm.get("displayOrder")
+                        "displayOrder": bm.get("displayOrder"),
+                        "color": bm.get("color", "")
                     })
             p["bookmarks"] = sanitized
     return projs
@@ -649,6 +650,9 @@ def api_add_bookmark(project):
     command = data.get("command", "").strip()
     name = data.get("name", "").strip()
     window_title = data.get("windowTitle", "").strip()
+    color = data.get("color", "").strip()
+    if color and not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+        return jsonify({"error": "Color must be a six-digit hex value"}), 400
     if not command:
         return jsonify({"error": "Command is required"}), 400
         
@@ -666,7 +670,7 @@ def api_add_bookmark(project):
             exists = True
             break
     if not exists:
-        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title})
+        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title, "color": color})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
@@ -706,10 +710,13 @@ def api_edit_bookmark(project, index):
     command = data.get("command", "").strip()
     name = data.get("name", "").strip()
     window_title = data.get("windowTitle", "").strip()
+    color = data.get("color", "").strip()
     new_index = data.get("newIndex")
     
     if not command:
         return jsonify({"error": "Command is required"}), 400
+    if color and not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+        return jsonify({"error": "Color must be a six-digit hex value"}), 400
         
     projects = load_projects_config()
     proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
@@ -722,6 +729,7 @@ def api_edit_bookmark(project, index):
         bm["command"] = command
         bm["name"] = name
         bm["windowTitle"] = window_title
+        bm["color"] = color
         
         # If new_index is provided and valid, move the bookmark
         if new_index is not None:

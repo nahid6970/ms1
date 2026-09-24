@@ -2,6 +2,13 @@
 
 ---
 
+## [2026-09-24] - Add Colors to Bookmark Commands
+**Problem:** Bookmark commands had no per-command visual color, making it harder to distinguish frequently used tools in the merged command list.
+**Solution:** Added an optional custom hex color to the bookmark editor. The color is saved with the bookmark and applied to its display name; disabling the option restores the normal theme text color.
+**Files Modified:** `app.py`, `templates/index.html`
+
+---
+
 ## [2026-09-24] - Global Bookmarks Could Not Be Dragged
 **Problem:** A global bookmark appeared in the merged bookmark list without a usable drag operation. Drops onto bookmarks from another workspace did nothing.
 **Root Cause:** The drag handler required source and target bookmarks to belong to the same workspace, even though the visible list merges bookmarks from multiple workspaces.

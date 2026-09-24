@@ -5,6 +5,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-24] - Add Bookmark Command Colors
+**What We Accomplished:**
+- Added an optional color picker to the bookmark edit/add dialog.
+- Persisted validated six-digit hex colors with bookmark records.
+- Applied custom colors to bookmark display names while retaining the default theme color when disabled.
+
+**Files Modified:**
+- `app.py`
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-24] - Allow Dragging Global Bookmarks
 **What We Accomplished:**
 - Added drag handles to global bookmarks in the merged bookmark list.

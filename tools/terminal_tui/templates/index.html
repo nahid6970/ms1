@@ -2463,6 +2463,11 @@
                     <label for="edit-bookmark-name" style="font-size: 0.8rem; font-weight: 500;">Display Name (Alias)</label>
                     <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Build Project" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
                 </div>
+                <div class="form-group" style="margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="edit-bookmark-color-enabled" style="accent-color: var(--accent-color); cursor: pointer;">
+                    <label for="edit-bookmark-color" style="font-size: 0.8rem; font-weight: 500;">Custom command color</label>
+                    <input type="color" id="edit-bookmark-color" value="#d1d5db" title="Choose command color" style="width: 34px; height: 26px; padding: 1px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer;">
+                </div>
 
                 <div id="bookmark-position-row" class="form-group" style="margin-bottom: 20px;">
                     <label for="edit-bookmark-index" style="font-size: 0.8rem; font-weight: 500;">Position / Order</label>
@@ -6165,6 +6170,7 @@
                     const isGlobal = (typeof bm === 'object') ? (bm.global === true) : false;
                     const bmName = (typeof bm === 'object') ? (bm.name || '') : '';
                     const windowTitle = (typeof bm === 'object') ? (bm.windowTitle || '') : '';
+                    const bmColor = (typeof bm === 'object' && /^#[0-9a-fA-F]{6}$/.test(bm.color || '')) ? bm.color : '';
                     
                     if (isCurrent || isGlobal) {
                         displayList.push({
@@ -6172,6 +6178,7 @@
                             global: isGlobal,
                             name: bmName,
                             windowTitle: windowTitle,
+                            color: bmColor,
                             displayOrder: (typeof bm === 'object' && Number.isFinite(Number(bm.displayOrder))) ? Number(bm.displayOrder) : null,
                             project: p.name,
                             index: idx,
@@ -6247,7 +6254,7 @@
                     row.oncontextmenu = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle);
+                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle, bm.color);
                     };
 
                     // Drag-to-reorder is available for local and global bookmarks.
@@ -6297,7 +6304,7 @@
 
                     row.innerHTML = `
                         ${dragHandle}
-                        <span style="font-size: 0.85rem; color: var(--text-primary); white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
+                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                             <button type="button" class="subcmd-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdPanel(this, '${bm.command.replace(/'/g, "\\'")}')" title="Sub-commands">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -6337,13 +6344,15 @@
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${activeProject}`;
             document.getElementById('edit-bookmark-cmd').value = '';
             document.getElementById('edit-bookmark-name').value = '';
+            document.getElementById('edit-bookmark-color-enabled').checked = false;
+            document.getElementById('edit-bookmark-color').value = '#d1d5db';
             document.getElementById('bookmark-modal-save-btn').innerText = 'Add';
             document.getElementById('bookmark-position-row').style.display = 'none';
             document.getElementById('bookmark-modal').classList.add('show');
             document.getElementById('edit-bookmark-cmd').focus();
         }
 
-        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle) {
+        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle, currentColor) {
             _bookmarkModalIsNew = false;
             editingBookmarkProj = projName;
             editingBookmarkIndex = index;
@@ -6354,6 +6363,8 @@
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName} (Current Position: ${index + 1})`;
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
+            document.getElementById('edit-bookmark-color-enabled').checked = !!currentColor;
+            document.getElementById('edit-bookmark-color').value = currentColor || '#d1d5db';
             
             // Find the project's bookmarks to populate select dropdown
             const proj = projects.find(p => p.name.toLowerCase() == projName.toLowerCase());
@@ -6484,6 +6495,9 @@
 
             const cmd = document.getElementById('edit-bookmark-cmd').value.trim();
             const alias = document.getElementById('edit-bookmark-name').value.trim();
+            const color = document.getElementById('edit-bookmark-color-enabled').checked
+                ? document.getElementById('edit-bookmark-color').value
+                : '';
 
             if (!cmd) {
                 alert("Command is required");
@@ -6496,7 +6510,7 @@
                     const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command: cmd, name: alias })
+                        body: JSON.stringify({ command: cmd, name: alias, color })
                     });
                     if (response.ok) {
                         projects = await response.json();
@@ -6523,6 +6537,7 @@
                         command: cmd,
                         name: alias,
                         windowTitle: "",
+                        color,
                         newIndex: newIndex
                     })
                 });
