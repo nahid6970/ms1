@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
+    <style>
+      .cut-modifier-head{display:flex;align-items:center;gap:8px;padding:7px 8px;margin-bottom:8px;background:#faf9ff;border:1px solid #e8e6ff;border-radius:6px;color:#6f6cff}.cut-modifier-icon{width:25px;height:25px;display:grid;place-items:center;background:#6f6cff;color:#fff;border-radius:5px;font-size:14px}.cut-modifier-head strong,.cut-modifier-head small{display:block}.cut-modifier-head strong{font-size:10px;color:#20222a}.cut-modifier-head small{margin-top:2px;font-size:8px;color:#a2a3ae}.cut-gizmo-modes{display:flex;gap:4px;margin-bottom:8px}.cut-gizmo-mode{height:27px;flex:1;border-radius:5px;border:1px solid #e8e9ee;background:#fafafd;font:600 9px Manrope,sans-serif;color:#6a6b76;cursor:pointer}.cut-gizmo-mode.active{background:#f0efff;border-color:#bcbaff;color:#6f6cff}
+    </style>
   </head>
   <body>
     <div class="startup-error" id="startup-error" hidden><div class="startup-card"><div class="startup-symbol">!</div><h2>Forma could not start</h2><p>The 3D engine did not load. Start Forma through a local web server, then reload:</p><code>python -m http.server 8000</code><p class="startup-small">Open <strong>http://localhost:8000</strong> — do not double-click index.html.</p><button onclick="location.reload()">Reload Forma</button></div></div>
@@ -30,6 +33,11 @@
           </div>
           <!-- cut context panel — shown only when cut tool is active -->
           <div id="cut-context" class="cut-context hidden">
+            <div class="cut-modifier-head"><span class="cut-modifier-icon">✂</span><div><strong>Cut modifier</strong><small>Manipulate the highlighted plane in the viewport</small></div></div>
+            <div class="cut-gizmo-modes">
+              <button class="cut-gizmo-mode active" id="cut-gizmo-move">↔ Move plane</button>
+              <button class="cut-gizmo-mode" id="cut-gizmo-rotate">⟳ Rotate plane</button>
+            </div>
             <div class="cut-ctx-axis">
               <button class="cut-ctx-pill active" data-cut-axis="y">Y</button>
               <button class="cut-ctx-pill" data-cut-axis="x">X</button>
@@ -48,7 +56,7 @@
               <input type="range" id="cut-gap-slider" class="cut-slider" min="0.02" max="2" step="0.01" value="0.3" />
             </div>
             <button class="accent-btn cut-ctx-apply" id="ctx-apply-btn">✓ Apply cut</button>
-            <p class="cut-ctx-tip">Drag sliders to position · <kbd>Esc</kbd> cancel</p>
+            <p class="cut-ctx-tip">Drag the purple plane to place it · rotate for any angle</p>
           </div>
           <div class="section-label">ADD OBJECT</div>
           <div class="add-list">
@@ -95,6 +103,6 @@
     <input type="file" id="load-input" accept="application/json,.json" hidden />
     <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","three-mesh-bvh":"./vendor/three-mesh-bvh/build/index.module.js","three-bvh-csg":"./vendor/three-bvh-csg/build/index.module.js"}}</script>
     <script>window.setTimeout(function(){if(!window.__formaStarted){document.getElementById('startup-error').hidden=false;}},1800);</script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=20260924-cutbox"></script>
   </body>
 </html>

@@ -17,6 +17,7 @@ const transform = new TransformControls(camera, renderer.domElement);
 scene.add(transform);
 transform.addEventListener('dragging-changed', e => controls.enabled=!e.value);
 transform.addEventListener('objectChange', syncInspector);
+transform.addEventListener('objectChange', () => { if(tool==='cut') updateCutPlanes(); });
 
 scene.add(new THREE.HemisphereLight(0xffffff,0x9ea7b5,2.2));
 const key=new THREE.DirectionalLight(0xffffff,3); key.position.set(5,9,4); key.castShadow=true; scene.add(key);
@@ -46,7 +47,7 @@ function select(obj, additive=false) {
   transform.detach();
   if(selected && tool!=='select' && tool!=='cut') transform.attach(selected);
   syncInspector(); updateScene(); updateBoolUI();
-  if(tool==='cut' && selected) initCutPanel();
+  if(tool==='cut' && selected){ initCutPanel(); transform.setMode(cutGizmoMode); transform.attach(cutFrame); }
 }
 
 function updateBoolUI() {
@@ -61,7 +62,7 @@ function setTool(next) {
   document.querySelectorAll('.tool-card').forEach(b=>b.classList.toggle('active',b.dataset.tool===next));
   if(next==='cut'){
     transform.detach();
-    if(selected) initCutPanel(); else toast('Select an object first');
+    if(selected){ initCutPanel(); transform.setMode(cutGizmoMode); transform.attach(cutFrame); } else toast('Select an object first');
   } else {
     hideCutPlane();
     document.getElementById('cut-context').classList.add('hidden');
@@ -146,13 +147,14 @@ function pasteObject() {
 // ── Cut / Slice ───────────────────────────────────────────────────────────
 let cutAxis='y', cutMode='slice', cutPos=0, cutGap=0.3;
 let cutBBox=null; // world bbox of selected when cut panel opened
+let cutGizmoMode='translate', cutObjectCenter=new THREE.Vector3(), cutSliderMin=0, cutSliderMax=1;
+const cutFrame=new THREE.Object3D(); cutFrame.name='Cut plane modifier'; scene.add(cutFrame);
 
-// Two semi-transparent planes as visual preview
-const cutMatA = new THREE.MeshBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false});
-const cutMatB = new THREE.MeshBasicMaterial({color:0xff7b58,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false});
-const cutPlaneA = new THREE.Mesh(new THREE.PlaneGeometry(40,40), cutMatA);
-const cutPlaneB = new THREE.Mesh(new THREE.PlaneGeometry(40,40), cutMatB);
-cutPlaneA.renderOrder = cutPlaneB.renderOrder = 999;
+// Compact cutter box: the only cut preview shown in the viewport.
+const cutHandleMat = new THREE.MeshStandardMaterial({color:0x6f6cff,transparent:true,opacity:0.22,roughness:0.35,metalness:0.05,side:THREE.DoubleSide,depthWrite:false});
+const cutHandle = new THREE.Mesh(new THREE.BoxGeometry(1,1,1),cutHandleMat);
+const cutHandleEdges = new THREE.LineSegments(new THREE.EdgesGeometry(cutHandle.geometry),new THREE.LineBasicMaterial({color:0x6f6cff,transparent:true,opacity:0.95}));
+cutHandle.add(cutHandleEdges); cutHandle.renderOrder=998; cutHandle.visible=false; cutFrame.add(cutHandle);
 
 function initCutPanel() {
   if(!selected) return;
@@ -161,6 +163,11 @@ function initCutPanel() {
   const size = cutBBox.getSize(new THREE.Vector3());
   // auto-pick longest axis
   cutAxis = size.x>=size.y&&size.x>=size.z ? 'x' : size.z>=size.y ? 'z' : 'y';
+  cutObjectCenter.copy(cutBBox.getCenter(new THREE.Vector3()));
+  setCutFrameAxis(cutAxis, false);
+  const objectSize=cutBBox.getSize(new THREE.Vector3());
+  const handleSize=Math.max(objectSize.x,objectSize.y,objectSize.z)*1.12;
+  cutHandle.scale.set(handleSize,handleSize,Math.max(0.04,handleSize*0.035));
 
   const min = cutAxis==='y'?cutBBox.min.y : cutAxis==='x'?cutBBox.min.x : cutBBox.min.z;
   const max = cutAxis==='y'?cutBBox.max.y : cutAxis==='x'?cutBBox.max.x : cutBBox.max.z;
@@ -172,8 +179,9 @@ function initCutPanel() {
   // configure slider range to match object extent with padding
   const pad=(max-min)*0.1;
   const slider=document.getElementById('cut-pos-slider');
-  slider.min=(min-pad).toFixed(3);
-  slider.max=(max+pad).toFixed(3);
+  cutSliderMin=min-pad; cutSliderMax=max+pad;
+  slider.min=cutSliderMin.toFixed(3);
+  slider.max=cutSliderMax.toFixed(3);
   slider.step=((max-min)/200).toFixed(4);
   slider.value=cutPos.toFixed(3);
 
@@ -192,28 +200,29 @@ function initCutPanel() {
 }
 
 function hideCutPlane() {
-  scene.remove(cutPlaneA); scene.remove(cutPlaneB);
+  cutHandle.visible=false;
+  transform.detach();
+}
+
+function setCutFrameAxis(axis, keepPosition=false) {
+  if(!selected) return;
+  selected.updateMatrixWorld(true);
+  const bbox=new THREE.Box3().setFromObject(selected);
+  const center=bbox.getCenter(new THREE.Vector3());
+  const min=axis==='y'?bbox.min.y:axis==='x'?bbox.min.x:bbox.min.z;
+  const max=axis==='y'?bbox.max.y:axis==='x'?bbox.max.x:bbox.max.z;
+  const normal=new THREE.Vector3(axis==='x'?1:0,axis==='y'?1:0,axis==='z'?1:0);
+  cutFrame.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
+  if(!keepPosition) cutFrame.position.copy(center);
+  else cutFrame.position.copy(center).add(normal.multiplyScalar(cutPos-((min+max)/2)));
+  cutPos=cutFrame.position.dot(normal);
 }
 
 function updateCutPlanes() {
   if(!cutBBox) return;
-  const center = cutBBox.getCenter(new THREE.Vector3());
-  const half = cutMode==='band' ? cutGap/2 : 0;
-
-  if(cutAxis==='y') {
-    cutPlaneA.rotation.set(0,0,0); cutPlaneA.position.set(center.x, cutPos-half, center.z);
-    cutPlaneB.rotation.set(0,0,0); cutPlaneB.position.set(center.x, cutPos+half, center.z);
-  } else if(cutAxis==='x') {
-    cutPlaneA.rotation.set(0,Math.PI/2,0); cutPlaneA.position.set(cutPos-half, center.y, center.z);
-    cutPlaneB.rotation.set(0,Math.PI/2,0); cutPlaneB.position.set(cutPos+half, center.y, center.z);
-  } else {
-    cutPlaneA.rotation.set(Math.PI/2,0,0); cutPlaneA.position.set(center.x, center.y, cutPos-half);
-    cutPlaneB.rotation.set(Math.PI/2,0,0); cutPlaneB.position.set(center.x, center.y, cutPos+half);
-  }
-
-  scene.add(cutPlaneA);
-  if(cutMode==='band') scene.add(cutPlaneB); else scene.remove(cutPlaneB);
-
+  cutHandle.visible=true;
+  const handleDepth=Math.max(0.04,cutMode==='band'?cutGap:cutHandle.scale.x*0.035);
+  cutHandle.scale.z=handleDepth;
   // gap controls visibility
   document.getElementById('cut-gap-row').classList.toggle('hidden', cutMode!=='band');
   updateCutReadouts();
@@ -229,7 +238,7 @@ function updateCutReadouts() {
 function setCutAxis(axis) {
   cutAxis=axis;
   document.querySelectorAll('[data-cut-axis]').forEach(b=>b.classList.toggle('active',b.dataset.cutAxis===axis));
-  if(selected) initCutPanel();
+  if(selected){ setCutFrameAxis(axis); updateCutPlanes(); }
 }
 
 function setCutMode(m) {
@@ -239,17 +248,29 @@ function setCutMode(m) {
   updateCutPlanes();
 }
 
+function setCutGizmoMode(mode) {
+  cutGizmoMode=mode;
+  document.querySelectorAll('.cut-gizmo-mode').forEach(b=>b.classList.toggle('active',b.id===`cut-gizmo-${mode==='translate'?'move':'rotate'}`));
+  if(tool==='cut' && selected){
+    transform.enabled=true;
+    transform.setSpace('world');
+    transform.setMode(mode);
+    transform.attach(cutFrame);
+    toast(mode==='rotate'?'Rotate gizmo active — drag a colored ring':'Move gizmo active — drag an arrow');
+  }
+}
+
 // ── CSG helpers ──────────────────────────────────────────────────────────
 function toBakedBrush(mesh) {
   const geo=mesh.geometry.clone();
   mesh.updateMatrixWorld(true); geo.applyMatrix4(mesh.matrixWorld);
   const b=new Brush(geo,mesh.material); b.updateMatrixWorld(true); return b;
 }
-function csgSubtractBox(targetMesh, wx,wy,wz, cx,cy,cz) {
+function csgSubtractBox(targetMesh, wx,wy,wz, cx,cy,cz, quaternion=null) {
   try {
     const brushA=toBakedBrush(targetMesh);
     const brushB=new Brush(new THREE.BoxGeometry(wx,wy,wz), new THREE.MeshStandardMaterial());
-    brushB.position.set(cx,cy,cz); brushB.updateMatrixWorld(true);
+    brushB.position.set(cx,cy,cz); if(quaternion) brushB.quaternion.copy(quaternion); brushB.updateMatrixWorld(true);
     const result=(new Evaluator()).evaluate(brushA,brushB,SUBTRACTION);
     result.castShadow=result.receiveShadow=true;
     result.material=new THREE.MeshStandardMaterial({color:targetMesh.material.color.getHex(),metalness:targetMesh.material.metalness,roughness:targetMesh.material.roughness});
@@ -269,22 +290,16 @@ function performSlice() {
   if(!selected){toast('Select an object first');return;}
   selected.updateMatrixWorld(true);
   const bbox=new THREE.Box3().setFromObject(selected);
-  const center=bbox.getCenter(new THREE.Vector3());
-  const pos=cutPos, BIG=500;
+  const normal=new THREE.Vector3(0,0,1).applyQuaternion(cutFrame.quaternion).normalize();
+  const plane=cutFrame.position.clone(), BIG=500;
   let resA, resB;
-  if(cutAxis==='y') {
-    const tH=bbox.max.y-pos+BIG; resA=csgSubtractBox(selected,BIG,tH,BIG,center.x,pos+tH/2,center.z);
-    const bH=pos-bbox.min.y+BIG; resB=csgSubtractBox(selected,BIG,bH,BIG,center.x,pos-bH/2,center.z);
-  } else if(cutAxis==='x') {
-    const rH=bbox.max.x-pos+BIG; resA=csgSubtractBox(selected,rH,BIG,BIG,pos+rH/2,center.y,center.z);
-    const lH=pos-bbox.min.x+BIG; resB=csgSubtractBox(selected,lH,BIG,BIG,pos-lH/2,center.y,center.z);
-  } else {
-    const fH=bbox.max.z-pos+BIG; resA=csgSubtractBox(selected,BIG,BIG,fH,center.x,center.y,pos+fH/2);
-    const bkH=pos-bbox.min.z+BIG; resB=csgSubtractBox(selected,BIG,BIG,bkH,center.x,center.y,pos-bkH/2);
-  }
+  const positive=plane.clone().addScaledVector(normal,BIG/2);
+  const negative=plane.clone().addScaledVector(normal,-BIG/2);
+  resA=csgSubtractBox(selected,BIG,BIG,BIG,positive.x,positive.y,positive.z,cutFrame.quaternion);
+  resB=csgSubtractBox(selected,BIG,BIG,BIG,negative.x,negative.y,negative.z,cutFrame.quaternion);
   if(!resA||!resB) return;
   const g=0.12;
-  if(cutAxis==='y'){resA.position.y+=g;resB.position.y-=g;} else if(cutAxis==='x'){resA.position.x+=g;resB.position.x-=g;} else{resA.position.z+=g;resB.position.z-=g;}
+  resA.position.addScaledVector(normal,g); resB.position.addScaledVector(normal,-g);
   const nb=selected.name; resA.name=nb+' A'; resA.userData.type='sliced'; resB.name=nb+' B'; resB.userData.type='sliced';
   const old=selected; selected=null; selected2=null; hideCutPlane();
   document.getElementById('cut-context').classList.add('hidden');
@@ -297,12 +312,8 @@ function performBand() {
   if(!selected){toast('Select an object first');return;}
   selected.updateMatrixWorld(true);
   const bbox=new THREE.Box3().setFromObject(selected);
-  const center=bbox.getCenter(new THREE.Vector3());
-  const pos=cutPos, gap=Math.max(0.01,cutGap), BIG=500;
-  let result;
-  if(cutAxis==='y')      result=csgSubtractBox(selected,BIG,gap,BIG,center.x,pos,center.z);
-  else if(cutAxis==='x') result=csgSubtractBox(selected,gap,BIG,BIG,pos,center.y,center.z);
-  else                   result=csgSubtractBox(selected,BIG,BIG,gap,center.x,center.y,pos);
+  const gap=Math.max(0.01,cutGap), BIG=500, plane=cutFrame.position;
+  const result=csgSubtractBox(selected,BIG,BIG,gap,plane.x,plane.y,plane.z,cutFrame.quaternion);
   if(!result) return;
   result.name=selected.name+' (cut)'; result.userData.type='sliced';
   const old=selected; selected=null; hideCutPlane();
@@ -337,12 +348,16 @@ document.querySelectorAll('[data-bool]').forEach(b=>b.onclick=()=>performBool(b.
 
 // Cut axis pills
 document.querySelectorAll('[data-cut-axis]').forEach(b=>b.onclick=()=>setCutAxis(b.dataset.cutAxis));
+document.getElementById('cut-gizmo-move').onclick=()=>setCutGizmoMode('translate');
+document.getElementById('cut-gizmo-rotate').onclick=()=>setCutGizmoMode('rotate');
 // Cut mode
 document.getElementById('ctx-mode-slice').onclick=()=>setCutMode('slice');
 document.getElementById('ctx-mode-band').onclick=()=>setCutMode('band');
 // Cut position slider
 document.getElementById('cut-pos-slider').oninput=e=>{
   cutPos=parseFloat(e.target.value);
+  const normal=new THREE.Vector3(0,0,1).applyQuaternion(cutFrame.quaternion).normalize();
+  cutFrame.position.copy(cutObjectCenter).addScaledVector(normal,cutPos-cutObjectCenter.dot(normal));
   updateCutPlanes();
 };
 // Cut gap slider
@@ -395,6 +410,7 @@ document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT') return;
   if(e.ctrlKey&&e.key.toLowerCase()==='c'){copySelected();return;}
   if(e.ctrlKey&&e.key.toLowerCase()==='v'){pasteObject();return;}
+  if(tool==='cut' && e.key.toLowerCase()==='r'){setCutGizmoMode('rotate');return;}
   const map={q:'select',w:'translate',e:'rotate',r:'scale',t:'cut'};
   if(map[e.key.toLowerCase()]) setTool(map[e.key.toLowerCase()]);
   if(e.key==='Escape'&&tool==='cut') setTool('select');
