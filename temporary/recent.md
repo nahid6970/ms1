@@ -8,6 +8,7 @@ Vanilla JS + Three.js r161 (no build step), single-page 3D modeling studio. Thre
 **`vendor/`** — Three.js r161, three-mesh-bvh@0.6.8, three-bvh-csg@0.0.17 all local.
 
 **`app.js`** (full rewrite this session)
+- `Ctrl+A` selects all objects and attaches a shared translation pivot; moving its arrows translates every object together without changing individual saved transforms.
 - Fixed `transform.getHelper()` crash (r161 API)
 - Fixed PNG export (data URL direct, not in Blob)
 - `clipboard` + `copySelected()` / `pasteObject()` — Ctrl+C / Ctrl+V, pastes at exact position

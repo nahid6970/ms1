@@ -26,6 +26,7 @@ Then open `http://localhost:8000`. No package download or build required — Thr
 - **Cut / Slice** `T` — slider-based cut tool (see below)
 - `F` — frame selected object
 - `Delete` / `Backspace` — remove selected object
+- `Ctrl+A` — select all objects and move them together with one shared gizmo
 
 ### Cut / Slice tool (`T`)
 Select an object, press `T`. The left panel shows:

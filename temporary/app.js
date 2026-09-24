@@ -21,6 +21,13 @@ transform.addEventListener('mouseDown', () => { gizmoPointerDown=true; });
 transform.addEventListener('mouseUp', () => { gizmoPointerDown=false; });
 transform.addEventListener('objectChange', syncInspector);
 transform.addEventListener('objectChange', () => { if(tool==='cut') updateCutPlanes(); });
+transform.addEventListener('objectChange', () => {
+  if(!multiSelected.length || transform.object!==multiPivot) return;
+  const delta=multiPivot.position.clone().sub(multiLastPosition);
+  multiSelected.forEach(obj=>obj.position.add(delta));
+  multiLastPosition.copy(multiPivot.position);
+  updateScene();
+});
 
 scene.add(new THREE.HemisphereLight(0xffffff,0x9ea7b5,2.2));
 const key=new THREE.DirectionalLight(0xffffff,3); key.position.set(5,9,4); key.castShadow=true; scene.add(key);
@@ -29,6 +36,9 @@ const ground = new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.ShadowMat
 ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 
 let selected=null, selected2=null, tool='select', idCounter=1, clipboard=null;
+let multiSelected=[];
+const multiPivot=new THREE.Object3D(); multiPivot.name='Multi-object move pivot'; scene.add(multiPivot);
+const multiLastPosition=new THREE.Vector3();
 const objects=[];
 const colors=['#6f6cff','#ff7b58','#55b5a1','#e8ad58','#d975aa'];
 const geometryFor = type => ({box:new THREE.BoxGeometry(1.5,1.5,1.5),sphere:new THREE.SphereGeometry(1,32,20),cylinder:new THREE.CylinderGeometry(.8,.8,1.7,32),torus:new THREE.TorusGeometry(.75,.28,16,40)})[type];
@@ -48,12 +58,28 @@ function addObject(type='box', data={}) {
 }
 
 function select(obj, additive=false) {
+  multiSelected=[];
   if(additive && selected && obj && obj!==selected){selected2=obj;}
   else{selected=obj; selected2=null;}
   transform.detach();
   if(selected && tool!=='select' && tool!=='cut') transform.attach(selected);
   syncInspector(); updateScene(); updateBoolUI();
   if(tool==='cut' && selected){ initCutPanel(); transform.setMode(cutGizmoMode); transform.attach(cutFrame); }
+}
+
+function selectAllObjects() {
+  if(!objects.length) return;
+  multiSelected=objects.slice();
+  selected=multiSelected[0]; selected2=null;
+  const bounds=new THREE.Box3(); multiSelected.forEach(obj=>bounds.expandByObject(obj));
+  bounds.getCenter(multiPivot.position);
+  multiLastPosition.copy(multiPivot.position);
+  transform.detach();
+  tool='translate';
+  document.querySelectorAll('.tool-card').forEach(b=>b.classList.toggle('active',b.dataset.tool==='translate'));
+  transform.setMode('translate'); transform.attach(multiPivot);
+  syncInspector(); updateScene(); updateBoolUI();
+  toast(`Selected ${multiSelected.length} objects — drag an arrow to move together`);
 }
 
 function updateBoolUI() {
@@ -72,7 +98,12 @@ function setTool(next) {
   } else {
     hideCutPlane();
     document.getElementById('cut-context').classList.add('hidden');
-    if(selected&&next!=='select'){transform.setMode(next==='translate'?'translate':next==='rotate'?'rotate':'scale');transform.attach(selected);}
+    if(multiSelected.length && next==='translate'){
+      transform.setMode('translate'); transform.attach(multiPivot);
+    } else if(selected&&next!=='select'){
+      multiSelected=[];
+      transform.setMode(next==='translate'?'translate':next==='rotate'?'rotate':'scale');transform.attach(selected);
+    }
     else transform.detach();
   }
 }
@@ -100,7 +131,7 @@ function updateScene() {
   tree.innerHTML=objects.length?'':`<div class="tree-empty">Your scene is empty</div>`;
   objects.forEach(o=>{
     const row=document.createElement('button');
-    const isSel=o===selected||o===selected2;
+    const isSel=o===selected||o===selected2||multiSelected.includes(o);
     row.className=`tree-row ${isSel?'selected':''}`;
     if(o===selected2) row.style.opacity='0.7';
     row.innerHTML=`<span class="tree-icon"></span><span class="tree-name">${o.name}</span><span class="tree-type">${o.userData.type}</span>`;
@@ -511,6 +542,7 @@ document.addEventListener('keydown', e=>{
   if(e.target.tagName==='INPUT') return;
   if(e.ctrlKey&&e.key.toLowerCase()==='c'){copySelected();return;}
   if(e.ctrlKey&&e.key.toLowerCase()==='v'){pasteObject();return;}
+  if(e.ctrlKey&&e.key.toLowerCase()==='a'){e.preventDefault();selectAllObjects();return;}
   if(tool==='cut' && e.key.toLowerCase()==='r'){setCutGizmoMode('rotate');return;}
   if(tool==='cut' && e.key.toLowerCase()==='s'){setCutGizmoMode('scale');return;}
   const map={q:'select',w:'translate',e:'rotate',r:'scale',t:'cut'};

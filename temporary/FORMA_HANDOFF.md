@@ -42,6 +42,7 @@ Keyboard shortcuts should also work:
 - `R` while Cut is active: switch the cutter to rotate mode. Use the Move plane / Rotate plane buttons to switch gizmo modes.
 - `S` while Cut is active: switch the cutter to scale mode and limit the cut to its resized footprint.
 - `F`: frame the selected object with the camera.
+- `Ctrl+A`: select all scene objects and use a shared Move gizmo to translate them together.
 - Delete / Backspace: remove the selected object.
 
 The viewport should support orbiting with mouse drag and zooming with the mouse wheel.
