@@ -24,6 +24,9 @@ The left sidebar should add these primitives to the scene:
 - Sphere
 - Cylinder
 - Torus
+- Triangle prism
+- Cone
+- Capsule
 
 Keyboard shortcuts should also work:
 
@@ -31,6 +34,9 @@ Keyboard shortcuts should also work:
 - `2` — add sphere
 - `3` — add cylinder
 - `4` — add torus
+- `5` — add triangle prism
+- `6` — add cone
+- `7` — add capsule
 
 ### Transform tools
 

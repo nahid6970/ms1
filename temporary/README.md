@@ -15,8 +15,8 @@ Then open `http://localhost:8000`. No package download or build required — Thr
 ## Features
 
 ### Primitives
-- Cube, Sphere, Cylinder, Torus
-- Keyboard shortcuts: `1` `2` `3` `4`
+- Cube, Sphere, Cylinder, Torus, Triangle, Cone, Capsule
+- Keyboard shortcuts: `1` `2` `3` `4` `5` `6` `7`
 
 ### Transform tools
 - **Select** `Q` — click objects in viewport or scene tree

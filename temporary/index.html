@@ -15,6 +15,9 @@
       .cut-shape-row{display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:5px;margin:0 0 9px;color:#9b9da7;font:500 9px 'DM Mono',monospace}.cut-shape-btn{height:25px;border:1px solid #e8e9ee;border-radius:5px;background:#fafafd;color:#6a6b76;font:600 9px Manrope,sans-serif;cursor:pointer}.cut-shape-btn.active{background:#f0efff;border-color:#bcbaff;color:#6f6cff}
       .cut-uniform-row{padding:7px 8px;margin:0 0 9px;background:#fafafd;border:1px solid #e8e9ee;border-radius:5px}.cut-uniform-row>div{display:flex;justify-content:space-between;margin-bottom:5px;color:#9b9da7;font:9px 'DM Mono',monospace}.cut-uniform-row strong{color:#20222a}.cut-uniform-row input{width:100%;accent-color:#6f6cff}.cut-uniform-row.hidden{display:none}
     </style>
+    <style>
+      .triangle-glyph{transform:rotate(30deg);clip-path:polygon(50% 0,100% 100%,0 100%);background:#b1b2bb!important;border:0!important}.cone-glyph{border-radius:50% 50% 35% 35%;transform:scaleX(.7)}.capsule-glyph{border-radius:50%}
+    </style>
   </head>
   <body>
     <div class="startup-error" id="startup-error" hidden><div class="startup-card"><div class="startup-symbol">!</div><h2>Forma could not start</h2><p>The 3D engine did not load. Start Forma through a local web server, then reload:</p><code>python -m http.server 8000</code><p class="startup-small">Open <strong>http://localhost:8000</strong> — do not double-click index.html.</p><button onclick="location.reload()">Reload Forma</button></div></div>
@@ -71,6 +74,9 @@
             <button data-add="sphere"><span class="object-glyph sphere-glyph"></span>Sphere <kbd>2</kbd></button>
             <button data-add="cylinder"><span class="object-glyph cylinder-glyph"></span>Cylinder <kbd>3</kbd></button>
             <button data-add="torus"><span class="object-glyph torus-glyph"></span>Torus <kbd>4</kbd></button>
+            <button data-add="triangle"><span class="object-glyph triangle-glyph"></span>Triangle <kbd>5</kbd></button>
+            <button data-add="cone"><span class="object-glyph cone-glyph"></span>Cone <kbd>6</kbd></button>
+            <button data-add="capsule"><span class="object-glyph capsule-glyph"></span>Capsule <kbd>7</kbd></button>
           </div>
           <div class="section-label">BOOLEAN OPS <span class="hint">A+B</span></div>
           <div class="bool-hint" id="bool-hint">Select 2 objects</div>
@@ -110,6 +116,6 @@
     <input type="file" id="load-input" accept="application/json,.json" hidden />
     <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","three-mesh-bvh":"./vendor/three-mesh-bvh/build/index.module.js","three-bvh-csg":"./vendor/three-bvh-csg/build/index.module.js"}}</script>
     <script>window.setTimeout(function(){if(!window.__formaStarted){document.getElementById('startup-error').hidden=false;}},1800);</script>
-    <script type="module" src="app.js?v=20260924-multimove"></script>
+    <script type="module" src="app.js?v=20260924-primitives"></script>
   </body>
 </html>

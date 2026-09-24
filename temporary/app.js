@@ -41,7 +41,15 @@ const multiPivot=new THREE.Object3D(); multiPivot.name='Multi-object move pivot'
 const multiLastPosition=new THREE.Vector3();
 const objects=[];
 const colors=['#6f6cff','#ff7b58','#55b5a1','#e8ad58','#d975aa'];
-const geometryFor = type => ({box:new THREE.BoxGeometry(1.5,1.5,1.5),sphere:new THREE.SphereGeometry(1,32,20),cylinder:new THREE.CylinderGeometry(.8,.8,1.7,32),torus:new THREE.TorusGeometry(.75,.28,16,40)})[type];
+const geometryFor = type => ({
+  box:new THREE.BoxGeometry(1.5,1.5,1.5),
+  sphere:new THREE.SphereGeometry(1,32,20),
+  cylinder:new THREE.CylinderGeometry(.8,.8,1.7,32),
+  torus:new THREE.TorusGeometry(.75,.28,16,40),
+  triangle:new THREE.ConeGeometry(.9,1.6,3),
+  cone:new THREE.ConeGeometry(.8,1.7,32),
+  capsule:new THREE.CapsuleGeometry(.55,1.1,8,16)
+})[type];
 
 function addObject(type='box', data={}) {
   const material=new THREE.MeshStandardMaterial({color:data.color||colors[(objects.length)%colors.length],metalness:data.metalness??.2,roughness:data.roughness??.4});
@@ -554,6 +562,9 @@ document.addEventListener('keydown', e=>{
   if(e.key==='2') addObject('sphere');
   if(e.key==='3') addObject('cylinder');
   if(e.key==='4') addObject('torus');
+  if(e.key==='5') addObject('triangle');
+  if(e.key==='6') addObject('cone');
+  if(e.key==='7') addObject('capsule');
 });
 
 $('#load-input').onchange=e=>{
