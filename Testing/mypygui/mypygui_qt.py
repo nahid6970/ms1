@@ -6050,10 +6050,7 @@ class TranscriptionDialog(QDialog):
                 color: #aaaaaa;
                 border: 1px solid #2e2e2e;
                 border-radius: 3px;
-                font-family: 'JetBrainsMono NFP', 'Consolas', sans-serif;
-                font-size: 8pt;
-                font-weight: bold;
-                padding: 4px 10px;
+                padding: 0px;
             }}
             QPushButton#action_btn:hover {{
                 background: {accent_dim};
@@ -6145,13 +6142,34 @@ class TranscriptionDialog(QDialog):
         footer_layout.setContentsMargins(10, 4, 10, 10)
         footer_layout.setSpacing(6)
 
-        for mode, icon, label, tip in (
-            ("search",    "🔍", "Search",  "Google search"),
-            ("clipboard", "📋", "Paste",   "Copy/paste to active window"),
-            ("gg",        "⚡", "GG",      "Run GG"),
+        action_icons = {
+            "search": '<circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 4.2 4.2"/>',
+            "clipboard": '<rect x="6" y="4.5" width="12" height="16" rx="1.5"/><path d="M9 4.5v-2h6v2M9 9h6M9 12h6M9 15h4"/>',
+            "gg": '<rect x="2.5" y="4" width="19" height="16" rx="2"/><path d="m7.5 9 3 3-3 3M13 15h4"/>',
+        }
+        for mode, label, tip in (
+            ("search",    "Search", "Google search"),
+            ("clipboard", "Paste",  "Copy/paste to active window"),
+            ("gg",        "GG",     "Run GG"),
         ):
-            btn = QPushButton(f"{icon}  {label}")
+            svg = (
+                f'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" '
+                f'viewBox="0 0 24 24" fill="none" stroke="{accent}" stroke-width="1.8" '
+                f'stroke-linecap="round" stroke-linejoin="round">{action_icons[mode]}</svg>'
+            )
+            icon_pixmap = QPixmap(24, 24)
+            icon_pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(icon_pixmap)
+            renderer = QSvgRenderer(QByteArray(svg.encode("utf-8")))
+            if renderer.isValid():
+                renderer.render(painter)
+            painter.end()
+            btn = QPushButton()
             btn.setObjectName("action_btn")
+            btn.setFixedSize(34, 30)
+            btn.setIcon(QIcon(icon_pixmap))
+            btn.setIconSize(QSize(18, 18))
+            btn.setAccessibleName(label)
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setToolTip(tip)
             btn.clicked.connect(
