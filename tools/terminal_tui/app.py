@@ -28,6 +28,8 @@ if sys.stdout is None or sys.stderr is None:
             sys.stderr = open(os.devnull, "w")
 
 import json
+import copy
+import shutil
 import queue
 import re
 import threading
@@ -621,6 +623,80 @@ def api_projects_post():
     save_projects_config(projects)
     
     return jsonify(scan_projects())
+
+@app.route('/api/projects/<project>/duplicate', methods=['POST'])
+def api_projects_duplicate(project):
+    projects = load_projects_config()
+    source = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not source:
+        return jsonify({"error": "Workspace not found"}), 404
+
+    configured_source_path = (source.get("path") or "").strip()
+    if not configured_source_path:
+        return jsonify({"error": "The workspace has no folder path"}), 400
+    source_path = os.path.abspath(os.path.expanduser(configured_source_path))
+    if not os.path.isdir(source_path):
+        return jsonify({"error": "The workspace folder does not exist"}), 400
+
+    source_name = source["name"]
+    source_folder = os.path.basename(os.path.normpath(source_path))
+    base_name = source.get("duplicateBaseName") or source_name
+    base_folder = source.get("duplicateBaseFolder") or source_folder
+    parent_path = os.path.dirname(source_path)
+    registered_names = {p["name"].casefold() for p in projects}
+    registered_paths = {
+        os.path.normcase(os.path.abspath(p.get("path", "")))
+        for p in projects if p.get("path")
+    }
+
+    suffix = 2
+    while True:
+        new_name = f"{base_name}-{suffix}"
+        new_path = os.path.join(parent_path, f"{base_folder}-{suffix}")
+        normalized_path = os.path.normcase(os.path.abspath(new_path))
+        if (new_name.casefold() not in registered_names
+                and normalized_path not in registered_paths
+                and not os.path.exists(new_path)):
+            break
+        suffix += 1
+
+    ignored_copy_entries = {
+        ".git", ".venv", "venv", "node_modules", "__pycache__",
+        ".pytest_cache", ".mypy_cache", ".ruff_cache", "dist", "build", "target"
+    }
+
+    def ignore_generated_entries(directory, entries):
+        return [entry for entry in entries if entry.casefold() in ignored_copy_entries]
+
+    destination_reserved = False
+    try:
+        # Reserve the selected path atomically so concurrent duplicate requests
+        # cannot overwrite an existing workspace folder.
+        os.mkdir(new_path)
+        destination_reserved = True
+        shutil.copytree(
+            source_path,
+            new_path,
+            dirs_exist_ok=True,
+            ignore=ignore_generated_entries,
+            symlinks=True
+        )
+
+        duplicate = copy.deepcopy(source)
+        duplicate["name"] = new_name
+        duplicate["path"] = os.path.abspath(new_path)
+        duplicate["pinned"] = False
+        duplicate["layout"] = {}
+        duplicate["duplicateBaseName"] = base_name
+        duplicate["duplicateBaseFolder"] = base_folder
+        projects.append(duplicate)
+        save_projects_config(projects)
+    except Exception as exc:
+        if destination_reserved and os.path.isdir(new_path):
+            shutil.rmtree(new_path, ignore_errors=True)
+        return jsonify({"error": f"Could not duplicate workspace: {exc}"}), 500
+
+    return jsonify({"name": new_name, "path": os.path.abspath(new_path), "projects": scan_projects()}), 201
 
 @app.route('/api/projects/<project>', methods=['DELETE'])
 def api_projects_delete(project):

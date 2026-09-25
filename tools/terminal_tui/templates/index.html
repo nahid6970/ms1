@@ -1598,6 +1598,12 @@
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
+                <button class="action-btn" id="workspace-duplicate-btn" onclick="duplicateActiveProject()" title="Duplicate active workspace" aria-label="Duplicate active workspace" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="8" y="8" width="13" height="13" rx="2"></rect>
+                        <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
+                    </svg>
+                </button>
                 <button class="action-btn" id="workspace-add-btn" onclick="openAddModal()" title="Add workspace folder" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -4723,6 +4729,51 @@
             document.getElementById('add-modal').classList.remove('show');
         }
 
+        async function duplicateActiveProject() {
+            if (!activeProject) return;
+            const source = projects.find(project => project.name === activeProject);
+            if (!source) return;
+
+            const confirmed = confirm(
+                `Copy workspace "${source.name}" into the next available numbered folder?\n\n` +
+                `The copy will omit .git, virtual environments, node_modules, caches, and common build output.`
+            );
+            if (!confirmed) return;
+
+            const button = document.getElementById('workspace-duplicate-btn');
+            if (button) {
+                button.disabled = true;
+                button.title = 'Copying workspace…';
+                button.style.opacity = '0.55';
+            }
+
+            try {
+                const response = await fetch(`/api/projects/${encodeURIComponent(activeProject)}/duplicate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    alert(data.error || 'Failed to duplicate workspace.');
+                    return;
+                }
+
+                projects = data.projects || projects;
+                handleSearch();
+                await selectProject(data.name);
+            } catch (err) {
+                console.error('Error duplicating workspace:', err);
+                alert('Could not duplicate the workspace. Check the server log for details.');
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.title = 'Duplicate active workspace';
+                    button.style.opacity = '';
+                }
+            }
+        }
+
         async function handleAddProject(event) {
             event.preventDefault();
             const errorMsg = document.getElementById('modal-error-msg');
@@ -5928,6 +5979,10 @@
             const addProjectBtn = document.getElementById('workspace-add-btn');
             if (addProjectBtn) {
                 addProjectBtn.style.display = 'flex';
+            }
+            const duplicateProjectBtn = document.getElementById('workspace-duplicate-btn');
+            if (duplicateProjectBtn) {
+                duplicateProjectBtn.style.display = activeProject ? 'flex' : 'none';
             }
             
             // 3. The workspace-header is ALWAYS visible now since it has global buttons

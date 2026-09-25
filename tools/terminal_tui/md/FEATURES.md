@@ -26,6 +26,7 @@
 - Pin/unpin — keep important workspaces at top
 - Drag-to-reorder — custom ordering persisted
 - Custom PowerShell profiles with project-specific prompt, aliases, history
+- Duplicate the active workspace into the next available `-2`, `-3`, … sibling folder, copying workspace settings and files while omitting Git metadata and common generated folders
 
 ---
 

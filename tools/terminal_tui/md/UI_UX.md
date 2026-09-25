@@ -156,5 +156,6 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - Projects can be searched and selected directly.
 - Commands searches saved bookmarks available to the active workspace.
 - The New project action opens the existing workspace creation form.
+- An icon beside the active workspace controls duplicates its files and settings into the next available numbered sibling, then switches to the copy.
 - Arrow keys navigate results and Enter activates the highlighted result.
 - Ctrl/Cmd+1–9 selects the corresponding visible project result.

@@ -202,6 +202,7 @@ function prompt { ... }
 ### Projects
 - `GET /api/projects` - List all workspaces
 - `POST /api/projects` - Add new workspace
+- `POST /api/projects/<project>/duplicate` - Copy workspace files/settings into the next numbered sibling
 - `DELETE /api/projects/<project>` - Delete workspace
 - `POST /api/projects/customize` - Update workspace settings
 - `POST /api/projects/reorder` - Reorder workspace list
@@ -315,6 +316,12 @@ python app.py
 3. Creates entry in projects.json
 4. Creates profile.ps1 in Project_data/<name>/
 5. Click workspace card to spawn terminal
+
+### Duplicating a Workspace
+1. Select a workspace and use the duplicate icon beside the workspace controls.
+2. The backend copies files into the next available numbered sibling folder (`name-2`, `name-3`, …), omitting `.git`, virtual environments, dependency folders, caches, and common build output.
+3. A separate workspace is registered with the source category, theme, and bookmarks; its terminal layout starts fresh.
+4. The new workspace is selected and gets a new per-workspace profile when its terminal starts.
 
 ### Customizing Workspace
 1. Right-click workspace card → Customize

@@ -2,6 +2,13 @@
 
 ---
 
+## [2026-09-26] - Duplicate a Workspace into a Numbered Copy
+**Problem:** There was no quick way to create a similar workspace with a separate copy of the current workspace files.
+**Solution:** Added an active-workspace duplicate action. It chooses the next available `-2`, `-3`, … sibling name, copies files while excluding Git metadata and common generated folders, copies category/theme/bookmarks, resets the terminal layout, registers the new workspace, and opens it.
+**Files Modified:** `app.py`, `templates/index.html`
+
+---
+
 ## [2026-09-25] - Git Monitor Missed Project After Folder Case Rename
 **Problem:** The Git status monitor did not reliably show edits in `testing/mypygui` after the parent directory casing changed from `Testing` to `testing`.
 **Root Cause:** Git stores the tracked path with its original casing while the workspace config uses the renamed casing; status and diff queries depended on Git's implicit case-insensitive path matching.

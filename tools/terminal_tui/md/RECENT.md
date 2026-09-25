@@ -5,6 +5,23 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-26] - Duplicate Workspace into Numbered Copy
+**What We Accomplished:**
+- Added an active-workspace duplicate button that creates the next available `-2`, `-3`, … sibling copy.
+- Copies files while excluding `.git`, virtual environments, dependency folders, caches, and common build output.
+- Carries over category, theme, and bookmarks, starts with a fresh terminal layout, and switches to the copy.
+
+**Files Modified:**
+- `app.py`
+- `templates/index.html`
+- `md/FEATURES.md`
+- `md/ARCHITECTURE.md`
+- `md/UI_UX.md`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-25] - Make Git Monitor Path Matching Case-Insensitive
 **What We Accomplished:**
 - Made workspace Git status, diff counts, and changed-file listing match project pathspecs without depending on directory-name casing.
