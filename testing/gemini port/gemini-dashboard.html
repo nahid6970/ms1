@@ -651,7 +651,7 @@
                         <div class="stat">
                             <span class="stat-label">Working Dir:</span>
                             <span class="stat-value"
-                                style="font-size: 0.75em; word-break: break-all;">C:\@delta\ms1\Testing\geminiTesting</span>
+                                style="font-size: 0.75em; word-break: break-all;">C:\@delta\ms1\testing\geminiTesting</span>
                         </div>
                     </div>
 
@@ -1057,7 +1057,7 @@ System Information:
             // Load current settings
             const settings = JSON.parse(localStorage.getItem('geminiSettings') || '{}');
 
-            document.getElementById('workingDirInput').value = settings.workingDir || 'C:\\@delta\\ms1\\Testing\\geminiTesting';
+            document.getElementById('workingDirInput').value = settings.workingDir || 'C:\\@delta\\ms1\\testing\\geminiTesting';
             document.getElementById('defaultModelInput').value = settings.defaultModel || 'gemini-pro';
             document.getElementById('defaultTempInput').value = settings.defaultTemp || '0.7';
             document.getElementById('defaultMaxTokensInput').value = settings.defaultMaxTokens || '2048';
