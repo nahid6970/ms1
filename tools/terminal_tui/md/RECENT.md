@@ -5,6 +5,18 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-09-25] - Make Git Monitor Path Matching Case-Insensitive
+**What We Accomplished:**
+- Made workspace Git status, diff counts, and changed-file listing match project pathspecs without depending on directory-name casing.
+- Covered the `Testing` to `testing` path case for the `mypygui` workspace.
+
+**Files Modified:**
+- `app.py`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-09-24] - Add Bookmark Command Colors
 **What We Accomplished:**
 - Added an optional color picker to the bookmark edit/add dialog.

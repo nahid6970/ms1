@@ -205,7 +205,7 @@ def get_git_status(path):
 
         # Get file statuses scoped to this project subfolder
         res_status = subprocess.run(
-            ["git", "status", "--porcelain", "-uall", "--", pathspec],
+            ["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--", pathspec],
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=2
         )
@@ -219,7 +219,7 @@ def get_git_status(path):
         insertions, deletions = 0, 0
         for extra_flag in [[], ["--cached"]]:
             res_diff = subprocess.run(
-                ["git", "diff", "--shortstat"] + extra_flag + ["--", pathspec],
+                ["git", "--icase-pathspecs", "diff", "--shortstat"] + extra_flag + ["--", pathspec],
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=2
             )
@@ -1033,7 +1033,7 @@ def api_git_changed_files(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
-        res = subprocess.run(["git", "status", "--porcelain", "-uall", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
+        res = subprocess.run(["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
         files = []
         for line in res.stdout.splitlines():
             if not line.strip():

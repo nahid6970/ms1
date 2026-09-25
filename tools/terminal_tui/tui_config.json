@@ -32,7 +32,7 @@
           "global": true,
           "name": " Antigravity",
           "windowTitle": "",
-          "displayOrder": 1,
+          "displayOrder": 4,
           "color": "#f7fb32"
         },
         {
@@ -40,7 +40,7 @@
           "global": true,
           "name": " Codex",
           "windowTitle": "",
-          "displayOrder": 2,
+          "displayOrder": 1,
           "color": "#85c4ff"
         },
         {
@@ -48,7 +48,7 @@
           "global": true,
           "name": " Kiro-Cli",
           "windowTitle": "",
-          "displayOrder": 3,
+          "displayOrder": 2,
           "color": "#b576d6"
         },
         {
@@ -56,7 +56,7 @@
           "global": true,
           "name": " convex",
           "windowTitle": "",
-          "displayOrder": 4,
+          "displayOrder": 3,
           "color": "#ee342f"
         },
         {

@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-09-25] - Git Monitor Missed Project After Folder Case Rename
+**Problem:** The Git status monitor did not reliably show edits in `testing/mypygui` after the parent directory casing changed from `Testing` to `testing`.
+**Root Cause:** Git stores the tracked path with its original casing while the workspace config uses the renamed casing; status and diff queries depended on Git's implicit case-insensitive path matching.
+**Solution:** Added Git's explicit `--icase-pathspecs` option to the monitor's status and diff queries and the changed-files query, so the configured workspace path matches the tracked path regardless of case.
+**Files Modified:** `app.py`
+
+---
+
 ## [2026-09-24] - Add Colors to Bookmark Commands
 **Problem:** Bookmark commands had no per-command visual color, making it harder to distinguish frequently used tools in the merged command list.
 **Solution:** Added an optional custom hex color to the bookmark editor, with a one-line color picker and direct six-digit hex input such as `#ff55ff`. The row uses a targeted flex-direction override so the shared vertical form layout cannot stack its controls. The color is saved with the bookmark and applied to its display name; disabling the option restores the normal theme text color.
