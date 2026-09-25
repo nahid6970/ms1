@@ -6128,10 +6128,9 @@ class TranscriptionDialog(QDialog):
         # Available text width: 360 (fixed editor width) - 20 (padding 10+10) - 2 (border) - 10 (safety)
         measure_doc.setTextWidth(328)
         doc_h = measure_doc.documentLayout().documentSize().height()
-        # Multiply by 1.35 to account for actual line-height being taller than
-        # the bare document height (leading, font substitution for Bengali, etc.)
-        # then add fixed vertical padding (top+bottom padding + border + spare)
-        height = max(40, min(600, int(doc_h * 1.35) + 28))
+        # QTextDocument already measures the wrapped lines with this language's
+        # font. Add only the editor's vertical padding and border.
+        height = max(40, min(600, int(doc_h) + 20))
         editor.setFixedHeight(height)
         self.editor = editor
         body_layout.addWidget(editor)

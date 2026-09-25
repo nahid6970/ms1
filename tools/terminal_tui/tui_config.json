@@ -780,7 +780,13 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "pane-1790312841509-2"
+        ]
+      }
     },
     {
       "name": "yt_notifier",
