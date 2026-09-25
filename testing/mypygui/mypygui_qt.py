@@ -5984,6 +5984,8 @@ class TranscriptionDialog(QDialog):
         accent = CP_GREEN if is_bn else CP_CYAN
         accent_dim = "#006644" if is_bn else "#004d55"
         lang_label_text = language
+        editor_font_family = "'Vrinda', 'Nirmala UI', sans-serif" if is_bn else "'JetBrainsMono NFP', 'Consolas', sans-serif"
+        measure_font_family = "Vrinda" if is_bn else "JetBrainsMono NFP"
 
         self.setStyleSheet(f"""
             QDialog {{
@@ -6007,7 +6009,7 @@ class TranscriptionDialog(QDialog):
                 border: 1px solid #2a2a2a;
                 border-left: 2px solid {accent};
                 padding: 8px 10px;
-                font-family: 'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', sans-serif;
+                font-family: {editor_font_family};
                 font-size: 10pt;
                 selection-background-color: {accent_dim};
                 selection-color: white;
@@ -6119,7 +6121,7 @@ class TranscriptionDialog(QDialog):
         # and measure at the actual available text width, then add generous padding
         # so neither English nor Bengali gets cut off.
         content = editor.toPlainText()
-        measure_font = QFont("Consolas", 10)
+        measure_font = QFont(measure_font_family, 10)
         measure_doc = QTextDocument()
         measure_doc.setDefaultFont(measure_font)
         measure_doc.setPlainText(content)
