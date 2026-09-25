@@ -33,7 +33,8 @@ const tabSearch = document.getElementById('tabSearch');
 // Tags management
 let availableTags = [
   { name: 'applied', color: '#e3f2fd', borderColor: '#bbdefb' },
-  { name: 'paid', color: '#c8e6c9', borderColor: '#a5d6a7' }
+  { name: 'paid', color: '#c8e6c9', borderColor: '#a5d6a7' },
+  { name: 'exam', color: '#f44336', borderColor: '#d32f2f' }
 ];
 
 function loadTags() {
@@ -46,6 +47,10 @@ function loadTags() {
         if (!tag.borderColor) return { ...tag, borderColor: tag.color }; // Default border to BG color if missing
         return tag;
       });
+    }
+    if (!availableTags.some(tag => tag.name.toLowerCase() === 'exam')) {
+      availableTags.push({ name: 'exam', color: '#f44336', borderColor: '#d32f2f' });
+      chrome.storage.local.set({ availableTags });
     }
     populateTagDropdown();
     renderManageTags();

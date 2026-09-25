@@ -5965,6 +5965,8 @@ def paste_text(text, preserve_clipboard=False):
 
 class TranscriptionDialog(QDialog):
     """Independent editable transcription window for one language — redesigned UI."""
+    closed = pyqtSignal()
+
     def __init__(self, language, text, error, action_callback, parent=None):
         super().__init__(parent)
         self.language = language
@@ -6176,6 +6178,10 @@ class TranscriptionDialog(QDialog):
 
     def _hdr_release(self, event):
         self._drag_pos = None
+
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        QTimer.singleShot(0, self.closed.emit)
 
 
 class LanguageChoiceDialog(QDialog):
@@ -7374,17 +7380,25 @@ class VoiceApp(QMainWindow):
             TranscriptionDialog("ENGLISH", english, english_error, self._run_voice_action, self),
             TranscriptionDialog("বাংলা", bangla, bangla_error, self._run_voice_action, self),
         ]
+        for dlg in self._transcription_dialogs:
+            dlg.closed.connect(self._reposition_transcription_dialogs)
+            dlg.show()
+        self._reposition_transcription_dialogs()
+
+    def _reposition_transcription_dialogs(self):
+        dialogs = [dlg for dlg in getattr(self, "_transcription_dialogs", []) if dlg.isVisible()]
+        if not dialogs:
+            return
         screen = QApplication.primaryScreen().availableGeometry()
         anchor = self.status_btn.mapToGlobal(QPoint(0, self.status_btn.height() + 4))
         gap = 8
-        total_width = max(dlg.width() for dlg in self._transcription_dialogs)
-        total_height = sum(dlg.height() for dlg in self._transcription_dialogs) + gap
+        total_width = max(dlg.width() for dlg in dialogs)
+        total_height = sum(dlg.height() for dlg in dialogs) + gap * (len(dialogs) - 1)
         start_x = max(screen.left() + 4, min(anchor.x(), screen.right() - total_width - 4))
         start_y = min(anchor.y(), screen.bottom() - total_height - 4)
         current_y = start_y
-        for index, dlg in enumerate(self._transcription_dialogs):
+        for dlg in dialogs:
             dlg.move(start_x, current_y)
-            dlg.show()
             current_y += dlg.height() + gap
 
     def _start_continuous(self):

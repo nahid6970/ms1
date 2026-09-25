@@ -189,7 +189,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
           // Load tags
           chrome.storage.local.get(['availableTags'], (result) => {
-            const tags = result.availableTags || [{ name: 'applied', color: '#e3f2fd' }, { name: 'paid', color: '#c8e6c9' }];
+            const tags = result.availableTags || [
+              { name: 'applied', color: '#e3f2fd', borderColor: '#bbdefb' },
+              { name: 'paid', color: '#c8e6c9', borderColor: '#a5d6a7' },
+              { name: 'exam', color: '#f44336', borderColor: '#d32f2f' }
+            ];
+            if (!tags.some(tag => (typeof tag === 'string' ? tag : tag.name).toLowerCase() === 'exam')) {
+              tags.push({ name: 'exam', color: '#f44336', borderColor: '#d32f2f' });
+              chrome.storage.local.set({ availableTags: tags });
+            }
             tags.forEach(tag => {
               const name = typeof tag === 'string' ? tag : tag.name;
               const option = document.createElement('option');
@@ -207,7 +215,11 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             const tagName = newTagName.value.trim().toLowerCase();
             if (tagName) {
               chrome.storage.local.get(['availableTags'], (result) => {
-                const tags = result.availableTags || [{ name: 'applied', color: '#e3f2fd' }, { name: 'paid', color: '#c8e6c9' }];
+                const tags = result.availableTags || [
+                  { name: 'applied', color: '#e3f2fd', borderColor: '#bbdefb' },
+                  { name: 'paid', color: '#c8e6c9', borderColor: '#a5d6a7' },
+                  { name: 'exam', color: '#f44336', borderColor: '#d32f2f' }
+                ];
                 // Check if tag already exists (handling both strings and objects)
                 const exists = tags.some(t => (typeof t === 'string' ? t : t.name) === tagName);
                 if (!exists) {
