@@ -2877,6 +2877,8 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
             cwd,
             timeout_seconds=int(args.get("timeout_seconds", 60) or 60),
         )
+    if name == "lan_workspace":
+        return lan_workspace_tool(args, lan_editor_url)
     if name == "request_follow_up":
         reason = args.get("reason") or "Continuing..."
         return f"Follow-up turn granted: {reason}"
@@ -3030,8 +3032,6 @@ class GeminiClient:
             "https://generativelanguage.googleapis.com/v1beta/models/"
             f"{urllib.parse.quote(model_name, safe='')}:generateContent?key={urllib.parse.quote(self.api_key)}"
         )
-    if name == "lan_workspace":
-        return lan_workspace_tool(args, lan_editor_url)
         request = urllib.request.Request(
             url,
             data=json.dumps(payload).encode("utf-8"),
