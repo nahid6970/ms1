@@ -65,6 +65,7 @@ Select object A, then Shift+click object B. Three operations available:
 ### Scene tree & inspector
 - All objects listed in the right panel; click to select
 - Edit name, position, rotation, scale, color, metalness, roughness
+- Spin objects automatically with axis, direction, enable/disable, and speed controls
 
 ### Save & load
 - **Save** (`⌘`) — saves to browser localStorage, restores on next visit

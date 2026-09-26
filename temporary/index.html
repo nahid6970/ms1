@@ -18,6 +18,9 @@
     <style>
       .triangle-glyph{transform:rotate(30deg);clip-path:polygon(50% 0,100% 100%,0 100%);background:#b1b2bb!important;border:0!important}.cone-glyph{border-radius:50% 50% 35% 35%;transform:scaleX(.7)}.capsule-glyph{border-radius:50%}
     </style>
+    <style>
+      .spin-section{padding-top:13px}.spin-toggle{display:flex;align-items:center;gap:7px;color:#6a6b76;font-size:10px;margin:0 0 12px}.spin-toggle input{accent-color:#6f6cff}.spin-row{display:flex;align-items:center;justify-content:space-between;margin:9px 0;color:#858690;font-size:10px}.spin-axis,.spin-direction{display:flex;gap:4px}.spin-axis button,.spin-direction button{height:25px;border:1px solid #e8e9ee;border-radius:5px;background:#fafafd;color:#6a6b76;font:600 9px Manrope,sans-serif;cursor:pointer}.spin-axis button{width:27px}.spin-direction button{padding:0 7px}.spin-axis button.active,.spin-direction button.active{background:#f0efff;border-color:#bcbaff;color:#6f6cff}.spin-section .field-label span{color:#b7b8c1}.spin-section .range-field{margin-bottom:0}
+    </style>
   </head>
   <body>
     <div class="startup-error" id="startup-error" hidden><div class="startup-card"><div class="startup-symbol">!</div><h2>Forma could not start</h2><p>The 3D engine did not load. Start Forma through a local web server, then reload:</p><code>python -m http.server 8000</code><p class="startup-small">Open <strong>http://localhost:8000</strong> — do not double-click index.html.</p><button onclick="location.reload()">Reload Forma</button></div></div>
@@ -105,6 +108,7 @@
               <div class="object-name-row"><span class="selected-shape" id="selected-shape"></span><input id="object-name" value="Cube" /></div>
               <div class="inspector-section"><div class="field-label">TRANSFORM <span>LOCAL</span></div><div class="field-grid"><label>Position X<input data-transform="position.x" type="number" step="0.1" /></label><label>Y<input data-transform="position.y" type="number" step="0.1" /></label><label>Z<input data-transform="position.z" type="number" step="0.1" /></label></div><div class="field-grid"><label>Rotation X<input data-transform="rotation.x" type="number" step="1" /></label><label>Y<input data-transform="rotation.y" type="number" step="1" /></label><label>Z<input data-transform="rotation.z" type="number" step="1" /></label></div><div class="field-grid"><label>Scale X<input data-transform="scale.x" type="number" step="0.1" min="0.01" /></label><label>Y<input data-transform="scale.y" type="number" step="0.1" min="0.01" /></label><label>Z<input data-transform="scale.z" type="number" step="0.1" min="0.01" /></label></div></div>
               <div class="inspector-section"><div class="field-label">APPEARANCE</div><label class="color-field">Color <span class="color-control"><input id="object-color" type="color" value="#6f6cff" /><span id="color-value">#6F6CFF</span></span></label><label class="range-field">Metalness <input id="object-metalness" type="range" min="0" max="1" step="0.01" /><span id="metalness-value">0.20</span></label><label class="range-field">Roughness <input id="object-roughness" type="range" min="0" max="1" step="0.01" /><span id="roughness-value">0.40</span></label></div>
+              <div class="inspector-section spin-section"><div class="field-label">SPIN <span id="spin-status">OFF</span></div><label class="spin-toggle"><input id="object-spin-enabled" type="checkbox" /> Enable automatic spin</label><div class="spin-row"><span>Axis</span><div class="spin-axis"><button data-spin-axis="x">X</button><button data-spin-axis="y" class="active">Y</button><button data-spin-axis="z">Z</button></div></div><div class="spin-row"><span>Direction</span><div class="spin-direction"><button id="spin-direction-negative">↺ Reverse</button><button id="spin-direction-positive" class="active">↻ Forward</button></div></div><label class="range-field">Speed <input id="object-spin-speed" type="range" min="0.1" max="5" step="0.1" /><span id="spin-speed-value">1.0×</span></label></div>
               <button class="danger-btn" id="delete-btn">Delete object <span>⌫</span></button>
             </div>
           </div>
@@ -116,6 +120,6 @@
     <input type="file" id="load-input" accept="application/json,.json" hidden />
     <script type="importmap">{"imports":{"three":"./vendor/three/build/three.module.js","three/addons/":"./vendor/three/examples/jsm/","three-mesh-bvh":"./vendor/three-mesh-bvh/build/index.module.js","three-bvh-csg":"./vendor/three-bvh-csg/build/index.module.js"}}</script>
     <script>window.setTimeout(function(){if(!window.__formaStarted){document.getElementById('startup-error').hidden=false;}},1800);</script>
-    <script type="module" src="app.js?v=20260924-primitives"></script>
+    <script type="module" src="app.js?v=20260926-spin"></script>
   </body>
 </html>

@@ -68,6 +68,7 @@ When an object is selected, the inspector should allow editing:
 - Material color
 - Metalness
 - Roughness
+- Automatic spin: enabled state, axis, direction, and speed
 
 Changes should update the object immediately in the viewport.
 

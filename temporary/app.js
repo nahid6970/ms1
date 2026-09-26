@@ -58,6 +58,7 @@ function addObject(type='box', data={}) {
   const mesh=new THREE.Mesh(geometry,material);
   mesh.name=data.name||`${type[0].toUpperCase()+type.slice(1)} ${idCounter++}`;
   mesh.castShadow=true; mesh.receiveShadow=true; mesh.userData.type=type;
+  mesh.userData.spin={enabled:data.spin?.enabled??false,axis:data.spin?.axis||'y',direction:data.spin?.direction===-1?-1:1,speed:Number(data.spin?.speed??1)};
   mesh.position.set(...(data.position||[0,type==='box'?0.75:1,0]));
   if(data.rotation) mesh.rotation.set(...data.rotation.map(v=>THREE.MathUtils.degToRad(v)));
   if(data.scale) mesh.scale.set(...data.scale);
@@ -122,6 +123,7 @@ function syncInspector() {
   $('#inspector-content').classList.toggle('hidden',!has);
   $('#selection-label').textContent=has?'OBJECT':'NONE SELECTED';
   if(!has) return;
+  if(!selected.userData.spin) selected.userData.spin={enabled:false,axis:'y',direction:1,speed:1};
   $('#object-name').value=selected.name;
   $('#selected-shape').style.background=selected.material.color.getStyle();
   const vals={position:{x:selected.position.x,y:selected.position.y,z:selected.position.z},rotation:{x:THREE.MathUtils.radToDeg(selected.rotation.x),y:THREE.MathUtils.radToDeg(selected.rotation.y),z:THREE.MathUtils.radToDeg(selected.rotation.z)},scale:{x:selected.scale.x,y:selected.scale.y,z:selected.scale.z}};
@@ -132,6 +134,14 @@ function syncInspector() {
   $('#metalness-value').textContent=selected.material.metalness.toFixed(2);
   $('#object-roughness').value=selected.material.roughness;
   $('#roughness-value').textContent=selected.material.roughness.toFixed(2);
+  const spin=selected.userData.spin||{enabled:false,axis:'y',direction:1,speed:1};
+  $('#object-spin-enabled').checked=spin.enabled;
+  $('#spin-status').textContent=spin.enabled?'ON':'OFF';
+  document.querySelectorAll('[data-spin-axis]').forEach(b=>b.classList.toggle('active',b.dataset.spinAxis===spin.axis));
+  $('#spin-direction-negative').classList.toggle('active',spin.direction===-1);
+  $('#spin-direction-positive').classList.toggle('active',spin.direction!==-1);
+  $('#object-spin-speed').value=spin.speed;
+  $('#spin-speed-value').textContent=spin.speed.toFixed(1)+'×';
 }
 
 function updateScene() {
@@ -156,7 +166,7 @@ function removeSelected() {
 }
 
 function serialize() {
-  return {version:1,name:$('#project-name').value,objects:objects.map(o=>({name:o.name,type:o.userData.type,geometry:['sliced','boolean'].includes(o.userData.type)?o.geometry.toJSON():undefined,position:o.position.toArray(),rotation:[o.rotation.x,o.rotation.y,o.rotation.z].map(THREE.MathUtils.radToDeg),scale:o.scale.toArray(),color:'#'+o.material.color.getHexString(),metalness:o.material.metalness,roughness:o.material.roughness}))};
+  return {version:1,name:$('#project-name').value,objects:objects.map(o=>({name:o.name,type:o.userData.type,geometry:['sliced','boolean'].includes(o.userData.type)?o.geometry.toJSON():undefined,position:o.position.toArray(),rotation:[o.rotation.x,o.rotation.y,o.rotation.z].map(THREE.MathUtils.radToDeg),scale:o.scale.toArray(),color:'#'+o.material.color.getHexString(),metalness:o.material.metalness,roughness:o.material.roughness,spin:o.userData.spin}))};
 }
 function download(filename,data,type='application/json') {
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type})); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),500);
@@ -182,7 +192,7 @@ function frame() {
 }
 function copySelected() {
   if(!selected) return;
-  clipboard={type:selected.userData.type,geometry:['sliced','boolean'].includes(selected.userData.type)?selected.geometry.toJSON():undefined,position:selected.position.toArray(),rotation:[selected.rotation.x,selected.rotation.y,selected.rotation.z].map(THREE.MathUtils.radToDeg),scale:selected.scale.toArray(),color:'#'+selected.material.color.getHexString(),metalness:selected.material.metalness,roughness:selected.material.roughness};
+  clipboard={type:selected.userData.type,geometry:['sliced','boolean'].includes(selected.userData.type)?selected.geometry.toJSON():undefined,position:selected.position.toArray(),rotation:[selected.rotation.x,selected.rotation.y,selected.rotation.z].map(THREE.MathUtils.radToDeg),scale:selected.scale.toArray(),color:'#'+selected.material.color.getHexString(),metalness:selected.material.metalness,roughness:selected.material.roughness,spin:{...selected.userData.spin}};
   toast('Copied — Ctrl+V to paste');
 }
 function pasteObject() {
@@ -534,6 +544,16 @@ $('#object-color').oninput=e=>{ if(selected){selected.material.color.set(e.targe
 ['metalness','roughness'].forEach(k=>$('#object-'+k).oninput=e=>{
   if(selected){ selected.material[k]=Number(e.target.value); $(`#${k}-value`).textContent=Number(e.target.value).toFixed(2); }
 });
+$('#object-spin-enabled').onchange=e=>{ if(selected){ selected.userData.spin.enabled=e.target.checked; syncInspector(); } };
+document.querySelectorAll('[data-spin-axis]').forEach(button=>button.onclick=()=>{
+  if(!selected) return;
+  selected.userData.spin.axis=button.dataset.spinAxis; syncInspector();
+});
+$('#spin-direction-negative').onclick=()=>{ if(selected){ selected.userData.spin.direction=-1; syncInspector(); } };
+$('#spin-direction-positive').onclick=()=>{ if(selected){ selected.userData.spin.direction=1; syncInspector(); } };
+$('#object-spin-speed').oninput=e=>{
+  if(selected){ selected.userData.spin.speed=Number(e.target.value); $('#spin-speed-value').textContent=selected.userData.spin.speed.toFixed(1)+'×'; }
+};
 
 renderer.domElement.addEventListener('pointerdown', e=>{
   // Objects remain selectable while using Move/Rotate/Scale so the gizmo
@@ -579,5 +599,14 @@ if(stored) try{load(JSON.parse(stored));}catch{}
 
 function resize(){const r=viewport.getBoundingClientRect();camera.aspect=r.width/r.height;camera.updateProjectionMatrix();renderer.setSize(r.width,r.height,false);}
 window.addEventListener('resize',resize); resize();
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
-animate(); updateScene();
+let lastFrameTime=performance.now();
+function animate(now){
+  requestAnimationFrame(animate);
+  const delta=Math.min((now-lastFrameTime)/1000,0.1); lastFrameTime=now;
+  objects.forEach(obj=>{
+    const spin=obj.userData.spin;
+    if(spin?.enabled) obj.rotation[spin.axis]+=spin.direction*spin.speed*delta;
+  });
+  controls.update(); renderer.render(scene,camera);
+}
+animate(lastFrameTime); updateScene();
