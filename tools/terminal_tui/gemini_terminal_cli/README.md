@@ -79,6 +79,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
+- `/device [pc|android]` - select PC or Android/Termux terminal input mode; Android mode prefers the terminal TTY for arrow-key input
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file

@@ -478,6 +478,7 @@ else:
 
 try:
     from prompt_toolkit import prompt as pt_prompt
+    from prompt_toolkit.input.defaults import create_input
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.completion import Completer, Completion
     from prompt_toolkit.formatted_text import ANSI
@@ -488,6 +489,7 @@ try:
     from prompt_toolkit.styles import Style
 except Exception:
     pt_prompt = None
+    create_input = None
     AutoSuggestFromHistory = None
     Completer = None
     Completion = None
@@ -987,6 +989,7 @@ if Completer is not None:
             ("/test", "Test all models and hide failures"),
             ("/api", "Open API account picker"),
             ("/settings", "Open interactive CLI settings"),
+            ("/device", "Set terminal device to PC or Android/Termux"),
             ("/loops", "Set max tool-call loops"),
             ("/failover", "Open auto-failover picker"),
             ("/tool", "Open tool manager"),
@@ -1144,6 +1147,7 @@ def read_dynamic_prompt(
     cwd: Optional[Path] = None,
     prompt_fg: str = "ansired",
     prompt_bg: str = "",
+    device_mode: str = "pc",
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
@@ -1174,6 +1178,10 @@ def read_dynamic_prompt(
 
         lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
         
+        prompt_options = {}
+        if device_mode == "android" and create_input is not None:
+            prompt_options["input"] = create_input(always_prefer_tty=True)
+
         return pt_prompt(
             message=lambda: ANSI(prompt_provider()),
             history=prompt_history,
@@ -1186,6 +1194,7 @@ def read_dynamic_prompt(
             wrap_lines=True,
             refresh_interval=0.25,
             style=user_style,
+            **prompt_options,
         )
 
     return input(prompt_provider())
@@ -3746,6 +3755,7 @@ def default_model_prefs() -> Dict[str, Any]:
         "prompt_prefix_color": "1;32",
         "gui_font_size": 11,
         "gui_line_height": 140,
+        "device_mode": "pc",
     }
 
 
@@ -3812,6 +3822,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "prompt_prefix_color": str(data.get("prompt_prefix_color") or "1;32"),
             "gui_font_size": int(data.get("gui_font_size") or 11),
             "gui_line_height": int(data.get("gui_line_height") or 140),
+            "device_mode": str(data.get("device_mode") or "pc").lower(),
         })
         return prefs
     except Exception:
@@ -3851,6 +3862,7 @@ def save_model_prefs(
     prompt_prefix_color: str = "1;32",
     gui_font_size: int = 11,
     gui_line_height: int = 140,
+    device_mode: str = "pc",
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
@@ -3875,6 +3887,7 @@ def save_model_prefs(
         "prompt_prefix_color": prompt_prefix_color,
         "gui_font_size": int(gui_font_size),
         "gui_line_height": int(gui_line_height),
+        "device_mode": device_mode,
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -4846,6 +4859,7 @@ def print_help() -> None:
               /mm                   Open the model picker
               /test                 Test all models and hide failures
               /api                  Open the API account picker
+              /device [pc|android] Set terminal input mode (Android enables TTY input)
               /loops <n>            Set max tool-call loops
               /failover             Open the auto-failover picker
               /tool                 Open the tool manager and toggle tools with Space
@@ -5446,6 +5460,9 @@ def main() -> int:
     prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
     gui_font_size = int(model_prefs.get("gui_font_size") or 11)
     gui_line_height = int(model_prefs.get("gui_line_height") or 140)
+    device_mode = str(model_prefs.get("device_mode") or "pc").lower()
+    if device_mode not in {"pc", "android"}:
+        device_mode = "pc"
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
@@ -5839,6 +5856,7 @@ def main() -> int:
             prompt_prefix_color,
             gui_font_size,
             gui_line_height,
+            device_mode,
         )
 
     def add_api_account_interactive(provider: str = "gemini") -> None:
@@ -6098,6 +6116,7 @@ def main() -> int:
                     cwd=cwd,
                     prompt_fg=prompt_fg,
                     prompt_bg=prompt_bg,
+                    device_mode=device_mode,
                 ).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
@@ -6116,6 +6135,16 @@ def main() -> int:
                     break
                 if command == "/help":
                     print_help()
+                    continue
+                if command == "/device":
+                    if not remainder:
+                        info(f"Current device mode: {device_mode}. Use /device pc or /device android.")
+                    elif remainder.lower() in {"pc", "android"}:
+                        device_mode = remainder.lower()
+                        persist_selection()
+                        info(f"Device mode set to {device_mode}.")
+                    else:
+                        warn("Usage: /device [pc|android]")
                     continue
                 if command in {"/setting", "/settings"}:
                     presets = [
