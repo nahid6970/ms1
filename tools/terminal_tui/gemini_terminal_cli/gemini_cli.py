@@ -478,6 +478,7 @@ else:
 
 try:
     from prompt_toolkit import prompt as pt_prompt
+    from prompt_toolkit import PromptSession
     from prompt_toolkit.input.defaults import create_input
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.completion import Completer, Completion
@@ -489,6 +490,7 @@ try:
     from prompt_toolkit.styles import Style
 except Exception:
     pt_prompt = None
+    PromptSession = None
     create_input = None
     AutoSuggestFromHistory = None
     Completer = None
@@ -1178,24 +1180,23 @@ def read_dynamic_prompt(
 
         lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
         
-        prompt_options = {}
-        if device_mode == "android" and create_input is not None:
+        prompt_options = {
+            "message": lambda: ANSI(prompt_provider()),
+            "history": prompt_history,
+            "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
+            "completer": completer,
+            "lexer": lexer,
+            "complete_while_typing": True,
+            "complete_style": CompleteStyle.COLUMN,
+            "mouse_support": False,
+            "wrap_lines": True,
+            "refresh_interval": 0.25,
+            "style": user_style,
+        }
+        if device_mode == "android" and PromptSession is not None and create_input is not None:
             prompt_options["input"] = create_input(always_prefer_tty=True)
-
-        return pt_prompt(
-            message=lambda: ANSI(prompt_provider()),
-            history=prompt_history,
-            auto_suggest=AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
-            completer=completer,
-            lexer=lexer,
-            complete_while_typing=True,
-            complete_style=CompleteStyle.COLUMN,
-            mouse_support=False,
-            wrap_lines=True,
-            refresh_interval=0.25,
-            style=user_style,
-            **prompt_options,
-        )
+            return PromptSession(**prompt_options).prompt()
+        return pt_prompt(**prompt_options)
 
     return input(prompt_provider())
 
