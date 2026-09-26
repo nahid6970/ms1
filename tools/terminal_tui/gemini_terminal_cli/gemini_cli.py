@@ -3991,11 +3991,13 @@ def read_key() -> str:
             old_settings = termios.tcgetattr(fd)
             try:
                 tty.setraw(fd)
-                ch = sys.stdin.read(1)
+                ch = os.read(fd, 1).decode("utf-8", errors="ignore")
                 if ch == "\x1b":
                     sequence = ch
-                    while select.select([sys.stdin], [], [], 0.04)[0]:
-                        sequence += sys.stdin.read(1)
+                    # Android keyboards may deliver ESC and the rest of CSI in
+                    # separate writes, so wait longer than a desktop terminal.
+                    while select.select([fd], [], [], 0.2)[0]:
+                        sequence += os.read(fd, 1).decode("utf-8", errors="ignore")
                         if len(sequence) >= 3 and sequence[-1].isalpha():
                             break
                     return {
