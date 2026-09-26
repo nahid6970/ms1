@@ -860,14 +860,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790427882478-1"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "FolderSync",
@@ -937,13 +930,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790403956262-1"
-        ]
-      },
       "duplicateBaseName": "Temporary",
       "duplicateBaseFolder": "temporary"
     },
@@ -966,12 +952,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main"
-        ]
-      },
       "duplicateBaseName": "Temporary",
       "duplicateBaseFolder": "temporary"
     },

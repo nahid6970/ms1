@@ -419,7 +419,12 @@ def run_command() -> Any:
         return jsonify(error="Command is required."), 400
     if len(command) > 10000:
         return jsonify(error="Command is too long."), 413
-    cwd = find_root(root_id)
+    if root_id:
+        cwd = find_root(root_id)
+        cwd_label = next((x["name"] for x in load_roots() if x["id"] == root_id), "shared folder")
+    else:
+        cwd = Path.home().resolve()
+        cwd_label = "PC user home folder"
     try:
         timeout = max(1, min(int(data.get("timeout_seconds", 60) or 60), 120))
     except (TypeError, ValueError):
@@ -438,7 +443,7 @@ def run_command() -> Any:
         truncated = len(stdout) + len(stderr) > 30000
         return jsonify(
             command=command,
-            cwd_label=next((x["name"] for x in load_roots() if x["id"] == root_id), ""),
+            cwd_label=cwd_label,
             shell=("cmd.exe" if os.name == "nt" else os.environ.get("SHELL", "/bin/sh")),
             exit_code=result.returncode,
             stdout=stdout[:20000],
