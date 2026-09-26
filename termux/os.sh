@@ -143,7 +143,7 @@ setup_storage_passwd() {
 install_font_with_oh_my_posh() {
     clear
     echo -e "\e[34mInstalling JetBrainsMono NFP font using oh-my-posh...\e[0m"
-    oh-my-posh font install
+    oh-my-posh font install jetbrainsmono
     FONT_PATH="$HOME/.local/share/fonts/jetbrainsmono-nfp/JetBrainsMonoNerdFontPropo-Regular.ttf"
     TERMUX_FONT_DIR="$HOME/.termux"
     # Check if the font is installed
