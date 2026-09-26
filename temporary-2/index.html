@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101914" />
+    <meta name="description" content="An interactive, sculptural 3D bonsai tree." />
+    <title>Stillwood — A living sculpture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <main class="stage">
+      <div class="grain" aria-hidden="true"></div>
+      <header class="masthead">
+        <a class="brand" href="#" aria-label="Stillwood home"><span class="brand-mark">✳</span> STILLWOOD</a>
+        <span class="collection">LIVING SCULPTURES&nbsp; / &nbsp;No. 03</span>
+        <button class="sound" id="reset-view" type="button" aria-label="Reset tree view"><span class="reset-icon">↻</span> RESET VIEW</button>
+      </header>
+
+      <section class="composition" aria-labelledby="title">
+        <div class="copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> THE ART OF PATIENCE</p>
+          <h1 id="title">A little<br />more <em>still.</em></h1>
+          <p class="intro">An evergreen moment, shaped by time.<br />Meet the Japanese black pine.</p>
+          <div class="rule"></div>
+          <div class="specs">
+            <div><span>SPECIES</span><strong>Pinus thunbergii</strong></div>
+            <div><span>EST. AGE</span><strong>38 years</strong></div>
+            <div><span>ORIGIN</span><strong>Shikoku, Japan</strong></div>
+          </div>
+          <p class="gesture"><span class="gesture-icon">⤢</span> DRAG TO ORBIT <i>·</i> SCROLL TO ZOOM</p>
+        </div>
+
+        <div class="scene-wrap">
+          <div class="scene-halo"></div>
+          <div id="scene" role="img" aria-label="Interactive 3D Japanese black pine bonsai in a ceramic pot"></div>
+          <div class="scene-label"><span>01</span><span class="label-line"></span><span>FORM &amp; BALANCE</span></div>
+          <div class="vertical-label">EST. IN THE QUIET&nbsp; · &nbsp;2024</div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-note"><span class="footer-spark">✳</span><span>GROWN SLOWLY.<br />APPRECIATED DAILY.</span></div>
+        <p>Some things only reveal themselves<br />when you take the time to look.</p>
+        <span class="edition">A STUDY IN SERENITY &nbsp;—&nbsp; 001 / 008</span>
+      </footer>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

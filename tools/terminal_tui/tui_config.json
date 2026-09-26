@@ -40,7 +40,7 @@
       },
       "bookmarks": [
         {
-          "command": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358",
+          "command": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358 --max-output-tokens 65536",
           "global": true,
           "name": " myGG",
           "windowTitle": "",
@@ -910,6 +910,83 @@
           "color": "#f78100"
         }
       ]
+    },
+    {
+      "name": "Temporary-2",
+      "path": "C:\\@delta\\ms1\\temporary-2",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790403956262-1"
+        ]
+      },
+      "duplicateBaseName": "Temporary",
+      "duplicateBaseFolder": "temporary"
+    },
+    {
+      "name": "Temporary-3",
+      "path": "C:\\@delta\\ms1\\temporary-3",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main"
+        ]
+      },
+      "duplicateBaseName": "Temporary",
+      "duplicateBaseFolder": "temporary"
+    },
+    {
+      "name": "Termux",
+      "path": "C:\\@delta\\ms1\\termux",
+      "category": "Android+Termux",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
     }
   ],
   "extension_icons": {
