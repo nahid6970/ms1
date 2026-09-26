@@ -125,8 +125,8 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 - `replace_file` — alias for write_file
 
 **Execution & Shell**:
-- `run_shell_command` — run shell commands via subprocess
-- `run_powershell` — run PowerShell commands (preferred on Windows)
+- `run_shell_command` — run commands through the host platform shell (POSIX commands on Termux/Linux/macOS)
+- `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`
@@ -155,7 +155,7 @@ Disabled tools are stored in `model_prefs.json` under the `disabled_tools` array
 
 ## Notes
 
-- `run_powershell` runs through `powershell.exe -NoProfile`. Use for `rg`, `Get-Content`, `git status`, and tests before editing. For literal searches with `Select-String`, prefer `-SimpleMatch` and single-quoted patterns.
+- Runtime OS and shell guidance is added to each model request. In Termux, use `run_shell_command` with POSIX `sh` syntax; use `bash -lc '…'` for Bash-only syntax only when Bash is installed. `run_powershell` requires `powershell.exe`.
 - When an `apply_patch` or `fuzzy_apply_patch` call is shown in the terminal, removed diff lines render red and added diff lines render green.
 - REPL input history is stored in `prompt_history.txt` so Up/Down history survives restarts.
 - The CLI restores the last-used API account and model on startup when saved.

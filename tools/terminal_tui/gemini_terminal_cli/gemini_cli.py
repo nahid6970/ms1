@@ -58,8 +58,7 @@ PI_FAILOVER_API_KEY = "pi-local-secret"
 DEFAULT_SYSTEM = (
     "You are a terminal coding and OS automation assistant. "
     "Be concise, practical, and ask before making destructive changes. "
-    "For code work, inspect with run_powershell commands such as rg and Get-Content first. "
-    "When using Select-String for literal code text, use -SimpleMatch and single-quoted patterns. "
+    "For code work, inspect with read-only tools and choose shell commands that match the current runtime environment. "
     "Prefer apply_patch or smart_replace_block for edits only after refreshing the exact surrounding context. "
     "Always double-check your changes using verify_file_content or read_file after making modifications to confirm they were actually applied. "
     "AUTOSAVE MEMORY & USER BEHAVIOR: Memory tools are active. You MUST immediately call `save_memory` whenever the user shares personal facts or preferences. "
@@ -846,15 +845,45 @@ def delete_memory_item(path: str = "main", key: Optional[str] = None) -> str:
         return f"Error deleting file '{rel_p}': {exc}"
 
 
+def get_runtime_tool_guidance() -> str:
+    prefix = os.environ.get("PREFIX", "").lower()
+    is_termux = bool(os.environ.get("TERMUX_VERSION")) or "com.termux" in prefix
+    if is_termux:
+        environment = "Android running in Termux"
+        shell_path = os.environ.get("SHELL", "")
+        shell_name = Path(shell_path).name if shell_path else "sh"
+        shell_advice = (
+            f"The configured interactive shell is {shell_name}; run_shell_command uses the platform shell. "
+            "Use POSIX sh syntax by default; use `bash -lc '…'` only when Bash-specific syntax is needed and Bash is installed."
+        )
+        powershell_advice = "PowerShell and desktop GUI automation are generally unavailable in Termux; do not call those tools unless confirmed installed and usable."
+    elif os.name == "nt":
+        environment = f"Windows ({platform.platform()})"
+        shell_advice = "Use run_powershell for PowerShell commands and run_shell_command for commands supported by the configured Windows shell."
+        powershell_advice = "PowerShell is available through the run_powershell tool."
+    else:
+        environment = platform.platform()
+        shell_path = os.environ.get("SHELL", "")
+        shell_name = Path(shell_path).name if shell_path else "sh"
+        shell_advice = f"Use POSIX shell commands with run_shell_command; the configured interactive shell is {shell_name}."
+        powershell_advice = "PowerShell is not assumed to be installed; use it only if confirmed available."
+    return (
+        "\n\n[Runtime Environment and Tool Guidance]\n"
+        f"Host: {environment}.\n{shell_advice} {powershell_advice} "
+        "These runtime facts take precedence over conflicting shell or OS examples in the base instructions."
+    )
+
+
 def get_effective_system_instruction(base_system: str, disabled_tools: Set[str]) -> str:
+    runtime_guidance = get_runtime_tool_guidance()
     if "read_memory" in disabled_tools:
-        return base_system
+        return base_system + runtime_guidance
     main_data = load_main_memory()
     basic = main_data.get("basic_memories", {})
     sub_files = main_data.get("sub_memories", {})
 
     if not basic and not sub_files:
-        return base_system
+        return base_system + runtime_guidance
 
     memory_lines = ["\n\n[Active Main Memory & Index]"]
     if basic:
@@ -869,7 +898,7 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str])
             desc = sinfo.get("description", "") if isinstance(sinfo, dict) else str(sinfo)
             memory_lines.append(f"  - {sp}: {desc}")
 
-    return base_system + "\n".join(memory_lines)
+    return base_system + "\n".join(memory_lines) + runtime_guidance
 
 
 
@@ -2371,7 +2400,7 @@ FUNCTIONS = {
     },
     "run_shell_command": {
         "name": "run_shell_command",
-        "description": "Run a shell command.",
+        "description": "Run a command through the host platform shell. On Android Termux, use POSIX sh syntax by default; invoke `bash -lc '…'` for Bash-only syntax only when Bash is installed.",
         "parameters": {
             "type": "OBJECT",
             "properties": {"command": {"type": "STRING"}},
@@ -2380,7 +2409,7 @@ FUNCTIONS = {
     },
     "run_powershell": {
         "name": "run_powershell",
-        "description": "Run a PowerShell command for inspection, git checks, tests, or targeted local scripting. Use Select-String -SimpleMatch with single-quoted patterns for literal code searches.",
+        "description": "Run a PowerShell command on hosts where powershell.exe is installed (usually Windows). Do not use on Android Termux unless PowerShell availability is confirmed.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
