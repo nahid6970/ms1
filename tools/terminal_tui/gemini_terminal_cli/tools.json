@@ -149,7 +149,7 @@
     "name": "lan_workspace",
     "category": "Remote Files",
     "rating": "Edit approved PC folders over Wi-Fi",
-    "description": "Use the PC LAN Code Editor configured with /lan. Browse/read/search/create/write files, or run a command directly on the PC with action run. Interpret 7777/ms1/temporary/ as mapped folder ms1/temporary. Commands use the PC shell and run with the shared folder as working directory; this is not a sandbox. Never use this to download/install packages or build packages; provide those commands for the user to run."
+    "description": "Use the PC LAN Code Editor configured with /lan. Browse/read/search/create/write files, or run a command directly on the PC with action run. Treat '7777 and run ...' as remote PC execution. Interpret 7777/ms1/temporary/ as mapped folder ms1/temporary. If no folder is given for run, use the PC user's home folder. Commands use the PC shell; this is not a sandbox. Never use this to download/install packages or build packages; provide those commands for the user to run."
   },
   {
     "name": "request_follow_up",

@@ -882,6 +882,7 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str],
             f" The PC LAN Code Editor is configured at {lan_editor_url}. "
             "For requested files on that PC, use lan_workspace with the mapped folder URL path. "
             "For commands the user asks to run on that PC, use lan_workspace action run so the command is sent directly to the Flask app; do not create script files as command relays. "
+            "Treat user requests phrased as '7777 and run ...' as requests to run the command on the PC through lan_workspace. If no mapped folder is named, omit folder and use the PC user's home directory by default. "
             "Choose command syntax for the remote PC shell. Never use remote command execution to download or install packages or build packages; give the user those commands to run themselves. "
             "Ordinary local file tools operate on this device."
         )
@@ -2245,7 +2246,9 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
     action = str(args.get("action", "list")).strip().lower()
     folder = str(args.get("folder", "")).strip().strip("/")
     relative = str(args.get("path", "")).strip().strip("/")
-    if not folder or any(part in {"", ".", ".."} for part in folder.split("/")):
+    if action != "run" and not folder:
+        return "Error: folder must be the mapped URL path shown in the editor, for example ms1/temporary."
+    if folder and any(part in {"", ".", ".."} for part in folder.split("/")):
         return "Error: folder must be the mapped URL path shown in the editor, for example ms1/temporary."
     if relative and any(part in {"", ".", ".."} for part in relative.split("/")):
         return "Error: path must stay inside the selected folder."
@@ -2273,8 +2276,8 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
         roots = roots_data.get("roots", [])
         remote_shell = roots_data.get("command_shell", "unknown shell")
         remote_os = roots_data.get("host_os", "unknown OS")
-        root = next((item for item in roots if str(item.get("url_path", "")).strip("/") == folder), None)
-        if root is None:
+        root = next((item for item in roots if folder and str(item.get("url_path", "")).strip("/") == folder), None)
+        if folder and root is None:
             available = ", ".join(str(item.get("url_path", "")) for item in roots) or "(none added)"
             return f"Error: no folder mapped to '{folder}'. Available URL paths: {available}"
 
@@ -2283,7 +2286,7 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
             if not command:
                 return "Error: set command to the shell command to run on the PC."
             payload = {
-                "root": root["id"],
+                "root": root["id"] if root else "",
                 "command": command,
                 "timeout_seconds": args.get("timeout_seconds", 60),
             }
@@ -2542,12 +2545,12 @@ FUNCTIONS = {
     },
     "lan_workspace": {
         "name": "lan_workspace",
-        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor, or run a command directly on the PC with action run. Use for PC work when this CLI is on another device. Interpret a path like 7777/ms1/temporary/ as folder ms1/temporary. For run, send the command directly to Flask; it runs in the selected shared folder using the PC shell. This is remote PC command execution, not a sandbox. Never use it to download/install packages or build packages; give those commands to the user. Configure the server with /lan.",
+        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor, or run a command directly on the PC with action run. Treat a user request like '7777 and run ...' as remote PC execution. Interpret a path like 7777/ms1/temporary/ as folder ms1/temporary. For run, send the command directly to Flask using the PC shell; if folder is omitted, it runs in the PC user's home directory. This is remote PC command execution, not a sandbox. Never use it to download/install packages or build packages; give those commands to the user. Configure the server with /lan.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
                 "action": {"type": "STRING", "enum": ["list", "read", "search", "create", "write", "run"]},
-                "folder": {"type": "STRING", "description": "Mapped URL path configured in the PC editor, such as ms1/temporary."},
+                "folder": {"type": "STRING", "description": "Mapped URL path such as ms1/temporary. Required for file actions; optional for run, which defaults to the PC user's home directory."},
                 "path": {"type": "STRING", "description": "Relative file/folder path inside that shared folder; omit for its root listing."},
                 "query": {"type": "STRING", "description": "Text to search for when action is search."},
                 "content": {"type": "STRING", "description": "Full UTF-8 text content for create or write."},
