@@ -9,8 +9,10 @@ import re
 import secrets
 import socket
 import stat
+import subprocess
 import tempfile
 import uuid
+import platform
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
@@ -146,7 +148,7 @@ def roots_list() -> Any:
     return jsonify(roots=[
         {"id": x["id"], "name": x["name"], "url_path": x["url_path"]}
         for x in load_roots()
-    ])
+    ], host_os=platform.system(), command_shell=("cmd.exe" if os.name == "nt" else os.environ.get("SHELL", "/bin/sh")))
 
 
 @app.post("/api/roots")
@@ -404,6 +406,58 @@ def search_root() -> Any:
     except OSError:
         return jsonify(error="Could not search this folder."), 400
     return jsonify(query=query, results=results, truncated=truncated)
+
+
+@app.post("/api/command")
+@require_session
+def run_command() -> Any:
+    require_csrf()
+    data = request.get_json(silent=True) or {}
+    root_id = str(data.get("root", ""))
+    command = str(data.get("command", "")).strip()
+    if not command:
+        return jsonify(error="Command is required."), 400
+    if len(command) > 10000:
+        return jsonify(error="Command is too long."), 413
+    cwd = find_root(root_id)
+    try:
+        timeout = max(1, min(int(data.get("timeout_seconds", 60) or 60), 120))
+    except (TypeError, ValueError):
+        timeout = 60
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            errors="replace",
+            timeout=timeout,
+        )
+        stdout, stderr = result.stdout or "", result.stderr or ""
+        truncated = len(stdout) + len(stderr) > 30000
+        return jsonify(
+            command=command,
+            cwd_label=next((x["name"] for x in load_roots() if x["id"] == root_id), ""),
+            shell=("cmd.exe" if os.name == "nt" else os.environ.get("SHELL", "/bin/sh")),
+            exit_code=result.returncode,
+            stdout=stdout[:20000],
+            stderr=stderr[:10000],
+            truncated=truncated,
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else (exc.stdout or "")
+        stderr = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else (exc.stderr or "")
+        return jsonify(
+            command=command,
+            exit_code=None,
+            timed_out=True,
+            stdout=stdout[:20000],
+            stderr=stderr[:10000],
+            error=f"Command exceeded the {timeout}-second timeout.",
+        ), 408
+    except OSError as exc:
+        return jsonify(error=f"Could not execute command: {exc}"), 400
 
 
 @app.route("/<path:virtual_path>", methods=["GET", "PUT"])

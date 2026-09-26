@@ -36,12 +36,14 @@ Replace the example address with the LAN address printed by the server. A GET of
 
 An agent that can make HTTP requests can edit an existing file with PUT to its direct URL. Send a JSON body with content and revision, preserve the session cookie from the GET request, and send the X-CSRF-Token header returned by that GET. Saves are rejected if the file changed since it was read. The agent must be able to reach the private LAN address; public web search or chat alone cannot access it.
 
+The Gemini CLI can also send shell commands directly through its `lan_workspace` tool using action `run`; it does not need to create a temporary script file. Commands use the PC shell and run with the selected shared folder as the working directory. The working directory does not restrict shell access to that folder.
+
 ## Access and limits
 
 - The app binds to all network interfaces so other devices on the LAN can connect. Use it only on a trusted private Wi-Fi network.
-- No password is required. Folder access can only be granted from the PC itself; devices on Wi-Fi can browse and edit folders already added.
-- The app has no access to files outside the added roots. Paths and symlinks are checked against the selected root.
-- Only existing UTF-8 text files up to 2 MB can be edited. Binary files, file creation, deletion, and renaming are not supported.
+- No password is required. Folder access can only be granted from the PC itself; devices on Wi-Fi can browse and edit folders already added. The command endpoint also allows reachable devices to execute commands as the PC user.
+- File browsing and editing are restricted to configured roots. Shell commands are not sandboxed and can access anything the PC user can access.
+- UTF-8 text files up to 2 MB can be edited, and new files can be created inside an added root. Binary files, deletion, and renaming are not supported.
 - Before saving, the app checks whether the PC file changed since it was opened and refuses to overwrite a conflicting edit.
 - Traffic uses HTTP on the local network. Avoid untrusted or public Wi-Fi.
 - The built-in Flask server is intended for personal LAN use, not direct exposure to the public internet.

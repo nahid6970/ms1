@@ -880,8 +880,10 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str],
     if lan_editor_url:
         runtime_guidance += (
             f" The PC LAN Code Editor is configured at {lan_editor_url}. "
-            "For requested files on that PC, use lan_workspace with the mapped folder URL path; "
-            "ordinary local file tools operate on this device."
+            "For requested files on that PC, use lan_workspace with the mapped folder URL path. "
+            "For commands the user asks to run on that PC, use lan_workspace action run so the command is sent directly to the Flask app; do not create script files as command relays. "
+            "Choose command syntax for the remote PC shell. Never use remote command execution to download or install packages or build packages; give the user those commands to run themselves. "
+            "Ordinary local file tools operate on this device."
         )
     if "read_memory" in disabled_tools:
         return base_system + runtime_guidance
@@ -2247,8 +2249,8 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
         return "Error: folder must be the mapped URL path shown in the editor, for example ms1/temporary."
     if relative and any(part in {"", ".", ".."} for part in relative.split("/")):
         return "Error: path must stay inside the selected folder."
-    if action not in {"list", "read", "search", "create", "write"}:
-        return "Error: action must be list, read, search, create, or write."
+    if action not in {"list", "read", "search", "create", "write", "run"}:
+        return "Error: action must be list, read, search, create, write, or run."
 
     cookie_jar = http.cookiejar.CookieJar()
     opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
@@ -2261,7 +2263,7 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
             body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
             request_headers["Content-Type"] = "application/json; charset=utf-8"
         req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
-        with opener.open(req, timeout=20) as response:
+        with opener.open(req, timeout=130) as response:
             return response.read(), response.headers
 
     try:
@@ -2269,15 +2271,30 @@ def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
         csrf_token = roots_headers.get("X-CSRF-Token", "")
         roots_data = json.loads(roots_body.decode("utf-8"))
         roots = roots_data.get("roots", [])
+        remote_shell = roots_data.get("command_shell", "unknown shell")
+        remote_os = roots_data.get("host_os", "unknown OS")
         root = next((item for item in roots if str(item.get("url_path", "")).strip("/") == folder), None)
         if root is None:
             available = ", ".join(str(item.get("url_path", "")) for item in roots) or "(none added)"
             return f"Error: no folder mapped to '{folder}'. Available URL paths: {available}"
 
+        if action == "run":
+            command = str(args.get("command", "")).strip()
+            if not command:
+                return "Error: set command to the shell command to run on the PC."
+            payload = {
+                "root": root["id"],
+                "command": command,
+                "timeout_seconds": args.get("timeout_seconds", 60),
+            }
+            body, _ = send("POST", base_url + "/api/command", payload, {"X-CSRF-Token": csrf_token})
+            return json.dumps(json.loads(body.decode("utf-8")), ensure_ascii=False, indent=2)[:30000]
+
         file_url = base_url + "/" + urllib.parse.quote(folder + (("/" + relative) if relative else ""), safe="/")
         if action == "list":
             body, _ = send("GET", file_url)
             result = json.loads(body.decode("utf-8"))
+            result["remote_host"] = {"os": remote_os, "shell": remote_shell}
             return json.dumps(result, ensure_ascii=False, indent=2)[:40000]
         if action == "read":
             if not relative:
@@ -2525,16 +2542,18 @@ FUNCTIONS = {
     },
     "lan_workspace": {
         "name": "lan_workspace",
-        "description": "Browse, read, search, create, or write files in folders explicitly shared by the configured PC LAN Code Editor. Use for paths on the PC when this CLI is running on another device. Interpret a user path like 7777/ms1/temporary/ as folder ms1/temporary at the configured server address. Folder is the mapped URL path; path is relative inside it. Read before write and pass the returned revision. Configure the server address with /lan.",
+        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor, or run a command directly on the PC with action run. Use for PC work when this CLI is on another device. Interpret a path like 7777/ms1/temporary/ as folder ms1/temporary. For run, send the command directly to Flask; it runs in the selected shared folder using the PC shell. This is remote PC command execution, not a sandbox. Never use it to download/install packages or build packages; give those commands to the user. Configure the server with /lan.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
-                "action": {"type": "STRING", "enum": ["list", "read", "search", "create", "write"]},
+                "action": {"type": "STRING", "enum": ["list", "read", "search", "create", "write", "run"]},
                 "folder": {"type": "STRING", "description": "Mapped URL path configured in the PC editor, such as ms1/temporary."},
                 "path": {"type": "STRING", "description": "Relative file/folder path inside that shared folder; omit for its root listing."},
                 "query": {"type": "STRING", "description": "Text to search for when action is search."},
                 "content": {"type": "STRING", "description": "Full UTF-8 text content for create or write."},
                 "revision": {"type": "STRING", "description": "Revision returned by read; required for write to avoid overwriting newer changes."},
+                "command": {"type": "STRING", "description": "Command to run on the PC when action is run; use the PC's shell syntax."},
+                "timeout_seconds": {"type": "INTEGER", "description": "Maximum command duration, capped at 120 seconds."},
             },
             "required": ["action", "folder"],
         },
@@ -2923,7 +2942,7 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "delete_block", "category": "Code Modifications", "rating": "Good (Targeted removal)", "description": "[Code-Merge] Delete an exact block of text from a file."},
         {"name": "run_shell_command", "category": "Execution & Shell", "rating": "Powerful (Command execution)", "description": "Run a shell command."},
         {"name": "run_powershell", "category": "Execution & Shell", "rating": "Best for Windows inspection & tests", "description": "Run a PowerShell command."},
-        {"name": "lan_workspace", "category": "Remote Files", "rating": "Edit approved PC folders over Wi-Fi", "description": "Browse, read, search, create, or edit files in folders shared by the PC LAN Code Editor."},
+        {"name": "lan_workspace", "category": "Remote Files", "rating": "Edit files and run PC commands over Wi-Fi", "description": "Browse, read, search, create, or edit files and send commands directly to the PC Flask app."},
         {"name": "request_follow_up", "category": "Control Flow", "rating": "Safe", "description": "Request another turn for multi-step work."},
     ]
     return _TOOLS_CACHE

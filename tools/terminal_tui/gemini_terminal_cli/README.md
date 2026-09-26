@@ -128,7 +128,9 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 **Execution & Shell**:
 - `run_shell_command` — run commands through the host platform shell (POSIX commands on Termux/Linux/macOS)
 - `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
-- `lan_workspace` — browse, read, search, create, and edit files in folders shared by the PC LAN Code Editor
+- `lan_workspace` — browse, read, search, create, and edit shared PC files, or send a command directly to the PC Flask app with action `run`
+
+For remote commands, configure `/lan http://<PC-IP>:7777`, enable `lan_workspace` in `/tool`, and ask the model to run the command in a mapped folder. It sends the command to Flask without creating a script file. The command uses the PC shell and runs as the PC user; the shared folder is the working directory, not a security sandbox. On a no-password LAN, any device that can reach the app can run commands as that user. Do not use this for package downloads/installations or package builds; provide those commands for the user to run.
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`

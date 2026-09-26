@@ -149,7 +149,7 @@
     "name": "lan_workspace",
     "category": "Remote Files",
     "rating": "Edit approved PC folders over Wi-Fi",
-    "description": "Use the PC LAN Code Editor configured with /lan. Browse and read shared folders, search their text files, create files, or write existing files. Use when the user asks to work on PC files from another device. Interpret a user path like 7777/ms1/temporary/ as folder ms1/temporary at the configured server. Read before write and pass its revision."
+    "description": "Use the PC LAN Code Editor configured with /lan. Browse/read/search/create/write files, or run a command directly on the PC with action run. Interpret 7777/ms1/temporary/ as mapped folder ms1/temporary. Commands use the PC shell and run with the shared folder as working directory; this is not a sandbox. Never use this to download/install packages or build packages; provide those commands for the user to run."
   },
   {
     "name": "request_follow_up",
