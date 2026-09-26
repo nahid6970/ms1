@@ -34,6 +34,9 @@ h1, h2, p { margin-top: 0; }
 .root-row.active { background: #102022; border-left-color: var(--cyan); }
 .root-select { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; padding: 9px; text-align: left; background: transparent; border: 0; color: var(--text); font-size: 12px; }
 .root-select span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.root-label { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.root-label strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.root-label small { color: #666; font-size: 9px; }
 .folder-icon { color: var(--yellow); }
 .root-remove { border: 0; background: transparent; color: #666; font-size: 20px; padding: 4px 11px; }
 .root-remove:hover { color: var(--red); }

@@ -59,7 +59,8 @@ function renderRoots() {
   list.innerHTML = state.roots.map((root) =>
     '<div class="root-row ' + (state.root === root.id ? "active" : "") + '">' +
     '<button class="root-select" data-root="' + escapeHtml(root.id) + '">' +
-    '<span class="folder-icon">▰</span><span>' + escapeHtml(root.name) + '</span></button>' +
+    '<span class="folder-icon">▰</span><span class="root-label"><strong>' + escapeHtml(root.name) +
+    '</strong><small>/' + escapeHtml(root.url_path) + '/</small></span></button>' +
     '<button class="root-remove" data-remove="' + escapeHtml(root.id) + '" title="Remove access">×</button></div>'
   ).join("");
   list.querySelectorAll("[data-root]").forEach((button) =>
@@ -245,7 +246,9 @@ $("add-root-form")?.addEventListener("submit", async (event) => {
   try {
     const data = await request("/api/roots", {
       method: "POST",
-      body: JSON.stringify({ name: $("root-name").value, path: $("root-path").value })
+      body: JSON.stringify({
+        name: $("root-name").value, path: $("root-path").value, url_path: $("root-url").value
+      })
     });
     closeAddDialog();
     $("add-root-form").reset();

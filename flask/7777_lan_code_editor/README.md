@@ -25,6 +25,16 @@ Keep the server terminal running while you edit. Both devices must be on the sam
 
 The root list is saved locally in folder_roots.json, which is ignored by Git. The browser does not receive the configured absolute paths.
 
+## Direct URLs for AI agents
+
+When adding a folder on the PC, give it a URL path such as ms1/tools. That maps the approved PC folder to:
+
+    http://192.168.0.101:7777/ms1/tools/
+
+Replace the example address with the LAN address printed by the server. A GET of a folder URL returns JSON entries with direct URLs. A GET of a file URL returns its UTF-8 text and includes an ETag revision plus an X-CSRF-Token response header.
+
+An agent that can make HTTP requests can edit an existing file with PUT to its direct URL. Send a JSON body with content and revision, preserve the session cookie from the GET request, and send the X-CSRF-Token header returned by that GET. Saves are rejected if the file changed since it was read. The agent must be able to reach the private LAN address; public web search or chat alone cannot access it.
+
 ## Access and limits
 
 - The app binds to all network interfaces so other devices on the LAN can connect. Use it only on a trusted private Wi-Fi network.

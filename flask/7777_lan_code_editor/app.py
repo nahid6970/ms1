@@ -5,6 +5,7 @@ import hmac
 import ipaddress
 import json
 import os
+import re
 import secrets
 import socket
 import stat
@@ -13,6 +14,7 @@ import uuid
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import quote
 
 from flask import Flask, abort, jsonify, render_template, request, session
 
@@ -35,7 +37,12 @@ def load_roots() -> list[dict[str, str]]:
     if not isinstance(data, list):
         return []
     return [
-        {"id": str(x["id"]), "name": str(x["name"]), "path": str(x["path"])}
+        {
+            "id": str(x["id"]),
+            "name": str(x["name"]),
+            "path": str(x["path"]),
+            "url_path": str(x.get("url_path") or re.sub(r"[^a-zA-Z0-9._-]+", "-", str(x["name"]).strip()).strip("-").lower()),
+        }
         for x in data
         if isinstance(x, dict) and x.get("id") and x.get("name") and x.get("path")
     ]
@@ -45,6 +52,15 @@ def save_roots(roots: list[dict[str, str]]) -> None:
     temporary = ROOTS_FILE.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(roots, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     temporary.replace(ROOTS_FILE)
+
+
+def normalize_url_path(value: str) -> str:
+    parts = value.strip().strip("/").split("/")
+    if not parts or any(not re.fullmatch(r"[A-Za-z0-9._-]+", part) or part in {".", ".."} for part in parts):
+        raise ValueError("URL path must contain simple folder names, for example ms1/tools.")
+    if parts[0].lower() in {"api", "static"}:
+        raise ValueError("URL path cannot start with api or static.")
+    return "/".join(parts)
 
 
 def find_root(root_id: str) -> Path:
@@ -121,7 +137,10 @@ def index() -> Any:
 @app.get("/api/roots")
 @require_session
 def roots_list() -> Any:
-    return jsonify(roots=[{"id": x["id"], "name": x["name"]} for x in load_roots()])
+    return jsonify(roots=[
+        {"id": x["id"], "name": x["name"], "url_path": x["url_path"]}
+        for x in load_roots()
+    ])
 
 
 @app.post("/api/roots")
@@ -137,20 +156,36 @@ def roots_add() -> Any:
     data = request.get_json(silent=True) or {}
     raw = str(data.get("path", "")).strip()
     name = str(data.get("name", "")).strip()
+    raw_url_path = str(data.get("url_path", "")).strip()
     try:
         path = Path(raw).expanduser().resolve(strict=True)
     except (OSError, RuntimeError):
         return jsonify(error="That folder path does not exist or cannot be accessed."), 400
     if not path.is_dir():
         return jsonify(error="The selected path is not a folder."), 400
+    if not name:
+        name = path.name or str(path)
+    if not raw_url_path:
+        raw_url_path = re.sub(r"[^a-zA-Z0-9._-]+", "-", name).strip("-").lower() or "project"
+    try:
+        url_path = normalize_url_path(raw_url_path)
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
     roots = load_roots()
     normalized = os.path.normcase(str(path))
     if any(os.path.normcase(str(Path(x["path"]).resolve())) == normalized for x in roots):
         return jsonify(error="That folder is already added."), 409
-    root = {"id": uuid.uuid4().hex, "name": (name[:60] or path.name or str(path)), "path": str(path)}
+    if any(x["url_path"].lower() == url_path.lower() for x in roots):
+        return jsonify(error="That URL path is already in use."), 409
+    root = {
+        "id": uuid.uuid4().hex,
+        "name": name[:60],
+        "path": str(path),
+        "url_path": url_path,
+    }
     roots.append(root)
     save_roots(roots)
-    return jsonify(root={"id": root["id"], "name": root["name"]})
+    return jsonify(root={"id": root["id"], "name": root["name"], "url_path": root["url_path"]})
 
 
 @app.delete("/api/roots/<root_id>")
@@ -243,6 +278,102 @@ def file_save() -> Any:
             temporary_path.unlink(missing_ok=True)
         return jsonify(error="Could not save this file."), 400
     return jsonify(revision=hashlib.sha256(encoded).hexdigest(), saved=True)
+
+
+@app.route("/<path:virtual_path>", methods=["GET", "PUT"])
+@require_session
+def direct_folder_access(virtual_path: str) -> Any:
+    requested = virtual_path.strip("/")
+    roots = sorted(load_roots(), key=lambda item: len(item["url_path"]), reverse=True)
+    selected = None
+    relative = ""
+    for item in roots:
+        prefix = item["url_path"].strip("/")
+        if requested == prefix:
+            selected, relative = item, ""
+            break
+        if requested.startswith(prefix + "/"):
+            selected, relative = item, requested[len(prefix) + 1:]
+            break
+    if selected is None:
+        abort(404, description="No added folder is mapped to this URL.")
+
+    root, path = safe_path(selected["id"], relative)
+    csrf = session["csrf_token"]
+    if request.method == "GET":
+        if path.is_dir():
+            entries = []
+            try:
+                for child in sorted(path.iterdir(), key=lambda item: (not item.is_dir(), item.name.lower())):
+                    try:
+                        resolved = child.resolve(strict=True)
+                        resolved.relative_to(root)
+                        is_directory = resolved.is_dir()
+                        info = resolved.stat()
+                    except (OSError, ValueError):
+                        continue
+                    child_relative = child.relative_to(root).as_posix()
+                    entries.append({
+                        "name": child.name,
+                        "kind": "directory" if is_directory else "file",
+                        "size": None if is_directory else info.st_size,
+                        "url": "/" + quote(selected["url_path"] + "/" + child_relative, safe="/"),
+                    })
+            except OSError:
+                abort(400, description="Could not read this folder.")
+            response = jsonify(
+                kind="directory",
+                path="/" + quote(selected["url_path"] + (("/" + relative) if relative else ""), safe="/"),
+                entries=entries,
+            )
+        else:
+            if not path.is_file():
+                abort(400, description="This path is not a file or folder.")
+            try:
+                raw = path.read_bytes()
+                if len(raw) > MAX_EDIT_BYTES:
+                    abort(413, description="File is larger than 2 MB.")
+                content = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                abort(415, description="This file is not UTF-8 text.")
+            response = app.response_class(content, mimetype="text/plain")
+            response.headers["ETag"] = '"' + hashlib.sha256(raw).hexdigest() + '"'
+        response.headers["X-CSRF-Token"] = csrf
+        response.headers["Cache-Control"] = "no-store"
+        return response
+
+    require_csrf()
+    if not path.is_file():
+        abort(400, description="Only existing text files can be edited.")
+    data = request.get_json(silent=True)
+    content = data.get("content") if isinstance(data, dict) else request.get_data(as_text=True)
+    expected = str(data.get("revision", "")) if isinstance(data, dict) else request.headers.get("If-Match", "").strip('"')
+    if not isinstance(content, str):
+        abort(400, description="Send UTF-8 text as the request body or JSON content field.")
+    encoded = content.encode("utf-8")
+    if len(encoded) > MAX_EDIT_BYTES:
+        abort(413, description="Files must be at most 2 MB.")
+    try:
+        current = path.read_bytes()
+        if hashlib.sha256(current).hexdigest() != expected:
+            return jsonify(error="File changed since it was read. GET it again before saving."), 409
+        mode = stat.S_IMODE(path.stat().st_mode)
+        with tempfile.NamedTemporaryFile(mode="wb", dir=path.parent, prefix=".lan-edit-", delete=False) as handle:
+            handle.write(encoded)
+            temporary = Path(handle.name)
+        os.chmod(temporary, mode)
+        temporary.replace(path)
+    except OSError:
+        try:
+            temporary.unlink(missing_ok=True)
+        except (OSError, UnboundLocalError):
+            pass
+        abort(400, description="Could not save this file.")
+    revision = hashlib.sha256(encoded).hexdigest()
+    response = jsonify(saved=True, revision=revision)
+    response.headers["ETag"] = '"' + revision + '"'
+    response.headers["X-CSRF-Token"] = csrf
+    return response
 
 
 def local_addresses() -> list[str]:
