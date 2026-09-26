@@ -77,6 +77,17 @@ except Exception:
     msvcrt = None
 
 try:
+    import select
+    import termios
+    import tty
+except Exception:
+    select = None
+    termios = None
+    tty = None
+
+ACTIVE_DEVICE_MODE = "pc"
+
+try:
     from PyQt6.QtWidgets import (
         QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
         QLabel, QPushButton, QLineEdit, QTextEdit, QTextBrowser, QDialog,
@@ -3969,6 +3980,35 @@ def clear_screen() -> None:
 
 def read_key() -> str:
     if msvcrt is None:
+        if (
+            ACTIVE_DEVICE_MODE == "android"
+            and sys.stdin.isatty()
+            and select is not None
+            and termios is not None
+            and tty is not None
+        ):
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            try:
+                tty.setraw(fd)
+                ch = sys.stdin.read(1)
+                if ch == "\x1b":
+                    sequence = ch
+                    while select.select([sys.stdin], [], [], 0.04)[0]:
+                        sequence += sys.stdin.read(1)
+                        if len(sequence) >= 3 and sequence[-1].isalpha():
+                            break
+                    return {
+                        "\x1b[A": "UP",
+                        "\x1b[B": "DOWN",
+                        "\x1b[5~": "PAGEUP",
+                        "\x1b[6~": "PAGEDOWN",
+                        "\x1bOA": "UP",
+                        "\x1bOB": "DOWN",
+                    }.get(sequence, sequence)
+                return ch
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return input().strip()
     ch = msvcrt.getwch()
     if ch in ("\x00", "\xe0"):
@@ -4067,13 +4107,13 @@ def interactive_select(
             return items[index]
         if key == "\x1b" or key.lower() == "q":
             return None
-        if key in ("\xe0H", "\x00H"):
+        if key in ("\xe0H", "\x00H", "UP"):
             index = (index - 1) % len(items)
-        elif key in ("\xe0P", "\x00P"):
+        elif key in ("\xe0P", "\x00P", "DOWN"):
             index = (index + 1) % len(items)
-        elif key in ("\xe0I", "\x00I"):
+        elif key in ("\xe0I", "\x00I", "PAGEUP"):
             index = max(0, index - max_visible)
-        elif key in ("\xe0Q", "\x00Q"):
+        elif key in ("\xe0Q", "\x00Q", "PAGEDOWN"):
             index = min(len(items) - 1, index + max_visible)
         elif key == " " and on_space is not None:
             on_space(items[index], index)
@@ -5417,6 +5457,7 @@ def resolve_system_instruction_input(text: str, cwd: Path) -> tuple[str, bool]:
 
 
 def main() -> int:
+    global ACTIVE_DEVICE_MODE
     parser = argparse.ArgumentParser(description="Gemini terminal CLI")
     parser.add_argument("startup_args", nargs="*", help="Optional startup command such as /api 09")
     parser.add_argument("-p", "--prompt", help="Run one prompt and exit")
@@ -5464,6 +5505,7 @@ def main() -> int:
     device_mode = str(model_prefs.get("device_mode") or "pc").lower()
     if device_mode not in {"pc", "android"}:
         device_mode = "pc"
+    ACTIVE_DEVICE_MODE = device_mode
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
@@ -6142,6 +6184,7 @@ def main() -> int:
                         info(f"Current device mode: {device_mode}. Use /device pc or /device android.")
                     elif remainder.lower() in {"pc", "android"}:
                         device_mode = remainder.lower()
+                        ACTIVE_DEVICE_MODE = device_mode
                         persist_selection()
                         info(f"Device mode set to {device_mode}.")
                     else:
