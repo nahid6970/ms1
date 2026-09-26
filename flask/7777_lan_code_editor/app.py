@@ -104,6 +104,13 @@ def require_csrf() -> None:
         abort(403, description="Request verification failed. Reload the page and try again.")
 
 
+def is_local_client() -> bool:
+    try:
+        return ipaddress.ip_address(request.remote_addr or "").is_loopback
+    except ValueError:
+        return False
+
+
 @app.after_request
 def security_headers(response: Any) -> Any:
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -112,6 +119,8 @@ def security_headers(response: Any) -> Any:
         "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
         "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
     )
+    if session.get("csrf_token"):
+        response.headers["X-CSRF-Token"] = str(session["csrf_token"])
     return response
 
 
@@ -123,10 +132,7 @@ def too_large(_: Any) -> tuple[Any, int]:
 @app.get("/")
 @require_session
 def index() -> Any:
-    try:
-        can_add_roots = ipaddress.ip_address(request.remote_addr or "").is_loopback
-    except ValueError:
-        can_add_roots = False
+    can_add_roots = is_local_client()
     return render_template(
         "index.html",
         csrf_token=session["csrf_token"],
@@ -147,11 +153,7 @@ def roots_list() -> Any:
 @require_session
 def roots_add() -> Any:
     require_csrf()
-    try:
-        is_local_request = ipaddress.ip_address(request.remote_addr or "").is_loopback
-    except ValueError:
-        is_local_request = False
-    if not is_local_request:
+    if not is_local_client():
         return jsonify(error="Add folders from the PC using http://127.0.0.1:7777. Android can edit added folders."), 403
     data = request.get_json(silent=True) or {}
     raw = str(data.get("path", "")).strip()
@@ -186,6 +188,28 @@ def roots_add() -> Any:
     roots.append(root)
     save_roots(roots)
     return jsonify(root={"id": root["id"], "name": root["name"], "url_path": root["url_path"]})
+
+
+@app.put("/api/roots/<root_id>")
+@require_session
+def roots_update(root_id: str) -> Any:
+    require_csrf()
+    if not is_local_client():
+        return jsonify(error="Change folder URL paths from the PC at http://127.0.0.1:7777."), 403
+    data = request.get_json(silent=True) or {}
+    try:
+        url_path = normalize_url_path(str(data.get("url_path", "")))
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    roots = load_roots()
+    selected = next((item for item in roots if item["id"] == root_id), None)
+    if selected is None:
+        return jsonify(error="Folder not found."), 404
+    if any(item["id"] != root_id and item["url_path"].lower() == url_path.lower() for item in roots):
+        return jsonify(error="That URL path is already in use."), 409
+    selected["url_path"] = url_path
+    save_roots(roots)
+    return jsonify(root={"id": root_id, "name": selected["name"], "url_path": url_path})
 
 
 @app.delete("/api/roots/<root_id>")
@@ -278,6 +302,108 @@ def file_save() -> Any:
             temporary_path.unlink(missing_ok=True)
         return jsonify(error="Could not save this file."), 400
     return jsonify(revision=hashlib.sha256(encoded).hexdigest(), saved=True)
+
+
+@app.post("/api/file")
+@require_session
+def file_create() -> Any:
+    require_csrf()
+    data = request.get_json(silent=True) or {}
+    root_id = str(data.get("root", ""))
+    relative = str(data.get("path", ""))
+    content = data.get("content", "")
+    if not isinstance(content, str):
+        return jsonify(error="File content must be text."), 400
+    encoded = content.encode("utf-8")
+    if len(encoded) > MAX_EDIT_BYTES:
+        return jsonify(error="Files must be at most 2 MB."), 413
+    root = find_root(root_id)
+    clean = relative.replace("\\", "/")
+    parts = clean.split("/")
+    if not clean or any(part in {"", ".", ".."} for part in parts):
+        return jsonify(error="Provide a new file path inside the selected folder."), 400
+    leaf = Path(parts[-1])
+    if leaf.is_absolute() or leaf.name != parts[-1]:
+        return jsonify(error="Invalid file name."), 400
+    try:
+        parent = root
+        for segment in parts[:-1]:
+            next_parent = parent / segment
+            if not next_parent.exists():
+                next_parent.mkdir()
+            parent = next_parent.resolve(strict=True)
+            parent.relative_to(root)
+            if not parent.is_dir():
+                return jsonify(error="Parent path is not a folder."), 400
+        target = parent / leaf
+        target.resolve(strict=False).relative_to(root)
+        with target.open("xb") as handle:
+            handle.write(encoded)
+    except FileExistsError:
+        return jsonify(error="A file already exists at that path."), 409
+    except (OSError, ValueError):
+        return jsonify(error="Could not create this file inside the selected folder."), 400
+    return jsonify(created=True, path=relative, revision=hashlib.sha256(encoded).hexdigest()), 201
+
+
+@app.get("/api/search")
+@require_session
+def search_root() -> Any:
+    root_id = request.args.get("root", "")
+    query = request.args.get("query", "")
+    if not query:
+        return jsonify(error="Search query is required."), 400
+    root = find_root(root_id)
+    root_config = next((item for item in load_roots() if item["id"] == root_id), None)
+    if root_config is None:
+        abort(404)
+    results = []
+    excluded = {".git", ".venv", "venv", "__pycache__", "node_modules", "dist", "build"}
+    file_limit = 5000
+    match_limit = 100
+    visited = 0
+    truncated = False
+    try:
+        for current, dirs, files in os.walk(root, followlinks=False):
+            current_path = Path(current)
+            dirs[:] = [
+                name for name in dirs
+                if name not in excluded
+                and not (current_path / name).is_symlink()
+            ]
+            for filename in files:
+                visited += 1
+                if visited > file_limit:
+                    truncated = True
+                    break
+                candidate = current_path / filename
+                try:
+                    resolved = candidate.resolve(strict=True)
+                    resolved.relative_to(root)
+                    if not resolved.is_file() or resolved.stat().st_size > MAX_EDIT_BYTES:
+                        continue
+                    text = resolved.read_text(encoding="utf-8")
+                except (OSError, UnicodeDecodeError, ValueError):
+                    continue
+                for line_number, line in enumerate(text.splitlines(), 1):
+                    if query.casefold() in line.casefold():
+                        relative = resolved.relative_to(root).as_posix()
+                        results.append({
+                            "path": relative,
+                            "line": line_number,
+                            "text": line[:400],
+                            "url": "/" + quote(root_config["url_path"] + "/" + relative, safe="/"),
+                        })
+                        if len(results) >= match_limit:
+                            truncated = True
+                            break
+                if len(results) >= match_limit:
+                    break
+            if truncated:
+                break
+    except OSError:
+        return jsonify(error="Could not search this folder."), 400
+    return jsonify(query=query, results=results, truncated=truncated)
 
 
 @app.route("/<path:virtual_path>", methods=["GET", "PUT"])

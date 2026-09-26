@@ -40,6 +40,8 @@ h1, h2, p { margin-top: 0; }
 .folder-icon { color: var(--yellow); }
 .root-remove { border: 0; background: transparent; color: #666; font-size: 20px; padding: 4px 11px; }
 .root-remove:hover { color: var(--red); }
+.root-url-edit { border: 0; background: transparent; color: #777; font-size: 13px; padding: 5px; }
+.root-url-edit:hover { color: var(--cyan); }
 .file-tree { overflow: auto; flex: 1; padding: 6px 8px 12px; border-top: 1px solid #202020; }
 .tree-entry { display: flex; width: 100%; align-items: center; gap: 8px; padding: 8px 9px; border: 0; background: transparent; color: #aaa; text-align: left; font-size: 12px; }
 .tree-entry:hover, .tree-entry.selected { background: #151515; color: var(--cyan); }
@@ -108,6 +110,7 @@ dialog::backdrop { background: #000b; backdrop-filter: blur(3px); }
   .root-row.active { border-bottom-color: var(--cyan); }
   .root-select { max-width: 170px; padding: 7px; }
   .root-remove { padding: 3px 7px; }
+  .root-url-edit { padding: 4px; }
   .file-tree { min-height: 45px; max-height: 23dvh; padding: 4px 8px; }
   .tree-entry { min-height: 35px; padding: 7px 8px; }
   .sidebar-foot { display: none; }

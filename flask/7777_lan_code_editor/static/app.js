@@ -1,6 +1,7 @@
 "use strict";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+const canManageRoots = document.body.dataset.canManageRoots === "true";
 const state = { roots: [], root: null, folder: "", file: "", revision: "", dirty: false };
 const $ = (id) => document.getElementById(id);
 
@@ -61,12 +62,32 @@ function renderRoots() {
     '<button class="root-select" data-root="' + escapeHtml(root.id) + '">' +
     '<span class="folder-icon">▰</span><span class="root-label"><strong>' + escapeHtml(root.name) +
     '</strong><small>/' + escapeHtml(root.url_path) + '/</small></span></button>' +
+    (canManageRoots ? '<button class="root-url-edit" data-url-edit="' + escapeHtml(root.id) + '" title="Change URL path">↗</button>' : "") +
     '<button class="root-remove" data-remove="' + escapeHtml(root.id) + '" title="Remove access">×</button></div>'
   ).join("");
   list.querySelectorAll("[data-root]").forEach((button) =>
     button.addEventListener("click", () => selectRoot(button.dataset.root)));
   list.querySelectorAll("[data-remove]").forEach((button) =>
     button.addEventListener("click", () => removeRoot(button.dataset.remove)));
+  list.querySelectorAll("[data-url-edit]").forEach((button) =>
+    button.addEventListener("click", () => editRootUrl(button.dataset.urlEdit)));
+}
+
+async function editRootUrl(rootId) {
+  const root = state.roots.find((item) => item.id === rootId);
+  if (!root) return;
+  const urlPath = window.prompt("URL path for this folder (example: ms1/temporary):", root.url_path);
+  if (urlPath === null || !urlPath.trim() || urlPath.trim() === root.url_path) return;
+  try {
+    await request("/api/roots/" + encodeURIComponent(rootId), {
+      method: "PUT",
+      body: JSON.stringify({ url_path: urlPath.trim() })
+    });
+    await loadRoots();
+    showNotice("Folder URL updated to /" + urlPath.trim() + "/", "success");
+  } catch (error) {
+    showNotice(error.message, "error");
+  }
 }
 
 function confirmDiscard() {

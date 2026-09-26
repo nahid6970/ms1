@@ -20,6 +20,7 @@ Keep the server terminal running while you edit. Both devices must be on the sam
 
 1. On the PC, open http://127.0.0.1:7777 and select Add Project Folder.
 2. Enter the absolute path of a folder on the PC.
+   Set its URL path to a name such as ms1/temporary. For a folder that is already added, use the ↗ control beside it on the PC to change its URL path.
 3. From Android, open the printed LAN address, browse added folders, tap a text file, edit it, then press Save.
 4. Remove a folder from the sidebar to revoke access. This never deletes the folder or its files.
 

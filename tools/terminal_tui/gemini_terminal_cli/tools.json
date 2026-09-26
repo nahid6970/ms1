@@ -146,6 +146,12 @@
     "description": "Run a PowerShell command via powershell.exe. Available on hosts where PowerShell is installed, usually Windows; do not assume it is available in Android Termux. Captures stdout and stderr."
   },
   {
+    "name": "lan_workspace",
+    "category": "Remote Files",
+    "rating": "Edit approved PC folders over Wi-Fi",
+    "description": "Use the PC LAN Code Editor configured with /lan. Browse and read shared folders, search their text files, create files, or write existing files. Use when the user asks to work on PC files from another device. Interpret a user path like 7777/ms1/temporary/ as folder ms1/temporary at the configured server. Read before write and pass its revision."
+  },
+  {
     "name": "request_follow_up",
     "category": "Control Flow",
     "rating": "Safe",

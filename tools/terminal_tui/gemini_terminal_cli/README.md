@@ -80,6 +80,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
 - `/device [pc|android]` - select PC or Android/Termux terminal input mode; Android mode prefers the terminal TTY for arrow-key input
+- `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace tool
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file
@@ -127,6 +128,7 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 **Execution & Shell**:
 - `run_shell_command` — run commands through the host platform shell (POSIX commands on Termux/Linux/macOS)
 - `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
+- `lan_workspace` — browse, read, search, create, and edit files in folders shared by the PC LAN Code Editor
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`

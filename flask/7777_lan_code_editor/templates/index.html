@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   <script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </head>
-<body>
+<body data-can-manage-roots="{{ 'true' if can_add_roots else 'false' }}">
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">▰</span> LAN<span>CODE</span></a>
     <div class="top-status"><i></i> PRIVATE SESSION <b>·</b> PORT 7777</div>
