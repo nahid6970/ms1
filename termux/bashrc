@@ -7,7 +7,7 @@ termux-wake-lock
 
 # Aliases for convenience
 alias cls='clear'
-alias gg='python ms1/tools/terminal_tui/gemini_terminal_cli/gemini_cli.py --password 182358 --max-output-tokens 65536'
+alias gg='python ~/ms1/tools/terminal_tui/gemini_terminal_cli/gemini_cli.py --password 182358 --max-output-tokens 65536'
 alias la='ls -a'
 alias ll='ls -la'
 alias ls='eza -al --color=always --group-directories-first'
