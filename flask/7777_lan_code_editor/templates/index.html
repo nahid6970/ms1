@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>LAN Code Editor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">▰</span> LAN<span>CODE</span></a>
+    <div class="top-status"><i></i> PRIVATE SESSION <b>·</b> PORT 7777</div>
+    <div class="top-status">NO PASSWORD</div>
+  </header>
+
+  <main class="workspace">
+    <aside class="sidebar">
+      <div class="side-heading">
+        <div><div class="eyebrow">WORKSPACE</div><h2>PROJECTS</h2></div>
+        {% if can_add_roots %}<button id="add-root-open" class="icon-button" title="Add a folder" aria-label="Add a folder">＋</button>{% endif %}
+      </div>
+      <div id="root-list" class="root-list"><div class="empty">Loading folders…</div></div>
+      <div class="sidebar-foot"><span class="dot"></span> ONLY ADDED FOLDERS ARE ACCESSIBLE</div>
+    </aside>
+
+    <section class="main-panel">
+      <div class="toolbar">
+        <div class="breadcrumbs" id="breadcrumbs"><span>SELECT A PROJECT</span></div>
+        <div class="toolbar-actions">
+          <span id="save-state" class="save-state">READY</span>
+          <button id="reload-file" class="secondary-button" disabled>RELOAD</button>
+          <button id="save-file" class="primary save-button" disabled>SAVE <kbd>Ctrl S</kbd></button>
+        </div>
+      </div>
+      <div id="welcome" class="welcome">
+        <div class="welcome-icon">⌘</div>
+        <div class="eyebrow">SAME WI-FI · YOUR PC FILES</div>
+        <h1>Pick a project.<br><span>Edit from anywhere.</span></h1>
+        <p>Add a folder from this PC, browse its files on your phone, then save changes back to the original file.</p>
+        {% if can_add_roots %}
+        <button id="add-root-welcome" class="primary">＋ ADD PROJECT FOLDER</button>
+        {% else %}
+        <p class="tiny">Add folders from the PC at http://127.0.0.1:7777. This device can edit folders already added.</p>
+        {% endif %}
+      </div>
+      <div id="editor-shell" class="editor-shell hidden">
+        <div class="editor-meta">
+          <div class="file-symbol">{ }</div>
+          <div class="file-info"><strong id="file-name">—</strong><span id="file-path"></span></div>
+          <span class="text-badge">UTF-8 · TEXT</span>
+        </div>
+        <textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"
+          placeholder="Select a text file to start editing…"></textarea>
+      </div>
+      <div id="notice" class="notice toast hidden" role="status"></div>
+    </section>
+  </main>
+
+  {% if can_add_roots %}<dialog id="add-root-dialog">
+    <form id="add-root-form" class="dialog-card">
+      <button type="button" class="dialog-close" id="add-root-close" aria-label="Close">×</button>
+      <div class="eyebrow">GRANT FOLDER ACCESS</div>
+      <h2>ADD A PROJECT</h2>
+      <p class="muted">Enter a folder path on this PC. The app can access this folder and its contents.</p>
+      <label for="root-name">DISPLAY NAME <span class="optional">OPTIONAL</span></label>
+      <input id="root-name" name="name" maxlength="60" placeholder="e.g. My Website">
+      <label for="root-path">FULL FOLDER PATH ON THIS PC</label>
+      <input id="root-path" name="path" required placeholder="C:\Users\you\Projects\website">
+      <div class="dialog-actions">
+        <button type="button" id="cancel-root" class="secondary-button">CANCEL</button>
+        <button type="submit" class="primary">ADD FOLDER</button>
+      </div>
+    </form>
+  </dialog>{% endif %}
+</body>
+</html>
