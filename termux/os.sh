@@ -381,7 +381,14 @@ show_ssh_connection_info() {
     echo "Port: $ssh_port"
     echo "Password: use the Windows account password"
     printf 'Connect command: ssh -p %s %s@%s\n' "$ssh_port" "$pc_user" "$pc_ip"
-    echo "The Windows OpenSSH server must be running for this command to connect."
+    echo
+    echo "If the SSH server is stopped, run these in Administrator PowerShell on the PC:"
+    echo "  Set-Service sshd -StartupType Automatic"
+    echo "  Start-Service sshd"
+    echo
+    echo "To change the Windows account password used by SSH, run in Administrator PowerShell:"
+    echo "  net user $pc_user *"
+    echo "Enter the new password when prompted; it will not be displayed."
 }
 
 # Run Termux OpenSSH in the foreground so this script remains active until stopped.
