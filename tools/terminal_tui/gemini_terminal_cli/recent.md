@@ -2,7 +2,7 @@
 
 2. Latest Implementation:
 - PC remote access: “7777 and run ...” uses Flask `lan_workspace` action `run` (not SSH); omitting folder uses the PC user's home folder. SSH is separate and used only when explicitly requested, e.g. `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. SSH also defaults to the PC user's home folder. Never ask for or store the SSH password. Flask `/lan` remains available for PC file browsing/editing.
-- `/add_device <name> <user@host> [port] [identity_file]` stores named SSH connection metadata in `model_prefs.json`; `/add_device` lists entries and `/add_device remove <name>` deletes one. Passwords are not stored.
+- `/add_device` opens an interactive SSH device manager; each saved entry has exactly a name and full SSH connection command. Entries can be viewed, added, modified, or removed. Commands are stored in `model_prefs.json`; passwords and remote commands are not stored in the connection field.
 - `gemini_cli.py`: Added loopback proxy using encrypted `api_accounts.lock`, quota/rate-limit failover, JSON/SSE forwarding, explicit stream close, safe account/model-prefixed diagnostics, and `/test` synchronization into Pi's failover catalog.
 - `README.md`: Documents proxy, model synchronization, and safe logging.
 - `C:\Users\nahid\.pi\agent\auth.json`, `models.json`, `settings.json`: Configured failover-only Pi provider, enabled models, and default `google-failover/gemini-3.1-flash-lite`.

@@ -892,10 +892,9 @@ def get_effective_system_instruction(
     if ssh_devices:
         entries = []
         for name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
-            identity = f" -i {shlex.quote(device['identity_file'])}" if device.get("identity_file") else ""
-            entries.append(f"{name}: ssh{identity} -p {device['port']} {device['user']}@{device['host']}")
+            entries.append(f"{name}: {device['connect_command']}")
         runtime_guidance += (
-            " Saved SSH devices (use the matching connection when the user names one): "
+            " Saved SSH devices (use the matching connection when the user names one, then append the requested remote command): "
             + "; ".join(entries)
             + ". Never ask for or store passwords."
         )
@@ -3946,20 +3945,43 @@ def normalize_bool(value: Any) -> bool:
     return bool(value)
 
 
+def validate_ssh_connect_command(value: Any) -> str:
+    command = str(value or "").strip()
+    if not command or len(command) > 1200 or any(ord(char) < 32 for char in command):
+        raise ValueError("Enter a single SSH connection command.")
+    if any(char in command for char in ";|&<>`$"):
+        raise ValueError("Connection command cannot contain shell operators or expansions.")
+    if re.search(r"password|passphrase|sshpass", command, re.IGNORECASE):
+        raise ValueError("Do not include passwords; use SSH key authentication.")
+    try:
+        parts = shlex.split(command, posix=True)
+    except ValueError as exc:
+        raise ValueError(f"Invalid SSH command quoting: {exc}") from exc
+    if len(parts) < 2 or Path(parts[0].replace("\\", "/")).name.lower() not in {"ssh", "ssh.exe"}:
+        raise ValueError("Command must start with ssh and end with a host, for example: ssh -p 22 user@host")
+    if not re.fullmatch(r"(?:[A-Za-z0-9._-]+@)?(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])", parts[-1]):
+        raise ValueError("The final SSH command argument must be the device host (optionally user@host).")
+    return command
+
+
 def normalize_ssh_devices(value: Any) -> Dict[str, Dict[str, str]]:
     if not isinstance(value, dict):
         return {}
     devices: Dict[str, Dict[str, str]] = {}
     for name, raw in value.items():
-        if not isinstance(raw, dict) or raw.get("type") != "ssh":
+        if not isinstance(raw, dict):
             continue
-        devices[str(name)] = {
-            "type": "ssh",
-            "user": str(raw.get("user") or ""),
-            "host": str(raw.get("host") or ""),
-            "port": str(raw.get("port") or "22"),
-            "identity_file": str(raw.get("identity_file") or ""),
-        }
+        if raw.get("connect_command"):
+            command = raw.get("connect_command")
+        elif raw.get("type") == "ssh" and raw.get("host") and raw.get("user"):
+            identity = f" -i {shlex.quote(str(raw['identity_file']))}" if raw.get("identity_file") else ""
+            command = f"ssh{identity} -p {str(raw.get('port') or '22')} {raw['user']}@{raw['host']}"
+        else:
+            continue
+        try:
+            devices[str(name)] = {"connect_command": validate_ssh_connect_command(command)}
+        except ValueError:
+            continue
     return devices
 
 
@@ -6131,6 +6153,77 @@ def main() -> int:
             ssh_devices,
         )
 
+    def add_or_edit_ssh_device(existing_name: str = "") -> None:
+        current = ssh_devices.get(existing_name, {})
+        name = input(f"Device name [{existing_name or 'new'}]: ").strip() or existing_name
+        connect_command = input(f"SSH command [{current.get('connect_command', '')}]: ").strip()
+        connect_command = connect_command or str(current.get("connect_command") or "")
+
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,31}", name):
+            warn("Device name must be 1-32 letters, numbers, underscores, or hyphens, and start with a letter or number.")
+            return
+        try:
+            connect_command = validate_ssh_connect_command(connect_command)
+        except ValueError as exc:
+            warn(str(exc))
+            return
+        ssh_devices[name] = {"connect_command": connect_command}
+        if existing_name and existing_name != name:
+            ssh_devices.pop(existing_name, None)
+        persist_selection()
+        info(f"Saved SSH device '{name}'.")
+
+    def manage_ssh_devices() -> None:
+        items: List[Dict[str, str]] = [{"action": "add", "name": "Add SSH device", "details": "Create a named connection"}]
+        for name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
+            items.append({
+                "action": "manage",
+                "name": name,
+                "details": device["connect_command"],
+            })
+
+        chosen = interactive_select(
+            title_text="Manage SSH Devices",
+            items=items,
+            render_item=lambda item, index, selected=False: _ansi_wrap(
+                f"{'>' if selected else ' '} {index + 1:>2}  {item['name']:<20} {item['details']}",
+                "48;5;24;97" if selected else ("32" if item["action"] == "add" else "39"),
+            ),
+            footer_lines=["Select a device to view or modify it; Esc/Q cancels."],
+        )
+        if not chosen:
+            return
+        if chosen["action"] == "add":
+            add_or_edit_ssh_device()
+            return
+
+        device_name = chosen["name"]
+        device = ssh_devices.get(device_name, {})
+        details = device.get("connect_command", "")
+        actions = [
+            {"action": "edit", "name": "Modify device", "details": details},
+            {"action": "remove", "name": "Remove device", "details": "Delete saved connection"},
+            {"action": "cancel", "name": "Back", "details": "Return to prompt"},
+        ]
+        action = interactive_select(
+            title_text=f"SSH Device: {device_name}",
+            items=actions,
+            render_item=lambda item, index, selected=False: _ansi_wrap(
+                f"{'>' if selected else ' '} {index + 1}. {item['name']}  {item['details']}",
+                "48;5;24;97" if selected else "39",
+            ),
+            footer_lines=["Enter to select; Esc/Q to go back."],
+        )
+        if not action or action["action"] == "cancel":
+            return
+        if action["action"] == "edit":
+            add_or_edit_ssh_device(device_name)
+            return
+        if input(f"Remove '{device_name}'? [y/N]: ").strip().lower() == "y":
+            ssh_devices.pop(device_name, None)
+            persist_selection()
+            info(f"Removed SSH device '{device_name}'.")
+
     def add_api_account_interactive(provider: str = "gemini") -> None:
         nonlocal api_accounts, tavily_accounts, api_accounts_loaded, model_cache
         provider = provider.lower().strip() or "gemini"
@@ -6461,55 +6554,38 @@ def main() -> int:
                         warn(f"Could not parse device details: {exc}")
                         continue
                     if not device_args:
-                        info("Usage: /add_device <name> <user@host> [port] [identity_file]")
-                        info("Example: /add_device pc nahid@192.168.0.101 22 ~/.ssh/id_ed25519_windows_pc")
-                        info("Remove one: /add_device remove <name>")
-                        if ssh_devices:
-                            info("Saved SSH devices:")
-                            for device_name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
-                                identity = f" -i {shlex.quote(device['identity_file'])}" if device.get("identity_file") else ""
-                                info(f"  {device_name}: ssh{identity} -p {device['port']} {device['user']}@{device['host']}")
-                        else:
-                            info("No named SSH devices saved yet.")
+                        manage_ssh_devices()
                         continue
-                    if device_args[0].lower() == "remove":
+                    subcommand = device_args[0].lower()
+                    if subcommand == "list":
+                        if not ssh_devices:
+                            info("No named SSH devices saved yet.")
+                        for device_name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
+                            info(f"{device_name}: {device['connect_command']}")
+                        continue
+                    if subcommand == "edit":
+                        if len(device_args) != 2 or device_args[1] not in ssh_devices:
+                            warn("Usage: /add_device edit <saved-name>")
+                        else:
+                            add_or_edit_ssh_device(device_args[1])
+                        continue
+                    if subcommand == "remove":
                         if len(device_args) != 2:
                             warn("Usage: /add_device remove <name>")
                         elif device_args[1] not in ssh_devices:
                             warn(f"No saved device named '{device_args[1]}'.")
-                        else:
+                        elif input(f"Remove '{device_args[1]}'? [y/N]: ").strip().lower() == "y":
                             del ssh_devices[device_args[1]]
                             persist_selection()
                             info(f"Removed SSH device '{device_args[1]}'.")
                         continue
-                    if len(device_args) < 2 or len(device_args) > 4:
-                        warn("Usage: /add_device <name> <user@host> [port] [identity_file]")
+                    if subcommand == "add":
+                        if len(device_args) != 1:
+                            warn("Use /add_device add, then enter the device name and SSH connection command.")
+                        else:
+                            add_or_edit_ssh_device()
                         continue
-                    device_name, destination = device_args[0], device_args[1]
-                    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,31}", device_name):
-                        warn("Device name must be 1-32 letters, numbers, underscores, or hyphens, and start with a letter or number.")
-                        continue
-                    match = re.fullmatch(r"([A-Za-z0-9._-]+)@([A-Za-z0-9.-]+)", destination)
-                    if not match:
-                        warn("Use a connection target in user@host format; passwords and full shell commands are not accepted.")
-                        continue
-                    port_text = device_args[2] if len(device_args) >= 3 else "22"
-                    if not port_text.isdigit() or not 1 <= int(port_text) <= 65535:
-                        warn("Port must be a number from 1 to 65535.")
-                        continue
-                    identity_file = device_args[3] if len(device_args) == 4 else ""
-                    if any(ord(char) < 32 for char in identity_file) or "password" in identity_file.lower():
-                        warn("Identity file must be a key file path; passwords are not saved.")
-                        continue
-                    ssh_devices[device_name] = {
-                        "type": "ssh",
-                        "user": match.group(1),
-                        "host": match.group(2),
-                        "port": str(int(port_text)),
-                        "identity_file": identity_file,
-                    }
-                    persist_selection()
-                    info(f"Saved SSH device '{device_name}'. The model can now use that name when you request a connection.")
+                    warn("Usage: /add_device [list|add|edit <name>|remove <name>]")
                     continue
                 if command in {"/setting", "/settings"}:
                     presets = [
