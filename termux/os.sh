@@ -371,25 +371,17 @@ get_ssh_device_ips() {
 }
 
 show_ssh_connection_info() {
-    local ssh_port=8022
-    local ssh_user
-    local device_ips
-    ssh_user="$(whoami)"
-    device_ips="$(get_ssh_device_ips)"
+    local pc_user="nahid"
+    local pc_ip="192.168.0.101"
+    local ssh_port=22
 
-    echo -e "${CYAN}SSH connection details for this phone${NC}"
-    echo "Username: $ssh_user"
+    echo -e "${CYAN}SSH connection details for the Windows PC${NC}"
+    echo "Username: $pc_user"
+    echo "PC IP: $pc_ip"
     echo "Port: $ssh_port"
-    echo "Password: 1823 (option 15 sets it when the server starts)"
-    if [ -n "$device_ips" ]; then
-        for device_ip in $device_ips; do
-            echo "Phone IP: $device_ip"
-            printf 'Connect command: ssh -p %s %s@%s\n' "$ssh_port" "$ssh_user" "$device_ip"
-        done
-    else
-        echo "Phone IP: could not detect it; connect the phone to Wi-Fi and try again."
-    fi
-    echo "Start the server with option 15 and leave that session running while connecting."
+    echo "Password: use the Windows account password"
+    printf 'Connect command: ssh -p %s %s@%s\n' "$ssh_port" "$pc_user" "$pc_ip"
+    echo "The Windows OpenSSH server must be running for this command to connect."
 }
 
 # Run Termux OpenSSH in the foreground so this script remains active until stopped.
