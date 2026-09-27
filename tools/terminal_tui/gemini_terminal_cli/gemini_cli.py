@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import shlex
 import time
 import subprocess
 import sys
@@ -875,7 +876,12 @@ def get_runtime_tool_guidance() -> str:
     )
 
 
-def get_effective_system_instruction(base_system: str, disabled_tools: Set[str], lan_editor_url: str = "") -> str:
+def get_effective_system_instruction(
+    base_system: str,
+    disabled_tools: Set[str],
+    lan_editor_url: str = "",
+    ssh_devices: Optional[Dict[str, Dict[str, str]]] = None,
+) -> str:
     runtime_guidance = get_runtime_tool_guidance()
     runtime_guidance += (
         " The user's remote PC is reachable over SSH at nahid@192.168.0.101, port 22. "
@@ -883,6 +889,16 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str],
         "OpenSSH starts in the PC user's home directory by default. Use syntax for the SSH server's configured shell, checking it over SSH if needed. Authenticate with the configured private key; never ask for or store the SSH password. "
         "Requests phrased as '7777 and run ...' must continue to use lan_workspace action run through the Flask app, not SSH. If no mapped folder is named, use the PC user's home directory by omitting folder."
     )
+    if ssh_devices:
+        entries = []
+        for name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
+            identity = f" -i {shlex.quote(device['identity_file'])}" if device.get("identity_file") else ""
+            entries.append(f"{name}: ssh{identity} -p {device['port']} {device['user']}@{device['host']}")
+        runtime_guidance += (
+            " Saved SSH devices (use the matching connection when the user names one): "
+            + "; ".join(entries)
+            + ". Never ask for or store passwords."
+        )
     if lan_editor_url:
         runtime_guidance += (
             f" The PC LAN Code Editor is configured at {lan_editor_url}. "
@@ -1048,6 +1064,7 @@ if Completer is not None:
             ("/settings", "Open interactive CLI settings"),
             ("/device", "Set terminal device to PC or Android/Termux"),
             ("/lan", "Configure the PC LAN Code Editor address"),
+            ("/add_device", "Save or list named SSH devices"),
             ("/loops", "Set max tool-call loops"),
             ("/failover", "Open auto-failover picker"),
             ("/tool", "Open tool manager"),
@@ -3929,6 +3946,23 @@ def normalize_bool(value: Any) -> bool:
     return bool(value)
 
 
+def normalize_ssh_devices(value: Any) -> Dict[str, Dict[str, str]]:
+    if not isinstance(value, dict):
+        return {}
+    devices: Dict[str, Dict[str, str]] = {}
+    for name, raw in value.items():
+        if not isinstance(raw, dict) or raw.get("type") != "ssh":
+            continue
+        devices[str(name)] = {
+            "type": "ssh",
+            "user": str(raw.get("user") or ""),
+            "host": str(raw.get("host") or ""),
+            "port": str(raw.get("port") or "22"),
+            "identity_file": str(raw.get("identity_file") or ""),
+        }
+    return devices
+
+
 def default_model_prefs() -> Dict[str, Any]:
     return {
         **empty_account_model_prefs(),
@@ -3948,6 +3982,7 @@ def default_model_prefs() -> Dict[str, Any]:
         "gui_line_height": 140,
         "device_mode": "pc",
         "lan_editor_url": "",
+        "ssh_devices": {},
     }
 
 
@@ -4016,6 +4051,7 @@ def load_model_prefs() -> Dict[str, Any]:
             "gui_line_height": int(data.get("gui_line_height") or 140),
             "device_mode": str(data.get("device_mode") or "pc").lower(),
             "lan_editor_url": str(data.get("lan_editor_url") or "").rstrip("/"),
+            "ssh_devices": normalize_ssh_devices(data.get("ssh_devices", {})),
         })
         return prefs
     except Exception:
@@ -4057,6 +4093,7 @@ def save_model_prefs(
     gui_line_height: int = 140,
     device_mode: str = "pc",
     lan_editor_url: str = "",
+    ssh_devices: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
     api_accounts = {
@@ -4083,6 +4120,7 @@ def save_model_prefs(
         "gui_line_height": int(gui_line_height),
         "device_mode": device_mode,
         "lan_editor_url": lan_editor_url.rstrip("/"),
+        "ssh_devices": normalize_ssh_devices(ssh_devices or {}),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     return f"Saved model preferences to {MODEL_PREFS_FILE}"
@@ -5087,6 +5125,7 @@ def print_help() -> None:
               /api                  Open the API account picker
               /device [pc|android] Set terminal input mode (Android enables TTY input)
               /lan [URL|off]       Configure the remote PC LAN Code Editor
+              /add_device          List/add/remove named SSH devices
               /loops <n>            Set max tool-call loops
               /failover             Open the auto-failover picker
               /tool                 Open the tool manager and toggle tools with Space
@@ -5693,6 +5732,7 @@ def main() -> int:
         device_mode = "pc"
     ACTIVE_DEVICE_MODE = device_mode
     lan_editor_url = str(model_prefs.get("lan_editor_url") or "").rstrip("/")
+    ssh_devices: Dict[str, Dict[str, str]] = normalize_ssh_devices(model_prefs.get("ssh_devices", {}))
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
     last_turn_tokens: Optional[int] = None
@@ -6088,6 +6128,7 @@ def main() -> int:
             gui_line_height,
             device_mode,
             lan_editor_url,
+            ssh_devices,
         )
 
     def add_api_account_interactive(provider: str = "gemini") -> None:
@@ -6195,7 +6236,7 @@ def main() -> int:
 
         try:
             for _ in range(tool_loop_limit):
-                eff_system = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url)
+                eff_system = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url, ssh_devices)
                 try:
                     response = client.generate(
                         contents=contents,
@@ -6412,6 +6453,63 @@ def main() -> int:
                             lan_editor_url = candidate
                             persist_selection()
                             info(f"PC LAN editor set to {lan_editor_url}")
+                    continue
+                if command == "/add_device":
+                    try:
+                        device_args = shlex.split(remainder, posix=True)
+                    except ValueError as exc:
+                        warn(f"Could not parse device details: {exc}")
+                        continue
+                    if not device_args:
+                        info("Usage: /add_device <name> <user@host> [port] [identity_file]")
+                        info("Example: /add_device pc nahid@192.168.0.101 22 ~/.ssh/id_ed25519_windows_pc")
+                        info("Remove one: /add_device remove <name>")
+                        if ssh_devices:
+                            info("Saved SSH devices:")
+                            for device_name, device in sorted(ssh_devices.items(), key=lambda pair: pair[0].lower()):
+                                identity = f" -i {shlex.quote(device['identity_file'])}" if device.get("identity_file") else ""
+                                info(f"  {device_name}: ssh{identity} -p {device['port']} {device['user']}@{device['host']}")
+                        else:
+                            info("No named SSH devices saved yet.")
+                        continue
+                    if device_args[0].lower() == "remove":
+                        if len(device_args) != 2:
+                            warn("Usage: /add_device remove <name>")
+                        elif device_args[1] not in ssh_devices:
+                            warn(f"No saved device named '{device_args[1]}'.")
+                        else:
+                            del ssh_devices[device_args[1]]
+                            persist_selection()
+                            info(f"Removed SSH device '{device_args[1]}'.")
+                        continue
+                    if len(device_args) < 2 or len(device_args) > 4:
+                        warn("Usage: /add_device <name> <user@host> [port] [identity_file]")
+                        continue
+                    device_name, destination = device_args[0], device_args[1]
+                    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,31}", device_name):
+                        warn("Device name must be 1-32 letters, numbers, underscores, or hyphens, and start with a letter or number.")
+                        continue
+                    match = re.fullmatch(r"([A-Za-z0-9._-]+)@([A-Za-z0-9.-]+)", destination)
+                    if not match:
+                        warn("Use a connection target in user@host format; passwords and full shell commands are not accepted.")
+                        continue
+                    port_text = device_args[2] if len(device_args) >= 3 else "22"
+                    if not port_text.isdigit() or not 1 <= int(port_text) <= 65535:
+                        warn("Port must be a number from 1 to 65535.")
+                        continue
+                    identity_file = device_args[3] if len(device_args) == 4 else ""
+                    if any(ord(char) < 32 for char in identity_file) or "password" in identity_file.lower():
+                        warn("Identity file must be a key file path; passwords are not saved.")
+                        continue
+                    ssh_devices[device_name] = {
+                        "type": "ssh",
+                        "user": match.group(1),
+                        "host": match.group(2),
+                        "port": str(int(port_text)),
+                        "identity_file": identity_file,
+                    }
+                    persist_selection()
+                    info(f"Saved SSH device '{device_name}'. The model can now use that name when you request a connection.")
                     continue
                 if command in {"/setting", "/settings"}:
                     presets = [
@@ -7103,7 +7201,7 @@ def main() -> int:
                     continue
                 if command == "/tokens":
                     # Calculate total character count including text, function calls, responses, and system instruction
-                    eff_sys = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url)
+                    eff_sys = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url, ssh_devices)
                     total_chars = len(eff_sys) if eff_sys else 0
                     for msg in contents:
                         for part in msg.get("parts", []):

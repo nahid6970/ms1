@@ -81,6 +81,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/loops <n>` - set the max tool-call loops for a turn
 - `/device [pc|android]` - select PC or Android/Termux terminal input mode; Android mode prefers the terminal TTY for arrow-key input
 - `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace file tool
+- `/add_device` - list, add, or remove named SSH devices
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file
@@ -131,6 +132,8 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 - `lan_workspace` — browse, read, search, create, and edit shared PC files through the Flask app
 
 For PC commands requested with “7777 and run …”, keep using `lan_workspace` action `run` through the Flask app; “7777” does not switch the command to SSH. If no folder is named, it runs from the PC user's home folder; a mapped folder can still be specified. SSH is separate and only used when explicitly requested. To run a command over SSH, append it to `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. SSH starts in the PC user's home folder when no directory is named and uses the remote server's configured shell. Never ask for or store the SSH password. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
+
+Use `/add_device <name> <user@host> [port] [identity_file]` to save another SSH target, for example `/add_device lab coder@192.168.0.120 22 ~/.ssh/id_ed25519_lab`. `/add_device` lists saved targets; `/add_device remove <name>` removes one. The CLI saves connection metadata in `model_prefs.json` so the model can select a device by name. Passwords and arbitrary shell commands are not accepted as device settings.
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`
