@@ -879,9 +879,9 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str],
     runtime_guidance = get_runtime_tool_guidance()
     runtime_guidance += (
         " The user's remote PC is reachable over SSH at nahid@192.168.0.101, port 22. "
-        "When asked to connect to the PC or run a command there (including requests phrased as '7777 and run ...'), use run_shell_command to invoke OpenSSH with `ssh -p 22 nahid@192.168.0.101 <remote-command>`. "
+        "When asked to connect to the PC or run a command there (including requests phrased as '7777 and run ...'), use run_shell_command to invoke OpenSSH with `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101 <remote-command>`. "
         "OpenSSH starts in the PC user's home directory by default; use an explicit remote directory only when the user names one. "
-        "Use syntax for the SSH server's configured shell, checking it over SSH if needed. Keep credentials out of commands and files; rely on SSH's configured authentication and let the user handle any terminal password prompt. "
+        "Use syntax for the SSH server's configured shell, checking it over SSH if needed. Authenticate with the configured private key; never ask for or store the SSH password. "
         "Use lan_workspace for PC file browsing and editing through Flask, not for routine remote command execution."
     )
     if lan_editor_url:
@@ -2551,7 +2551,7 @@ FUNCTIONS = {
     },
     "lan_workspace": {
         "name": "lan_workspace",
-        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor. For PC commands, prefer SSH with `ssh -p 22 nahid@192.168.0.101`; the default working directory is the PC user's home folder. Treat '7777 and run ...' as a remote PC command request. Use the PC's configured SSH shell syntax. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
+        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor. For PC commands, use SSH with `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101`; the default working directory is the PC user's home folder. Treat '7777 and run ...' as a remote PC command request. Use the PC's configured SSH shell syntax and key authentication; never ask for the SSH password. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
