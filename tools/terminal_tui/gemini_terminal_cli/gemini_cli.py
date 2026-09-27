@@ -879,7 +879,7 @@ def get_effective_system_instruction(base_system: str, disabled_tools: Set[str],
     runtime_guidance = get_runtime_tool_guidance()
     runtime_guidance += (
         " The user's remote PC is reachable over SSH at nahid@192.168.0.101, port 22. "
-        "When the user explicitly asks to connect or run a command over SSH, use run_shell_command with `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101 <remote-command>`. "
+        "When the user explicitly asks to connect or run a command over SSH, use run_shell_command with `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 <remote-command>`. "
         "OpenSSH starts in the PC user's home directory by default. Use syntax for the SSH server's configured shell, checking it over SSH if needed. Authenticate with the configured private key; never ask for or store the SSH password. "
         "Requests phrased as '7777 and run ...' must continue to use lan_workspace action run through the Flask app, not SSH. If no mapped folder is named, use the PC user's home directory by omitting folder."
     )
@@ -2550,7 +2550,7 @@ FUNCTIONS = {
     },
     "lan_workspace": {
         "name": "lan_workspace",
-        "description": "Use the configured PC LAN Code Editor for remote file operations and commands requested with '7777'. For action run, omit folder to use the PC user's home folder, or select a mapped folder. If the user explicitly asks for SSH, use `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101` through run_shell_command and use the configured remote shell. Never ask for or store the SSH password. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
+        "description": "Use the configured PC LAN Code Editor for remote file operations and commands requested with '7777'. For action run, omit folder to use the PC user's home folder, or select a mapped folder. If the user explicitly asks for SSH, use `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101` through run_shell_command and use the configured remote shell. Never ask for or store the SSH password. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
         "parameters": {
             "type": "OBJECT",
             "properties": {

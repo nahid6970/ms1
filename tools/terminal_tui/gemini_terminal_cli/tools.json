@@ -149,7 +149,7 @@
     "name": "lan_workspace",
     "category": "Remote Files",
     "rating": "Edit approved PC folders over Wi-Fi",
-    "description": "Use the PC LAN Code Editor configured with /lan for file operations and commands requested with '7777'. For action run, omit folder to use the PC user's home folder, or select a mapped folder. Only when the user explicitly asks for SSH, use ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101 through run_shell_command. Use the configured remote shell and key authentication; never ask for or store the SSH password. Never use remote commands to download/install packages or build packages; provide those commands for the user to run."
+    "description": "Use the PC LAN Code Editor configured with /lan for file operations and commands requested with '7777'. For action run, omit folder to use the PC user's home folder, or select a mapped folder. Only when the user explicitly asks for SSH, use ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 through run_shell_command. Use the configured remote shell and key authentication; never ask for or store the SSH password. Never use remote commands to download/install packages or build packages; provide those commands for the user to run."
   },
   {
     "name": "request_follow_up",

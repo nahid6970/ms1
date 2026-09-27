@@ -36,7 +36,7 @@ Replace the example address with the LAN address printed by the server. A GET of
 
 An agent that can make HTTP requests can edit an existing file with PUT to its direct URL. Send a JSON body with content and revision, preserve the session cookie from the GET request, and send the X-CSRF-Token header returned by that GET. Saves are rejected if the file changed since it was read. The agent must be able to reach the private LAN address; public web search or chat alone cannot access it.
 
-The Gemini CLI's “7777 and run ...” command flow uses this app's command endpoint, not SSH. If no mapped folder is specified, it runs from the PC user's home folder; a mapped folder can be selected explicitly. SSH is a separate option when explicitly requested, for example `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101 "<command>"`. The command endpoint runs as the PC user without a shell sandbox.
+The Gemini CLI's “7777 and run ...” command flow uses this app's command endpoint, not SSH. If no mapped folder is specified, it runs from the PC user's home folder; a mapped folder can be selected explicitly. SSH is a separate option when explicitly requested, for example `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. The command endpoint runs as the PC user without a shell sandbox.
 
 ## Access and limits
 
