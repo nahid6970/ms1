@@ -974,6 +974,29 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
+    },
+    {
+      "name": "Temporary-4",
+      "path": "C:\\@delta\\ms1\\temporary-4",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "layout": {},
+      "duplicateBaseName": "Temporary",
+      "duplicateBaseFolder": "temporary"
     }
   ],
   "extension_icons": {

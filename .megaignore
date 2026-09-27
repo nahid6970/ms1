@@ -1,0 +1,9 @@
+-d:.git
+-d:__pycache__
+-d:.uv-envs
+-d:.freebuff
+-d:*.freebuff*
+-d:*.git*
+-d:*.uv-envs*
+-d:*__pycache__*
+-s:*
