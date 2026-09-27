@@ -2722,6 +2722,52 @@ Same hotkey (Ctrl+S), different actions based on context!
 <a name="recent-changes"></a>
 # Recent Changes
 
+## 2026-09-28
+
+### ✅ Added Clipboard Manager (Ditto-style)
+**New Feature:** Background startup script that captures every text copy into a 9-slot history. Paste any saved item without overwriting your current clipboard.
+
+**Hotkeys:**
+- `Ctrl+Alt+Numpad1–9` — Paste slot 1 (most recent) through slot 9
+- `Ctrl+Alt+Numpad0` — Show all saved slots as a tooltip
+
+**How It Works:**
+- Hooks `OnClipboardChange` — every text copy is automatically pushed to slot 1, older entries shift down
+- Duplicate consecutive copies are skipped
+- A brief tooltip confirms each capture: `[3] preview of text...`
+- Restores your original clipboard after pasting so nothing is lost
+
+**Files Modified:**
+- `ahk_shortcuts.json` — Added "Clipboard Manager (Ditto-style)" to `startup_scripts`
+
+---
+
+### ✅ Fixed & Rewrote Macro Recorder
+**Problems Fixed:**
+- **Stuck modifier keys** — `Ctrl`/`Alt` stayed held after recording or playback when using combos like `Ctrl+Alt+4`
+- **Raw `SendEvent` VK replay** — unreliable for modifiers; OS doesn't always honor synthetic down/up events the same as physical keys
+- **`CleanTrailingHotkey` stripping too much** — was removing all modifier tail events including Alt which belonged to the recorded macro
+- **`held.Delete(vk)` crash** — "Item has no value" error when a key-up arrived for a key with no matching key-down in the buffer
+- **`StatusGui` dangling reference** — destroyed Gui object was not cleared, causing silent errors on repeated use
+- **`SetTimer(() => { ... })` syntax error** — AHK v2 doesn't allow multi-line block bodies in inline arrow functions
+
+**New Approach — Combo Reconstruction:**
+Instead of replaying raw key-down/up events, the recorder now reconstructs proper `Send()` combo strings from the buffer. For example:
+- `Ctrl-down → Alt-down → 4-down → 4-up → Alt-up → Ctrl-up` → `Send("^!{vk34sc005}")`
+
+This is identical to hand-written AHK and is fully reliable — no stuck modifiers possible.
+
+**Other Improvements:**
+- Inter-key timing preserved during playback (original gaps between combos are honoured, capped at 500ms)
+- Hard modifier release (`LCtrl/RCtrl/LAlt/RAlt/LShift/RShift/LWin/RWin up`) before and after playback
+- "SAVED N" popup now shows how many combos were captured
+- `MacroTrimStopKey()` only strips Ctrl+R events (not Alt or other modifiers that belong to the macro)
+
+**Files Modified:**
+- `ahk_shortcuts.json` — Rewrote "Macro Recorder" action in `startup_scripts`
+
+---
+
 ## 2026-02-15
 
 ### ✅ Added "Open Focused App Directory" Shortcut
