@@ -37,6 +37,7 @@ menu_items=(
     "Flask CoC start             : start_python_flask_CoC                  :$BLUE"
     "Database Upload Instantly   : upload_latest_database                  :$BLUE"
     "Database Download Instantly : download_latest_database                :$BLUE"
+    "Start SSH Server             : start_ssh_server                        :$GREEN"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -349,6 +350,39 @@ about_device() {
     fastfetch
 }
 
+# Run Termux OpenSSH in the foreground so this script remains active until stopped.
+start_ssh_server() {
+    local ssh_port=8022
+    local ssh_user="$(whoami)"
+
+    if ! command -v sshd >/dev/null 2>&1; then
+        echo -e "${RED}OpenSSH is not installed. Use 'pkg install openssh' first.${NC}"
+        return 1
+    fi
+
+    mkdir -p "$HOME/.ssh"
+    if ! compgen -G "$PREFIX/etc/ssh/ssh_host_*_key" >/dev/null; then
+        ssh-keygen -A || return 1
+    fi
+
+    echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
+    echo "Connect from another device on the same network using:"
+    ip -o -4 addr show scope global | awk '{print "  ssh -p '"$ssh_port"' "'"$ssh_user"'@" $4}' | cut -d/ -f1
+    echo
+    echo "To use just 'ssh $ssh_user', add this to that device's ~/.ssh/config"
+    echo "(replace <phone-ip> with an address printed above):"
+    printf 'Host %s\n  HostName <phone-ip>\n  User %s\n  Port %s\n\n' "$ssh_user" "$ssh_user" "$ssh_port"
+    echo "Press Ctrl+C here to stop the SSH server."
+
+    termux-wake-lock 2>/dev/null || true
+    trap 'termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
+    sshd -D -p "$ssh_port"
+    local status=$?
+    termux-wake-unlock 2>/dev/null || true
+    trap - INT TERM
+    return "$status"
+}
+
 # ntfy_notify() {
 #     clear
 #     # Initialize counter
@@ -520,5 +554,4 @@ while true; do
     else
         echo -e "${RED}Invalid option. Please try again.${NC}"
     fi
-    source "$HOME/ms1/termux/os.sh"
 done
