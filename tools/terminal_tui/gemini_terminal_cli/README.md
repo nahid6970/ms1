@@ -80,7 +80,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
 - `/device [pc|android]` - select PC or Android/Termux terminal input mode; Android mode prefers the terminal TTY for arrow-key input
-- `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace tool
+- `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace file tool
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
 - `/system <text|file>` - replace the system instruction or load it from a file
@@ -128,9 +128,9 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 **Execution & Shell**:
 - `run_shell_command` — run commands through the host platform shell (POSIX commands on Termux/Linux/macOS)
 - `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
-- `lan_workspace` — browse, read, search, create, and edit shared PC files, or send a command directly to the PC Flask app with action `run`
+- `lan_workspace` — browse, read, search, create, and edit shared PC files through the Flask app
 
-For remote commands, configure `/lan http://<PC-IP>:7777` and make sure `lan_workspace` is enabled in `/tool`. You can say, for example, “7777 and run `dir`” (or “7777 and run `ls`”); the model sends the command directly to Flask without creating a script file. When you name a mapped folder, such as `7777/ms1/temporary/`, the command runs there. When you do not name a folder, it runs from the PC user's home folder by default. Commands use the PC shell, regardless of whether the CLI itself is running in Android Termux. This is remote command execution as the PC user, not a sandbox; on a no-password LAN, any device that can reach the app can run commands as that user. Do not use this for package downloads/installations or package builds; provide those commands for the user to run.
+For remote PC commands, use SSH from the other device: `ssh -p 22 nahid@192.168.0.101`. Requests such as “7777 and run `dir`” mean to send the requested command over SSH to that PC. SSH starts in the PC user's home folder when no directory is named. Commands use the remote SSH server's configured shell, not the Android shell. If OpenSSH prompts for the password, enter it in the terminal; do not put it in chat, command history, or project files. For unattended use, configure SSH key authentication yourself. Keep `/lan http://<PC-IP>:7777` for `lan_workspace` file browsing and editing; it is no longer the default command route. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`

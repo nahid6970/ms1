@@ -36,7 +36,7 @@ Replace the example address with the LAN address printed by the server. A GET of
 
 An agent that can make HTTP requests can edit an existing file with PUT to its direct URL. Send a JSON body with content and revision, preserve the session cookie from the GET request, and send the X-CSRF-Token header returned by that GET. Saves are rejected if the file changed since it was read. The agent must be able to reach the private LAN address; public web search or chat alone cannot access it.
 
-The Gemini CLI can send shell commands directly through `lan_workspace` action `run`; it does not need to create a temporary script file. A request such as “7777 and run `dir`” sends the command to this PC. If a mapped folder is named, the command runs there; if none is named, it runs from the PC user's home folder. Commands use the PC shell. The working directory does not restrict shell access to that folder.
+The Flask app has a command endpoint, but the Gemini CLI now prefers SSH for remote PC commands. Use `ssh -p 22 nahid@192.168.0.101` from another device; SSH starts in the PC user's home folder by default. Keep this Flask app for browsing and editing shared files. Its command endpoint remains available for explicit Flask-based use and runs as the PC user, without a shell sandbox.
 
 ## Access and limits
 

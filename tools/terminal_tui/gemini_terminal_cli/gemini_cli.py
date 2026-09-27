@@ -877,13 +877,19 @@ def get_runtime_tool_guidance() -> str:
 
 def get_effective_system_instruction(base_system: str, disabled_tools: Set[str], lan_editor_url: str = "") -> str:
     runtime_guidance = get_runtime_tool_guidance()
+    runtime_guidance += (
+        " The user's remote PC is reachable over SSH at nahid@192.168.0.101, port 22. "
+        "When asked to connect to the PC or run a command there (including requests phrased as '7777 and run ...'), use run_shell_command to invoke OpenSSH with `ssh -p 22 nahid@192.168.0.101 <remote-command>`. "
+        "OpenSSH starts in the PC user's home directory by default; use an explicit remote directory only when the user names one. "
+        "Use syntax for the SSH server's configured shell, checking it over SSH if needed. Keep credentials out of commands and files; rely on SSH's configured authentication and let the user handle any terminal password prompt. "
+        "Use lan_workspace for PC file browsing and editing through Flask, not for routine remote command execution."
+    )
     if lan_editor_url:
         runtime_guidance += (
             f" The PC LAN Code Editor is configured at {lan_editor_url}. "
             "For requested files on that PC, use lan_workspace with the mapped folder URL path. "
-            "For commands the user asks to run on that PC, use lan_workspace action run so the command is sent directly to the Flask app; do not create script files as command relays. "
-            "Treat user requests phrased as '7777 and run ...' as requests to run the command on the PC through lan_workspace. If no mapped folder is named, omit folder and use the PC user's home directory by default. "
-            "Choose command syntax for the remote PC shell. Never use remote command execution to download or install packages or build packages; give the user those commands to run themselves. "
+            "If the user explicitly asks to run a command through Flask, lan_workspace action run is available; otherwise use SSH for PC commands. "
+            "Never use remote command execution to download or install packages or build packages; give the user those commands to run themselves. "
             "Ordinary local file tools operate on this device."
         )
     if "read_memory" in disabled_tools:
@@ -2545,7 +2551,7 @@ FUNCTIONS = {
     },
     "lan_workspace": {
         "name": "lan_workspace",
-        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor, or run a command directly on the PC with action run. Treat a user request like '7777 and run ...' as remote PC execution. Interpret a path like 7777/ms1/temporary/ as folder ms1/temporary. For run, send the command directly to Flask using the PC shell; if folder is omitted, it runs in the PC user's home directory. This is remote PC command execution, not a sandbox. Never use it to download/install packages or build packages; give those commands to the user. Configure the server with /lan.",
+        "description": "Browse, read, search, create, or write files in folders shared by the configured PC LAN Code Editor. For PC commands, prefer SSH with `ssh -p 22 nahid@192.168.0.101`; the default working directory is the PC user's home folder. Treat '7777 and run ...' as a remote PC command request. Use the PC's configured SSH shell syntax. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
         "parameters": {
             "type": "OBJECT",
             "properties": {
