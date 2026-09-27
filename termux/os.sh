@@ -368,11 +368,17 @@ start_ssh_server() {
     echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
     echo "Run this command from another device on the same network:"
     local device_ips=""
+    if command -v termux-wifi-connectioninfo >/dev/null 2>&1 && command -v python >/dev/null 2>&1; then
+        device_ips="$(termux-wifi-connectioninfo 2>/dev/null | python -c 'import json,sys; print(json.load(sys.stdin).get("ip", ""))' 2>/dev/null)"
+    fi
     if command -v hostname >/dev/null 2>&1; then
-        device_ips="$(hostname -I 2>/dev/null)"
+        [ -n "$device_ips" ] || device_ips="$(hostname -I 2>/dev/null)"
     fi
     if [ -z "$device_ips" ] && command -v getprop >/dev/null 2>&1; then
         device_ips="$(getprop dhcp.wlan0.ipaddress 2>/dev/null)"
+    fi
+    if [ -z "$device_ips" ] && command -v python >/dev/null 2>&1; then
+        device_ips="$(python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(("192.0.2.1", 1)); print(s.getsockname()[0]); s.close()' 2>/dev/null)"
     fi
     if [ -n "$device_ips" ]; then
         for device_ip in $device_ips; do
