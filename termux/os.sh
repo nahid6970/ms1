@@ -38,6 +38,7 @@ menu_items=(
     "Database Upload Instantly   : upload_latest_database                  :$BLUE"
     "Database Download Instantly : download_latest_database                :$BLUE"
     "Start SSH Server             : start_ssh_server                        :$GREEN"
+    "SSH Connection Info          : show_ssh_connection_info                :$GREEN"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -350,6 +351,47 @@ about_device() {
     fastfetch
 }
 
+get_ssh_device_ips() {
+    local device_ips=""
+    if command -v python >/dev/null 2>&1; then
+        device_ips="$(python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(("192.0.2.1", 1)); print(s.getsockname()[0]); s.close()' 2>/dev/null)"
+    fi
+    if [ -z "$device_ips" ] && command -v hostname >/dev/null 2>&1; then
+        device_ips="$(hostname -I 2>/dev/null)"
+    fi
+    if [ -z "$device_ips" ] && command -v getprop >/dev/null 2>&1; then
+        device_ips="$(getprop dhcp.wlan0.ipaddress 2>/dev/null)"
+    fi
+
+    for device_ip in $device_ips; do
+        case "$device_ip" in
+            *.*) printf '%s\n' "$device_ip" ;;
+        esac
+    done
+}
+
+show_ssh_connection_info() {
+    local ssh_port=8022
+    local ssh_user
+    local device_ips
+    ssh_user="$(whoami)"
+    device_ips="$(get_ssh_device_ips)"
+
+    echo -e "${CYAN}SSH connection details for this phone${NC}"
+    echo "Username: $ssh_user"
+    echo "Port: $ssh_port"
+    echo "Password: 1823 (option 15 sets it when the server starts)"
+    if [ -n "$device_ips" ]; then
+        for device_ip in $device_ips; do
+            echo "Phone IP: $device_ip"
+            printf 'Connect command: ssh -p %s %s@%s\n' "$ssh_port" "$ssh_user" "$device_ip"
+        done
+    else
+        echo "Phone IP: could not detect it; connect the phone to Wi-Fi and try again."
+    fi
+    echo "Start the server with option 15 and leave that session running while connecting."
+}
+
 # Run Termux OpenSSH in the foreground so this script remains active until stopped.
 start_ssh_server() {
     local ssh_port=8022
@@ -390,16 +432,7 @@ PY
     echo -e "${GREEN}SSH password has been set to: 1823${NC}"
     echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
     echo "Run this command from another device on the same network:"
-    local device_ips=""
-    if command -v python >/dev/null 2>&1; then
-        device_ips="$(python -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(("192.0.2.1", 1)); print(s.getsockname()[0]); s.close()' 2>/dev/null)"
-    fi
-    if command -v hostname >/dev/null 2>&1; then
-        [ -n "$device_ips" ] || device_ips="$(hostname -I 2>/dev/null)"
-    fi
-    if [ -z "$device_ips" ] && command -v getprop >/dev/null 2>&1; then
-        device_ips="$(getprop dhcp.wlan0.ipaddress 2>/dev/null)"
-    fi
+    local device_ips="$(get_ssh_device_ips)"
     if [ -n "$device_ips" ]; then
         for device_ip in $device_ips; do
             case "$device_ip" in
