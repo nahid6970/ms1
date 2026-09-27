@@ -366,12 +366,8 @@ start_ssh_server() {
     fi
 
     echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
-    echo "Connect from another device on the same network using:"
-    ip -o -4 addr show scope global | awk '{print "  ssh -p '"$ssh_port"' "'"$ssh_user"'@" $4}' | cut -d/ -f1
-    echo
-    echo "To use just 'ssh $ssh_user', add this to that device's ~/.ssh/config"
-    echo "(replace <phone-ip> with an address printed above):"
-    printf 'Host %s\n  HostName <phone-ip>\n  User %s\n  Port %s\n\n' "$ssh_user" "$ssh_user" "$ssh_port"
+    echo "Run this command from another device on the same network:"
+    ip -o -4 addr show scope global | awk -v user="$ssh_user" -v port="$ssh_port" '{ip=$4; sub(/\/.*/, "", ip); print "  ssh -p " port " " user "@" ip}'
     echo "Press Ctrl+C here to stop the SSH server."
 
     termux-wake-lock 2>/dev/null || true
