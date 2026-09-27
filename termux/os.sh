@@ -360,12 +360,34 @@ start_ssh_server() {
         return 1
     fi
 
+    if ! command -v python >/dev/null 2>&1; then
+        echo -e "${RED}Python is required to configure the SSH password. Install it with 'pkg install python'.${NC}"
+        return 1
+    fi
+
+    python - "$HOME/.termux_authinfo" <<'PY'
+import hashlib
+import os
+import sys
+
+password_hash = hashlib.pbkdf2_hmac(
+    "sha1", b"1823", b"Termux!", 65536, dklen=20
+)
+with open(sys.argv[1], "wb") as auth_file:
+    auth_file.write(password_hash)
+os.chmod(sys.argv[1], 0o600)
+PY
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to configure the SSH password.${NC}"
+        return 1
+    fi
+
     mkdir -p "$HOME/.ssh"
     if ! compgen -G "$PREFIX/etc/ssh/ssh_host_*_key" >/dev/null; then
         ssh-keygen -A || return 1
     fi
 
-    echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
+    echo -e "${GREEN}SSH password set to 1823. Starting SSH for $ssh_user on port $ssh_port.${NC}"
     echo "Run this command from another device on the same network:"
     local device_ips=""
     if command -v python >/dev/null 2>&1; then
