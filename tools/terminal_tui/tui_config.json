@@ -1003,14 +1003,6 @@
       {
         "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
         "label": ""
-      },
-      {
-        "cmd": "kiro-cli whoami",
-        "label": ""
-      },
-      {
-        "cmd": "kiro-cli logout ; kiro-cli login",
-        "label": "logout && login"
       }
     ],
     "npm run deploy:pages": [
