@@ -387,7 +387,8 @@ PY
         ssh-keygen -A || return 1
     fi
 
-    echo -e "${GREEN}SSH password set to 1823. Starting SSH for $ssh_user on port $ssh_port.${NC}"
+    echo -e "${GREEN}SSH password has been set to: 1823${NC}"
+    echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
     echo "Run this command from another device on the same network:"
     local device_ips=""
     if command -v python >/dev/null 2>&1; then
