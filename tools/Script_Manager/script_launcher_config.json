@@ -4742,7 +4742,7 @@
                     "inline_blocks": [
                         {
                             "comment": "install the OpenSSH Server capability",
-                            "type": "cmd",
+                            "type": "python",
                             "code": "Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0",
                             "comment_size": 11,
                             "comment_color": "#FF5500"
@@ -4760,11 +4760,19 @@
                             "code": "Set-Service -Name sshd -StartupType Automatic",
                             "comment_size": 11,
                             "comment_color": "#FF5500"
+                        },
+                        {
+                            "comment": "",
+                            "type": "cmd",
+                            "code": "sshd",
+                            "comment_size": 14,
+                            "comment_color": "#FF5500"
                         }
                     ],
                     "edit_on_click": false,
                     "auto_wrap": false,
-                    "hover_transparent_bg": false
+                    "hover_transparent_bg": false,
+                    "_runtime_text_align": "left"
                 },
                 {
                     "name": "Chrome Flag Fix",
