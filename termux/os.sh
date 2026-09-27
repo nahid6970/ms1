@@ -367,7 +367,23 @@ start_ssh_server() {
 
     echo -e "${GREEN}Starting SSH for $ssh_user on port $ssh_port.${NC}"
     echo "Run this command from another device on the same network:"
-    ip -o -4 addr show scope global | awk -v user="$ssh_user" -v port="$ssh_port" '{ip=$4; sub(/\/.*/, "", ip); print "  ssh -p " port " " user "@" ip}'
+    local device_ips=""
+    if command -v hostname >/dev/null 2>&1; then
+        device_ips="$(hostname -I 2>/dev/null)"
+    fi
+    if [ -z "$device_ips" ] && command -v getprop >/dev/null 2>&1; then
+        device_ips="$(getprop dhcp.wlan0.ipaddress 2>/dev/null)"
+    fi
+    if [ -n "$device_ips" ]; then
+        for device_ip in $device_ips; do
+            case "$device_ip" in
+                *.*) printf '  ssh -p %s %s@%s\n' "$ssh_port" "$ssh_user" "$device_ip" ;;
+            esac
+        done
+    else
+        echo "  Could not detect the phone's Wi-Fi IP address. Find it in Android Wi-Fi settings, then run:"
+        echo "  ssh -p $ssh_port $ssh_user@<phone-ip>"
+    fi
     echo "Press Ctrl+C here to stop the SSH server."
 
     termux-wake-lock 2>/dev/null || true
