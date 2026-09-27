@@ -130,7 +130,7 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 - `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
 - `lan_workspace` — browse, read, search, create, and edit shared PC files through the Flask app
 
-For PC commands requested with “7777 and run …”, keep using `lan_workspace` action `run` through the Flask app. If no folder is named, it runs from the PC user's home folder; a mapped folder can still be specified. SSH is a separate option only when explicitly requested: `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101`. SSH starts in the PC user's home folder when no directory is named and uses the remote server's configured shell. Never ask for or store the SSH password. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
+For PC commands requested with “7777 and run …”, keep using `lan_workspace` action `run` through the Flask app; “7777” does not switch the command to SSH. If no folder is named, it runs from the PC user's home folder; a mapped folder can still be specified. SSH is separate and only used when explicitly requested. To run a command over SSH, append it to `ssh -i ~/.ssh/id_ed25519_windows_pc -p 22 nahid@192.168.0.101 "<command>"`. SSH starts in the PC user's home folder when no directory is named and uses the remote server's configured shell. Never ask for or store the SSH password. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
 
 **Memory & Context**:
 - `save_memory` — save basic facts to `memory/main.json` or create structured topic sub-memory files/folders in `memory/`
