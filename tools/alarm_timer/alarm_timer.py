@@ -16,10 +16,11 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QLineEdit, QScrollArea, QDialog,
     QFormLayout, QGroupBox, QFrame, QSizePolicy, QInputDialog,
     QMessageBox, QDateTimeEdit, QRadioButton,
-    QButtonGroup, QDialogButtonBox, QGridLayout, QColorDialog, QCheckBox,
+    QButtonGroup, QDialogButtonBox, QGridLayout, QColorDialog, QCheckBox, QMenu,
 )
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize, QRectF
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDateTime, QByteArray, QSize, QRectF, QUrl
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtSvg import QSvgRenderer
 
 # ── SVG icon helper ────────────────────────────────────────
@@ -1951,6 +1952,14 @@ class MainWindow(QMainWindow):
         tbl.addStretch(1)
 
         self._btn_add_col  = self._tbtn("＋  COLUMN",  CP_CYAN, "#000")
+        self._btn_windows_clock = self._tbtn("◷  WINDOWS CLOCK", CP_DIM, CP_TEXT)
+        self._btn_windows_clock.setToolTip(
+            "Open Windows Clock's Alarm or Timer screen. Set the details in Clock."
+        )
+        clock_menu = QMenu(self)
+        clock_menu.addAction("Open Alarm", lambda: self._open_windows_clock("alarm"))
+        clock_menu.addAction("Open Timer", lambda: self._open_windows_clock("timer"))
+        self._btn_windows_clock.setMenu(clock_menu)
         self._btn_settings = self._tbtn("⚙  SETTINGS", CP_DIM,  CP_TEXT)
         self._btn_restart  = self._tbtn("↺  RESTART",  CP_DIM,  CP_TEXT)
 
@@ -1958,7 +1967,7 @@ class MainWindow(QMainWindow):
         self._btn_settings.clicked.connect(self._on_settings)
         self._btn_restart.clicked.connect(self._on_restart)
 
-        for b in (self._btn_add_col, self._btn_settings, self._btn_restart):
+        for b in (self._btn_add_col, self._btn_windows_clock, self._btn_settings, self._btn_restart):
             tbl.addWidget(b)
 
         # horizontal scroll for columns
@@ -2031,6 +2040,19 @@ class MainWindow(QMainWindow):
         )
         self._st("Column added: " + name.strip())
         self._save()
+
+    def _open_windows_clock(self, page: str):
+        """Open the requested Windows Clock page; Clock has no supported preset URI."""
+        if page not in {"alarm", "timer"}:
+            return
+        if not QDesktopServices.openUrl(QUrl(f"ms-clock:{page}")):
+            QMessageBox.warning(
+                self,
+                "Windows Clock unavailable",
+                "Windows could not open the Clock app. Check that Windows Clock is installed.",
+            )
+        else:
+            self._st(f"Opened Windows Clock: {page.title()} — finish setting it in Clock.")
 
     def _on_col_removed(self, cid: str):
         col = self._columns.pop(cid, None)
