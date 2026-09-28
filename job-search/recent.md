@@ -62,6 +62,8 @@ Example links section (after table):
 | Dhaka University | 6 posts (5 categories, post names unknown) | Unknown — need circular image | ⚠️ Need to check | Sept 13–15, Nov 2, 2026 |
 | Midland Bank PLC | Probationary Officer | Fresher — CGPA ≥ 3.00, SSC/HSC GPA ≥ 4.50 | ✅ Suitable | Oct 20, 2026 |
 | Midland Bank PLC | Trainee Assistant Officer | Fresher — CGPA ≥ 2.75, SSC/HSC GPA ≥ 4.00 | ✅ Suitable | Oct 20, 2026 |
+| ICBI Asset Management PLC (IAMPLC) | Senior Officer (Grade-9) | Fresher, MBA Finance | ✅ Suitable | Oct 29, 2026 |
+| ICBI Asset Management PLC (IAMPLC) | Officer (Grade-10) | Fresher, BBA Finance | ✅ Suitable | Oct 29, 2026 |
 
 ---
 
@@ -86,3 +88,4 @@ Example links section (after table):
 | Watch BSCS for Job ID 26102 & 26103 (Officer G / Officer Cash) | Ongoing | 🔴 High priority — new batch expected |
 | Check Dhaka University post details (jobs.du.ac.bd) | Sept 13–15, Nov 2 | ⚠️ Verify post names |
 | Apply Midland Bank PLC (Probationary Officer / TAO) via bdjobs.com/mdb | Oct 20, 2026 | 🟡 Apply |
+| Apply IAMPLC Senior Officer (Grade-9) + Officer (Grade-10) — portal opens Oct 1 | Oct 29, 2026 | 🟡 Apply from Oct 1 at icb.org.bd/iamcl/career/cindex.php |
