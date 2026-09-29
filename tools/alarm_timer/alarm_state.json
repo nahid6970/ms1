@@ -98,13 +98,13 @@
         {
           "id": "ed31453c",
           "label": "04",
-          "fires_at": 1790843580.0,
-          "created_at": 1789358203.2745605,
+          "fires_at": 1790800380.0,
+          "created_at": 1790625113.5258067,
           "input_mode": "custom_3",
-          "input_value": "14:33 on 1 Oct",
+          "input_value": "2:33 on 1 Oct",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": true
+          "secondary_mode": false
         },
         {
           "id": "5d7fdebf",
