@@ -1,11 +1,23 @@
 // Load settings on page load
 document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.sync.get({
-    prompts: [],
     showViewer: true
   }, (settings) => {
     document.getElementById('showViewer').checked = settings.showViewer;
-    renderPrompts(settings.prompts);
+    chrome.storage.local.get({ prompts: null }, (localSettings) => {
+      if (Array.isArray(localSettings.prompts)) {
+        renderPrompts(localSettings.prompts);
+        return;
+      }
+
+      // Migrate prompts saved by older versions from sync storage. Long prompts
+      // belong in local storage because Chrome sync has a small per-item quota.
+      chrome.storage.sync.get({ prompts: [] }, (legacySettings) => {
+        const prompts = Array.isArray(legacySettings.prompts) ? legacySettings.prompts : [];
+        renderPrompts(prompts);
+        chrome.storage.local.set({ prompts });
+      });
+    });
   });
 });
 
@@ -17,7 +29,11 @@ function storageGet(area) {
 }
 
 function storageSet(area, data) {
-  return new Promise((resolve) => chrome.storage[area].set(data, resolve));
+  return new Promise((resolve, reject) => chrome.storage[area].set(data, () => {
+    const error = chrome.runtime.lastError;
+    if (error) reject(new Error(error.message));
+    else resolve();
+  }));
 }
 
 function storageClear(area) {
@@ -59,16 +75,29 @@ function renderPrompts(prompts) {
   currentPrompts.forEach((p, index) => {
     const item = document.createElement('div');
     item.className = 'prompt-item';
-    item.innerHTML = `
-      <div class="prompt-header">
-        <span class="prompt-name">${p.name}</span>
-        <div class="prompt-actions">
-          <button class="edit-prompt" data-index="${index}" title="Edit prompt">✎</button>
-          <button class="delete-prompt" data-index="${index}" title="Delete prompt">×</button>
-        </div>
-      </div>
-      <div class="prompt-text-preview">${p.text}</div>
-    `;
+    const header = document.createElement('div');
+    header.className = 'prompt-header';
+    const name = document.createElement('span');
+    name.className = 'prompt-name';
+    name.textContent = p.name;
+    const actions = document.createElement('div');
+    actions.className = 'prompt-actions';
+    const editButton = document.createElement('button');
+    editButton.className = 'edit-prompt';
+    editButton.dataset.index = index;
+    editButton.title = 'Edit prompt';
+    editButton.textContent = '✎';
+    const deleteButton = document.createElement('button');
+    deleteButton.className = 'delete-prompt';
+    deleteButton.dataset.index = index;
+    deleteButton.title = 'Delete prompt';
+    deleteButton.textContent = '×';
+    actions.append(editButton, deleteButton);
+    header.append(name, actions);
+    const preview = document.createElement('div');
+    preview.className = 'prompt-text-preview';
+    preview.textContent = p.text;
+    item.append(header, preview);
     list.appendChild(item);
   });
   
@@ -200,6 +229,11 @@ document.getElementById('loadFromConvex').addEventListener('click', async () => 
 
     const syncData = data.sync && typeof data.sync === 'object' ? data.sync : {};
     const localData = data.local && typeof data.local === 'object' ? data.local : {};
+    const restoredPrompts = Array.isArray(localData.prompts)
+      ? localData.prompts
+      : (Array.isArray(syncData.prompts) ? syncData.prompts : []);
+    delete syncData.prompts;
+    localData.prompts = restoredPrompts;
 
     await Promise.all([
       storageClear('sync'),
@@ -211,7 +245,6 @@ document.getElementById('loadFromConvex').addEventListener('click', async () => 
       storageSet('local', localData)
     ]);
 
-    const restoredPrompts = Array.isArray(syncData.prompts) ? syncData.prompts : [];
     renderPrompts(restoredPrompts);
     document.getElementById('showViewer').checked = syncData.showViewer !== false;
     clearEditState();
@@ -227,13 +260,18 @@ document.getElementById('loadFromConvex').addEventListener('click', async () => 
 });
 
 // Save settings
-document.getElementById('save').addEventListener('click', () => {
-  const settings = {
-    prompts: currentPrompts,
-    showViewer: document.getElementById('showViewer').checked
-  };
-  
-  chrome.storage.sync.set(settings, () => {
+document.getElementById('save').addEventListener('click', async () => {
+  const button = document.getElementById('save');
+  button.disabled = true;
+  try {
+    await Promise.all([
+      storageSet('local', { prompts: currentPrompts }),
+      storageSet('sync', { showViewer: document.getElementById('showViewer').checked })
+    ]);
     setStatus('SETTINGS SAVED SUCCESSFULLY!', '#28a745');
-  });
+  } catch (error) {
+    setStatus(`SAVE FAILED: ${error.message}`, '#ff003c', 5000);
+  } finally {
+    button.disabled = false;
+  }
 });

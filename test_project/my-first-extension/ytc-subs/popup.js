@@ -8,12 +8,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentPrompts = [];
 
   // Load prompts and settings
-  chrome.storage.sync.get({
-    prompts: [],
-    lastSelectedPrompt: ''
-  }, (settings) => {
-    currentPrompts = settings.prompts || [];
-    
+  const [{ prompts }, settings] = await Promise.all([
+    chrome.storage.local.get({ prompts: [] }),
+    chrome.storage.sync.get({ lastSelectedPrompt: '' })
+  ]);
+  currentPrompts = Array.isArray(prompts) ? prompts : [];
+
     currentPrompts.forEach(p => {
       const opt = document.createElement('option');
       opt.value = p.name;
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (settings.lastSelectedPrompt) {
       promptSelect.value = settings.lastSelectedPrompt;
     }
-  });
 
   // Mode 1: Proactive Fetch
   fetchBtn.addEventListener('click', async () => {
