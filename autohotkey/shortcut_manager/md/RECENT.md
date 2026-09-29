@@ -2,6 +2,12 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-09-29 - Apply exclusion rules across shortcut types
+
+- Exclusion guards cover matching hotkeys in script, launcher, context, text, background-script, and key-remap shortcuts.
+- Blank exclusion rules also guard typed text and file triggers; specific hotkey rules match only actual hotkeys.
+- Updated `FEATURES.md`, `KEYBOARD_SHORTCUTS.md`, `dev.md`, and this handoff document to describe the current behavior.
+
 ## 2026-08-10 - External Source File Support for Text Shortcuts
 
 **What We Accomplished:**
@@ -294,12 +300,6 @@ All sessions are recorded here. Do not archive old entries.
 - `ahk_gui_pyqt.py`
 - `ahk_shortcuts.json`
 
-## 2026-09-29 - Apply exclusion rules across shortcut types
-
-- Exclusion guards now cover key remaps, text shortcuts with hotkey triggers, and hotkeys declared in background scripts; launcher shortcuts already had guards.
-- Blank exclusion rules also guard typed text and file shortcuts; specific hotkey rules only match actual hotkeys.
-- Updated `FEATURES.md` to document the scope.
-
 ## 2026-06-10 17:49 - Per-hotkey exclusion: excluded_hotkeys field added to exclusion rules
 
 **What We Accomplished:**
@@ -316,7 +316,7 @@ All sessions are recorded here. Do not archive old entries.
 - `ahk_gui_pyqt.py`
 - `ahk_shortcuts.json`
 
-## 2026-06-10 17:42 - Exclusion rule fixes: text shortcuts unwrapped + JSON data corrected
+## 2026-06-10 17:42 - Historical exclusion behavior (superseded 2026-09-29)
 
 **What We Accomplished:**
 

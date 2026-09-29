@@ -56,5 +56,6 @@
 
 - Comma-separated values are treated as multiple match options.
 - Context shortcuts activate only when their match function returns true.
-- Exclusion rules disable shortcuts in matching applications.
+- Exclusion rules disable matching shortcuts in matching applications. Specific `excluded_hotkeys` entries apply to script, launcher, context, text-hotkey, background-script, and key-remap shortcuts.
+- A blank `excluded_hotkeys` field excludes all shortcut triggers, including typed text and file shortcuts. Typed triggers cannot match a specific hotkey entry.
 

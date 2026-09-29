@@ -63,17 +63,19 @@ App settings stored in the same JSON:
 
 `generate_ahk_script()` writes helper functions first, then emits shortcuts in this order:
 
-1. Startup scripts
-2. Exclusion guard function
+1. Startup initialization and exclusion helper
+2. Background script hotkeys with context/exclusion guards
 3. Script shortcuts
-4. Context shortcuts
-5. Text shortcuts
-6. File shortcuts
+4. Launcher shortcuts
+5. Context shortcuts
+6. Text shortcuts
+7. File shortcuts
+8. Key remaps
 
 Important behavior:
 
 - Context shortcuts generate `#HotIf` guards based on window title, process name, and window class.
-- Exclusion rules generate `IsShortcutExcluded()` and are applied globally so matching apps do not trigger shortcuts.
+- Exclusion rules generate `IsShortcutExcluded()`. Specific `excluded_hotkeys` entries guard matching hotkeys across script, launcher, context, text-hotkey, background-script, and key-remap types. A blank list guards all shortcut triggers, including typed text and file shortcuts.
 - Comma-separated values are treated as multiple matches.
 - Multi-line script actions are wrapped into block syntax.
 - Text/file shortcuts use helper paste functions in the generated AHK script.

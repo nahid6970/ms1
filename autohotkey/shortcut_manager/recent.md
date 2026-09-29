@@ -6,7 +6,12 @@ PyQt6 GUI app (`ahk_gui_pyqt.py`) that manages AutoHotkey v2 shortcuts stored in
 
 ---
 
-## 2. Latest Implementation (2026-09-28)
+## 2. Latest Implementation (2026-09-29)
+
+### Exclusion rules across shortcut types
+- Exclusion rules guard matching Script, Launcher, Context, Text hotkey, Key Remap, and Background Script hotkeys.
+- Blank `excluded_hotkeys` rules guard all shortcut triggers, including typed Text and File shortcuts. Specific hotkey rules match only actual hotkeys.
+- After changing the generator, restart the GUI and click **Generate AHK** to update `generated_shortcuts.ahk`.
 
 ### Clipboard Manager (Ditto-style) — `startup_scripts`
 - **File:** `ahk_shortcuts.json` → entry name `"Clipboard Manager (Ditto-style)"`

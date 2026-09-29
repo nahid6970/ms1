@@ -1,5 +1,22 @@
 # Problems & Fixes Log
 
+## 2026-09-29 - Exclusion rules did not cover every shortcut type
+
+**Problem:** Key remaps and hotkeys inside background scripts could bypass exclusion rules. Text and file triggers also needed guards when a blank rule excludes all shortcuts.
+
+**Root Cause:** Exclusion guards were emitted in selected generator sections instead of being consistently applied across shortcut types.
+
+**Solution:** Centralized the exclusion map before shortcut generation, added guards for key remaps and background-script hotkeys, and applied blank-rule guards to typed text and file triggers. Specific hotkey entries match only actual hotkeys.
+
+**Files Modified:**
+
+- `ahk_gui_pyqt.py`
+- `md/FEATURES.md`
+- `md/KEYBOARD_SHORTCUTS.md`
+- `md/RECENT.md`
+- `recent.md`
+- `dev.md`
+
 ## 2026-06-10 12:00 - Context matching treated comma-separated values as one string
 
 **Problem:** Context shortcut fields like window title, process name, and window class accepted comma-separated text in the GUI, but generation treated the whole field as a single literal string.
