@@ -5040,36 +5040,7 @@ class AHKShortcutEditor(QMainWindow):
 
             append_exclusion_checker()
 
-            # Add Background/Startup Scripts Hotkeys & Definitions (after the auto-execute section)
-            if startup_definitions:
-                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS (DEFINITIONS & HOTKEYS) ===")
-                for shortcut, def_part in startup_definitions:
-                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
-                    if shortcut.get('description'):
-                        output_lines.append(f";! {shortcut.get('description')}")
-                        
-                    context_mode = shortcut.get('context_mode', 'none')
-                    window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
-                    process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
-                    window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
-                    has_context = context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
-
-                    if has_context:
-                        safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
-                        func_name = f"IsStartup{safe_name}Context"
-                        append_context_checker(shortcut, func_name)
-                        guard = func_name + "()"
-                        if context_mode == 'inactive':
-                            guard = "!" + guard
-                        output_lines.append(f"#HotIf {guard}")
-
-                    output_lines.append(def_part)
-
-                    if has_context:
-                        output_lines.append("#HotIf")
-                    output_lines.append("")
-
-            # Build exclusion map: which hotkeys are excluded (empty set = all)
+            # Build the exclusion map before generating any shortcut type.
             enabled_exclusions = [s for s in self.exclusion_rules if s.get('enabled', True)]
             exclude_all_hotkeys = any(
                 not s.get('excluded_hotkeys', '').strip() for s in enabled_exclusions
@@ -5085,6 +5056,90 @@ class AHKShortcutEditor(QMainWindow):
 
             def needs_exclusion_guard(hotkey):
                 return exclude_all_hotkeys or hotkey in specifically_excluded
+
+            def add_startup_exclusion_guards(def_part, base_guard=""):
+                """Add exclusion conditions to top-level hotkeys in a background script."""
+                lines = def_part.splitlines()
+                guarded_lines = []
+                block_depth = 0
+                active_guard = False
+
+                def brace_delta(line):
+                    # Ignore braces in quoted strings and comments when finding hotkey blocks.
+                    depth = 0
+                    quote = None
+                    escaped = False
+                    for index, char in enumerate(line):
+                        if escaped:
+                            escaped = False
+                            continue
+                        if char == '`':
+                            escaped = True
+                            continue
+                        if quote:
+                            if char == quote:
+                                quote = None
+                            continue
+                        if char in ('"', "'"):
+                            quote = char
+                        elif char == ';' and (index == 0 or line[index - 1].isspace()):
+                            break
+                        elif char == '{':
+                            depth += 1
+                        elif char == '}':
+                            depth -= 1
+                    return depth
+
+                for line in lines:
+                    stripped = line.strip()
+                    if block_depth == 0 and '::' in stripped and not stripped.startswith(';'):
+                        hotkey = stripped.split('::', 1)[0]
+                        is_hotstring = hotkey.startswith(':')
+                        should_guard = needs_exclusion_guard(hotkey) if not is_hotstring else exclude_all_hotkeys
+                        if should_guard or base_guard:
+                            guard_parts = [base_guard] if base_guard else []
+                            if should_guard:
+                                guard_parts.append("!IsShortcutExcluded()")
+                            guarded_lines.append("#HotIf " + " && ".join(guard_parts))
+                            active_guard = True
+
+                    guarded_lines.append(line)
+                    block_depth += brace_delta(line)
+                    if block_depth <= 0 and active_guard:
+                        guarded_lines.append("#HotIf" + (f" {base_guard}" if base_guard else ""))
+                        active_guard = False
+                        block_depth = 0
+
+                return "\n".join(guarded_lines)
+
+            # Add Background/Startup Scripts Hotkeys & Definitions (after the auto-execute section)
+            if startup_definitions:
+                output_lines.append(";! === BACKGROUND / STARTUP SCRIPTS (DEFINITIONS & HOTKEYS) ===")
+                for shortcut, def_part in startup_definitions:
+                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        output_lines.append(f";! {shortcut.get('description')}")
+                        
+                    context_mode = shortcut.get('context_mode', 'none')
+                    window_title = shortcut.get('window_title', '') if shortcut.get('window_title_enabled', True) else ''
+                    process_name = shortcut.get('process_name', '') if shortcut.get('process_name_enabled', True) else ''
+                    window_class = shortcut.get('window_class', '') if shortcut.get('window_class_enabled', True) else ''
+                    has_context = context_mode in ('active', 'inactive') and any([window_title, process_name, window_class])
+
+                    base_guard = ""
+                    if has_context:
+                        safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
+                        func_name = f"IsStartup{safe_name}Context"
+                        append_context_checker(shortcut, func_name)
+                        base_guard = func_name + "()"
+                        if context_mode == 'inactive':
+                            base_guard = "!" + base_guard
+
+                    guarded_def = add_startup_exclusion_guards(def_part, base_guard)
+                    output_lines.append(guarded_def)
+                    if base_guard:
+                        output_lines.append("#HotIf")
+                    output_lines.append("")
 
             # Add script shortcuts
             enabled_scripts = [s for s in self.script_shortcuts if s.get('enabled', True)]
@@ -5420,7 +5475,10 @@ class AHKShortcutEditor(QMainWindow):
                     safe_trigger = escape_hotkey(trigger)
                     prefix_x = "" if is_hotkey else ":X:"
 
-                    guarded_by_exclusion = is_hotkey and needs_exclusion_guard(trigger)
+                    guarded_by_exclusion = (
+                        (is_hotkey and needs_exclusion_guard(trigger))
+                        or (exclude_all_hotkeys and not is_hotkey)
+                    )
                     if has_context_fields or guarded_by_exclusion:
                         guards = []
                         if has_context_fields:
@@ -5683,7 +5741,11 @@ class AHKShortcutEditor(QMainWindow):
                     
                     # Escape single quotes in path
                     safe_path = file_path.replace("'", "''")
+                    if exclude_all_hotkeys:
+                        output_lines.append("#HotIf !IsShortcutExcluded()")
                     output_lines.append(f":X:{trigger}::PasteFile('{safe_path}')")
+                    if exclude_all_hotkeys:
+                        output_lines.append("#HotIf")
                     output_lines.append("")
                 output_lines.append("")
 
@@ -5702,7 +5764,12 @@ class AHKShortcutEditor(QMainWindow):
                     safe_origin = escape_hotkey(origin)
                     safe_dest = escape_hotkey(dest)
                     
+                    guarded = needs_exclusion_guard(origin)
+                    if guarded:
+                        output_lines.append("#HotIf !IsShortcutExcluded()")
                     output_lines.append(f"{safe_origin}::{safe_dest}")
+                    if guarded:
+                        output_lines.append("#HotIf")
                     output_lines.append("")
                 output_lines.append("")
 

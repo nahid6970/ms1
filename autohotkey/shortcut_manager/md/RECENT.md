@@ -294,6 +294,12 @@ All sessions are recorded here. Do not archive old entries.
 - `ahk_gui_pyqt.py`
 - `ahk_shortcuts.json`
 
+## 2026-09-29 - Apply exclusion rules across shortcut types
+
+- Exclusion guards now cover key remaps, text shortcuts with hotkey triggers, and hotkeys declared in background scripts; launcher shortcuts already had guards.
+- Blank exclusion rules also guard typed text and file shortcuts; specific hotkey rules only match actual hotkeys.
+- Updated `FEATURES.md` to document the scope.
+
 ## 2026-06-10 17:49 - Per-hotkey exclusion: excluded_hotkeys field added to exclusion rules
 
 **What We Accomplished:**

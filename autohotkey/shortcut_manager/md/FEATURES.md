@@ -95,9 +95,10 @@
 
 - Stored in `exclusion_rules`
 - Generates `IsShortcutExcluded()` function using `WinGetProcessName`, `WinGetTitle`, `WinGetClass`
-- `excluded_hotkeys` field (one per line): if filled, only those hotkeys are guarded; if blank, all script/context shortcuts are guarded
-- Applied only to script shortcuts and context shortcuts — text and file hotstrings are never excluded
-- Each script shortcut gets its own `#HotIf !IsShortcutExcluded()` / `#HotIf` pair only when needed
+- `excluded_hotkeys` field (one per line): if filled, only matching hotkeys are guarded; if blank, all shortcuts are guarded
+- Applies to script, launcher, context, text-hotkey, key-remap, and background-script hotkeys. Blank rules also guard typed text and file shortcuts.
+- A typed text or file trigger is only affected by a blank exclusion rule because it has no hotkey to compare against a specific excluded key.
+- The generator emits `#HotIf !IsShortcutExcluded()` only where a shortcut needs the exclusion guard.
 
 **Usage:**
 
