@@ -1112,6 +1112,20 @@
             "excluded_hotkeys": "LAlt & e",
             "enabled": true,
             "favourite": true
+        },
+        {
+            "name": "Google Docs Bold Formatting",
+            "category": "General",
+            "description": "",
+            "window_title": "Untitled document - Google Docs - Google Chrome",
+            "process_name": "",
+            "window_class": "",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "excluded_hotkeys": "^b",
+            "enabled": false,
+            "favourite": true
         }
     ],
     "remap_shortcuts": [],
