@@ -5404,7 +5404,6 @@ class AHKShortcutEditor(QMainWindow):
                     
                     if has_context_fields:
                         append_context_checker(shortcut, func_name)
-                        output_lines.append(f"#HotIf {func_name}()")
 
                     show_as_menu = shortcut.get('show_as_menu', False)
 
@@ -5420,6 +5419,15 @@ class AHKShortcutEditor(QMainWindow):
 
                     safe_trigger = escape_hotkey(trigger)
                     prefix_x = "" if is_hotkey else ":X:"
+
+                    guarded_by_exclusion = is_hotkey and needs_exclusion_guard(trigger)
+                    if has_context_fields or guarded_by_exclusion:
+                        guards = []
+                        if has_context_fields:
+                            guards.append(f"{func_name}()")
+                        if guarded_by_exclusion:
+                            guards.append("!IsShortcutExcluded()")
+                        output_lines.append("#HotIf " + " && ".join(guards))
 
                     if show_as_menu and '\n' in replacement:
                         output_lines.append(f"{prefix_x}{safe_trigger}:: {{")
@@ -5656,7 +5664,7 @@ class AHKShortcutEditor(QMainWindow):
                             else:
                                 output_lines.append(f'{prefix_x}{safe_trigger}::SendText("{safe_replacement}")')
                     
-                    if has_context_fields:
+                    if has_context_fields or guarded_by_exclusion:
                         output_lines.append("#HotIf")
                     output_lines.append("")
                 output_lines.append("")
