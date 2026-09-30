@@ -278,7 +278,7 @@ function displayTabs(tabs) {
       };
       const textColor = getContrastYIQ(color);
       
-      tagHTML = `<div class="tab-tag" style="background-color: ${color} !important; color: ${textColor} !important; border: 1.5px solid ${bColor} !important; margin-left: auto; padding: 3px 7px; border-radius: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${tab.tag}</div>`;
+      tagHTML = `<div class="tab-tag" style="background-color: ${color} !important; color: ${textColor} !important; border: 1.5px solid ${bColor} !important; margin-left: 4px; padding: 3px 7px; border-radius: 0; font-size: 10px; font-weight: 700; text-transform: uppercase;">${tab.tag}</div>`;
     }
 
     // Calculate days left for deadline
