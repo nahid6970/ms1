@@ -18,13 +18,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Terminal TUI",
@@ -518,14 +512,7 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": [],
-      "category": "Extension",
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790752670820-1"
-        ]
-      }
+      "category": "Extension"
     },
     {
       "name": "Tab Saver",
@@ -833,15 +820,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {
-        "layoutClass": "split-tabs",
-        "paneIds": [
-          "main",
-          "pane-1790755893082-1",
-          "pane-1790755900603-2"
-        ]
-      }
+      "bookmarks": []
     },
     {
       "name": "Rclone Manager",
