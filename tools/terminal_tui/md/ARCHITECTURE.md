@@ -171,14 +171,12 @@ Stores all workspace metadata:
         "name": "Dev Server",
         "windowTitle": ""
       }
-    ],
-    "layout": {
-      "layoutClass": "split-tabs",
-      "paneIds": ["main", "pane-1"]
-    }
+    ]
   }
 ]
 ```
+
+Terminal tabs are session-only. They are not stored in `projects.json`; opening a workspace after restarting the app starts one default terminal tab.
 
 ### profile.ps1 (per workspace)
 ```powershell

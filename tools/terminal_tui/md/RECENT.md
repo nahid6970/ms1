@@ -361,3 +361,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - `md/PROBLEMS_AND_FIXES.md` — documented problem and fix details
 - `md/RECENT.md` — updated recent development logs
 
+# [2026-09-30] - Keep Terminal Tabs Session-Only
+- Stopped writing terminal layout and pane IDs to workspace JSON.
+- Workspace startup now always creates one default terminal tab, avoiding restoration of empty tabs after an app restart.
+- Updated architecture and feature documentation to describe session-only tabs.

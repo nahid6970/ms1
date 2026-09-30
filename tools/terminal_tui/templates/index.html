@@ -7666,51 +7666,12 @@
                 localStorage.removeItem('active-project');
                 return;
             }
-            const parent = document.getElementById('terminal-parent');
             localStorage.setItem('active-project', activeProject);
-            
-            const layoutClass = parent.className;
-            const paneIds = terminalPanes.map(p => p.paneId);
-            
-            // Immediately sync layout in memory for real-time consistency
-            const proj = projects.find(p => p.name === activeProject);
-            if (proj) {
-                const hasNoSavedLayout = !proj.layout || !proj.layout.layoutClass;
-                
-                // If it already matches, don't POST to backend
-                if (!hasNoSavedLayout && 
-                    proj.layout.layoutClass === layoutClass && 
-                    JSON.stringify(proj.layout.paneIds) === JSON.stringify(paneIds)) {
-                    return;
-                }
-                // If it is the default layout and project has no layout, don't POST to backend
-                if (hasNoSavedLayout && layoutClass === 'split-tabs' && paneIds.length === 1 && paneIds[0] === 'main') {
-                    return;
-                }
-                proj.layout = { layoutClass, paneIds };
-            }
-            
-            try {
-                await fetch(`/api/projects/${activeProject}/layout`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ layoutClass, paneIds })
-                });
-            } catch (err) {
-                console.error("Error saving terminal layout to backend:", err);
-            }
         }
 
         async function restoreTerminalLayout(projectName) {
             try {
                 const currentProjDetails = projects.find(p => p.name === projectName) || {};
-                const layoutConfig = currentProjDetails.layout || {};
-                
-                let savedLayoutClass = layoutConfig.layoutClass || 'split-tabs';
-                const savedPaneIds = layoutConfig.paneIds || ['main'];
-                if (savedPaneIds.length === 1 && savedPaneIds[0] === 'main' && savedLayoutClass === 'split-right') {
-                    savedLayoutClass = 'split-tabs';
-                }
                 
                 activeProject = projectName;
                 startStatsMonitoring();
@@ -7746,27 +7707,17 @@
                 
                 const parent = document.getElementById('terminal-parent');
                 parent.innerHTML = '';
-                parent.className = savedLayoutClass;
-                
-                for (const paneId of savedPaneIds) {
-                    if (paneId.startsWith('pane-')) {
-                        const parts = paneId.split('-');
-                        const counterVal = parseInt(parts[parts.length - 1], 10);
-                        if (!isNaN(counterVal) && counterVal >= splitPaneCounter) {
-                            splitPaneCounter = counterVal + 1;
-                        }
-                    }
-                    
-                    const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                    const response = await fetch(`/api/session/${projectName}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paneId: paneId, useRealDirName: useRealDir })
-                    });
-                    
-                    if (response.ok) {
-                        createTerminalPane(projectName, paneId, currentProjDetails.theme);
-                    }
+                parent.className = 'split-tabs';
+
+                const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
+                const response = await fetch(`/api/session/${projectName}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
+                });
+
+                if (response.ok) {
+                    createTerminalPane(projectName, 'main', currentProjDetails.theme);
                 }
                 
                 updateBookmarksDropdown();
