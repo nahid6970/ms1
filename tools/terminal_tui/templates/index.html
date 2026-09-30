@@ -909,6 +909,15 @@
             color: #f87171;
         }
 
+        .terminal-tab-notification {
+            width: 8px;
+            height: 8px;
+            flex: 0 0 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.65);
+        }
+
         .terminal-tab-add {
             min-width: 34px;
             justify-content: center;
@@ -3568,6 +3577,26 @@
         let socket = null;
         let terminalPanes = [];
         let splitPaneCounter = 1;
+        let isRestoringTerminalTabs = false;
+        const terminalTabsStoragePrefix = 'terminal-tabs:';
+        const terminalActiveTabStoragePrefix = 'terminal-active-tab:';
+
+        function getSavedTerminalPaneIds(projectName) {
+            const saved = localStorage.getItem(terminalTabsStoragePrefix + projectName);
+            const paneIds = saved ? saved.split(',').filter(paneId => paneId === 'main' || /^pane-\d+(?:-\d+)?$/.test(paneId)) : [];
+            return paneIds.length ? [...new Set(paneIds)] : ['main'];
+        }
+
+        function clearSavedTerminalTabs() {
+            const keysToRemove = [];
+            for (let index = 0; index < localStorage.length; index++) {
+                const key = localStorage.key(index);
+                if (key && (key.startsWith(terminalTabsStoragePrefix) || key.startsWith(terminalActiveTabStoragePrefix))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+        }
 
         // Close context menu on any outside click
         document.addEventListener('click', (e) => {
@@ -3999,18 +4028,6 @@
             if (activeProject === projectName) return;
 
             try {
-                const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                const response = await fetch(`/api/session/${projectName}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    alert(errorData.error || "Failed to open workspace terminal");
-                    return;
-                }
-
                 await restoreTerminalLayout(projectName);
                 updateBookmarksDropdown();
                 
@@ -4143,6 +4160,14 @@
                 titleSpan.className = 'terminal-tab-title';
                 titleSpan.innerText = `Terminal ${index + 1}`;
                 tab.appendChild(titleSpan);
+
+                if (pane.needsAttention) {
+                    const notification = document.createElement('span');
+                    notification.className = 'terminal-tab-notification';
+                    notification.title = 'A command finished in this tab';
+                    notification.setAttribute('aria-label', 'A command finished in this tab');
+                    tab.appendChild(notification);
+                }
                 
                 const closeBtn = document.createElement('span');
                 closeBtn.className = 'terminal-tab-close';
@@ -4159,8 +4184,10 @@
                     socket = pane.socket;
                     document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
                     pane.element.classList.add('active-pane');
+                    pane.needsAttention = false;
                     
                     updateTerminalTabs();
+                    saveTerminalLayoutState();
                     
                     setTimeout(() => {
                         try { pane.fitAddon.fit(); } catch (e) {}
@@ -4218,6 +4245,7 @@
                 term = nextPane.term;
                 fitAddon = nextPane.fitAddon;
                 socket = nextPane.socket;
+                nextPane.needsAttention = false;
                 if (nextPane.element) {
                     nextPane.element.classList.add('active-pane');
                 }
@@ -4353,7 +4381,7 @@
             }
 
             const paneSocket = io('/pty');
-            const pane = { paneId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null };
+            const pane = { paneId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;
             fitAddon = paneFitAddon;
@@ -4366,6 +4394,9 @@
                 if (!paneDiv.classList.contains('active-pane')) {
                     document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
                     paneDiv.classList.add('active-pane');
+                    pane.needsAttention = false;
+                    updateTerminalTabs();
+                    saveTerminalLayoutState();
                     setTimeout(() => {
                         try { paneFitAddon.fit(); } catch (e) {}
                         if (paneSocket && paneSocket.connected) {
@@ -4419,13 +4450,16 @@
 
             paneSocket.on('pty-output', (msg) => {
                 if (msg.data) {
+                    const displayData = stripTerminalPromptMarkers(pane, msg.data);
                     const buffer = paneTerm.buffer.active;
                     const isAtBottom = (buffer.viewportY >= buffer.baseY - 1);
-                    paneTerm.write(msg.data, () => {
-                        if (isAtBottom || autoScrollEnabled) {
-                            paneTerm.scrollToBottom();
-                        }
-                    });
+                    if (displayData) {
+                        paneTerm.write(displayData, () => {
+                            if (isAtBottom || autoScrollEnabled) {
+                                paneTerm.scrollToBottom();
+                            }
+                        });
+                    }
                 } else if (msg.eof) {
                     paneTerm.write("\r\n\x1b[31m[Shell Session Ended. Refresh or re-select to restart]\x1b[0m\r\n");
                     paneSocket.disconnect();
@@ -4572,6 +4606,43 @@
             paneTerm.focus();
             saveTerminalLayoutState();
             return pane;
+        }
+
+        function stripTerminalPromptMarkers(pane, data) {
+            const marker = '\x1b]9;ttui;prompt\x07';
+            const input = (pane.promptMarkerCarry || '') + data;
+            pane.promptMarkerCarry = '';
+            let output = '';
+            let offset = 0;
+            let markerIndex;
+
+            while ((markerIndex = input.indexOf(marker, offset)) !== -1) {
+                output += input.slice(offset, markerIndex);
+                offset = markerIndex + marker.length;
+                if (pane.hasSeenPromptMarker) {
+                    if (pane.element && !pane.element.classList.contains('active-pane')) {
+                        pane.needsAttention = true;
+                        updateTerminalTabs();
+                    } else {
+                        pane.needsAttention = false;
+                    }
+                } else {
+                    pane.hasSeenPromptMarker = true;
+                }
+            }
+
+            const remaining = input.slice(offset);
+            let carryLength = Math.min(marker.length - 1, remaining.length);
+            while (carryLength > 0 && !marker.startsWith(remaining.slice(-carryLength))) {
+                carryLength--;
+            }
+            if (carryLength > 0) {
+                output += remaining.slice(0, -carryLength);
+                pane.promptMarkerCarry = remaining.slice(-carryLength);
+            } else {
+                output += remaining;
+            }
+            return output;
         }
 
         function splitTerminal(direction, initialCommand = null) {
@@ -5312,6 +5383,7 @@
                     const result = await response.json();
                     projects = result.projects || result;
                     
+                    clearSavedTerminalTabs();
                     activeProject = null;
                     clearTerminalPanes();
                     saveTerminalLayoutState();
@@ -7667,6 +7739,16 @@
                 return;
             }
             localStorage.setItem('active-project', activeProject);
+            if (!isRestoringTerminalTabs) {
+                const paneIds = terminalPanes.map(pane => pane.paneId);
+                if (paneIds.length) {
+                    localStorage.setItem(terminalTabsStoragePrefix + activeProject, paneIds.join(','));
+                    const activePane = terminalPanes.find(pane => pane.element.classList.contains('active-pane')) || terminalPanes[0];
+                    if (activePane) {
+                        localStorage.setItem(terminalActiveTabStoragePrefix + activeProject, activePane.paneId);
+                    }
+                }
+            }
         }
 
         async function restoreTerminalLayout(projectName) {
@@ -7708,31 +7790,43 @@
                 const parent = document.getElementById('terminal-parent');
                 parent.innerHTML = '';
                 parent.className = 'split-tabs';
-
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                const response = await fetch(`/api/session/${projectName}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
-                });
+                const savedPaneIds = getSavedTerminalPaneIds(projectName);
+                const savedActivePaneId = localStorage.getItem(terminalActiveTabStoragePrefix + projectName) || savedPaneIds[0];
+                isRestoringTerminalTabs = true;
+                try {
+                    for (const paneId of savedPaneIds) {
+                        const paneNumber = Number.parseInt(paneId.split('-').pop(), 10);
+                        if (Number.isFinite(paneNumber)) splitPaneCounter = Math.max(splitPaneCounter, paneNumber + 1);
 
-                if (response.ok) {
-                    createTerminalPane(projectName, 'main', currentProjDetails.theme);
+                        const response = await fetch(`/api/session/${projectName}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ paneId, useRealDirName: useRealDir })
+                        });
+                        if (response.ok) {
+                            createTerminalPane(projectName, paneId, currentProjDetails.theme);
+                        }
+                    }
+                } finally {
+                    isRestoringTerminalTabs = false;
                 }
+                await saveTerminalLayoutState();
                 
                 updateBookmarksDropdown();
                 
                 if (terminalPanes.length > 0) {
-                    const firstPane = terminalPanes[0];
-                    term = firstPane.term;
-                    fitAddon = firstPane.fitAddon;
-                    socket = firstPane.socket;
+                    const activePane = terminalPanes.find(pane => pane.paneId === savedActivePaneId) || terminalPanes[0];
+                    term = activePane.term;
+                    fitAddon = activePane.fitAddon;
+                    socket = activePane.socket;
                     document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
-                    firstPane.element.classList.add('active-pane');
+                    activePane.element.classList.add('active-pane');
                     updateTerminalTabs();
+                    saveTerminalLayoutState();
                     setTimeout(() => {
-                        try { firstPane.fitAddon.fit(); } catch (e) {}
-                        firstPane.term.focus();
+                        try { activePane.fitAddon.fit(); } catch (e) {}
+                        activePane.term.focus();
                     }, 100);
                 } else {
                     updateTerminalTabs();

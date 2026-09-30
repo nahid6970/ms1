@@ -33,9 +33,10 @@
 ## Split Terminal Panes
 **Status:** ✅ Complete
 **Description:** Multiple terminal panes per workspace with a tabbed terminal bar shown by default.
-**Implementation:** `splitTerminal(layout, initialCmd)` creates new PTY sessions. Layouts: `tabs` (default tabbed), `right` (vertical), `bottom` (horizontal), `stacked` (quad). Tabs are session-only; each workspace starts with one default tab after an app restart.
+**Implementation:** `splitTerminal(layout, initialCmd)` creates new PTY sessions. Layouts: `tabs` (default tabbed), `right` (vertical), `bottom` (horizontal), `stacked` (quad). Pane IDs and the active tab are stored in browser `localStorage`, not workspace JSON, so browser refresh reconnects to the same tabs. Resetting all sessions clears the saved tabs.
 **Files Involved:** `templates/index.html` (JS: `splitTerminal()`, `confirmSplitLayout()`), `app.py` (session keyed as `<project>::<pane-id>`)
 **Usage:** Click the `+` terminal tab to open another tab, or click split button in toolbar → select layout from card-style modal.
+**Notifications:** An unfocused terminal tab shows an amber dot when PowerShell returns to its prompt after a command. Selecting the tab clears the dot.
 
 ---
 

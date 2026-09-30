@@ -365,3 +365,11 @@ Read this file only when relevant to the current task. When reading, reference t
 - Stopped writing terminal layout and pane IDs to workspace JSON.
 - Workspace startup now always creates one default terminal tab, avoiding restoration of empty tabs after an app restart.
 - Updated architecture and feature documentation to describe session-only tabs.
+# [2026-09-30] - Notify When a Background Tab Finishes a Command
+- Added a hidden PowerShell prompt marker and use it to detect command completion in terminal output.
+- Show an amber indicator on unfocused terminal tabs after command completion; selecting the tab clears it.
+- Filter the marker from terminal display output.
+
+# [2026-09-30] - Restore Terminal Tabs After Browser Refresh
+- Save workspace pane IDs and the selected pane in browser `localStorage`, not workspace JSON.
+- Reconnect to the same sessions after a browser refresh and clear the saved state from Reset All Sessions.

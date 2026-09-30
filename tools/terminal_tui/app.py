@@ -348,6 +348,8 @@ function cd {{
 
 # Custom prompt showing project root and subdirectories
 function prompt {{
+    # Signal that PowerShell has returned to a prompt (the previous command finished).
+    Write-Host -NoNewline "$([char]27)]9;ttui;prompt$([char]7)"
     $current = $pwd.Path.Replace("/", "\\")
     $root = $global:PROJECT_ROOT_PATH.Replace("/", "\\")
     if ($current.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {{

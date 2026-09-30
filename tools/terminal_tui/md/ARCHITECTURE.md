@@ -176,7 +176,7 @@ Stores all workspace metadata:
 ]
 ```
 
-Terminal tabs are session-only. They are not stored in `projects.json`; opening a workspace after restarting the app starts one default terminal tab.
+Terminal pane IDs and the active tab are stored in browser `localStorage`, not `projects.json`. A browser refresh reconnects to those terminal sessions. The Reset All Sessions action clears the saved tab state along with the sessions.
 
 ### profile.ps1 (per workspace)
 ```powershell
