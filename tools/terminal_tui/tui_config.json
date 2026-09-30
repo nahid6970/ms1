@@ -518,7 +518,14 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": [],
-      "category": "Extension"
+      "category": "Extension",
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790752670820-1"
+        ]
+      }
     },
     {
       "name": "Tab Saver",
