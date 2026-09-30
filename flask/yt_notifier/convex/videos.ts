@@ -98,9 +98,10 @@ export const list = query({
     const isWatchLaterView = effectiveCategory === "watchlater";
     const isLongView = effectiveCategory === "long";
 
-    // When filtering by playlist, fetch all videos so none are missed regardless of date.
-    // For blocked/watchlater, also fetch all so count matches what's shown.
-    const takeAmount = (playlistId || folder || channelId || isBlockedView || isWatchLaterView || isLongView) ? 10000 : (isShortsView || feedLimit === 0 ? 2000 : Math.max(500, feedLimit * 4));
+    // Filter rules, shorts, and privacy after reading videos, so a small pre-filter
+    // window can leave a numeric feed page partly empty even when older matches exist.
+    // Read the same bounded recent window for every feed, then apply feedLimit below.
+    const takeAmount = 10000;
     const videos = await q.take(takeAmount);
 
     const filtered = videos

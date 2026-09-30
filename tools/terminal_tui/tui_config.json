@@ -833,7 +833,15 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "layout": {
+        "layoutClass": "split-tabs",
+        "paneIds": [
+          "main",
+          "pane-1790755893082-1",
+          "pane-1790755900603-2"
+        ]
+      }
     },
     {
       "name": "Rclone Manager",
@@ -925,50 +933,6 @@
       ]
     },
     {
-      "name": "Temporary-2",
-      "path": "C:\\@delta\\ms1\\temporary-2",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "duplicateBaseName": "Temporary",
-      "duplicateBaseFolder": "temporary"
-    },
-    {
-      "name": "Temporary-3",
-      "path": "C:\\@delta\\ms1\\temporary-3",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "duplicateBaseName": "Temporary",
-      "duplicateBaseFolder": "temporary"
-    },
-    {
       "name": "Termux",
       "path": "C:\\@delta\\ms1\\termux",
       "category": "Android+Termux",
@@ -987,28 +951,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
-    },
-    {
-      "name": "Temporary-4",
-      "path": "C:\\@delta\\ms1\\temporary-4",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "duplicateBaseName": "Temporary",
-      "duplicateBaseFolder": "temporary"
     }
   ],
   "extension_icons": {

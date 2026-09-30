@@ -1,5 +1,9 @@
 # Forma — Browser 3D Studio
 
+## FLIP//FALL gravity platformer
+
+Open `gravity.html` through the local server to play the bundled 3D platform game. In Forma, use **Play FLIP//FALL** in the top bar to open it. Move with `A`/`D` or arrow keys, jump with `Space`, and press `Q` to flip gravity. Collect five shards and reach the exit. Press `R` to restart and `Esc` to pause. It uses the vendored Three.js files; no package install or build is needed.
+
 A lightweight, dependency-free-to-install browser 3D modeling workspace inspired by the essential parts of Blender.
 
 ## Run it
