@@ -392,7 +392,7 @@ document.getElementById('menuSetDeadline').onclick = () => {
     const savedTabs = result.savedTabs || [];
     const tab = savedTabs.find(t => t.id === currentRightClickedTabId);
     if (tab) {
-      editHeaderTitle.value = tab.headerTitle || '';
+      editHeaderTitle.value = tab.headerTitle || tab.title || '';
       editDocLink.value = tab.docLink || '';
       editTag.value = tab.tag || '';
       if (tab.deadline) {
@@ -489,7 +489,7 @@ document.getElementById('saveCurrentTab').addEventListener('click', (e) => {
         loadTabs();
         // Open deadline modal for the newly saved tab
         currentRightClickedTabId = newTab.id;
-        editHeaderTitle.value = '';
+        editHeaderTitle.value = newTab.title || '';
         editDocLink.value = '';
         editDeadlineDays.value = '';
         editDeadlineDate.value = '';
