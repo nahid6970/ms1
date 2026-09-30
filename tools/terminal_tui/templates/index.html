@@ -3580,6 +3580,47 @@
         let isRestoringTerminalTabs = false;
         const terminalTabsStoragePrefix = 'terminal-tabs:';
         const terminalActiveTabStoragePrefix = 'terminal-active-tab:';
+        let terminalNotificationAudioContext = null;
+
+        function unlockTerminalNotificationAudio() {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            try {
+                if (!terminalNotificationAudioContext) {
+                    terminalNotificationAudioContext = new AudioContextClass();
+                }
+                if (terminalNotificationAudioContext.state === 'suspended') {
+                    terminalNotificationAudioContext.resume().catch(() => {});
+                }
+            } catch (err) {
+                // Audio is an optional enhancement; keep terminal behavior unaffected.
+            }
+        }
+
+        function playTerminalNotificationSound() {
+            const audioContext = terminalNotificationAudioContext;
+            if (!audioContext || audioContext.state !== 'running') return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                const startAt = audioContext.currentTime;
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(740, startAt);
+                oscillator.frequency.setValueAtTime(988, startAt + 0.08);
+                gain.gain.setValueAtTime(0.0001, startAt);
+                gain.gain.exponentialRampToValueAtTime(0.045, startAt + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.22);
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+                oscillator.start(startAt);
+                oscillator.stop(startAt + 0.23);
+            } catch (err) {
+                // Ignore unsupported or unavailable audio devices.
+            }
+        }
+
+        document.addEventListener('pointerdown', unlockTerminalNotificationAudio, { passive: true });
+        document.addEventListener('keydown', unlockTerminalNotificationAudio);
 
         function getSavedTerminalPaneIds(projectName) {
             const saved = localStorage.getItem(terminalTabsStoragePrefix + projectName);
@@ -4621,8 +4662,11 @@
                 offset = markerIndex + marker.length;
                 if (pane.hasSeenPromptMarker) {
                     if (pane.element && !pane.element.classList.contains('active-pane')) {
-                        pane.needsAttention = true;
-                        updateTerminalTabs();
+                        if (!pane.needsAttention) {
+                            pane.needsAttention = true;
+                            updateTerminalTabs();
+                            playTerminalNotificationSound();
+                        }
                     } else {
                         pane.needsAttention = false;
                     }

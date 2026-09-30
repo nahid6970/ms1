@@ -373,3 +373,4 @@ Read this file only when relevant to the current task. When reading, reference t
 # [2026-09-30] - Restore Terminal Tabs After Browser Refresh
 - Save workspace pane IDs and the selected pane in browser `localStorage`, not workspace JSON.
 - Reconnect to the same sessions after a browser refresh and clear the saved state from Reset All Sessions.
+- Play a brief notification sound when an unfocused tab first receives its completion indicator.
