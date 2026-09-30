@@ -16,6 +16,7 @@ const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
 const editDeadlineDate = document.getElementById('editDeadlineDate');
 const editHeaderTitle = document.getElementById('editHeaderTitle');
+const editDocLink = document.getElementById('editDocLink');
 const editTag = document.getElementById('editTag');
 const addTagBtn = document.getElementById('addTagBtn');
 const newTagInputContainer = document.getElementById('newTagInputContainer');
@@ -251,6 +252,12 @@ function displayTabs(tabs) {
       faviconHTML = `<img src="${favicon}" class="tab-favicon" loading="lazy" decoding="async" onerror="this.src='${fallbackGlobe}'">`;
     }
     
+    // Doc link chip HTML
+    let docLinkHTML = '';
+    if (tab.docLink) {
+      docLinkHTML = `<a class="tab-doc-link" href="${tab.docLink}" target="_blank" title="${tab.docLink}" onclick="event.stopPropagation()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>`;
+    }
+
     // Tag HTML
     let tagHTML = '';
     if (tab.tag) {
@@ -307,6 +314,7 @@ function displayTabs(tabs) {
         <div class="tab-title">${headerTitle}</div>
         <div class="tab-url">${tab.url}</div>
       </div>
+      ${docLinkHTML}
       ${tagHTML}
       ${deadlineHTML}
       <button class="tab-remove" data-id="${tab.id}">×</button>
@@ -343,7 +351,8 @@ function matchesSearch(tab, query) {
     tab.headerTitle || '',
     tab.title || '',
     tab.url || '',
-    tab.tag || ''
+    tab.tag || '',
+    tab.docLink || ''
   ].join(' ').toLowerCase();
   return haystack.includes(value);
 }
@@ -376,6 +385,7 @@ document.getElementById('menuSetDeadline').onclick = () => {
   editDeadlineDays.value = '';
   editDeadlineDate.value = '';
   editHeaderTitle.value = '';
+  editDocLink.value = '';
   
   // Set current tag and deadline
   chrome.storage.local.get(['savedTabs'], (result) => {
@@ -383,6 +393,7 @@ document.getElementById('menuSetDeadline').onclick = () => {
     const tab = savedTabs.find(t => t.id === currentRightClickedTabId);
     if (tab) {
       editHeaderTitle.value = tab.headerTitle || '';
+      editDocLink.value = tab.docLink || '';
       editTag.value = tab.tag || '';
       if (tab.deadline) {
         const date = new Date(tab.deadline);
@@ -404,6 +415,7 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
   const days = editDeadlineDays.value;
   const date = editDeadlineDate.value;
   const headerTitle = editHeaderTitle.value.trim();
+  const docLink = editDocLink.value.trim();
   const tag = editTag.value;
   let deadline = null;
   
@@ -424,7 +436,7 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
       if (tab.id === currentRightClickedTabId) {
         // Keep existing deadline if no new one provided
         const finalDeadline = (deadline !== null) ? deadline : tab.deadline;
-        return { ...tab, headerTitle: headerTitle || null, deadline: finalDeadline, tag: tag };
+        return { ...tab, headerTitle: headerTitle || null, docLink: docLink || null, deadline: finalDeadline, tag: tag };
       }
       return tab;
     });
@@ -478,6 +490,7 @@ document.getElementById('saveCurrentTab').addEventListener('click', (e) => {
         // Open deadline modal for the newly saved tab
         currentRightClickedTabId = newTab.id;
         editHeaderTitle.value = '';
+        editDocLink.value = '';
         editDeadlineDays.value = '';
         editDeadlineDate.value = '';
         editTag.value = '';

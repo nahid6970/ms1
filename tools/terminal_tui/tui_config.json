@@ -22,8 +22,7 @@
       "layout": {
         "layoutClass": "split-tabs",
         "paneIds": [
-          "main",
-          "pane-1790625370415-1"
+          "main"
         ]
       }
     },
