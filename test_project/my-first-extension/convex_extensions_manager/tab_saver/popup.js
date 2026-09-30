@@ -161,9 +161,11 @@ function displayTabs(tabs) {
   const outdatedTabs = tabs.filter(tab => isOutdatedDeadline(tab));
   const nonOutdatedTabs = tabs.filter(tab => !isOutdatedDeadline(tab));
   const filteredTabs = tabs.filter(tab => matchesSearch(tab, currentSearchQuery));
-  const visibleTabs = currentTabView === 'outdated'
-    ? filteredTabs.filter(tab => isOutdatedDeadline(tab))
-    : filteredTabs.filter(tab => !isOutdatedDeadline(tab));
+  const visibleTabs = currentSearchQuery.trim()
+    ? filteredTabs
+    : currentTabView === 'outdated'
+      ? filteredTabs.filter(tab => isOutdatedDeadline(tab))
+      : filteredTabs.filter(tab => !isOutdatedDeadline(tab));
 
   allTabCount.textContent = nonOutdatedTabs.length;
   outdatedTabCount.textContent = outdatedTabs.length;
