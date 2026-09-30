@@ -238,7 +238,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 3px;
   background: #e3f2fd;
   color: #1976d2;
   white-space: nowrap;
@@ -254,14 +254,14 @@ body {
   justify-content: center;
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  background: #f0f4ff;
-  color: #4a6cf7;
-  border: 1px solid #c7d2fe;
+  border-radius: 3px;
+  background: #4a6cf7;
+  color: #ffffff;
+  border: 1px solid #3a5ce5;
   margin-left: 6px;
   text-decoration: none;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
 }
 
 .tab-doc-link svg {
@@ -271,9 +271,8 @@ body {
 }
 
 .tab-doc-link:hover {
-  background: #4a6cf7;
-  color: #ffffff;
-  border-color: #4a6cf7;
+  background: #3a5ce5;
+  border-color: #2d4fd6;
   transform: translateY(-1px);
 }
 
