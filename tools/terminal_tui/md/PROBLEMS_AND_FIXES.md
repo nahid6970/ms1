@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-02] - Git Status Badge Stale for Several Seconds After Commit
+**Problem:** After committing via the git modal, the status bar kept showing "N files changed" for 6–7 seconds (up to 30s) before clearing to clean.
+**Root Cause:** `GIT_STATUS_CACHE_SECONDS = 30`. The commit route never invalidated the cache, so `updateStatsMonitor()` called immediately after commit returned the stale cached result until the TTL expired.
+**Solution:** Added `invalidate_git_status_cache(path)` that drops the cache entry for a given path. Called it in `api_git_commit` right after a successful `git commit` so the very next stats poll runs a fresh scan.
+**Files Modified:** `app.py`
+
+---
+
 ## [2026-10-01] - Git Process Buildup and Terminal Tabs Stalling
 **Problem:** Git processes accumulated during active workspace monitoring. Closing tabs could leave their PowerShell sessions and child processes running, and a slow session shutdown could hold the global session lock and block opening another workspace.
 **Root Cause:** The stats endpoint ran multiple Git commands every three seconds with no request coalescing. Closing a non-final tab only disconnected its socket; it never stopped its server-side PTY. Session cleanup also ran while holding the lock and the `taskkill` call had no timeout.

@@ -192,6 +192,12 @@ def get_git_status(path):
             _git_status_cache[cache_key] = (time.monotonic(), result)
         return result
 
+def invalidate_git_status_cache(path):
+    """Drop the cached git status for a project path so the next poll runs a fresh scan."""
+    cache_key = os.path.normcase(os.path.abspath(path))
+    with _git_status_cache_lock:
+        _git_status_cache.pop(cache_key, None)
+
 def _get_git_status_uncached(path):
     if not os.path.isdir(path):
         return None
@@ -1239,6 +1245,8 @@ def api_git_commit(project):
             return jsonify({"error": f"git commit failed: {err}"}), 500
 
         output = (res_commit.stdout or "").strip()
+        # Drop stale cache so the next stats poll reflects the clean state immediately.
+        invalidate_git_status_cache(path)
 
         if do_push:
             res_push = subprocess.run(["git", "push"], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=30)

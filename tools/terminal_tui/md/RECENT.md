@@ -5,6 +5,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-02] - Fix Git Status Stale After Commit
+**What We Accomplished:**
+- After committing, the git status badge in the status bar kept showing the old "dirty" state for several seconds (up to the 30-second cache window).
+- Root cause: the git status cache was never invalidated after a successful commit, so `updateStatsMonitor()` (called immediately after commit) returned the stale cached result.
+- Added `invalidate_git_status_cache(path)` helper and called it in `api_git_commit` right after a successful `git commit`. The next stats poll now runs a fresh scan and returns the clean state immediately.
+
+**Files Modified:**
+- `app.py`
+- `md/PROBLEMS_AND_FIXES.md`
+- `md/RECENT.md`
+
+---
+
+
 ## [2026-10-01] - Preserve Multiline Paste Semantics in Terminal
 **What We Accomplished:**
 - Routed clipboard text through xterm.js `Terminal.paste()` instead of writing raw text directly to the PTY.
