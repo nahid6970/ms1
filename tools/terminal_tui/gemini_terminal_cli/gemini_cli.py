@@ -1367,15 +1367,22 @@ def read_dynamic_prompt(
     prompt_fg: str = "ansired",
     prompt_bg: str = "",
     device_mode: str = "pc",
+    pt_history: Any = None,
 ) -> str:
-    """Read a line while allowing a time-sensitive prompt to refresh."""
+    """Read a line while allowing a time-sensitive prompt to refresh.
+
+    pt_history: an already-created prompt_toolkit InMemoryHistory instance.
+    Pass the same object on every call so arrow-key history accumulates across
+    the whole session.  If None a fresh (empty) InMemoryHistory is used.
+    """
     is_posix_device = device_mode in {"android-termux", "linux", "posix"}
 
-    if pt_prompt is not None and ANSI is not None and FileHistory is not None and CompleteStyle is not None and Style is not None and PromptSession is not None:
-        # Use FileHistory so Up/Down arrow history persists across sessions on
-        # all platforms, including Android Termux.  The in-memory list passed
-        # in as `history` was loaded from the same file, so both stay in sync.
-        file_history = FileHistory(str(PROMPT_HISTORY_FILE))
+    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None and PromptSession is not None:
+        # Re-use the caller-supplied history object so Up/Down arrow navigation
+        # sees every prompt submitted in this session.  The REPL loop creates
+        # this once (pre-seeded with entries loaded from prompt_history.txt)
+        # and passes it on every call.
+        session_history = pt_history if pt_history is not None else InMemoryHistory()
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
 
         bg_str = prompt_bg.strip()
@@ -1404,7 +1411,7 @@ def read_dynamic_prompt(
 
         prompt_options = {
             "message": lambda: ANSI(prompt_provider()),
-            "history": file_history,
+            "history": session_history,
             "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
             "completer": completer,
             "lexer": lexer,
@@ -6506,6 +6513,9 @@ def main() -> int:
         run_turn(args.prompt)
     else:
         command_history: List[str] = load_prompt_history()
+        # Create one InMemoryHistory pre-seeded with saved entries so arrow-key
+        # navigation works immediately and accumulates across the whole session.
+        repl_pt_history = InMemoryHistory(list(command_history)) if InMemoryHistory is not None else None
         while True:
             try:
                 user_input = read_dynamic_prompt(
@@ -6515,6 +6525,7 @@ def main() -> int:
                     prompt_fg=prompt_fg,
                     prompt_bg=prompt_bg,
                     device_mode=device_mode,
+                    pt_history=repl_pt_history,
                 ).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
@@ -6524,6 +6535,10 @@ def main() -> int:
                 user_input = "continue"
                 info("continue")
             append_prompt_history(user_input, command_history)
+            # Keep the prompt_toolkit history object in sync so newly submitted
+            # prompts are immediately available via Up arrow in the same session.
+            if repl_pt_history is not None:
+                repl_pt_history.append_string(user_input)
             if user_input.startswith("/"):
                 command, _, remainder = user_input.partition(" ")
                 command = command.lower()
