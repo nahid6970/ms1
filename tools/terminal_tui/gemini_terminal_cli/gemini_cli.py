@@ -1369,15 +1369,15 @@ def read_dynamic_prompt(
     device_mode: str = "pc",
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
-    if device_mode in {"android-termux", "linux", "posix"}:
-        # Plain terminal input with bracketed paste keeps multiline input
-        # together and avoids prompt-toolkit redraws changing POSIX scrollback.
-        return read_posix_prompt(prompt_provider())
+    is_posix_device = device_mode in {"android-termux", "linux", "posix"}
 
-    if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
-        prompt_history = InMemoryHistory(history or [])
+    if pt_prompt is not None and ANSI is not None and FileHistory is not None and CompleteStyle is not None and Style is not None and PromptSession is not None:
+        # Use FileHistory so Up/Down arrow history persists across sessions on
+        # all platforms, including Android Termux.  The in-memory list passed
+        # in as `history` was loaded from the same file, so both stay in sync.
+        file_history = FileHistory(str(PROMPT_HISTORY_FILE))
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
-        
+
         bg_str = prompt_bg.strip()
         fg_str = prompt_fg.strip() or "ansired"
         if bg_str and bg_str != "none":
@@ -1401,10 +1401,10 @@ def read_dynamic_prompt(
         })
 
         lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
-        
+
         prompt_options = {
             "message": lambda: ANSI(prompt_provider()),
-            "history": prompt_history,
+            "history": file_history,
             "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
             "completer": completer,
             "lexer": lexer,
@@ -1415,7 +1415,8 @@ def read_dynamic_prompt(
             "refresh_interval": 0.25,
             "style": user_style,
         }
-        if os.name == "nt" and PromptSession is not None and Win32Input is not None:
+
+        if os.name == "nt" and Win32Input is not None:
             # Win32Input recognizes multiline console paste. Collect any
             # remaining keys already read in the same console batch as a
             # fallback for terminals that split a paste across input events.
@@ -1425,7 +1426,18 @@ def read_dynamic_prompt(
             session = PromptSession(input=win_input, **prompt_options)
             response = session.prompt()
             return response + collect_windows_prompt_tail(win_input)
-        return pt_prompt(**prompt_options)
+
+        # POSIX / Android Termux: use a plain PromptSession (no Win32Input).
+        # This gives Up/Down arrow history, Tab slash-completion, and
+        # prompt-toolkit's built-in bracketed-paste handling — none of which
+        # the raw read_posix_prompt() provides.
+        session = PromptSession(**prompt_options)
+        return session.prompt()
+
+    if is_posix_device:
+        # prompt_toolkit not installed — fall back to raw reader (bracketed
+        # paste works but no arrow-key history or slash completion).
+        return read_posix_prompt(prompt_provider())
 
     return input(prompt_provider())
 
