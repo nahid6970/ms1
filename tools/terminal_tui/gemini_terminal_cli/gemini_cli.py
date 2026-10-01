@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import codecs
 import datetime as dt
 import getpass
 import http.cookiejar
@@ -87,6 +88,18 @@ except Exception:
     tty = None
 
 ACTIVE_DEVICE_MODE = "pc"
+
+
+def detect_terminal_environment() -> str:
+    """Detect Windows, Termux, or Linux for the appropriate prompt reader."""
+    prefix = os.environ.get("PREFIX", "").lower()
+    if os.environ.get("TERMUX_VERSION") or "com.termux" in prefix:
+        return "android-termux"
+    if os.name == "nt":
+        return "windows"
+    if sys.platform.startswith("linux"):
+        return "linux"
+    return "posix"
 
 try:
     from PyQt6.QtWidgets import (
@@ -491,7 +504,6 @@ else:
 try:
     from prompt_toolkit import prompt as pt_prompt
     from prompt_toolkit import PromptSession
-    from prompt_toolkit.input.defaults import create_input
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.completion import Completer, Completion
     from prompt_toolkit.formatted_text import ANSI
@@ -503,7 +515,6 @@ try:
 except Exception:
     pt_prompt = None
     PromptSession = None
-    create_input = None
     AutoSuggestFromHistory = None
     Completer = None
     Completion = None
@@ -513,6 +524,11 @@ except Exception:
     Lexer = None
     CompleteStyle = None
     Style = None
+
+try:
+    from prompt_toolkit.input.win32 import Win32Input
+except Exception:
+    Win32Input = None
 
 
 if Lexer is not None:
@@ -1061,7 +1077,7 @@ if Completer is not None:
             ("/test", "Test all models and hide failures"),
             ("/api", "Open API account picker"),
             ("/settings", "Open interactive CLI settings"),
-            ("/device", "Set terminal device to PC or Android/Termux"),
+            ("/device", "Show automatically detected terminal OS"),
             ("/lan", "Configure the PC LAN Code Editor address"),
             ("/add_device", "Save or list named SSH devices"),
             ("/loops", "Set max tool-call loops"),
@@ -1215,6 +1231,146 @@ else:
     GeminiCliCompleter = None
 
 
+def read_posix_prompt(prompt: str) -> str:
+    """Read one POSIX prompt, preserving newlines inside bracketed pastes."""
+    if not (sys.stdin.isatty() and termios is not None and tty is not None):
+        return input(prompt)
+
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    text: List[str] = []
+    decoder = codecs.getincrementaldecoder("utf-8")("replace")
+    paste_bytes = bytearray()
+    marker_buffer = bytearray()
+    in_paste = False
+    paste_start = b"\x1b[200~"
+    paste_end = b"\x1b[201~"
+
+    def add_paste() -> None:
+        value = paste_bytes.decode("utf-8", errors="replace").replace("\r\n", "\n").replace("\r", "\n")
+        value = "".join(char for char in value if char in "\n\t" or (ord(char) >= 32 and ord(char) != 127))
+        text.append(value)
+        if value:
+            sys.stdout.write(value)
+            sys.stdout.flush()
+        paste_bytes.clear()
+
+    def handle_typed_char(char: str) -> Optional[str]:
+        if char in {"\r", "\n"}:
+            return "submit"
+        if char in {"\x03", "\x04"}:
+            if char == "\x03":
+                raise KeyboardInterrupt
+            if not text:
+                raise EOFError
+            return None
+        if char in {"\x08", "\x7f"}:
+            if text:
+                text.pop()
+                sys.stdout.write("\b \b")
+                sys.stdout.flush()
+            return None
+        if char == "\t" or (ord(char) >= 32 and ord(char) != 127):
+            text.append(char)
+            sys.stdout.write(char)
+            sys.stdout.flush()
+        return None
+
+    try:
+        tty.setraw(fd)
+        sys.stdout.write("\x1b[?2004h" + prompt)
+        sys.stdout.flush()
+        while True:
+            data = os.read(fd, 1)
+            if not data:
+                raise EOFError
+            byte = data[0]
+
+            if marker_buffer:
+                marker_buffer.append(byte)
+                markers = (paste_start, paste_end)
+                if bytes(marker_buffer) == paste_start:
+                    in_paste = True
+                    paste_bytes.clear()
+                    marker_buffer.clear()
+                    continue
+                if bytes(marker_buffer) == paste_end:
+                    if in_paste:
+                        add_paste()
+                    in_paste = False
+                    marker_buffer.clear()
+                    continue
+                if any(marker.startswith(marker_buffer) for marker in markers):
+                    continue
+                if in_paste:
+                    paste_bytes.extend(marker_buffer)
+                marker_buffer.clear()
+                continue
+
+            if byte == 0x1B:
+                marker_buffer.append(byte)
+                continue
+            if in_paste:
+                paste_bytes.append(byte)
+                continue
+
+            char_text = decoder.decode(data, final=False)
+            for char in char_text:
+                if handle_typed_char(char) == "submit":
+                    sys.stdout.write("\r\n\x1b[?2004l")
+                    sys.stdout.flush()
+                    return "".join(text)
+    finally:
+        try:
+            sys.stdout.write("\x1b[?2004l")
+            sys.stdout.flush()
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+
+def collect_windows_prompt_tail(input_object: Any) -> str:
+    """Drain multiline paste events queued just after Windows accepted Enter."""
+    try:
+        from prompt_toolkit.input.typeahead import get_typeahead
+
+        pending = list(get_typeahead(input_object))
+    except Exception:
+        pending = []
+
+    parts: List[str] = []
+
+    def append_events(events: List[Any]) -> None:
+        for keypress in events:
+            data = str(getattr(keypress, "data", "") or "")
+            if data:
+                parts.append(data)
+
+    append_events(pending)
+    start_time = time.monotonic()
+    last_event_time = start_time
+    initial_wait = 0.08
+    quiet_window = 0.12
+    max_wait = 0.45
+    while time.monotonic() - start_time < max_wait:
+        now = time.monotonic()
+        if now - start_time >= initial_wait and now - last_event_time >= quiet_window:
+            break
+        try:
+            events = list(input_object.read())
+        except Exception:
+            break
+        if events:
+            append_events(events)
+            last_event_time = time.monotonic()
+        else:
+            time.sleep(0.01)
+
+    tail = "".join(parts).replace("\r\n", "\n").replace("\r", "\n")
+    if any(char not in "\n\t" and (ord(char) < 32 or ord(char) == 127) for char in tail):
+        return ""
+    return tail
+
+
 def read_dynamic_prompt(
     prompt_provider: Callable[[], str],
     history: Optional[List[str]] = None,
@@ -1224,6 +1380,11 @@ def read_dynamic_prompt(
     device_mode: str = "pc",
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh."""
+    if device_mode in {"android-termux", "linux", "posix"}:
+        # Plain terminal input with bracketed paste keeps multiline input
+        # together and avoids prompt-toolkit redraws changing POSIX scrollback.
+        return read_posix_prompt(prompt_provider())
+
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None:
         prompt_history = InMemoryHistory(history or [])
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
@@ -1265,9 +1426,16 @@ def read_dynamic_prompt(
             "refresh_interval": 0.25,
             "style": user_style,
         }
-        if device_mode == "android" and PromptSession is not None and create_input is not None:
-            prompt_options["input"] = create_input(always_prefer_tty=True)
-            return PromptSession(**prompt_options).prompt()
+        if os.name == "nt" and PromptSession is not None and Win32Input is not None:
+            # Win32Input recognizes multiline console paste. Collect any
+            # remaining keys already read in the same console batch as a
+            # fallback for terminals that split a paste across input events.
+            win_input = Win32Input()
+            if hasattr(win_input, "recognize_paste"):
+                win_input.recognize_paste = True
+            session = PromptSession(input=win_input, **prompt_options)
+            response = session.prompt()
+            return response + collect_windows_prompt_tail(win_input)
         return pt_prompt(**prompt_options)
 
     return input(prompt_provider())
@@ -4217,49 +4385,49 @@ def clear_screen() -> None:
         if os.name == "nt":
             os.system("cls")
         else:
-            sys.stdout.write("\033[3J\033[2J\033[H")
+            # CSI 3 J erases terminal scrollback (not just the active screen),
+            # which is especially disruptive in Termux.
+            sys.stdout.write("\033[2J\033[H")
             sys.stdout.flush()
 
 
 def read_key() -> str:
-    if msvcrt is None:
-        if (
-            ACTIVE_DEVICE_MODE == "android"
-            and sys.stdin.isatty()
-            and select is not None
-            and termios is not None
-            and tty is not None
-        ):
-            fd = sys.stdin.fileno()
-            old_settings = termios.tcgetattr(fd)
-            try:
-                tty.setraw(fd)
-                ch = os.read(fd, 1).decode("utf-8", errors="ignore")
-                if ch == "\x1b":
-                    sequence = ch
-                    # Android keyboards may deliver ESC and the rest of CSI in
-                    # separate writes, so wait longer than a desktop terminal.
-                    while select.select([fd], [], [], 0.2)[0]:
-                        sequence += os.read(fd, 1).decode("utf-8", errors="ignore")
-                        if len(sequence) >= 3 and sequence[-1].isalpha():
-                            break
-                    return {
-                        "\x1b[A": "UP",
-                        "\x1b[B": "DOWN",
-                        "\x1b[5~": "PAGEUP",
-                        "\x1b[6~": "PAGEDOWN",
-                        "\x1bOA": "UP",
-                        "\x1bOB": "DOWN",
-                    }.get(sequence, sequence)
-                return ch
-            finally:
-                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return input().strip()
-    ch = msvcrt.getwch()
-    if ch in ("\x00", "\xe0"):
-        ch2 = msvcrt.getwch()
-        return ch + ch2
-    return ch
+    if msvcrt is not None:
+        ch = msvcrt.getwch()
+        if ch in ("\x00", "\xe0"):
+            ch2 = msvcrt.getwch()
+            return ch + ch2
+        return ch
+    if sys.stdin.isatty() and select is not None and termios is not None and tty is not None:
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = os.read(fd, 1).decode("utf-8", errors="ignore")
+            if ch == "\x1b":
+                sequence = ch
+                # Bluetooth/mobile keyboards can split an escape sequence
+                # across writes; collect it before returning to cooked mode.
+                while select.select([fd], [], [], 0.5)[0] and len(sequence) < 16:
+                    sequence += os.read(fd, 1).decode("utf-8", errors="ignore")
+                    if len(sequence) >= 3 and sequence[-1].isalpha():
+                        break
+                return {
+                    "\x1b[A": "UP",
+                    "\x1b[B": "DOWN",
+                    "\x1b[C": "RIGHT",
+                    "\x1b[D": "LEFT",
+                    "\x1b[5~": "PAGEUP",
+                    "\x1b[6~": "PAGEDOWN",
+                    "\x1bOA": "UP",
+                    "\x1bOB": "DOWN",
+                    "\x1bOC": "RIGHT",
+                    "\x1bOD": "LEFT",
+                }.get(sequence, sequence)
+            return ch
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return input().strip()
 
 
 def _get_term_height() -> int:
@@ -5145,7 +5313,7 @@ def print_help() -> None:
               /mm                   Open the model picker
               /test                 Test all models and hide failures
               /api                  Open the API account picker
-              /device [pc|android] Set terminal input mode (Android enables TTY input)
+              /device               Show detected terminal OS and input mode
               /lan [URL|off]       Configure the remote PC LAN Code Editor
               /add_device          List/add/remove named SSH devices
               /loops <n>            Set max tool-call loops
@@ -5749,9 +5917,7 @@ def main() -> int:
     prompt_prefix_color = str(model_prefs.get("prompt_prefix_color") or "1;32")
     gui_font_size = int(model_prefs.get("gui_font_size") or 11)
     gui_line_height = int(model_prefs.get("gui_line_height") or 140)
-    device_mode = str(model_prefs.get("device_mode") or "pc").lower()
-    if device_mode not in {"pc", "android"}:
-        device_mode = "pc"
+    device_mode = detect_terminal_environment()
     ACTIVE_DEVICE_MODE = device_mode
     lan_editor_url = str(model_prefs.get("lan_editor_url") or "").rstrip("/")
     ssh_devices: Dict[str, Dict[str, str]] = normalize_ssh_devices(model_prefs.get("ssh_devices", {}))
@@ -6015,6 +6181,7 @@ def main() -> int:
 
     title("Gemini Terminal CLI")
     info(f"Project root: {cwd}")
+    info(f"Terminal environment: {device_mode} (auto-detected)")
     info(failover_status_line())
 
     model_cache: List[Dict[str, Any]] = []
@@ -6510,14 +6677,9 @@ def main() -> int:
                     continue
                 if command == "/device":
                     if not remainder:
-                        info(f"Current device mode: {device_mode}. Use /device pc or /device android.")
-                    elif remainder.lower() in {"pc", "android"}:
-                        device_mode = remainder.lower()
-                        ACTIVE_DEVICE_MODE = device_mode
-                        persist_selection()
-                        info(f"Device mode set to {device_mode}.")
+                        info(f"Detected terminal environment: {device_mode} (automatic at startup).")
                     else:
-                        warn("Usage: /device [pc|android]")
+                        warn("Terminal environment is detected automatically; use /device to view it.")
                     continue
                 if command == "/lan":
                     if not remainder:

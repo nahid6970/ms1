@@ -79,7 +79,8 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn
-- `/device [pc|android]` - select PC or Android/Termux terminal input mode; Android mode prefers the terminal TTY for arrow-key input
+- Startup prints the detected environment and selects Windows, Android Termux, Linux, or another POSIX input mode automatically. `/device` displays the detected environment.
+- Multiline paste is captured as one prompt on Windows and POSIX terminals; paste the block, then press Enter once to submit it.
 - `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace file tool
 - `/add_device` - list, add, or remove named SSH devices
 - `/failover` - open the auto-failover picker
