@@ -2,6 +2,22 @@
 
 ---
 
+## [2026-10-01] - Git Process Buildup and Terminal Tabs Stalling
+**Problem:** Git processes accumulated during active workspace monitoring. Closing tabs could leave their PowerShell sessions and child processes running, and a slow session shutdown could hold the global session lock and block opening another workspace.
+**Root Cause:** The stats endpoint ran multiple Git commands every three seconds with no request coalescing. Closing a non-final tab only disconnected its socket; it never stopped its server-side PTY. Session cleanup also ran while holding the lock and the `taskkill` call had no timeout.
+**Solution:** Cache and coalesce Git status scans for 30 seconds, prevent overlapping stats requests and stale workspace responses, add a per-pane stop endpoint used when closing a tab, detach sessions before cleanup, and bound `taskkill` to five seconds.
+**Files Modified:** `app.py`, `templates/index.html`
+
+---
+
+## [2026-10-01] - Multiline Terminal Paste Submitted Each Line
+**Problem:** Multiline clipboard text in the embedded terminal could be interpreted as separate Enter submissions by CLI prompts.
+**Root Cause:** The custom clipboard path sent text directly to the PTY, bypassing xterm.js paste transformations and bracketed-paste handling.
+**Solution:** Keep the existing single-paste and deduplication flow, but pass clipboard text through the public `paneTerm.paste(text)` API. xterm.js then forwards the transformed paste through the existing `onData` handler.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-09-26] - Duplicate a Workspace into a Numbered Copy
 **Problem:** There was no quick way to create a similar workspace with a separate copy of the current workspace files.
 **Solution:** Added an active-workspace duplicate action. It chooses the next available `-2`, `-3`, … sibling name, copies files while excluding Git metadata and common generated folders, copies category/theme/bookmarks, resets the terminal layout, registers the new workspace, and opens it.

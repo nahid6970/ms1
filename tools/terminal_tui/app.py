@@ -34,6 +34,7 @@ import queue
 import re
 import threading
 import subprocess
+import time
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
 from winpty import PTY
@@ -163,8 +164,35 @@ def save_extension_icons(icons):
 
 active_sessions = {}
 sessions_lock = threading.Lock()
+_git_status_cache = {}
+_git_status_cache_locks = {}
+_git_status_cache_lock = threading.Lock()
+GIT_STATUS_CACHE_SECONDS = 30
 
 def get_git_status(path):
+    if not os.path.isdir(path):
+        return None
+    cache_key = os.path.normcase(os.path.abspath(path))
+    now = time.monotonic()
+    with _git_status_cache_lock:
+        cached = _git_status_cache.get(cache_key)
+        if cached and now - cached[0] < GIT_STATUS_CACHE_SECONDS:
+            return cached[1]
+        refresh_lock = _git_status_cache_locks.setdefault(cache_key, threading.Lock())
+
+    # Coalesce concurrent polling requests for the same repository into one Git scan.
+    with refresh_lock:
+        now = time.monotonic()
+        with _git_status_cache_lock:
+            cached = _git_status_cache.get(cache_key)
+            if cached and now - cached[0] < GIT_STATUS_CACHE_SECONDS:
+                return cached[1]
+        result = _get_git_status_uncached(path)
+        with _git_status_cache_lock:
+            _git_status_cache[cache_key] = (time.monotonic(), result)
+        return result
+
+def _get_git_status_uncached(path):
     if not os.path.isdir(path):
         return None
     try:
@@ -253,7 +281,29 @@ def get_session_key(project, pane_id=None):
 
 
 def session_belongs_to_project(session_key, project):
-    return session_key == project or session_key.startswith(f"{project}::")
+    normalized_key = session_key.casefold()
+    normalized_project = project.casefold()
+    return normalized_key == normalized_project or normalized_key.startswith(f"{normalized_project}::")
+
+
+def detach_project_sessions(project):
+    with sessions_lock:
+        detached = [
+            (key, session) for key, session in active_sessions.items()
+            if session_belongs_to_project(key, project)
+        ]
+        for key, _session in detached:
+            active_sessions.pop(key, None)
+    return [session for _key, session in detached]
+
+
+def kill_sessions(sessions, wait=True):
+    if not wait:
+        for session in sessions:
+            threading.Thread(target=session.kill, daemon=True).start()
+        return
+    for session in sessions:
+        session.kill()
 
 
 def restart_current_process(delay_seconds=1.0):
@@ -277,6 +327,8 @@ def restart_current_process(delay_seconds=1.0):
 
 class TerminalSession:
     def __init__(self, name, path, use_real_dir_name=False):
+        self._kill_lock = threading.Lock()
+        self._killed = False
         self.name = name
         self.path = path
         self.cols = 100
@@ -484,17 +536,31 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             return self.history
 
     def kill(self):
-        if hasattr(self, 'pty') and self.pty.pid:
-            try:
-                # Forcefully terminate the process tree starting from the WinPTY shell process
-                subprocess.run(["taskkill", "/F", "/T", "/PID", str(self.pty.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception as e:
-                print(f"Error calling taskkill on PID {self.pty.pid}: {e}")
-        if hasattr(self, 'pty') and self.pty.isalive():
-            try:
-                os.close(self.pty.fd)
-            except Exception:
-                pass
+        with self._kill_lock:
+            if self._killed:
+                return
+            self._killed = True
+            if hasattr(self, 'pty') and self.pty.pid:
+                try:
+                    # Forcefully terminate this pane's shell and its child process tree.
+                    cf = 0x08000000 if sys.platform == "win32" else 0
+                    subprocess.run(
+                        ["taskkill", "/F", "/T", "/PID", str(self.pty.pid)],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        creationflags=cf,
+                        timeout=5,
+                        check=False,
+                    )
+                except subprocess.TimeoutExpired:
+                    print(f"Timed out terminating terminal process tree for PID {self.pty.pid}")
+                except Exception as e:
+                    print(f"Error calling taskkill on PID {self.pty.pid}: {e}")
+            if hasattr(self, 'pty') and self.pty.isalive():
+                try:
+                    os.close(self.pty.fd)
+                except Exception:
+                    pass
 
 def load_projects_config():
     projs = get_config_val("projects", list)
@@ -712,13 +778,8 @@ def api_projects_delete(project):
         
     save_projects_config(filtered_projects)
     
-    # Kill active session if any
-    with sessions_lock:
-        for session_key, session in list(active_sessions.items()):
-            if not session_belongs_to_project(session_key, project):
-                continue
-            session.kill()
-            del active_sessions[session_key]
+    # Remove sessions from the registry before terminating their processes.
+    kill_sessions(detach_project_sessions(project), wait=False)
             
     return jsonify(scan_projects())
 
@@ -884,12 +945,7 @@ def api_projects_customize():
             
     # Terminate active session if name or path changed, so it starts fresh!
     if name_changed or path_changed:
-        with sessions_lock:
-            for session_key, session in list(active_sessions.items()):
-                if not session_belongs_to_project(session_key.lower(), original_name.lower()):
-                    continue
-                session.kill()
-                del active_sessions[session_key]
+        kill_sessions(detach_project_sessions(original_name), wait=False)
                 
     # Update properties
     if new_name:
@@ -958,9 +1014,9 @@ def api_projects_save_layout(project):
 @app.route('/api/sessions/reset', methods=['POST'])
 def api_sessions_reset():
     with sessions_lock:
-        for name, session in list(active_sessions.items()):
-            session.kill()
+        sessions_to_kill = list(active_sessions.values())
         active_sessions.clear()
+    kill_sessions(sessions_to_kill)
 
     # Reset layout configuration to default (single terminal pane) for all workspaces
     projects = load_projects_config()
@@ -983,14 +1039,27 @@ def api_session_stop(project):
     if not proj_details:
         return jsonify({"error": "Project not found"}), 404
         
-    with sessions_lock:
-        for session_key, session in list(active_sessions.items()):
-            if not session_belongs_to_project(session_key.lower(), project.lower()):
-                continue
-            session.kill()
-            del active_sessions[session_key]
+    kill_sessions(detach_project_sessions(proj_details["name"]), wait=False)
             
     return jsonify(scan_projects())
+
+@app.route('/api/session/<project>/pane/<pane_id>', methods=['DELETE'])
+def api_session_pane_stop(project, pane_id):
+    if pane_id != "main" and not re.fullmatch(r"pane-\d+(?:-\d+)*", pane_id):
+        return jsonify({"error": "Invalid pane ID"}), 400
+
+    projects = load_projects_config()
+    proj_details = next((p for p in projects if p["name"].casefold() == project.casefold()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+
+    session_key = get_session_key(proj_details["name"], pane_id)
+    with sessions_lock:
+        session = active_sessions.pop(session_key, None)
+
+    if session:
+        threading.Thread(target=session.kill, daemon=True).start()
+    return jsonify({"success": True, "paneId": pane_id})
 
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):

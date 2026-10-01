@@ -5,7 +5,6 @@ import argparse
 import codecs
 import datetime as dt
 import getpass
-import http.cookiejar
 import html
 import json
 import os
@@ -895,15 +894,14 @@ def get_runtime_tool_guidance() -> str:
 def get_effective_system_instruction(
     base_system: str,
     disabled_tools: Set[str],
-    lan_editor_url: str = "",
     ssh_devices: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> str:
     runtime_guidance = get_runtime_tool_guidance()
     runtime_guidance += (
         " The user's remote PC is reachable over SSH at nahid@192.168.0.101, port 22. "
-        "When the user explicitly asks to connect or run a command over SSH, use run_shell_command with `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 <remote-command>`. "
+        "For remote PC commands and file work, including requests that mention port 7777, use run_shell_command with `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 <remote-command>`. "
         "OpenSSH starts in the PC user's home directory by default. Use syntax for the SSH server's configured shell, checking it over SSH if needed. Authenticate with the configured private key; never ask for or store the SSH password. "
-        "Requests phrased as '7777 and run ...' must continue to use lan_workspace action run through the Flask app, not SSH. If no mapped folder is named, use the PC user's home directory by omitting folder."
+        "If the user names a saved SSH device, use its saved connection command. Never route PC work through the LAN Flask editor."
     )
     if ssh_devices:
         entries = []
@@ -913,14 +911,6 @@ def get_effective_system_instruction(
             " Saved SSH devices (use the matching connection when the user names one, then append the requested remote command): "
             + "; ".join(entries)
             + ". Never ask for or store passwords."
-        )
-    if lan_editor_url:
-        runtime_guidance += (
-            f" The PC LAN Code Editor is configured at {lan_editor_url}. "
-            "For requested files on that PC, use lan_workspace with the mapped folder URL path. "
-            "Use lan_workspace for PC file operations and for commands requested with '7777'; use SSH only when the user explicitly asks for SSH. "
-            "Never use remote command execution to download or install packages or build packages; give the user those commands to run themselves. "
-            "Ordinary local file tools operate on this device."
         )
     if "read_memory" in disabled_tools:
         return base_system + runtime_guidance
@@ -1078,7 +1068,6 @@ if Completer is not None:
             ("/api", "Open API account picker"),
             ("/settings", "Open interactive CLI settings"),
             ("/device", "Show automatically detected terminal OS"),
-            ("/lan", "Configure the PC LAN Code Editor address"),
             ("/add_device", "Save or list named SSH devices"),
             ("/loops", "Set max tool-call loops"),
             ("/failover", "Open auto-failover picker"),
@@ -2423,119 +2412,6 @@ def run_powershell_command(command: str, cwd: Path, timeout_seconds: int = 60) -
         return f"Error running PowerShell command: {exc}"
 
 
-def lan_workspace_tool(args: Dict[str, Any], base_url: str) -> str:
-    """Use the configured LAN Code Editor for files on the remote PC."""
-    base_url = str(base_url or "").strip().rstrip("/")
-    if not base_url:
-        return "Error: configure the PC editor first with /lan http://<PC-IP>:7777."
-    parsed = urllib.parse.urlsplit(base_url)
-    if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.username or parsed.password:
-        return "Error: /lan needs an http:// or https:// base address, such as http://192.168.0.101:7777."
-
-    action = str(args.get("action", "list")).strip().lower()
-    folder = str(args.get("folder", "")).strip().strip("/")
-    relative = str(args.get("path", "")).strip().strip("/")
-    if action != "run" and not folder:
-        return "Error: folder must be the mapped URL path shown in the editor, for example ms1/temporary."
-    if folder and any(part in {"", ".", ".."} for part in folder.split("/")):
-        return "Error: folder must be the mapped URL path shown in the editor, for example ms1/temporary."
-    if relative and any(part in {"", ".", ".."} for part in relative.split("/")):
-        return "Error: path must stay inside the selected folder."
-    if action not in {"list", "read", "search", "create", "write", "run"}:
-        return "Error: action must be list, read, search, create, write, or run."
-
-    cookie_jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
-    csrf_token = ""
-
-    def send(method: str, url: str, payload: Optional[Dict[str, Any]] = None, headers: Optional[Dict[str, str]] = None):
-        request_headers = dict(headers or {})
-        body = None
-        if payload is not None:
-            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-            request_headers["Content-Type"] = "application/json; charset=utf-8"
-        req = urllib.request.Request(url, data=body, headers=request_headers, method=method)
-        with opener.open(req, timeout=130) as response:
-            return response.read(), response.headers
-
-    try:
-        roots_body, roots_headers = send("GET", base_url + "/api/roots")
-        csrf_token = roots_headers.get("X-CSRF-Token", "")
-        roots_data = json.loads(roots_body.decode("utf-8"))
-        roots = roots_data.get("roots", [])
-        remote_shell = roots_data.get("command_shell", "unknown shell")
-        remote_os = roots_data.get("host_os", "unknown OS")
-        root = next((item for item in roots if folder and str(item.get("url_path", "")).strip("/") == folder), None)
-        if folder and root is None:
-            available = ", ".join(str(item.get("url_path", "")) for item in roots) or "(none added)"
-            return f"Error: no folder mapped to '{folder}'. Available URL paths: {available}"
-
-        if action == "run":
-            command = str(args.get("command", "")).strip()
-            if not command:
-                return "Error: set command to the shell command to run on the PC."
-            payload = {
-                "root": root["id"] if root else "",
-                "command": command,
-                "timeout_seconds": args.get("timeout_seconds", 60),
-            }
-            body, _ = send("POST", base_url + "/api/command", payload, {"X-CSRF-Token": csrf_token})
-            return json.dumps(json.loads(body.decode("utf-8")), ensure_ascii=False, indent=2)[:30000]
-
-        file_url = base_url + "/" + urllib.parse.quote(folder + (("/" + relative) if relative else ""), safe="/")
-        if action == "list":
-            body, _ = send("GET", file_url)
-            result = json.loads(body.decode("utf-8"))
-            result["remote_host"] = {"os": remote_os, "shell": remote_shell}
-            return json.dumps(result, ensure_ascii=False, indent=2)[:40000]
-        if action == "read":
-            if not relative:
-                return "Error: set path to a file inside folder."
-            body, headers = send("GET", file_url)
-            text = body.decode("utf-8")
-            revision = headers.get("ETag", "").strip('"')
-            result = {"path": folder + "/" + relative, "revision": revision, "content": text}
-            return json.dumps(result, ensure_ascii=False)[:40000]
-        if action == "search":
-            query = str(args.get("query", ""))
-            if not query:
-                return "Error: set query to the text to search for."
-            search_url = base_url + "/api/search?" + urllib.parse.urlencode({
-                "root": root["id"], "query": query,
-            })
-            body, _ = send("GET", search_url)
-            return json.dumps(json.loads(body.decode("utf-8")), ensure_ascii=False, indent=2)[:40000]
-        if not relative:
-            return "Error: set path to a file inside folder."
-        if action == "create":
-            payload = {
-                "root": root["id"],
-                "path": relative,
-                "content": str(args.get("content", "")),
-            }
-            body, _ = send("POST", base_url + "/api/file", payload, {"X-CSRF-Token": csrf_token})
-            return json.dumps(json.loads(body.decode("utf-8")), ensure_ascii=False)
-        revision = str(args.get("revision", ""))
-        if not revision:
-            return "Error: read the file first and pass its revision to the write action."
-        payload = {
-            "content": str(args.get("content", "")),
-            "revision": revision,
-        }
-        body, _ = send("PUT", file_url, payload, {"X-CSRF-Token": csrf_token})
-        return json.dumps(json.loads(body.decode("utf-8")), ensure_ascii=False)
-    except urllib.error.HTTPError as exc:
-        try:
-            detail = exc.read().decode("utf-8", errors="replace")
-        except Exception:
-            detail = str(exc)
-        return f"Error: LAN editor returned HTTP {exc.code}: {detail[:2000]}"
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        return f"Error: could not reach {base_url}. Confirm the PC server is running and both devices are on the same Wi-Fi. {exc}"
-    except (UnicodeDecodeError, json.JSONDecodeError, KeyError, TypeError) as exc:
-        return f"Error: unexpected response from the LAN editor: {exc}"
-
-
 FUNCTIONS = {
     "read_file": {
         "name": "read_file",
@@ -2730,24 +2606,6 @@ FUNCTIONS = {
                 "timeout_seconds": {"type": "INTEGER"},
             },
             "required": ["command"],
-        },
-    },
-    "lan_workspace": {
-        "name": "lan_workspace",
-        "description": "Use the configured PC LAN Code Editor for remote file operations and commands requested with '7777'. For action run, omit folder to use the PC user's home folder, or select a mapped folder. If the user explicitly asks for SSH, use `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101` through run_shell_command and use the configured remote shell. Never ask for or store the SSH password. Never use remote commands to download/install packages or build packages; give those commands to the user. Configure Flask file access with /lan.",
-        "parameters": {
-            "type": "OBJECT",
-            "properties": {
-                "action": {"type": "STRING", "enum": ["list", "read", "search", "create", "write", "run"]},
-                "folder": {"type": "STRING", "description": "Mapped URL path such as ms1/temporary. Required for file actions; optional for run, which defaults to the PC user's home directory."},
-                "path": {"type": "STRING", "description": "Relative file/folder path inside that shared folder; omit for its root listing."},
-                "query": {"type": "STRING", "description": "Text to search for when action is search."},
-                "content": {"type": "STRING", "description": "Full UTF-8 text content for create or write."},
-                "revision": {"type": "STRING", "description": "Revision returned by read; required for write to avoid overwriting newer changes."},
-                "command": {"type": "STRING", "description": "Command to run on the PC when action is run; use the PC's shell syntax."},
-                "timeout_seconds": {"type": "INTEGER", "description": "Maximum command duration, capped at 120 seconds."},
-            },
-            "required": ["action", "folder"],
         },
     },
     "request_follow_up": {
@@ -2945,7 +2803,7 @@ def record_file_snapshot(filepath: Path, current_turn_idx: int = 0) -> None:
         pass
 
 
-def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None, current_turn_idx: int = 0, lan_editor_url: str = "") -> str:
+def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Optional[Dict[str, str]] = None, current_turn_idx: int = 0) -> str:
     if name in {"write_file", "replace_file", "smart_replace_block", "replace_block", "replace_lines", "insert_after", "delete_block", "delete_file"}:
         fp_raw = args.get("filepath") or args.get("path")
         if fp_raw:
@@ -3088,8 +2946,6 @@ def execute_tool(name: str, args: Dict[str, Any], cwd: Path, tavily_accounts: Op
             cwd,
             timeout_seconds=int(args.get("timeout_seconds", 60) or 60),
         )
-    if name == "lan_workspace":
-        return lan_workspace_tool(args, lan_editor_url)
     if name == "request_follow_up":
         reason = args.get("reason") or "Continuing..."
         return f"Follow-up turn granted: {reason}"
@@ -3134,7 +2990,6 @@ def list_tool_catalog() -> List[Dict[str, str]]:
         {"name": "delete_block", "category": "Code Modifications", "rating": "Good (Targeted removal)", "description": "[Code-Merge] Delete an exact block of text from a file."},
         {"name": "run_shell_command", "category": "Execution & Shell", "rating": "Powerful (Command execution)", "description": "Run a shell command."},
         {"name": "run_powershell", "category": "Execution & Shell", "rating": "Best for Windows inspection & tests", "description": "Run a PowerShell command."},
-        {"name": "lan_workspace", "category": "Remote Files", "rating": "Edit files and run PC commands over Wi-Fi", "description": "Browse, read, search, create, or edit files and send commands directly to the PC Flask app."},
         {"name": "request_follow_up", "category": "Control Flow", "rating": "Safe", "description": "Request another turn for multi-step work."},
     ]
     return _TOOLS_CACHE
@@ -4171,7 +4026,6 @@ def default_model_prefs() -> Dict[str, Any]:
         "gui_font_size": 11,
         "gui_line_height": 140,
         "device_mode": "pc",
-        "lan_editor_url": "",
         "ssh_devices": {},
     }
 
@@ -4240,7 +4094,6 @@ def load_model_prefs() -> Dict[str, Any]:
             "gui_font_size": int(data.get("gui_font_size") or 11),
             "gui_line_height": int(data.get("gui_line_height") or 140),
             "device_mode": str(data.get("device_mode") or "pc").lower(),
-            "lan_editor_url": str(data.get("lan_editor_url") or "").rstrip("/"),
             "ssh_devices": normalize_ssh_devices(data.get("ssh_devices", {})),
         })
         return prefs
@@ -4282,7 +4135,6 @@ def save_model_prefs(
     gui_font_size: int = 11,
     gui_line_height: int = 140,
     device_mode: str = "pc",
-    lan_editor_url: str = "",
     ssh_devices: Optional[Dict[str, Dict[str, str]]] = None,
 ) -> str:
     account_model_prefs = serialize_model_prefs(hidden_models, speed_tags, model_usage_counts, failover_uses)
@@ -4309,7 +4161,6 @@ def save_model_prefs(
         "gui_font_size": int(gui_font_size),
         "gui_line_height": int(gui_line_height),
         "device_mode": device_mode,
-        "lan_editor_url": lan_editor_url.rstrip("/"),
         "ssh_devices": normalize_ssh_devices(ssh_devices or {}),
     }
     MODEL_PREFS_FILE.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -5314,7 +5165,6 @@ def print_help() -> None:
               /test                 Test all models and hide failures
               /api                  Open the API account picker
               /device               Show detected terminal OS and input mode
-              /lan [URL|off]       Configure the remote PC LAN Code Editor
               /add_device          List/add/remove named SSH devices
               /loops <n>            Set max tool-call loops
               /failover             Open the auto-failover picker
@@ -5919,7 +5769,6 @@ def main() -> int:
     gui_line_height = int(model_prefs.get("gui_line_height") or 140)
     device_mode = detect_terminal_environment()
     ACTIVE_DEVICE_MODE = device_mode
-    lan_editor_url = str(model_prefs.get("lan_editor_url") or "").rstrip("/")
     ssh_devices: Dict[str, Dict[str, str]] = normalize_ssh_devices(model_prefs.get("ssh_devices", {}))
     last_assistant_response_text = ""
     last_assistant_raw_markdown = ""
@@ -6316,7 +6165,6 @@ def main() -> int:
             gui_font_size,
             gui_line_height,
             device_mode,
-            lan_editor_url,
             ssh_devices,
         )
 
@@ -6496,7 +6344,7 @@ def main() -> int:
 
         try:
             for _ in range(tool_loop_limit):
-                eff_system = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url, ssh_devices)
+                eff_system = get_effective_system_instruction(system_instruction, disabled_tools, ssh_devices)
                 try:
                     response = client.generate(
                         contents=contents,
@@ -6564,7 +6412,6 @@ def main() -> int:
                         cwd,
                         ensure_tavily_accounts_loaded(),
                         current_turn_idx=len(contents),
-                        lan_editor_url=lan_editor_url,
                     )
                     responses.append(
                         {
@@ -6680,34 +6527,6 @@ def main() -> int:
                         info(f"Detected terminal environment: {device_mode} (automatic at startup).")
                     else:
                         warn("Terminal environment is detected automatically; use /device to view it.")
-                    continue
-                if command == "/lan":
-                    if not remainder:
-                        info(f"PC LAN editor: {lan_editor_url or 'not configured'}")
-                        info("Usage: /lan http://192.168.0.101:7777  |  /lan off")
-                    elif remainder.lower() == "off":
-                        lan_editor_url = ""
-                        persist_selection()
-                        info("PC LAN editor address cleared.")
-                    else:
-                        candidate = remainder.strip().rstrip("/")
-                        if "://" not in candidate:
-                            candidate = "http://" + candidate
-                        parsed_url = urllib.parse.urlsplit(candidate)
-                        if (
-                            parsed_url.scheme not in {"http", "https"}
-                            or not parsed_url.netloc
-                            or parsed_url.username
-                            or parsed_url.password
-                            or parsed_url.path not in {"", "/"}
-                            or parsed_url.query
-                            or parsed_url.fragment
-                        ):
-                            warn("Use a host address such as http://192.168.0.101:7777")
-                        else:
-                            lan_editor_url = candidate
-                            persist_selection()
-                            info(f"PC LAN editor set to {lan_editor_url}")
                     continue
                 if command == "/add_device":
                     try:
@@ -7439,7 +7258,7 @@ def main() -> int:
                     continue
                 if command == "/tokens":
                     # Calculate total character count including text, function calls, responses, and system instruction
-                    eff_sys = get_effective_system_instruction(system_instruction, disabled_tools, lan_editor_url, ssh_devices)
+                    eff_sys = get_effective_system_instruction(system_instruction, disabled_tools, ssh_devices)
                     total_chars = len(eff_sys) if eff_sys else 0
                     for msg in contents:
                         for part in msg.get("parts", []):

@@ -3577,7 +3577,8 @@
         let socket = null;
         let terminalPanes = [];
         let splitPaneCounter = 1;
-        let isRestoringTerminalTabs = false;
+        let terminalTabRestoreDepth = 0;
+        let workspaceRestoreGeneration = 0;
         const terminalTabsStoragePrefix = 'terminal-tabs:';
         const terminalActiveTabStoragePrefix = 'terminal-active-tab:';
         let terminalNotificationAudioContext = null;
@@ -4068,15 +4069,23 @@
         async function selectProject(projectName) {
             if (activeProject === projectName) return;
 
+            const restoreGeneration = ++workspaceRestoreGeneration;
             try {
-                await restoreTerminalLayout(projectName);
+                await restoreTerminalLayout(projectName, restoreGeneration);
+                if (restoreGeneration !== workspaceRestoreGeneration) return;
                 updateBookmarksDropdown();
                 
                 // Immediately refresh projects to show the green running dot on the card
                 fetchProjects();
             } catch (err) {
-                activeProject = null;
-                handleSearch();
+                if (restoreGeneration === workspaceRestoreGeneration) {
+                    activeProject = null;
+                    stopStatsMonitoring();
+                    clearTerminalPanes();
+                    document.getElementById('terminal-wrapper').style.display = 'none';
+                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                    handleSearch();
+                }
                 console.error("Error setting up session:", err);
             }
         }
@@ -4267,6 +4276,13 @@
             if (paneIndex < 0) return;
 
             const pane = terminalPanes[paneIndex];
+            const projectName = activeProject;
+            if (projectName) {
+                fetch(`/api/session/${encodeURIComponent(projectName)}/pane/${encodeURIComponent(paneId)}`, {
+                    method: 'DELETE',
+                    keepalive: true
+                }).catch(err => console.warn('Could not stop the closed terminal pane:', err));
+            }
             try { pane.socket.disconnect(); } catch (e) {}
             try { pane.resizeObserver.disconnect(); } catch (e) {}
             try { pane.term.dispose(); } catch (e) {}
@@ -4519,9 +4535,9 @@
                 if (text === lastTerminalPasteText && now - lastTerminalPasteAt < 250) return;
                 lastTerminalPasteText = text;
                 lastTerminalPasteAt = now;
-                if (paneSocket && paneSocket.connected) {
-                    paneSocket.emit('pty-input', { project: projectName, paneId, data: text });
-                }
+                // Let xterm apply paste handling (including bracketed-paste
+                // markers when enabled) before its onData handler forwards it.
+                paneTerm.paste(text);
             };
 
             // Handle text paste once before xterm.js can process the same browser
@@ -6231,14 +6247,18 @@
         }
 
         let statsIntervalId = null;
+        let statsRequestInFlight = false;
+        let statsMonitorGeneration = 0;
 
         function startStatsMonitoring() {
             stopStatsMonitoring();
-            updateStatsMonitor();
-            statsIntervalId = setInterval(updateStatsMonitor, 3000);
+            const generation = statsMonitorGeneration;
+            updateStatsMonitor(generation);
+            statsIntervalId = setInterval(() => updateStatsMonitor(generation), 3000);
         }
 
         function stopStatsMonitoring() {
+            statsMonitorGeneration++;
             if (statsIntervalId) {
                 clearInterval(statsIntervalId);
                 statsIntervalId = null;
@@ -6258,15 +6278,19 @@
             if (gitInfoEl) gitInfoEl.style.display = 'none';
         }
 
-        async function updateStatsMonitor() {
+        async function updateStatsMonitor(generation = statsMonitorGeneration) {
             if (!activeProject) {
                 stopStatsMonitoring();
                 return;
             }
+            if (statsRequestInFlight) return;
+            const projectName = activeProject;
+            statsRequestInFlight = true;
             try {
-                const response = await fetch(`/api/session/${encodeURIComponent(activeProject)}/stats`);
+                const response = await fetch(`/api/session/${encodeURIComponent(projectName)}/stats`);
                 if (response.ok) {
                     const data = await response.json();
+                    if (generation !== statsMonitorGeneration || activeProject !== projectName) return;
                     const dot = document.getElementById('monitor-status-dot');
                     if (dot) dot.style.backgroundColor = data.panes_count > 0 ? '#10b981' : '#64748b';
                     const panes = document.getElementById('monitor-panes-count');
@@ -6329,6 +6353,8 @@
                 }
             } catch (err) {
                 console.error("Error fetching session stats:", err);
+            } finally {
+                statsRequestInFlight = false;
             }
         }
 
@@ -7783,7 +7809,7 @@
                 return;
             }
             localStorage.setItem('active-project', activeProject);
-            if (!isRestoringTerminalTabs) {
+            if (terminalTabRestoreDepth === 0) {
                 const paneIds = terminalPanes.map(pane => pane.paneId);
                 if (paneIds.length) {
                     localStorage.setItem(terminalTabsStoragePrefix + activeProject, paneIds.join(','));
@@ -7795,8 +7821,9 @@
             }
         }
 
-        async function restoreTerminalLayout(projectName) {
+        async function restoreTerminalLayout(projectName, restoreGeneration = ++workspaceRestoreGeneration) {
             try {
+                if (restoreGeneration !== workspaceRestoreGeneration) return;
                 const currentProjDetails = projects.find(p => p.name === projectName) || {};
                 
                 activeProject = projectName;
@@ -7837,9 +7864,10 @@
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
                 const savedPaneIds = getSavedTerminalPaneIds(projectName);
                 const savedActivePaneId = localStorage.getItem(terminalActiveTabStoragePrefix + projectName) || savedPaneIds[0];
-                isRestoringTerminalTabs = true;
+                terminalTabRestoreDepth++;
                 try {
                     for (const paneId of savedPaneIds) {
+                        if (restoreGeneration !== workspaceRestoreGeneration) return;
                         const paneNumber = Number.parseInt(paneId.split('-').pop(), 10);
                         if (Number.isFinite(paneNumber)) splitPaneCounter = Math.max(splitPaneCounter, paneNumber + 1);
 
@@ -7848,12 +7876,26 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ paneId, useRealDirName: useRealDir })
                         });
+                        if (restoreGeneration !== workspaceRestoreGeneration) return;
                         if (response.ok) {
                             createTerminalPane(projectName, paneId, currentProjDetails.theme);
                         }
                     }
                 } finally {
-                    isRestoringTerminalTabs = false;
+                    terminalTabRestoreDepth = Math.max(0, terminalTabRestoreDepth - 1);
+                }
+                if (restoreGeneration !== workspaceRestoreGeneration) return;
+                if (terminalPanes.length === 0) {
+                    const fallbackResponse = await fetch(`/api/session/${encodeURIComponent(projectName)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
+                    });
+                    if (restoreGeneration !== workspaceRestoreGeneration) return;
+                    if (!fallbackResponse.ok) {
+                        throw new Error(`Failed to open workspace terminal (HTTP ${fallbackResponse.status})`);
+                    }
+                    createTerminalPane(projectName, 'main', currentProjDetails.theme);
                 }
                 await saveTerminalLayoutState();
                 
@@ -7876,9 +7918,12 @@
                     updateTerminalTabs();
                 }
                 
+                if (restoreGeneration !== workspaceRestoreGeneration) return;
                 fetchProjects();
             } catch (err) {
+                if (restoreGeneration !== workspaceRestoreGeneration) return;
                 console.error("Error restoring terminal layout:", err);
+                throw err;
             }
         }
 
@@ -15240,7 +15285,9 @@
             if (savedActiveProject) {
                 const projExists = projects.some(p => p.name === savedActiveProject);
                 if (projExists) {
-                    restoreTerminalLayout(savedActiveProject);
+                    await restoreTerminalLayout(savedActiveProject).catch(err => {
+                        console.error("Error restoring the active workspace:", err);
+                    });
                 }
             }
 

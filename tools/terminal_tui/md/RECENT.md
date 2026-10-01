@@ -5,6 +5,17 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-01] - Preserve Multiline Paste Semantics in Terminal
+**What We Accomplished:**
+- Routed clipboard text through xterm.js `Terminal.paste()` instead of writing raw text directly to the PTY.
+- Retained the existing Ctrl+V, Shift+Insert, image-paste, and duplicate-paste handling while allowing xterm.js to apply paste transformations.
+
+**Files Modified:**
+- `templates/index.html`
+- `md/PROBLEMS_AND_FIXES.md`
+
+---
+
 ## [2026-09-26] - Duplicate Workspace into Numbered Copy
 **What We Accomplished:**
 - Added an active-workspace duplicate button that creates the next available `-2`, `-3`, … sibling copy.
@@ -374,3 +385,8 @@ Read this file only when relevant to the current task. When reading, reference t
 - Save workspace pane IDs and the selected pane in browser `localStorage`, not workspace JSON.
 - Reconnect to the same sessions after a browser refresh and clear the saved state from Reset All Sessions.
 - Play a brief notification sound when an unfocused tab first receives its completion indicator.
+
+# [2026-10-01] - Stop Closed Pane Processes and Throttle Git Status
+- Cache and coalesce Git status scans to reduce repeated Git process creation.
+- Closing a tab now removes its PTY session and child process tree; bound process termination and avoid holding the session registry lock during cleanup.
+- Prevent overlapping stats polls and stale workspace restores from overwriting the active workspace.

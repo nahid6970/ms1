@@ -2,7 +2,7 @@
 
 2. Latest Implementation:
 - Terminal input/paste: startup detects Windows, Android Termux, Linux, or POSIX; Windows uses PromptSession with Win32Input and combines queued multiline console paste after Enter, while POSIX uses raw bracketed-paste input. `/device` reports the detected environment. See `Recentfixes.md`.
-- PC remote access: “7777 and run ...” uses Flask `lan_workspace` action `run` (not SSH); omitting folder uses the PC user's home folder. SSH is separate and used only when explicitly requested, e.g. `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. SSH also defaults to the PC user's home folder. Never ask for or store the SSH password. Flask `/lan` remains available for PC file browsing/editing.
+- PC remote access uses SSH through `run_shell_command`, including requests that mention port 7777. The connection command is `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101`; SSH defaults to the PC user's home folder. Never ask for or store the SSH password. LAN Flask integration is removed from the CLI.
 - `/add_device` opens an interactive SSH device manager; each saved entry has exactly a name and full SSH connection command. Entries can be viewed, added, modified, or removed. Commands are stored in `model_prefs.json`; passwords and remote commands are not stored in the connection field.
 - `gemini_cli.py`: Added loopback proxy using encrypted `api_accounts.lock`, quota/rate-limit failover, JSON/SSE forwarding, explicit stream close, safe account/model-prefixed diagnostics, and `/test` synchronization into Pi's failover catalog.
 - `README.md`: Documents proxy, model synchronization, and safe logging.

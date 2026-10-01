@@ -81,7 +81,6 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/loops <n>` - set the max tool-call loops for a turn
 - Startup prints the detected environment and selects Windows, Android Termux, Linux, or another POSIX input mode automatically. `/device` displays the detected environment.
 - Multiline paste is captured as one prompt on Windows and POSIX terminals; paste the block, then press Enter once to submit it.
-- `/lan <URL|off>` - save or clear the PC LAN Code Editor address used by the lan_workspace file tool
 - `/add_device` - list, add, or remove named SSH devices
 - `/failover` - open the auto-failover picker
 - `/failover ...` - control automatic API account rotation on quota or rate-limit errors directly
@@ -130,9 +129,8 @@ The `/tool` menu loads categories dynamically from `tools.json`. Adding a new ca
 **Execution & Shell**:
 - `run_shell_command` — run commands through the host platform shell (POSIX commands on Termux/Linux/macOS)
 - `run_powershell` — run PowerShell commands on hosts where `powershell.exe` is installed, usually Windows
-- `lan_workspace` — browse, read, search, create, and edit shared PC files through the Flask app
 
-For PC commands requested with “7777 and run …”, keep using `lan_workspace` action `run` through the Flask app; “7777” does not switch the command to SSH. If no folder is named, it runs from the PC user's home folder; a mapped folder can still be specified. SSH is separate and only used when explicitly requested. To run a command over SSH, append it to `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. SSH starts in the PC user's home folder when no directory is named and uses the remote server's configured shell. Never ask for or store the SSH password. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
+For PC commands and file work, use SSH through `run_shell_command`, for example `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101 "<command>"`. This includes requests that mention port 7777; use SSH instead of the Flask app. SSH starts in the PC user's home folder when no directory is named and uses the remote server's configured shell. Never ask for or store the SSH password. Never use remote command execution to download/install packages or build packages; provide those commands for the user to run.
 
 `/add_device` opens a manager where each entry has exactly two fields: a device name and its full SSH connection command. For example, name it `pc` and enter `ssh -i ~/.ssh/id_ed25519_windows_pc -o WarnWeakCrypto=no-pq-kex -p 22 nahid@192.168.0.101`. Select an existing device to view or modify it, or remove it from the manager. `/add_device add`, `/add_device edit <name>`, `/add_device remove <name>`, and `/add_device list` are also available. The CLI saves the connection commands in `model_prefs.json` so the model can select a device by name. Do not include passwords or a remote command in the saved connection command.
 
