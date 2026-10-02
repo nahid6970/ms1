@@ -41,6 +41,7 @@ menu_items=(
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
+    "Linux Setup                 : linux_setup                             :$MAGENTA"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -611,6 +612,221 @@ pkg_update_upgrade() {
     echo -e "${CYAN}Running pkg upgrade...${NC}"
     pkg upgrade -y
     echo -e "${GREEN}Done.${NC}"
+}
+
+# ─── Linux Setup ───────────────────────────────────────────────────────────────
+
+linux_setup() {
+    clear
+    echo -e "${MAGENTA}╔══════════════════════════════════════╗${NC}"
+    echo -e "${MAGENTA}║          Linux Setup Menu            ║${NC}"
+    echo -e "${MAGENTA}╚══════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "  ${GREEN}1)${NC} Install Ubuntu (proot-distro)"
+    echo -e "  ${CYAN}2)${NC} Setup Termux environment (bashrc, prompt, dirs)"
+    echo ""
+    read -p "Enter choice [1/2]: " linux_choice
+    case "$linux_choice" in
+        1) _install_ubuntu ;;
+        2) _setup_termux_env ;;
+        *) echo -e "${RED}Invalid choice.${NC}" ;;
+    esac
+}
+
+# Option 1 – install Ubuntu via proot-distro
+_install_ubuntu() {
+    clear
+    echo -e "${MAGENTA}Installing Ubuntu via proot-distro...${NC}"
+    echo ""
+
+    # Install proot-distro if missing
+    if ! command -v proot-distro >/dev/null 2>&1; then
+        echo -e "${CYAN}Installing proot-distro...${NC}"
+        pkg install proot-distro -y || {
+            echo -e "${RED}Failed to install proot-distro.${NC}"
+            return 1
+        }
+    fi
+
+    # Install Ubuntu if not already present
+    if proot-distro list | grep -q "ubuntu.*installed"; then
+        echo -e "${GREEN}Ubuntu is already installed.${NC}"
+    else
+        echo -e "${CYAN}Downloading and installing Ubuntu...${NC}"
+        proot-distro install ubuntu || {
+            echo -e "${RED}Failed to install Ubuntu.${NC}"
+            return 1
+        }
+        echo -e "${GREEN}Ubuntu installed successfully.${NC}"
+    fi
+
+    echo ""
+    echo -e "${CYAN}Setting up Ubuntu (update + essential packages)...${NC}"
+    proot-distro login ubuntu -- bash -c "
+        apt update -y && apt upgrade -y
+        apt install -y curl wget git nano vim sudo locales tzdata
+        locale-gen en_US.UTF-8
+        echo 'Ubuntu ready. Run: proot-distro login ubuntu'
+    "
+    echo ""
+    echo -e "${GREEN}Done! Launch Ubuntu with:${NC} proot-distro login ubuntu"
+}
+
+# Option 2 – set up a nicer Termux shell environment
+_setup_termux_env() {
+    clear
+    echo -e "${CYAN}Setting up Termux environment...${NC}"
+    echo ""
+
+    # ── 1. Create useful directories ────────────────────────────────
+    echo -e "${CYAN}[1/5] Creating standard directories...${NC}"
+    mkdir -p "$HOME/projects" "$HOME/scripts" "$HOME/tmp" "$HOME/bin"
+
+    # ── 2. Write a clean .bashrc ─────────────────────────────────────
+    echo -e "${CYAN}[2/5] Writing ~/.bashrc...${NC}"
+    cat > "$HOME/.bashrc" << 'BASHRC'
+# ── Termux .bashrc ──────────────────────────────────────────────────
+
+# Colors
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
+BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'
+BOLD='\033[1m'; NC='\033[0m'
+
+# ── Prompt ──────────────────────────────────────────────────────────
+# Shows: user@host  current-dir  git-branch
+_git_branch() {
+    git rev-parse --is-inside-work-tree &>/dev/null || return
+    local branch
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+    printf " \033[0;33m(%s)\033[0m" "$branch"
+}
+PS1='\[\033[0;32m\]\u@\h\[\033[0m\] \[\033[0;34m\]\w\[\033[0m\]$(_git_branch) \[\033[0;36m\]❯\[\033[0m\] '
+
+# ── History ─────────────────────────────────────────────────────────
+HISTSIZE=5000
+HISTFILESIZE=10000
+HISTCONTROL=ignoreboth:erasedups
+shopt -s histappend
+
+# ── Navigation aliases ───────────────────────────────────────────────
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# ── ls / eza ────────────────────────────────────────────────────────
+if command -v eza &>/dev/null; then
+    alias ls='eza --icons --group-directories-first'
+    alias ll='eza -lah --icons --group-directories-first --git'
+    alias lt='eza --tree --icons --level=2'
+else
+    alias ls='ls --color=auto'
+    alias ll='ls -lah --color=auto'
+fi
+
+# ── Common shortcuts ─────────────────────────────────────────────────
+alias c='clear'
+alias q='exit'
+alias reload='source ~/.bashrc && echo "bashrc reloaded"'
+alias bashrc='nano ~/.bashrc'
+alias myip='curl -s https://ipinfo.io/ip && echo'
+alias ports='ss -tulpn'
+alias path='echo -e "${PATH//:/\\n}"'
+alias now='date "+%Y-%m-%d %H:%M:%S"'
+alias df='df -h'
+alias du='du -sh'
+alias free='free -h'
+
+# ── Git shortcuts ────────────────────────────────────────────────────
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate -15'
+alias gpl='git pull'
+
+# ── mkdir + cd in one ───────────────────────────────────────────────
+mkcd() { mkdir -p "$1" && cd "$1"; }
+
+# ── Quick find ───────────────────────────────────────────────────────
+ff()  { find . -name "*$1*" 2>/dev/null; }
+ffc() { find . -name "*$1*" 2>/dev/null | wc -l; }
+
+# ── Extract any archive ──────────────────────────────────────────────
+extract() {
+    case "$1" in
+        *.tar.gz|*.tgz)  tar xzf "$1" ;;
+        *.tar.bz2|*.tbz) tar xjf "$1" ;;
+        *.tar.xz)        tar xJf "$1" ;;
+        *.tar)           tar xf  "$1" ;;
+        *.zip)           unzip   "$1" ;;
+        *.gz)            gunzip  "$1" ;;
+        *.bz2)           bunzip2 "$1" ;;
+        *.xz)            unxz    "$1" ;;
+        *.7z)            7z x    "$1" ;;
+        *) echo "Unknown archive: $1" ;;
+    esac
+}
+
+# ── PATH extras ──────────────────────────────────────────────────────
+export PATH="$HOME/bin:$PATH"
+
+# ── zoxide (smarter cd) ──────────────────────────────────────────────
+command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
+
+# ── fzf keybindings ─────────────────────────────────────────────────
+[ -f "$PREFIX/share/fzf/key-bindings.bash" ] && \
+    source "$PREFIX/share/fzf/key-bindings.bash"
+[ -f "$PREFIX/share/fzf/completion.bash" ] && \
+    source "$PREFIX/share/fzf/completion.bash"
+
+# ── oh-my-posh prompt (overrides PS1 if installed) ──────────────────
+# command -v oh-my-posh &>/dev/null && \
+#     eval "$(oh-my-posh init bash)"
+
+BASHRC
+
+    # ── 3. Write a .nanorc for better nano experience ────────────────
+    echo -e "${CYAN}[3/5] Writing ~/.nanorc...${NC}"
+    cat > "$HOME/.nanorc" << 'NANORC'
+set autoindent
+set linenumbers
+set mouse
+set smooth
+set tabsize 4
+set tabstospaces
+set trimblanks
+set constantshow
+include "$PREFIX/share/nano/*.nanorc"
+NANORC
+
+    # ── 4. Write a .gitconfig with sensible defaults ──────────────────
+    echo -e "${CYAN}[4/5] Writing ~/.gitconfig defaults...${NC}"
+    git config --global core.editor nano
+    git config --global pull.rebase false
+    git config --global init.defaultBranch main
+    git config --global color.ui auto
+    git config --global alias.st status
+    git config --global alias.lg "log --oneline --graph --decorate -15"
+
+    # ── 5. Set a welcome message ──────────────────────────────────────
+    echo -e "${CYAN}[5/5] Setting up MOTD...${NC}"
+    cat > "$PREFIX/etc/motd" << 'MOTD'
+
+  Welcome to Termux 🚀
+  Type 'os' to open the setup menu.
+
+MOTD
+
+    echo ""
+    echo -e "${GREEN}✓ Termux environment setup complete!${NC}"
+    echo -e "  • ${CYAN}~/.bashrc${NC}  — prompt, aliases, functions"
+    echo -e "  • ${CYAN}~/.nanorc${NC}  — line numbers, autoindent, syntax highlighting"
+    echo -e "  • ${CYAN}~/.gitconfig${NC} — sensible git defaults"
+    echo -e "  • ${CYAN}~/projects  ~/scripts  ~/tmp  ~/bin${NC}  created"
+    echo ""
+    echo -e "${YELLOW}Run 'source ~/.bashrc' or reopen Termux to apply.${NC}"
 }
 
 # ─── Mirror helpers ────────────────────────────────────────────────────────────
