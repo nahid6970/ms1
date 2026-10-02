@@ -39,6 +39,7 @@ menu_items=(
     "Database Download Instantly : download_latest_database                :$BLUE"
     "SSH for Android              : start_ssh_server                        :$GREEN"
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
+    "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -600,6 +601,66 @@ rclone_decrypt() {
     cp "$HOME/ms1/asset/rclone/rclone.conf" "$HOME/.config/rclone"
 }
 
+
+
+# Select the fastest Termux mirror by measuring response time
+select_best_mirror() {
+    clear
+    echo -e "${CYAN}Testing Termux mirrors to find the fastest one...${NC}"
+
+    # List of known Termux mirrors: label and base URL
+    declare -A mirrors=(
+        ["Grimler (SE)"]="https://grimler.se/termux/termux-packages-24"
+        ["A-Zu (DE)"]="https://packages.termux.dev/apt/termux-main"
+        ["BFSU (CN)"]="https://mirrors.bfsu.edu.cn/termux/termux-packages-24"
+        ["TUNA (CN)"]="https://mirrors.tuna.tsinghua.edu.cn/termux/termux-packages-24"
+        ["USTC (CN)"]="https://mirrors.ustc.edu.cn/termux/termux-packages-24"
+        ["HIT (CN)"]="https://mirrors.hit.edu.cn/termux/termux-packages-24"
+        ["NJU (CN)"]="https://mirror.nju.edu.cn/termux/termux-packages-24"
+        ["Oslo (NO)"]="https://ftp.fau.de/termux/termux-packages-24"
+    )
+
+    best_label=""
+    best_url=""
+    best_time=99999
+
+    for label in "${!mirrors[@]}"; do
+        url="${mirrors[$label]}"
+        # Measure time-to-first-byte in milliseconds
+        response_ms=$(curl -o /dev/null -s -w "%{time_starttransfer}" \
+            --connect-timeout 5 --max-time 8 "$url/dists/stable/Release" 2>/dev/null)
+
+        if [ $? -eq 0 ] && [ -n "$response_ms" ]; then
+            # Convert to integer milliseconds for comparison (remove decimal)
+            response_int=$(echo "$response_ms" | awk '{printf "%d", $1 * 1000}')
+            echo -e "  ${label}: ${GREEN}${response_int} ms${NC}"
+            if [ "$response_int" -lt "$best_time" ]; then
+                best_time="$response_int"
+                best_label="$label"
+                best_url="$url"
+            fi
+        else
+            echo -e "  ${label}: ${RED}unreachable${NC}"
+        fi
+    done
+
+    if [ -z "$best_label" ]; then
+        echo -e "${RED}Could not reach any mirror. Check your network connection.${NC}"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}Best mirror: $best_label ($best_url) — ${best_time} ms${NC}"
+
+    # Write the selected mirror to the sources.list
+    local sources_file="$PREFIX/etc/apt/sources.list"
+    echo "deb $best_url stable main" > "$sources_file"
+    echo -e "${GREEN}sources.list updated to use $best_label.${NC}"
+
+    echo -e "${CYAN}Running pkg update with the new mirror...${NC}"
+    pkg update -y
+    echo -e "${GREEN}Mirror selection complete.${NC}"
+}
 
 
 while true; do
