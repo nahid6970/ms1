@@ -662,11 +662,11 @@ _mirror_auto_pick() {
 
     if [ -d "$mirror_dir" ]; then
         while IFS= read -r -d '' mfile; do
-            local label url line1
+            local label url
             label="$(basename "$mfile")"
-            line1="$(head -n1 "$mfile" 2>/dev/null)"
-            url="$(echo "$line1" | awk '{print $2}')"
-            if [ -n "$url" ]; then
+            # Mirror files are shell scripts; extract the MAIN= variable value
+            url="$(grep -m1 '^MAIN=' "$mfile" 2>/dev/null | cut -d'"' -f2)"
+            if [[ "$url" == https://* ]]; then
                 bm_labels+=("$label")
                 bm_urls+=("$url")
             fi
@@ -714,14 +714,14 @@ _mirror_auto_pick() {
         if [ $? -eq 0 ] && [ -n "$response_ms" ]; then
             local response_int
             response_int=$(echo "$response_ms" | awk '{printf "%d", $1 * 1000}')
-            printf "  %-42s %s%d ms%s\n" "$label" "$GREEN" "$response_int" "$NC"
+            printf "  %-42s %b%d ms%b\n" "$label" "$GREEN" "$response_int" "$NC"
             if [ "$response_int" -lt "$best_time" ]; then
                 best_time="$response_int"
                 best_label="$label"
                 best_url="$url"
             fi
         else
-            printf "  %-42s %sunreachable%s\n" "$label" "$RED" "$NC"
+            printf "  %-42s %bunreachable%b\n" "$label" "$RED" "$NC"
         fi
     done
 
