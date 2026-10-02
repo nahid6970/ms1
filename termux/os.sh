@@ -38,6 +38,7 @@ menu_items=(
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Pkg Search & Install        : pkg_search_install                      :$CYAN"
+    "Pkg Uninstall               : pkg_uninstall                           :$CYAN"
     "Linux Setup                 : linux_setup                             :$MAGENTA"
     "Termux UI Restore           : termux_ui_restore                       :$MAGENTA"
     "Welcome Page                : welcome_remove                          :$RED"
@@ -698,6 +699,55 @@ pkg_search_install() {
     read -p "Install these packages? [y/N]: " confirm
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         pkg install -y $selected
+        echo -e "${GREEN}Done.${NC}"
+    else
+        echo -e "${YELLOW}Cancelled.${NC}"
+    fi
+}
+
+pkg_uninstall() {
+    clear
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo -e "${RED}fzf is not installed. Installing...${NC}"
+        pkg install fzf -y || { echo -e "${RED}Failed to install fzf.${NC}"; return 1; }
+    fi
+
+    echo -e "${CYAN}Loading installed packages...${NC}"
+    local pkg_list
+    pkg_list=$(dpkg-query -W -f='${Package}\t${Version}\t${Status}\n' 2>/dev/null \
+        | awk -F'\t' '$3 ~ /installed/ {print $1"\t"$2}' | sort)
+
+    if [ -z "$pkg_list" ]; then
+        echo -e "${RED}Could not retrieve installed packages.${NC}"
+        return 1
+    fi
+
+    local selected
+    selected=$(echo "$pkg_list" | fzf \
+        --multi \
+        --prompt="Uninstall packages (Tab=select, Enter=confirm): " \
+        --preview='apt-cache show {1} 2>/dev/null | grep -E "^(Package|Version|Installed-Size|Description):"' \
+        --preview-window=right:40%:wrap \
+        --height=90% \
+        --reverse \
+        --ansi \
+        --bind='ctrl-a:select-all' \
+        | awk '{print $1}')
+
+    if [ -z "$selected" ]; then
+        echo -e "${YELLOW}No package selected.${NC}"
+        return 0
+    fi
+
+    echo ""
+    echo -e "${RED}Packages to remove:${NC}"
+    echo "$selected" | while read -r p; do
+        echo -e "  ${RED}-${NC} $p"
+    done
+    echo ""
+    read -p "Uninstall these packages? [y/N]: " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        pkg uninstall -y $selected
         echo -e "${GREEN}Done.${NC}"
     else
         echo -e "${YELLOW}Cancelled.${NC}"
