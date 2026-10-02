@@ -1,0 +1,87 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 2,
+  "final_space": true,
+  "console_title_template": "{{ .Shell }} | {{ .Folder }}",
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#89b4fa",
+          "template": "╭─"
+        },
+        {
+          "type": "os",
+          "style": "plain",
+          "foreground": "#89b4fa",
+          "template": " 🤖 termux"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#585b70",
+          "template": " •"
+        },
+        {
+          "type": "path",
+          "style": "plain",
+          "foreground": "#89dceb",
+          "properties": {
+            "style": "folder"
+          },
+          "template": " 📁 {{ .Path }}"
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "foreground": "#a6e3a1",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#f9e2af{{ end }}",
+            "{{ if .Ahead }}#cba6f7{{ end }}",
+            "{{ if .Behind }}#f38ba8{{ end }}"
+          ],
+          "properties": {
+            "branch_icon": "🌿 ",
+            "fetch_status": true
+          },
+          "template": " • 🌿 {{ .HEAD }}{{ if .Working.Changed }} *{{ end }}"
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "#a6e3a1",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#f38ba8{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          },
+          "template": " • {{ if gt .Code 0 }}✘ {{ .Code }}{{ else }}✔{{ end }}"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "foreground": "#89b4fa",
+          "template": "╰─❯"
+        }
+      ]
+    }
+  ],
+  "transient_prompt": {
+    "foreground": "#89b4fa",
+    "background": "transparent",
+    "template": "❯ "
+  }
+}

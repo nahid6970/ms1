@@ -42,6 +42,7 @@ menu_items=(
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Linux Setup                 : linux_setup                             :$MAGENTA"
+    "Termux UI Restore           : termux_ui_restore                       :$MAGENTA"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -612,6 +613,69 @@ pkg_update_upgrade() {
     echo -e "${CYAN}Running pkg upgrade...${NC}"
     pkg upgrade -y
     echo -e "${GREEN}Done.${NC}"
+}
+
+# ─── Termux UI Restore ─────────────────────────────────────────────────────────
+
+termux_ui_restore() {
+    clear
+    echo -e "${MAGENTA}╔══════════════════════════════════════╗${NC}"
+    echo -e "${MAGENTA}║       Termux UI Restore              ║${NC}"
+    echo -e "${MAGENTA}╚══════════════════════════════════════╝${NC}"
+    echo ""
+
+    local dotfiles="$REPO_DIR/termux/dotfiles"
+
+    # ── 1. Install required packages ────────────────────────────────
+    echo -e "${CYAN}[1/7] Installing required packages...${NC}"
+    pkg install -y bash eza fastfetch zoxide fzf oh-my-posh git curl
+
+    # ── 2. Catppuccin color theme ────────────────────────────────────
+    echo -e "${CYAN}[2/7] Applying Catppuccin Mocha color theme...${NC}"
+    mkdir -p "$HOME/.termux"
+    cp "$dotfiles/colors.properties" "$HOME/.termux/colors.properties"
+
+    # ── 3. JetBrainsMono Nerd Font ───────────────────────────────────
+    echo -e "${CYAN}[3/7] Installing JetBrainsMono Nerd Font...${NC}"
+    curl -fLo "$HOME/.termux/font.ttf" \
+        "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/v3.2.1/patched-fonts/JetBrainsMono/NoLigatures/Regular/JetBrainsMonoNLNerdFont-Regular.ttf"
+    chmod 644 "$HOME/.termux/font.ttf"
+
+    # ── 4. termux.properties ─────────────────────────────────────────
+    echo -e "${CYAN}[4/7] Copying termux.properties...${NC}"
+    cp "$TERMUX_PROPERTIES_SOURCE" "$TERMUX_PROPERTIES_DEST"
+
+    # ── 5. Fastfetch config ──────────────────────────────────────────
+    echo -e "${CYAN}[5/7] Copying fastfetch config...${NC}"
+    mkdir -p "$HOME/.config/fastfetch"
+    cp "$dotfiles/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+
+    # ── 6. Oh My Posh theme ──────────────────────────────────────────
+    echo -e "${CYAN}[6/7] Copying Oh My Posh Catppuccin theme...${NC}"
+    mkdir -p "$HOME/.config/ohmyposh"
+    cp "$dotfiles/ohmyposh/catppuccin.omp.json" "$HOME/.config/ohmyposh/catppuccin.omp.json"
+
+    # ── 7. .bashrc + silence welcome banner ─────────────────────────
+    echo -e "${CYAN}[7/7] Copying .bashrc and silencing welcome banner...${NC}"
+    cp "$BASHRC_SOURCE" "$BASHRC_DEST"
+    touch "$HOME/.hushlogin"
+    echo "" > "$PREFIX/etc/motd"
+    [ -f "$PREFIX/etc/motd-playstore" ] && echo "" > "$PREFIX/etc/motd-playstore"
+    [ -f "$PREFIX/etc/motd.sh" ] && printf '#!/bin/sh\n' > "$PREFIX/etc/motd.sh"
+
+    # ── Reload settings ──────────────────────────────────────────────
+    termux-reload-settings
+
+    echo ""
+    echo -e "${GREEN}✓ Termux UI restore complete!${NC}"
+    echo -e "  • Catppuccin Mocha colors applied"
+    echo -e "  • JetBrainsMono Nerd Font installed"
+    echo -e "  • termux.properties updated"
+    echo -e "  • Fastfetch config applied"
+    echo -e "  • Oh My Posh Catppuccin theme applied"
+    echo -e "  • .bashrc copied, welcome banner silenced"
+    echo ""
+    echo -e "${YELLOW}Run 'source ~/.bashrc' or reopen Termux to apply the prompt.${NC}"
 }
 
 # ─── Linux Setup ───────────────────────────────────────────────────────────────
