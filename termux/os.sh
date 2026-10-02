@@ -224,21 +224,63 @@ git_push_repo() {
 update_ms1_repo() {
     clear
     local ms1_folder="$HOME/ms1"
-    if [ -d "$ms1_folder" ]; then
-        echo "Changing directory to $ms1_folder..."
-        cd "$ms1_folder" || {
-            echo "Failed to change directory to $ms1_folder."
-            return 1
-        }
-        echo "Pulling latest changes from the repository..."
-        git pull || {
-            echo "Failed to pull changes. Please check your repository setup."
-            return 1
-        }
-        echo "Repository updated successfully."
-    else
+    if [ ! -d "$ms1_folder" ]; then
         echo "The folder $ms1_folder does not exist."
         return 1
+    fi
+
+    cd "$ms1_folder" || { echo "Failed to cd into $ms1_folder."; return 1; }
+
+    # Fetch latest from remote first
+    echo -e "${CYAN}Fetching from remote...${NC}"
+    git fetch origin || { echo -e "${RED}Fetch failed. Check network/auth.${NC}"; return 1; }
+
+    # Check the state
+    local local_commit remote_commit base_commit
+    local_commit=$(git rev-parse HEAD)
+    remote_commit=$(git rev-parse "@{u}" 2>/dev/null)
+    base_commit=$(git merge-base HEAD "@{u}" 2>/dev/null)
+
+    if [ "$local_commit" = "$remote_commit" ]; then
+        echo -e "${GREEN}Already up to date.${NC}"
+        return 0
+    fi
+
+    if [ "$local_commit" = "$base_commit" ]; then
+        # Normal fast-forward
+        echo -e "${CYAN}Fast-forwarding...${NC}"
+        git pull --ff-only
+    else
+        # Local has diverged (reverted commits, amended, etc.)
+        echo -e "${YELLOW}Local branch has diverged from remote.${NC}"
+        echo -e "${YELLOW}Local:  $(git log --oneline -1 HEAD)${NC}"
+        echo -e "${YELLOW}Remote: $(git log --oneline -1 "@{u}")${NC}"
+        echo ""
+        echo -e "  ${GREEN}1)${NC} Reset to remote  ${RED}(discards local commits)${NC}"
+        echo -e "  ${CYAN}2)${NC} Rebase on top of remote"
+        echo -e "  ${YELLOW}3)${NC} Cancel"
+        echo ""
+        read -p "Choose [1/2/3]: " sync_choice
+        case "$sync_choice" in
+            1)
+                echo -e "${CYAN}Resetting to origin/$(git rev-parse --abbrev-ref HEAD)...${NC}"
+                git reset --hard "@{u}"
+                git clean -fd
+                echo -e "${GREEN}Reset complete.${NC}"
+                ;;
+            2)
+                echo -e "${CYAN}Rebasing...${NC}"
+                git rebase "@{u}" || {
+                    echo -e "${RED}Rebase had conflicts. Aborting.${NC}"
+                    git rebase --abort
+                    return 1
+                }
+                echo -e "${GREEN}Rebase complete.${NC}"
+                ;;
+            *)
+                echo -e "${YELLOW}Cancelled.${NC}"
+                ;;
+        esac
     fi
 }
 
