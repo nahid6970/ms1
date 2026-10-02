@@ -622,8 +622,8 @@ linux_setup() {
     echo -e "${MAGENTA}║          Linux Setup Menu            ║${NC}"
     echo -e "${MAGENTA}╚══════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "  ${GREEN}1)${NC} Install Ubuntu (proot-distro)"
-    echo -e "  ${CYAN}2)${NC} Setup Termux environment (bashrc, prompt, dirs)"
+    echo -e "  ${GREEN}1)${NC} Install Ubuntu           (proot-distro)"
+    echo -e "  ${CYAN}2)${NC} Setup Ubuntu environment  (bashrc, nano, git, packages)"
     echo ""
     read -p "Enter choice [1/2]: " linux_choice
     case "$linux_choice" in
@@ -672,50 +672,53 @@ _install_ubuntu() {
     echo -e "${GREEN}Done! Launch Ubuntu with:${NC} proot-distro login ubuntu"
 }
 
-# Option 2 – set up a nicer Termux shell environment
+# Option 2 – set up a nice environment inside Ubuntu (proot-distro)
 _setup_termux_env() {
     clear
-    echo -e "${CYAN}Setting up Termux environment...${NC}"
+    echo -e "${CYAN}Setting up Ubuntu environment...${NC}"
     echo ""
 
+    # Make sure Ubuntu is actually installed
+    if ! command -v proot-distro >/dev/null 2>&1 || \
+       ! proot-distro list 2>/dev/null | grep -q "ubuntu.*installed"; then
+        echo -e "${RED}Ubuntu is not installed yet. Run option 1 first.${NC}"
+        return 1
+    fi
+
+    local ubuntu_root="$HOME/.local/share/proot-distro/installed-rootfs/ubuntu"
+    local ub_home="$ubuntu_root/root"
+
     # ── 1. Create useful directories ────────────────────────────────
-    echo -e "${CYAN}[1/5] Creating standard directories...${NC}"
-    mkdir -p "$HOME/projects" "$HOME/scripts" "$HOME/tmp" "$HOME/bin"
+    echo -e "${CYAN}[1/5] Creating standard directories in Ubuntu...${NC}"
+    mkdir -p "$ub_home/projects" "$ub_home/scripts" "$ub_home/tmp" "$ub_home/bin"
 
-    # ── 2. Write a clean .bashrc ─────────────────────────────────────
-    echo -e "${CYAN}[2/5] Writing ~/.bashrc...${NC}"
-    cat > "$HOME/.bashrc" << 'BASHRC'
-# ── Termux .bashrc ──────────────────────────────────────────────────
+    # ── 2. Write ~/.bashrc ───────────────────────────────────────────
+    echo -e "${CYAN}[2/5] Writing Ubuntu ~/.bashrc...${NC}"
+    cat > "$ub_home/.bashrc" << 'BASHRC'
+# ── Ubuntu .bashrc ───────────────────────────────────────────────────
 
-# Colors
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'
-BLUE='\033[0;34m'; MAGENTA='\033[0;35m'; CYAN='\033[0;36m'
-BOLD='\033[1m'; NC='\033[0m'
-
-# ── Prompt ──────────────────────────────────────────────────────────
-# Shows: user@host  current-dir  git-branch
+# ── Prompt: user@host  dir  (git-branch)  ❯ ────────────────────────
 _git_branch() {
     git rev-parse --is-inside-work-tree &>/dev/null || return
-    local branch
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-    printf " \033[0;33m(%s)\033[0m" "$branch"
+    local b
+    b=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+    printf " \033[0;33m(%s)\033[0m" "$b"
 }
 PS1='\[\033[0;32m\]\u@\h\[\033[0m\] \[\033[0;34m\]\w\[\033[0m\]$(_git_branch) \[\033[0;36m\]❯\[\033[0m\] '
 
-# ── History ─────────────────────────────────────────────────────────
+# ── History ──────────────────────────────────────────────────────────
 HISTSIZE=5000
 HISTFILESIZE=10000
 HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend
 
-# ── Navigation aliases ───────────────────────────────────────────────
+# ── Navigation ───────────────────────────────────────────────────────
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-alias ~='cd ~'
 alias -- -='cd -'
 
-# ── ls / eza ────────────────────────────────────────────────────────
+# ── ls ───────────────────────────────────────────────────────────────
 if command -v eza &>/dev/null; then
     alias ls='eza --icons --group-directories-first'
     alias ll='eza -lah --icons --group-directories-first --git'
@@ -725,35 +728,30 @@ else
     alias ll='ls -lah --color=auto'
 fi
 
-# ── Common shortcuts ─────────────────────────────────────────────────
+# ── Common shortcuts ──────────────────────────────────────────────────
 alias c='clear'
 alias q='exit'
-alias reload='source ~/.bashrc && echo "bashrc reloaded"'
+alias reload='source ~/.bashrc && echo "reloaded"'
 alias bashrc='nano ~/.bashrc'
 alias myip='curl -s https://ipinfo.io/ip && echo'
 alias ports='ss -tulpn'
-alias path='echo -e "${PATH//:/\\n}"'
 alias now='date "+%Y-%m-%d %H:%M:%S"'
 alias df='df -h'
-alias du='du -sh'
+alias du='du -sh *'
 alias free='free -h'
+alias update='apt update && apt upgrade -y'
 
-# ── Git shortcuts ────────────────────────────────────────────────────
+# ── Git shortcuts ─────────────────────────────────────────────────────
 alias gs='git status'
 alias ga='git add .'
 alias gc='git commit -m'
 alias gp='git push'
-alias gl='git log --oneline --graph --decorate -15'
 alias gpl='git pull'
+alias gl='git log --oneline --graph --decorate -15'
 
-# ── mkdir + cd in one ───────────────────────────────────────────────
-mkcd() { mkdir -p "$1" && cd "$1"; }
-
-# ── Quick find ───────────────────────────────────────────────────────
-ff()  { find . -name "*$1*" 2>/dev/null; }
-ffc() { find . -name "*$1*" 2>/dev/null | wc -l; }
-
-# ── Extract any archive ──────────────────────────────────────────────
+# ── Handy functions ───────────────────────────────────────────────────
+mkcd()   { mkdir -p "$1" && cd "$1"; }
+ff()     { find . -name "*$1*" 2>/dev/null; }
 extract() {
     case "$1" in
         *.tar.gz|*.tgz)  tar xzf "$1" ;;
@@ -769,65 +767,59 @@ extract() {
     esac
 }
 
-# ── PATH extras ──────────────────────────────────────────────────────
 export PATH="$HOME/bin:$PATH"
 
-# ── zoxide (smarter cd) ──────────────────────────────────────────────
+# ── zoxide (smarter cd) ───────────────────────────────────────────────
 command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
-
-# ── fzf keybindings ─────────────────────────────────────────────────
-[ -f "$PREFIX/share/fzf/key-bindings.bash" ] && \
-    source "$PREFIX/share/fzf/key-bindings.bash"
-[ -f "$PREFIX/share/fzf/completion.bash" ] && \
-    source "$PREFIX/share/fzf/completion.bash"
-
-# ── oh-my-posh prompt (overrides PS1 if installed) ──────────────────
-# command -v oh-my-posh &>/dev/null && \
-#     eval "$(oh-my-posh init bash)"
-
 BASHRC
 
-    # ── 3. Write a .nanorc for better nano experience ────────────────
-    echo -e "${CYAN}[3/5] Writing ~/.nanorc...${NC}"
-    cat > "$HOME/.nanorc" << 'NANORC'
+    # ── 3. Write ~/.nanorc ───────────────────────────────────────────
+    echo -e "${CYAN}[3/5] Writing Ubuntu ~/.nanorc...${NC}"
+    cat > "$ub_home/.nanorc" << 'NANORC'
 set autoindent
 set linenumbers
 set mouse
-set smooth
 set tabsize 4
 set tabstospaces
 set trimblanks
 set constantshow
-include "$PREFIX/share/nano/*.nanorc"
+include "/usr/share/nano/*.nanorc"
 NANORC
 
-    # ── 4. Write a .gitconfig with sensible defaults ──────────────────
-    echo -e "${CYAN}[4/5] Writing ~/.gitconfig defaults...${NC}"
-    git config --global core.editor nano
-    git config --global pull.rebase false
-    git config --global init.defaultBranch main
-    git config --global color.ui auto
-    git config --global alias.st status
-    git config --global alias.lg "log --oneline --graph --decorate -15"
+    # ── 4. Install extra packages inside Ubuntu ──────────────────────
+    echo -e "${CYAN}[4/5] Installing useful packages inside Ubuntu...${NC}"
+    proot-distro login ubuntu -- bash -c "
+        apt update -y
+        apt install -y \
+            curl wget git nano vim htop tree \
+            zsh tmux unzip zip \
+            python3 python3-pip \
+            build-essential \
+            2>/dev/null || true
+    "
 
-    # ── 5. Set a welcome message ──────────────────────────────────────
-    echo -e "${CYAN}[5/5] Setting up MOTD...${NC}"
-    cat > "$PREFIX/etc/motd" << 'MOTD'
-
-  Welcome to Termux 🚀
-  Type 'os' to open the setup menu.
-
-MOTD
+    # ── 5. Git config inside Ubuntu ──────────────────────────────────
+    echo -e "${CYAN}[5/5] Configuring git inside Ubuntu...${NC}"
+    proot-distro login ubuntu -- bash -c "
+        git config --global core.editor nano
+        git config --global pull.rebase false
+        git config --global init.defaultBranch main
+        git config --global color.ui auto
+        git config --global alias.st status
+        git config --global alias.lg 'log --oneline --graph --decorate -15'
+    "
 
     echo ""
-    echo -e "${GREEN}✓ Termux environment setup complete!${NC}"
-    echo -e "  • ${CYAN}~/.bashrc${NC}  — prompt, aliases, functions"
-    echo -e "  • ${CYAN}~/.nanorc${NC}  — line numbers, autoindent, syntax highlighting"
+    echo -e "${GREEN}✓ Ubuntu environment setup complete!${NC}"
+    echo -e "  • ${CYAN}~/.bashrc${NC}   — prompt, aliases, git shortcuts, history"
+    echo -e "  • ${CYAN}~/.nanorc${NC}   — line numbers, autoindent, syntax highlight"
     echo -e "  • ${CYAN}~/.gitconfig${NC} — sensible git defaults"
     echo -e "  • ${CYAN}~/projects  ~/scripts  ~/tmp  ~/bin${NC}  created"
+    echo -e "  • curl wget git nano vim htop tree zsh tmux python3 installed"
     echo ""
-    echo -e "${YELLOW}Run 'source ~/.bashrc' or reopen Termux to apply.${NC}"
+    echo -e "${YELLOW}Login with: proot-distro login ubuntu${NC}"
 }
+
 
 # ─── Mirror helpers ────────────────────────────────────────────────────────────
 
