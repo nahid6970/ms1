@@ -40,8 +40,7 @@ menu_items=(
     "SSH for Android              : start_ssh_server                        :$GREEN"
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
-    "Pkg Update                  : pkg_update                              :$CYAN"
-    "Pkg Upgrade                 : pkg_upgrade                             :$CYAN"
+    "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
     "Exit                        : exit_script                             :$RED"
@@ -605,15 +604,10 @@ rclone_decrypt() {
 
 
 
-pkg_update() {
+pkg_update_upgrade() {
     clear
     echo -e "${CYAN}Running pkg update...${NC}"
     pkg update -y
-    echo -e "${GREEN}Done.${NC}"
-}
-
-pkg_upgrade() {
-    clear
     echo -e "${CYAN}Running pkg upgrade...${NC}"
     pkg upgrade -y
     echo -e "${GREEN}Done.${NC}"
@@ -621,29 +615,7 @@ pkg_upgrade() {
 
 # ─── Mirror helpers ────────────────────────────────────────────────────────────
 
-# Ordered list of mirrors  (label|url pairs – arrays keep insertion order)
-_mirror_labels=(
-    "Grimler (SE)"
-    "Termux.dev (DE)"
-    "BFSU (CN)"
-    "TUNA (CN)"
-    "USTC (CN)"
-    "HIT (CN)"
-    "NJU (CN)"
-    "FAU (DE)"
-)
-_mirror_urls=(
-    "https://grimler.se/termux/termux-packages-24"
-    "https://packages.termux.dev/apt/termux-main"
-    "https://mirrors.bfsu.edu.cn/termux/termux-packages-24"
-    "https://mirrors.tuna.tsinghua.edu.cn/termux/termux-packages-24"
-    "https://mirrors.ustc.edu.cn/termux/termux-packages-24"
-    "https://mirrors.hit.edu.cn/termux/termux-packages-24"
-    "https://mirror.nju.edu.cn/termux/termux-packages-24"
-    "https://ftp.fau.de/termux/termux-packages-24"
-)
-
-# Apply a mirror URL to sources.list and run pkg update
+# Apply a mirror URL directly to sources.list and run pkg update
 _apply_mirror() {
     local label="$1"
     local url="$2"
@@ -655,7 +627,6 @@ _apply_mirror() {
     echo -e "${GREEN}Done.${NC}"
 }
 
-# Auto-benchmark all mirrors and pick the fastest one
 select_best_mirror() {
     clear
     echo -e "${CYAN}╔══════════════════════════════════════╗${NC}"
@@ -663,28 +634,78 @@ select_best_mirror() {
     echo -e "${CYAN}╚══════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${YELLOW}Choose mode:${NC}"
-    echo -e "  ${GREEN}1)${NC} Auto  – benchmark all mirrors and pick the fastest"
-    echo -e "  ${CYAN}2)${NC} Manual – pick a mirror from a list (like termux-change-repo)"
+    echo -e "  ${GREEN}1)${NC} termux-change-repo  – full official mirror list (interactive)"
+    echo -e "  ${CYAN}2)${NC} Auto benchmark       – ping mirrors and pick the fastest"
     echo ""
     read -p "Enter choice [1/2]: " mirror_mode
 
     case "$mirror_mode" in
-        2) _mirror_manual_pick ;;
-        *)  _mirror_auto_pick  ;;
+        2) _mirror_auto_pick ;;
+        *)
+            if command -v termux-change-repo >/dev/null 2>&1; then
+                termux-change-repo
+            else
+                echo -e "${RED}termux-change-repo not found. Falling back to auto benchmark...${NC}"
+                _mirror_auto_pick
+            fi
+            ;;
     esac
 }
 
-# Benchmark every mirror, apply the winner automatically
+# Benchmark mirrors – reads from Termux's own mirror files when available,
+# falls back to a hardcoded list otherwise.
 _mirror_auto_pick() {
+    local mirror_dir="$PREFIX/etc/termux/mirrors"
+
+    declare -a bm_labels=()
+    declare -a bm_urls=()
+
+    if [ -d "$mirror_dir" ]; then
+        while IFS= read -r -d '' mfile; do
+            local label url line1
+            label="$(basename "$mfile")"
+            line1="$(head -n1 "$mfile" 2>/dev/null)"
+            url="$(echo "$line1" | awk '{print $2}')"
+            if [ -n "$url" ]; then
+                bm_labels+=("$label")
+                bm_urls+=("$url")
+            fi
+        done < <(find "$mirror_dir" -type f ! -name "*.dpkg-*" ! -name "*~" -print0 2>/dev/null)
+    fi
+
+    # Fallback list if Termux mirror directory is empty or missing
+    if [ ${#bm_labels[@]} -eq 0 ]; then
+        bm_labels=(
+            "default (Cloudflare)"
+            "packages.termux.dev"
+            "grimler.se"
+            "mirrors.tuna.tsinghua.edu.cn"
+            "mirrors.bfsu.edu.cn"
+            "mirrors.ustc.edu.cn"
+            "mirror.nju.edu.cn"
+            "ftp.fau.de"
+        )
+        bm_urls=(
+            "https://packages.termux.dev/apt/termux-main"
+            "https://packages.termux.dev/apt/termux-main"
+            "https://grimler.se/termux/termux-packages-24"
+            "https://mirrors.tuna.tsinghua.edu.cn/termux/termux-packages-24"
+            "https://mirrors.bfsu.edu.cn/termux/termux-packages-24"
+            "https://mirrors.ustc.edu.cn/termux/termux-packages-24"
+            "https://mirror.nju.edu.cn/termux/termux-packages-24"
+            "https://ftp.fau.de/termux/termux-packages-24"
+        )
+    fi
+
     echo ""
-    echo -e "${CYAN}Benchmarking mirrors (measuring response time)...${NC}"
+    echo -e "${CYAN}Benchmarking ${#bm_labels[@]} mirrors...${NC}"
     echo ""
 
     local best_label="" best_url="" best_time=99999999
 
-    for i in "${!_mirror_labels[@]}"; do
-        local label="${_mirror_labels[$i]}"
-        local url="${_mirror_urls[$i]}"
+    for i in "${!bm_labels[@]}"; do
+        local label="${bm_labels[$i]}"
+        local url="${bm_urls[$i]}"
         local response_ms
         response_ms=$(curl -o /dev/null -s -w "%{time_starttransfer}" \
             --connect-timeout 5 --max-time 8 \
@@ -693,14 +714,14 @@ _mirror_auto_pick() {
         if [ $? -eq 0 ] && [ -n "$response_ms" ]; then
             local response_int
             response_int=$(echo "$response_ms" | awk '{printf "%d", $1 * 1000}')
-            printf "  %-20s %s%d ms%s\n" "$label" "$GREEN" "$response_int" "$NC"
+            printf "  %-42s %s%d ms%s\n" "$label" "$GREEN" "$response_int" "$NC"
             if [ "$response_int" -lt "$best_time" ]; then
                 best_time="$response_int"
                 best_label="$label"
                 best_url="$url"
             fi
         else
-            printf "  %-20s %sunreachable%s\n" "$label" "$RED" "$NC"
+            printf "  %-42s %sunreachable%s\n" "$label" "$RED" "$NC"
         fi
     done
 
@@ -713,53 +734,6 @@ _mirror_auto_pick() {
     echo -e "${GREEN}★ Best mirror: $best_label — ${best_time} ms${NC}"
     echo ""
     _apply_mirror "$best_label" "$best_url"
-}
-
-# Interactive list picker – mirrors displayed with current ping, user selects
-_mirror_manual_pick() {
-    echo ""
-    echo -e "${CYAN}Available mirrors:${NC}"
-    echo ""
-
-    # Probe all mirrors and display the list with live ping
-    local pings=()
-    for i in "${!_mirror_labels[@]}"; do
-        local label="${_mirror_labels[$i]}"
-        local url="${_mirror_urls[$i]}"
-        local response_ms
-        response_ms=$(curl -o /dev/null -s -w "%{time_starttransfer}" \
-            --connect-timeout 5 --max-time 8 \
-            "$url/dists/stable/Release" 2>/dev/null)
-
-        local ping_str
-        if [ $? -eq 0 ] && [ -n "$response_ms" ]; then
-            local ms
-            ms=$(echo "$response_ms" | awk '{printf "%d", $1 * 1000}')
-            ping_str="${GREEN}${ms} ms${NC}"
-        else
-            ping_str="${RED}unreachable${NC}"
-        fi
-        pings+=("$ping_str")
-
-        printf "  ${YELLOW}%2d)${NC} %-20s  %b\n" "$((i+1))" "$label" "$ping_str"
-    done
-
-    echo ""
-    read -p "Enter mirror number (or 0 to cancel): " mirror_choice
-
-    if [[ "$mirror_choice" == "0" ]]; then
-        echo -e "${YELLOW}Cancelled.${NC}"
-        return 0
-    fi
-
-    if ! [[ "$mirror_choice" =~ ^[0-9]+$ ]] || \
-       (( mirror_choice < 1 || mirror_choice > ${#_mirror_labels[@]} )); then
-        echo -e "${RED}Invalid choice.${NC}"
-        return 1
-    fi
-
-    local idx=$(( mirror_choice - 1 ))
-    _apply_mirror "${_mirror_labels[$idx]}" "${_mirror_urls[$idx]}"
 }
 
 
