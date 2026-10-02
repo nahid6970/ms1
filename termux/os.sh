@@ -41,6 +41,7 @@ menu_items=(
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
+    "Pkg Search & Install        : pkg_search_install                      :$CYAN"
     "Linux Setup                 : linux_setup                             :$MAGENTA"
     "Termux UI Restore           : termux_ui_restore                       :$MAGENTA"
     "Welcome Page                : welcome_remove                          :$RED"
@@ -655,6 +656,56 @@ pkg_update_upgrade() {
     echo -e "${CYAN}Running pkg upgrade...${NC}"
     pkg upgrade -y
     echo -e "${GREEN}Done.${NC}"
+}
+
+pkg_search_install() {
+    clear
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo -e "${RED}fzf is not installed. Installing...${NC}"
+        pkg install fzf -y || { echo -e "${RED}Failed to install fzf.${NC}"; return 1; }
+    fi
+
+    echo -e "${CYAN}Loading package list...${NC}"
+    # Get all available packages with short description
+    local pkg_list
+    pkg_list=$(apt-cache search . 2>/dev/null | sort)
+
+    if [ -z "$pkg_list" ]; then
+        echo -e "${RED}No packages found. Try running pkg update first.${NC}"
+        return 1
+    fi
+
+    # Let user pick one or more packages with fzf (Tab to multi-select)
+    local selected
+    selected=$(echo "$pkg_list" | fzf \
+        --multi \
+        --prompt="Search packages (Tab=select, Enter=install): " \
+        --preview='apt-cache show {1} 2>/dev/null | grep -E "^(Package|Version|Installed-Size|Description):"' \
+        --preview-window=right:40%:wrap \
+        --height=90% \
+        --reverse \
+        --ansi \
+        --bind='ctrl-a:select-all' \
+        | awk '{print $1}')
+
+    if [ -z "$selected" ]; then
+        echo -e "${YELLOW}No package selected.${NC}"
+        return 0
+    fi
+
+    echo ""
+    echo -e "${CYAN}Selected packages:${NC}"
+    echo "$selected" | while read -r p; do
+        echo -e "  ${GREEN}+${NC} $p"
+    done
+    echo ""
+    read -p "Install these packages? [y/N]: " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        pkg install -y $selected
+        echo -e "${GREEN}Done.${NC}"
+    else
+        echo -e "${YELLOW}Cancelled.${NC}"
+    fi
 }
 
 # ─── Termux UI Restore ─────────────────────────────────────────────────────────
