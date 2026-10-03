@@ -827,12 +827,48 @@ linux_setup() {
     echo ""
     echo -e "  ${GREEN}1)${NC} Install Ubuntu           (proot-distro)"
     echo -e "  ${CYAN}2)${NC} Setup Ubuntu environment  (bashrc, nano, git, packages)"
+    echo -e "  ${RED}3)${NC} Remove Ubuntu completely (Termux only)"
     echo ""
-    read -p "Enter choice [1/2]: " linux_choice
+    read -p "Enter choice [1/3]: " linux_choice
     case "$linux_choice" in
         1) _install_ubuntu ;;
         2) _setup_termux_env ;;
+        3) _remove_ubuntu ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
+    esac
+}
+
+# Option 3 – remove the Ubuntu rootfs from Termux
+_remove_ubuntu() {
+    clear
+    if [ -r /etc/os-release ] && grep -qi '^ID=ubuntu$' /etc/os-release; then
+        echo -e "${RED}Run this option from Termux, not inside Ubuntu.${NC}"
+        return 1
+    fi
+
+    if ! command -v proot-distro >/dev/null 2>&1; then
+        echo -e "${YELLOW}proot-distro is not installed; there is no Ubuntu installation to remove.${NC}"
+        return 0
+    fi
+
+    if ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' && \
+       [ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]; then
+        echo -e "${YELLOW}Ubuntu is not installed.${NC}"
+        return 0
+    fi
+
+    echo -e "${RED}This will permanently remove the Ubuntu root filesystem and its files.${NC}"
+    read -r -p "Remove Ubuntu? [y/N]: " remove_ubuntu_confirm
+    case "$remove_ubuntu_confirm" in
+        y|Y|yes|YES)
+            if proot-distro remove ubuntu; then
+                echo -e "${GREEN}Ubuntu has been removed.${NC}"
+            else
+                echo -e "${RED}Failed to remove Ubuntu.${NC}"
+                return 1
+            fi
+            ;;
+        *) echo -e "${YELLOW}Removal cancelled.${NC}" ;;
     esac
 }
 
