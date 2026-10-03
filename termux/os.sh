@@ -133,6 +133,8 @@ install_packages() {
             echo -e "${GREEN}$pkg is already installed.${NC}"
         fi
     done
+
+    pip install pycryptodomex
 }
 
 # Function to set up storage and password
