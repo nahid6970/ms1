@@ -29,14 +29,16 @@ show_menu() {
     echo -e "  ${GREEN}1)${NC} Install Ubuntu in Termux (proot-distro)"
     echo -e "  ${CYAN}2)${NC} Set up Ubuntu environment (bashrc, nano, packages)"
     echo -e "  ${RED}3)${NC} Remove Ubuntu completely (Termux only)"
+    echo -e "  ${BLUE}4)${NC} Install AI coding agents"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
         2) setup_ubuntu_environment ;;
         3) remove_ubuntu ;;
+        4) install_ai_agents ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -172,6 +174,52 @@ git config --global alias.lg 'log --oneline --graph --decorate -15'"
     else
         echo -e "Login with: proot-distro login ubuntu"
     fi
+}
+
+run_in_ubuntu() {
+    local command_string="$1"
+    if inside_ubuntu; then
+        bash -lc "$command_string"
+    elif command -v proot-distro >/dev/null 2>&1 && \
+         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
+           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
+        proot-distro login ubuntu -- bash -lc "$command_string"
+    else
+        echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
+        return 1
+    fi
+}
+
+install_ai_agents() {
+    local choice
+    clear
+    echo -e "${MAGENTA}AI Coding Agents for Ubuntu${NC}"
+    echo
+    echo -e "  ${GREEN}1)${NC} Install Kiro CLI"
+    echo -e "  ${CYAN}2)${NC} Install Codex CLI"
+    echo -e "  ${BLUE}3)${NC} Install both"
+    echo -e "  ${YELLOW}q)${NC} Back"
+    echo
+    read -r -p 'Enter choice [1/2/3/q]: ' choice
+
+    case "$choice" in
+        1)
+            echo -e "${CYAN}Installing Kiro CLI in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://cli.kiro.dev/install | bash'
+            ;;
+        2)
+            echo -e "${CYAN}Installing Codex CLI in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+            ;;
+        3)
+            echo -e "${CYAN}Installing Kiro CLI in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://cli.kiro.dev/install | bash' || return 1
+            echo -e "${CYAN}Installing Codex CLI in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+            ;;
+        q|Q) return 0 ;;
+        *) echo -e "${RED}Invalid choice.${NC}"; return 1 ;;
+    esac
 }
 
 show_menu
