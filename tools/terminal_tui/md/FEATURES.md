@@ -42,7 +42,7 @@
 
 ## Git Integration
 **Status:** ✅ Complete
-**Description:** Full git workflow from the status bar — view changes, stage, commit, push, checkout, branch management, diff viewer.
+**Description:** Full git workflow from the status bar — view changes, stage, commit, push, checkout, branch management, diff viewer, AI-suggested commit messages.
 **Implementation:** Backend runs git CLI commands via `subprocess`. Frontend renders in modals.
 **Files Involved:** `app.py` (routes: `/api/project/<project>/git/*`), `templates/index.html` (git modal UI)
 **Usage:** Click git badge in status bar → review files → commit → push.
@@ -55,6 +55,7 @@
 - Branch management (create, switch, merge, delete)
 - Diff viewer with line-by-line changes
 - Git graph visualization
+- **AI Suggest Commit Message** — `✨` button + Gemini model dropdown in commit message row; fetches git diff, calls Gemini API, fills textarea with conventional commit suggestion. Model dropdown is independent from AI copilot, respects hidden-models list, persists selection.
 
 ---
 

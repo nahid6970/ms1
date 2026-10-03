@@ -5,6 +5,44 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-03] - AI Suggest Commit Message + Model Tester Auto-Hide & Speed
+
+### AI Suggest Commit Message Button (git modal)
+- Added `✨` icon button in the git modal commit message label row (top-right of the textarea)
+- Added independent Gemini model `<select>` dropdown to the left of the button — separate from the AI copilot model selector
+- Dropdown populated from `DYNAMIC_AI_MODELS['gemini']` (same live list as AI copilot); falls back to 5 hardcoded models if not yet loaded
+- Always fires a background fetch to Gemini models API on git modal open to keep list fresh
+- Respects the hidden-models list — models toggled hidden in AI copilot are excluded from the dropdown
+- Selection persisted to `localStorage['git-ai-commit-model']`; defaults to AI copilot's last selected Gemini model
+- Backend route `POST /api/project/<project>/git/suggest-commit` in `app.py`:
+  - Runs `git diff --staged` first, falls back to `git diff`, then `git status --short`
+  - Truncates diff to 12,000 chars to stay within token limits
+  - Calls Gemini REST API directly with a conventional commits prompt
+  - Returns `{"suggestion": "..."}` or `{"error": "..."}`
+- Button shows spinning SVG while loading, fills textarea on success, shows green status tick
+- `populateGitAIModelDropdown()` also hooked into `fetchDynamicModels` completion so git modal dropdown updates live when AI copilot fetches models
+
+### Model Tester — Auto-hide Failed Models
+- After each failed model test (HTTP error or network exception), automatically toggles that model to hidden via `_toggleTesterModelVisibility()`
+- Skips models already hidden (no double-toggle)
+- Shows count at end: `· N failed model(s) auto-hidden` appended to status line
+
+### Model Tester — Auto-save Speed from Elapsed Time
+- After each successful model test, classifies response time and saves to `ai-model-speeds`:
+  - < 3 s → **Fast**
+  - 3–8 s → **Medium**
+  - ≥ 8 s → **Slow**
+- Speed select on the card reflects real measured speed immediately after test
+- `syncAIModelDropdown()` called after batch completes to update speed tags in AI copilot dropdown
+
+**Files Modified:**
+- `app.py` — added `POST /api/project/<project>/git/suggest-commit` route
+- `templates/index.html` — git modal HTML, `populateGitAIModelDropdown()`, `suggestGitCommitMessage()`, `runModelBatchTest()` auto-hide + auto-speed logic, `fetchDynamicModels` hook, `@keyframes spin` CSS
+- `md/FEATURES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-10-02] - Fix Git Status Stale After Commit
 **What We Accomplished:**
 - After committing, the git status badge in the status bar kept showing the old "dirty" state for several seconds (up to the 30-second cache window).
