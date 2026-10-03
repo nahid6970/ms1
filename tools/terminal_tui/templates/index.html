@@ -12418,7 +12418,7 @@
             // Render all cards as pending
             resultsEl.innerHTML = models.map(m => _renderTesterCard(m, 'pending', '', null)).join('');
 
-            let passed = 0, failed = 0;
+            let passed = 0, failed = 0, autoHidden = 0;
 
             for (let i = 0; i < models.length; i++) {
                 if (_modelTesterAbort) break;
@@ -12463,6 +12463,11 @@
                     if (!res.ok) {
                         failed++;
                         if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', data.error || `HTTP ${res.status}`, elapsed);
+                        // Auto-hide failed model if not already hidden
+                        if (!_isModelHidden(model.val)) {
+                            _toggleTesterModelVisibility(model.val);
+                            autoHidden++;
+                        }
                     } else {
                         passed++;
                         const reply = data.command || data.text || '(empty response)';
@@ -12473,12 +12478,18 @@
                     failed++;
                     const updatedCard = resultsEl.querySelector(`[data-model="${model.val}"]`);
                     if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', err.message, elapsed);
+                    // Auto-hide failed model if not already hidden
+                    if (!_isModelHidden(model.val)) {
+                        _toggleTesterModelVisibility(model.val);
+                        autoHidden++;
+                    }
                 }
             }
 
             const totalTested = passed + failed;
             counterEl.textContent = `${passed} ✅  ${failed} ❌  (${totalTested}/${models.length})`;
-            statusEl.textContent = _modelTesterAbort ? 'Stopped by user' : 'Complete';
+            const hiddenNote = autoHidden > 0 ? `  ·  ${autoHidden} failed model${autoHidden > 1 ? 's' : ''} auto-hidden` : '';
+            statusEl.textContent = (_modelTesterAbort ? 'Stopped by user' : 'Complete') + hiddenNote;
             runBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'none';
             _modelTesterRunning = false;
