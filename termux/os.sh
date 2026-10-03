@@ -976,19 +976,29 @@ alias -- -='cd -'
 
 # ── ls ───────────────────────────────────────────────────────────────
 if command -v eza &>/dev/null; then
-    alias ls='eza --icons --group-directories-first'
-    alias ll='eza -lah --icons --group-directories-first --git'
-    alias lt='eza --tree --icons --level=2'
+    alias ls='eza --group-directories-first'
+    alias la='eza -a --group-directories-first'
+    alias ll='eza -l --header --group-directories-first'
+    alias lla='eza -la --header --group-directories-first'
+    alias lt='eza --tree --level=2'
+    alias tree='eza --tree'
 else
     alias ls='ls --color=auto'
+    alias la='ls -a --color=auto'
     alias ll='ls -lah --color=auto'
+    alias lla='ls -lah --color=auto'
+    alias tree='tree -C'
 fi
+alias cls='clear'
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
 
 # ── Common shortcuts ──────────────────────────────────────────────────
 alias c='clear'
 alias q='exit'
 alias reload='source ~/.bashrc && echo "reloaded"'
 alias bashrc='nano ~/.bashrc'
+alias rb='reload'
 alias myip='curl -s https://ipinfo.io/ip && echo'
 alias ports='ss -tulpn'
 alias now='date "+%Y-%m-%d %H:%M:%S"'
@@ -1004,6 +1014,19 @@ alias gc='git commit -m'
 alias gp='git push'
 alias gpl='git pull'
 alias gl='git log --oneline --graph --decorate -15'
+
+# Termux-style shortcuts that are safe to use from Ubuntu.
+os() {
+    local termux_home="/data/data/com.termux/files/home"
+    if [ -f "$HOME/ms1/termux/os.sh" ]; then
+        bash "$HOME/ms1/termux/os.sh"
+    elif [ -f "$termux_home/ms1/termux/os.sh" ]; then
+        HOME="$termux_home" bash "$termux_home/ms1/termux/os.sh"
+    else
+        echo "Could not find ms1/termux/os.sh in Ubuntu or Termux home."
+        return 1
+    fi
+}
 
 # ── Handy functions ───────────────────────────────────────────────────
 mkcd()   { mkdir -p "$1" && cd "$1"; }
@@ -1027,6 +1050,11 @@ export PATH="$HOME/bin:$PATH"
 
 # ── zoxide (smarter cd) ───────────────────────────────────────────────
 command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
+
+# Fastfetch on interactive startup, like the Termux shell configuration.
+if [[ $- == *i* ]] && command -v fastfetch &>/dev/null; then
+    fastfetch
+fi
 BASHRC
 
     # ── 3. Write ~/.nanorc ───────────────────────────────────────────
