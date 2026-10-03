@@ -167,3 +167,30 @@
 **Implementation:** Backend saves to `C:\Users\nahid\AppData\Local\Temp\screenshot_temp`.
 **Files Involved:** `app.py` (routes: `/api/images/temp`, `/api/session/<project>/paste-image`), `templates/index.html` (file input + paste handler)
 **Usage:** Click 📷 button or paste image → path auto-copied.
+
+---
+
+## AI Copilot
+**Status:** ✅ Complete
+**Description:** In-app AI assistant powered by Google Gemini, Groq, Morph, or OpenRouter. Supports tool use, chat history, system prompts, and model management.
+**Implementation:** Backend `/api/ai-command` routes requests to the selected provider. Frontend renders a popover with chat history, model/provider selector, and tool toggles.
+**Files Involved:** `app.py` (route: `/api/ai-command`), `ai_tools.py`, `templates/index.html` (AI copilot popover)
+**Usage:** Click 🤖 in status bar (or Ctrl+I) → type prompt → Enter.
+**Sub-features:**
+- Multi-provider: Gemini, Groq, Morph, OpenRouter
+- Dynamic model list fetched live from each provider's API
+- Model visibility toggle (hide/show per provider)
+- Bookmarked models sorted to top
+- Speed tags (Fast / Medium / Slow) per model — manually set or auto-measured by batch tester
+- Rate limit display per model (RPM / RPD / TPM)
+- Custom system prompts (stored in `tui_config.json`)
+- Chat history with re-prompt
+- Tool use: shell commands, file read/write, directory listing
+- Multiple API accounts per provider with label selector
+- **Model Batch Tester** — sends a test prompt to every model of a provider sequentially:
+  - Auto-hides failed models (adds to hidden list)
+  - Auto-classifies speed from elapsed time (< 3 s Fast, 3–8 s Medium, ≥ 8 s Slow)
+  - Per-model ignore toggle (skip in tests without hiding)
+  - Eye toggle (hide/show globally) per card
+  - Speed select override per card
+  - Syncs copilot dropdown speed tags after batch completes
