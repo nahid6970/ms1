@@ -1777,6 +1777,110 @@ def api_git_discard(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/suggest-commit', methods=['POST'])
+def api_git_suggest_commit(project):
+    """Use AI (Google Gemini) to suggest a commit message based on git diff."""
+    req_data = request.get_json() or {}
+    api_key = req_data.get("api_key", "").strip()
+    model = req_data.get("model", "gemini-2.0-flash").strip()
+
+    if not api_key:
+        return jsonify({"error": "No AI API key provided. Please set one in the AI Copilot settings."}), 400
+
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+
+    try:
+        # Resolve git root
+        res_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=5
+        )
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath((res_root.stdout or "").strip())
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+
+        # Try staged diff first, fall back to full working-tree diff
+        diff_result = subprocess.run(
+            ["git", "diff", "--staged", "--stat", "--patch", "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=10
+        )
+        diff_text = (diff_result.stdout or "").strip()
+
+        if not diff_text:
+            # Nothing staged — use full working-tree diff (unstaged + untracked content)
+            diff_result2 = subprocess.run(
+                ["git", "diff", "--stat", "--patch", "--", pathspec],
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=cf, timeout=10
+            )
+            diff_text = (diff_result2.stdout or "").strip()
+
+        if not diff_text:
+            # No diff at all — list files from status
+            status_result = subprocess.run(
+                ["git", "status", "--short", "--", pathspec],
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                text=True, creationflags=cf, timeout=5
+            )
+            diff_text = (status_result.stdout or "").strip()
+            if not diff_text:
+                return jsonify({"error": "No changes detected in this project to generate a commit message from."}), 400
+
+        # Truncate very large diffs to avoid exceeding token limits
+        MAX_DIFF_CHARS = 12000
+        if len(diff_text) > MAX_DIFF_CHARS:
+            diff_text = diff_text[:MAX_DIFF_CHARS] + "\n... (diff truncated)"
+
+        prompt = (
+            "You are an expert software developer. "
+            "Analyze the following git diff and write a concise, conventional commit message. "
+            "Use the conventional commits format: type(scope): short description\n"
+            "Common types: feat, fix, refactor, style, docs, test, chore, perf\n"
+            "Rules:\n"
+            "- First line: 72 chars max, imperative mood, no period at end\n"
+            "- Output ONLY the commit message text, nothing else — no explanation, no markdown code block, no quotes\n\n"
+            f"Git diff:\n{diff_text}"
+        )
+
+        import requests as _requests
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 200}
+        }
+        headers = {"Content-Type": "application/json"}
+        resp = _requests.post(gemini_url, json=payload, headers=headers, timeout=30)
+        resp_json = resp.json()
+
+        if not resp.ok:
+            err_msg = resp_json.get("error", {}).get("message", resp.text[:300])
+            return jsonify({"error": f"Gemini API error: {err_msg}"}), 500
+
+        try:
+            suggestion = resp_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+            # Strip any wrapping markdown code fences if model included them
+            if suggestion.startswith("```"):
+                lines = suggestion.splitlines()
+                suggestion = "\n".join(l for l in lines if not l.startswith("```")).strip()
+        except (KeyError, IndexError):
+            return jsonify({"error": "AI returned an unexpected response format."}), 500
+
+        return jsonify({"suggestion": suggestion})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def api_paste_image(project):
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)

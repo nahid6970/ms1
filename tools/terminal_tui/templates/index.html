@@ -1551,6 +1551,7 @@
         }
         .sbicon-btn:hover { color: var(--text-primary); border-color: var(--accent-color); background: rgba(37,99,235,0.1); }
         .sbicon-btn.active { color: var(--accent-color); border-color: var(--accent-color); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -3231,7 +3232,12 @@
 
             <!-- Commit message -->
             <div style="margin-bottom: 12px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Commit Message</label>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 6px;">
+                    <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);">Commit Message</label>
+                    <button id="git-ai-suggest-btn" onclick="suggestGitCommitMessage()" title="AI suggest commit message using selected AI copilot model" style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.35); color: #a855f7; cursor: pointer; font-size: 0.72rem; padding: 3px 9px; border-radius: 5px; transition: all 0.2s; font-weight: 500; display:flex; align-items:center; gap:4px; line-height:1;" onmouseenter="this.style.backgroundColor='rgba(168,85,247,0.22)'; this.style.borderColor='rgba(168,85,247,0.6)'" onmouseleave="this.style.backgroundColor='rgba(168,85,247,0.1)'; this.style.borderColor='rgba(168,85,247,0.35)'">
+                        <span id="git-ai-suggest-icon">✨</span> AI Suggest
+                    </button>
+                </div>
                 <textarea id="git-commit-msg" rows="3" placeholder="feat: describe your changes..." style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.85rem; resize: vertical; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
             </div>
 
@@ -13810,6 +13816,74 @@
                 const btnConfig = item.label !== undefined ? item : { label: item.label, data: item.data };
                 addCustomButtonToPane(paneId, btnConfig, i);
             });
+        }
+
+        async function suggestGitCommitMessage() {
+            const btn = document.getElementById('git-ai-suggest-btn');
+            const iconEl = document.getElementById('git-ai-suggest-icon');
+            const statusEl = document.getElementById('git-status-msg');
+            const textarea = document.getElementById('git-commit-msg');
+
+            // Get the current AI provider + model + API key from copilot settings
+            const providerEl = document.getElementById('ai-provider-select');
+            const provider = providerEl ? providerEl.value : 'gemini';
+
+            // Only Gemini is supported by the backend suggest-commit route
+            if (provider !== 'gemini') {
+                statusEl.style.color = '#f59e0b';
+                statusEl.innerText = 'AI suggest only supports Google Gemini. Please select Gemini in AI Copilot.';
+                setTimeout(() => { statusEl.innerText = ''; statusEl.style.color = 'var(--text-secondary)'; }, 4000);
+                return;
+            }
+
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            if (!apiKey) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'No Gemini API key found. Add it in AI Copilot settings.';
+                setTimeout(() => { statusEl.innerText = ''; statusEl.style.color = 'var(--text-secondary)'; }, 4000);
+                return;
+            }
+
+            const modelEl = document.getElementById('ai-model-select');
+            const model = (modelEl && modelEl.value) ? modelEl.value : 'gemini-2.0-flash';
+
+            // Show loading state on button
+            btn.disabled = true;
+            iconEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = 'Analyzing changes with AI...';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/suggest-commit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey, model: model })
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = data.error || 'AI suggestion failed.';
+                    setTimeout(() => { statusEl.innerText = ''; statusEl.style.color = 'var(--text-secondary)'; }, 5000);
+                    return;
+                }
+
+                if (data.suggestion) {
+                    textarea.value = data.suggestion;
+                    textarea.style.borderColor = 'var(--accent-color)';
+                    setTimeout(() => { textarea.style.borderColor = 'var(--border-color)'; }, 1500);
+                    statusEl.style.color = '#22c55e';
+                    statusEl.innerText = 'AI commit message filled ✓';
+                    setTimeout(() => { statusEl.innerText = ''; statusEl.style.color = 'var(--text-secondary)'; }, 3000);
+                }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Request failed: ' + e.message;
+                setTimeout(() => { statusEl.innerText = ''; statusEl.style.color = 'var(--text-secondary)'; }, 5000);
+            } finally {
+                btn.disabled = false;
+                iconEl.textContent = '✨';
+            }
         }
 
         async function runGitCommit() {
