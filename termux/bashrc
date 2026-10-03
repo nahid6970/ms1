@@ -1,233 +1,143 @@
-# ~/.bashrc
+# Shared interactive Bash configuration for Termux and Ubuntu.
 
-# Custom PS1 prompt
-# PS1='\[\e[32m\]\u@\h \[\e[34m\]\w\[\e[0m\] $ '
+# Detect Termux without relying on commands that are unavailable in Ubuntu.
+IS_TERMUX=false
+if [[ -r /etc/os-release ]] && grep -qi '^ID=ubuntu$' /etc/os-release; then
+    IS_TERMUX=false
+elif [[ "${PREFIX:-}" == *"/com.termux/files/usr"* ]] || [[ -n "${TERMUX_VERSION:-}" ]]; then
+    IS_TERMUX=true
+fi
 
-termux-wake-lock
+# History and interactive key bindings.
+shopt -s histappend
+export HISTSIZE=5000
+export HISTFILESIZE=10000
+export HISTCONTROL=ignoreboth:erasedups
+export HISTIGNORE="ls:ll:cd:cd -:pwd:exit:clear"
+if [[ $- == *i* ]]; then
+    bind '"\e[A": history-search-backward' 2>/dev/null || true
+    bind '"\e[B": history-search-forward' 2>/dev/null || true
+fi
 
-# Aliases for convenience
+# Shared aliases. Prefer eza when installed and retain ordinary ls otherwise.
 alias cls='clear'
-alias gg='python ~/ms1/tools/terminal_tui/gemini_terminal_cli/gemini_cli.py --password 182358 --max-output-tokens 65536'
-alias la='ls -a'
-alias ll='ls -la'
-alias ls='eza -al --color=always --group-directories-first'
-alias os='bash ~/ms1/termux/os.sh'
-alias osx='bash ~/ms3/osx.sh'
-alias ubuntu='proot-distro login ubuntu'
-alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'
-alias rb='termux-reload-settings'
-alias rc="bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh"
-alias rm='rm -f -r'
-alias ro="rclone cat g00:/Remote_Control/output.txt"
-alias update='pkg update && pkg upgrade -y'
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --group-directories-first'
+    alias la='eza -a --group-directories-first'
+    alias ll='eza -l --header --group-directories-first'
+    alias lla='eza -la --header --group-directories-first'
+    alias tree='eza --tree'
+else
+    alias ls='ls --color=auto'
+    alias la='ls -a --color=auto'
+    alias ll='ls -lah --color=auto'
+    alias lla='ls -lah --color=auto'
+fi
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
+alias c='clear'
+alias q='exit'
+alias reload='source ~/.bashrc && echo "reloaded"'
+alias bashrc='nano ~/.bashrc'
+alias myip='curl -s https://ipinfo.io/ip && echo'
+alias ports='ss -tulpn'
+alias now='date "+%Y-%m-%d %H:%M:%S"'
+alias df='df -h'
+alias du='du -sh *'
+alias free='free -h'
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'
+alias gp='git push'
+alias gpl='git pull'
+alias gl='git log --oneline --graph --decorate -15'
 
-nvim() {
-    chmod +x ~/ms3/switch_termux_properties.sh
-    ~/ms3/switch_termux_properties.sh nvim
-    command nvim "$@"  # Use the original nvim command with all passed arguments
-    ~/ms3/switch_termux_properties.sh default
-}
-
-
-# Search history with fzf and execute the selected command
-hf() {
-    local cmd
-    # Use `fzf` to interactively search through command history
-    cmd=$(history | awk '{$1=""; print substr($0,2)}' | fzf --height=40% --reverse --prompt="Search History: " --ansi)
-    # If a command is selected, execute it
-    if [ -n "$cmd" ]; then
-        echo "Executing: $cmd"
-        eval "$cmd"
-    fi
-}
-
-# Add this to your .bashrc
-hh() {
-    if [ -z "$1" ]; then
-        echo "Usage: search_history <pattern>"
+# The shared os.sh can be reached from either Ubuntu's home or Termux's home.
+os() {
+    local termux_home="/data/data/com.termux/files/home"
+    if [[ -f "$HOME/ms1/termux/os.sh" ]]; then
+        bash "$HOME/ms1/termux/os.sh"
+    elif [[ -f "$termux_home/ms1/termux/os.sh" ]]; then
+        HOME="$termux_home" bash "$termux_home/ms1/termux/os.sh"
+    else
+        echo "Could not find ms1/termux/os.sh."
         return 1
     fi
-    # Search the command history for the given pattern
+}
+
+# Shared helpers.
+mkcd() { mkdir -p "$1" && cd "$1"; }
+ff() { find . -name "*$1*" 2>/dev/null; }
+hf() {
+    command -v fzf >/dev/null 2>&1 || { echo "fzf is not installed."; return 1; }
+    local selected
+    selected=$(history | awk '{$1=""; print substr($0,2)}' | fzf --height=40% --reverse --prompt="Search History: " --ansi)
+    [[ -n "$selected" ]] && eval "$selected"
+}
+hh() {
+    [[ -n "$1" ]] || { echo "Usage: hh <pattern>"; return 1; }
     history | grep --color=auto -i "$1"
 }
-
-
-
-# Enable bash completion if available
-if [ -f /data/data/com.termux/files/usr/etc/bash_completion ]; then
-    . /data/data/com.termux/files/usr/etc/bash_completion
-fi
-
-# ~/.bashrc
-
-# Source custom scripts from the ms3/scripts directory
-SCRIPTS_DIR="$HOME/ms3/scripts"
-# Check if the scripts directory exists
-if [ -d "$SCRIPTS_DIR" ]; then
-    # Source each script file
-    for script in "$SCRIPTS_DIR"/*.sh; do
-        [ -r "$script" ] && . "$script"
-    done
-fi
-
-# Enable reverse search with Up/Down keys for partially typed commands
-# This will use arrow keys to search through history based on the typed prefix
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
-
-# Export paths (if necessary)
-# export PATH="$HOME/bin:$PATH"
-
-# History settings
-# History Managemenst Using .bashrc
-# Enable appending to the history file
-shopt -s histappend
-export HISTCONTROL=ignoreboth:erasedups
-export PROMPT_COMMAND="history -n; history -w; history -c; history -r"
-
-# Function to clean up the history
-cleanup_history() {
-    local tmpfile="$HOME/.bash_history_tmp"
-    # Create a temporary file in the home directory
-    tac "$HISTFILE" | awk '!x[$0]++' > "$tmpfile" &&
-    tac "$tmpfile" > "$HISTFILE"
-    # Remove the temporary file
-    rm "$tmpfile"
-}
-# Call the cleanup function
-cleanup_history
-
-# Ignore some commands from history
-export HISTIGNORE="ls:ll:cd:cd -:pwd:exit:clear"
-
-# Function to clone or update a Git repository
 git_clone() {
-    local repo_url=$1
-    local repo_name=$(basename "$repo_url" .git)
-    # Check if the repository already exists
-    if [ -d "$repo_name/.git" ]; then
-        echo "Repository '$repo_name' already exists. Updating..."
-        cd "$repo_name" || exit
-        git pull
-        cd - || exit
+    local repo_url="$1"
+    [[ -n "$repo_url" ]] || { echo "Usage: git_clone <repo-url>"; return 1; }
+    local repo_name
+    repo_name=$(basename "$repo_url" .git)
+    if [[ -d "$repo_name/.git" ]]; then
+        (cd "$repo_name" && git pull)
     else
-        # Clone the repository if it doesn't exist
-        echo "Cloning repository '$repo_name'..."
         git clone "$repo_url"
     fi
 }
 
-# # Play music on SSH login in Termux
-# if [[ $SSH_CONNECTION ]]; then
-#     mpv /storage/emulated/0/song/wwe/ww.mp3 &
-# fi
+# OS-specific commands and startup behavior.
+if [[ "$IS_TERMUX" == true ]]; then
+    alias gg='python ~/ms1/tools/terminal_tui/gemini_terminal_cli/gemini_cli.py --password 182358 --max-output-tokens 65536'
+    alias osx='bash ~/ms3/osx.sh'
+    alias ubuntu='proot-distro login ubuntu'
+    alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'
+    alias rb='termux-reload-settings'
+    alias rc='bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh'
+    alias rm='rm -f -r'
+    alias ro='rclone cat g00:/Remote_Control/output.txt'
+    alias update='pkg update && pkg upgrade -y'
 
-sshd
+    termux-wake-lock 2>/dev/null || true
+    if [[ -f /data/data/com.termux/files/usr/etc/bash_completion ]]; then
+        . /data/data/com.termux/files/usr/etc/bash_completion
+    fi
 
-# if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py" > /dev/null; then
-#     nohup python /data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py > /dev/null 2>&1 &
-#     echo "Wake-on-LAN Flask app started in the background."
-# fi
+    SCRIPTS_DIR="$HOME/ms3/scripts"
+    if [[ -d "$SCRIPTS_DIR" ]]; then
+        for script in "$SCRIPTS_DIR"/*.sh; do
+            [[ -r "$script" ]] && . "$script"
+        done
+    fi
+    command -v sshd >/dev/null 2>&1 && sshd 2>/dev/null || true
 
-# if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/battery.py" > /dev/null; then
-#     nohup python /data/data/com.termux/files/home/ms1/tailscale/battery.py > /dev/null 2>&1 &
-#     echo "Battery script started in the background."
-# fi
-
-# if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/device_info.py" > /dev/null; then
-#     nohup python /data/data/com.termux/files/home/ms1/tailscale/device_info.py > /dev/null 2>&1 &
-#     echo "Device Info script started in the background."
-# fi
-
-# if ! pgrep -f "python /data/data/com.termux/files/home/ms1/tailscale/clipboard_send.py" > /dev/null; then
-#     nohup python /data/data/com.termux/files/home/ms1/tailscale/clipboard_send.py > /dev/null 2>&1 &
-#     echo "clipboard_send script started in the background."
-# fi
-
-# echo "Welcome to Termux!"
-# echo "System Info:"
-# uname -a
-# echo "Uptime:"
-# uptime
-# echo "Free Memory:"
-# free -h
-
-# start_python_flask_CoC(){
-#     python "$HOME/5010_coc/Clash_of_Clans_android.py" &
-#     # Wait for a moment to ensure the server starts
-#     sleep 2
-#     # Open Chrome with the server URL
-#     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
-# }
-# start_python_flask_CoC
-
-#! Xxposed EDge Shell Command to Start below first one doesnt work but second one works
-#! am start -n com.termux/.app.TermuxActivity && sleep 2 && termux-wake-lock && python "$HOME/5010_coc/Clash_of_Clans_android.py" & sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
-
-#* Xposed Edge Shell Command Working
-# PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/5010_coc/Clash_of_Clans_android.py"; TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"; am startservice --user 0 -n com.termux/com.termux.app.RunCommandService -a com.termux.RUN_COMMAND --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" --esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" --ez com.termux.RUN_COMMAND_BACKGROUND "true" && sleep 2 && am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
-
-#* Paste to pc
-# am start -n com.termux/.app.TermuxActivity && sleep 2 && \
-# am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
-# -a com.termux.RUN_COMMAND \
-# --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/python" \
-# --esa com.termux.RUN_COMMAND_ARGUMENTS "/data/data/com.termux/files/home/ms1/tailscale/clipboard_send_once.py" \
-# --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
-# --ez com.termux.RUN_COMMAND_BACKGROUND true && \
-# am start -a android.intent.action.VIEW -d "http://192.168.0.101:5001" com.android.chrome
-
-#* Paste to pc working
-# am start -n com.termux/.HomeActivity && \
-# sleep 3 && \
-# am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
-# -a com.termux.RUN_COMMAND \
-# --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/python" \
-# --esa com.termux.RUN_COMMAND_ARGUMENTS "/data/data/com.termux/files/home/ms1/tailscale/clipboard_send_once.py" \
-# --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
-# --ez com.termux.RUN_COMMAND_BACKGROUND true
-
-# PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/ms1/tailscale/clipboard_send_once.py"; TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"; am startservice --user 0 -n com.termux/com.termux.app.RunCommandService -a com.termux.RUN_COMMAND --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" --esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" --ez com.termux.RUN_COMMAND_BACKGROUND "true" && sleep 2 && am start -a android.intent.action.VIEW -d "http://192.168.0.101:5001" com.android.chrome
-
-
-#* Wake on LAN
-# am start -n com.termux/.app.TermuxActivity && sleep 2 && \
-# am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
-# -a com.termux.RUN_COMMAND \
-# --es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/python" \
-# --esa com.termux.RUN_COMMAND_ARGUMENTS "/data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py" \
-# --es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
-# --ez com.termux.RUN_COMMAND_BACKGROUND true &&
-
-#* Wake on LAN background
-#PYTHON_SCRIPT_FULL_PATH="/data/data/com.termux/files/home/ms1/tailscale/wake_on_lan.py"
-#TERMUX_INTERNAL_COMMAND_SEQUENCE="termux-wake-lock && python \"${PYTHON_SCRIPT_FULL_PATH}\" &"
-#
-#am startservice --user 0 -n com.termux/com.termux.app.RunCommandService \
-#-a com.termux.RUN_COMMAND \
-#--es com.termux.RUN_COMMAND_PATH "/data/data/com.termux/files/usr/bin/sh" \
-#--esa com.termux.RUN_COMMAND_ARGUMENTS "-c,${TERMUX_INTERNAL_COMMAND_SEQUENCE}" \
-#--es com.termux.RUN_COMMAND_WORKDIR "/data/data/com.termux/files/home" \
-#--ez com.termux.RUN_COMMAND_BACKGROUND true
-
-
-# Termux UI setup: aliases, startup banner, prompt, and navigation
-alias cls='clear'
-alias ls='eza --group-directories-first'
-alias la='eza -a --group-directories-first'
-alias ll='eza -l --header --group-directories-first'
-alias lla='eza -la --header --group-directories-first'
-alias tree='eza --tree'
-alias grep='grep --color=auto'
-alias diff='diff --color=auto'
-alias rb='termux-reload-settings'
-alias update='pkg update && pkg upgrade -y'
-
-# Fastfetch on interactive startup
-if [[ $- == *i* ]]; then
-    fastfetch
+    nvim() {
+        local switch_script="$HOME/ms3/switch_termux_properties.sh"
+        if [[ -x "$switch_script" ]]; then "$switch_script" nvim; fi
+        command nvim "$@"
+        if [[ -x "$switch_script" ]]; then "$switch_script" default; fi
+    }
+else
+    alias update='sudo apt update && sudo apt upgrade -y'
+    alias rb='reload'
 fi
 
-# Shell prompt and directory navigation
-eval "$(oh-my-posh init bash --config ~/.config/ohmyposh/catppuccin.omp.json)"
-eval "$(zoxide init bash --cmd cd)"
+export PATH="$HOME/bin:$PATH"
+
+# Optional prompt, directory jump, and startup tools.
+if command -v zoxide >/dev/null 2>&1; then
+    eval "$(zoxide init bash --cmd cd)"
+fi
+if command -v oh-my-posh >/dev/null 2>&1; then
+    local_omp_config="$HOME/.config/ohmyposh/catppuccin.omp.json"
+    if [[ -f "$local_omp_config" ]]; then
+        eval "$(oh-my-posh init bash --config "$local_omp_config")"
+    fi
+fi
+if [[ $- == *i* ]] && command -v fastfetch >/dev/null 2>&1; then
+    fastfetch
+fi

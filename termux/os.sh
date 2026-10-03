@@ -14,6 +14,9 @@ NC='\033[0m' # No Color
 
 REPO_DIR="$HOME/ms1"
 BASHRC_SOURCE="$REPO_DIR/termux/bashrc"
+if [ ! -f "$BASHRC_SOURCE" ] && [ -f "$(dirname "${BASH_SOURCE[0]}")/bashrc" ]; then
+    BASHRC_SOURCE="$(dirname "${BASH_SOURCE[0]}")/bashrc"
+fi
 TERMUX_PROPERTIES_SOURCE="$REPO_DIR/termux/termux.properties"
 BASHRC_DEST="$HOME/.bashrc"
 TERMUX_PROPERTIES_DEST="$HOME/.termux/termux.properties"
@@ -948,115 +951,13 @@ _setup_termux_env() {
     echo -e "${CYAN}[1/5] Creating standard directories in Ubuntu...${NC}"
     mkdir -p "$ub_home/projects" "$ub_home/scripts" "$ub_home/tmp" "$ub_home/bin"
 
-    # ── 2. Write ~/.bashrc ───────────────────────────────────────────
-    echo -e "${CYAN}[2/5] Writing Ubuntu ~/.bashrc...${NC}"
-    cat > "$ub_home/.bashrc" << 'BASHRC'
-# ── Ubuntu .bashrc ───────────────────────────────────────────────────
-
-# ── Prompt: user@host  dir  (git-branch)  ❯ ────────────────────────
-_git_branch() {
-    git rev-parse --is-inside-work-tree &>/dev/null || return
-    local b
-    b=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-    printf " \033[0;33m(%s)\033[0m" "$b"
-}
-PS1='\[\033[0;32m\]\u@\h\[\033[0m\] \[\033[0;34m\]\w\[\033[0m\]$(_git_branch) \[\033[0;36m\]❯\[\033[0m\] '
-
-# ── History ──────────────────────────────────────────────────────────
-HISTSIZE=5000
-HISTFILESIZE=10000
-HISTCONTROL=ignoreboth:erasedups
-shopt -s histappend
-
-# ── Navigation ───────────────────────────────────────────────────────
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias -- -='cd -'
-
-# ── ls ───────────────────────────────────────────────────────────────
-if command -v eza &>/dev/null; then
-    alias ls='eza --group-directories-first'
-    alias la='eza -a --group-directories-first'
-    alias ll='eza -l --header --group-directories-first'
-    alias lla='eza -la --header --group-directories-first'
-    alias lt='eza --tree --level=2'
-    alias tree='eza --tree'
-else
-    alias ls='ls --color=auto'
-    alias la='ls -a --color=auto'
-    alias ll='ls -lah --color=auto'
-    alias lla='ls -lah --color=auto'
-    alias tree='tree -C'
-fi
-alias cls='clear'
-alias grep='grep --color=auto'
-alias diff='diff --color=auto'
-
-# ── Common shortcuts ──────────────────────────────────────────────────
-alias c='clear'
-alias q='exit'
-alias reload='source ~/.bashrc && echo "reloaded"'
-alias bashrc='nano ~/.bashrc'
-alias rb='reload'
-alias myip='curl -s https://ipinfo.io/ip && echo'
-alias ports='ss -tulpn'
-alias now='date "+%Y-%m-%d %H:%M:%S"'
-alias df='df -h'
-alias du='du -sh *'
-alias free='free -h'
-alias update='apt update && apt upgrade -y'
-
-# ── Git shortcuts ─────────────────────────────────────────────────────
-alias gs='git status'
-alias ga='git add .'
-alias gc='git commit -m'
-alias gp='git push'
-alias gpl='git pull'
-alias gl='git log --oneline --graph --decorate -15'
-
-# Termux-style shortcuts that are safe to use from Ubuntu.
-os() {
-    local termux_home="/data/data/com.termux/files/home"
-    if [ -f "$HOME/ms1/termux/os.sh" ]; then
-        bash "$HOME/ms1/termux/os.sh"
-    elif [ -f "$termux_home/ms1/termux/os.sh" ]; then
-        HOME="$termux_home" bash "$termux_home/ms1/termux/os.sh"
-    else
-        echo "Could not find ms1/termux/os.sh in Ubuntu or Termux home."
+    # ── 2. Copy the shared OS-aware bashrc ───────────────────────────
+    echo -e "${CYAN}[2/5] Copying shared Ubuntu/Termux ~/.bashrc...${NC}"
+    if [ ! -f "$BASHRC_SOURCE" ]; then
+        echo -e "${RED}Shared bashrc not found: $BASHRC_SOURCE${NC}"
         return 1
     fi
-}
-
-# ── Handy functions ───────────────────────────────────────────────────
-mkcd()   { mkdir -p "$1" && cd "$1"; }
-ff()     { find . -name "*$1*" 2>/dev/null; }
-extract() {
-    case "$1" in
-        *.tar.gz|*.tgz)  tar xzf "$1" ;;
-        *.tar.bz2|*.tbz) tar xjf "$1" ;;
-        *.tar.xz)        tar xJf "$1" ;;
-        *.tar)           tar xf  "$1" ;;
-        *.zip)           unzip   "$1" ;;
-        *.gz)            gunzip  "$1" ;;
-        *.bz2)           bunzip2 "$1" ;;
-        *.xz)            unxz    "$1" ;;
-        *.7z)            7z x    "$1" ;;
-        *) echo "Unknown archive: $1" ;;
-    esac
-}
-
-export PATH="$HOME/bin:$PATH"
-
-# ── zoxide (smarter cd) ───────────────────────────────────────────────
-command -v zoxide &>/dev/null && eval "$(zoxide init bash)"
-
-# Fastfetch on interactive startup, like the Termux shell configuration.
-if [[ $- == *i* ]] && command -v fastfetch &>/dev/null; then
-    fastfetch
-fi
-BASHRC
-
+    cp "$BASHRC_SOURCE" "$ub_home/.bashrc" || return 1
     # ── 3. Write ~/.nanorc ───────────────────────────────────────────
     echo -e "${CYAN}[3/5] Writing Ubuntu ~/.nanorc...${NC}"
     cat > "$ub_home/.nanorc" << 'NANORC'
