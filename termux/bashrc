@@ -124,6 +124,14 @@ if [[ "$IS_TERMUX" == true ]]; then
 else
     alias update='sudo apt update && sudo apt upgrade -y'
     alias rb='reload'
+
+    _git_branch() {
+        git rev-parse --is-inside-work-tree &>/dev/null || return
+        local branch
+        branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+        printf " \033[0;33m(%s)\033[0m" "$branch"
+    }
+    PS1='\[\033[0;32m\]\u@\h\[\033[0m\] \[\033[0;34m\]\w\[\033[0m\]$(_git_branch) \[\033[0;36m\]❯\[\033[0m\] '
 fi
 
 export PATH="$HOME/bin:$PATH"
@@ -132,7 +140,7 @@ export PATH="$HOME/bin:$PATH"
 if command -v zoxide >/dev/null 2>&1; then
     eval "$(zoxide init bash --cmd cd)"
 fi
-if command -v oh-my-posh >/dev/null 2>&1; then
+if [[ "$IS_TERMUX" == true ]] && command -v oh-my-posh >/dev/null 2>&1; then
     local_omp_config="$HOME/.config/ohmyposh/catppuccin.omp.json"
     if [[ -f "$local_omp_config" ]]; then
         eval "$(oh-my-posh init bash --config "$local_omp_config")"
