@@ -881,15 +881,32 @@ _setup_termux_env() {
     echo -e "${CYAN}Setting up Ubuntu environment...${NC}"
     echo ""
 
-    # Make sure Ubuntu is actually installed
-    if ! command -v proot-distro >/dev/null 2>&1 || \
-       ! proot-distro list 2>/dev/null | grep -q "ubuntu.*installed"; then
+    # This script can be run from either Termux or from inside Ubuntu.
+    local inside_ubuntu=false
+    if [ -r /etc/os-release ] && grep -qi '^ID=ubuntu$' /etc/os-release; then
+        inside_ubuntu=true
+    fi
+
+    # Make sure Ubuntu is actually installed when running from Termux. The
+    # installed-rootfs directory is also a reliable fallback across versions
+    # whose `proot-distro list` output differs.
+    if [ "$inside_ubuntu" = false ] && {
+        ! command -v proot-distro >/dev/null 2>&1 || {
+            ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
+            [ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ];
+        }
+    }; then
         echo -e "${RED}Ubuntu is not installed yet. Run option 1 first.${NC}"
         return 1
     fi
 
-    local ubuntu_root="$HOME/.local/share/proot-distro/installed-rootfs/ubuntu"
-    local ub_home="$ubuntu_root/root"
+    local ub_home
+    if [ "$inside_ubuntu" = true ]; then
+        ub_home="$HOME"
+    else
+        local ubuntu_root="$HOME/.local/share/proot-distro/installed-rootfs/ubuntu"
+        ub_home="$ubuntu_root/root"
+    fi
 
     # ── 1. Create useful directories ────────────────────────────────
     echo -e "${CYAN}[1/5] Creating standard directories in Ubuntu...${NC}"
@@ -991,7 +1008,12 @@ NANORC
 
     # ── 4. Install extra packages inside Ubuntu ──────────────────────
     echo -e "${CYAN}[4/5] Installing useful packages inside Ubuntu...${NC}"
-    proot-distro login ubuntu -- bash -c "
+    if [ "$inside_ubuntu" = true ]; then
+        apt update -y
+        apt install -y curl wget git nano vim htop tree zsh tmux unzip zip \
+            python3 python3-pip build-essential
+    else
+        proot-distro login ubuntu -- bash -c "
         apt update -y
         apt install -y \
             curl wget git nano vim htop tree \
@@ -999,18 +1021,28 @@ NANORC
             python3 python3-pip \
             build-essential \
             2>/dev/null || true
-    "
+        "
+    fi
 
     # ── 5. Git config inside Ubuntu ──────────────────────────────────
     echo -e "${CYAN}[5/5] Configuring git inside Ubuntu...${NC}"
-    proot-distro login ubuntu -- bash -c "
+    if [ "$inside_ubuntu" = true ]; then
         git config --global core.editor nano
         git config --global pull.rebase false
         git config --global init.defaultBranch main
         git config --global color.ui auto
         git config --global alias.st status
         git config --global alias.lg 'log --oneline --graph --decorate -15'
-    "
+    else
+        proot-distro login ubuntu -- bash -c "
+            git config --global core.editor nano
+            git config --global pull.rebase false
+            git config --global init.defaultBranch main
+            git config --global color.ui auto
+            git config --global alias.st status
+            git config --global alias.lg 'log --oneline --graph --decorate -15'
+        "
+    fi
 
     echo ""
     echo -e "${GREEN}✓ Ubuntu environment setup complete!${NC}"
@@ -1020,7 +1052,11 @@ NANORC
     echo -e "  • ${CYAN}~/projects  ~/scripts  ~/tmp  ~/bin${NC}  created"
     echo -e "  • curl wget git nano vim htop tree zsh tmux python3 installed"
     echo ""
-    echo -e "${YELLOW}Login with: proot-distro login ubuntu${NC}"
+    if [ "$inside_ubuntu" = true ]; then
+        echo -e "${YELLOW}Ubuntu environment configured for $HOME.${NC}"
+    else
+        echo -e "${YELLOW}Login with: proot-distro login ubuntu${NC}"
+    fi
 }
 
 
