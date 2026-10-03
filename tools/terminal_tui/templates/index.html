@@ -12471,6 +12471,12 @@
                     } else {
                         passed++;
                         const reply = data.command || data.text || '(empty response)';
+                        // Auto-classify and save speed based on elapsed time
+                        const autoSpeed = elapsed < 3000 ? 'Fast' : elapsed < 8000 ? 'Medium' : 'Slow';
+                        const speeds = getModelSpeeds();
+                        if (!speeds[provider]) speeds[provider] = {};
+                        speeds[provider][model.val] = autoSpeed;
+                        saveModelSpeeds(speeds);
                         if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'success', reply, elapsed);
                     }
                 } catch (err) {
@@ -12493,6 +12499,8 @@
             runBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'none';
             _modelTesterRunning = false;
+            // Sync speed tags in the AI copilot model dropdown
+            if (typeof syncAIModelDropdown === 'function') syncAIModelDropdown();
         }
 
         function selectAIProvider(val) {
