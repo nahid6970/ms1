@@ -10599,6 +10599,13 @@
                     if (document.getElementById('ai-model-filter-modal').classList.contains('show') && activeFilterTab === provider) {
                         renderFilterModelsList();
                     }
+                    // Refresh git modal model dropdown if it's open and we just got gemini models
+                    if (provider === 'gemini' && typeof populateGitAIModelDropdown === 'function') {
+                        const gitModal = document.getElementById('git-modal');
+                        if (gitModal && gitModal.classList.contains('show')) {
+                            populateGitAIModelDropdown();
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Failed to fetch dynamic models for ' + provider, err);
@@ -12501,6 +12508,11 @@
             _modelTesterRunning = false;
             // Sync speed tags in the AI copilot model dropdown
             if (typeof syncAIModelDropdown === 'function') syncAIModelDropdown();
+            // Refresh git modal model dropdown if open
+            if (typeof populateGitAIModelDropdown === 'function') {
+                const gitModal = document.getElementById('git-modal');
+                if (gitModal && gitModal.classList.contains('show')) populateGitAIModelDropdown();
+            }
         }
 
         function selectAIProvider(val) {
@@ -13876,17 +13888,13 @@
                 sel.onchange = () => localStorage.setItem('git-ai-commit-model', sel.value);
             }
 
-            // Use already-loaded dynamic list if available
+            // Use already-loaded dynamic list if available (fills instantly)
             const dynamic = (typeof DYNAMIC_AI_MODELS !== 'undefined') ? (DYNAMIC_AI_MODELS['gemini'] || []) : [];
-            if (dynamic.length > 0) {
-                _fillSelect(dynamic);
-                return;
-            }
+            const hiddenList = (typeof getHiddenModels === 'function') ? (getHiddenModels()['gemini'] || []) : [];
+            const filterHidden = models => models.filter(m => !hiddenList.includes(m.val));
+            _fillSelect(filterHidden(dynamic.length > 0 ? dynamic : FALLBACK_MODELS));
 
-            // Nothing loaded yet — fill with fallback immediately so the select isn't blank
-            _fillSelect(FALLBACK_MODELS);
-
-            // Then attempt a live fetch and repopulate when done
+            // Always fire a background fetch to get the freshest list
             const apiKey = localStorage.getItem('gemini-api-key') || '';
             if (!apiKey) return;
             fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
@@ -13901,9 +13909,10 @@
                             DYNAMIC_AI_MODELS['gemini'] = fetched;
                             try { localStorage.setItem('ai-dynamic-models', JSON.stringify(DYNAMIC_AI_MODELS)); } catch(e) {}
                         }
-                        // Only repopulate if the modal is still open
+                        // Repopulate if the modal is still open
                         if (document.getElementById('git-modal') && document.getElementById('git-modal').classList.contains('show')) {
-                            _fillSelect(fetched);
+                            const freshHidden = (typeof getHiddenModels === 'function') ? (getHiddenModels()['gemini'] || []) : [];
+                            _fillSelect(fetched.filter(m => !freshHidden.includes(m.val)));
                         }
                     }
                 })
