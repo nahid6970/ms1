@@ -4573,7 +4573,7 @@
                             }).then(async (response) => {
                                 if (response.ok) {
                                     const result = await response.json();
-                                    const pathToSend = `"${result.path}"`;
+                                    const pathToSend = result.path;
                                     sendTerminalPasteText(pathToSend);
                                 } else {
                                     const errData = await response.json();
@@ -5528,10 +5528,7 @@
                         
                         if (response.ok) {
                             const result = await response.json();
-                            // Wrap path in quotes for cmd/powershell safety
-                            const pathToSend = `"${result.path}"`;
-                            
-                            // Send the path as input to the active terminal
+                            const pathToSend = result.path;
                             fetch(`/input/${activeProject}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -5571,7 +5568,7 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    const pathToSend = `"${result.path}"`;
+                    const pathToSend = result.path;
 
                     fetch(`/input/${activeProject}`, {
                         method: 'POST',
@@ -5612,7 +5609,7 @@
                 }
                 
                 const result = await response.json();
-                return `"${result.path}"`;
+                return result.path;
             });
 
             try {
