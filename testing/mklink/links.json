@@ -40,53 +40,6 @@
         ]
     },
     {
-        "name": "Gemini Settings",
-        "items": [
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\settings.json",
-                "fake": "C:\\Users\\nahid\\.gemini\\settings.json"
-            },
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\GEMINI.md",
-                "fake": "C:\\Users\\nahid\\.gemini\\GEMINI.md"
-            },
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\task_complete.py",
-                "fake": "C:\\Users\\nahid\\.gemini\\task_complete.py"
-            },
-            {
-                "type": "folder",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\policies",
-                "fake": "C:\\Users\\nahid\\.gemini\\policies"
-            },
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\trustedFolders.json",
-                "fake": "C:\\Users\\nahid\\.gemini\\trustedFolders.json"
-            }
-        ],
-        "copy_mode": false
-    },
-    {
-        "name": "Kiro",
-        "items": [
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\KIRO\\KIRO.md",
-                "fake": "C:\\Users\\nahid\\.kiro\\steering\\KIRO.md"
-            },
-            {
-                "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\KIRO\\task_complete.py",
-                "fake": "C:\\Users\\nahid\\.kiro\\steering\\task_complete.py"
-            }
-        ],
-        "copy_mode": false
-    },
-    {
         "name": "VLR.gg STATS",
         "items": [
             {
@@ -232,12 +185,22 @@
         "copy_mode": true
     },
     {
-        "name": "Codex AI Agent Guidline",
+        "name": "AGENT Prompting",
         "items": [
             {
                 "type": "file",
-                "target": "C:\\@delta\\ms1\\asset\\gemini\\GEMINI.md",
+                "target": "C:\\@delta\\ms1\\asset\\Prompting\\AGENT.md",
                 "fake": "C:\\Users\\nahid\\.codex\\AGENTS.md"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\Prompting\\AGENT.md",
+                "fake": "C:\\Users\\nahid\\.kiro\\steering\\KIRO.md"
+            },
+            {
+                "type": "file",
+                "target": "C:\\@delta\\ms1\\asset\\Prompting\\AGENT.md",
+                "fake": "C:\\Users\\nahid\\.gemini\\GEMINI.md"
             }
         ],
         "copy_mode": false
