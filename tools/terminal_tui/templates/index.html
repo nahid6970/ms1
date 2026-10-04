@@ -1527,21 +1527,40 @@
         .snippet-edit  { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; line-height: 1; }
         .snippet-edit:hover { color: var(--accent-color); background: rgba(var(--accent-rgb, 99,102,241),0.12); }
 
-        /* Bookmark subcommand panel */
-        .subcmd-panel {
-            position: absolute; z-index: 2000;
-            background: var(--bg-sidebar); border: 1px solid var(--border-color);
-            border-radius: 8px; box-shadow: 0 10px 28px rgba(0,0,0,0.55);
-            width: 280px; padding: 0; overflow: hidden;
+        /* Bookmark subcommand inline row */
+        .bm-subcmds-row {
+            display: none; flex-wrap: wrap; gap: 5px;
+            padding: 6px 12px 8px 26px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.12);
         }
-        .subcmd-panel-header { padding: 8px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; }
-        .subcmd-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.1s; cursor: pointer; }
-        .subcmd-item:last-child { border-bottom: none; }
-        .subcmd-item:hover { background: var(--bg-card-hover); }
-        .subcmd-text { font-family: 'Fira Code', monospace; font-size: 0.74rem; color: var(--text-primary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .subcmd-del { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; padding: 1px 4px; border-radius: 3px; flex-shrink: 0; line-height: 1; }
-        .subcmd-del:hover { color: #f87171; }
-        .subcmd-add-row { display: flex; gap: 5px; padding: 8px 10px; border-top: 1px solid var(--border-color); }
+        .bm-subcmds-row.open { display: flex; }
+        .bm-subcmd-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 3px 9px; border-radius: 5px; font-size: 0.74rem; cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-sidebar); color: var(--text-primary);
+            transition: filter 0.15s, opacity 0.15s; white-space: nowrap;
+            line-height: 1.4; user-select: none;
+        }
+        .bm-subcmd-btn:hover { filter: brightness(1.25); }
+        .bm-subcmd-add-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+            padding: 3px 9px; border-radius: 5px; font-size: 0.72rem; cursor: pointer;
+            border: 1px dashed var(--border-color); background: none;
+            color: var(--text-muted); transition: border-color 0.15s, color 0.15s;
+        }
+        .bm-subcmd-add-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .bm-subcmds-row .bm-subcmd-edit-overlay {
+            position: absolute; top: -4px; right: -4px; width: 14px; height: 14px;
+            background: var(--bg-sidebar); border: 1px solid var(--border-color);
+            border-radius: 50%; font-size: 0.55rem; display: none;
+            align-items: center; justify-content: center; cursor: pointer;
+            color: var(--text-secondary); line-height: 1; z-index: 1;
+        }
+        .bm-subcmd-wrap { position: relative; display: inline-flex; }
+        .bm-subcmd-wrap:hover .bm-subcmd-edit-overlay { display: flex; }
+
 
         /* Status bar icon buttons */
         .sbicon-btn {
@@ -2507,28 +2526,59 @@
         </div>
     </div>
 
-    <!-- Subcommand Add Modal -->
+    <!-- Subcommand Edit Modal -->
     <div class="modal-overlay" id="subcmd-add-modal">
-        <div class="modal-content" style="max-width: 400px; padding: 24px;">
+        <div class="modal-content" style="width: 420px; max-width: 95%; padding: 24px;">
             <div class="modal-header" style="margin-bottom: 16px;">
-                <h2>Add Sub-command</h2>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="subcmd-add-modal-subtitle"></div>
+                <h2 id="subcmd-modal-title" style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Add Sub-command</h2>
+                <button onclick="closeSubcmdAddModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
             </div>
-            <form onsubmit="handleSaveSubcmd(event)">
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label style="font-size: 0.8rem; font-weight: 500;">Command</label>
-                    <textarea id="subcmd-add-cmd" class="form-input" required autocomplete="off" rows="3"
-                        style="padding: 8px 12px; font-size: 0.82rem; font-family: 'Fira Code', monospace; resize: vertical; min-height: 60px; width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none;"></textarea>
+            <!-- Label -->
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Display Label <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
+                <input id="subcmd-add-label" type="text" placeholder="e.g. Run Tests" autocomplete="off" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+            <!-- Command -->
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Command</label>
+                <textarea id="subcmd-add-cmd" rows="3" required autocomplete="off" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.82rem; resize: vertical; min-height: 60px; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+            </div>
+            <!-- Colors -->
+            <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Colors</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-bg-color').click()">
+                        <input id="subcmd-bg-color" type="color" value="#1e293b" title="Background color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Background</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-fg-color').click()">
+                        <input id="subcmd-fg-color" type="color" value="#e2e8f0" title="Text color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Text</span>
+                    </div>
+                    <button type="button" onclick="resetSubcmdColors()" title="Reset to default colors" style="height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:0.75rem; white-space:nowrap; flex-shrink:0;">Reset</button>
                 </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="font-size: 0.8rem; font-weight: 500;">Display Label <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
-                    <input type="text" id="subcmd-add-label" class="form-input" placeholder="e.g. Run Tests" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
+            </div>
+            <!-- Border -->
+            <div style="margin-bottom: 16px;">
+                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Border</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-border-color').click()">
+                        <input id="subcmd-border-color" type="color" value="#334155" title="Border color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
+                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Color</span>
+                    </div>
+                    <input id="subcmd-border-width" type="number" min="0" max="8" placeholder="px" title="Border thickness (px)" style="width:58px; height:34px; padding:0 8px; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:0.82rem; outline:none; text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <input id="subcmd-border-radius" type="number" min="0" max="999" placeholder="r px" title="Border radius (px)" style="width:62px; height:34px; padding:0 8px; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:0.82rem; outline:none; text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <span style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap;">radius</span>
                 </div>
-                <div class="form-actions" style="border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeSubcmdAddModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Add</button>
+            </div>
+            <!-- Actions -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px;">
+                <button id="subcmd-modal-delete" type="button" onclick="deleteSubcmdFromModal()" style="padding: 7px 16px; font-size: 0.85rem; background: #ef4444; border: 1px solid #ef4444; border-radius: 8px; color: white; cursor: pointer; display: none;">Delete</button>
+                <div style="display: flex; gap: 10px; margin-left: auto;">
+                    <button type="button" onclick="closeSubcmdAddModal()" style="padding: 7px 16px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer;">Cancel</button>
+                    <button id="subcmd-modal-save" type="button" onclick="handleSaveSubcmd()" style="padding: 7px 20px; font-size: 0.85rem; background: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 8px; color: white; cursor: pointer;">Add</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -6478,22 +6528,9 @@
                     }
                     row.onmouseenter = () => {
                         row.style.backgroundColor = 'var(--bg-card-hover)';
-                        row._hoverTimeout = setTimeout(() => {
-                            if (_activeSubcmdCmd !== bm.command) {
-                                const subcmds = loadSubcmds(bm.command);
-                                if (subcmds && subcmds.length > 0) {
-                                    const subcmdBtn = row.querySelector('.subcmd-btn');
-                                    if (subcmdBtn) toggleSubcmdPanel(subcmdBtn, bm.command);
-                                }
-                            }
-                        }, 1000);
                     };
                     row.onmouseleave = () => {
                         row.style.backgroundColor = 'transparent';
-                        if (row._hoverTimeout) {
-                            clearTimeout(row._hoverTimeout);
-                            row._hoverTimeout = null;
-                        }
                     };
                     row.onclick = () => runBookmarkedCommand(bm.command, bm.windowTitle);
                     row.oncontextmenu = (e) => {
@@ -6547,17 +6584,32 @@
 
                     const dragHandle = `<span class="bm-drag-handle" title="Drag to reorder within ${bm.project}" style="color:var(--text-muted); cursor:grab; font-size:0.9rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.5;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.5'">⠿</span>`;
 
+                    const bmCmdEsc = bm.command.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+                    // Wrap in a container so the inline subcmds row can live below the main row
+                    const wrap = document.createElement('div');
+                    wrap.style.cssText = `border-bottom: ${isLast ? 'none' : '1px solid var(--border-color)'};`;
+                    if (idx === 0) { wrap.style.borderTopLeftRadius = '7px'; wrap.style.borderTopRightRadius = '7px'; }
+                    if (isLast) { wrap.style.borderBottomLeftRadius = '7px'; wrap.style.borderBottomRightRadius = '7px'; }
+
+                    // Remove border from row itself — wrapper owns it now
+                    row.style.borderBottom = 'none';
+                    row.style.borderTopLeftRadius = idx === 0 ? '7px' : '0';
+                    row.style.borderTopRightRadius = idx === 0 ? '7px' : '0';
+                    row.style.borderBottomLeftRadius = '0';
+                    row.style.borderBottomRightRadius = '0';
+
                     row.innerHTML = `
                         ${dragHandle}
                         <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                            <button type="button" class="subcmd-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdPanel(this, '${bm.command.replace(/'/g, "\\'")}')" title="Sub-commands">
+                            <button type="button" class="subcmd-toggle-btn" data-bmcmd="${bmCmdEsc}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdInline(this, '${bmCmdEsc}')" title="Sub-commands">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
                                     <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
                                 </svg>
                             </button>
-                            <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bm.command.replace(/'/g, "\\'")}')" title="Run in new split terminal">
+                            <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bmCmdEsc}')" title="Run in new split terminal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color);">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                     <line x1="12" y1="3" x2="12" y2="21"></line>
@@ -6572,7 +6624,16 @@
                             <button type="button" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); deleteBookmark('${bm.project}', ${bm.index})">❌</button>
                         </div>
                     `;
-                    listEl.appendChild(row);
+
+                    // Inline subcommands strip (collapsed by default)
+                    const subcmdsRow = document.createElement('div');
+                    subcmdsRow.className = 'bm-subcmds-row';
+                    subcmdsRow.dataset.bmcmd = bm.command;
+                    renderSubcmdsInline(subcmdsRow, bm.command);
+
+                    wrap.appendChild(row);
+                    wrap.appendChild(subcmdsRow);
+                    listEl.appendChild(wrap);
                 });
             }
         }
@@ -6886,206 +6947,163 @@
             }
         }
 
-        let _activeSubcmdPanel = null;
-        let _activeSubcmdCmd = null;
+        // ── Inline subcommand strip ─────────────────────────────────────────
 
-        function toggleSubcmdPanel(btn, bmCmd) {
-            // If same panel is open, close it
-            if (_activeSubcmdPanel && _activeSubcmdCmd === bmCmd) {
-                closeSubcmdPanel();
-                return;
-            }
-            closeSubcmdPanel();
-            _activeSubcmdCmd = bmCmd;
-
-            const panel = document.createElement('div');
-            panel.className = 'subcmd-panel';
-            panel.id = 'active-subcmd-panel';
-            panel.onclick = e => e.stopPropagation();
-
-            renderSubcmdPanelContent(panel, bmCmd);
-
-            // Position below/near the button
-            document.body.appendChild(panel);
-            _activeSubcmdPanel = panel;
-
-            const rect = btn.getBoundingClientRect();
-            const panelW = 280;
-            let left = rect.right - panelW;
-            if (left < 4) left = 4;
-            panel.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-            panel.style.left = left + 'px';
-
-            // Close on outside click
-            setTimeout(() => {
-                window.addEventListener('pointerdown', _subcmdOutside, true);
-            }, 10);
+        function toggleSubcmdInline(btn, bmCmd) {
+            // Find the bm-subcmds-row that belongs to this bookmark's wrapper
+            const wrap = btn.closest('.bookmark-item')?.parentElement;
+            if (!wrap) return;
+            const strip = wrap.querySelector('.bm-subcmds-row');
+            if (!strip) return;
+            const isOpen = strip.classList.contains('open');
+            strip.classList.toggle('open', !isOpen);
+            btn.style.color = !isOpen ? 'var(--accent-color)' : '';
         }
 
-        function _subcmdOutside(e) {
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel && !panel.contains(e.target)) {
-                closeSubcmdPanel();
-            }
-        }
-
-        function closeSubcmdPanel() {
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel) panel.remove();
-            _activeSubcmdPanel = null;
-            _activeSubcmdCmd = null;
-            window.removeEventListener('pointerdown', _subcmdOutside, true);
-        }
-
-        function renderSubcmdPanelContent(panel, bmCmd) {
+        function renderSubcmdsInline(stripEl, bmCmd) {
             const subcmds = loadSubcmds(bmCmd);
-            const shortName = bmCmd.length > 28 ? bmCmd.slice(0, 28) + '…' : bmCmd;
+            stripEl.innerHTML = '';
 
-            // Build static shell first
-            panel.innerHTML = `
-                <div class="subcmd-panel-header">
-                    <span>⚡ Sub-commands</span>
-                    <button onclick="closeSubcmdPanel()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem;line-height:1;padding:0 2px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">✕</button>
-                </div>
-                <div id="subcmd-items-list"></div>
-                <div style="padding: 8px 10px; border-top: 1px solid var(--border-color);">
-                    <button onclick="event.stopPropagation(); openSubcmdAddModal('${bmCmd.replace(/'/g, "\\'")}')"
-                        style="width:100%; padding:5px; background:none; border:1px dashed var(--border-color); border-radius:5px; color:var(--text-secondary); font-size:0.75rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:all 0.2s;"
-                        onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--accent-color)'"
-                        onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Add Sub-command
-                    </button>
-                </div>
-            `;
+            subcmds.forEach((sc, i) => {
+                const label = (sc.label || sc.cmd);
+                const wrap = document.createElement('div');
+                wrap.className = 'bm-subcmd-wrap';
 
-            // Populate items list with DOM elements for drag support
-            const listEl = panel.querySelector('#subcmd-items-list');
-            if (!subcmds.length) {
-                listEl.innerHTML = `<div style="padding:8px 12px; font-size:0.74rem; color:var(--text-muted); font-style:italic;">No sub-commands yet.</div>`;
-            } else {
-                let scDragSrc = null;
-                subcmds.forEach((sc, i) => {
-                    const label = sc.label || sc.cmd;
-                    const item = document.createElement('div');
-                    item.className = 'subcmd-item';
-                    item.draggable = true;
-                    item.dataset.idx = i;
-                    item.style.cursor = 'default';
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'bm-subcmd-btn';
+                btn.textContent = label;
+                btn.title = sc.cmd;
+                // Apply saved styling
+                if (sc.bg)           btn.style.backgroundColor = sc.bg;
+                if (sc.fg)           btn.style.color           = sc.fg;
+                if (sc.borderColor)  btn.style.borderColor     = sc.borderColor;
+                if (sc.borderWidth != null) btn.style.borderWidth = sc.borderWidth + 'px';
+                if (sc.borderRadius != null) btn.style.borderRadius = sc.borderRadius + 'px';
+                btn.addEventListener('click', (e) => { e.stopPropagation(); runSubcmd(sc.cmd); });
 
-                    item.innerHTML = `
-                        <span style="color:var(--text-muted); cursor:grab; font-size:0.85rem; padding:0 4px 0 0; flex-shrink:0; user-select:none; opacity:0.45; line-height:1;" onmouseenter="this.style.opacity='1'" onmouseleave="this.style.opacity='0.45'">⠿</span>
-                        <span class="subcmd-text" title="${sc.cmd.replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${label.replace(/</g,'&lt;')}</span>
-                        <button class="subcmd-del" title="Delete">✕</button>
-                    `;
-
-                    // Click to run (but not on del button)
-                    item.addEventListener('click', (e) => {
-                        if (e.target.classList.contains('subcmd-del')) return;
-                        runSubcmd(sc.cmd);
-                    });
-
-                    // Delete
-                    item.querySelector('.subcmd-del').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        deleteSubcmd(bmCmd, i);
-                    });
-
-                    // Drag events
-                    item.addEventListener('dragstart', (e) => {
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.dataTransfer.setData('text/plain', i);
-                        item.style.opacity = '0.4';
-                        scDragSrc = i;
-                    });
-                    item.addEventListener('dragend', () => {
-                        item.style.opacity = '1';
-                        listEl.querySelectorAll('.subcmd-item').forEach(r => r.style.borderTop = '');
-                    });
-                    item.addEventListener('dragover', (e) => {
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = 'move';
-                        listEl.querySelectorAll('.subcmd-item').forEach(r => r.style.borderTop = '');
-                        if (scDragSrc !== i) item.style.borderTop = '2px solid var(--accent-color)';
-                    });
-                    item.addEventListener('dragleave', () => {
-                        item.style.borderTop = '';
-                    });
-                    item.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        item.style.borderTop = '';
-                        if (scDragSrc === null || scDragSrc === i) return;
-                        reorderSubcmd(bmCmd, scDragSrc, i);
-                    });
-
-                    listEl.appendChild(item);
+                // Edit overlay (pencil on hover)
+                const editBtn = document.createElement('span');
+                editBtn.className = 'bm-subcmd-edit-overlay';
+                editBtn.title = 'Edit';
+                editBtn.textContent = '✎';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openSubcmdEditModal(bmCmd, i);
                 });
-            }
 
-            setTimeout(() => { const inp = panel.querySelector('#subcmd-input'); if(inp) inp.focus(); }, 30);
+                wrap.appendChild(btn);
+                wrap.appendChild(editBtn);
+                stripEl.appendChild(wrap);
+            });
+
+            // Add sub-command button
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.className = 'bm-subcmd-add-btn';
+            addBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add`;
+            addBtn.addEventListener('click', (e) => { e.stopPropagation(); openSubcmdEditModal(bmCmd, null); });
+            stripEl.appendChild(addBtn);
         }
 
-        function addSubcmd(bmCmd) {
-            const input = document.getElementById('subcmd-input');
-            if (!input) return;
-            const raw = input.value.trim();
-            if (!raw) return;
-            let label = '', cmd = '';
-            const sepIdx = raw.indexOf('::');
-            if (sepIdx !== -1) {
-                label = raw.slice(0, sepIdx).trim();
-                cmd   = raw.slice(sepIdx + 2).trim();
+        function _refreshSubcmdsStrip(bmCmd) {
+            document.querySelectorAll('.bm-subcmds-row').forEach(strip => {
+                if (strip.dataset.bmcmd === bmCmd) {
+                    renderSubcmdsInline(strip, bmCmd);
+                }
+            });
+        }
+
+        // ── Subcommand edit modal ───────────────────────────────────────────
+
+        let _subcmdAddModalCmd = null;
+        let _subcmdEditIdx = null;  // null = add mode, number = edit mode
+
+        function resetSubcmdColors() {
+            document.getElementById('subcmd-bg-color').value = '#1e293b';
+            document.getElementById('subcmd-fg-color').value = '#e2e8f0';
+            document.getElementById('subcmd-border-color').value = '#334155';
+            document.getElementById('subcmd-border-width').value = '';
+            document.getElementById('subcmd-border-radius').value = '';
+        }
+
+        function openSubcmdEditModal(bmCmd, idx) {
+            _subcmdAddModalCmd = bmCmd;
+            _subcmdEditIdx = idx;
+            const isEdit = (idx !== null && idx !== undefined);
+
+            document.getElementById('subcmd-modal-title').textContent = isEdit ? 'Edit Sub-command' : 'Add Sub-command';
+            document.getElementById('subcmd-modal-save').textContent = isEdit ? 'Save' : 'Add';
+            document.getElementById('subcmd-modal-delete').style.display = isEdit ? 'block' : 'none';
+
+            if (isEdit) {
+                const sc = (loadSubcmds(bmCmd))[idx] || {};
+                document.getElementById('subcmd-add-label').value = sc.label || '';
+                document.getElementById('subcmd-add-cmd').value   = sc.cmd   || '';
+                document.getElementById('subcmd-bg-color').value           = sc.bg           || '#1e293b';
+                document.getElementById('subcmd-fg-color').value           = sc.fg           || '#e2e8f0';
+                document.getElementById('subcmd-border-color').value       = sc.borderColor  || '#334155';
+                document.getElementById('subcmd-border-width').value       = sc.borderWidth  != null ? sc.borderWidth  : '';
+                document.getElementById('subcmd-border-radius').value      = sc.borderRadius != null ? sc.borderRadius : '';
             } else {
-                cmd = raw; label = '';
+                document.getElementById('subcmd-add-label').value = '';
+                document.getElementById('subcmd-add-cmd').value   = '';
+                resetSubcmdColors();
             }
+
+            document.getElementById('subcmd-add-modal').classList.add('show');
+            setTimeout(() => document.getElementById('subcmd-add-cmd').focus(), 50);
+        }
+
+        // Keep old name as alias so any lingering references still work
+        function openSubcmdAddModal(bmCmd) { openSubcmdEditModal(bmCmd, null); }
+
+        function closeSubcmdAddModal() {
+            document.getElementById('subcmd-add-modal').classList.remove('show');
+            _subcmdAddModalCmd = null;
+            _subcmdEditIdx = null;
+        }
+
+        function handleSaveSubcmd() {
+            if (!_subcmdAddModalCmd) return;
+            const cmd   = document.getElementById('subcmd-add-cmd').value.trim();
+            const label = document.getElementById('subcmd-add-label').value.trim();
             if (!cmd) return;
-            const list = loadSubcmds(bmCmd);
-            list.push({ cmd, label });
-            saveSubcmds(bmCmd, list);
-            // Re-render panel in place
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel) renderSubcmdPanelContent(panel, bmCmd);
+
+            const bg           = document.getElementById('subcmd-bg-color').value;
+            const fg           = document.getElementById('subcmd-fg-color').value;
+            const borderColor  = document.getElementById('subcmd-border-color').value;
+            const borderWidthV = document.getElementById('subcmd-border-width').value;
+            const borderRadiusV= document.getElementById('subcmd-border-radius').value;
+            const borderWidth  = borderWidthV  !== '' ? parseInt(borderWidthV,  10) : null;
+            const borderRadius = borderRadiusV !== '' ? parseInt(borderRadiusV, 10) : null;
+
+            const entry = { cmd, label, bg, fg, borderColor };
+            if (borderWidth  !== null) entry.borderWidth  = borderWidth;
+            if (borderRadius !== null) entry.borderRadius = borderRadius;
+
+            const list = loadSubcmds(_subcmdAddModalCmd);
+            if (_subcmdEditIdx !== null && _subcmdEditIdx !== undefined) {
+                list[_subcmdEditIdx] = entry;
+            } else {
+                list.push(entry);
+            }
+            saveSubcmds(_subcmdAddModalCmd, list);
+            _refreshSubcmdsStrip(_subcmdAddModalCmd);
+            closeSubcmdAddModal();
+        }
+
+        function deleteSubcmdFromModal() {
+            if (!_subcmdAddModalCmd || _subcmdEditIdx === null) return;
+            deleteSubcmd(_subcmdAddModalCmd, _subcmdEditIdx);
+            closeSubcmdAddModal();
         }
 
         function deleteSubcmd(bmCmd, index) {
             const list = loadSubcmds(bmCmd);
             list.splice(index, 1);
             saveSubcmds(bmCmd, list);
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel) renderSubcmdPanelContent(panel, bmCmd);
-        }
-
-        let _subcmdAddModalCmd = null;
-
-        function openSubcmdAddModal(bmCmd) {
-            _subcmdAddModalCmd = bmCmd;
-            const shortName = bmCmd.length > 40 ? bmCmd.slice(0, 40) + '…' : bmCmd;
-            document.getElementById('subcmd-add-modal-subtitle').innerText = `For: ${shortName}`;
-            document.getElementById('subcmd-add-cmd').value = '';
-            document.getElementById('subcmd-add-label').value = '';
-            document.getElementById('subcmd-add-modal').classList.add('show');
-            setTimeout(() => document.getElementById('subcmd-add-cmd').focus(), 50);
-        }
-
-        function closeSubcmdAddModal() {
-            document.getElementById('subcmd-add-modal').classList.remove('show');
-            _subcmdAddModalCmd = null;
-        }
-
-        function handleSaveSubcmd(event) {
-            event.preventDefault();
-            if (!_subcmdAddModalCmd) return;
-            const cmd = document.getElementById('subcmd-add-cmd').value.trim();
-            const label = document.getElementById('subcmd-add-label').value.trim();
-            if (!cmd) return;
-            const list = loadSubcmds(_subcmdAddModalCmd);
-            list.push({ cmd, label });
-            saveSubcmds(_subcmdAddModalCmd, list);
-            closeSubcmdAddModal();
-            // Re-render subcmd panel if still open
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel) renderSubcmdPanelContent(panel, _subcmdAddModalCmd);
+            _refreshSubcmdsStrip(bmCmd);
         }
 
         function reorderSubcmd(bmCmd, fromIdx, toIdx) {
@@ -7094,12 +7112,10 @@
             const [moved] = list.splice(fromIdx, 1);
             list.splice(toIdx, 0, moved);
             saveSubcmds(bmCmd, list);
-            const panel = document.getElementById('active-subcmd-panel');
-            if (panel) renderSubcmdPanelContent(panel, bmCmd);
+            _refreshSubcmdsStrip(bmCmd);
         }
 
         function runSubcmd(cmd) {
-            closeSubcmdPanel();
             if (!activeProject) { alert('Select a workspace first.'); return; }
             if (socket && socket.connected) {
                 const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
@@ -7113,6 +7129,7 @@
                 });
             }
         }
+
 
         async function addBookmarkFromInput() {
             if (!activeProject) return;

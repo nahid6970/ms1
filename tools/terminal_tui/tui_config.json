@@ -994,11 +994,17 @@
     "kiro-cli chat --trust-all-tools --resume": [
       {
         "cmd": "kiro-cli chat --trust-all-tools",
-        "label": ""
+        "label": "N",
+        "bg": "#1e293b",
+        "fg": "#e2e8f0",
+        "borderColor": "#334155"
       },
       {
         "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
-        "label": ""
+        "label": "W/L/L",
+        "bg": "#1e293b",
+        "fg": "#e2e8f0",
+        "borderColor": "#334155"
       }
     ],
     "npm run deploy:pages": [
