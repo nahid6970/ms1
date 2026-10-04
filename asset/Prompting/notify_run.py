@@ -1,13 +1,10 @@
 import sys
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QGraphicsDropShadowEffect)
+from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel,
+                              QPushButton, QGraphicsDropShadowEffect)
 from PyQt6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
-from PyQt6.QtGui import QColor, QLinearGradient
+from PyQt6.QtGui import QColor
 
-BG_COLOR = "#1E1E2E"
 BORDER_COLOR = "#313244"
-PRIMARY_COLOR = "#89B4FA"  # Kiro Blue
-TEXT_COLOR = "#CDD6F4"
-BTN_HOVER = "#74C7EC"
 
 # Gradient color sets for animation
 GRADIENT_COLORS = [
@@ -21,10 +18,15 @@ GRADIENT_COLORS = [
     ("#ff9a9e", "#fecfef"),  # Pink to Light Pink
 ]
 
+
 class TaskCompletePopup(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool
+        )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.gradient_index = 0
@@ -44,7 +46,7 @@ class TaskCompletePopup(QWidget):
 
     def setup_animation(self):
         self.animation = QPropertyAnimation(self, b"transition_progress")
-        self.animation.setDuration(1200)  # 1.2 second transition
+        self.animation.setDuration(1200)
         self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
     def setup_ui(self):
@@ -66,7 +68,7 @@ class TaskCompletePopup(QWidget):
         shadow.setOffset(0, 4)
         self.container.setGraphicsEffect(shadow)
 
-        title = QLabel("✦ KIRO AI")
+        title = QLabel("✦ AI ASSISTANT")
         title.setObjectName("title")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         c_layout.addWidget(title)
@@ -93,7 +95,7 @@ class TaskCompletePopup(QWidget):
     def setup_gradient_timer(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.start_transition)
-        self.timer.start(2500)  # Start new transition every 2.5 seconds
+        self.timer.start(3000)  # New transition every 3 seconds
 
     def start_transition(self):
         self.gradient_index = (self.gradient_index + 1) % len(GRADIENT_COLORS)
@@ -102,35 +104,32 @@ class TaskCompletePopup(QWidget):
         self.animation.start()
 
     def interpolate_color(self, color1, color2, t):
-        """Interpolate between two hex colors"""
         c1 = QColor(color1)
         c2 = QColor(color2)
-        r = int(c1.red() + (c2.red() - c1.red()) * t)
+        r = int(c1.red()   + (c2.red()   - c1.red())   * t)
         g = int(c1.green() + (c2.green() - c1.green()) * t)
-        b = int(c1.blue() + (c2.blue() - c1.blue()) * t)
+        b = int(c1.blue()  + (c2.blue()  - c1.blue())  * t)
         return f"#{r:02x}{g:02x}{b:02x}"
 
     def get_text_color(self, bg_color):
-        """Get contrasting text color based on background brightness"""
         color = QColor(bg_color)
-        brightness = (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114)
+        brightness = color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114
         return "black" if brightness > 128 else "white"
 
     def update_gradient_style(self):
         current_colors = GRADIENT_COLORS[self.gradient_index]
         prev_index = (self.gradient_index - 1) % len(GRADIENT_COLORS)
         prev_colors = GRADIENT_COLORS[prev_index]
-        
-        # Interpolate between previous and current gradient
+
         color1 = self.interpolate_color(prev_colors[0], current_colors[0], self._transition_progress)
         color2 = self.interpolate_color(prev_colors[1], current_colors[1], self._transition_progress)
-        
-        # Calculate text color based on average brightness of gradient
+
         avg_color = self.interpolate_color(color1, color2, 0.5)
         text_color = self.get_text_color(avg_color)
+
         self.setStyleSheet(f"""
             QWidget#Container {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 {color1}, stop:1 {color2});
                 border: 1px solid {BORDER_COLOR};
                 border-radius: 8px;
@@ -158,7 +157,7 @@ class TaskCompletePopup(QWidget):
                 font-size: 10pt;
                 font-weight: 700;
             }}
-            QPushButton:hover {{ background-color: rgba(255, 255, 255, 1); }}
+            QPushButton:hover   {{ background-color: rgba(255, 255, 255, 1.0); }}
             QPushButton:pressed {{ background-color: rgba(255, 255, 255, 0.8); }}
         """)
 
@@ -173,14 +172,15 @@ class TaskCompletePopup(QWidget):
             self.oldPos = event.globalPosition().toPoint()
 
     def mouseMoveEvent(self, event):
-        if hasattr(self, 'oldPos'):
+        if hasattr(self, "oldPos"):
             delta = QPoint(event.globalPosition().toPoint() - self.oldPos)
             self.move(self.x() + delta.x(), self.y() + delta.y())
             self.oldPos = event.globalPosition().toPoint()
 
     def mouseReleaseEvent(self, event):
-        if hasattr(self, 'oldPos'):
+        if hasattr(self, "oldPos"):
             del self.oldPos
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
