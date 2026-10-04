@@ -65,13 +65,13 @@
         {
           "id": "505a49e5",
           "label": "00",
-          "fires_at": 1790834760.0,
-          "created_at": 1788692825.8522632,
+          "fires_at": 1793685060.0,
+          "created_at": 1791093207.7261395,
           "input_mode": "custom_3",
-          "input_value": "12:06 on 1 Oct",
+          "input_value": "11:51 on 3 Nov",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": false
+          "secondary_mode": true
         },
         {
           "id": "a7f5c453",
