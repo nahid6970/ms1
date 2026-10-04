@@ -1,7 +1,19 @@
 # Notification Rules
+
+<!-- OPTION A: Direct run — model runs the script as a command -->
+- When you have completely finished helping the user, run the notification script EXACTLY ONCE as your final action.
+- Command: `python C:\@delta\ms1\asset\Prompting\notify_run.py`
+- The notification displays a styled popup window with the message "Task Completed Successfully".
+- Run it for both complex tasks and simple conversations (hi, hello, thanks, etc.)
+- This must be the absolute last action — no text or explanations after running the command.
+
+<!-- OPTION B: Daemon style — model writes datetime to file, daemon shows popup -->
+<!-- Uncomment below and comment out OPTION A to switch
 - When you have completely finished helping the user, write the current date and time (format: YYYY-MM-DD HH:MM) to `C:\Users\nahid\notification.txt` EXACTLY ONCE as your final action.
 - This triggers a desktop notification popup via the daemon running in the background.
 - Do this for both complex tasks and simple conversations (hi, hello, thanks, etc.)
+- This must be the absolute last action.
+-->
 
 # Running Commands
 - CRITICAL: Do not run any command to download or build any packages — give me all the commands and I will run them myself.
