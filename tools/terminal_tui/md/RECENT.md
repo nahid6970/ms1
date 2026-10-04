@@ -5,6 +5,19 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-04] - Remove Quote-Wrapping from Pasted Image Paths
+
+### Problem
+All four image paste code paths (pane-level capture handler, document-level paste handler, drag-drop handler, screenshot file select) wrapped the returned path in double quotes: `` `"${result.path}"` ``. This caused AI CLI tools (Kiro, Gemini, Codex) to receive literal `"` characters as part of the path string, e.g. `"C:/Users/nahid/AppData/Local/Temp/screenshot_temp/pasted_image_20261004_230001.png"`.
+
+### Fix
+Removed all quote-wrapping — paths are now sent as-is (`result.path`). The temp folder filenames never contain spaces, so shell quoting was never necessary. AI tools handle raw paths directly without shell quoting.
+
+**Files Modified:**
+- `templates/index.html` — pane capture handler, document paste handler, `uploadDroppedImage()`, `handleScreenshotFileSelect()`
+
+---
+
 ## [2026-10-04] - Fix Image Paste Broken by Terminal Paste Refactor
 
 ### Root Cause

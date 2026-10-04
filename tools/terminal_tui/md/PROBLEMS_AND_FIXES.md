@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-04] - Pasted Image Paths Sent with Literal Quote Characters
+**Problem:** Pasting an image (clipboard image, drag-drop, or screenshot upload) into any AI CLI tool (Kiro, Gemini, Codex) sent the path wrapped in double quotes, e.g. `"C:/Users/.../pasted_image.png"`. The quotes appeared as literal characters in the tool's input rather than acting as shell quoting.
+**Root Cause:** All four paste code paths used `` `"${result.path}"` `` to wrap the returned path — intended for PowerShell/CMD shell safety — but `paneTerm.paste()` and the `/input/` PTY write both pass text verbatim, so the `"` characters became part of the string received by the AI tool.
+**Solution:** Removed quote-wrapping from all four paste paths. Paths are now sent as `result.path`. The temp directory filenames never contain spaces, so no shell quoting is needed, and AI tools receive a clean path.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-10-02] - Git Status Badge Stale for Several Seconds After Commit
 **Problem:** After committing via the git modal, the status bar kept showing "N files changed" for 6–7 seconds (up to 30s) before clearing to clean.
 **Root Cause:** `GIT_STATUS_CACHE_SECONDS = 30`. The commit route never invalidated the cache, so `updateStatsMonitor()` called immediately after commit returned the stale cached result until the TTL expired.
