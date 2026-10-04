@@ -5,6 +5,25 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-04] - Fix Image Paste Broken by Terminal Paste Refactor
+
+### Root Cause
+The 2026-09-23 "Prevent Duplicate Terminal Paste" refactor added a capture-phase `paste` listener on each `paneDiv`. This listener called `e.stopPropagation()` for text paste — but xterm.js itself also calls `stopPropagation()` internally on its textarea's paste event. The result: when a terminal pane was focused, the `document`-level image-paste handler (`document.addEventListener('paste', ...)`) never fired because the event was consumed by xterm.js before it could bubble to the document.
+
+### Fix
+Moved the image-paste detection logic into the pane-level **capture-phase** handler (which fires before xterm.js). When the clipboard contains an image type:
+1. `preventDefault()` and `stopPropagation()` are called immediately.
+2. The image is uploaded to `/api/session/${activeProject}/paste-image`.
+3. The returned path is sent to the active terminal via `sendTerminalPasteText(pathToSend)` (uses `paneTerm.paste()`, targeting the correct pane directly).
+
+Text paste behavior is unchanged. The global `document` paste handler remains as a fallback for non-terminal contexts (e.g., if paste happens while no pane is focused).
+
+**Files Modified:**
+- `templates/index.html` — pane-level paste listener
+- `md/RECENT.md`
+
+---
+
 ## [2026-10-03] - AI Suggest Commit Message + Model Tester Auto-Hide & Speed
 
 ### AI Suggest Commit Message Button (git modal)

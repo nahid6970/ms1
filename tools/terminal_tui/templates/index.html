@@ -4549,11 +4549,45 @@
                 paneTerm.paste(text);
             };
 
-            // Handle text paste once before xterm.js can process the same browser
-            // paste event. This keeps Ctrl+V out of AI CLI image-paste shortcuts.
+            // Handle paste before xterm.js processes the same browser paste event.
+            // This keeps Ctrl+V text out of AI CLI image-paste shortcuts, AND ensures
+            // image paste works even though xterm.js calls stopPropagation() internally
+            // (which would prevent the document-level image-paste handler from firing).
             paneDiv.addEventListener('paste', (e) => {
+                const items = e.clipboardData?.items;
+
+                // Check if clipboard contains an image
+                if (items) {
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].type.indexOf('image') === 0) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!activeProject) return;
+                            const blob = items[i].getAsFile();
+                            if (!blob) return;
+                            const formData = new FormData();
+                            formData.append('image', blob, 'pasted_image.png');
+                            fetch(`/api/session/${activeProject}/paste-image`, {
+                                method: 'POST',
+                                body: formData
+                            }).then(async (response) => {
+                                if (response.ok) {
+                                    const result = await response.json();
+                                    const pathToSend = `"${result.path}"`;
+                                    sendTerminalPasteText(pathToSend);
+                                } else {
+                                    const errData = await response.json();
+                                    alert(errData.error || "Failed to upload pasted image");
+                                }
+                            }).catch(err => console.error("Error pasting image:", err));
+                            return;
+                        }
+                    }
+                }
+
+                // Text paste: handle once before xterm.js to avoid duplicate PTY input.
                 const text = e.clipboardData?.getData('text/plain');
-                if (!text || e.clipboardData?.files?.length) return;
+                if (!text) return;
                 e.preventDefault();
                 e.stopPropagation();
                 sendTerminalPasteText(text);
