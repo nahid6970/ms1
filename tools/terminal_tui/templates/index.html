@@ -1527,38 +1527,29 @@
         .snippet-edit  { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.78rem; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; line-height: 1; }
         .snippet-edit:hover { color: var(--accent-color); background: rgba(var(--accent-rgb, 99,102,241),0.12); }
 
-        /* Bookmark subcommand inline row */
-        .bm-subcmds-row {
-            display: none; flex-wrap: wrap; gap: 5px;
-            padding: 6px 12px 8px 26px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            background: rgba(0,0,0,0.12);
-        }
-        .bm-subcmds-row.open { display: flex; }
+        /* Bookmark subcommand inline buttons */
         .bm-subcmd-btn {
             display: inline-flex; align-items: center; justify-content: center;
-            padding: 3px 9px; border-radius: 5px; font-size: 0.74rem; cursor: pointer;
+            padding: 2px 8px; border-radius: 5px; font-size: 0.72rem; cursor: pointer;
             border: 1px solid var(--border-color);
             background: var(--bg-sidebar); color: var(--text-primary);
-            transition: filter 0.15s, opacity 0.15s; white-space: nowrap;
-            line-height: 1.4; user-select: none;
+            white-space: nowrap; line-height: 1.4; user-select: none;
         }
-        .bm-subcmd-btn:hover { filter: brightness(1.25); }
         .bm-subcmd-add-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-            padding: 3px 9px; border-radius: 5px; font-size: 0.72rem; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; border-radius: 5px; font-size: 0.85rem; cursor: pointer;
             border: 1px dashed var(--border-color); background: none;
-            color: var(--text-muted); transition: border-color 0.15s, color 0.15s;
+            color: var(--text-muted); transition: border-color 0.15s, color 0.15s; flex-shrink: 0;
         }
         .bm-subcmd-add-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
-        .bm-subcmds-row .bm-subcmd-edit-overlay {
+        .bm-subcmd-wrap { position: relative; display: inline-flex; }
+        .bm-subcmd-edit-overlay {
             position: absolute; top: -4px; right: -4px; width: 14px; height: 14px;
             background: var(--bg-sidebar); border: 1px solid var(--border-color);
             border-radius: 50%; font-size: 0.55rem; display: none;
             align-items: center; justify-content: center; cursor: pointer;
             color: var(--text-secondary); line-height: 1; z-index: 1;
         }
-        .bm-subcmd-wrap { position: relative; display: inline-flex; }
         .bm-subcmd-wrap:hover .bm-subcmd-edit-overlay { display: flex; }
 
 
@@ -6586,29 +6577,33 @@
 
                     const bmCmdEsc = bm.command.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-                    // Wrap in a container so the inline subcmds row can live below the main row
-                    const wrap = document.createElement('div');
-                    wrap.style.cssText = `border-bottom: ${isLast ? 'none' : '1px solid var(--border-color)'};`;
-                    if (idx === 0) { wrap.style.borderTopLeftRadius = '7px'; wrap.style.borderTopRightRadius = '7px'; }
-                    if (isLast) { wrap.style.borderBottomLeftRadius = '7px'; wrap.style.borderBottomRightRadius = '7px'; }
-
-                    // Remove border from row itself — wrapper owns it now
-                    row.style.borderBottom = 'none';
-                    row.style.borderTopLeftRadius = idx === 0 ? '7px' : '0';
-                    row.style.borderTopRightRadius = idx === 0 ? '7px' : '0';
-                    row.style.borderBottomLeftRadius = '0';
-                    row.style.borderBottomRightRadius = '0';
+                    // Build inline subcmd buttons HTML
+                    const subcmds = loadSubcmds(bm.command);
+                    let subcmdButtonsHtml = '';
+                    subcmds.forEach((sc, i) => {
+                        const label = sc.label || sc.cmd;
+                        const labelEsc = label.replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                        const scCmdEsc = sc.cmd.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                        let btnStyle = `display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;border:1px solid;white-space:nowrap;transition:filter 0.15s;`;
+                        btnStyle += `background:${sc.bg || 'var(--bg-sidebar)'};`;
+                        btnStyle += `color:${sc.fg || 'var(--text-primary)'};`;
+                        btnStyle += `border-color:${sc.borderColor || 'var(--border-color)'};`;
+                        if (sc.borderWidth != null) btnStyle += `border-width:${sc.borderWidth}px;`;
+                        if (sc.borderRadius != null) btnStyle += `border-radius:${sc.borderRadius}px;`;
+                        subcmdButtonsHtml += `<div class="bm-subcmd-wrap" style="position:relative;display:inline-flex;">
+                            <button type="button" class="bm-subcmd-btn" title="${scCmdEsc}" style="${btnStyle}" onclick="event.stopPropagation();runSubcmd('${scCmdEsc}')" onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''">${labelEsc}</button>
+                            <span class="bm-subcmd-edit-overlay" title="Edit" onclick="event.stopPropagation();openSubcmdEditModal('${bmCmdEsc}',${i})">✎</span>
+                        </div>`;
+                    });
+                    subcmdButtonsHtml += `<button type="button" class="bm-subcmd-add-btn" onclick="event.stopPropagation();openSubcmdEditModal('${bmCmdEsc}',null)" title="Add sub-command">+</button>`;
 
                     row.innerHTML = `
                         ${dragHandle}
-                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: normal; word-break: break-word; flex: 1; margin-right: 12px; line-height: 1.3;" title="${bm.command}">${displayName}</span>
+                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 120px;" title="${bm.command}">${displayName}</span>
+                        <div class="bm-subcmds-inline" style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1;overflow:hidden;padding:0 6px;" onclick="event.stopPropagation()">
+                            ${subcmdButtonsHtml}
+                        </div>
                         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                            <button type="button" class="subcmd-toggle-btn" data-bmcmd="${bmCmdEsc}" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'; this.style.color='var(--accent-color)'" onmouseleave="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)'" onclick="event.stopPropagation(); toggleSubcmdInline(this, '${bmCmdEsc}')" title="Sub-commands">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-                                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                                </svg>
-                            </button>
                             <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bmCmdEsc}')" title="Run in new split terminal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color);">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -6625,15 +6620,7 @@
                         </div>
                     `;
 
-                    // Inline subcommands strip (collapsed by default)
-                    const subcmdsRow = document.createElement('div');
-                    subcmdsRow.className = 'bm-subcmds-row';
-                    subcmdsRow.dataset.bmcmd = bm.command;
-                    renderSubcmdsInline(subcmdsRow, bm.command);
-
-                    wrap.appendChild(row);
-                    wrap.appendChild(subcmdsRow);
-                    listEl.appendChild(wrap);
+                    listEl.appendChild(row);
                 });
             }
         }
@@ -6947,71 +6934,11 @@
             }
         }
 
-        // ── Inline subcommand strip ─────────────────────────────────────────
-
-        function toggleSubcmdInline(btn, bmCmd) {
-            // Find the bm-subcmds-row that belongs to this bookmark's wrapper
-            const wrap = btn.closest('.bookmark-item')?.parentElement;
-            if (!wrap) return;
-            const strip = wrap.querySelector('.bm-subcmds-row');
-            if (!strip) return;
-            const isOpen = strip.classList.contains('open');
-            strip.classList.toggle('open', !isOpen);
-            btn.style.color = !isOpen ? 'var(--accent-color)' : '';
-        }
-
-        function renderSubcmdsInline(stripEl, bmCmd) {
-            const subcmds = loadSubcmds(bmCmd);
-            stripEl.innerHTML = '';
-
-            subcmds.forEach((sc, i) => {
-                const label = (sc.label || sc.cmd);
-                const wrap = document.createElement('div');
-                wrap.className = 'bm-subcmd-wrap';
-
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'bm-subcmd-btn';
-                btn.textContent = label;
-                btn.title = sc.cmd;
-                // Apply saved styling
-                if (sc.bg)           btn.style.backgroundColor = sc.bg;
-                if (sc.fg)           btn.style.color           = sc.fg;
-                if (sc.borderColor)  btn.style.borderColor     = sc.borderColor;
-                if (sc.borderWidth != null) btn.style.borderWidth = sc.borderWidth + 'px';
-                if (sc.borderRadius != null) btn.style.borderRadius = sc.borderRadius + 'px';
-                btn.addEventListener('click', (e) => { e.stopPropagation(); runSubcmd(sc.cmd); });
-
-                // Edit overlay (pencil on hover)
-                const editBtn = document.createElement('span');
-                editBtn.className = 'bm-subcmd-edit-overlay';
-                editBtn.title = 'Edit';
-                editBtn.textContent = '✎';
-                editBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openSubcmdEditModal(bmCmd, i);
-                });
-
-                wrap.appendChild(btn);
-                wrap.appendChild(editBtn);
-                stripEl.appendChild(wrap);
-            });
-
-            // Add sub-command button
-            const addBtn = document.createElement('button');
-            addBtn.type = 'button';
-            addBtn.className = 'bm-subcmd-add-btn';
-            addBtn.innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add`;
-            addBtn.addEventListener('click', (e) => { e.stopPropagation(); openSubcmdEditModal(bmCmd, null); });
-            stripEl.appendChild(addBtn);
-        }
+        // ── Subcommand helpers ──────────────────────────────────────────────
 
         function _refreshSubcmdsStrip(bmCmd) {
-            document.querySelectorAll('.bm-subcmds-row').forEach(strip => {
-                if (strip.dataset.bmcmd === bmCmd) {
-                    renderSubcmdsInline(strip, bmCmd);
-                }
-            });
+            // Re-render all bookmark rows that belong to this command
+            updateBookmarksDropdown();
         }
 
         // ── Subcommand edit modal ───────────────────────────────────────────

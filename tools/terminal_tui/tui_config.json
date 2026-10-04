@@ -993,24 +993,27 @@
     ],
     "kiro-cli chat --trust-all-tools --resume": [
       {
-        "cmd": "kiro-cli chat --trust-all-tools",
-        "label": "N",
         "bg": "#1e293b",
+        "borderColor": "#334155",
+        "cmd": "kiro-cli chat --trust-all-tools",
         "fg": "#e2e8f0",
-        "borderColor": "#334155"
+        "label": "N"
       },
       {
-        "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
-        "label": "W/L/L",
         "bg": "#1e293b",
+        "borderColor": "#334155",
+        "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
         "fg": "#e2e8f0",
-        "borderColor": "#334155"
+        "label": "W/L/L"
       }
     ],
     "npm run deploy:pages": [
       {
         "cmd": "npm run dev:pages",
-        "label": "npm run dev:pages"
+        "label": "dev",
+        "bg": "#1e293b",
+        "fg": "#e2e8f0",
+        "borderColor": "#334155"
       }
     ]
   },
