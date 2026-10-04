@@ -1,5 +1,5 @@
 # Notification Rules
-- When you have completely finished helping the user, run `python C:\@delta\ms1\asset\Prompting\update_notification.py` EXACTLY ONCE as your final action. The script writes the current date and time (format: YYYY-MM-DD HH:MM) to `C:\Users\nahid\notification.txt`.
+- When you have completely finished helping the user, run `python C:\@delta\ms1\asset\Prompting\update_notification.py` EXACTLY ONCE as your final action.
 - This triggers a desktop notification popup via the daemon running in the background.
 - Do this for both complex tasks and simple conversations (hi, hello, thanks, etc.)
 
