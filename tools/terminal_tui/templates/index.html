@@ -1528,8 +1528,11 @@
         .snippet-edit:hover { color: var(--accent-color); background: rgba(var(--accent-rgb, 99,102,241),0.12); }
 
         /* Quick path bar */
+        #quick-path-input-wrap {
+            border-color: transparent !important;
+        }
         #quick-path-input-wrap:focus-within {
-            border-color: var(--accent-color);
+            border-color: var(--accent-color) !important;
         }
         .quick-path-history-item {
             display: flex; align-items: center; gap: 6px;
@@ -1673,6 +1676,32 @@
                 <button class="action-btn" id="active-project-path-btn" title="Open in Explorer" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="openProjectInExplorer()">
                     📂
                 </button>
+                <!-- Quick Path Bar -->
+                <div id="quick-path-bar" style="position: relative; display: inline-flex; align-items: center;">
+                    <div id="quick-path-input-wrap" style="display: flex; align-items: center; height: 34px; background-color: var(--bg-sidebar); border: 1px solid transparent; border-radius: 4px; overflow: hidden; transition: border-color 0.15s;">
+                        <span style="padding: 0 6px 0 9px; color: var(--text-muted); display: flex; align-items: center; flex-shrink: 0; pointer-events: none;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </span>
+                        <input id="quick-path-input" type="text" autocomplete="off" spellcheck="false"
+                            placeholder="cd to path…"
+                            title="Type a folder path and press Enter to cd into it"
+                            style="width: 180px; height: 100%; background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.8rem; font-family: 'JetBrainsMono NFP','JetBrains Mono NF','JetBrains Mono','Fira Code',monospace; padding: 0 4px 0 0;"
+                            onfocus="quickPathOnFocus()"
+                            onblur="quickPathOnBlur()"
+                            onkeydown="quickPathOnKeydown(event)"
+                            oninput="quickPathOnInput(event)"
+                        >
+                        <button id="quick-path-chevron" onclick="toggleQuickPathDropdown(event)" tabindex="-1" onmousedown="event.preventDefault()"
+                            style="height: 100%; padding: 0 7px; background: none; border: none; border-left: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color 0.15s;"
+                            onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                    </div>
+                    <div id="quick-path-dropdown" style="display: none; position: absolute; left: 0; top: 38px; min-width: 300px; max-width: 460px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; flex-direction: column; overflow: hidden;">
+                        <div id="quick-path-history-list" style="max-height: 240px; overflow-y: auto;"></div>
+                        <div id="quick-path-empty" style="display: none; padding: 12px; text-align: center; font-size: 0.78rem; color: var(--text-muted);">No recent paths</div>
+                    </div>
+                </div>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div id="project-specific-actions" style="display: flex; align-items: center; gap: 4px;">
@@ -1696,32 +1725,6 @@
                                     Add Command
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                    <!-- Quick Path Bar -->
-                    <div id="quick-path-bar" style="position: relative; display: inline-flex; align-items: center;">
-                        <div id="quick-path-input-wrap" style="display: flex; align-items: center; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: border-color 0.15s;">
-                            <span style="padding: 0 6px 0 9px; color: var(--text-muted); display: flex; align-items: center; flex-shrink: 0; pointer-events: none;">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                            </span>
-                            <input id="quick-path-input" type="text" autocomplete="off" spellcheck="false"
-                                placeholder="cd to path…"
-                                title="Type a folder path and press Enter to cd into it"
-                                style="width: 180px; height: 100%; background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.8rem; font-family: 'JetBrainsMono NFP','JetBrains Mono NF','JetBrains Mono','Fira Code',monospace; padding: 0 4px 0 0;"
-                                onfocus="quickPathOnFocus()"
-                                onblur="quickPathOnBlur()"
-                                onkeydown="quickPathOnKeydown(event)"
-                                oninput="quickPathOnInput(event)"
-                            >
-                            <button id="quick-path-chevron" onclick="toggleQuickPathDropdown(event)" tabindex="-1"
-                                style="height: 100%; padding: 0 7px; background: none; border: none; border-left: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; transition: color 0.15s;"
-                                onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-muted)'">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-                            </button>
-                        </div>
-                        <div id="quick-path-dropdown" style="display: none; position: absolute; left: 0; top: 38px; min-width: 300px; max-width: 460px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; flex-direction: column; overflow: hidden;">
-                            <div id="quick-path-history-list" style="max-height: 240px; overflow-y: auto;"></div>
-                            <div id="quick-path-empty" style="display: none; padding: 12px; text-align: center; font-size: 0.78rem; color: var(--text-muted);">No recent paths</div>
                         </div>
                     </div>
                     <button class="action-btn" onclick="openFrameworkSelectModal()" title="Initialize Frontend Framework" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
@@ -7050,18 +7053,16 @@
         }
 
         function quickPathOnFocus() {
-            document.getElementById('quick-path-input-wrap').style.borderColor = 'var(--accent-color)';
             openQuickPathDropdown();
         }
 
         function quickPathOnBlur() {
-            // Delay so clicks inside dropdown register first
             setTimeout(() => {
-                const dd = document.getElementById('quick-path-dropdown');
-                if (dd && !dd.matches(':hover')) {
+                const bar = document.getElementById('quick-path-bar');
+                const active = document.activeElement;
+                if (!bar || !bar.contains(active)) {
                     closeQuickPathDropdown();
                 }
-                document.getElementById('quick-path-input-wrap').style.borderColor = '';
             }, 180);
         }
 
@@ -7090,10 +7091,8 @@
             closeQuickPathDropdown();
             document.getElementById('quick-path-input').value = path;
             quickPathAddEntry(path);
-            // Send cd command to active terminal
-            const activePane = terminalPanes.find(p => p.socket === socket);
-            const paneId = activePane ? activePane.paneId : 'main';
-            await executeCommandMacro(activeProject, paneId, `cd "${path}"`, socket);
+            // Open a new tab and cd into the path
+            splitTerminal('tabs', `cd "${path}"`);
         }
 
         // Close quick path dropdown on outside click
