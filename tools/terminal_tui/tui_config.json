@@ -1243,5 +1243,8 @@
     "borderWidth": "1px",
     "borderRadius": "0px",
     "fontFamily": "'JetBrainsMono NFP Regular'"
-  }
+  },
+  "git_exclude_patterns": [
+    "gg.json"
+  ]
 }

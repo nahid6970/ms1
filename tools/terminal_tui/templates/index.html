@@ -8929,6 +8929,7 @@
 
         async function openGitCommitModal() {
             if (!activeProject) return;
+            await gitExcludeLoadPatterns();
             const modal = document.getElementById('git-modal');
             const branchEl = document.getElementById('git-modal-branch');
             const subtitleEl = document.getElementById('git-modal-subtitle');
@@ -9038,15 +9039,28 @@
         }
 
         // ── Git Auto-Exclude Patterns ─────────────────────────────────────────
-        const GIT_EXCLUDE_KEY = 'git-auto-exclude-patterns';
+        let _gitExcludePatterns = [];
 
-        function gitExcludeGetPatterns() {
-            try { return JSON.parse(localStorage.getItem(GIT_EXCLUDE_KEY) || '[]'); }
-            catch { return []; }
+        async function gitExcludeLoadPatterns() {
+            try {
+                const res = await fetch('/api/git-exclude-patterns');
+                if (res.ok) _gitExcludePatterns = await res.json();
+            } catch {}
         }
 
-        function gitExcludeSavePatterns(list) {
-            localStorage.setItem(GIT_EXCLUDE_KEY, JSON.stringify(list));
+        async function gitExcludeSavePatterns(list) {
+            _gitExcludePatterns = list;
+            try {
+                await fetch('/api/git-exclude-patterns', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(list)
+                });
+            } catch {}
+        }
+
+        function gitExcludeGetPatterns() {
+            return _gitExcludePatterns;
         }
 
         function gitExcludeMatches(filePath, patterns) {
@@ -9077,23 +9091,23 @@
             `).join('');
         }
 
-        function addGitExcludePattern() {
+        async function addGitExcludePattern() {
             const input = document.getElementById('git-exclude-input');
             const val = (input.value || '').trim();
             if (!val) return;
-            const list = gitExcludeGetPatterns();
+            const list = [...gitExcludeGetPatterns()];
             if (!list.includes(val)) {
                 list.push(val);
-                gitExcludeSavePatterns(list);
+                await gitExcludeSavePatterns(list);
             }
             input.value = '';
             renderGitExcludeList();
         }
 
-        function removeGitExcludePattern(idx) {
-            const list = gitExcludeGetPatterns();
+        async function removeGitExcludePattern(idx) {
+            const list = [...gitExcludeGetPatterns()];
             list.splice(idx, 1);
-            gitExcludeSavePatterns(list);
+            await gitExcludeSavePatterns(list);
             renderGitExcludeList();
         }
 
@@ -15695,6 +15709,9 @@
 
             // Fetch system prompts config from server first
             await fetchSystemPromptsConfig();
+
+            // Load git auto-exclude patterns
+            gitExcludeLoadPatterns();
 
             // Init auto-scroll button state
             updateAutoScrollBtn();

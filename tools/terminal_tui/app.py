@@ -3385,6 +3385,18 @@ def api_post_subcommands():
     save_subcommands(data)
     return jsonify({"status": "success"})
 
+@app.route('/api/git-exclude-patterns', methods=['GET'])
+def api_get_git_exclude_patterns():
+    return jsonify(get_config_val("git_exclude_patterns", list))
+
+@app.route('/api/git-exclude-patterns', methods=['POST'])
+def api_post_git_exclude_patterns():
+    data = request.json
+    if not isinstance(data, list):
+        return jsonify({"error": "Expected a list"}), 400
+    set_config_val("git_exclude_patterns", data)
+    return jsonify({"status": "success"})
+
 @app.route('/api/fonts')
 def list_system_fonts():
     fonts = set()
