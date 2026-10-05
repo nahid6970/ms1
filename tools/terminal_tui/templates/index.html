@@ -6600,7 +6600,7 @@
 
                     row.innerHTML = `
                         ${dragHandle}
-                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 130px;" title="${bm.command}">${displayName}</span>
+                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 200px;" title="${bm.command}">${displayName}</span>
                         <div class="bm-subcmds-inline" style="display:flex;flex-wrap:nowrap;align-items:center;gap:4px;flex:1;overflow:hidden;padding:0 6px;justify-content:flex-end;" onclick="event.stopPropagation()">
                             ${subcmdButtonsHtml}
                         </div>

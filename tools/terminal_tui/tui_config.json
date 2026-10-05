@@ -993,7 +993,7 @@
     ],
     "codex --dangerously-bypass-approvals-and-sandbox resume": [
       {
-        "cmd": "codex --dangerously-bypass-approvals-and-sandbox resume",
+        "cmd": "codex --dangerously-bypass-approvals-and-sandbox",
         "label": "N",
         "bg": "#ffffff",
         "fg": "#000000",
