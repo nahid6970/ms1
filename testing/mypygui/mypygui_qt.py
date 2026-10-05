@@ -3966,16 +3966,25 @@ def git_sync(path):
     # Build a PowerShell snippet that unstages excluded files after git add .
     unstage_lines = ""
     if exclude_patterns:
-        # For each pattern, run git restore --staged matching files
-        pats_ps = ", ".join(f'"{p}"' for p in exclude_patterns)
-        unstage_lines = (
-            f"$_excludePatterns = @({pats_ps});"
-            "$_stagedFiles = git diff --cached --name-only;"
-            "foreach ($_pat in $_excludePatterns) {"
-            "  $_matched = $_stagedFiles | Where-Object { $_ -like \"*$_pat\" -or ($_ -split '/')[-1] -eq $_pat };"
-            "  foreach ($_f in $_matched) { git restore --staged $\"$_f\" 2>$null; Write-Host \"  [excluded] $_f\" -ForegroundColor DarkGray; }"
-            "};"
-        )
+        # Use git restore --staged with pathspec for each pattern directly
+        # This is reliable — git handles the glob matching natively
+        restore_cmds = []
+        for pat in exclude_patterns:
+            pat = pat.strip()
+            if not pat:
+                continue
+            if pat.startswith("*."):
+                # glob: pass as pathspec glob
+                restore_cmds.append(
+                    f"git restore --staged -- ':(glob)**/{pat}' 2>$null; "
+                    f"Write-Host '  [excluded] {pat}' -ForegroundColor DarkGray;"
+                )
+            else:
+                # exact filename: find all staged files with that basename and unstage them
+                restore_cmds.append(
+                    f"git diff --cached --name-only | Where-Object {{ ($_ -split '[/\\\\]')[-1] -eq '{pat}' }} | ForEach-Object {{ git restore --staged -- $_ 2>$null; Write-Host \"  [excluded] $_\" -ForegroundColor DarkGray }};"
+                )
+        unstage_lines = "".join(restore_cmds)
 
     script = (
         "& {$host.UI.RawUI.WindowTitle='GiTSync';"
