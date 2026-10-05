@@ -9649,7 +9649,6 @@
             return results;
         }
 
-        function cmRenderFileList(files) {
         function cmRenderFileList(files, excludedCount = 0) {
             const list = document.getElementById('cm-file-list');
             if (!files.length) {
