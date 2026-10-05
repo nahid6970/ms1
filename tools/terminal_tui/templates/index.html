@@ -1534,6 +1534,7 @@
             border: 1px solid var(--border-color);
             background: var(--bg-sidebar); color: var(--text-primary);
             white-space: nowrap; line-height: 1.4; user-select: none;
+            font-family: 'JetBrainsMono NFP', 'JetBrains Mono NF', 'JetBrains Mono', 'Fira Code', monospace;
         }
         .bm-subcmd-add-btn {
             display: inline-flex; align-items: center; justify-content: center;
@@ -1652,7 +1653,7 @@
                                 <path d="M6 9l6 6 6-6"/>
                             </svg>
                         </button>
-                        <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 360px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; flex-direction: column;">
+                        <div class="custom-dropdown-content" id="bookmark-dropdown-content" style="display: none; position: absolute; right: 0; top: 38px; width: 520px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; flex-direction: column;">
                             <div id="bookmark-items-list" style="overflow-y: auto;">
                                 <!-- Bookmarks will be injected here dynamically -->
                             </div>
@@ -6584,7 +6585,7 @@
                         const label = sc.label || sc.cmd;
                         const labelEsc = label.replace(/"/g, '&quot;').replace(/</g, '&lt;');
                         const scCmdEsc = sc.cmd.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                        let btnStyle = `display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;border:1px solid;white-space:nowrap;transition:filter 0.15s;`;
+                        let btnStyle = `display:inline-flex;align-items:center;padding:2px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;border:1px solid;white-space:nowrap;transition:filter 0.15s;font-family:'JetBrainsMono NFP','JetBrains Mono NF','JetBrains Mono','Fira Code',monospace;`;
                         btnStyle += `background:${sc.bg || 'var(--bg-sidebar)'};`;
                         btnStyle += `color:${sc.fg || 'var(--text-primary)'};`;
                         btnStyle += `border-color:${sc.borderColor || 'var(--border-color)'};`;
@@ -6599,11 +6600,11 @@
 
                     row.innerHTML = `
                         ${dragHandle}
-                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 120px;" title="${bm.command}">${displayName}</span>
-                        <div class="bm-subcmds-inline" style="display:flex;flex-wrap:wrap;align-items:center;gap:4px;flex:1;overflow:hidden;padding:0 6px;" onclick="event.stopPropagation()">
+                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 130px;" title="${bm.command}">${displayName}</span>
+                        <div class="bm-subcmds-inline" style="display:flex;flex-wrap:nowrap;align-items:center;gap:4px;flex:1;overflow:hidden;padding:0 6px;justify-content:flex-end;" onclick="event.stopPropagation()">
                             ${subcmdButtonsHtml}
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-left: 6px; border-left: 1px solid var(--border-color);">
                             <button type="button" style="background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background-color 0.2s;" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.08)'" onmouseleave="this.style.backgroundColor='transparent'" onclick="event.stopPropagation(); runBookmarkInSplit('${bmCmdEsc}')" title="Run in new split terminal">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--accent-color);">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
