@@ -991,29 +991,38 @@
         "label": "npm run deploy:pages"
       }
     ],
+    "codex --dangerously-bypass-approvals-and-sandbox resume": [
+      {
+        "cmd": "codex --dangerously-bypass-approvals-and-sandbox resume",
+        "label": "N",
+        "bg": "#ffffff",
+        "fg": "#000000",
+        "borderColor": "#334155"
+      }
+    ],
     "kiro-cli chat --trust-all-tools --resume": [
       {
-        "bg": "#1e293b",
-        "borderColor": "#334155",
         "cmd": "kiro-cli chat --trust-all-tools",
-        "fg": "#e2e8f0",
-        "label": "N"
+        "label": "N",
+        "bg": "#ffffff",
+        "fg": "#000000",
+        "borderColor": "#334155"
       },
       {
-        "bg": "#1e293b",
-        "borderColor": "#334155",
         "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
+        "label": "logout & login",
+        "bg": "#1e293b",
         "fg": "#e2e8f0",
-        "label": "W/L/L"
+        "borderColor": "#334155"
       }
     ],
     "npm run deploy:pages": [
       {
-        "cmd": "npm run dev:pages",
-        "label": "dev",
         "bg": "#1e293b",
+        "borderColor": "#334155",
+        "cmd": "npm run dev:pages",
         "fg": "#e2e8f0",
-        "borderColor": "#334155"
+        "label": "dev"
       }
     ]
   },
