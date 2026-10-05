@@ -1818,6 +1818,10 @@
                     <button id="ai-copilot-btn" class="sbicon-btn" onclick="toggleAICopilotPopover(event)" title="AI Copilot (Ctrl+I)" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
                     </button>
+                    <!-- Code Merger Button -->
+                    <button id="code-merger-btn" class="sbicon-btn" onclick="toggleCodeMergerPopover(event)" title="Code Merger — prep files & apply AI responses" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.4);">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
+                    </button>
                     <!-- Screenshot/Image Upload button -->
                     <input type="file" id="screenshot-file-input" accept="image/*" multiple style="display: none;" onchange="handleScreenshotFileSelect(event)">
                     <button id="screenshot-upload-btn" class="sbicon-btn" onclick="document.getElementById('screenshot-file-input').click()" title="Upload Screenshot / Image" style="color: #a78bfa; border-color: rgba(167, 139, 250, 0.4);">
@@ -1865,6 +1869,78 @@
 
 
 
+
+    <!-- ═══ Code Merger Popover ══════════════════════════════════════════════ -->
+    <div id="code-merger-popover" class="statusbar-popover" style="right:84px; width:480px; max-width:96vw;">
+        <div class="sbpop-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
+                <span style="color:#22d3ee;">Code Merger</span>
+                <span id="cm-project-label" style="font-size:0.68rem; color:var(--text-muted); font-weight:400; font-family:'Fira Code',monospace;"></span>
+            </div>
+            <button class="sbpop-close" onclick="closeCodeMergerPopover()">✕</button>
+        </div>
+
+        <!-- Tab bar -->
+        <div style="display:flex; border-bottom:1px solid var(--border-color); flex-shrink:0;">
+            <button id="cm-tab-prep" onclick="switchCMTab('prep')" style="flex:1; padding:7px 0; font-size:0.73rem; font-weight:600; background:none; border:none; border-bottom:2px solid #22d3ee; color:#22d3ee; cursor:pointer; transition:all 0.15s;">📋 PREP</button>
+            <button id="cm-tab-merge" onclick="switchCMTab('merge')" style="flex:1; padding:7px 0; font-size:0.73rem; font-weight:600; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-muted); cursor:pointer; transition:all 0.15s;">🔀 MERGE</button>
+        </div>
+
+        <!-- ── PREP panel ── -->
+        <div id="cm-panel-prep" style="display:flex; flex-direction:column; overflow:hidden;">
+            <!-- File list -->
+            <div style="padding:8px 12px; border-bottom:1px solid var(--border-color); flex-shrink:0; display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size:0.71rem; color:var(--text-secondary); font-weight:600;">PROJECT FILES</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button onclick="cmSelectAllFiles(true)"  style="font-size:0.65rem; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); padding:1px 7px; cursor:pointer;" onmouseenter="this.style.borderColor='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'">All</button>
+                    <button onclick="cmSelectAllFiles(false)" style="font-size:0.65rem; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); padding:1px 7px; cursor:pointer;" onmouseenter="this.style.borderColor='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'">None</button>
+                    <button onclick="cmLoadFiles()" style="font-size:0.65rem; background:none; border:1px solid var(--border-color); border-radius:4px; color:var(--text-muted); padding:1px 7px; cursor:pointer;" title="Refresh file list" onmouseenter="this.style.borderColor='var(--accent-color)'" onmouseleave="this.style.borderColor='var(--border-color)'">↺</button>
+                </div>
+            </div>
+            <div id="cm-file-list" style="flex:1; overflow-y:auto; max-height:180px; padding:6px 10px; display:flex; flex-direction:column; gap:2px; min-height:60px;">
+                <div style="color:var(--text-muted); font-size:0.73rem; text-align:center; padding:12px 0;">Load a workspace to see files.</div>
+            </div>
+
+            <!-- Task input -->
+            <div style="padding:8px 12px; border-top:1px solid var(--border-color); flex-shrink:0;">
+                <textarea id="cm-task-input" placeholder="Describe your task / instructions for the AI (optional)…" style="width:100%; box-sizing:border-box; height:52px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 9px; font-size:0.78rem; resize:none; outline:none; font-family:inherit;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+            </div>
+
+            <!-- Generate button + copy -->
+            <div style="padding:0 12px 10px; display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                <button onclick="cmGeneratePrompt()" style="flex:1; padding:6px 0; background:#0e7490; border:none; border-radius:6px; color:white; font-size:0.78rem; font-weight:600; cursor:pointer; transition:background 0.15s;" onmouseenter="this.style.background='#0891b2'" onmouseleave="this.style.background='#0e7490'">⚡ Generate Prompt</button>
+                <button id="cm-copy-btn" onclick="cmCopyPrompt()" style="padding:6px 12px; background:none; border:1px solid var(--border-color); border-radius:6px; color:var(--text-secondary); font-size:0.78rem; cursor:pointer; transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--text-primary)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">Copy</button>
+            </div>
+
+            <!-- Generated prompt preview -->
+            <div id="cm-prompt-preview-wrap" style="display:none; padding:0 12px 10px; flex-shrink:0;">
+                <div style="font-size:0.68rem; color:var(--text-muted); margin-bottom:4px;">Generated prompt (<span id="cm-char-count">0</span> chars)</div>
+                <textarea id="cm-prompt-preview" readonly style="width:100%; box-sizing:border-box; height:80px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-secondary); padding:6px 9px; font-size:0.72rem; resize:none; outline:none; font-family:'Fira Code',monospace;"></textarea>
+            </div>
+        </div>
+
+        <!-- ── MERGE panel ── -->
+        <div id="cm-panel-merge" style="display:none; flex-direction:column; overflow:hidden;">
+            <div style="padding:8px 12px 6px; flex-shrink:0;">
+                <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:6px;">Paste the full AI response below (with <code style="background:var(--bg-main); padding:1px 4px; border-radius:3px; font-size:0.68rem;">@@FILE / @@MODE / @@END</code> blocks):</div>
+                <textarea id="cm-response-input" placeholder="Paste AI response here…" style="width:100%; box-sizing:border-box; height:120px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:7px 10px; font-size:0.78rem; resize:none; outline:none; font-family:'Fira Code',monospace;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+            </div>
+            <!-- Options -->
+            <div style="padding:0 12px 8px; display:flex; gap:14px; align-items:center; flex-shrink:0;">
+                <label style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary); cursor:pointer; user-select:none;">
+                    <input type="checkbox" id="cm-opt-backup" checked style="cursor:pointer; accent-color:#22d3ee;"> .bak backups
+                </label>
+            </div>
+            <!-- Actions -->
+            <div style="padding:0 12px 10px; display:flex; gap:6px; flex-shrink:0;">
+                <button onclick="cmParseResponse()" style="flex:1; padding:6px 0; background:none; border:1px solid #22d3ee; border-radius:6px; color:#22d3ee; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;" onmouseenter="this.style.background='rgba(34,211,238,0.1)'" onmouseleave="this.style.background='none'">🔍 Parse</button>
+                <button onclick="cmApplyResponse()" style="flex:1; padding:6px 0; background:#0e7490; border:none; border-radius:6px; color:white; font-size:0.78rem; font-weight:600; cursor:pointer; transition:background 0.15s;" onmouseenter="this.style.background='#0891b2'" onmouseleave="this.style.background='#0e7490'">✔ Apply Changes</button>
+            </div>
+            <!-- Results -->
+            <div id="cm-results" style="flex:1; overflow-y:auto; max-height:200px; padding:6px 12px 10px; display:flex; flex-direction:column; gap:4px;"></div>
+        </div>
+    </div>
 
     <!-- ═══ Scheduled Commands Popover ═══════════════════════════════════════ -->
     <div id="sched-popover" class="statusbar-popover" style="right:12px; width:360px;">
@@ -9450,6 +9526,382 @@
         // Run migration once on page load
         migrateLocalSnippets();
 
+        // ═══════════════════════════════════════════════════════════════
+        // CODE MERGER
+        // ═══════════════════════════════════════════════════════════════
+
+        let _cmCheckedFiles = new Set();  // rel paths of checked files
+        let _cmPromptText   = '';         // last generated prompt
+
+        // File extensions that are worth including in prompts (text/code)
+        const CM_TEXT_EXTS = new Set([
+            '.py','.js','.ts','.tsx','.jsx','.html','.css','.scss','.sass',
+            '.json','.yaml','.yml','.toml','.ini','.cfg','.conf','.env',
+            '.md','.txt','.sh','.bat','.ps1','.psm1','.psd1',
+            '.c','.cpp','.h','.hpp','.cs','.java','.go','.rs','.rb','.php',
+            '.sql','.graphql','.proto','.tf','.hcl','.xml','.csv',
+            '.vue','.svelte','.astro','.mjs','.cjs','.gitignore','.dockerignore','dockerfile'
+        ]);
+
+        // Folders to always skip
+        const CM_SKIP_DIRS = new Set([
+            'node_modules','.git','__pycache__','.venv','venv','env',
+            'dist','build','out','.next','.nuxt','coverage','.cache',
+            '.pytest_cache','.mypy_cache','target','vendor','eggs',
+            '.eggs','*.egg-info','.tox'
+        ]);
+
+        function toggleCodeMergerPopover(e) {
+            if (e) e.stopPropagation();
+            const pop = document.getElementById('code-merger-popover');
+            if (pop.classList.contains('show')) {
+                closeCodeMergerPopover();
+            } else {
+                closeAllStatusPopovers();
+                pop.classList.add('show');
+                document.getElementById('code-merger-btn').classList.add('active');
+                // Show current project name
+                const lbl = document.getElementById('cm-project-label');
+                if (lbl) lbl.textContent = activeProject ? `// ${activeProject}` : '';
+                // Auto-load files
+                cmLoadFiles();
+                _popoverOutside('code-merger-popover', 'code-merger-btn', closeCodeMergerPopover);
+            }
+        }
+
+        function closeCodeMergerPopover() {
+            const pop = document.getElementById('code-merger-popover');
+            const btn = document.getElementById('code-merger-btn');
+            if (pop) pop.classList.remove('show');
+            if (btn) btn.classList.remove('active');
+        }
+
+        function switchCMTab(tab) {
+            const tabs = ['prep', 'merge'];
+            tabs.forEach(t => {
+                const btn   = document.getElementById(`cm-tab-${t}`);
+                const panel = document.getElementById(`cm-panel-${t}`);
+                const active = t === tab;
+                if (btn) {
+                    btn.style.borderBottomColor = active ? '#22d3ee' : 'transparent';
+                    btn.style.color = active ? '#22d3ee' : 'var(--text-muted)';
+                }
+                if (panel) panel.style.display = active ? 'flex' : 'none';
+            });
+        }
+
+        async function cmLoadFiles() {
+            if (!activeProject) {
+                document.getElementById('cm-file-list').innerHTML =
+                    '<div style="color:var(--text-muted);font-size:0.73rem;text-align:center;padding:12px 0;">No active workspace.</div>';
+                return;
+            }
+            const list = document.getElementById('cm-file-list');
+            list.innerHTML = '<div style="color:var(--text-muted);font-size:0.73rem;text-align:center;padding:12px 0;">Loading…</div>';
+            try {
+                const files = await cmFetchAllFiles('');
+                _cmCheckedFiles = new Set(files.filter(f => cmIsTextFile(f)).map(f => f));
+                cmRenderFileList(files);
+            } catch(err) {
+                list.innerHTML = '<div style="color:#ef4444;font-size:0.73rem;text-align:center;padding:12px 0;">Failed to load files.</div>';
+            }
+        }
+
+        function cmIsTextFile(relPath) {
+            const lower = relPath.toLowerCase();
+            const ext = lower.includes('.') ? '.' + lower.split('.').pop() : lower.split('/').pop();
+            return CM_TEXT_EXTS.has(ext) || CM_TEXT_EXTS.has(lower.split('/').pop());
+        }
+
+        function cmIsSkipDir(name) {
+            return CM_SKIP_DIRS.has(name.toLowerCase()) || name.startsWith('.');
+        }
+
+        async function cmFetchAllFiles(subdir) {
+            const url = `/api/project/${encodeURIComponent(activeProject)}/files${subdir ? '?subdir=' + encodeURIComponent(subdir) : ''}`;
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            const results = [];
+            for (const item of (data.items || [])) {
+                if (item.is_dir) {
+                    if (cmIsSkipDir(item.name)) continue;
+                    const sub = await cmFetchAllFiles(item.rel_path);
+                    results.push(...sub);
+                } else {
+                    results.push(item.rel_path);
+                }
+            }
+            return results;
+        }
+
+        function cmRenderFileList(files) {
+            const list = document.getElementById('cm-file-list');
+            if (!files.length) {
+                list.innerHTML = '<div style="color:var(--text-muted);font-size:0.73rem;text-align:center;padding:12px 0;">No files found.</div>';
+                return;
+            }
+            list.innerHTML = '';
+            files.forEach(rel => {
+                const row = document.createElement('label');
+                row.style.cssText = 'display:flex;align-items:center;gap:7px;padding:2px 4px;border-radius:4px;cursor:pointer;font-size:0.75rem;color:var(--text-primary);transition:background 0.1s;';
+                row.onmouseenter = () => row.style.background = 'var(--bg-card-hover)';
+                row.onmouseleave = () => row.style.background = 'transparent';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = _cmCheckedFiles.has(rel);
+                cb.style.cssText = 'cursor:pointer;accent-color:#22d3ee;flex-shrink:0;';
+                cb.onchange = () => {
+                    if (cb.checked) _cmCheckedFiles.add(rel);
+                    else _cmCheckedFiles.delete(rel);
+                };
+
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:"Fira Code",monospace;';
+                nameSpan.textContent = rel;
+                if (!cmIsTextFile(rel)) nameSpan.style.color = 'var(--text-muted)';
+
+                row.appendChild(cb);
+                row.appendChild(nameSpan);
+                list.appendChild(row);
+            });
+        }
+
+        function cmSelectAllFiles(checked) {
+            const list = document.getElementById('cm-file-list');
+            list.querySelectorAll('input[type=checkbox]').forEach(cb => {
+                cb.checked = checked;
+                const rel = cb.closest('label').querySelector('span').textContent;
+                if (checked) _cmCheckedFiles.add(rel);
+                else _cmCheckedFiles.delete(rel);
+            });
+        }
+
+        async function cmGeneratePrompt() {
+            if (!activeProject) { alert('No active workspace.'); return; }
+            if (_cmCheckedFiles.size === 0) { alert('Select at least one file.'); return; }
+
+            const btn = document.querySelector('#cm-panel-prep button[onclick="cmGeneratePrompt()"]');
+            const origText = btn.textContent;
+            btn.textContent = '⏳ Loading…';
+            btn.disabled = true;
+
+            try {
+                // Read PROMPT_GUIDE content from the code_merger folder
+                const promptGuide = `## RESPONSE FORMAT RULES
+
+1. Each changed file starts with \`@@FILE:\` followed by the relative path.
+2. Use \`@@MODE: replace_block\` to replace a specific block of code.
+3. Use \`@@MODE: replace_file\` to replace the entire file content.
+4. Use \`@@MODE: insert_after\` to insert code after a specific line.
+5. Use \`@@MODE: delete_block\` to delete a block of code.
+6. Every change ends with \`@@END\`.
+7. If NO changes needed for a file, omit it entirely.
+
+### Replace a block (most common):
+\`\`\`
+@@FILE: path/to/file.py
+@@MODE: replace_block
+@@FROM:
+exact original code here
+@@TO:
+new replacement code here
+@@END
+\`\`\`
+
+### Replace entire file:
+\`\`\`
+@@FILE: path/to/file.py
+@@MODE: replace_file
+@@TO:
+full new file content here
+@@END
+\`\`\`
+
+### Insert after a line:
+\`\`\`
+@@FILE: path/to/file.py
+@@MODE: insert_after
+@@AFTER:
+the exact line to insert after
+@@INSERT:
+new lines to insert here
+@@END
+\`\`\`
+
+### Delete a block:
+\`\`\`
+@@FILE: path/to/file.py
+@@MODE: delete_block
+@@FROM:
+exact block to delete
+@@END
+\`\`\`
+
+Always wrap your **entire response** in a single markdown code block.`;
+
+                const task = document.getElementById('cm-task-input').value.trim();
+                let prompt = promptGuide + '\n\n---\n\n';
+                if (task) prompt += `## TASK\n${task}\n\n---\n\n`;
+                prompt += `## NOW, HERE ARE MY FILES:\n\n`;
+
+                // Fetch file contents
+                const fileEntries = [];
+                for (const rel of _cmCheckedFiles) {
+                    try {
+                        const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/file-content?path=${encodeURIComponent(rel)}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            fileEntries.push({ rel, content: data.content });
+                        }
+                    } catch(e) { /* skip */ }
+                }
+
+                fileEntries.forEach(({ rel, content }) => {
+                    prompt += `### ${rel}\n\`\`\`\n${content}\n\`\`\`\n\n`;
+                });
+
+                _cmPromptText = prompt;
+
+                const preview = document.getElementById('cm-prompt-preview');
+                const wrap    = document.getElementById('cm-prompt-preview-wrap');
+                const count   = document.getElementById('cm-char-count');
+                preview.value = prompt;
+                count.textContent = prompt.length.toLocaleString();
+                wrap.style.display = 'block';
+
+            } finally {
+                btn.textContent = origText;
+                btn.disabled = false;
+            }
+        }
+
+        async function cmCopyPrompt() {
+            if (!_cmPromptText) { await cmGeneratePrompt(); }
+            if (!_cmPromptText) return;
+            try {
+                await navigator.clipboard.writeText(_cmPromptText);
+                const btn = document.getElementById('cm-copy-btn');
+                const orig = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.color = '#22d3ee';
+                setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
+            } catch(e) {
+                alert('Failed to copy to clipboard.');
+            }
+        }
+
+        function cmParseResponse() {
+            const text = document.getElementById('cm-response-input').value.trim();
+            if (!text) { alert('Paste an AI response first.'); return; }
+
+            const blocks = cmParseBlocks(text);
+            const resultsEl = document.getElementById('cm-results');
+            resultsEl.innerHTML = '';
+
+            if (!blocks.length) {
+                resultsEl.innerHTML = '<div style="color:#f59e0b;font-size:0.75rem;padding:4px 0;">No @@FILE blocks found in the pasted text.</div>';
+                return;
+            }
+
+            blocks.forEach(b => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;font-size:0.73rem;font-family:"Fira Code",monospace;';
+                row.innerHTML = `
+                    <span style="color:#22d3ee;flex-shrink:0;">📄</span>
+                    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);">${b.file}</span>
+                    <span style="color:var(--text-muted);flex-shrink:0;font-size:0.67rem;">${b.mode}</span>
+                `;
+                resultsEl.appendChild(row);
+            });
+
+            const summary = document.createElement('div');
+            summary.style.cssText = 'font-size:0.7rem;color:var(--text-muted);padding:4px 2px;';
+            summary.textContent = `${blocks.length} file change${blocks.length !== 1 ? 's' : ''} detected. Click ✔ Apply Changes to write them.`;
+            resultsEl.prepend(summary);
+        }
+
+        function cmParseBlocks(text) {
+            // Strip outer markdown fence if present
+            const stripped = text.trim();
+            let inner = stripped;
+            if (stripped.startsWith('```')) {
+                const lines = stripped.split('\n');
+                const end = lines[lines.length - 1].trim() === '```' ? lines.length - 1 : lines.length;
+                inner = lines.slice(1, end).join('\n');
+            }
+            const parts = inner.split(/(?=^@@FILE:)/m);
+            const blocks = [];
+            parts.forEach(part => {
+                part = part.trim();
+                if (!part.startsWith('@@FILE:')) return;
+                const lines = part.split('\n');
+                const file = lines[0].replace('@@FILE:', '').trim();
+                const modeMatch = part.match(/^@@MODE:\s*(\S+)/m);
+                const mode = modeMatch ? modeMatch[1] : 'replace_file';
+                blocks.push({ file, mode });
+            });
+            return blocks;
+        }
+
+        async function cmApplyResponse() {
+            if (!activeProject) { alert('No active workspace.'); return; }
+            const text = document.getElementById('cm-response-input').value.trim();
+            if (!text) { alert('Paste an AI response first.'); return; }
+
+            const backup = document.getElementById('cm-opt-backup').checked;
+            const resultsEl = document.getElementById('cm-results');
+            resultsEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.73rem;">Applying changes…</div>';
+
+            const applyBtn = document.querySelector('#cm-panel-merge button[onclick="cmApplyResponse()"]');
+            const origText = applyBtn.textContent;
+            applyBtn.disabled = true;
+            applyBtn.textContent = '⏳ Applying…';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/merge-apply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ response: text, backup })
+                });
+                const data = await res.json();
+                resultsEl.innerHTML = '';
+
+                if (data.error) {
+                    resultsEl.innerHTML = `<div style="color:#ef4444;font-size:0.73rem;">${data.error}</div>`;
+                    return;
+                }
+
+                (data.results || []).forEach(r => {
+                    const ok = r.status === 'ok';
+                    const row = document.createElement('div');
+                    row.style.cssText = `display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-main);border:1px solid ${ok ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};border-radius:6px;font-size:0.73rem;font-family:"Fira Code",monospace;`;
+                    row.innerHTML = `
+                        <span style="flex-shrink:0;">${ok ? '✅' : '❌'}</span>
+                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${ok ? '#86efac' : '#fca5a5'};">${r.file}</span>
+                        ${ok ? `<span style="color:var(--text-muted);font-size:0.65rem;">${r.mode}</span>` : `<span style="color:#fca5a5;font-size:0.67rem;" title="${r.message}">! ${r.message}</span>`}
+                    `;
+                    resultsEl.appendChild(row);
+                });
+
+                const okCount  = (data.results || []).filter(r => r.status === 'ok').length;
+                const errCount = (data.results || []).length - okCount;
+                const summary  = document.createElement('div');
+                summary.style.cssText = 'font-size:0.7rem;color:var(--text-muted);padding:4px 2px;';
+                summary.textContent = `Applied ${okCount} change${okCount !== 1 ? 's' : ''}${errCount ? `, ${errCount} failed` : ''}.`;
+                resultsEl.prepend(summary);
+
+            } catch(err) {
+                resultsEl.innerHTML = `<div style="color:#ef4444;font-size:0.73rem;">Request failed: ${err.message}</div>`;
+            } finally {
+                applyBtn.disabled = false;
+                applyBtn.textContent = origText;
+            }
+        }
+
+        // ── end Code Merger ──────────────────────────────────────────────────
+
         async function toggleSnippetsPopover(e) {
             if (e) e.stopPropagation();
             const pop = document.getElementById('snippets-popover');
@@ -9634,6 +10086,7 @@
             closeSnippetsPopover();
             closeMobileInputTray();
             closeAICopilotPopover();
+            closeCodeMergerPopover();
         }
 
         function _popoverOutside(popId, btnId, closeFn) {

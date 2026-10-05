@@ -2041,6 +2041,185 @@ def api_project_file_write(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/file-overwrite', methods=['POST'])
+def api_project_file_overwrite(project):
+    """Write (create or overwrite) a file in the project directory."""
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+    data = request.json or {}
+    rel_path = data.get("path", "").strip()
+    content = data.get("content", "")
+    if not rel_path:
+        return jsonify({"error": "No path provided"}), 400
+    target = os.path.normpath(os.path.join(base_path, rel_path))
+    if not os.path.abspath(target).startswith(base_path):
+        return jsonify({"error": "Unauthorized path"}), 403
+    try:
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(content)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/merge-apply', methods=['POST'])
+def api_project_merge_apply(project):
+    """
+    Parse and apply @@FILE/@@MODE/@@END blocks from an AI response.
+    Supported modes: replace_file, replace_block, insert_after, delete_block.
+    Returns per-file results.
+    """
+    import re as _re
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    base_path = os.path.abspath(proj_details["path"])
+
+    data = request.json or {}
+    response_text = data.get("response", "")
+    make_backup = data.get("backup", True)
+
+    # ---------- parser ----------
+    # Strip optional outer markdown fence (``` ... ```)
+    stripped = response_text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.split("\n")
+        # drop first line (```[lang]) and last ``` if present
+        if lines[-1].strip() == "```":
+            lines = lines[1:-1]
+        else:
+            lines = lines[1:]
+        response_text = "\n".join(lines)
+
+    # Split into @@FILE blocks
+    raw_blocks = _re.split(r'(?=^@@FILE:)', response_text, flags=_re.MULTILINE)
+
+    results = []
+
+    def _safe_read(path):
+        if not os.path.isfile(path):
+            return None
+        with open(path, "r", encoding="utf-8", errors="replace") as fh:
+            return fh.read()
+
+    def _safe_write(path, content):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if make_backup and os.path.isfile(path):
+            from datetime import datetime as _dt
+            bak = path + "." + _dt.now().strftime("%Y%m%d_%H%M%S") + ".bak"
+            import shutil as _sh
+            _sh.copy2(path, bak)
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(content)
+
+    def _norm(text):
+        """Normalise whitespace for tolerant matching."""
+        return "\n".join(line.rstrip() for line in text.splitlines())
+
+    for raw in raw_blocks:
+        raw = raw.strip()
+        if not raw.startswith("@@FILE:"):
+            continue
+
+        lines = raw.split("\n")
+        rel_path = lines[0][len("@@FILE:"):].strip()
+        body = "\n".join(lines[1:])
+
+        # Security
+        target = os.path.normpath(os.path.join(base_path, rel_path))
+        if not os.path.abspath(target).startswith(base_path):
+            results.append({"file": rel_path, "status": "error", "message": "Unauthorized path"})
+            continue
+
+        # Extract mode
+        mode_m = _re.search(r'^@@MODE:\s*(\S+)', body, _re.MULTILINE)
+        mode = mode_m.group(1).strip() if mode_m else "replace_file"
+
+        try:
+            if mode == "replace_file":
+                to_m = _re.search(r'@@TO:\n([\s\S]*?)(?=@@END|$)', body)
+                if not to_m:
+                    results.append({"file": rel_path, "status": "error", "message": "No @@TO block found"})
+                    continue
+                new_content = to_m.group(1).rstrip("\n")
+                _safe_write(target, new_content)
+                results.append({"file": rel_path, "status": "ok", "mode": mode})
+
+            elif mode == "replace_block":
+                from_m = _re.search(r'@@FROM:\n([\s\S]*?)(?=@@TO:)', body)
+                to_m   = _re.search(r'@@TO:\n([\s\S]*?)(?=@@END|$)', body)
+                if not from_m or not to_m:
+                    results.append({"file": rel_path, "status": "error", "message": "Missing @@FROM or @@TO"})
+                    continue
+                old_block = from_m.group(1).rstrip("\n")
+                new_block = to_m.group(1).rstrip("\n")
+                original = _safe_read(target)
+                if original is None:
+                    results.append({"file": rel_path, "status": "error", "message": "File not found"})
+                    continue
+                if old_block in original:
+                    updated = original.replace(old_block, new_block, 1)
+                elif _norm(old_block) in _norm(original):
+                    # whitespace-tolerant replace
+                    updated = _norm(original).replace(_norm(old_block), _norm(new_block), 1)
+                else:
+                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found in file"})
+                    continue
+                _safe_write(target, updated)
+                results.append({"file": rel_path, "status": "ok", "mode": mode})
+
+            elif mode == "insert_after":
+                after_m  = _re.search(r'@@AFTER:\n([\s\S]*?)(?=@@INSERT:)', body)
+                insert_m = _re.search(r'@@INSERT:\n([\s\S]*?)(?=@@END|$)', body)
+                if not after_m or not insert_m:
+                    results.append({"file": rel_path, "status": "error", "message": "Missing @@AFTER or @@INSERT"})
+                    continue
+                anchor  = after_m.group(1).rstrip("\n")
+                insert  = insert_m.group(1).rstrip("\n")
+                original = _safe_read(target)
+                if original is None:
+                    results.append({"file": rel_path, "status": "error", "message": "File not found"})
+                    continue
+                if anchor in original:
+                    updated = original.replace(anchor, anchor + "\n" + insert, 1)
+                else:
+                    results.append({"file": rel_path, "status": "error", "message": "@@AFTER anchor not found"})
+                    continue
+                _safe_write(target, updated)
+                results.append({"file": rel_path, "status": "ok", "mode": mode})
+
+            elif mode == "delete_block":
+                from_m = _re.search(r'@@FROM:\n([\s\S]*?)(?=@@END|$)', body)
+                if not from_m:
+                    results.append({"file": rel_path, "status": "error", "message": "Missing @@FROM"})
+                    continue
+                old_block = from_m.group(1).rstrip("\n")
+                original = _safe_read(target)
+                if original is None:
+                    results.append({"file": rel_path, "status": "error", "message": "File not found"})
+                    continue
+                if old_block in original:
+                    updated = original.replace(old_block, "", 1)
+                else:
+                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found"})
+                    continue
+                _safe_write(target, updated)
+                results.append({"file": rel_path, "status": "ok", "mode": mode})
+
+            else:
+                results.append({"file": rel_path, "status": "error", "message": f"Unknown mode: {mode}"})
+
+        except Exception as ex:
+            results.append({"file": rel_path, "status": "error", "message": str(ex)})
+
+    return jsonify({"results": results})
+
+
 @app.route('/api/project/<project>/paste-clipboard', methods=['POST'])
 def api_project_paste_clipboard(project):
     import shutil
