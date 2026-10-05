@@ -23,6 +23,7 @@ class TaskCompletePopup(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(W, H)
         self.setCursor(Qt.CursorShape.ArrowCursor)
+        self.setMouseTracking(True)
 
         self._aurora_t    = 0.0
         self._opacity     = 0.0
