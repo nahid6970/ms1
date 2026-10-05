@@ -9575,7 +9575,8 @@
                 // Show current project name
                 const lbl = document.getElementById('cm-project-label');
                 if (lbl) lbl.textContent = activeProject ? `// ${activeProject}` : '';
-                // Auto-load files
+                // Load per-workspace exclude patterns, then files
+                cmLoadExcludePatterns();
                 cmLoadFiles();
                 _popoverOutside('code-merger-popover', 'code-merger-btn', closeCodeMergerPopover);
             }
@@ -9703,12 +9704,34 @@
         }
 
         // Default exclude patterns — same as CM_SKIP_DIRS in the fetch logic but user-editable
-        let _cmExcludePatterns = [
+        const CM_EXCLUDE_DEFAULTS = [
             '*.pyc', '*.pyo', '*.pyd', '__pycache__/', '.git/', '.venv/', 'venv/',
             'node_modules/', 'dist/', 'build/', '.next/', 'coverage/',
             '*.log', '*.bak', '*.tmp', '*.lock', 'package-lock.json',
             '.pytest_cache/', '.mypy_cache/', '.cache/'
         ];
+
+        // Per-workspace exclude patterns — loaded from localStorage on open
+        let _cmExcludePatterns = [...CM_EXCLUDE_DEFAULTS];
+
+        function _cmStorageKey() {
+            return `cm-exclude-${activeProject || '__global__'}`;
+        }
+
+        function cmLoadExcludePatterns() {
+            try {
+                const raw = localStorage.getItem(_cmStorageKey());
+                _cmExcludePatterns = raw ? JSON.parse(raw) : [...CM_EXCLUDE_DEFAULTS];
+            } catch(e) {
+                _cmExcludePatterns = [...CM_EXCLUDE_DEFAULTS];
+            }
+        }
+
+        function cmSaveExcludePatterns() {
+            try {
+                localStorage.setItem(_cmStorageKey(), JSON.stringify(_cmExcludePatterns));
+            } catch(e) { /* quota exceeded, ignore */ }
+        }
 
         function cmToggleExcludePanel() {
             const panel = document.getElementById('cm-exclude-panel');
@@ -9745,8 +9768,9 @@
             if (!val) return;
             if (!_cmExcludePatterns.includes(val)) {
                 _cmExcludePatterns.push(val);
+                cmSaveExcludePatterns();
                 cmRenderExcludeTags();
-                cmLoadFiles();   // re-filter immediately
+                cmLoadFiles();
             }
             input.value = '';
             input.focus();
@@ -9754,8 +9778,9 @@
 
         function cmRemoveExcludePattern(idx) {
             _cmExcludePatterns.splice(idx, 1);
+            cmSaveExcludePatterns();
             cmRenderExcludeTags();
-            cmLoadFiles();  // re-filter immediately
+            cmLoadFiles();
         }
 
         /**
