@@ -997,7 +997,8 @@
         "label": "N",
         "bg": "#ffffff",
         "fg": "#000000",
-        "borderColor": "#334155"
+        "borderColor": "#334155",
+        "borderRadius": 0
       }
     ],
     "kiro-cli chat --trust-all-tools --resume": [
@@ -1006,14 +1007,16 @@
         "label": "N",
         "bg": "#ffffff",
         "fg": "#000000",
-        "borderColor": "#334155"
+        "borderColor": "#334155",
+        "borderRadius": 0
       },
       {
         "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
-        "label": "logout & login",
-        "bg": "#1e293b",
-        "fg": "#e2e8f0",
-        "borderColor": "#334155"
+        "label": "whoami & logout & login",
+        "bg": "#dbf038",
+        "fg": "#000000",
+        "borderColor": "#334155",
+        "borderRadius": 0
       }
     ],
     "npm run deploy:pages": [
