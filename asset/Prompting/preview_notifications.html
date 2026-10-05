@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Notification Style Previews</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0d0d0d;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 60px 20px;
+  }
+
+  h1 {
+    color: #666;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+
+  .label {
+    color: #444;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  /* ─── A: Glassmorphism + Particles ──────────────────────────────────── */
+  .glass-wrap {
+    position: relative;
+    width: 420px;
+    height: 240px;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .glass-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #0a0a1e, #12103a);
+    border-radius: 24px;
+  }
+  .glass-surface {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.07);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+  }
+  .glass-highlight {
+    position: absolute; top: 0; left: 24px; right: 24px;
+    height: 1.5px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 2px;
+  }
+  .glass-border-glow {
+    position: absolute; inset: -1px;
+    border-radius: 25px;
+    border: 2px solid transparent;
+    background: linear-gradient(#0a0a1e,#0a0a1e) padding-box,
+                linear-gradient(120deg, #7c4dff, #00c8ff, #b84dff, #00ffb4, #ff64c8) border-box;
+    animation: aurora-border 4s linear infinite;
+    background-size: 300% 300%;
+  }
+  @keyframes aurora-border {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: float-up linear infinite;
+    filter: blur(2px);
+  }
+  @keyframes float-up {
+    0%   { transform: translateY(0)   translateX(0);   opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-260px) translateX(var(--drift)); opacity: 0; }
+  }
+  .glass-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+  }
+  .glass-icon  { font-size: 22px; color: rgba(255,255,255,0.9); }
+  .glass-sub   { font-size: 8px; letter-spacing: 4px; color: rgba(255,255,255,0.45); font-weight: 700; }
+  .glass-msg   { font-size: 16px; color: rgba(255,255,255,0.92); font-weight: 600; margin-top: 8px; }
+  .glass-time  { font-size: 8px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+  .glass-btn {
+    margin-top: 14px;
+    padding: 6px 26px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.8);
+    font-size: 9px; letter-spacing: 1px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .glass-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* ─── B: Terminal / Matrix ──────────────────────────────────────────── */
+  .terminal-wrap {
+    width: 420px;
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 255, 80, 0.08);
+    font-family: 'Courier New', monospace;
+  }
+  .terminal-titlebar {
+    background: #111;
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 7px;
+    border-bottom: 1px solid #1e1e1e;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .terminal-title-text { color: #333; font-size: 10px; margin-left: 6px; letter-spacing: 1px; }
+  .terminal-body { padding: 20px 24px; }
+  .t-line { color: #00ff50; font-size: 10px; line-height: 1.9; }
+  .t-dim  { color: #1a6625; }
+  .t-bright { color: #00ff50; }
+  .t-white { color: #ccc; }
+  .t-done { color: #00ff50; font-size: 13px; font-weight: bold; margin: 10px 0 4px; }
+  .t-bar-wrap { background: #0f1f0f; border-radius: 3px; height: 6px; margin: 6px 0 14px; overflow: hidden; }
+  .t-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #005c1a, #00ff50);
+    border-radius: 3px;
+    animation: fill-bar 1.8s ease-out forwards;
+  }
+  @keyframes fill-bar { to { width: 100%; } }
+  .scanlines {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+  }
+  .terminal-wrap { position: relative; }
+  .t-btn {
+    background: transparent;
+    border: 1px solid #00ff50;
+    color: #00ff50;
+    padding: 5px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .t-btn:hover { background: rgba(0,255,80,0.1); }
+
+  /* ─── C: Holographic Card ──────────────────────────────────────────── */
+  .holo-wrap {
+    width: 420px; height: 240px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    perspective: 800px;
+    cursor: pointer;
+  }
+  .holo-card {
+    width: 100%; height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #1a0533, #0d1a33, #0a2b1a);
+    position: relative;
+    overflow: hidden;
+    animation: holo-tilt 6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes holo-tilt {
+    0%,100% { transform: rotateX(0deg) rotateY(0deg); }
+    25%      { transform: rotateX(4deg) rotateY(-5deg); }
+    50%      { transform: rotateX(-2deg) rotateY(5deg); }
+    75%      { transform: rotateX(3deg) rotateY(-3deg); }
+  }
+  .holo-sheen {
+    position: absolute; inset: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+      from 0deg,
+      rgba(255,0,128,0.15), rgba(255,165,0,0.15), rgba(255,255,0,0.15),
+      rgba(0,255,128,0.15), rgba(0,200,255,0.15), rgba(128,0,255,0.15),
+      rgba(255,0,128,0.15)
+    );
+    animation: sheen-rotate 4s linear infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes sheen-rotate { to { transform: rotate(360deg); } }
+  .holo-border {
+    position: absolute; inset: 0;
+    border-radius: 20px;
+    border: 1.5px solid transparent;
+    background: linear-gradient(#0d1a33,#0d1a33) padding-box,
+                conic-gradient(from 0deg, #ff0080, #ff9000, #ffff00, #00ff80, #00c8ff, #8000ff, #ff0080) border-box;
+    animation: holo-border-spin 3s linear infinite;
+  }
+  @keyframes holo-border-spin { to { filter: hue-rotate(360deg); } }
+  .holo-glow {
+    position: absolute; inset: -2px;
+    border-radius: 22px;
+    box-shadow: 0 0 30px rgba(128,0,255,0.4), 0 0 60px rgba(0,200,255,0.2);
+    animation: holo-pulse 2s ease-in-out infinite;
+  }
+  @keyframes holo-pulse {
+    0%,100% { box-shadow: 0 0 30px rgba(128,0,255,0.4), 0 0 60px rgba(0,200,255,0.2); }
+    50%      { box-shadow: 0 0 50px rgba(255,0,128,0.5), 0 0 90px rgba(0,200,255,0.3); }
+  }
+  .holo-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px;
+  }
+  .holo-icon { font-size: 28px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.8)); }
+  .holo-sub { font-size: 8px; letter-spacing: 5px; color: rgba(255,255,255,0.4); font-weight: 700; }
+  .holo-msg {
+    font-size: 15px; font-weight: 700;
+    background: linear-gradient(90deg, #ff80bf, #80ffef, #bf80ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-size: 200%;
+    animation: shimmer-text 2s linear infinite;
+  }
+  @keyframes shimmer-text { to { background-position: 200%; } }
+  .holo-time { font-size: 8px; color: rgba(255,255,255,0.3); }
+  .holo-btn {
+    margin-top: 8px; padding: 6px 24px; border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7); font-size: 9px; letter-spacing: 1px;
+    cursor: pointer;
+  }
+
+  /* ─── D: Synthwave ──────────────────────────────────────────────────── */
+  .synth-wrap {
+    width: 420px; height: 260px;
+    border-radius: 12px;
+    background: #0d0014;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #1a0030;
+    box-shadow: 0 0 60px rgba(255, 0, 128, 0.15), inset 0 0 60px rgba(0,0,20,0.8);
+  }
+  /* Grid floor */
+  .synth-grid {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 90px;
+    background-image:
+      linear-gradient(rgba(255,0,200,0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,0,200,0.3) 1px, transparent 1px);
+    background-size: 40px 20px;
+    transform: perspective(200px) rotateX(50deg);
+    transform-origin: bottom;
+    opacity: 0.5;
+  }
+  /* Sun */
+  .synth-sun {
+    position: absolute; bottom: 70px;
+    left: 50%; transform: translateX(-50%);
+    width: 100px; height: 50px;
+    border-radius: 100px 100px 0 0;
+    background: linear-gradient(180deg, #ffcc00, #ff4500);
+    box-shadow: 0 0 40px rgba(255,100,0,0.6);
+    overflow: hidden;
+  }
+  .synth-sun-lines {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; flex-direction: column; gap: 6px; padding: 6px 0;
+  }
+  .synth-sun-line { height: 2px; background: #0d0014; margin: 0 2px; }
+  /* Scanlines */
+  .synth-scan {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
+    pointer-events: none;
+  }
+  .synth-content {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; flex-direction: column;
+    align-items: center; padding-top: 28px; gap: 4px;
+  }
+  .synth-sub {
+    font-size: 8px; letter-spacing: 5px; color: rgba(0,200,255,0.6);
+    font-weight: 700;
+  }
+  .synth-msg {
+    font-size: 16px; font-weight: 700;
+    color: #ff2d78;
+    text-shadow: 0 0 10px #ff2d78, 0 0 30px rgba(255,45,120,0.5);
+    letter-spacing: 1px;
+  }
+  .synth-time { font-size: 8px; color: rgba(0,200,255,0.4); }
+  .synth-btn {
+    margin-top: 10px; padding: 6px 24px; border-radius: 4px;
+    background: transparent;
+    border: 1px solid #ff2d78;
+    color: #ff2d78;
+    font-size: 9px; letter-spacing: 2px;
+    cursor: pointer;
+    text-shadow: 0 0 6px #ff2d78;
+    box-shadow: 0 0 10px rgba(255,45,120,0.2);
+  }
+  .synth-neon-line {
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, #ff2d78, transparent);
+    margin: 6px 0;
+    box-shadow: 0 0 8px #ff2d78;
+  }
+
+  /* ─── E: Minimal Luxury ─────────────────────────────────────────────── */
+  .luxury-wrap {
+    width: 420px;
+    background: #000;
+    border-radius: 4px;
+    border: 1px solid #1a1a1a;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .luxury-sweep {
+    position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,210,80,0.06), transparent);
+    animation: sweep 3s ease-in-out infinite;
+  }
+  @keyframes sweep { to { left: 140%; } }
+  .luxury-line-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  }
+  .luxury-line-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, #c9a84c40, transparent);
+  }
+  .luxury-sub {
+    font-size: 8px; letter-spacing: 5px; color: #555; font-weight: 700;
+    text-align: center; margin-bottom: 12px;
+  }
+  .luxury-msg {
+    font-size: 15px; font-weight: 300; letter-spacing: 2px;
+    text-align: center;
+    background: linear-gradient(90deg, #8a6a20, #f0d060, #c9a84c, #f5e070, #8a6a20);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-size: 300%;
+    animation: gold-shimmer 3s linear infinite;
+  }
+  @keyframes gold-shimmer { to { background-position: 300%; } }
+  .luxury-divider {
+    width: 40px; height: 1px;
+    background: #c9a84c40;
+    margin: 12px auto;
+  }
+  .luxury-time { font-size: 8px; color: #333; text-align: center; letter-spacing: 2px; }
+  .luxury-btn {
+    display: block; margin: 18px auto 0;
+    padding: 7px 28px;
+    background: transparent;
+    border: 1px solid #c9a84c40;
+    color: #c9a84c;
+    font-size: 8px; letter-spacing: 3px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .luxury-btn:hover { border-color: #c9a84c; color: #f5e070; }
+</style>
+</head>
+<body>
+
+<h1>Notification Style Previews</h1>
+
+<!-- ── A: Glassmorphism ──────────────────────────────────────────────── -->
+<div>
+  <div class="label">A — Glassmorphism + Floating Particles</div>
+  <div class="glass-wrap">
+    <div class="glass-bg"></div>
+    <!-- particles -->
+    <div class="particle" style="width:10px;height:10px;background:radial-gradient(#8cb4ff,transparent);left:12%;bottom:0;--drift:15px;animation-duration:5.2s;animation-delay:0s;"></div>
+    <div class="particle" style="width:7px;height:7px;background:radial-gradient(#c88cff,transparent);left:28%;bottom:0;--drift:-10px;animation-duration:6.8s;animation-delay:0.8s;"></div>
+    <div class="particle" style="width:12px;height:12px;background:radial-gradient(#64f0d2,transparent);left:45%;bottom:0;--drift:8px;animation-duration:5.8s;animation-delay:1.5s;"></div>
+    <div class="particle" style="width:8px;height:8px;background:radial-gradient(#ffa0dc,transparent);left:62%;bottom:0;--drift:-12px;animation-duration:7.1s;animation-delay:0.3s;"></div>
+    <div class="particle" style="width:6px;height:6px;background:radial-gradient(#ffe676,transparent);left:78%;bottom:0;--drift:6px;animation-duration:6.3s;animation-delay:2.0s;"></div>
+    <div class="particle" style="width:9px;height:9px;background:radial-gradient(#8cb4ff,transparent);left:90%;bottom:0;--drift:-8px;animation-duration:5.5s;animation-delay:0.6s;"></div>
+    <div class="particle" style="width:5px;height:5px;background:radial-gradient(#c88cff,transparent);left:35%;bottom:0;--drift:14px;animation-duration:7.4s;animation-delay:1.2s;"></div>
+    <div class="glass-surface"></div>
+    <div class="glass-highlight"></div>
+    <div class="glass-border-glow"></div>
+    <div class="glass-content">
+      <div class="glass-icon">✦</div>
+      <div class="glass-sub">AI ASSISTANT</div>
+      <div class="glass-msg">Task Completed Successfully</div>
+      <div class="glass-time">Finished at  2026-10-05 14:22</div>
+      <button class="glass-btn">Dismiss</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── B: Terminal ──────────────────────────────────────────────────── -->
+<div>
+  <div class="label">B — Terminal / Matrix</div>
+  <div class="terminal-wrap">
+    <div class="scanlines"></div>
+    <div class="terminal-titlebar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-title-text">ai_assistant — bash</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line"><span class="t-dim">$</span> <span class="t-white">executing task...</span></div>
+      <div class="t-line"><span class="t-dim">[████████████████]</span></div>
+      <div class="t-bar-wrap"><div class="t-bar"></div></div>
+      <div class="t-done">✓ TASK COMPLETE</div>
+      <div class="t-line t-dim">finished_at=2026-10-05T14:22:00</div>
+      <div class="t-line t-dim">exit_code=0 &nbsp;|&nbsp; status=SUCCESS</div>
+      <br/>
+      <button class="t-btn">[ DISMISS ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── C: Holographic ───────────────────────────────────────────────── -->
+<div>
+  <div class="label">C — Holographic Card</div>
+  <div class="holo-wrap">
+    <div class="holo-card">
+      <div class="holo-sheen"></div>
+      <div class="holo-border"></div>
+      <div class="holo-glow"></div>
+      <div class="holo-content">
+        <div class="holo-icon">◈</div>
+        <div class="holo-sub">AI ASSISTANT</div>
+        <div class="holo-msg">Task Completed Successfully</div>
+        <div class="holo-time">Finished at  2026-10-05 14:22</div>
+        <button class="holo-btn">Dismiss</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── D: Synthwave ─────────────────────────────────────────────────── -->
+<div>
+  <div class="label">D — Retro Synthwave</div>
+  <div class="synth-wrap">
+    <div class="synth-sun">
+      <div class="synth-sun-lines">
+        <div class="synth-sun-line"></div>
+        <div class="synth-sun-line"></div>
+        <div class="synth-sun-line"></div>
+        <div class="synth-sun-line"></div>
+      </div>
+    </div>
+    <div class="synth-grid"></div>
+    <div class="synth-scan"></div>
+    <div class="synth-content">
+      <div class="synth-sub">AI ASSISTANT</div>
+      <div class="synth-neon-line"></div>
+      <div class="synth-msg">Task Completed Successfully</div>
+      <div class="synth-time">Finished at  2026-10-05 14:22</div>
+      <button class="synth-btn">DISMISS</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── E: Minimal Luxury ────────────────────────────────────────────── -->
+<div>
+  <div class="label">E — Minimal Luxury (Black + Gold)</div>
+  <div class="luxury-wrap">
+    <div class="luxury-sweep"></div>
+    <div class="luxury-line-top"></div>
+    <div class="luxury-line-bottom"></div>
+    <div class="luxury-sub">AI ASSISTANT</div>
+    <div class="luxury-msg">Task Completed Successfully</div>
+    <div class="luxury-divider"></div>
+    <div class="luxury-time">Finished at &nbsp; 2026-10-05 14:22</div>
+    <button class="luxury-btn">DISMISS</button>
+  </div>
+</div>
+
+</body>
+</html>

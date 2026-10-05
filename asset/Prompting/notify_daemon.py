@@ -1,27 +1,184 @@
 import os
 import sys
 import time
+import math
 
-from PyQt6.QtWidgets import (QApplication, QWidget, QVBoxLayout, QLabel,
-                              QPushButton, QGraphicsDropShadowEffect)
-from PyQt6.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
-from PyQt6.QtGui import QColor
+from PyQt6.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt6.QtCore import Qt, QPoint, QTimer, QRectF, QPointF
+from PyQt6.QtGui import (QColor, QPainter, QPainterPath, QPen,
+                         QFont, QLinearGradient, QConicalGradient, QRegion)
 
 FILE_PATH = r"C:\Users\nahid\notification.txt"
 
-BORDER_COLOR = "#313244"
+W, H          = 460, 220
+CORNER_RADIUS = 22
+PAD           = 20          # outer window padding for glow room
+BG_COLOR      = QColor(11, 14, 26)   # dark navy
 
-# Gradient color sets for animation
-GRADIENT_COLORS = [
-    ("#FF6B6B", "#4ECDC4"),  # Red to Teal
-    ("#667eea", "#764ba2"),  # Blue to Purple
-    ("#f093fb", "#f5576c"),  # Pink to Red
-    ("#4facfe", "#00f2fe"),  # Blue to Cyan
-    ("#43e97b", "#38f9d7"),  # Green to Cyan
-    ("#fa709a", "#fee140"),  # Pink to Yellow
-    ("#a8edea", "#fed6e3"),  # Cyan to Pink
-    ("#ff9a9e", "#fecfef"),  # Pink to Light Pink
+# Aurora border colors — wide spectrum so the shift is clearly visible
+AURORA = [
+    QColor(80,  60, 255),   # violet-blue
+    QColor(0,  160, 255),   # cyan-blue
+    QColor(0,  220, 180),   # mint/teal
+    QColor(120, 60, 255),   # purple
+    QColor(255, 80, 180),   # pink
+    QColor(255, 160,  40),  # amber
+    QColor(0,  200, 255),   # bright cyan
+    QColor(160, 40, 255),   # deep violet
 ]
+
+
+class NotifyCard(QWidget):
+    def __init__(self, finished_at: str, parent=None):
+        super().__init__(parent)
+        self.finished_at = finished_at
+        self.setFixedSize(W, H)
+
+        self._aurora_t   = 0.0   # 0..1 drives border color cycle
+        self._glow_pulse = 0.0   # 0..1 breathing glow intensity
+        self._glow_dir   = 1
+        self._opacity    = 0.0   # entrance fade
+        self._slide_y    = 20.0
+
+        self._tick_timer = QTimer()
+        self._tick_timer.timeout.connect(self._tick)
+        self._tick_timer.start(16)   # ~60 fps
+
+        # Dismiss button
+        self.btn = QPushButton("Dismiss", self)
+        self.btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn.setFixedSize(120, 36)
+        self.btn.move((W - 120) // 2, H - 60)
+        self.btn.setStyleSheet("""
+            QPushButton {
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.30);
+                border-radius: 18px;
+                color: rgba(255, 255, 255, 0.88);
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 10pt;
+                font-weight: 500;
+            }
+            QPushButton:hover {
+                background: rgba(255, 255, 255, 0.07);
+                border-color: rgba(255, 255, 255, 0.55);
+            }
+            QPushButton:pressed {
+                background: rgba(255, 255, 255, 0.12);
+            }
+        """)
+
+    def _tick(self):
+        self._aurora_t = (self._aurora_t + 0.008) % 1.0
+        self._glow_pulse += self._glow_dir * 0.012
+        if self._glow_pulse >= 1.0:
+            self._glow_dir = -1
+        elif self._glow_pulse <= 0.0:
+            self._glow_dir = 1
+        # entrance
+        if self._opacity < 1.0:
+            self._opacity = min(self._opacity + 0.06, 1.0)
+            self._slide_y = max(self._slide_y - 1.2, 0.0)
+        self.update()
+
+    def stop(self):
+        self._tick_timer.stop()
+
+    def _aurora_color(self) -> QColor:
+        n   = len(AURORA)
+        pos = self._aurora_t * n
+        i   = int(pos) % n
+        j   = (i + 1) % n
+        t   = pos - int(pos)
+        a, b = AURORA[i], AURORA[j]
+        return QColor(
+            int(a.red()   + (b.red()   - a.red())   * t),
+            int(a.green() + (b.green() - a.green()) * t),
+            int(a.blue()  + (b.blue()  - a.blue())  * t),
+        )
+
+    def paintEvent(self, event):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+        p.setOpacity(self._opacity)
+
+        rect = QRectF(0, 0, W, H)
+        path = QPainterPath()
+        path.addRoundedRect(rect, CORNER_RADIUS, CORNER_RADIUS)
+
+        # OS mask — true rounded corners, no child widget bleed
+        self.setMask(QRegion(path.toFillPolygon().toPolygon()))
+
+        # ── 1. Background fill ───────────────────────────────────────────────
+        p.setClipPath(path)
+        p.fillPath(path, BG_COLOR)
+
+        # ── 2. Very subtle inner vignette (slightly lighter centre) ──────────
+        from PyQt6.QtGui import QRadialGradient
+        rg = QRadialGradient(QPointF(W * 0.5, H * 0.4), W * 0.65)
+        rg.setColorAt(0, QColor(255, 255, 255, 8))
+        rg.setColorAt(1, QColor(0, 0, 0, 0))
+        p.fillPath(path, rg)
+
+        # ── 3. Content ───────────────────────────────────────────────────────
+        # ✦ sparkle
+        p.setClipping(False)
+        p.setFont(QFont("Segoe UI", 18))
+        p.setPen(QColor(255, 255, 255, 230))
+        star_rect = QRectF(0, 24, W, 36)
+        p.drawText(star_rect, Qt.AlignmentFlag.AlignCenter, "✦")
+
+        # AI ASSISTANT label
+        f_sub = QFont("Segoe UI", 8, QFont.Weight.Bold)
+        f_sub.setLetterSpacing(QFont.SpacingType.AbsoluteSpacing, 4.0)
+        p.setFont(f_sub)
+        p.setPen(QColor(255, 255, 255, 100))
+        p.drawText(QRectF(0, 66, W, 20), Qt.AlignmentFlag.AlignCenter, "AI ASSISTANT")
+
+        # Main message
+        f_main = QFont("Segoe UI", 15, QFont.Weight.Bold)
+        p.setFont(f_main)
+        p.setPen(QColor(255, 255, 255, 240))
+        p.drawText(QRectF(0, 94, W, 30), Qt.AlignmentFlag.AlignCenter,
+                   "Task Completed Successfully")
+
+        # Timestamp
+        f_time = QFont("Segoe UI", 8)
+        p.setFont(f_time)
+        p.setPen(QColor(255, 255, 255, 80))
+        p.drawText(QRectF(0, 128, W, 20), Qt.AlignmentFlag.AlignCenter,
+                   f"Finished at  {self.finished_at}")
+
+        # ── 4. Aurora border ─────────────────────────────────────────────────
+        aurora = self._aurora_color()
+        glow_a = int(180 + self._glow_pulse * 75)   # 180..255
+
+        inner = QRectF(1, 1, W - 2, H - 2)
+        inner_path = QPainterPath()
+        inner_path.addRoundedRect(inner, CORNER_RADIUS - 1, CORNER_RADIUS - 1)
+
+        # wide soft outer glow
+        pen_glow = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(),
+                               int(glow_a * 0.45)), 10)
+        pen_glow.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        p.setPen(pen_glow)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        p.drawPath(inner_path)
+
+        # mid glow
+        pen_mid = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(),
+                              int(glow_a * 0.7)), 4)
+        pen_mid.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
+        p.setPen(pen_mid)
+        p.drawPath(inner_path)
+
+        # crisp inner border
+        pen_crisp = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(), glow_a), 1.5)
+        p.setPen(pen_crisp)
+        p.drawPath(inner_path)
+
+        p.end()
 
 
 class TaskCompletePopup(QWidget):
@@ -34,154 +191,37 @@ class TaskCompletePopup(QWidget):
             | Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setFixedSize(W + PAD * 2, H + PAD * 2)
 
-        self.gradient_index = 0
-        self._transition_progress = 1.0
-        self.setup_ui()
-        self.setup_gradient_timer()
-        self.setup_animation()
+        self.card = NotifyCard(finished_at, self)
+        self.card.move(PAD, PAD)
+        self.card.btn.clicked.connect(self.close)
 
-    @pyqtProperty(float)
-    def transition_progress(self):
-        return self._transition_progress
+        self._position()
 
-    @transition_progress.setter
-    def transition_progress(self, value):
-        self._transition_progress = value
-        self.update_gradient_style()
+    def _position(self):
+        screen = self.screen().availableGeometry()
+        self.move(
+            (screen.width()  - self.width())  // 2,
+            (screen.height() - self.height()) // 2,
+        )
 
-    def setup_animation(self):
-        self.animation = QPropertyAnimation(self, b"transition_progress")
-        self.animation.setDuration(1200)
-        self.animation.setEasingCurve(QEasingCurve.Type.InOutQuad)
-
-    def setup_ui(self):
-        layout = QVBoxLayout()
-        layout.setContentsMargins(10, 10, 10, 10)
-        self.setLayout(layout)
-
-        self.container = QWidget()
-        self.container.setObjectName("Container")
-        c_layout = QVBoxLayout(self.container)
-        c_layout.setContentsMargins(40, 30, 40, 30)
-        layout.addWidget(self.container)
-
-        self.update_gradient_style()
-
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(24)
-        shadow.setColor(QColor(0, 0, 0, 120))
-        shadow.setOffset(0, 4)
-        self.container.setGraphicsEffect(shadow)
-
-        title = QLabel("✦ AI ASSISTANT")
-        title.setObjectName("title")
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(title)
-
-        c_layout.addSpacing(8)
-
-        msg = QLabel("Task Completed Successfully")
-        msg.setObjectName("msg")
-        msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(msg)
-
-        c_layout.addSpacing(6)
-
-        time_label = QLabel(f"Finished at: {self.finished_at}")
-        time_label.setObjectName("time_label")
-        time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        c_layout.addWidget(time_label)
-
-        c_layout.addSpacing(20)
-
-        btn = QPushButton("Dismiss")
-        btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.clicked.connect(self.close)
-        c_layout.addWidget(btn, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.adjustSize()
-        qr = self.frameGeometry()
-        qr.moveCenter(self.screen().availableGeometry().center())
-        self.move(qr.topLeft())
-
-    def setup_gradient_timer(self):
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.start_transition)
-        self.timer.start(3000)  # New transition every 3 seconds
-
-    def start_transition(self):
-        self.gradient_index = (self.gradient_index + 1) % len(GRADIENT_COLORS)
-        self.animation.setStartValue(0.0)
-        self.animation.setEndValue(1.0)
-        self.animation.start()
-
-    def interpolate_color(self, color1, color2, t):
-        c1 = QColor(color1)
-        c2 = QColor(color2)
-        r = int(c1.red()   + (c2.red()   - c1.red())   * t)
-        g = int(c1.green() + (c2.green() - c1.green()) * t)
-        b = int(c1.blue()  + (c2.blue()  - c1.blue())  * t)
-        return f"#{r:02x}{g:02x}{b:02x}"
-
-    def get_text_color(self, bg_color):
-        color = QColor(bg_color)
-        brightness = color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114
-        return "black" if brightness > 128 else "white"
-
-    def update_gradient_style(self):
-        current_colors = GRADIENT_COLORS[self.gradient_index]
-        prev_index = (self.gradient_index - 1) % len(GRADIENT_COLORS)
-        prev_colors = GRADIENT_COLORS[prev_index]
-
-        color1 = self.interpolate_color(prev_colors[0], current_colors[0], self._transition_progress)
-        color2 = self.interpolate_color(prev_colors[1], current_colors[1], self._transition_progress)
-
-        avg_color = self.interpolate_color(color1, color2, 0.5)
-        text_color = self.get_text_color(avg_color)
-
-        self.setStyleSheet(f"""
-            QWidget#Container {{
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 {color1}, stop:1 {color2});
-                border: 1px solid {BORDER_COLOR};
-                border-radius: 8px;
-                min-width: 400px;
-            }}
-            QLabel#title {{
-                color: {text_color};
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 11pt;
-                font-weight: 700;
-                letter-spacing: 1px;
-            }}
-            QLabel#msg {{
-                color: {text_color};
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 13pt;
-            }}
-            QLabel#time_label {{
-                color: {text_color};
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 9pt;
-            }}
-            QPushButton {{
-                background-color: rgba(255, 255, 255, 0.9);
-                color: #1E1E2E;
-                border: none;
-                border-radius: 4px;
-                padding: 8px 24px;
-                font-family: 'Segoe UI', sans-serif;
-                font-size: 10pt;
-                font-weight: 700;
-            }}
-            QPushButton:hover   {{ background-color: rgba(255, 255, 255, 1.0); }}
-            QPushButton:pressed {{ background-color: rgba(255, 255, 255, 0.8); }}
-        """)
+    def paintEvent(self, event):
+        # Faint outer glow behind the card
+        p = QPainter(self)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing)
+        from PyQt6.QtGui import QRadialGradient
+        cx, cy = self.width() // 2, self.height() // 2
+        rg = QRadialGradient(QPointF(cx, cy), 180)
+        rg.setColorAt(0, QColor(60, 80, 220, 20))
+        rg.setColorAt(1, QColor(0, 0, 0, 0))
+        gp = QPainterPath()
+        gp.addEllipse(QPointF(cx, cy), 180, 180)
+        p.fillPath(gp, rg)
+        p.end()
 
     def closeEvent(self, event):
-        self.timer.stop()
-        self.animation.stop()
+        self.card.stop()
         QApplication.instance().quit()
         event.accept()
 
@@ -210,7 +250,6 @@ def show_notification(finished_at: str):
 def main():
     print(f"Monitoring {FILE_PATH} for changes...")
 
-    # Create file if it doesn't exist
     if not os.path.exists(FILE_PATH):
         try:
             with open(FILE_PATH, "w", encoding="utf-8") as f:
@@ -218,7 +257,6 @@ def main():
         except Exception:
             pass
 
-    # Read initial content so we don't fire on startup
     last_content = ""
     try:
         with open(FILE_PATH, "r", encoding="utf-8") as f:
