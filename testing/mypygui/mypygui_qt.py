@@ -3939,9 +3939,63 @@ def git_sync(path):
 
     Embedded copy of the old `gitter` PowerShell-profile function so the GUI
     no longer depends on the user's profile being loaded. Prints the current
-    branch before committing.
+    branch before committing. Respects git_exclude_patterns from config.
     """
-    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", _GIT_SYNC_PS.replace("{path}", path)], shell=True)
+    cfg = load_config()
+    exclude_patterns = cfg.get("git_exclude_patterns", [])
+
+    # Build a PowerShell snippet that unstages excluded files after git add .
+    unstage_lines = ""
+    if exclude_patterns:
+        # For each pattern, run git restore --staged matching files
+        pats_ps = ", ".join(f'"{p}"' for p in exclude_patterns)
+        unstage_lines = (
+            f"$_excludePatterns = @({pats_ps});"
+            "$_stagedFiles = git diff --cached --name-only;"
+            "foreach ($_pat in $_excludePatterns) {"
+            "  $_matched = $_stagedFiles | Where-Object { $_ -like \"*$_pat\" -or ($_ -split '/')[-1] -eq $_pat };"
+            "  foreach ($_f in $_matched) { git restore --staged $\"$_f\" 2>$null; Write-Host \"  [excluded] $_f\" -ForegroundColor DarkGray; }"
+            "};"
+        )
+
+    script = (
+        "& {$host.UI.RawUI.WindowTitle='GiTSync';"
+        f"Set-Location -Path '{path}';"
+        "if (-not (Test-Path '.git')) { Write-Host 'This is not a Git repository.' -ForegroundColor Red; return };"
+        "$Branch = git branch --show-current;"
+        "if (-not $Branch) {"
+        "  $Short = git rev-parse --short HEAD 2>$null;"
+        "  if ($LASTEXITCODE -eq 0 -and $Short) { $Branch = 'DETACHED @ ' + $Short } else { $Branch = 'UNBORN (no commits yet)' }"
+        "};"
+        "Write-Host '';"
+        'Write-Host "On branch: $Branch" -ForegroundColor Cyan;'
+        "Write-Host '--------------------------------------------' -ForegroundColor DarkGray;"
+        "git status;"
+        "git add .;"
+        "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git add. Window will remain open.' -ForegroundColor Red; return };"
+        + unstage_lines +
+        "$UserInput = Read-Host 'Enter commit message (press Enter to use Auto-commit)';"
+        "if ([string]::IsNullOrWhiteSpace($UserInput)) { $CommitMessage = 'Auto-commit' } else { $CommitMessage = $UserInput };"
+        "while ($true) {"
+        "  git commit -m $CommitMessage;"
+        "  if ($LASTEXITCODE -eq 0) { break };"
+        "  git diff --cached --quiet;"
+        "  if ($LASTEXITCODE -eq 0) { Write-Host 'Nothing to commit - working tree clean.' -ForegroundColor Yellow; break };"
+        "  Write-Host 'Commit failed. Press Enter to retry or type a new message:' -ForegroundColor Yellow;"
+        '  $Retry = Read-Host "[$CommitMessage]";'
+        "  if (-not [string]::IsNullOrWhiteSpace($Retry)) { $CommitMessage = $Retry }"
+        "};"
+        "git pull --rebase --autostash;"
+        "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git pull --rebase. Resolve conflicts (or push manually). Window will remain open.' -ForegroundColor Red; return };"
+        "git push;"
+        "if ($LASTEXITCODE -ne 0) { Write-Host 'Error during git push. Window will remain open.' -ForegroundColor Red; return };"
+        "Write-Host '============================================' -ForegroundColor Green;"
+        "Write-Host '  >>  COMMIT & PUSH COMPLETE' -ForegroundColor Green;"
+        'Write-Host "       Branch: $Branch" -ForegroundColor Cyan;'
+        "Write-Host '============================================' -ForegroundColor Green;"
+        "exit}"
+    )
+    subprocess.Popen(["Start", "pwsh", "-NoExit", "-Command", script], shell=True)
 
 
 def open_git_cmd(path, title, command):
@@ -5142,6 +5196,50 @@ class StatusBar(QMainWindow):
         form_git.addRow("RIGHT CLICK", git_rc_cb)
         left_col.addWidget(grp_git)
 
+        # ── GIT EXCLUDE PATTERNS ──────────────────────────────────────────────
+        grp_git_ex = QGroupBox("GIT COMMIT EXCLUDE")
+        form_git_ex = QVBoxLayout(); grp_git_ex.setLayout(form_git_ex)
+
+        _ex_note = QLabel("Files / extensions that start unchecked in git commit.\nExamples: *.json  yarn.lock  tui_config.json")
+        _ex_note.setStyleSheet(f"color: {CP_DIM}; font-size: 11px;")
+        _ex_note.setWordWrap(True)
+        form_git_ex.addWidget(_ex_note)
+
+        git_ex_list = QListWidget()
+        git_ex_list.setFixedHeight(90)
+        git_ex_list.setSpacing(1)
+        for pat in self._config.get("git_exclude_patterns", []):
+            git_ex_list.addItem(pat)
+        form_git_ex.addWidget(git_ex_list)
+
+        _ex_input_row = QHBoxLayout()
+        git_ex_le = QLineEdit(); git_ex_le.setPlaceholderText("*.json or filename.ext")
+        git_ex_le.setFixedHeight(26)
+        _ex_add_btn = QPushButton("Add"); _ex_add_btn.setFixedWidth(50); _ex_add_btn.setFixedHeight(26)
+        _ex_add_btn.setObjectName("btn_save")
+        _ex_rm_btn = QPushButton("Remove"); _ex_rm_btn.setFixedWidth(65); _ex_rm_btn.setFixedHeight(26)
+        _ex_rm_btn.setStyleSheet(f"border-color: {CP_RED}; color: {CP_RED};")
+        _ex_input_row.addWidget(git_ex_le); _ex_input_row.addWidget(_ex_add_btn); _ex_input_row.addWidget(_ex_rm_btn)
+        form_git_ex.addLayout(_ex_input_row)
+
+        def _ex_add():
+            val = git_ex_le.text().strip()
+            if not val: return
+            existing = [git_ex_list.item(i).text() for i in range(git_ex_list.count())]
+            if val not in existing:
+                git_ex_list.addItem(val)
+            git_ex_le.clear()
+
+        def _ex_remove():
+            for item in git_ex_list.selectedItems():
+                git_ex_list.takeItem(git_ex_list.row(item))
+
+        _ex_add_btn.clicked.connect(_ex_add)
+        _ex_rm_btn.clicked.connect(_ex_remove)
+        git_ex_le.returnPressed.connect(_ex_add)
+
+        left_col.addWidget(grp_git_ex)
+
         grp_kom = QGroupBox("KOMOREBI"); form_kom = QFormLayout(); grp_kom.setLayout(form_kom)
         komorebi_indent_le = QLineEdit(str(self._config.get("komorebi_item_indent", 20)))
         komorebi_indent_le.setFixedWidth(60)
@@ -5276,6 +5374,7 @@ class StatusBar(QMainWindow):
                 }
                 cfg["git_indicator_style"] = git_ind_cb.currentText().lower()
                 cfg["git_right_click"] = "lazygit" if git_rc_cb.currentText().lower() == "lazygit" else "menu"
+                cfg["git_exclude_patterns"] = [git_ex_list.item(i).text() for i in range(git_ex_list.count())]
                 cfg["komorebi_item_indent"] = int(komorebi_indent_le.text())
                 cfg["proc_top_n"] = proc_top_n_spin.value()
 
