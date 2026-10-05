@@ -3960,14 +3960,20 @@
                 `;
                 
                 activeProjects.forEach(proj => {
+                    const escapedName = proj.name.replace(/'/g, "\\'");
                     html += `
-                        <button type="button" onclick="selectProject('${proj.name}')" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: all 0.2s ease; font-family: inherit; font-size: 0.95rem; font-weight: 500;" onmouseenter="this.style.backgroundColor='var(--bg-card-hover)'; this.style.borderColor='var(--accent-color)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(37,99,235,0.15)'" onmouseleave="this.style.backgroundColor='var(--bg-card)'; this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='none'">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="display: inline-block; width: 8px; height: 8px; background-color: var(--green-active); border-radius: 50%; box-shadow: 0 0 8px var(--green-active); animation: pulse 2s infinite ease-in-out;"></span>
-                                <span>${proj.name}</span>
-                            </div>
-                            <span style="font-size: 0.8rem; color: var(--accent-color); font-weight: 600; letter-spacing: 0.5px;">CONNECT →</span>
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" onclick="selectProject('${escapedName}')" style="flex:1; display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; transition: all 0.2s ease; font-family: inherit; font-size: 0.95rem; font-weight: 500;" onmouseenter="this.style.backgroundColor='var(--bg-card-hover)'; this.style.borderColor='var(--accent-color)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(37,99,235,0.15)'" onmouseleave="this.style.backgroundColor='var(--bg-card)'; this.style.borderColor='var(--border-color)'; this.style.transform='none'; this.style.boxShadow='none'">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; background-color: var(--green-active); border-radius: 50%; box-shadow: 0 0 8px var(--green-active); animation: pulse 2s infinite ease-in-out;"></span>
+                                    <span>${proj.name}</span>
+                                </div>
+                                <span style="font-size: 0.8rem; color: var(--accent-color); font-weight: 600; letter-spacing: 0.5px;">CONNECT →</span>
+                            </button>
+                            <button type="button" title="Kill session" onclick="stopProjectSession('${escapedName}'); setTimeout(updateEmptyStatePlaceholder, 400);" style="flex-shrink:0; width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:none; border:1px solid var(--border-color); border-radius:8px; color:var(--text-muted); cursor:pointer; transition:all 0.2s;" onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#ef4444'; this.style.backgroundColor='rgba(239,68,68,0.08)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-muted)'; this.style.backgroundColor='transparent'">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
                     `;
                 });
                 
