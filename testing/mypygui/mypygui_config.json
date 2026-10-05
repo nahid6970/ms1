@@ -2908,5 +2908,8 @@
     "proc_top_n": 15,
     "clock_settings": {
         "format": "12h"
-    }
+    },
+    "git_exclude_patterns": [
+        "gg.json"
+    ]
 }
