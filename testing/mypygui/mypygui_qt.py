@@ -1650,6 +1650,25 @@ def check_git_status(repo, q):
     lines = raw_lines[1:] if raw_lines[0].startswith("## ") else raw_lines
 
     config = load_config()
+
+    # Filter out files matching git_exclude_patterns
+    exclude_patterns = config.get("git_exclude_patterns", [])
+    if exclude_patterns:
+        def _excluded(porcelain_line):
+            fname = porcelain_line[3:].strip().replace("\\", "/")
+            basename = fname.split("/")[-1]
+            for pat in exclude_patterns:
+                pat = pat.strip()
+                if not pat:
+                    continue
+                if pat.startswith("*."):
+                    if basename.endswith(pat[1:]):
+                        return True
+                else:
+                    if basename == pat or fname.endswith(pat):
+                        return True
+            return False
+        lines = [ln for ln in lines if not _excluded(ln)]
     git_cfg = config.get("git_status_colors", {"rules": ".json:#ff55ff", "default": "#fe1616"})
     default_color = git_cfg.get("default", "#fe1616")
 
