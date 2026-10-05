@@ -4,7 +4,33 @@
 PyQt6 status bar desktop app (`mypygui_qt.py`) for system automation, script monitoring, and launcher controls, driven by config (`mypygui_config.json`) and pwsh-launching helpers (`run_command`, `open_git_cmd`).
 
 ## 2. Latest Implementation
-- **NEW: Scroll-wheel hour shift on uptime label (clock tooltip)**:
+
+### [2026-10-05] - Git Commit Exclude Patterns
+
+**Feature:** Persistent list of file names / extensions that are automatically excluded from git operations — hidden from the statusbar git status display and unstaged before committing.
+
+**Settings dialog — new "GIT COMMIT EXCLUDE" group box** (left column, after GIT STATUS COLORS):
+- Description label with format examples (`*.json`, `yarn.lock`, `tui_config.json`)
+- `QListWidget` showing all saved patterns (height 90px)
+- Text input + **Add** button (fires on Enter too) + **Remove** button for selected items
+- Saved to `cfg["git_exclude_patterns"]` (list of strings) in `mypygui_config.json` on Save
+
+**`check_git_status` — filter excluded files from statusbar:**
+- After parsing porcelain lines, runs `_excluded(line)` helper against `git_exclude_patterns`
+- Supports both `*.ext` glob style and exact filename matching
+- Filtered lines are dropped before color calculation and tooltip rendering
+- Result: if only excluded files changed, label shows green/clean; excluded files never appear in hover tooltip
+
+**`git_sync(path)` — unstage excluded files after `git add .`:**
+- Reads `git_exclude_patterns` from config at call time
+- For `*.ext` patterns: uses `git restore --staged -- ':(glob)**/*.ext'` (git handles glob natively)
+- For exact filenames: pipes `git diff --cached --name-only | Where-Object { basename -eq pat } | ForEach-Object { git restore --staged }` 
+- Each unstaged file prints `[excluded] <pattern>` in dark gray in the commit window
+- Commit message prompt appears after unstaging, so excluded files are never committed
+
+**Config key:** `git_exclude_patterns` (list of strings, default `[]`) in `mypygui_config.json`
+
+**Files modified:** `mypygui_qt.py`, `recent.md`
   - When hovering over the uptime label, scrolling the mouse wheel **up = +1h**, **down = −1h** shifts **both** clocks (Bangladesh yellow + Canada cyan) simultaneously, preserving their relative timezone difference.
   - Stored in `self._clock_hour_scroll` (int, in-memory, separate from `_clock_overrides`) so it survives label/timezone menu changes without touching config.
   - The floating tooltip refreshes **instantly** on each scroll tick — no wait for the 1s timer (`_get_tip_label()` text updated directly if visible).
