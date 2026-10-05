@@ -1564,7 +1564,7 @@
             #quick-path-bar #quick-path-input-wrap {
                 width: 100%;
             }
-            #quick-path-bar #quick-path-input { width: 100% !important; }
+            #quick-path-bar #quick-path-input { flex: 1 !important; width: 0 !important; }
             #quick-path-bar #quick-path-dropdown { width: 100%; min-width: unset; max-width: unset; }
         }
 
@@ -1677,15 +1677,15 @@
                     📂
                 </button>
                 <!-- Quick Path Bar -->
-                <div id="quick-path-bar" style="position: relative; display: inline-flex; align-items: center;">
-                    <div id="quick-path-input-wrap" style="display: flex; align-items: center; height: 34px; background-color: var(--bg-sidebar); border: 1px solid transparent; border-radius: 4px; overflow: hidden; transition: border-color 0.15s;">
+                <div id="quick-path-bar" style="position: relative; display: inline-flex; align-items: center; flex: 1; min-width: 0;">
+                    <div id="quick-path-input-wrap" style="display: flex; align-items: center; height: 34px; width: 100%; background-color: var(--bg-sidebar); border: 1px solid transparent; border-radius: 4px; overflow: hidden; transition: border-color 0.15s;">
                         <span style="padding: 0 6px 0 9px; color: var(--text-muted); display: flex; align-items: center; flex-shrink: 0; pointer-events: none;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                         </span>
                         <input id="quick-path-input" type="text" autocomplete="off" spellcheck="false"
                             placeholder="cd to path…"
                             title="Type a folder path and press Enter to cd into it"
-                            style="width: 180px; height: 100%; background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.8rem; font-family: 'JetBrainsMono NFP','JetBrains Mono NF','JetBrains Mono','Fira Code',monospace; padding: 0 4px 0 0;"
+                            style="flex: 1; min-width: 0; width: 0; height: 100%; background: none; border: none; outline: none; color: var(--text-primary); font-size: 0.8rem; font-family: 'JetBrainsMono NFP','JetBrains Mono NF','JetBrains Mono','Fira Code',monospace; padding: 0 4px 0 0;"
                             onfocus="quickPathOnFocus()"
                             onblur="quickPathOnBlur()"
                             onkeydown="quickPathOnKeydown(event)"
