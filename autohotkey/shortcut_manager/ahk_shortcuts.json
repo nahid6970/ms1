@@ -1098,7 +1098,7 @@
             "favourite": false
         },
         {
-            "action": "SendText(\"/chat save gg\")\nSend(\"{Enter}\")",
+            "action": "SendText(\"/chat save gg\")\nSleep 250\nSend(\"{Enter}\")",
             "category": "Terminal",
             "description": "Save current Gemini chat session",
             "enabled": true,
