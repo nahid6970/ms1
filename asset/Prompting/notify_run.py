@@ -3,7 +3,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton
 from PyQt6.QtCore import Qt, QPoint, QTimer, QRectF, QPointF
 from PyQt6.QtGui import (QColor, QPainter, QPainterPath, QPen,
-                         QFont, QRadialGradient, QRegion)
+                         QFont, QRadialGradient, QConicalGradient, QRegion)
 
 W, H          = 460, 220
 CORNER_RADIUS = 22
@@ -135,30 +135,31 @@ class NotifyCard(QWidget):
         p.drawText(QRectF(0, 128, W, 20), Qt.AlignmentFlag.AlignCenter,
                    "Finished at  2026-10-05 14:22")
 
-        # Aurora border
-        aurora = self._aurora_color()
-        glow_a = int(180 + self._glow_pulse * 75)
+        # ── Aurora border — rotating conical gradient ────────────────────────
+        cx, cy = W / 2, H / 2
+        angle  = self._aurora_t * 360.0
 
-        inner = QRectF(1, 1, W - 2, H - 2)
-        inner_path = QPainterPath()
-        inner_path.addRoundedRect(inner, CORNER_RADIUS - 1, CORNER_RADIUS - 1)
+        cg = QConicalGradient(QPointF(cx, cy), angle)
+        cg.setColorAt(0.00, QColor(80,  60, 255, 220))
+        cg.setColorAt(0.14, QColor(0,  160, 255, 220))
+        cg.setColorAt(0.28, QColor(0,  230, 180, 220))
+        cg.setColorAt(0.42, QColor(255, 80, 180, 220))
+        cg.setColorAt(0.57, QColor(255, 160, 40,  220))
+        cg.setColorAt(0.71, QColor(160, 40, 255,  220))
+        cg.setColorAt(0.85, QColor(0,  200, 255,  220))
+        cg.setColorAt(1.00, QColor(80,  60, 255,  220))
 
-        pen_glow = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(),
-                               int(glow_a * 0.45)), 10)
-        pen_glow.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        p.setPen(pen_glow)
-        p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawPath(inner_path)
+        outer_path = QPainterPath()
+        outer_path.addRoundedRect(QRectF(0, 0, W, H), CORNER_RADIUS, CORNER_RADIUS)
 
-        pen_mid = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(),
-                              int(glow_a * 0.7)), 4)
-        pen_mid.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
-        p.setPen(pen_mid)
-        p.drawPath(inner_path)
+        cut_path = QPainterPath()
+        cut_path.addRoundedRect(QRectF(1.5, 1.5, W - 3, H - 3),
+                                CORNER_RADIUS - 1, CORNER_RADIUS - 1)
 
-        pen_crisp = QPen(QColor(aurora.red(), aurora.green(), aurora.blue(), glow_a), 1.5)
-        p.setPen(pen_crisp)
-        p.drawPath(inner_path)
+        ring = outer_path - cut_path
+        p.setPen(Qt.PenStyle.NoPen)
+        p.setBrush(cg)
+        p.drawPath(ring)
 
         p.end()
 
