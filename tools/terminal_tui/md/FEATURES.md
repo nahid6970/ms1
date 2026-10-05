@@ -1,5 +1,46 @@
 # Feature Specifications
 
+## Code Merger
+**Status:** ✅ Complete
+**Description:** Built-in Code Merger panel accessible from the status bar. Packages project files into structured AI prompts (PREP tab) and applies AI responses back to disk (MERGE tab) using the `@@FILE / @@MODE / @@END` format. Completely self-contained inside terminal_tui — no external tools required.
+**Implementation:** `app.py` (routes: `/api/project/<project>/file-overwrite`, `/api/project/<project>/merge-apply`), `templates/index.html` (popover UI + JS)
+**Usage:** Click the `⇅` cyan button in the status bar → opens Code Merger popover.
+**Sub-features:**
+
+### PREP tab
+- Recursively lists all project files, skipping known junk dirs (`node_modules`, `.git`, `__pycache__`, etc.)
+- Checkboxes per file — text/code files auto-checked, binary/non-text files shown dimmed and unchecked
+- **All / None** selection buttons
+- **⊘ Exclude** button — toggles a collapsible panel with glob pattern exclusions:
+  - `folder/` syntax to exclude entire directory trees (e.g. `tests/`, `dist/`)
+  - `*.ext` syntax to exclude by extension (e.g. `*.log`, `*.pyc`)
+  - Substring match for anything else
+  - Pre-loaded with sensible defaults (`.git/`, `node_modules/`, `__pycache__/`, `*.pyc`, `*.log`, `*.bak`, `*.tmp`, `*.lock`, `package-lock.json`, etc.)
+  - Pattern tags with `×` remove button — removal immediately re-filters the list
+  - File count + `⊘ N excluded` indicator (clickable to open the exclude panel)
+- **↺ Refresh** button re-fetches the file list
+- Task / instructions textarea for describing the AI task
+- **⚡ Generate Prompt** — fetches file contents via `/api/project/<project>/file-content`, builds full prompt with format guide + task + file blocks
+- **Copy** button copies the generated prompt to clipboard
+- Prompt preview textarea showing char count
+
+### MERGE tab
+- Paste AI response textarea (accepts full `@@FILE/@@MODE/@@END` blocks, also strips outer markdown fences)
+- **.bak backups** checkbox — saves timestamped `.bak` copy before modifying any file (on by default)
+- **🔍 Parse** — previews which files will be changed and in what mode (no writes)
+- **✔ Apply Changes** — sends response to backend, shows per-file `✅`/`❌` results with error messages
+- Applied count + failed count summary
+
+### Supported merge modes
+| Mode | What it does |
+|---|---|
+| `replace_block` | Replaces a specific block; exact match first, falls back to whitespace-tolerant match |
+| `replace_file` | Overwrites the entire file |
+| `insert_after` | Inserts lines after a matched anchor |
+| `delete_block` | Removes a matched block entirely |
+
+---
+
 ## Global Restart and Page Refresh Controls
 **Status:** ✅ Complete
 **Description:** The global restart control offers separate actions for restarting the app and refreshing only the current page. F5 also refreshes the page.

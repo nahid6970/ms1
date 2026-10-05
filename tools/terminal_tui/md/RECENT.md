@@ -5,6 +5,54 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-05] - Code Merger Integration
+
+### What We Built
+Integrated the Code Merger workflow directly into the terminal_tui status bar as a self-contained popover — no external tools, no coupling to the standalone `code_merger` app.
+
+### Backend — `app.py`
+Two new routes added after the existing `file-write` route:
+
+- **`POST /api/project/<project>/file-overwrite`** — writes (creates or overwrites) any file inside the project with path traversal guard.
+- **`POST /api/project/<project>/merge-apply`** — parses `@@FILE/@@MODE/@@END` blocks from an AI response and applies them. Supports `replace_file`, `replace_block` (exact + whitespace-tolerant fallback), `insert_after`, `delete_block`. Makes timestamped `.bak` backups by default. Returns per-file `ok`/`error` results with messages.
+
+### Frontend — `templates/index.html`
+
+**Status bar button:**
+- Cyan `⇅` icon button (`id="code-merger-btn"`) added to `#subprocess-monitor` right-side div, right after the AI Copilot button.
+
+**Popover (`id="code-merger-popover"`):**
+- Two-tab layout: PREP and MERGE.
+- Header shows active project name.
+- Registered in `closeAllStatusPopovers()`.
+
+**PREP tab:**
+- Recursively fetches all project files (skipping known junk dirs via `CM_SKIP_DIRS` set).
+- Exclude panel (`⊘ Exclude` button) — collapsible, orange-accented:
+  - Accepts `folder/`, `*.ext`, or substring patterns.
+  - Pre-loaded with sensible defaults (`node_modules/`, `*.pyc`, `*.log`, `*.bak`, `*.lock`, etc.).
+  - Pattern tags with `×` to remove; removal immediately re-filters the list.
+  - File count header shows `⊘ N excluded` indicator (clickable).
+- All / None checkboxes; text/code files auto-checked.
+- Task textarea for AI instructions.
+- Generate Prompt builds format guide + task + file contents block.
+- Copy to clipboard with visual confirmation.
+- Prompt preview with char count.
+
+**MERGE tab:**
+- Paste AI response textarea.
+- `.bak backups` toggle (on by default).
+- Parse — previews changes without writing.
+- Apply Changes — POSTs to `merge-apply`, renders per-file `✅`/`❌` rows with error messages.
+
+**Files Modified:**
+- `app.py` — `api_project_file_overwrite`, `api_project_merge_apply`
+- `templates/index.html` — button, popover HTML, all JS functions
+- `md/FEATURES.md`
+- `md/RECENT.md`
+
+---
+
 ## [2026-10-04] - Remove Quote-Wrapping from Pasted Image Paths
 
 ### Problem

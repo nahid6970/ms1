@@ -222,11 +222,45 @@ function prompt { ... }
 
 ### Files
 - `GET /api/project/<project>/files` - List directory contents
+- `GET /api/project/<project>/file-content` - Read file content (1 MB limit)
+- `POST /api/project/<project>/file-write` - Create a new file (errors if exists)
+- `POST /api/project/<project>/file-overwrite` - Write file (create or overwrite)
+- `POST /api/project/<project>/file-delete` - Delete file or folder
+- `POST /api/project/<project>/paste-clipboard` - Paste files from Windows clipboard
+- `POST /api/project/<project>/merge-apply` - Parse and apply `@@FILE/@@MODE/@@END` AI response blocks
 - `POST /api/images/temp` - Upload temporary image
 
 ### Misc
 - `GET /api/fonts` - List system fonts
+- `POST /api/open-explorer` - Open path in Windows Explorer
 - `POST /shutdown` - Shutdown server
+
+---
+
+## Code Merger (Status Bar Feature)
+
+A self-contained AI prompt-prep and response-apply workflow built into the status bar popover.
+
+### Entry point
+Click the cyan `⇅` button (`#code-merger-btn`) in `#subprocess-monitor`.
+
+### PREP flow
+1. `cmLoadFiles()` — recursively fetches files via `/api/project/<project>/files`, filters through `_cmExcludePatterns` via `cmIsExcluded()`, auto-checks text/code extensions.
+2. User checks/unchecks files, optionally adds exclusion patterns, writes a task description.
+3. `cmGeneratePrompt()` — fetches each checked file's content via `/api/project/<project>/file-content`, assembles the `@@FILE/@@MODE/@@END` format guide + task + file blocks into `_cmPromptText`.
+4. Copy to clipboard via `cmCopyPrompt()`.
+
+### MERGE flow
+1. User pastes AI response into `#cm-response-input`.
+2. `cmParseResponse()` — client-side parse to preview blocks (no writes).
+3. `cmApplyResponse()` — POSTs `{ response, backup }` to `/api/project/<project>/merge-apply`.
+4. Backend parses blocks, applies changes with optional `.bak` backups, returns `[{file, status, mode, message}]`.
+5. Results rendered as `✅`/`❌` rows with error detail.
+
+### Exclusion pattern matching (`cmIsExcluded`)
+- `folder/` → matches any path segment equal to `folder`
+- `*.ext` → extension match
+- otherwise → substring match on full relative path
 
 ---
 
