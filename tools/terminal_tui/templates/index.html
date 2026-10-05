@@ -3438,6 +3438,25 @@
                         <option value="1000">1000</option>
                     </select>
                 </div>
+                <!-- Auto-exclude popover -->
+                <div style="position:relative; display:inline-block;">
+                    <button class="btn" id="git-exclude-btn" onclick="toggleGitExcludePopover(event)" style="padding: 7px 13px; font-size: 0.8rem; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; border-radius: 8px; transition: all 0.2s; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(251,191,36,0.18)'; this.style.borderColor='rgba(251,191,36,0.55)'" onmouseleave="this.style.backgroundColor='rgba(251,191,36,0.08)'; this.style.borderColor='rgba(251,191,36,0.3)'" title="Auto-exclude files from commit">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                        Exclude
+                    </button>
+                    <div id="git-exclude-popover" style="display:none; position:absolute; bottom: calc(100% + 8px); left:0; width:280px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:200; padding:12px; flex-direction:column; gap:8px;">
+                        <div style="font-size:0.78rem; font-weight:600; color:var(--text-primary); margin-bottom:2px;">Auto-exclude patterns</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:6px; line-height:1.4;">Files matching these names or extensions start unchecked. E.g. <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">*.json</code>, <code style="background:var(--bg-main);padding:1px 4px;border-radius:3px;">yarn.lock</code></div>
+                        <div id="git-exclude-list" style="display:flex; flex-direction:column; gap:4px; max-height:160px; overflow-y:auto;"></div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <input id="git-exclude-input" type="text" placeholder="*.json or filename.ext" autocomplete="off" spellcheck="false"
+                                style="flex:1; min-width:0; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 8px; font-size:0.78rem; font-family:'JetBrainsMono NFP','JetBrains Mono','Fira Code',monospace; outline:none;"
+                                onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"
+                                onkeydown="if(event.key==='Enter'){event.preventDefault();addGitExcludePattern();}">
+                            <button onclick="addGitExcludePattern()" style="padding:5px 10px; background:var(--accent-color); border:none; border-radius:6px; color:white; font-size:0.78rem; cursor:pointer; font-weight:500; flex-shrink:0;">Add</button>
+                        </div>
+                    </div>
+                </div>
                 <button class="btn" onclick="discardAllChanges()" style="padding: 7px 13px; font-size: 0.8rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3); color: #f87171; border-radius: 8px; transition: all 0.2s; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(239,68,68,0.18)'; this.style.borderColor='rgba(239,68,68,0.55)'" onmouseleave="this.style.backgroundColor='rgba(239,68,68,0.08)'; this.style.borderColor='rgba(239,68,68,0.3)'" title="Discard all uncommitted changes (git restore .)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> Discard</button>
                 <button class="btn" onclick="openGitDiffModal('HEAD', '')" style="padding: 7px 13px; font-size: 0.8rem; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3); color: #7dd3fc; border-radius: 8px; transition: all 0.2s; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.18)'; this.style.borderColor='rgba(56,189,248,0.55)'" onmouseleave="this.style.backgroundColor='rgba(56,189,248,0.08)'; this.style.borderColor='rgba(56,189,248,0.3)'" title="View current changes vs last commit">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
@@ -8979,22 +8998,26 @@
                         subtitleEl.innerText = 'No changes to commit';
                     } else {
                         subtitleEl.innerText = `${files.length} file${files.length !== 1 ? 's' : ''} changed`;
-                        // Track checked state — all checked by default
-                        window._gitCheckedFiles = new Set(files.map(f => f.path));
+                        // Track checked state — all checked by default, excluded patterns start unchecked
+                        const _excludePatterns = gitExcludeGetPatterns();
+                        window._gitCheckedFiles = new Set(
+                            files.filter(f => !gitExcludeMatches(f.path, _excludePatterns)).map(f => f.path)
+                        );
+                        const _checkedCount = window._gitCheckedFiles.size;
 
                         const allCheckId = 'git-files-check-all';
                         filesEl.innerHTML = `
                             <div style="display:flex; align-items:center; gap:10px; padding:5px 14px; border-bottom:1px solid var(--border-color); background:var(--bg-sidebar);">
-                                <input type="checkbox" id="${allCheckId}" checked title="Select / deselect all"
+                                <input type="checkbox" id="${allCheckId}" ${_checkedCount === files.length ? 'checked' : ''} title="Select / deselect all"
                                     style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
                                     onchange="gitToggleAllFiles(this.checked)">
                                 <span style="font-size:0.72rem;color:var(--text-muted);user-select:none;">
-                                    <span id="git-files-checked-count">${files.length}</span> / ${files.length} selected
+                                    <span id="git-files-checked-count">${_checkedCount}</span> / ${files.length} selected
                                 </span>
                             </div>
                             ${files.map(f => `
                             <div style="display:flex; align-items:center; gap:10px; padding: 6px 14px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.78rem;">
-                                <input type="checkbox" class="git-file-check" data-path="${f.path.replace(/"/g,'&quot;')}" checked
+                                <input type="checkbox" class="git-file-check" data-path="${f.path.replace(/"/g,'&quot;')}" ${window._gitCheckedFiles.has(f.path) ? 'checked' : ''}
                                     style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
                                     onchange="gitFileCheckChanged()">
                                 <span style="color:${f.color}; font-weight:600; min-width:90px; font-size:0.7rem; text-transform:uppercase;">${f.label}</span>
@@ -9002,6 +9025,9 @@
                             </div>
                             `).join('')}
                         `;
+                        // Set indeterminate state on select-all if partial
+                        const allCbEl = document.getElementById(allCheckId);
+                        if (allCbEl && _checkedCount > 0 && _checkedCount < files.length) allCbEl.indeterminate = true;
                     }
                 } else {
                     filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Failed to load changed files.</div>';
@@ -9010,6 +9036,87 @@
                 filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Error loading files.</div>';
             }
         }
+
+        // ── Git Auto-Exclude Patterns ─────────────────────────────────────────
+        const GIT_EXCLUDE_KEY = 'git-auto-exclude-patterns';
+
+        function gitExcludeGetPatterns() {
+            try { return JSON.parse(localStorage.getItem(GIT_EXCLUDE_KEY) || '[]'); }
+            catch { return []; }
+        }
+
+        function gitExcludeSavePatterns(list) {
+            localStorage.setItem(GIT_EXCLUDE_KEY, JSON.stringify(list));
+        }
+
+        function gitExcludeMatches(filePath, patterns) {
+            const name = filePath.replace(/\\/g, '/').split('/').pop();
+            return patterns.some(pat => {
+                pat = pat.trim();
+                if (!pat) return false;
+                if (pat.startsWith('*.')) {
+                    return name.endsWith(pat.slice(1));  // *.json → .json
+                }
+                return name === pat || filePath.endsWith(pat);
+            });
+        }
+
+        function renderGitExcludeList() {
+            const list = gitExcludeGetPatterns();
+            const el = document.getElementById('git-exclude-list');
+            if (!el) return;
+            if (list.length === 0) {
+                el.innerHTML = '<div style="font-size:0.72rem;color:var(--text-muted);padding:2px 0;">No patterns yet.</div>';
+                return;
+            }
+            el.innerHTML = list.map((p, i) => `
+                <div style="display:flex;align-items:center;gap:6px;padding:3px 6px;background:var(--bg-main);border-radius:5px;border:1px solid var(--border-color);">
+                    <span style="flex:1;font-size:0.75rem;font-family:'JetBrainsMono NFP','JetBrains Mono','Fira Code',monospace;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p}</span>
+                    <button onclick="removeGitExcludePattern(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.75rem;padding:1px 3px;border-radius:3px;line-height:1;flex-shrink:0;" onmouseenter="this.style.color='#f87171'" onmouseleave="this.style.color='var(--text-muted)'">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function addGitExcludePattern() {
+            const input = document.getElementById('git-exclude-input');
+            const val = (input.value || '').trim();
+            if (!val) return;
+            const list = gitExcludeGetPatterns();
+            if (!list.includes(val)) {
+                list.push(val);
+                gitExcludeSavePatterns(list);
+            }
+            input.value = '';
+            renderGitExcludeList();
+        }
+
+        function removeGitExcludePattern(idx) {
+            const list = gitExcludeGetPatterns();
+            list.splice(idx, 1);
+            gitExcludeSavePatterns(list);
+            renderGitExcludeList();
+        }
+
+        function toggleGitExcludePopover(e) {
+            e && e.stopPropagation();
+            const pop = document.getElementById('git-exclude-popover');
+            if (!pop) return;
+            const isOpen = pop.style.display === 'flex';
+            pop.style.display = isOpen ? 'none' : 'flex';
+            if (!isOpen) {
+                renderGitExcludeList();
+                setTimeout(() => document.getElementById('git-exclude-input')?.focus(), 50);
+            }
+        }
+
+        // Close exclude popover on outside click
+        document.addEventListener('click', (e) => {
+            const pop = document.getElementById('git-exclude-popover');
+            const btn = document.getElementById('git-exclude-btn');
+            if (pop && pop.style.display === 'flex' && !pop.contains(e.target) && e.target !== btn && !btn?.contains(e.target)) {
+                pop.style.display = 'none';
+            }
+        });
 
         function gitToggleAllFiles(checked) {
             document.querySelectorAll('.git-file-check').forEach(cb => {
