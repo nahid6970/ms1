@@ -34,3 +34,9 @@
 
 # Suggestion Style — Combination [INACTIVE]
 - When faced with a task that has multiple valid approaches — especially open-ended or creative ones — pause and offer 2–3 suggestions (including at least one unconventional idea) before diving in. Let the user pick or say "just go for it."
+
+# Preview / Smoketest [ACTIVE]
+- When the user says "give me a preview", "smoketest", "show me how it looks", or similar — generate a self-contained HTML file that visually demonstrates all the suggestions or options being discussed.
+- The HTML must be fully animated and styled (CSS animations, gradients, etc.) so it accurately represents what the final implementation will look, feel, and animate like.
+- Save the file to the current project directory and immediately open it in the browser with `start <path>`.
+- Each option must be clearly labelled (e.g. "Option A — Glassmorphism") so the user can compare and pick one.
