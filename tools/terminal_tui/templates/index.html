@@ -1544,14 +1544,6 @@
         }
         .bm-subcmd-add-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
         .bm-subcmd-wrap { position: relative; display: inline-flex; }
-        .bm-subcmd-edit-overlay {
-            position: absolute; top: -4px; right: -4px; width: 14px; height: 14px;
-            background: var(--bg-sidebar); border: 1px solid var(--border-color);
-            border-radius: 50%; font-size: 0.55rem; display: none;
-            align-items: center; justify-content: center; cursor: pointer;
-            color: var(--text-secondary); line-height: 1; z-index: 1;
-        }
-        .bm-subcmd-wrap:hover .bm-subcmd-edit-overlay { display: flex; }
 
 
         /* Status bar icon buttons */
@@ -6592,8 +6584,7 @@
                         if (sc.borderWidth != null) btnStyle += `border-width:${sc.borderWidth}px;`;
                         if (sc.borderRadius != null) btnStyle += `border-radius:${sc.borderRadius}px;`;
                         subcmdButtonsHtml += `<div class="bm-subcmd-wrap" style="position:relative;display:inline-flex;">
-                            <button type="button" class="bm-subcmd-btn" title="${scCmdEsc}" style="${btnStyle}" onclick="event.stopPropagation();runSubcmd('${scCmdEsc}')" onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''">${labelEsc}</button>
-                            <span class="bm-subcmd-edit-overlay" title="Edit" onclick="event.stopPropagation();openSubcmdEditModal('${bmCmdEsc}',${i})">✎</span>
+                            <button type="button" class="bm-subcmd-btn" title="${scCmdEsc}" style="${btnStyle}" onclick="event.stopPropagation();runSubcmd('${scCmdEsc}')" oncontextmenu="event.stopPropagation();event.preventDefault();openSubcmdEditModal('${bmCmdEsc}',${i})" onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''">${labelEsc}</button>
                         </div>`;
                     });
                     subcmdButtonsHtml += `<button type="button" class="bm-subcmd-add-btn" onclick="event.stopPropagation();openSubcmdEditModal('${bmCmdEsc}',null)" title="Add sub-command">+</button>`;
