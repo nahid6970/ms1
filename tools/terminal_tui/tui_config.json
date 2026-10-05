@@ -52,7 +52,7 @@
           "global": true,
           "name": " Antigravity",
           "windowTitle": "",
-          "displayOrder": 4,
+          "displayOrder": 3,
           "color": "#f7fb32"
         },
         {
@@ -76,7 +76,7 @@
           "global": true,
           "name": " convex",
           "windowTitle": "",
-          "displayOrder": 3,
+          "displayOrder": 4,
           "color": "#ee342f"
         },
         {
@@ -1021,11 +1021,12 @@
     ],
     "npm run deploy:pages": [
       {
-        "bg": "#1e293b",
-        "borderColor": "#334155",
         "cmd": "npm run dev:pages",
-        "fg": "#e2e8f0",
-        "label": "dev"
+        "label": "dev",
+        "bg": "#000000",
+        "fg": "#ffffff",
+        "borderColor": "#ffffff",
+        "borderRadius": 0
       }
     ]
   },
