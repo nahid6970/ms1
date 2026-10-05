@@ -8979,12 +8979,29 @@
                         subtitleEl.innerText = 'No changes to commit';
                     } else {
                         subtitleEl.innerText = `${files.length} file${files.length !== 1 ? 's' : ''} changed`;
-                        filesEl.innerHTML = files.map(f => `
+                        // Track checked state — all checked by default
+                        window._gitCheckedFiles = new Set(files.map(f => f.path));
+
+                        const allCheckId = 'git-files-check-all';
+                        filesEl.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:10px; padding:5px 14px; border-bottom:1px solid var(--border-color); background:var(--bg-sidebar);">
+                                <input type="checkbox" id="${allCheckId}" checked title="Select / deselect all"
+                                    style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
+                                    onchange="gitToggleAllFiles(this.checked)">
+                                <span style="font-size:0.72rem;color:var(--text-muted);user-select:none;">
+                                    <span id="git-files-checked-count">${files.length}</span> / ${files.length} selected
+                                </span>
+                            </div>
+                            ${files.map(f => `
                             <div style="display:flex; align-items:center; gap:10px; padding: 6px 14px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.78rem;">
+                                <input type="checkbox" class="git-file-check" data-path="${f.path.replace(/"/g,'&quot;')}" checked
+                                    style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
+                                    onchange="gitFileCheckChanged()">
                                 <span style="color:${f.color}; font-weight:600; min-width:90px; font-size:0.7rem; text-transform:uppercase;">${f.label}</span>
                                 <span style="color: var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.path}</span>
                             </div>
-                        `).join('');
+                            `).join('')}
+                        `;
                     }
                 } else {
                     filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Failed to load changed files.</div>';
@@ -8992,6 +9009,32 @@
             } catch (e) {
                 filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Error loading files.</div>';
             }
+        }
+
+        function gitToggleAllFiles(checked) {
+            document.querySelectorAll('.git-file-check').forEach(cb => {
+                cb.checked = checked;
+            });
+            gitFileCheckChanged();
+        }
+
+        function gitFileCheckChanged() {
+            const all = [...document.querySelectorAll('.git-file-check')];
+            const checked = all.filter(cb => cb.checked);
+            window._gitCheckedFiles = new Set(checked.map(cb => cb.dataset.path));
+            // Update counter
+            const counter = document.getElementById('git-files-checked-count');
+            if (counter) counter.textContent = checked.length;
+            // Update select-all checkbox state
+            const allCb = document.getElementById('git-files-check-all');
+            if (allCb) {
+                allCb.checked = checked.length === all.length;
+                allCb.indeterminate = checked.length > 0 && checked.length < all.length;
+            }
+        }
+
+        function getGitSelectedFiles() {
+            return window._gitCheckedFiles ? [...window._gitCheckedFiles] : [];
         }
 
         function closeGitModal() {
@@ -14109,7 +14152,7 @@
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/suggest-commit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ api_key: apiKey, model: model })
+                    body: JSON.stringify({ api_key: apiKey, model: model, files: getGitSelectedFiles() })
                 });
                 const data = await res.json();
 
@@ -14142,6 +14185,7 @@
             const msg = document.getElementById('git-commit-msg').value.trim();
             const addAll = document.getElementById('git-add-all').checked;
             const doPush = document.getElementById('git-do-push').checked;
+            const selectedFiles = getGitSelectedFiles();
             const statusEl = document.getElementById('git-status-msg');
             const btn = document.getElementById('git-commit-btn');
 
@@ -14160,7 +14204,7 @@
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/commit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg, add_all: addAll, push: doPush })
+                    body: JSON.stringify({ message: msg, add_all: addAll, push: doPush, files: selectedFiles })
                 });
                 const data = await res.json();
 

@@ -1214,6 +1214,7 @@ def api_git_commit(project):
     message = data.get("message", "").strip()
     add_all  = data.get("add_all", True)
     do_push  = data.get("push", False)
+    files    = data.get("files", [])  # optional list of specific file paths to stage
 
     if not message:
         return jsonify({"error": "Commit message is required"}), 400
@@ -1234,10 +1235,13 @@ def api_git_commit(project):
         pathspec = "." if rel_path == "." else rel_path
 
         if add_all:
-            # Use git add -A to stage all changes including new directories
-            res_add = subprocess.run(["git", "add", "-A", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+            if files:
+                # Stage only the selected files
+                res_add = subprocess.run(["git", "add", "--"] + files, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
+            else:
+                res_add = subprocess.run(["git", "add", "-A", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=10)
             if res_add.returncode != 0:
-                return jsonify({"error": f"git add failed: {(res_add.stderr or "").strip()}"}), 500
+                return jsonify({"error": f"git add failed: {(res_add.stderr or '').strip()}"}), 500
 
         res_commit = subprocess.run(["git", "commit", "-m", message], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=15)
         if res_commit.returncode != 0:
@@ -1783,6 +1787,7 @@ def api_git_suggest_commit(project):
     req_data = request.get_json() or {}
     api_key = req_data.get("api_key", "").strip()
     model = req_data.get("model", "gemini-2.0-flash").strip()
+    files = req_data.get("files", [])  # optional list of specific file paths to diff
 
     if not api_key:
         return jsonify({"error": "No AI API key provided. Please set one in the AI Copilot settings."}), 400
@@ -1808,9 +1813,12 @@ def api_git_suggest_commit(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
+        # Use selected files as pathspecs if provided, otherwise fall back to project pathspec
+        diff_pathspecs = files if files else [pathspec]
+
         # Try staged diff first, fall back to full working-tree diff
         diff_result = subprocess.run(
-            ["git", "diff", "--staged", "--stat", "--patch", "--", pathspec],
+            ["git", "diff", "--staged", "--stat", "--patch", "--"] + diff_pathspecs,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=10
         )
@@ -1819,7 +1827,7 @@ def api_git_suggest_commit(project):
         if not diff_text:
             # Nothing staged — use full working-tree diff (unstaged + untracked content)
             diff_result2 = subprocess.run(
-                ["git", "diff", "--stat", "--patch", "--", pathspec],
+                ["git", "diff", "--stat", "--patch", "--"] + diff_pathspecs,
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=10
             )
@@ -1828,7 +1836,7 @@ def api_git_suggest_commit(project):
         if not diff_text:
             # No diff at all — list files from status
             status_result = subprocess.run(
-                ["git", "status", "--short", "--", pathspec],
+                ["git", "status", "--short", "--"] + diff_pathspecs,
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=5
             )
