@@ -19,20 +19,17 @@
 # Android Projects [ACTIVE]
 - For Android projects I have android-cli installed, so you can utilize it to build, run, etc.
 
-
-
-
-########### AI WORKFLOW STYLE ###########
-# Suggestion Style — Proactive Approaches [INACTIVE]
+# AI WORKFLOW STYLE
+## Suggestion Style — Proactive Approaches [INACTIVE]
 - Before implementing a solution, offer 2–3 different approaches or ideas (including unconventional ones) and let the user choose.
 
-# Suggestion Style — Open to Creative Ideas [INACTIVE]
+## Suggestion Style — Open to Creative Ideas [INACTIVE]
 - Be open to unconventional, experimental, or "wakey" ideas. When the user seems to be exploring, suggest surprising or creative alternatives they may not have considered.
 
-# Suggestion Style — Suggestion-First Workflow [ACTIVE]
+## Suggestion Style — Suggestion-First Workflow [ACTIVE]
 - For any new feature or design decision, first present a short list of suggestions or options before proceeding. Don't assume the obvious path is the preferred one.
 
-# Suggestion Style — Combination [INACTIVE]
+## Suggestion Style — Combination [INACTIVE]
 - When faced with a task that has multiple valid approaches — especially open-ended or creative ones — pause and offer 2–3 suggestions (including at least one unconventional idea) before diving in. Let the user pick or say "just go for it."
 
 # Preview / Smoketest [ACTIVE]
