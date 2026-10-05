@@ -3066,6 +3066,9 @@
                 <button type="button" id="settings-tab-btn-ai" onclick="switchSettingsTab('ai')" title="AI Copilot Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </button>
+                <button type="button" id="settings-tab-btn-code-merger" onclick="switchSettingsTab('code-merger')" title="Code Merger Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
+                </button>
                 <button type="button" id="settings-tab-btn-badge" onclick="switchSettingsTab('badge')" title="Current Workspace Badge" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 </button>
@@ -3229,6 +3232,20 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="settings-ai-dropdown-reverse" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                             <label for="settings-ai-dropdown-reverse" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show AI Dropdowns Above Trigger</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Merger Settings -->
+                <div id="settings-sec-code-merger" style="display: none; margin-bottom: 16px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Code Merger Settings</div>
+                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <label for="settings-cm-popover-width" style="font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">Popover Width</label>
+                            <input type="number" id="settings-cm-popover-width" step="20" min="320" max="900" value="480"
+                                style="width: 64px; height: 26px; padding: 2px 6px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;"
+                                onfocus="this.style.borderColor='#22d3ee'" onblur="this.style.borderColor='var(--border-color)'">
+                            <span style="font-size: 0.72rem; color: var(--text-muted);">px</span>
                         </div>
                     </div>
                 </div>
@@ -7738,7 +7755,7 @@
         }
 
         function switchSettingsTab(tabName) {
-            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'badge'];
+            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'code-merger', 'badge'];
             tabs.forEach(t => {
                 const el = document.getElementById(`settings-sec-${t}`);
                 if (el) el.style.display = t === tabName ? 'block' : 'none';
@@ -7804,6 +7821,7 @@
             document.getElementById('settings-ai-rich-markdown').checked = localStorage.getItem('ai-rich-markdown') !== 'false';
             document.getElementById('settings-ai-popover-height').value = localStorage.getItem('ai-popover-height') || '600';
             document.getElementById('settings-ai-popover-width').value = localStorage.getItem('ai-popover-width') || '380';
+            document.getElementById('settings-cm-popover-width').value = localStorage.getItem('cm-popover-width') || '480';
             
             document.getElementById('settings-ai-custom-fallback-sign-toggle').checked = localStorage.getItem('ai-custom-fallback-sign-toggle') === 'true';
             document.getElementById('settings-ai-custom-fallback-sign-text').value = localStorage.getItem('ai-custom-fallback-sign-text') || '∞';
@@ -8031,6 +8049,10 @@
             const aiPopW = parseInt(document.getElementById('settings-ai-popover-width').value) || 380;
             localStorage.setItem('ai-popover-width', aiPopW);
             document.getElementById('ai-copilot-popover').style.width = aiPopW + 'px';
+
+            const cmPopW = parseInt(document.getElementById('settings-cm-popover-width').value) || 480;
+            localStorage.setItem('cm-popover-width', cmPopW);
+            document.getElementById('code-merger-popover').style.width = cmPopW + 'px';
             
             localStorage.setItem('ai-custom-fallback-sign-toggle', document.getElementById('settings-ai-custom-fallback-sign-toggle').checked);
             localStorage.setItem('ai-custom-fallback-sign-text', document.getElementById('settings-ai-custom-fallback-sign-text').value.trim());
@@ -16333,6 +16355,8 @@ Always wrap your **entire response** in a single markdown code block.`;
             document.documentElement.style.setProperty('--ai-popover-max-height', savedAiPopH + 'px');
             const savedAiPopW = parseInt(localStorage.getItem('ai-popover-width')) || 380;
             document.getElementById('ai-copilot-popover').style.width = savedAiPopW + 'px';
+            const savedCmPopW = parseInt(localStorage.getItem('cm-popover-width')) || 480;
+            document.getElementById('code-merger-popover').style.width = savedCmPopW + 'px';
             
             const isReversed = localStorage.getItem('ai-dropdown-reverse') === 'true';
             const popoverEl = document.getElementById('ai-copilot-popover');
