@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workspaces</title>
     <!-- Custom Favicon & PWA Manifest -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon-192.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='app-icon.svg') }}">
+    <link rel="apple-touch-icon" type="image/svg+xml" href="{{ url_for('static', filename='app-icon.svg') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <script>
         // Favicon Loading Logic
         const FaviconManager = {
-            originalHref: "{{ url_for('static', filename='favicon.png') }}",
+            originalHref: "{{ url_for('static', filename='app-icon.svg') }}",
             setLoading: function() {
                 const link = document.querySelector("link[rel~='icon']");
                 // Using a spinning gear SVG as a Data URL for the loading state
