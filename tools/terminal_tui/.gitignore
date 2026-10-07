@@ -3,17 +3,6 @@ ai_usage.json
 app.log
 *.log
 
-
-# Local image drops and screenshots
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.webp
-*.tif
-*.tiff
-
 # Python cache and compiled files
 __pycache__/
 *.pyc
