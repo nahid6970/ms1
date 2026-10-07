@@ -158,7 +158,7 @@
             {
                 "type": "selective",
                 "target": "C:\\@delta\\ms1\\asset\\notepadplusplus\\Notepad++",
-                "fake": "C:\\Users\\nahid\\AppData\\Roaming\\Notepad++",
+                "fake": "C:\\Users\\nahid\\scoop\\apps\\notepadplusplus\\current",
                 "selected_files": [
                     ".gitignore",
                     "config.xml",
