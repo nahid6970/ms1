@@ -1,18 +1,58 @@
-# Type1: Global
-import sys, os
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__)
+"""Qt-based AutoHotkey shortcut manager."""
+from __future__ import annotations
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "PyQt6",
+# ]
+# ///
 
+import importlib.util
 import sys
 import json
 import os
 import re
 import urllib.request
 import webbrowser
+import shutil
+import subprocess
 from html import escape as html_escape
+
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                             QWidget, QPushButton, QLineEdit, QCheckBox, QDialog,
                             QDialogButtonBox, QLabel, QTextEdit, QComboBox, QMessageBox,
