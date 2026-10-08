@@ -1,20 +1,61 @@
-import sys, os
-# 1. Add the absolute path to the folder containing install_deps.py
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
+"""Drag-and-drop file encryption utility."""
+from __future__ import annotations
 
-# 2. Import and run the bootstrap
-import install_deps
-install_deps.bootstrap(__file__)
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "pycryptodomex",
+#     "tkinterdnd2",
+# ]
+# ///
 
-
+import importlib.util
 import tkinter as tk
 from tkinter import ttk, filedialog
+import os
+import shutil
+import subprocess
+import sys
+
+
+DEPENDENCIES = (
+    ("Cryptodome", "pycryptodomex"),
+    ("tkinterdnd2", "tkinterdnd2"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from Cryptodome.Cipher import AES
 from Cryptodome.Protocol.KDF import PBKDF2
 from Cryptodome.Random import get_random_bytes
-import os
 
 class FileLockerApp(TkinterDnD.Tk):
     def __init__(self):
