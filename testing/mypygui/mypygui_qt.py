@@ -1,29 +1,86 @@
-import sys, os
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path:
-  sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__, python_version="3.12", isolated=False)
+"""Voice-enabled status-bar GUI."""
+from __future__ import annotations
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "PyAudio",
+#     "PyQt6",
+#     "psutil",
+#     "pyperclip",
+#     "pynput",
+#     "pywin32",
+#     "SpeechRecognition",
+# ]
+# ///
 
+import importlib.util
 import ctypes
 import json
 import os
 import subprocess
-import sys, os, math, time, threading
+import sys
+import winreg
+import math
+import time
+import threading
+import shutil
 import re
 import logging
 from functools import partial
 from datetime import datetime
 from queue import Queue, Empty
 
+
+DEPENDENCIES = (
+    ("pyaudio", "PyAudio"),
+    ("PyQt6", "PyQt6"),
+    ("psutil", "psutil"),
+    ("pyperclip", "pyperclip"),
+    ("pynput", "pynput"),
+    ("speech_recognition", "SpeechRecognition"),
+    ("win32api", "pywin32"),
+    ("win32file", "pywin32"),
+    ("win32gui", "pywin32"),
+    ("win32pipe", "pywin32"),
+    ("pywintypes", "pywin32"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
+
 import psutil
-import winreg
 import pyaudio
 import speech_recognition
 import pynput
 import pyperclip
-# ... rest of imports unchanged ...
 
 try:
     from pyadl import ADLManager
