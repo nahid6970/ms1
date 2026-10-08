@@ -1255,12 +1255,7 @@ def api_git_changed_files(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
-        # Apply exclude patterns from config (same logic as _get_git_status_uncached)
-        exclude_patterns = get_config_val("git_exclude_patterns", list) or []
-        exclude_pathspecs = [f":(exclude,icase)**/{p.strip()}" for p in exclude_patterns if p.strip()]
-        pathspecs = [pathspec] + exclude_pathspecs
-
-        res = subprocess.run(["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--"] + pathspecs, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
+        res = subprocess.run(["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
         files = []
         for line in res.stdout.splitlines():
             if not line.strip():
