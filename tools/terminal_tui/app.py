@@ -2098,6 +2098,154 @@ def api_git_fix_case_renames(project):
         return jsonify({"error": str(e)}), 500
 
 
+# ── Git Stash Routes ──────────────────────────────────────────────────────────
+
+def _git_stash_root(project):
+    """Helper: resolve project path + git root. Returns (git_root, cf, error_response)."""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return None, None, (jsonify({"error": "Project not found"}), 404)
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    res = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, creationflags=cf, timeout=2
+    )
+    if res.returncode != 0:
+        return None, None, (jsonify({"error": "Not a git repository"}), 400)
+    git_root = os.path.normpath((res.stdout or "").strip())
+    return git_root, cf, None
+
+
+@app.route('/api/project/<project>/git/stash/list', methods=['GET'])
+def api_git_stash_list(project):
+    """List all stash entries with index, message, and branch."""
+    try:
+        git_root, cf, err = _git_stash_root(project)
+        if err:
+            return err
+        res = subprocess.run(
+            ["git", "stash", "list", "--format=%gd|%s|%cr"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=5
+        )
+        stashes = []
+        for line in (res.stdout or "").splitlines():
+            if not line.strip():
+                continue
+            parts = line.split("|", 2)
+            ref   = parts[0].strip() if len(parts) > 0 else ""
+            msg   = parts[1].strip() if len(parts) > 1 else ""
+            when  = parts[2].strip() if len(parts) > 2 else ""
+            # ref is like stash@{0}
+            try:
+                idx = int(ref.split("{")[1].rstrip("}"))
+            except Exception:
+                idx = len(stashes)
+            stashes.append({"ref": ref, "index": idx, "message": msg, "when": when})
+        return jsonify({"stashes": stashes})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/stash/push', methods=['POST'])
+def api_git_stash_push(project):
+    """Stash current changes (git stash push -u)."""
+    try:
+        git_root, cf, err = _git_stash_root(project)
+        if err:
+            return err
+        data = request.get_json() or {}
+        message = data.get("message", "").strip()
+        cmd = ["git", "stash", "push", "-u"]
+        if message:
+            cmd += ["-m", message]
+        res = subprocess.run(cmd, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             text=True, creationflags=cf, timeout=15)
+        if res.returncode != 0:
+            return jsonify({"error": (res.stderr or res.stdout or "git stash failed").strip()}), 500
+        projects_list = scan_projects()
+        proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+        if proj:
+            invalidate_git_status_cache(proj["path"])
+        return jsonify({"success": True, "output": (res.stdout or res.stderr or "Changes stashed.").strip()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/stash/apply', methods=['POST'])
+def api_git_stash_apply(project):
+    """Apply a stash entry without removing it (git stash apply stash@{n})."""
+    try:
+        git_root, cf, err = _git_stash_root(project)
+        if err:
+            return err
+        data = request.get_json() or {}
+        ref = data.get("ref", "stash@{0}")
+        res = subprocess.run(
+            ["git", "stash", "apply", ref],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=15
+        )
+        if res.returncode != 0:
+            return jsonify({"error": (res.stderr or res.stdout or "git stash apply failed").strip()}), 500
+        projects_list = scan_projects()
+        proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+        if proj:
+            invalidate_git_status_cache(proj["path"])
+        return jsonify({"success": True, "output": (res.stdout or "Stash applied.").strip()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/stash/pop', methods=['POST'])
+def api_git_stash_pop(project):
+    """Pop a stash entry — apply and remove it (git stash pop stash@{n})."""
+    try:
+        git_root, cf, err = _git_stash_root(project)
+        if err:
+            return err
+        data = request.get_json() or {}
+        ref = data.get("ref", "stash@{0}")
+        res = subprocess.run(
+            ["git", "stash", "pop", ref],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=15
+        )
+        if res.returncode != 0:
+            return jsonify({"error": (res.stderr or res.stdout or "git stash pop failed").strip()}), 500
+        projects_list = scan_projects()
+        proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+        if proj:
+            invalidate_git_status_cache(proj["path"])
+        return jsonify({"success": True, "output": (res.stdout or "Stash popped.").strip()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/stash/drop', methods=['POST'])
+def api_git_stash_drop(project):
+    """Drop (delete) a stash entry without applying (git stash drop stash@{n})."""
+    try:
+        git_root, cf, err = _git_stash_root(project)
+        if err:
+            return err
+        data = request.get_json() or {}
+        ref = data.get("ref", "stash@{0}")
+        res = subprocess.run(
+            ["git", "stash", "drop", ref],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=10
+        )
+        if res.returncode != 0:
+            return jsonify({"error": (res.stderr or res.stdout or "git stash drop failed").strip()}), 500
+        return jsonify({"success": True, "output": (res.stdout or "Stash dropped.").strip()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def api_paste_image(project):
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)

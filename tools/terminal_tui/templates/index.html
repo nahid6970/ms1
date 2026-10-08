@@ -3547,6 +3547,38 @@
                 </div>
             </div>
 
+            <!-- Stash Manager Section -->
+            <div style="margin-bottom: 4px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; padding:7px 10px; border-radius:8px; transition:all 0.2s; border-left:3px solid transparent;" onclick="toggleStashPanel()" onmouseenter="this.style.backgroundColor='rgba(255,255,255,0.04)'; this.style.borderLeftColor='#fb923c'" onmouseleave="this.style.backgroundColor='transparent'; this.style.borderLeftColor='transparent'">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+                        <label style="font-size:0.8rem; font-weight:600; color:var(--text-primary); cursor:pointer; letter-spacing:0.02em;">Stash</label>
+                        <span id="stash-count-badge" style="display:none; font-size:0.65rem; background:rgba(251,146,60,0.15); color:#fb923c; border:1px solid rgba(251,146,60,0.3); border-radius:10px; padding:1px 7px; font-weight:600;"></span>
+                        <span id="stash-panel-arrow" style="transition:transform 0.25s ease; display:inline-flex; align-items:center; transform:rotate(0deg);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+                    </div>
+                    <button onclick="event.stopPropagation(); loadStashes();" id="stash-refresh-btn" style="display:none; background:rgba(251,146,60,0.1); border:1px solid rgba(251,146,60,0.2); color:#fb923c; cursor:pointer; font-size:0.68rem; padding:3px 8px; border-radius:5px; transition:all 0.2s; font-weight:500;" onmouseenter="this.style.backgroundColor='rgba(251,146,60,0.2)'" onmouseleave="this.style.backgroundColor='rgba(251,146,60,0.1)'" title="Refresh stashes">↻ Refresh</button>
+                </div>
+                <div id="stash-panel" style="display:none; margin-top:6px; margin-bottom:14px;">
+                    <!-- Push new stash row -->
+                    <div style="display:flex; gap:6px; margin-bottom:8px;">
+                        <input type="text" id="stash-message-input" placeholder="Stash message (optional)" autocomplete="off"
+                            style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
+                            onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'"
+                            onkeydown="if(event.key==='Enter') gitStashPush()">
+                        <button onclick="gitStashPush()" id="stash-push-btn" title="Stash current changes" style="padding:5px 12px; background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.35); border-radius:6px; color:#fb923c; font-size:0.78rem; cursor:pointer; white-space:nowrap; font-weight:500; transition:all 0.2s; display:flex; align-items:center; gap:5px;" onmouseenter="this.style.backgroundColor='rgba(251,146,60,0.22)'" onmouseleave="this.style.backgroundColor='rgba(251,146,60,0.12)'">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+                            Stash
+                        </button>
+                    </div>
+                    <!-- Stash status msg -->
+                    <div id="stash-status-msg" style="font-size:0.75rem; margin-bottom:6px; min-height:14px;"></div>
+                    <!-- Stash list -->
+                    <div id="stash-list" style="border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); max-height:200px; overflow-y:auto;">
+                        <div style="padding:10px 14px; color:var(--text-secondary); font-size:0.8rem;">Loading stashes...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action buttons -->
             <div style="display: flex; flex-direction:column; gap: 6px;">
                 <div style="display:flex; gap: 10px; justify-content: flex-end; align-items: center;">
@@ -4944,6 +4976,22 @@
                 return true;
             });
 
+            // ── Explain selection button ──────────────────────────────────────
+            // Show a floating "Explain" button whenever this pane has a selection
+            paneTerm.onSelectionChange(() => {
+                if (paneTerm.hasSelection()) {
+                    const sel = paneTerm.getSelection();
+                    if (sel && sel.trim().length > 0) {
+                        showExplainButton(paneDiv, sel.trim());
+                        return;
+                    }
+                }
+                // No selection — only hide if this pane was the one showing it
+                if (_explainBtnTargetPane === paneDiv) {
+                    hideExplainButton();
+                }
+            });
+
             paneTerm.onData(data => {
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) return;
                 if (data.startsWith('\x1b]')) return;
@@ -4955,6 +5003,105 @@
             paneTerm.focus();
             saveTerminalLayoutState();
             return pane;
+        }
+
+        // ── Terminal Explain Selection ────────────────────────────────────────
+        let _explainBtn = null;
+        let _explainBtnTargetPane = null;
+        let _explainBtnHideTimeout = null;
+
+        function _ensureExplainBtn() {
+            if (_explainBtn) return _explainBtn;
+            _explainBtn = document.createElement('button');
+            _explainBtn.id = 'terminal-explain-btn';
+            _explainBtn.title = 'Explain this with AI Copilot';
+            _explainBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Explain`;
+            Object.assign(_explainBtn.style, {
+                position: 'fixed',
+                display: 'none',
+                zIndex: '9999',
+                padding: '4px 10px',
+                background: 'rgba(168,85,247,0.18)',
+                border: '1px solid rgba(168,85,247,0.5)',
+                borderRadius: '6px',
+                color: '#c084fc',
+                fontSize: '0.73rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                alignItems: 'center',
+                gap: '5px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                transition: 'opacity 0.15s',
+                fontFamily: 'sans-serif',
+                lineHeight: '1',
+                userSelect: 'none',
+                whiteSpace: 'nowrap',
+            });
+            _explainBtn.addEventListener('mouseenter', () => {
+                _explainBtn.style.background = 'rgba(168,85,247,0.32)';
+                _explainBtn.style.borderColor = 'rgba(168,85,247,0.75)';
+                if (_explainBtnHideTimeout) { clearTimeout(_explainBtnHideTimeout); _explainBtnHideTimeout = null; }
+            });
+            _explainBtn.addEventListener('mouseleave', () => {
+                _explainBtn.style.background = 'rgba(168,85,247,0.18)';
+                _explainBtn.style.borderColor = 'rgba(168,85,247,0.5)';
+            });
+            document.body.appendChild(_explainBtn);
+            return _explainBtn;
+        }
+
+        function showExplainButton(paneDiv, selectedText) {
+            const btn = _ensureExplainBtn();
+            _explainBtnTargetPane = paneDiv;
+            if (_explainBtnHideTimeout) { clearTimeout(_explainBtnHideTimeout); _explainBtnHideTimeout = null; }
+
+            // Position: top-right corner of the pane
+            const rect = paneDiv.getBoundingClientRect();
+            btn.style.top  = (rect.top + 8) + 'px';
+            btn.style.right = (window.innerWidth - rect.right + 10) + 'px';
+            btn.style.left  = 'auto';
+            btn.style.display = 'flex';
+            btn.style.opacity = '1';
+
+            // Replace onclick to capture current selection
+            btn.onclick = () => explainTerminalSelection(selectedText);
+        }
+
+        function hideExplainButton() {
+            if (!_explainBtn) return;
+            _explainBtn.style.display = 'none';
+            _explainBtnTargetPane = null;
+        }
+
+        function explainTerminalSelection(text) {
+            hideExplainButton();
+            // Build prompt
+            const prompt = `Explain the following terminal output:\n\n\`\`\`\n${text}\n\`\`\``;
+            // Open AI Copilot popover
+            const pop = document.getElementById('ai-copilot-popover');
+            if (!pop) return;
+            if (!pop.classList.contains('show')) {
+                closeAllStatusPopovers();
+                pop.classList.add('show');
+                const aiBtn = document.getElementById('ai-copilot-btn');
+                if (aiBtn) aiBtn.classList.add('active');
+                const savedProvider = localStorage.getItem('ai-provider') || 'gemini';
+                const providerSelect = document.getElementById('ai-provider-select');
+                if (providerSelect) providerSelect.value = savedProvider;
+                if (typeof handleAIProviderChange === 'function') handleAIProviderChange();
+                if (typeof refreshAIProviderLabels === 'function') refreshAIProviderLabels();
+                if (typeof renderAIChatHistory === 'function') renderAIChatHistory();
+                if (typeof _popoverOutside === 'function') _popoverOutside('ai-copilot-popover', 'ai-copilot-btn', closeAICopilotPopover);
+            }
+            // Fill prompt and focus
+            const promptIn = document.getElementById('ai-prompt-input');
+            if (promptIn) {
+                promptIn.value = prompt;
+                setTimeout(() => {
+                    promptIn.focus();
+                    promptIn.setSelectionRange(promptIn.value.length, promptIn.value.length);
+                }, 120);
+            }
         }
 
         function stripTerminalPromptMarkers(pane, data) {
@@ -9133,6 +9280,18 @@
             if (branchArrow) branchArrow.style.transform = 'rotate(0deg)';
             if (branchRefreshBtn) branchRefreshBtn.style.display = 'none';
             if (branchStatusMsg) branchStatusMsg.innerText = '';
+
+            // Reset stash panel to collapsed
+            stashPanelOpen = false;
+            const stashPanel = document.getElementById('stash-panel');
+            const stashArrow = document.getElementById('stash-panel-arrow');
+            const stashRefreshBtn = document.getElementById('stash-refresh-btn');
+            const stashStatusMsg = document.getElementById('stash-status-msg');
+            const stashBadge = document.getElementById('stash-count-badge');
+            if (stashPanel) stashPanel.style.display = 'none';
+            if (stashArrow) stashArrow.style.transform = 'rotate(0deg)';
+            if (stashRefreshBtn) stashRefreshBtn.style.display = 'none';
+            if (stashStatusMsg) stashStatusMsg.innerText = '';
 
             // Set branch from status bar
             const gitBranchEl = document.getElementById('monitor-git-branch');
@@ -15850,6 +16009,170 @@ Always wrap your **entire response** in a single markdown code block.`;
 
             container.innerHTML = '';
             container.appendChild(table);
+        }
+
+        // ── Git Stash Manager ─────────────────────────────────────────────────
+        let stashPanelOpen = false;
+
+        function toggleStashPanel() {
+            const panel = document.getElementById('stash-panel');
+            const arrow = document.getElementById('stash-panel-arrow');
+            const refreshBtn = document.getElementById('stash-refresh-btn');
+            stashPanelOpen = !stashPanelOpen;
+            if (stashPanelOpen) {
+                panel.style.display = 'block';
+                arrow.style.transform = 'rotate(90deg)';
+                refreshBtn.style.display = 'inline-block';
+                loadStashes();
+            } else {
+                panel.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+                refreshBtn.style.display = 'none';
+            }
+        }
+
+        async function loadStashes() {
+            if (!activeProject) return;
+            const listEl = document.getElementById('stash-list');
+            const badge = document.getElementById('stash-count-badge');
+            const statusEl = document.getElementById('stash-status-msg');
+            if (!listEl) return;
+            listEl.innerHTML = '<div style="padding:10px 14px; color:var(--text-secondary); font-size:0.8rem;">Loading...</div>';
+            if (statusEl) statusEl.innerText = '';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/stash/list`);
+                const data = await res.json();
+                if (!res.ok) {
+                    listEl.innerHTML = `<div style="padding:10px 14px; color:#ef4444; font-size:0.8rem;">${data.error || 'Failed to load stashes'}</div>`;
+                    return;
+                }
+                const stashes = data.stashes || [];
+                if (badge) {
+                    if (stashes.length > 0) {
+                        badge.textContent = stashes.length;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                if (stashes.length === 0) {
+                    listEl.innerHTML = '<div style="padding:10px 14px; color:var(--text-secondary); font-size:0.8rem; font-style:italic;">No stashes found.</div>';
+                    return;
+                }
+                listEl.innerHTML = stashes.map(s => `
+                    <div style="padding:7px 12px; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:8px; transition:background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
+                        <span style="font-family:'Fira Code',monospace; font-size:0.68rem; color:#fb923c; min-width:72px; flex-shrink:0;">${s.ref}</span>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.message}">${s.message}</div>
+                            <div style="font-size:0.68rem; color:var(--text-muted); margin-top:1px;">${s.when}</div>
+                        </div>
+                        <div style="display:flex; gap:4px; flex-shrink:0;">
+                            <button onclick="gitStashApply('${s.ref}')" title="Apply — restore stash, keep it in list" style="background:none; border:1px solid #38bdf8; color:#38bdf8; cursor:pointer; font-size:0.68rem; padding:2px 7px; border-radius:4px; transition:all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.12)'" onmouseleave="this.style.backgroundColor='transparent'">Apply</button>
+                            <button onclick="gitStashPop('${s.ref}')" title="Pop — restore stash and remove from list" style="background:none; border:1px solid #34d399; color:#34d399; cursor:pointer; font-size:0.68rem; padding:2px 7px; border-radius:4px; transition:all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(52,211,153,0.12)'" onmouseleave="this.style.backgroundColor='transparent'">Pop</button>
+                            <button onclick="gitStashDrop('${s.ref}')" title="Drop — delete this stash permanently" style="background:none; border:1px solid #f87171; color:#f87171; cursor:pointer; font-size:0.68rem; padding:2px 7px; border-radius:4px; transition:all 0.2s; white-space:nowrap;" onmouseenter="this.style.backgroundColor='rgba(248,113,113,0.12)'" onmouseleave="this.style.backgroundColor='transparent'">Drop</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                listEl.innerHTML = `<div style="padding:10px 14px; color:#ef4444; font-size:0.8rem;">Error loading stashes.</div>`;
+            }
+        }
+
+        async function gitStashPush() {
+            if (!activeProject) return;
+            const msgInput = document.getElementById('stash-message-input');
+            const statusEl = document.getElementById('stash-status-msg');
+            const btn = document.getElementById('stash-push-btn');
+            const message = msgInput ? msgInput.value.trim() : '';
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+            if (statusEl) statusEl.innerText = '';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/stash/push`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (msgInput) msgInput.value = '';
+                    if (statusEl) { statusEl.style.color = '#34d399'; statusEl.innerText = '✓ ' + (data.output || 'Stashed!'); }
+                    loadStashes();
+                } else {
+                    if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = data.error || 'Stash failed'; }
+                }
+            } catch (e) {
+                if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = e.message; }
+            } finally {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+            }
+        }
+
+        async function gitStashApply(ref) {
+            if (!activeProject) return;
+            const statusEl = document.getElementById('stash-status-msg');
+            if (statusEl) statusEl.innerText = '';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/stash/apply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ref })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (statusEl) { statusEl.style.color = '#34d399'; statusEl.innerText = '✓ Applied ' + ref; }
+                    // Refresh the changed files list so staged files update
+                    setTimeout(() => openGitCommitModal(), 800);
+                } else {
+                    if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = data.error || 'Apply failed'; }
+                }
+            } catch (e) {
+                if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = e.message; }
+            }
+        }
+
+        async function gitStashPop(ref) {
+            if (!activeProject) return;
+            const statusEl = document.getElementById('stash-status-msg');
+            if (statusEl) statusEl.innerText = '';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/stash/pop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ref })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (statusEl) { statusEl.style.color = '#34d399'; statusEl.innerText = '✓ Popped ' + ref; }
+                    setTimeout(() => openGitCommitModal(), 800);
+                } else {
+                    if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = data.error || 'Pop failed'; }
+                }
+            } catch (e) {
+                if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = e.message; }
+            }
+        }
+
+        async function gitStashDrop(ref) {
+            if (!activeProject) return;
+            if (!confirm(`Drop ${ref}? This permanently deletes the stash.`)) return;
+            const statusEl = document.getElementById('stash-status-msg');
+            if (statusEl) statusEl.innerText = '';
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/stash/drop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ref })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (statusEl) { statusEl.style.color = '#34d399'; statusEl.innerText = '✓ Dropped ' + ref; }
+                    loadStashes();
+                } else {
+                    if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = data.error || 'Drop failed'; }
+                }
+            } catch (e) {
+                if (statusEl) { statusEl.style.color = '#ef4444'; statusEl.innerText = e.message; }
+            }
         }
 
         function toggleBranchPanel() {

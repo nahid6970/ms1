@@ -5,6 +5,47 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-08] - Git Stash Manager + Terminal Explain Selection
+
+### Feature 4 — Git Stash Manager (git modal)
+
+**Backend (`app.py`):**
+- Added `_git_stash_root(project)` helper to resolve git root (shared by all stash routes).
+- `GET /api/project/<project>/git/stash/list` — returns `[{ref, index, message, when}]` via `git stash list --format=%gd|%s|%cr`.
+- `POST /api/project/<project>/git/stash/push` — runs `git stash push -u [-m message]`, invalidates git status cache.
+- `POST /api/project/<project>/git/stash/apply` — `git stash apply <ref>`, invalidates cache.
+- `POST /api/project/<project>/git/stash/pop` — `git stash pop <ref>`, invalidates cache.
+- `POST /api/project/<project>/git/stash/drop` — `git stash drop <ref>`.
+
+**Frontend (`templates/index.html`):**
+- Collapsible **Stash** section added to git modal between the Graph panel and Action buttons. Orange (`#fb923c`) accent matches git stash convention.
+- Count badge on the header row shows number of stashes (hidden when 0).
+- Push row: text input for optional message + Stash button.
+- Stash list: each row shows `stash@{n}`, message, relative time, and three action buttons — **Apply** (blue), **Pop** (green), **Drop** (red).
+- JS functions: `toggleStashPanel`, `loadStashes`, `gitStashPush`, `gitStashApply`, `gitStashPop`, `gitStashDrop`.
+- Apply and Pop call `openGitCommitModal()` after 800 ms to refresh the changed-files list.
+- Drop requires `confirm()` before proceeding.
+- State (panel open/close, status msg) reset in `openGitCommitModal`.
+
+### Feature 6 — Inline Terminal Explain → AI Copilot
+
+**Frontend only (`templates/index.html`):**
+- `paneTerm.onSelectionChange` hook added inside `createTerminalPane` — fires whenever xterm.js selection changes.
+- When text is selected: `showExplainButton(paneDiv, text)` positions a fixed floating purple button (`#terminal-explain-btn`) at the top-right corner of the active pane.
+- When selection is cleared: `hideExplainButton()` hides the button.
+- Button is a single shared DOM element (created once, appended to `<body>`).
+- Clicking **Explain** calls `explainTerminalSelection(text)`:
+  - Opens AI Copilot popover if not already open (runs full init sequence).
+  - Pre-fills `#ai-prompt-input` with prompt: `Explain the following terminal output:\n\`\`\`\n<text>\n\`\`\``.
+  - Focuses the input and positions caret at end — user can edit or just press Enter.
+
+**Files Modified:**
+- `app.py` — stash routes
+- `templates/index.html` — stash panel HTML + JS, explain button JS, `openGitCommitModal` stash reset, `createTerminalPane` selection hook
+- `md/RECENT.md`
+
+---
+
 ## [2026-10-08] - Git Case-Rename Detection and Fix
 
 ### Problem
