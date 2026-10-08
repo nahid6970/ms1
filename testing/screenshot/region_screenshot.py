@@ -1,16 +1,55 @@
 """Fast PyQt6 region screenshot tool with lazy OCR integrations."""
 from __future__ import annotations
 
-# Type1: Global
-import sys, os
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__)
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "Pillow",
+#     "PyQt6",
+#     "pywin32",
+#     "pytesseract",
+#     "numpy",
+#     "easyocr",
+# ]
+# ///
 
+import importlib.util
 import io, json, os, struct, subprocess, sys, tempfile
 from datetime import datetime
 from pathlib import Path
+
+
+# Keep this launcher self-contained so `python region_screenshot.py` works.
+# Package names are declared explicitly because import names and PyPI names
+# are not always the same (for example, PIL is provided by Pillow).
+DEPENDENCIES = (
+    ("PIL", "Pillow"),
+    ("PyQt6", "PyQt6"),
+    ("win32clipboard", "pywin32"),
+    ("pytesseract", "pytesseract"),
+    ("numpy", "numpy"),
+    ("easyocr", "easyocr"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    print("Missing dependencies detected:")
+    for package in missing:
+        print(f"  - {package}")
+    print(f"Installing into: {sys.executable}")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
+
+
+ensure_dependencies()
+
 from PIL import ImageGrab, ImageQt
 from PyQt6.QtCore import QPoint, QRect, QSize, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPixmap
