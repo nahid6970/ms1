@@ -273,6 +273,23 @@ def _get_git_status_uncached(path):
         # If project IS the repo root, use '.' — otherwise use the relative subfolder
         pathspec = "." if rel_path == "." else rel_path
 
+        # Build exclude pathspecs from saved git-exclude-patterns config.
+        # Mirrors the frontend gitExcludeMatches logic:
+        #   *.ext  → exclude by extension
+        #   name   → exclude by exact filename or path suffix
+        exclude_patterns = get_config_val("git_exclude_patterns", list) or []
+        exclude_pathspecs = []
+        for pat in exclude_patterns:
+            pat = pat.strip()
+            if not pat:
+                continue
+            if pat.startswith("*."):
+                exclude_pathspecs.append(f":(exclude,icase)**/{pat}")
+            else:
+                # Could be a filename (e.g. yarn.lock) or a path suffix
+                exclude_pathspecs.append(f":(exclude,icase)**/{pat}")
+        pathspecs = [pathspec] + exclude_pathspecs
+
         # Get current branch name
         res_branch = subprocess.run(
             ["git", "branch", "--show-current"],
@@ -291,9 +308,9 @@ def _get_git_status_uncached(path):
         if not branch:
             return None
 
-        # Get file statuses scoped to this project subfolder
+        # Get file statuses scoped to this project subfolder, excluding configured patterns
         res_status = subprocess.run(
-            ["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--", pathspec],
+            ["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--"] + pathspecs,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, creationflags=cf, timeout=2
         )
@@ -303,11 +320,11 @@ def _get_git_status_uncached(path):
         unstaged  = len([l for l in status_lines if l[1] != ' '])
         untracked = len([l for l in status_lines if l.startswith('??')])
 
-        # Get lines added/deleted scoped to this project subfolder
+        # Get lines added/deleted scoped to this project subfolder, excluding configured patterns
         insertions, deletions = 0, 0
         for extra_flag in [[], ["--cached"]]:
             res_diff = subprocess.run(
-                ["git", "--icase-pathspecs", "diff", "--shortstat"] + extra_flag + ["--", pathspec],
+                ["git", "--icase-pathspecs", "diff", "--shortstat"] + extra_flag + ["--"] + pathspecs,
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=2
             )
@@ -1238,7 +1255,12 @@ def api_git_changed_files(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
-        res = subprocess.run(["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--", pathspec], cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
+        # Apply exclude patterns from config (same logic as _get_git_status_uncached)
+        exclude_patterns = get_config_val("git_exclude_patterns", list) or []
+        exclude_pathspecs = [f":(exclude,icase)**/{p.strip()}" for p in exclude_patterns if p.strip()]
+        pathspecs = [pathspec] + exclude_pathspecs
+
+        res = subprocess.run(["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--"] + pathspecs, cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=cf, timeout=3)
         files = []
         for line in res.stdout.splitlines():
             if not line.strip():
@@ -3931,6 +3953,13 @@ def api_post_git_exclude_patterns():
     if not isinstance(data, list):
         return jsonify({"error": "Expected a list"}), 400
     set_config_val("git_exclude_patterns", data)
+    # Invalidate git status cache for all projects so the status bar
+    # reflects the new exclude list on the next poll
+    for proj in scan_projects():
+        try:
+            invalidate_git_status_cache(proj["path"])
+        except Exception:
+            pass
     return jsonify({"status": "success"})
 
 @app.route('/api/fonts')
