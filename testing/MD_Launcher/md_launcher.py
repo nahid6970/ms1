@@ -1,8 +1,44 @@
 #!/usr/bin/env python3
+"""MD Launcher - A cyberpunk-themed floating file launcher."""
+
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "PyQt6",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
 import sys
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    subprocess.check_call(command)
+
+
+ensure_dependencies()
+
 import os
 import json
-import subprocess
 import platform
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QLabel, QScrollArea, QLineEdit, QPushButton, QFileDialog, QDialog, QSpinBox, QComboBox, QFontComboBox)
