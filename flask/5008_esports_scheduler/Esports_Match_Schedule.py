@@ -38,6 +38,7 @@ def ensure_dependencies():
 
 ensure_dependencies()
 
+import os
 import re
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for
@@ -200,6 +201,9 @@ def match_history():
 
 
 if __name__ == '__main__':
+    # Ensure the database directory exists before SQLite tries to create the file
+    db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
     with app.app_context():
         db.create_all()
     app.run(host="0.0.0.0", port=5008, debug=True)
