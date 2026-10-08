@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import importlib.util
 import io, json, os, struct, subprocess, sys, tempfile
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -44,8 +45,14 @@ def ensure_dependencies():
     print("Missing dependencies detected:")
     for package in missing:
         print(f"  - {package}")
-    print(f"Installing into: {sys.executable}")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", *missing])
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+        print(f"Installing with uv into: {sys.executable}")
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+        print(f"uv was not found; installing with pip into: {sys.executable}")
+    subprocess.check_call(command)
 
 
 ensure_dependencies()
