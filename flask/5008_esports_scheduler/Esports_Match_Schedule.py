@@ -1,7 +1,47 @@
+"""Esports Match Scheduler - Flask app for managing esports match schedules."""
+
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "Flask",
+#     "Flask-SQLAlchemy",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
+import sys
+
+DEPENDENCIES = (
+    ("flask", "Flask"),
+    ("flask_sqlalchemy", "Flask-SQLAlchemy"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    subprocess.check_call(command)
+
+
+ensure_dependencies()
+
+import re
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-import re
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/@delta/msBackups/DataBase/esports.db'
@@ -104,7 +144,6 @@ def delete_team(id):
     db.session.commit()
     return redirect(url_for('manage_teams'))
 
-from datetime import datetime, timedelta
 
 @app.route('/edit-match/<int:match_id>', methods=['GET', 'POST'])
 def edit_match(match_id):
