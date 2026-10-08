@@ -1,24 +1,63 @@
-import sys, os
+"""Cyberpunk startup-item manager GUI."""
+from __future__ import annotations
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "PyQt6",
+# ]
+# ///
+
+import importlib.util
+import ctypes
+import os
+import json
+import shutil
+import subprocess
+import sys
+import time
+
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
 import PyQt6
 
 # Fix for Qt platform plugin issue
 qt_plugin_path = os.path.join(os.path.dirname(PyQt6.__file__), "Qt6", "plugins")
-os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = qt_plugin_path
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = qt_plugin_path
 
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__)
-import install_deps
-install_deps.bootstrap(__file__)
-
-import ctypes
-import sys
-import os
-import json
 import winreg
-import subprocess
-import time
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QLineEdit, 
                              QScrollArea, QFrame, QMessageBox, QDialog, 
