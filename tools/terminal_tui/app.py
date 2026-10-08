@@ -1882,7 +1882,11 @@ def api_git_suggest_commit(project):
         rel_path = os.path.relpath(path, git_root)
         pathspec = "." if rel_path == "." else rel_path
 
-        # Use selected files as pathspecs if provided, otherwise fall back to project pathspec
+        # Use selected (checked) files as pathspecs if provided.
+        # An empty list means nothing is checked — don't fall back to all files,
+        # that would include files the user explicitly unchecked/excluded.
+        if files is not None and len(files) == 0:
+            return jsonify({"error": "No files selected. Check at least one file to generate a commit message."}), 400
         diff_pathspecs = files if files else [pathspec]
 
         # Try staged diff first, fall back to full working-tree diff
