@@ -1941,6 +1941,163 @@ def api_git_suggest_commit(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/ignorecase-check', methods=['GET'])
+def api_git_ignorecase_check(project):
+    """Check if core.ignoreCase is true and detect case-only renames in the working tree."""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
+        )
+        if res_root.returncode != 0:
+            return jsonify({"ignorecase": False, "renames": []})
+        git_root = os.path.normpath((res_root.stdout or "").strip())
+
+        # Check core.ignoreCase setting
+        res_cfg = subprocess.run(
+            ["git", "config", "--get", "core.ignoreCase"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
+        )
+        ignorecase_val = (res_cfg.stdout or "").strip().lower()
+        ignorecase = ignorecase_val == "true"
+
+        if not ignorecase:
+            return jsonify({"ignorecase": False, "renames": []})
+
+        # Detect case-only renames: compare index paths vs actual filesystem paths.
+        # git ls-files lists the paths as git knows them (index). We then check if
+        # the actual path on disk differs only in case.
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+
+        res_ls = subprocess.run(
+            ["git", "ls-files", "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=5
+        )
+        indexed_files = [l.strip() for l in (res_ls.stdout or "").splitlines() if l.strip()]
+
+        renames = []
+        seen_dirs = {}  # map from lowercased dir path → (index_name, actual_name)
+        for idx_file in indexed_files:
+            abs_idx = os.path.join(git_root, idx_file)
+            # Walk each path component and check for case mismatch
+            parts = idx_file.replace("\\", "/").split("/")
+            current = git_root
+            mismatch_found = False
+            actual_parts = list(parts)
+            for i, part in enumerate(parts[:-1]):  # check directories only
+                dir_key = os.path.normcase(os.path.join(current, part))
+                if dir_key not in seen_dirs:
+                    try:
+                        actual_entries = os.listdir(current)
+                        match = next((e for e in actual_entries if e.lower() == part.lower()), None)
+                        seen_dirs[dir_key] = match
+                    except OSError:
+                        seen_dirs[dir_key] = part
+                actual_name = seen_dirs[dir_key]
+                if actual_name and actual_name != part:
+                    mismatch_found = True
+                    actual_parts[i] = actual_name
+                current = os.path.join(current, part)
+
+            if mismatch_found:
+                old_path = "/".join(parts)
+                new_path = "/".join(actual_parts)
+                entry = {"old": old_path, "new": new_path}
+                if entry not in renames:
+                    renames.append(entry)
+
+        # Deduplicate to directory-level renames only (avoid listing every file)
+        dir_renames = {}
+        for r in renames:
+            old_dir = "/".join(r["old"].split("/")[:-1])
+            new_dir = "/".join(r["new"].split("/")[:-1])
+            if old_dir and old_dir != new_dir:
+                key = (old_dir, new_dir)
+                if key not in dir_renames:
+                    dir_renames[key] = {"old": old_dir, "new": new_dir}
+        final_renames = list(dir_renames.values()) if dir_renames else renames[:10]
+
+        return jsonify({"ignorecase": True, "renames": final_renames})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/fix-case-renames', methods=['POST'])
+def api_git_fix_case_renames(project):
+    """Fix case-only renames by setting core.ignoreCase=false and re-staging with git add -A."""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=2
+        )
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath((res_root.stdout or "").strip())
+
+        # Step 1: Set core.ignoreCase to false so git respects case changes
+        res_cfg = subprocess.run(
+            ["git", "config", "core.ignoreCase", "false"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=5
+        )
+        if res_cfg.returncode != 0:
+            err = (res_cfg.stderr or "").strip()
+            return jsonify({"error": f"Failed to set core.ignoreCase: {err}"}), 500
+
+        # Step 2: Run git add -A to re-index all files including case-renamed ones
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
+        res_add = subprocess.run(
+            ["git", "add", "-A", "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=30
+        )
+        if res_add.returncode != 0:
+            err = (res_add.stderr or "").strip()
+            return jsonify({"error": f"git add -A failed: {err}"}), 500
+
+        # Step 3: Check how many files are now staged
+        res_status = subprocess.run(
+            ["git", "status", "--porcelain", "-uall", "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=5
+        )
+        status_lines = [l for l in (res_status.stdout or "").strip().split("\n") if l.strip()]
+        staged_count = len([l for l in status_lines if l[0] not in ('?', ' ')])
+
+        # Invalidate git status cache so modal reflects new state
+        invalidate_git_status_cache(path)
+
+        return jsonify({
+            "success": True,
+            "staged": staged_count,
+            "message": f"core.ignoreCase set to false. {staged_count} file(s) staged."
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 def api_paste_image(project):
     projects = scan_projects()
     proj = next((p for p in projects if p["name"] == project), None)
