@@ -38,15 +38,19 @@ function updateMovieFilterUi() {
 
 function applyMovieFilters(query) {
     const searchQuery = String(query ?? document.getElementById('movieSearch')?.value ?? '').toLowerCase().trim();
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     document.querySelectorAll('.movie-card').forEach(card => {
         const title = (card.dataset.title || '').toLowerCase();
         const year = (card.dataset.year || '').toLowerCase();
         const matchesSearch = !searchQuery || title.includes(searchQuery) || year.includes(searchQuery);
         const hasDigital = !!card.dataset.digitalRelease;
+        const isFutureTheatrical = !!card.dataset.releaseDate && card.dataset.releaseDate > today;
         const matchesFilters = (!movieFilterState.hideWatched || card.dataset.watched !== 'true')
             && (!movieFilterState.hideArchived || card.dataset.archived !== 'true')
             && (!movieFilterState.onlyDigital || hasDigital)
             && (!movieFilterState.onlyPendingDigital || !hasDigital)
+            && (!movieFilterState.hideFutureTheatrical || !isFutureTheatrical)
             && (!movieFilterState.category || (card.dataset.category || '') === movieFilterState.category);
         card.classList.toggle('filter-hidden', !(matchesSearch && matchesFilters));
         card.style.display = matchesSearch ? (searchQuery ? 'flex' : '') : 'none';

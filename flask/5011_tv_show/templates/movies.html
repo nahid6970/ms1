@@ -75,6 +75,7 @@
                     <label class="filter-option"><input type="checkbox" data-movie-filter="hideArchived"><span>Hide archived</span></label>
                     <label class="filter-option"><input type="checkbox" data-movie-filter="onlyDigital"><span>Only with digital release</span></label>
                     <label class="filter-option"><input type="checkbox" data-movie-filter="onlyPendingDigital"><span>Only awaiting digital release</span></label>
+                    <label class="filter-option"><input type="checkbox" data-movie-filter="hideFutureTheatrical"><span>Hide future theatrical releases</span></label>
                     <label class="filter-select-option" for="movieCategoryFilter"><span>Category</span><select id="movieCategoryFilter"><option value="">All categories</option></select></label>
                 </div>
             </div>
@@ -88,7 +89,7 @@
 
     <div class="show-grid">
         {% for movie in movies %}
-            <div class="movie-card{% if movie.watched %} completed{% endif %}{% if movie.archived %} archived{% endif %}" data-movie-id="{{ movie.id }}" data-title="{{ movie.title }}" data-year="{{ movie.year }}" data-watched="{{ 'true' if movie.watched else 'false' }}" data-archived="{{ 'true' if movie.archived else 'false' }}" data-category="{{ movie.category or '' }}" data-digital-release="{{ movie.digital_release_date or '' }}">
+            <div class="movie-card{% if movie.watched %} completed{% endif %}{% if movie.archived %} archived{% endif %}" data-movie-id="{{ movie.id }}" data-title="{{ movie.title }}" data-year="{{ movie.year }}" data-watched="{{ 'true' if movie.watched else 'false' }}" data-archived="{{ 'true' if movie.archived else 'false' }}" data-category="{{ movie.category or '' }}" data-release-date="{{ movie.release_date or '' }}" data-digital-release="{{ movie.digital_release_date or '' }}">
                 <div class="library-card-title" title="{{ movie.title }}">{{ movie.title }}</div>
                 <div class="img-wrapper">
                     <img src="{{ movie.cover_image }}" alt="{{ movie.title }}">
