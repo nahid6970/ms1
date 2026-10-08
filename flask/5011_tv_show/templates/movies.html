@@ -4,24 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Movies</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon-movies.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="sticky-controls-wrapper">
         <div class="app-header-inner">
             <nav class="library-nav" aria-label="Library sections">
-                <a href="{{ url_for('agenda_page') }}" class="nav-link">Agenda</a>
-                <a href="{{ url_for('index') }}" class="nav-link">Shows</a>
+                <a href="{{ url_for('agenda_page') }}" class="nav-link"><svg class="nav-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8 2v4M16 2v4M3 10h18"></path></svg><span>Agenda</span></a>
+                <a href="{{ url_for('index') }}" class="nav-link"><svg class="nav-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="15" rx="2"></rect><path d="m17 2-5 5-5-5M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"></path></svg><span>Shows</span></a>
                 <div class="nav-dropdown-container" id="moviesNavDropdown">
-                    <a href="javascript:void(0)" class="nav-link active" id="navMovies" onclick="toggleMoviesNavDropdown(event)">{{ 'Archived 📦 ▾' if movie_view == 'archived' else ('Unwatched ▾' if movie_view == 'unwatched' else 'Movies ▾') }}</a>
+                    <a href="javascript:void(0)" class="nav-link active" id="navMovies" onclick="toggleMoviesNavDropdown(event)"><svg class="nav-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v14H3z"></path><path d="M8 7v14M16 7v14M5 11h.01M5 17h.01M19 11h.01M19 17h.01"></path></svg><span>{{ 'Archived 📦 ▾' if movie_view == 'archived' else ('Unwatched ▾' if movie_view == 'unwatched' else 'Movies ▾') }}</span></a>
                     <div class="nav-dropdown" id="moviesNavMenu">
                         <a href="{{ url_for('movies_page') }}" class="nav-dropdown-item{% if movie_view == 'all' %} active-item{% endif %}">Movies</a>
                         <a href="{{ url_for('movies_page', view='unwatched') }}" class="nav-dropdown-item{% if movie_view == 'unwatched' %} active-item{% endif %}">Unwatched</a>
                         <a href="{{ url_for('movies_page', view='archived') }}" class="nav-dropdown-item{% if movie_view == 'archived' %} active-item{% endif %}">Archived 📦</a>
                     </div>
                 </div>
-                <a href="{{ url_for('discover_page') }}" class="nav-link">Discover</a>
+                <a href="{{ url_for('discover_page') }}" class="nav-link"><svg class="nav-link-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5M13 8l-1.5 4-4 1.5 4 1.5 1.5 4 1.5-4 4-1.5-4-1.5z"></path></svg><span>Discover</span></a>
             </nav>
         <div class="top-center-controls">
             <a href="{{ url_for('index') }}" class="add-button" title="TV Shows">
