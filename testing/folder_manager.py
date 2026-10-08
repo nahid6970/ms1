@@ -1,11 +1,50 @@
+"""Folder Manager - A floating folder launcher with a cyberpunk-style web UI."""
+
+# /// script
+# requires-python = ">=3.8"
+# dependencies = [
+#     "PyQt6",
+#     "PyQt6-WebEngine",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
 import sys
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+    ("PyQt6.QtWebEngineWidgets", "PyQt6-WebEngine"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    subprocess.check_call(command)
+
+
+ensure_dependencies()
+
 import json
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QDesktopWidget, QWidget, QVBoxLayout, QLabel
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import Qt, pyqtSlot, QObject, QPoint
-from PyQt5.QtGui import QPalette
-from PyQt5.QtWebChannel import QWebChannel
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QWidget, QVBoxLayout, QLabel
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import Qt, pyqtSlot, QObject, QPoint
+from PyQt6.QtGui import QPalette
+from PyQt6.QtWebChannel import QWebChannel
 
 class FolderManager(QObject):
     def __init__(self, html_window):
@@ -122,7 +161,7 @@ class FolderWindow(QMainWindow):
         self.center_window()
         
         # Remove window frame and title bar for clean look
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         
         # Variables for window dragging
         self.dragging = False
@@ -133,7 +172,7 @@ class FolderWindow(QMainWindow):
     
     def center_window(self):
         """Center the window on the screen"""
-        screen = QApplication.desktop().screenGeometry()
+        screen = QApplication.primaryScreen().geometry()
         window = self.geometry()
         x = (screen.width() - window.width()) // 2
         y = (screen.height() - window.height()) // 2
@@ -141,27 +180,27 @@ class FolderWindow(QMainWindow):
     
     def mousePressEvent(self, event):
         """Handle mouse press for window dragging"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             # Check if the click is on the drag handle
             drag_handle_rect = self.drag_handle.geometry()
             if drag_handle_rect.contains(event.pos()):
                 self.dragging = True
-                self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
+                self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
                 event.accept()
                 return
         super().mousePressEvent(event)
     
     def mouseMoveEvent(self, event):
         """Handle mouse move for window dragging"""
-        if event.buttons() == Qt.LeftButton and self.dragging:
-            self.move(event.globalPos() - self.drag_position)
+        if event.buttons() == Qt.MouseButton.LeftButton and self.dragging:
+            self.move(event.globalPosition().toPoint() - self.drag_position)
             event.accept()
         else:
             super().mouseMoveEvent(event)
     
     def mouseReleaseEvent(self, event):
         """Handle mouse release to stop dragging"""
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = False
         super().mouseReleaseEvent(event)
     
@@ -176,7 +215,7 @@ class FolderWindow(QMainWindow):
         # Create drag handle
         self.drag_handle = QLabel("⋮⋮⋮ Drag to move ⋮⋮⋮")
         self.drag_handle.setFixedHeight(15)
-        self.drag_handle.setAlignment(Qt.AlignCenter)
+        self.drag_handle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.drag_handle.setStyleSheet("""
             QLabel {
                 background: rgba(102, 126, 234, 0.3);
@@ -188,7 +227,7 @@ class FolderWindow(QMainWindow):
                 background: rgba(102, 126, 234, 0.5);
             }
         """)
-        self.drag_handle.setCursor(Qt.SizeAllCursor)
+        self.drag_handle.setCursor(Qt.CursorShape.SizeAllCursor)
         
         # Create web view and channel
         self.web_view = QWebEngineView()
@@ -785,4 +824,4 @@ if __name__ == "__main__":
     folder_window = FolderWindow()
     folder_window.show()
     
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
