@@ -1,13 +1,60 @@
 #!/usr/bin/env python3
+"""Qt-based script manager GUI."""
+from __future__ import annotations
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "PyQt6",
+# ]
+# ///
+
+import importlib.util
 import sys
 import os
 import json
 import subprocess
 import shutil
+import ctypes
 from functools import partial
 import re
 import urllib.request
 import difflib
+
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QPushButton, QScrollArea, 
                              QFrame, QMessageBox, QGridLayout, QSizePolicy,
@@ -21,7 +68,6 @@ from PyQt6.QtGui import (QFont, QCursor, QColor, QDesktopServices, QAction, QIco
                          QBrush, QPixmap, QDrag, QTextDocument, QFontDatabase, QSyntaxHighlighter, QTextCharFormat, QFontMetrics, QTextOption)
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtCore import QUrl
-import ctypes
 
 # -----------------------------------------------------------------------------
 # CROSS-PLATFORM PATH NORMALIZATION HELPER
