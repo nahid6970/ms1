@@ -1,12 +1,77 @@
-import customtkinter as ctk
-import psutil
-import os
-import threading
-from tkinter import filedialog, messagebox
-import ctypes
-import sys
+"""PyQt6 cyberpunk file-lock inspection and process manager."""
+from __future__ import annotations
 
-# CYBERPUNK THEME PALETTE
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "PyQt6",
+#     "psutil",
+# ]
+# ///
+
+import importlib.util
+import os
+import shutil
+import subprocess
+import sys
+import threading
+import queue
+import ctypes
+
+
+DEPENDENCIES = (
+    ("PyQt6", "PyQt6"),
+    ("psutil", "psutil"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
+import psutil
+
+
 CP_BG = "#050505"
 CP_PANEL = "#111111"
 CP_YELLOW = "#FCEE0A"
@@ -18,210 +83,209 @@ CP_DIM = "#3a3a3a"
 CP_TEXT = "#E0E0E0"
 CP_SUBTEXT = "#808080"
 
-# Configuration
-ctk.set_appearance_mode("Dark")
+APP_STYLE = f"""
+QMainWindow, QWidget {{
+    background-color: {CP_BG}; color: {CP_TEXT}; font-family: Consolas;
+}}
+QFrame#panel, QFrame#process_item {{
+    background-color: {CP_PANEL}; border: 1px solid {CP_DIM};
+}}
+QLineEdit {{
+    background-color: {CP_BG}; color: {CP_CYAN}; border: 1px solid {CP_DIM};
+    padding: 8px; font-size: 12px;
+}}
+QLineEdit:focus {{ border: 1px solid {CP_CYAN}; }}
+QPushButton {{
+    background-color: {CP_DIM}; color: white; border: none;
+    padding: 8px 14px; font-weight: bold;
+}}
+QPushButton:hover {{ background-color: {CP_CYAN}; color: {CP_BG}; }}
+QPushButton#admin {{ background-color: {CP_ORANGE}; color: black; }}
+QPushButton#admin:hover {{ background-color: {CP_YELLOW}; }}
+QPushButton#kill {{ background-color: {CP_DIM}; color: white; }}
+QPushButton#kill:hover {{ background-color: {CP_RED}; color: white; }}
+QScrollArea {{ border: none; background: transparent; }}
+"""
 
-class ProcessItem(ctk.CTkFrame):
-    def __init__(self, master, proc, file_path, kill_callback):
-        super().__init__(master, fg_color=CP_PANEL, corner_radius=0, border_width=1, border_color=CP_DIM)
-        self.pack(fill="x", padx=10, pady=5)
+
+class ProcessItem(QFrame):
+    def __init__(self, proc, file_path, kill_callback, parent=None):
+        super().__init__(parent)
         self.proc = proc
         self.kill_callback = kill_callback
+        self.setObjectName("process_item")
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         try:
-            name = proc.name()
-            pid = proc.pid
-            username = proc.username()
-        except:
-            name = "Unknown"
-            pid = "???"
-            username = "???"
+            name, pid, username = proc.name(), proc.pid, proc.username()
+        except Exception:
+            name, pid, username = "Unknown", "???", "???"
 
-        # Icon/Label Container
-        info_frame = ctk.CTkFrame(self, fg_color="transparent")
-        info_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
+        info = QVBoxLayout()
+        title = QLabel(f"{name} (PID: {pid})")
+        title.setStyleSheet(f"color: {CP_CYAN}; font-size: 16px; font-weight: bold;")
+        user = QLabel(f"User: {username}")
+        user.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 12px;")
+        locked = QLabel(f"Locking: {file_path}")
+        locked.setWordWrap(True)
+        locked.setStyleSheet(f"color: {CP_RED}; font-size: 12px;")
+        info.addWidget(title)
+        info.addWidget(user)
+        info.addWidget(locked)
+        layout.addLayout(info, 1)
 
-        # Process Name
-        ctk.CTkLabel(info_frame, text=f"{name} (PID: {pid})", font=("Consolas", 16, "bold"), text_color=CP_CYAN).pack(anchor="w")
-        
-        # User & Path Info
-        ctk.CTkLabel(info_frame, text=f"User: {username}", font=("Consolas", 12), text_color=CP_SUBTEXT).pack(anchor="w")
-        ctk.CTkLabel(info_frame, text=f"Locking: {file_path}", font=("Consolas", 12), text_color=CP_RED, wraplength=400).pack(anchor="w")
-
-        # Action Button
-        self.btn_kill = ctk.CTkButton(self, text="KILL", font=("Consolas", 12, "bold"), 
-                                      fg_color=CP_DIM, hover_color=CP_RED, text_color="white",
-                                      command=self.terminate_process, width=80, corner_radius=0)
-        self.btn_kill.pack(side="right", padx=10, pady=10)
+        kill = QPushButton("KILL")
+        kill.setObjectName("kill")
+        kill.setFixedWidth(80)
+        kill.clicked.connect(self.terminate_process)
+        layout.addWidget(kill, 0, Qt.AlignmentFlag.AlignVCenter)
 
     def terminate_process(self):
         self.kill_callback(self.proc, self)
 
-from tkinterdnd2 import DND_FILES, TkinterDnD
 
-class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
+class LocksmithApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.TkdndVersion = TkinterDnD._require(self)
+        self.setWindowTitle("PyLocksmith - File Lock Manager")
+        self.resize(700, 600)
+        self.setAcceptDrops(True)
 
-        self.title("PyLocksmith - File Lock Manager")
-        self.geometry("700x600")
-        self.configure(fg_color=CP_BG)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        central = QWidget()
+        self.setCentralWidget(central)
+        root = QVBoxLayout(central)
+        root.setContentsMargins(20, 20, 20, 10)
+        root.setSpacing(10)
 
-        # Enable Drag and Drop
-        self.drop_target_register(DND_FILES)
-        self.dnd_bind('<<Drop>>', self.drop_data)
-
-        # Header
-        self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        self.header_frame.grid(row=0, column=0, padx=20, pady=(20, 10), sticky="ew")
-        
-        ctk.CTkLabel(self.header_frame, text="FILE LOCKSMITH", font=("Consolas", 28, "bold"), text_color=CP_YELLOW).pack(side="left")
-        
-        # Buttons Frame
-        self.btn_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
-        self.btn_frame.pack(side="right")
-
-        self.restart_btn = ctk.CTkButton(self.btn_frame, text="RESTART", font=("Consolas", 12, "bold"), 
-                                        fg_color=CP_DIM, hover_color=CP_CYAN, text_color="white", 
-                                        width=80, corner_radius=0, command=self.restart_app)
-        self.restart_btn.pack(side="right", padx=5)
-
+        header = QHBoxLayout()
+        title = QLabel("FILE LOCKSMITH")
+        title.setStyleSheet(f"color: {CP_YELLOW}; font-size: 28px; font-weight: bold;")
+        header.addWidget(title)
+        header.addStretch()
+        restart = QPushButton("RESTART")
+        restart.clicked.connect(self.restart_app)
+        header.addWidget(restart)
         if not self.is_admin():
-            self.admin_btn = ctk.CTkButton(self.btn_frame, text="ADMIN RESTART", font=("Consolas", 12, "bold"),
-                                          fg_color=CP_ORANGE, text_color="black", hover_color=CP_YELLOW, 
-                                          width=120, corner_radius=0, command=self.restart_admin)
-            self.admin_btn.pack(side="right", padx=5)
+            admin = QPushButton("ADMIN RESTART")
+            admin.setObjectName("admin")
+            admin.clicked.connect(self.restart_admin)
+            header.addWidget(admin)
+        root.addLayout(header)
 
-        # Search Area
-        self.search_frame = ctk.CTkFrame(self, fg_color=CP_PANEL, corner_radius=0, border_width=1, border_color=CP_DIM)
-        self.search_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+        search_panel = QFrame()
+        search_panel.setObjectName("panel")
+        search_layout = QHBoxLayout(search_panel)
+        search_layout.setContentsMargins(15, 10, 15, 10)
+        self.path_entry = QLineEdit()
+        self.path_entry.setPlaceholderText("Drag folder here or use Browse...")
+        search_layout.addWidget(self.path_entry, 1)
+        browse = QPushButton("BROWSE")
+        browse.clicked.connect(self.browse_path)
+        search_layout.addWidget(browse)
+        scan = QPushButton("SCAN LOCKS")
+        scan.clicked.connect(self.start_scan)
+        search_layout.addWidget(scan)
+        root.addWidget(search_panel)
 
-        self.path_entry = ctk.CTkEntry(self.search_frame, placeholder_text="Drag folder here or use Browse...", 
-                                       height=40, border_width=1, border_color=CP_DIM, fg_color=CP_BG, 
-                                       text_color=CP_CYAN, font=("Consolas", 12))
-        self.path_entry.pack(side="left", fill="x", expand=True, padx=(15, 10), pady=10)
-        
-        self.btn_browse = ctk.CTkButton(self.search_frame, text="BROWSE", font=("Consolas", 12, "bold"), 
-                                        width=80, command=self.browse_path, fg_color=CP_DIM, 
-                                        hover_color=CP_CYAN, corner_radius=0)
-        self.btn_browse.pack(side="left", padx=(0, 10), pady=10)
+        self.status_label = QLabel("SYSTEM READY")
+        self.status_label.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 12px;")
+        root.addWidget(self.status_label)
 
-        self.btn_scan = ctk.CTkButton(self.search_frame, text="SCAN LOCKS", font=("Consolas", 12, "bold"), 
-                                      width=100, command=self.start_scan, fg_color=CP_DIM, 
-                                      hover_color=CP_GREEN, corner_radius=0)
-        self.btn_scan.pack(side="left", padx=(0, 15), pady=10)
+        self.results_scroll = QScrollArea()
+        self.results_scroll.setWidgetResizable(True)
+        results = QWidget()
+        self.results_layout = QVBoxLayout(results)
+        self.results_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.results_scroll.setWidget(results)
+        root.addWidget(self.results_scroll, 1)
 
-        # status
-        self.status_label = ctk.CTkLabel(self, text="SYSTEM READY", font=("Consolas", 12), text_color=CP_SUBTEXT)
-        self.status_label.grid(row=3, column=0, padx=20, pady=5, sticky="w")
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
 
-        # Results Area
-        self.results_scroll = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        self.results_scroll.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
-
-    def drop_data(self, event):
-        data = event.data
-        if data.startswith('{') and data.endswith('}'):
-            data = data[1:-1]
-        self.path_entry.delete(0, "end")
-        self.path_entry.insert(0, data)
-        self.start_scan()
+    def dropEvent(self, event):
+        urls = event.mimeData().urls()
+        if urls:
+            self.path_entry.setText(urls[0].toLocalFile())
+            self.start_scan()
+        event.acceptProposedAction()
 
     def is_admin(self):
         try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
+            return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        except Exception:
             return False
 
     def restart_admin(self):
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-        sys.exit()
+        ctypes.windll.shell32.ShellExecuteW(
+            None, "runas", sys.executable, " ".join(sys.argv), None, 1
+        )
+        QApplication.quit()
 
     def restart_app(self):
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
+        os.execl(sys.executable, sys.executable, *sys.argv)
 
     def browse_path(self):
-        path = filedialog.askdirectory()
-        if not path: # Check for file if directory not picked
-            path = filedialog.askopenfilename()
-        
+        path = QFileDialog.getExistingDirectory(self, "Select folder")
+        if not path:
+            path, _ = QFileDialog.getOpenFileName(self, "Select file")
         if path:
-            self.path_entry.delete(0, "end")
-            self.path_entry.insert(0, path)
+            self.path_entry.setText(path)
+
+    def set_status(self, text, color):
+        self.status_label.setText(text)
+        self.status_label.setStyleSheet(f"color: {color}; font-size: 12px;")
+
+    def clear_results(self):
+        while self.results_layout.count():
+            item = self.results_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
 
     def start_scan(self):
-        target_path = self.path_entry.get()
+        target_path = self.path_entry.text().strip()
         if not target_path or not os.path.exists(target_path):
-            self.status_label.configure(text="INVALID PATH", text_color=CP_RED)
+            self.set_status("INVALID PATH", CP_RED)
             return
-
-        self.status_label.configure(text="SCANNING PROCESSES...", text_color=CP_CYAN)
-        for widget in self.results_scroll.winfo_children():
-            widget.destroy()
-
-        import queue
+        self.set_status("SCANNING PROCESSES...", CP_CYAN)
+        self.clear_results()
         self.scan_queue = queue.Queue()
-        
-        # Run scan in thread
-        threading.Thread(target=self.run_scan_thread, args=(target_path, self.scan_queue), daemon=True).start()
-        
-        # Start monitoring
-        self.check_scan_status()
+        threading.Thread(
+            target=self.run_scan_thread,
+            args=(target_path, self.scan_queue),
+            daemon=True,
+        ).start()
+        QTimer.singleShot(100, self.check_scan_status)
 
     def check_scan_status(self):
         try:
-            # Poll queue
             while True:
                 msg_type, data = self.scan_queue.get_nowait()
-                if msg_type == 'progress':
-                    self.status_label.configure(text=data.upper())
-                elif msg_type == 'done':
+                if msg_type == "progress":
+                    self.set_status(data.upper(), CP_CYAN)
+                elif msg_type == "done":
                     self.display_results(data)
-                    return # Stop polling
-        except:
-            pass # Queue empty
-        
-        self.after(100, self.check_scan_status)
+                    return
+        except queue.Empty:
+            pass
+        QTimer.singleShot(100, self.check_scan_status)
 
-    def run_scan_thread(self, target_path, q):
-        import time
+    def run_scan_thread(self, target_path, result_queue):
         target_path = os.path.abspath(target_path).lower()
         found_locks = []
-        
-        # Get all PIDs first to have a total count
         all_pids = list(psutil.pids())
         total = len(all_pids)
-        
-        # Common system PIDs to skip (System Idle, System)
-        skip_pids = {0, 4}
-
         for i, pid in enumerate(all_pids):
-            if pid in skip_pids:
+            if pid in {0, 4}:
                 continue
-
-            # Update progress fewer times to avoid queue spam
-            if i % 20 == 0: 
-                q.put(('progress', f"Scanning process {i}/{total}..."))
-                # minimal sleep just to be safe on CPU
-                time.sleep(0.001)
-
+            if i % 20 == 0:
+                result_queue.put(("progress", f"Scanning process {i}/{total}..."))
             try:
-                try:
-                    proc = psutil.Process(pid)
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-                
-                # Check attributes lightweight first
-                try:
-                    name = proc.name()
-                except:
-                    name = "???"
-
-                # Check CWD (Fast)
+                proc = psutil.Process(pid)
                 matched_file = None
                 try:
                     cwd = proc.cwd()
@@ -229,66 +293,56 @@ class LocksmithApp(ctk.CTk, TkinterDnD.DnDWrapper):
                         matched_file = cwd + " (Working Directory)"
                 except (psutil.AccessDenied, psutil.NoSuchProcess):
                     pass
-
-                # Check Open Files (Slow) - Only if not already found
                 if not matched_file:
                     try:
-                        open_files = proc.open_files()
-                        for f in open_files:
-                            if self.is_subpath(f.path, target_path):
-                                matched_file = f.path
+                        for opened in proc.open_files():
+                            if self.is_subpath(opened.path, target_path):
+                                matched_file = opened.path
                                 break
                     except (psutil.AccessDenied, psutil.NoSuchProcess):
                         pass
-                
                 if matched_file:
                     found_locks.append((proc, matched_file))
-
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                continue
             except Exception:
                 continue
+        result_queue.put(("done", found_locks))
 
-        q.put(('done', found_locks))
-
-    def is_subpath(self, path, target):
+    @staticmethod
+    def is_subpath(path, target):
         path = os.path.abspath(path).lower()
-        if path == target:
-            return True
-        if path.startswith(target + os.sep):
-            return True
-        return False
+        return path == target or path.startswith(target + os.sep)
 
     def display_results(self, locks):
         if not locks:
-            self.status_label.configure(text="NO LOCKS DETECTED", text_color=CP_RED)
-            lbl = ctk.CTkLabel(self.results_scroll, text="No processes found locking this file/folder.", 
-                               font=("Consolas", 16), text_color=CP_TEXT)
-            lbl.pack(pady=20)
+            self.set_status("NO LOCKS DETECTED", CP_RED)
+            label = QLabel("No processes found locking this file/folder.")
+            label.setStyleSheet(f"color: {CP_TEXT}; font-size: 16px;")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.results_layout.addWidget(label)
             return
-
-        self.status_label.configure(text=f"DETECTED {len(locks)} BLOCKING PROCESSES", text_color=CP_GREEN)
+        self.set_status(f"DETECTED {len(locks)} BLOCKING PROCESSES", CP_GREEN)
         for proc, file_path in locks:
-            item = ProcessItem(self.results_scroll, proc, file_path, self.confirm_kill)
+            self.results_layout.addWidget(ProcessItem(proc, file_path, self.confirm_kill))
 
     def confirm_kill(self, proc, item_widget):
         try:
-             name = proc.name()
-             proc.kill()
-             item_widget.destroy()
-             self.status_label.configure(text=f"TERMINATED {name.upper()}", text_color=CP_GREEN)
+            name = proc.name()
+            proc.kill()
+            item_widget.deleteLater()
+            self.set_status(f"TERMINATED {name.upper()}", CP_GREEN)
         except psutil.NoSuchProcess:
-            item_widget.destroy()
+            item_widget.deleteLater()
         except psutil.AccessDenied:
-            messagebox.showerror("Error", "Access Denied. Try running as Admin.")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+            QMessageBox.critical(self, "Error", "Access Denied. Try running as Admin.")
+        except Exception as exc:
+            QMessageBox.critical(self, "Error", str(exc))
+
 
 if __name__ == "__main__":
-    try:
-        print("Starting Locksmith App...")
-        app = LocksmithApp()
-        print("App initialized, entering mainloop...")
-        app.mainloop()
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        input("Press Enter to exit...")
+    app = QApplication(sys.argv)
+    app.setStyleSheet(APP_STYLE)
+    window = LocksmithApp()
+    window.show()
+    sys.exit(app.exec())
