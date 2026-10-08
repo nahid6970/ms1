@@ -13,6 +13,7 @@ Usage:
 
 import ast
 import hashlib
+import importlib.metadata
 import importlib.util
 import os
 import shutil
@@ -57,6 +58,30 @@ IMPORT_TO_PKG = {
     "sounddevice": "sounddevice",
     "soundfile": "soundfile",
     "numpy": "numpy",
+    # Common import-name/distribution-name mismatches.
+    "dateutil": "python-dateutil",
+    "jwt": "PyJWT",
+    "fitz": "PyMuPDF",
+    "skimage": "scikit-image",
+    "imageio": "imageio",
+    "lxml": "lxml",
+    "qrcode": "qrcode",
+    "pyperclip": "pyperclip",
+    "keyboard": "keyboard",
+    "mouse": "mouse",
+    "rapidfuzz": "RapidFuzz",
+    "openpyxl": "openpyxl",
+    "pandas": "pandas",
+    "matplotlib": "matplotlib",
+    "seaborn": "seaborn",
+    "flask": "Flask",
+    "fastapi": "fastapi",
+    "uvicorn": "uvicorn",
+    "httpx": "httpx",
+    "requests": "requests",
+    "rich": "rich",
+    "cryptography": "cryptography",
+    "nacl": "PyNaCl",
 }
 
 VERIFY_SUBMODULE = {
@@ -117,7 +142,22 @@ def is_used(module: str, tree: ast.AST, used_names: set[str]) -> bool:
 
 
 def resolve_pkg(module: str) -> str:
-    return IMPORT_TO_PKG.get(module, module)
+    """Resolve an import root to a PyPI distribution name.
+
+    Explicit aliases win. Metadata is useful for packages that are already
+    installed under a different distribution name; otherwise the import name
+    is the best installable fallback.
+    """
+    if module in IMPORT_TO_PKG:
+        return IMPORT_TO_PKG[module]
+    try:
+        distributions = importlib.metadata.packages_distributions()
+        matches = distributions.get(module, [])
+        if matches:
+            return sorted(matches, key=str.casefold)[0]
+    except Exception:
+        pass
+    return module
 
 
 def resolve_python_version(python_version: str | None = None) -> str:
@@ -304,16 +344,22 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
     installed_pkgs = []
     to_install = []
     for mod in sorted(third_party):
-        if is_used(mod, tree, used_names):
-            pkg = resolve_pkg(mod)
-            if sys.platform != "win32" and pkg in {"pywin32", "windows-curses", "pywinpty"}:
-                continue
-            if has_local_module(script_dir, mod) or (
-                isolated and probe_module_installed(target_python, mod)
-            ) or (not isolated and is_installed(mod, script_dir)):
-                installed_pkgs.append(pkg)
-            else:
-                to_install.append(pkg)
+        # Every import is a dependency, even when it is imported only for
+        # registration/side effects. Filtering on later name usage caused
+        # false negatives for aliases, decorators, callbacks, and plugins.
+        pkg = resolve_pkg(mod)
+        if sys.platform != "win32" and pkg in {"pywin32", "windows-curses", "pywinpty"}:
+            continue
+        if has_local_module(script_dir, mod) or (
+            isolated and probe_module_installed(target_python, mod)
+        ) or (not isolated and is_installed(mod, script_dir)):
+            installed_pkgs.append(pkg)
+        else:
+            to_install.append(pkg)
+
+    # A script may import two names provided by the same distribution.
+    installed_pkgs = sorted(set(installed_pkgs), key=str.casefold)
+    to_install = sorted(set(to_install), key=str.casefold)
 
     if installed_pkgs:
         print(f"\n[+] Installed dependencies for {os.path.basename(script_path)}:")
