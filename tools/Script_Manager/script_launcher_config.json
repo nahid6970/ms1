@@ -1966,7 +1966,8 @@
                     "_runtime_is_italic": false,
                     "text_align": "left",
                     "color": "#00557f",
-                    "transparent_bg": true
+                    "transparent_bg": true,
+                    "_runtime_text_align": "left"
                 },
                 {
                     "name": "5016 - Sync W Android",
@@ -5562,7 +5563,7 @@
                     "border_width": 0,
                     "col_span": 1,
                     "corner_radius": 0,
-                    "ctrl_left_cmd": "",
+                    "ctrl_left_cmd": "explorer \"{dir}\"",
                     "ctrl_right_cmd": "",
                     "font_family": "JetBrainsMono Nerd Font Propo",
                     "font_size": 14,
@@ -5582,13 +5583,22 @@
                     "name": "Tray <br> Manager",
                     "new_terminal": true,
                     "nf_char": "",
-                    "path": "C:/@delta/ms1/Tray_Manager.py",
+                    "path": "C:\\@delta\\ms1\\tools\\tray_manager\\Tray_Manager.py",
                     "require_password": false,
                     "row_span": 1,
                     "run_admin": false,
                     "type": "script",
                     "use_inline": false,
-                    "width": 0
+                    "width": 0,
+                    "tags": [],
+                    "use_multi_block": false,
+                    "inline_blocks": [],
+                    "edit_on_click": false,
+                    "text_align": "center",
+                    "auto_wrap": false,
+                    "transparent_bg": false,
+                    "hover_transparent_bg": false,
+                    "_runtime_text_align": "left"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",

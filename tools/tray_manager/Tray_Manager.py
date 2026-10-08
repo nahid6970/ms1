@@ -1,9 +1,59 @@
+"""Qt and system-tray manager for local services."""
+from __future__ import annotations
+
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "Pillow",
+#     "PyQt6",
+#     "pystray",
+# ]
+# ///
+
+import importlib.util
 import sys
 import os
 import json
 import subprocess
+import shutil
 import threading
 import time
+
+
+DEPENDENCIES = (
+    ("PIL", "Pillow"),
+    ("PyQt6", "PyQt6"),
+    ("pystray", "pystray"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
 
 from PIL import Image, ImageDraw
 import pystray
