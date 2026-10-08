@@ -5,6 +5,48 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-08] - Git Case-Rename Detection and Fix
+
+### Problem
+On Windows, git defaults to `core.ignoreCase = true`. When you rename a folder by case only (e.g. `TOOLS` → `tools`), git silently ignores the change — it never appears in `git status`, so the rename never gets committed.
+
+### What We Built
+A warning banner that automatically appears at the top of the git modal when case-sensitivity issues are detected, with a one-click Fix Now button.
+
+### Backend — `app.py`
+Two new routes added after `suggest-commit`:
+
+- **`GET /api/project/<project>/git/ignorecase-check`** — checks if `core.ignoreCase` is `true` for the repo; if so, scans the index with `git ls-files` and compares each path component against the actual filesystem to detect case-only mismatches. Returns `{ ignorecase, renames: [{old, new}, ...] }`. Deduplicates to directory-level renames.
+- **`POST /api/project/<project>/git/fix-case-renames`** — sets `core.ignoreCase false` via `git config`, then runs `git add -A` to re-index all files so case renames are picked up. Invalidates git status cache. Returns staged file count.
+
+### Frontend — `templates/index.html`
+
+**Banner HTML** (`id="git-case-rename-banner"`):
+- Hidden by default, inserted right after the modal header.
+- Yellow-accented (`#fbbf24`) warning style.
+- Shows detected rename pairs, e.g. `TOOLS → tools`.
+- Contains Fix Now button (`id="git-case-rename-fix-btn"`).
+
+**JS — `checkGitCaseRenames()`:**
+- Called on every git modal open, right after the modal becomes visible.
+- Hides banner first, then fetches `/git/ignorecase-check` async.
+- If `ignorecase=true` + renames detected: shows banner with rename list.
+- If `ignorecase=true` but no renames yet: shows softer notice about case tracking being disabled.
+- If `ignorecase=false`: stays hidden (all good).
+
+**JS — `fixGitCaseRenames()`:**
+- Called by the Fix Now button.
+- Shows a spinning loader on the button while POSTing to `/git/fix-case-renames`.
+- On success: shows green ✓ confirmation, hides banner after 1.5 s, then calls `openGitCommitModal()` to refresh the file list so newly staged renames appear.
+- On error: shows red error message, re-enables button.
+
+**Files Modified:**
+- `app.py` — `api_git_ignorecase_check`, `api_git_fix_case_renames`
+- `templates/index.html` — banner HTML, `checkGitCaseRenames()`, `fixGitCaseRenames()`, `openGitCommitModal()` call
+- `md/RECENT.md`
+
+---
+
 ## [2026-10-05] - Code Merger Integration
 
 ### What We Built

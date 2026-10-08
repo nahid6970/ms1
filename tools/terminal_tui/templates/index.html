@@ -9141,6 +9141,11 @@
             modal.classList.add('show');
             msgEl.focus();
 
+            // Hide case-rename banner initially, then check async
+            const caseBanner = document.getElementById('git-case-rename-banner');
+            if (caseBanner) caseBanner.style.display = 'none';
+            checkGitCaseRenames();
+
             // Fetch changed files
             try {
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/files`);
@@ -9188,6 +9193,79 @@
                 }
             } catch (e) {
                 filesEl.innerHTML = '<div style="padding: 10px 14px; color: #ef4444; font-size: 0.8rem;">Error loading files.</div>';
+            }
+        }
+
+        // ── Git Case-Rename Detection ─────────────────────────────────────────
+        async function checkGitCaseRenames() {
+            if (!activeProject) return;
+            const banner = document.getElementById('git-case-rename-banner');
+            const details = document.getElementById('git-case-rename-details');
+            const btn = document.getElementById('git-case-rename-fix-btn');
+            if (!banner || !details || !btn) return;
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/ignorecase-check`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.ignorecase && data.renames && data.renames.length > 0) {
+                        // Show warning with detected renames
+                        const renameList = data.renames.map(r => `<b>${r.old}</b> → <b>${r.new}</b>`).join(', ');
+                        details.innerHTML = `Git is ignoring case-only renames: ${renameList}. Click Fix Now to resolve.`;
+                        banner.style.display = 'block';
+                    } else if (data.ignorecase) {
+                        // ignoreCase=true but no renames detected yet
+                        details.innerHTML = 'Git is configured to ignore case. If you renamed folders/files by case only, changes won\'t appear. Click Fix Now to enable case-sensitive tracking.';
+                        banner.style.display = 'block';
+                    } else {
+                        // ignoreCase=false, all good
+                        banner.style.display = 'none';
+                    }
+                } else {
+                    banner.style.display = 'none';
+                }
+            } catch (e) {
+                banner.style.display = 'none';
+            }
+        }
+
+        async function fixGitCaseRenames() {
+            if (!activeProject) return;
+            const btn = document.getElementById('git-case-rename-fix-btn');
+            const banner = document.getElementById('git-case-rename-banner');
+            const details = document.getElementById('git-case-rename-details');
+            if (!btn || !banner || !details) return;
+
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" opacity="0.25"/><path d="M12 2 a10 10 0 0 1 10 10" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/></path></svg> Fixing...';
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/fix-case-renames`, { method: 'POST' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        details.innerHTML = `<span style="color:#10b981;">✓ Fixed!</span> ${data.message}`;
+                        setTimeout(() => {
+                            banner.style.display = 'none';
+                            // Refresh git files list
+                            openGitCommitModal();
+                        }, 1500);
+                    } else {
+                        details.innerHTML = `<span style="color:#ef4444;">Error:</span> ${data.error || 'Unknown error'}`;
+                        btn.disabled = false;
+                        btn.innerHTML = originalHTML;
+                    }
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    details.innerHTML = `<span style="color:#ef4444;">Error:</span> ${err.error || 'Failed to fix'}`;
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
+            } catch (e) {
+                details.innerHTML = `<span style="color:#ef4444;">Error:</span> ${e.message}`;
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
             }
         }
 
