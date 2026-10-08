@@ -42,6 +42,8 @@ IMPORT_TO_PKG = {
     "pyadl": "pyadl",
     "win32api": "pywin32",
     "win32con": "pywin32",
+    "win32com": "pywin32",
+    "win32clipboard": "pywin32",
     "win32gui": "pywin32",
     "win32process": "pywin32",
     "win32pipe": "pywin32",
@@ -124,7 +126,24 @@ def resolve_python_version(python_version: str | None = None) -> str:
 
 def ensure_uv_available() -> None:
     if shutil.which("uv") is None:
-        raise RuntimeError("uv was not found on PATH. Install uv first, then rerun the script.")
+        raise RuntimeError("uv was not found on PATH.")
+
+
+def install_command(target_python: str, packages: list[str], isolated: bool) -> list[str]:
+    """Return the safest installer command for the requested target interpreter."""
+    uv = shutil.which("uv")
+    if uv:
+        # Supplying --python avoids accidentally installing into a different
+        # Python selected by the current shell or an active virtualenv.
+        return [uv, "pip", "install", "--python", target_python, *packages]
+
+    if isolated:
+        raise RuntimeError(
+            "uv is required for isolated environments. Install uv or run without --isolated."
+        )
+
+    # Keep the non-isolated mode usable on machines that only have Python/pip.
+    return [target_python, "-m", "pip", "install", *packages]
 
 
 def has_visible_console() -> bool:
@@ -277,7 +296,10 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
 
     imported = get_imported_names(tree)
     used_names = get_used_names(tree)
-    third_party = {m for m in imported if m not in STDLIB and m != "install_deps"}
+    third_party = {
+        m for m in imported
+        if m not in STDLIB and m not in {"__future__", "install_deps"}
+    }
 
     installed_pkgs = []
     to_install = []
@@ -327,10 +349,12 @@ def bootstrap(script_path: str, python_version: str | None = None, isolated: boo
     print("")
     if isolated:
         print(f"  installing into isolated Python {requested_python} at: {target_python}")
-        subprocess.run(["uv", "pip", "install", "--python", target_python, *to_install], check=True)
     else:
         print(f"  installing into current Python at: {target_python}")
-        subprocess.run(["uv", "pip", "install", "--system", *to_install], check=True)
+
+    command = install_command(target_python, to_install, isolated)
+    print(f"  installer: {command[0]}")
+    subprocess.run(command, check=True)
 
     if isolated:
         print("\n[!] Dependencies installed. Restarting script...\n")
