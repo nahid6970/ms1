@@ -5,6 +5,34 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-08] - Fix Git Exclude Patterns Not Applied to Status Bar
+
+### Problem
+The git-exclude patterns (set via the ⊘ Exclude button in the git modal) only filtered the *display* of files inside the modal's file list (frontend JS). The status bar's file count, +insertions, and -deletions came from `_get_git_status_uncached` on the backend which had no knowledge of the exclude list — it ran raw `git status` and `git diff` against the full project path.
+
+### Fix
+- `_get_git_status_uncached` in `app.py`: loads `git_exclude_patterns` from config and converts each pattern to a `:(exclude,icase)**/pattern` git pathspec appended after the main pathspec in both `git status --porcelain` and `git diff --shortstat` calls. Status bar now ignores excluded files.
+- `api_git_changed_files` (modal file list) intentionally left unchanged — excluded files still appear in the modal, unchecked, so the user can still see and selectively stage them.
+- `api_post_git_exclude_patterns`: invalidates the git status cache for all projects immediately when patterns are saved, so the status bar reflects changes on the next poll rather than waiting 30 s.
+
+**Files Modified:**
+- `app.py` — `_get_git_status_uncached`, `api_post_git_exclude_patterns`
+- `md/RECENT.md`, `md/PROBLEMS_AND_FIXES.md`
+
+---
+
+## [2026-10-08] - Restart/Refresh Menu SVG Icons
+
+Replaced the plain unicode `↻` and `⟳` characters in the restart/refresh dropdown menu with proper inline SVGs:
+- **Restart app** — arrow-into-itself restart icon (consistent with the toggle button's existing SVG).
+- **Refresh page** — double circular-arrow sync icon (visually distinct from restart).
+Both buttons also gained a subtle hover highlight (`rgba(255,255,255,0.06)`).
+
+**Files Modified:**
+- `templates/index.html` — restart menu button HTML
+
+---
+
 ## [2026-10-08] - Git Stash Manager + Terminal Explain Selection
 
 ### Feature 4 — Git Stash Manager (git modal)

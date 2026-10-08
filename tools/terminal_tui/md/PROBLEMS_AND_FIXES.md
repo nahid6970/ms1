@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-08] - Git Exclude Patterns Not Reflected in Status Bar
+**Problem:** Files added to the git modal's ⊘ Exclude list still counted toward the status bar's file-changed count, +insertions, and -deletions. The exclude patterns only filtered the modal's file list display (frontend JS) — the backend `_get_git_status_uncached` had no knowledge of them.
+**Root Cause:** `_get_git_status_uncached` passed only the project pathspec to `git status --porcelain` and `git diff --shortstat`, never reading the saved `git_exclude_patterns` config.
+**Solution:** Load `git_exclude_patterns` from config in `_get_git_status_uncached` and append `:(exclude,icase)**/pattern` pathspecs to both git calls. Also invalidate the git status cache for all projects in `api_post_git_exclude_patterns` so the status bar updates immediately when patterns change. The modal's `api_git_changed_files` route is intentionally left unfiltered so excluded files still appear unchecked in the modal.
+**Files Modified:** `app.py`
+
+---
+
 ## [2026-10-04] - Pasted Image Paths Sent with Literal Quote Characters
 **Problem:** Pasting an image (clipboard image, drag-drop, or screenshot upload) into any AI CLI tool (Kiro, Gemini, Codex) sent the path wrapped in double quotes, e.g. `"C:/Users/.../pasted_image.png"`. The quotes appeared as literal characters in the tool's input rather than acting as shell quoting.
 **Root Cause:** All four paste code paths used `` `"${result.path}"` `` to wrap the returned path — intended for PowerShell/CMD shell safety — but `paneTerm.paste()` and the `/input/` PTY write both pass text verbatim, so the `"` characters became part of the string received by the AI tool.
