@@ -1,12 +1,64 @@
-import sys, os
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path:
-  sys.path.append(UTILITY_PATH)
-import install_deps
-install_deps.bootstrap(__file__, python_version="3.12", isolated=False)
+"""Web-based terminal TUI application."""
+from __future__ import annotations
 
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "Flask",
+#     "Flask-SocketIO",
+#     "PyAudio",
+#     "SpeechRecognition",
+#     "psutil",
+#     "pywinpty",
+#     "requests",
+# ]
+# ///
+
+import importlib.util
 import os
+import shutil
+import subprocess
 import sys
+
+
+DEPENDENCIES = (
+    ("flask", "Flask"),
+    ("flask_socketio", "Flask-SocketIO"),
+    ("pyaudio", "PyAudio"),
+    ("psutil", "psutil"),
+    ("requests", "requests"),
+    ("speech_recognition", "SpeechRecognition"),
+    ("winpty", "pywinpty"),
+)
+
+
+def ensure_dependencies() -> None:
+    """Install missing packages into the interpreter running this script."""
+    missing = sorted({
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    })
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except (OSError, subprocess.CalledProcessError) as exc:
+        packages = ", ".join(missing)
+        raise RuntimeError(
+            f"Dependency installation failed for {packages} "
+            f"using interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
 
 # Redirect stdout and stderr when running windowless (e.g., with pythonw.exe)
 # to prevent silent crashes from print() or logging calls.
