@@ -35,6 +35,62 @@ function toggleArchivedView() {
     document.getElementById('navShowsArchived').classList.toggle('active-item', isArchived);
 }
 
+let showFilterState = JSON.parse(localStorage.getItem('showLibraryFilters') || '{}');
+
+function toggleFilterMenu(event) {
+    event?.stopPropagation();
+    const menu = document.getElementById('filterMenuDropdown');
+    const button = document.querySelector('.filter-menu-button');
+    if (!menu) return;
+    menu.classList.toggle('show');
+    button?.classList.toggle('active', menu.classList.contains('show'));
+    button?.setAttribute('aria-expanded', menu.classList.contains('show'));
+}
+
+function closeFilterMenu() {
+    document.getElementById('filterMenuDropdown')?.classList.remove('show');
+    const button = document.querySelector('.filter-menu-button');
+    button?.classList.remove('active');
+    button?.setAttribute('aria-expanded', 'false');
+}
+
+function updateShowFilterUi() {
+    document.querySelectorAll('[data-filter]').forEach(input => { input.checked = !!showFilterState[input.dataset.filter]; });
+    const count = Object.values(showFilterState).filter(Boolean).length;
+    const badge = document.getElementById('filterCount');
+    if (badge) { badge.textContent = count; badge.hidden = !count; }
+}
+
+function applyShowFilters(query) {
+    const searchQuery = String(query ?? document.querySelector('.search-form input[name="query"]')?.value ?? '').toLowerCase().trim();
+    const normalize = str => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+    const words = normalize(searchQuery).split(/\s+/).filter(Boolean);
+    document.querySelectorAll('.show-card').forEach(card => {
+        const haystack = `${normalize(card.dataset.title || '')} ${normalize(card.dataset.year || '')}`;
+        const matchesSearch = !searchQuery || words.every(word => haystack.includes(word));
+        const status = (card.dataset.status || '').toLowerCase();
+        const watched = Number(card.dataset.watchedCount || 0) >= Number(card.dataset.releasedCount || 0) && Number(card.dataset.releasedCount || 0) > 0;
+        const endedCompleted = status === 'ended' && Number(card.dataset.watchedTotalCount || 0) === Number(card.dataset.totalCount || 0) && Number(card.dataset.totalCount || 0) > 0;
+        const released = Number(card.dataset.releasedCount || 0) > 0;
+        const matchesFilters = (!showFilterState.hideCompleted || (!watched && !endedCompleted))
+            && (!showFilterState.hideArchived || card.dataset.archived !== 'true')
+            && (!showFilterState.onlyContinuing || status !== 'ended')
+            && (!showFilterState.onlyEnded || status === 'ended')
+            && (!showFilterState.onlyReleased || released);
+        card.classList.toggle('filter-hidden', !(matchesSearch && matchesFilters));
+        card.style.display = matchesSearch ? (searchQuery ? 'flex' : '') : 'none';
+    });
+    const searchClear = document.getElementById('searchClear');
+    if (searchClear) searchClear.style.display = searchQuery ? 'block' : 'none';
+}
+
+function resetLibraryFilters() {
+    showFilterState = {};
+    localStorage.removeItem('showLibraryFilters');
+    updateShowFilterUi();
+    applyShowFilters();
+}
+
 async function openEditShowModal(showId) {
     const response = await fetch(`/edit_show/${showId}`);
     const show = await response.json();
@@ -1145,35 +1201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.querySelector('.search-form input[name="query"]');
     const searchClear = document.getElementById('searchClear');
 
-    function filterShows(query) {
-        const showCards = document.querySelectorAll('.show-card');
-        query = query.toLowerCase().trim();
-
-        // Normalize: strip punctuation, split into words
-        const normalize = str => str.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
-        const words = normalize(query).split(/\s+/).filter(Boolean);
-
-        showCards.forEach(card => {
-            const title = normalize(card.getAttribute('data-title') || '');
-            const year = normalize(card.getAttribute('data-year') || '');
-            const haystack = title + ' ' + year;
-
-            const matches = query === '' || words.every(w => haystack.includes(w));
-
-            if (query === '') {
-                card.style.display = '';
-            } else if (matches) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (searchClear) {
-            searchClear.style.display = query.length > 0 ? 'block' : 'none';
-        }
-    }
-
     if (searchInput) {
         // Initial check for clear button visibility (e.g. on page reload with query)
         if (searchClear) {
@@ -1181,17 +1208,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         searchInput.addEventListener('input', function(e) {
-            filterShows(e.target.value);
+            applyShowFilters(e.target.value);
         });
 
         if (searchClear) {
             searchClear.addEventListener('click', function() {
                 searchInput.value = '';
-                filterShows('');
+                applyShowFilters('');
                 searchInput.focus();
             });
         }
     }
+
+    updateShowFilterUi();
+    document.querySelectorAll('[data-filter]').forEach(input => input.addEventListener('change', () => {
+        showFilterState[input.dataset.filter] = input.checked;
+        localStorage.setItem('showLibraryFilters', JSON.stringify(showFilterState));
+        updateShowFilterUi();
+        applyShowFilters();
+    }));
+    applyShowFilters();
 
     // Add click listener for show cards
     document.querySelectorAll('.show-card').forEach(card => {
@@ -1563,6 +1599,8 @@ document.addEventListener('click', function(event) {
             button.classList.remove('active');
         }
     }
+    const filterContainer = document.querySelector('.filter-menu-container');
+    if (filterContainer && !filterContainer.contains(event.target)) closeFilterMenu();
     // Close shows nav dropdown on outside click
     const showsNavDropdown = document.getElementById('showsNavDropdown');
     if (showsNavDropdown && !showsNavDropdown.contains(event.target)) {

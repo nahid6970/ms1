@@ -76,6 +76,20 @@
                     </a>
                 </div>
             </div>
+            <div class="filter-menu-container">
+                <button class="add-button filter-menu-button" onclick="toggleFilterMenu(event)" title="Filter shows" aria-label="Filter shows" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+                    <span class="filter-count" id="filterCount" hidden>0</span>
+                </button>
+                <div class="filter-menu-dropdown" id="filterMenuDropdown" role="dialog" aria-label="Show filters">
+                    <div class="filter-menu-header"><strong>Filter shows</strong><button type="button" onclick="resetLibraryFilters()">Reset</button></div>
+                    <label class="filter-option"><input type="checkbox" data-filter="hideCompleted"><span>Hide watched / completed</span></label>
+                    <label class="filter-option"><input type="checkbox" data-filter="hideArchived"><span>Hide archived</span></label>
+                    <label class="filter-option"><input type="checkbox" data-filter="onlyContinuing"><span>Only continuing</span></label>
+                    <label class="filter-option"><input type="checkbox" data-filter="onlyEnded"><span>Only ended</span></label>
+                    <label class="filter-option"><input type="checkbox" data-filter="onlyReleased"><span>Only with released episodes</span></label>
+                </div>
+            </div>
             <button onclick="openSettingsModal()" class="add-button settings-button" title="Settings">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
@@ -86,7 +100,7 @@
 
     <div class="show-grid">
         {% for show in shows %}
-            <div class="show-card{% if show.watched_count >= show.released_count and show.released_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_total_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}{% if show.archived %} archived{% endif %}" data-show-id="{{ show.id }}" data-title="{{ show.title }}" data-year="{{ show.year }}" data-status="{{ show.status or 'Continuing' }}" data-released-count="{{ show.released_count }}">
+            <div class="show-card{% if show.watched_count >= show.released_count and show.released_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_total_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}{% if show.archived %} archived{% endif %}" data-show-id="{{ show.id }}" data-title="{{ show.title }}" data-year="{{ show.year }}" data-status="{{ show.status or 'Continuing' }}" data-released-count="{{ show.released_count }}" data-watched-count="{{ show.watched_count }}" data-watched-total-count="{{ show.watched_total_count }}" data-total-count="{{ show.total_count }}" data-archived="{{ 'true' if show.archived else 'false' }}">
                 <div class="library-card-title" title="{{ show.title }}">{{ show.title }}</div>
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">

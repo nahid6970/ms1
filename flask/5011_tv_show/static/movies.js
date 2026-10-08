@@ -9,6 +9,82 @@ function closeMoviesNavDropdown() {
     const menu = document.getElementById('moviesNavMenu');
     if (menu) menu.classList.remove('show');
 }
+
+let movieFilterState = JSON.parse(localStorage.getItem('movieLibraryFilters') || '{}');
+
+function toggleMovieFilterMenu(event) {
+    event?.stopPropagation();
+    const menu = document.getElementById('movieFilterMenuDropdown');
+    const button = document.querySelector('.filter-menu-button');
+    if (!menu) return;
+    menu.classList.toggle('show');
+    button?.classList.toggle('active', menu.classList.contains('show'));
+    button?.setAttribute('aria-expanded', menu.classList.contains('show'));
+}
+
+function closeMovieFilterMenu() {
+    document.getElementById('movieFilterMenuDropdown')?.classList.remove('show');
+    document.querySelector('.filter-menu-button')?.classList.remove('active');
+}
+
+function updateMovieFilterUi() {
+    document.querySelectorAll('[data-movie-filter]').forEach(input => { input.checked = !!movieFilterState[input.dataset.movieFilter]; });
+    const category = document.getElementById('movieCategoryFilter');
+    if (category) category.value = movieFilterState.category || '';
+    const count = Object.entries(movieFilterState).filter(([key, value]) => key !== 'category' ? !!value : !!value).length;
+    const badge = document.getElementById('movieFilterCount');
+    if (badge) { badge.textContent = count; badge.hidden = !count; }
+}
+
+function applyMovieFilters(query) {
+    const searchQuery = String(query ?? document.getElementById('movieSearch')?.value ?? '').toLowerCase().trim();
+    document.querySelectorAll('.movie-card').forEach(card => {
+        const title = (card.dataset.title || '').toLowerCase();
+        const year = (card.dataset.year || '').toLowerCase();
+        const matchesSearch = !searchQuery || title.includes(searchQuery) || year.includes(searchQuery);
+        const hasDigital = !!card.dataset.digitalRelease;
+        const matchesFilters = (!movieFilterState.hideWatched || card.dataset.watched !== 'true')
+            && (!movieFilterState.hideArchived || card.dataset.archived !== 'true')
+            && (!movieFilterState.onlyDigital || hasDigital)
+            && (!movieFilterState.onlyPendingDigital || !hasDigital)
+            && (!movieFilterState.category || (card.dataset.category || '') === movieFilterState.category);
+        card.classList.toggle('filter-hidden', !(matchesSearch && matchesFilters));
+        card.style.display = matchesSearch ? (searchQuery ? 'flex' : '') : 'none';
+    });
+    const searchClear = document.getElementById('movieSearchClear');
+    if (searchClear) searchClear.style.display = searchQuery ? 'block' : 'none';
+}
+
+function resetMovieFilters() {
+    movieFilterState = {};
+    localStorage.removeItem('movieLibraryFilters');
+    updateMovieFilterUi();
+    applyMovieFilters();
+}
+
+function initializeMovieFilters() {
+    const category = document.getElementById('movieCategoryFilter');
+    if (category) {
+        [...new Set([...document.querySelectorAll('.movie-card')].map(card => card.dataset.category).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b))
+            .forEach(value => category.insertAdjacentHTML('beforeend', `<option value="${value.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${value}</option>`));
+        category.addEventListener('change', () => {
+            movieFilterState.category = category.value;
+            if (!category.value) delete movieFilterState.category;
+            localStorage.setItem('movieLibraryFilters', JSON.stringify(movieFilterState));
+            updateMovieFilterUi();
+            applyMovieFilters();
+        });
+    }
+    document.querySelectorAll('[data-movie-filter]').forEach(input => input.addEventListener('change', () => {
+        movieFilterState[input.dataset.movieFilter] = input.checked;
+        localStorage.setItem('movieLibraryFilters', JSON.stringify(movieFilterState));
+        updateMovieFilterUi();
+        applyMovieFilters();
+    }));
+    updateMovieFilterUi();
+    applyMovieFilters();
+}
 function openAddMovieModal() {
     document.getElementById('addMovieModal').style.display = 'block';
     document.body.classList.add('modal-open');
@@ -110,6 +186,7 @@ async function toggleMovieWatched(movieId, btn) {
         const data = await response.json();
         if (data.success) {
             const card = btn.closest('.movie-card');
+            card.dataset.watched = data.watched ? 'true' : 'false';
             const statusEl = card.querySelector('.movie-status');
             if (data.watched) {
                 card.classList.add('completed');
@@ -139,6 +216,7 @@ async function toggleMovieArchive(movieId, btn) {
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to update archive state');
         const card = btn.closest('.movie-card');
         if (!card) return;
+        card.dataset.archived = data.archived ? 'true' : 'false';
         btn.title = data.archived ? 'Unarchive movie' : 'Archive movie';
         btn.setAttribute('aria-label', btn.title);
         const view = new URLSearchParams(window.location.search).get('view') || 'all';
@@ -354,41 +432,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('movieSearch');
     const searchClear = document.getElementById('movieSearchClear');
 
-    function filterMovies(query) {
-        query = query.toLowerCase().trim();
-        document.querySelectorAll('.movie-card').forEach(card => {
-            const title = (card.getAttribute('data-title') || '').toLowerCase();
-            const year = (card.getAttribute('data-year') || '').toLowerCase();
-            if (title.includes(query) || year.includes(query)) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (searchClear) {
-            searchClear.style.display = query.length > 0 ? 'block' : 'none';
-        }
-    }
-
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
-            filterMovies(e.target.value);
+            applyMovieFilters(e.target.value);
         });
     }
 
     if (searchClear) {
         searchClear.addEventListener('click', function() {
             searchInput.value = '';
-            filterMovies('');
+            applyMovieFilters('');
             searchInput.focus();
         });
     }
+
+    initializeMovieFilters();
 
     // Close movie modals when clicking outside
     document.addEventListener('click', (event) => {
         const moviesNav = document.getElementById('moviesNavDropdown');
         if (moviesNav && !moviesNav.contains(event.target)) closeMoviesNavDropdown();
+        const filterContainer = document.querySelector('.filter-menu-container');
+        if (filterContainer && !filterContainer.contains(event.target)) closeMovieFilterMenu();
         const addMovieModal = document.getElementById('addMovieModal');
         const editMovieModal = document.getElementById('editMovieModal');
         const movieMetadataModal = document.getElementById('movieMetadataModal');
