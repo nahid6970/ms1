@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-10] - File Explorer Path Paste Silently Broken on HTTP
+**Problem:** Clicking a file in the workspace file explorer did nothing — path was not pasted into the terminal and the filename didn't flash green.
+**Root Cause:** `navigator.clipboard.writeText()` throws `TypeError: Cannot read properties of undefined (reading 'writeText')` on HTTP (non-localhost) because `navigator.clipboard` is `undefined` on insecure origins. This uncaught exception killed the onclick handler before `term.paste()` was reached. A secondary issue was that the handler still used the old `socket.emit('pty-input')` direct emit instead of `term.paste()`, which could silently drop on a momentarily disconnected socket.
+**Solution:** Wrapped `navigator.clipboard.writeText()` in `try/catch`. Replaced direct `socket.emit` with `term.paste(relativePath)` to match all other paste paths.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-10-08] - Git Exclude Patterns Not Reflected in Status Bar
 **Problem:** Files added to the git modal's ⊘ Exclude list still counted toward the status bar's file-changed count, +insertions, and -deletions. The exclude patterns only filtered the modal's file list display (frontend JS) — the backend `_get_git_status_uncached` had no knowledge of them.
 **Root Cause:** `_get_git_status_uncached` passed only the project pathspec to `git status --porcelain` and `git diff --shortstat`, never reading the saved `git_exclude_patterns` config.

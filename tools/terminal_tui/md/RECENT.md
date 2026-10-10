@@ -5,6 +5,45 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-10] - Fix File Explorer Path Paste + Missing Workspace Folder Dialog
+
+### Fix 1 — File Explorer Path Paste Broken
+
+**Problem:** Clicking a file in the workspace file explorer sidebar no longer pasted the path into the active terminal.
+
+**Root Cause:** Two compounding issues:
+1. The file click handler was using the old `socket.emit('pty-input', ...)` direct PTY write approach. After the `[2026-10-01]` paste refactor, all other paste paths moved to `paneTerm.paste()` via xterm.js `onData`. The direct emit could silently fail if `socket.connected` was momentarily false.
+2. `navigator.clipboard.writeText(relativePath)` throws a `TypeError` on HTTP (non-localhost) because `navigator.clipboard` is `undefined` on insecure origins. This uncaught exception killed the entire onclick before `term.paste()` was ever reached.
+
+**Fix:**
+- Replaced `socket.emit('pty-input', ...)` with `term.paste(relativePath)` — consistent with all other paste paths.
+- Wrapped `navigator.clipboard.writeText()` in `try/catch` so clipboard failures (HTTP, permissions denied) never block the terminal paste.
+
+**Files Modified:** `templates/index.html` — `renderFileTreeItems` file onclick handler
+
+---
+
+### Fix 2 — Missing Workspace Folder Dialog
+
+**Feature:** When clicking a workspace whose folder has been deleted from disk, instead of silently failing to connect, a dialog now appears with two options:
+- **📁 Recreate** — creates the missing directory via backend, then connects normally.
+- **🗑 Delete** — removes the workspace entry from the list (folder is not touched).
+- **Cancel** — dismisses without action.
+
+**Backend (`app.py`):**
+- `GET /api/project/<project>/path-check` — returns `{ exists: bool, path: str }`.
+- `POST /api/project/<project>/recreate-path` — creates the directory with `os.makedirs`.
+
+**Frontend (`templates/index.html`):**
+- `showMissingPathDialog(projectName, missingPath)` — styled modal dialog, returns a Promise resolving to `'recreated'`, `'removed'`, or `'cancel'`.
+- `selectProject()` — calls `path-check` before `restoreTerminalLayout`; shows the dialog if path is missing; only proceeds to connect if result is `'recreated'`.
+
+**Files Modified:**
+- `app.py` — two new routes after `api_projects_delete`
+- `templates/index.html` — `showMissingPathDialog()`, `selectProject()` guard
+
+---
+
 ## [2026-10-08] - Fix Git Exclude Patterns Not Applied to Status Bar
 
 ### Problem
