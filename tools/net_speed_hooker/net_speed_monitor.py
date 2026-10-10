@@ -1,13 +1,55 @@
-import sys
+"""Network speed monitor with direct-launch dependency setup."""
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["psutil", "PyQt6", "scapy"]
+# ///
+
+import importlib.util
 import os
-import psutil
+import shutil
 import socket
+import subprocess
+import sys
 import threading
 import time
 import json
 from datetime import datetime
+
+DEPENDENCIES = (
+    ("psutil", "psutil"),
+    ("PyQt6", "PyQt6"),
+    ("scapy", "scapy"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"Could not install dependencies {', '.join(missing)} "
+            f"for interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
+import psutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, 
+                             QLabel, QPushButton, QTreeWidget, QTreeWidgetItem,
                              QHeaderView, QGroupBox, QFrame, QDialog, QSpinBox, QFormLayout,
                              QScrollArea, QComboBox, QCheckBox, QStyledItemDelegate, QStyle,
                              QColorDialog, QSlider)

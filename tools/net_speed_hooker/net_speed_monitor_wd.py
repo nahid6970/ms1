@@ -1,15 +1,55 @@
-import sys, os
-# 1. Add the absolute path to the folder containing install_deps.py
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
+"""Network speed monitor with direct-launch dependency setup."""
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["psutil", "PyQt6", "pydivert"]
+# ///
 
-# 2. Import and run the bootstrap
-import install_deps
-install_deps.bootstrap(__file__)
-
-import sys, os, psutil, socket, threading, time, json, sqlite3
+import importlib.util
+import shutil
+import subprocess
+import sys
+import os
+import socket
+import threading
+import time
+import json
+import sqlite3
 from multiprocessing.shared_memory import SharedMemory
 from datetime import datetime
+
+DEPENDENCIES = (
+    ("psutil", "psutil"),
+    ("PyQt6", "PyQt6"),
+    ("pydivert", "pydivert"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"Could not install dependencies {', '.join(missing)} "
+            f"for interpreter {sys.executable}."
+        ) from exc
+
+
+ensure_dependencies()
+
+import psutil
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QLabel, QPushButton, QTreeWidget, QTreeWidgetItem, QHeaderView,
                              QGroupBox, QDialog, QSpinBox, QFormLayout, QScrollArea, QComboBox, QLineEdit,
