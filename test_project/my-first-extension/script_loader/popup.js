@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'copy_table_as_markdown': 'Copy Table As Markdown - Shows a button on table hover to copy HTML tables as Markdown',
       'link_text_extractor': 'Link Text Extractor - Copies the text of a link to your clipboard when holding Ctrl and clicking',
       'ai_studio_quick_delete': 'AI Studio Quick Tools - Delete, copy code blocks & bookmark turns in Google AI Studio',
-      'youtube_swap_sections': 'YouTube Swap Sections - Swaps comments & video sidebar (Shortcut: Shift+F)'
+      'youtube_swap_sections': 'YouTube Swap Sections - Swaps comments & video sidebar (Shortcut: Shift+F)',
+      'element_hider': 'Element Hider - Hide any page element by port; click 👁 to pick elements visually'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];
@@ -102,11 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
     const isYtAnalyzer = scriptPath === 'user_scripts/yt_analyzer.js';
+    const isElementHider = scriptPath === 'user_scripts/element_hider.js';
     
     const modeLabels = {
       local: 'LOCAL',
@@ -129,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div class="script-actions">
-          ${(isFallbackScript || isWhitelistScript || isYtAnalyzer) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
+          ${(isFallbackScript || isWhitelistScript || isYtAnalyzer || isElementHider) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
           ${isFallbackScript ? `<button class="mode-btn ${fallbackSettings.mode}" data-script="${scriptPath}">${modeLabel}</button>` : ''}
           <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
             ${isEnabled ? 'ON' : 'OFF'}
@@ -167,6 +169,38 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="settings-hint">Click the field and press any key to set the shortcut.</div>
       `;
       scriptItem.appendChild(ytSettingsDiv);
+    } else if (isElementHider) {
+      // Build a per-port rules table from elementHiderRules
+      const rules = elementHiderRules || {};
+      const portEntries = Object.entries(rules);
+
+      let rulesHtml = '';
+      if (portEntries.length === 0) {
+        rulesHtml = '<div class="settings-hint" style="margin-top:4px;">No rules yet. Enable the script and use the 👁 button on any page to pick elements.</div>';
+      } else {
+        rulesHtml = portEntries.map(([port, portRule]) => {
+          const selectors = (portRule.selectors || []).join('\n');
+          const isOn = portRule.enabled !== false;
+          return `
+            <div class="eh-port-block" data-port="${port}" style="margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span class="settings-label" style="flex:1;">Port ${port}</span>
+                <button class="eh-port-toggle toggle-btn ${isOn ? 'active' : 'inactive'}" data-port="${port}" style="padding:3px 8px;min-width:36px;font-size:10px;">${isOn ? 'ON' : 'OFF'}</button>
+                <button class="eh-port-clear toggle-btn inactive" data-port="${port}" style="padding:3px 8px;min-width:46px;font-size:10px;">CLEAR</button>
+              </div>
+              <textarea class="settings-input eh-selectors-input" data-port="${port}" rows="3" placeholder="CSS selectors (one per line)" style="resize:vertical;">${selectors}</textarea>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const ehSettingsDiv = document.createElement('div');
+      ehSettingsDiv.className = 'fallback-settings hidden';
+      ehSettingsDiv.innerHTML = `
+        <div class="settings-hint" style="margin-bottom:6px;">Rules are created automatically when you pick elements on a page. You can also edit selectors manually below.</div>
+        <div id="ehPortRules">${rulesHtml}</div>
+      `;
+      scriptItem.appendChild(ehSettingsDiv);
     }
 
     return scriptItem;
@@ -213,6 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
       mode: nextMode
     });
     loadScriptList();
+  }
+
+  function saveElementHiderRules(rules) {
+    chrome.storage.local.set({ element_hider_rules: rules }, () => {
+      console.log('Element hider rules saved:', rules);
+    });
   }
 
   function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings) {
@@ -270,6 +310,49 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFallbackMode(fallbackSettings);
       });
     }
+
+    // ── Element Hider handlers ──────────────────────────────────────────────
+    // Selector textarea edits
+    scriptItem.querySelectorAll('.eh-selectors-input').forEach(textarea => {
+      textarea.addEventListener('change', () => {
+        const port = textarea.dataset.port;
+        const selectors = textarea.value.split('\n').map(s => s.trim()).filter(Boolean);
+        chrome.storage.local.get(['element_hider_rules'], (result) => {
+          const rules = result.element_hider_rules || {};
+          if (!rules[port]) rules[port] = { enabled: true, selectors: [] };
+          rules[port].selectors = selectors;
+          saveElementHiderRules(rules);
+        });
+      });
+    });
+
+    // Per-port ON/OFF toggle
+    scriptItem.querySelectorAll('.eh-port-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const port = btn.dataset.port;
+        chrome.storage.local.get(['element_hider_rules'], (result) => {
+          const rules = result.element_hider_rules || {};
+          if (!rules[port]) rules[port] = { enabled: true, selectors: [] };
+          rules[port].enabled = !rules[port].enabled;
+          saveElementHiderRules(rules);
+          // Refresh UI to reflect new state
+          loadScriptList();
+        });
+      });
+    });
+
+    // Per-port CLEAR button
+    scriptItem.querySelectorAll('.eh-port-clear').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const port = btn.dataset.port;
+        chrome.storage.local.get(['element_hider_rules'], (result) => {
+          const rules = result.element_hider_rules || {};
+          delete rules[port];
+          saveElementHiderRules(rules);
+          loadScriptList();
+        });
+      });
+    });
   }
 
   async function loadScriptList() {
@@ -285,11 +368,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
         const ytAnalyzerHotkey = result.ytAnalyzerHotkey || 'F9';
+        const elementHiderRules = result.element_hider_rules || {};
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -297,10 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules);
           
-          // Add click handler to toggle button
-          const toggleBtn = scriptItem.querySelector('.toggle-btn');
+          // Add click handler to toggle button (only the main ON/OFF in script-actions)
+          const toggleBtn = scriptItem.querySelector('.script-actions .toggle-btn');
           toggleBtn.addEventListener('click', () => {
             toggleScript(scriptPath, isEnabled);
           });
