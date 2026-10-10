@@ -138,6 +138,14 @@ All in `mypygui_qt.py`:
 
 ## 4. Pending Task / Known Issue
 
+### [2026-10-10] - Helium Incognito Toggle
+
+- Simplified incognito control to one write-capable control: the statusbar toolbar icon. The right-click utility at `C:\@delta\ms1\tools\terminal_link\helium_incognito_setup.py` is now read-only; its Enable/Disable buttons were removed.
+- The toolbar now finds Chrome's registered HTTP ProgID (including the Start Menu Internet client registration) and toggles Chrome's launch command directly. It no longer targets whichever browser Windows currently lists under `UrlAssociations\http\UserChoice`, which could be Edge even when Chrome was selected in the utility.
+- Toggle state detection handles case-insensitive private flags. After writing the registry command, the toolbar reads the state back and reports failure instead of silently appearing to toggle when the update did not stick.
+- The right-click status window explains that the toolbar targets Chrome; its dropdown is for inspecting a browser's status and does not change the toolbar target.
+- `git diff --check` passed. The UI and Chrome launch behavior were not live-tested.
+
 ### 🐛 Chrome black top bar on statusbar restart (UNSOLVED)
 
 **Symptom:** After restarting the statusbar (🔄 button → `_app_restart()`), Chrome windows (identified by komorebi as "Chrome Legacy Window") show a black strip at the top, and the minimize/maximize/close buttons appear shifted down. The more restarts, the worse it gets — if the focused window is on workspace 2 when restarting, workspace 1's Chrome gets the black bar.
