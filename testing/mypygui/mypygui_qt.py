@@ -4831,6 +4831,33 @@ def get_progid_command(prog_id):
         except OSError:
             return None
 
+def get_chrome_progid():
+    """Find Chrome's registered protocol ProgID, independent of Windows default browser."""
+    candidates = ["ChromeHTML"]
+    for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        try:
+            with winreg.OpenKey(root, r"SOFTWARE\Clients\StartMenuInternet") as clients:
+                count = winreg.QueryInfoKey(clients)[0]
+                for i in range(count):
+                    client = winreg.EnumKey(clients, i)
+                    if "chrome" not in client.lower():
+                        continue
+                    try:
+                        with winreg.OpenKey(root, fr"SOFTWARE\Clients\StartMenuInternet\{client}\Capabilities\URLAssociations") as key:
+                            prog_id, _ = winreg.QueryValueEx(key, "http")
+                            candidates.insert(0, prog_id)
+                    except OSError:
+                        continue
+        except OSError:
+            continue
+    for prog_id in dict.fromkeys(candidates):
+        command = get_progid_command(prog_id)
+        if command:
+            exe, _ = parse_command(command)
+            if "chrome" in os.path.basename(exe).lower():
+                return prog_id
+    return None
+
 def parse_command(cmd_str):
     cmd_str = cmd_str.strip()
     if cmd_str.startswith('"'):
@@ -4867,20 +4894,20 @@ def write_registry_value(prog_id, value):
     except OSError:
         return False
 
-def is_incognito_active():
-    prog_id = get_http_progid()
+def is_incognito_active(prog_id=None):
+    prog_id = prog_id or get_chrome_progid()
     if not prog_id:
         return False
     cmd_str = get_progid_command(prog_id)
     if not cmd_str:
         return False
     exe, args = parse_command(cmd_str)
-    arg_tokens = args.split()
-    all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
+    arg_tokens = args.lower().split()
+    all_flags = {"--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"}
     return any(f in arg_tokens for f in all_flags)
 
 def toggle_incognito():
-    prog_id = get_http_progid()
+    prog_id = get_chrome_progid()
     if not prog_id:
         return False
     cmd_str = get_progid_command(prog_id)
@@ -4889,18 +4916,20 @@ def toggle_incognito():
     exe, args = parse_command(cmd_str)
     arg_tokens = args.split()
     flag = get_private_flag(exe)
-    all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
-    is_active = any(f in arg_tokens for f in all_flags)
+    all_flags = {"--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"}
+    is_active = any(token.lower() in all_flags for token in arg_tokens)
 
-    if is_active:
-        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
-    else:
-        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+    arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
+    if not is_active:
         arg_tokens.insert(0, flag)
 
     new_args = " ".join(arg_tokens)
-    new_value = f'"{exe}" {new_args}'
-    return write_registry_value(prog_id, new_value)
+    new_value = f'"{exe}" {new_args}'.rstrip()
+    if not write_registry_value(prog_id, new_value):
+        return False
+    # Read back the merged HKCR value; the toolbar should only report success
+    # when Windows sees the requested state for the selected HTTP handler.
+    return is_incognito_active(prog_id) == (not is_active)
 
 # ─── Main window ──────────────────────────────────────────────────────────────
 class StatusBar(QMainWindow):
@@ -5552,13 +5581,14 @@ class StatusBar(QMainWindow):
             text = "\udb81\udd62"
             helium_toggle.setText(text)
             helium_toggle.setStyleSheet(f"color: {color}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold; margin-left: 2px; margin-right: 1px;")
-            helium_toggle.setToolTip(f"Helium Incognito: {'ACTIVE' if active else 'INACTIVE'}\nLeft Click to Toggle\nRight Click for Settings")
+            helium_toggle.setToolTip(f"Chrome launch mode: {'INCOGNITO' if active else 'NORMAL'}\nLeft Click to toggle\nRight Click to inspect browser settings")
             
         update_helium_style()
         
         def helium_click(event):
             if event.button() == Qt.MouseButton.LeftButton:
-                toggle_incognito()
+                if not toggle_incognito():
+                    QMessageBox.warning(self, "Helium Incognito", "Could not change Chrome's registered incognito launch setting. Check that Chrome is installed and try again.")
                 update_helium_style()
             elif event.button() == Qt.MouseButton.RightButton:
                 script_path = r"C:\@delta\ms1\tools\terminal_link\helium_incognito_setup.py"
