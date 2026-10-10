@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
+"""Gemini terminal assistant with optional encrypted accounts and GUI output."""
 from __future__ import annotations
+
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pycryptodomex",
+#     "PyQt6",
+# ]
+# ///
 
 import argparse
 import codecs
@@ -24,14 +33,46 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-try:
-    from Cryptodome.Cipher import AES
-    from Cryptodome.Protocol.KDF import PBKDF2
-    from Cryptodome.Random import get_random_bytes
-except Exception:
-    AES = None
-    PBKDF2 = None
-    get_random_bytes = None
+
+DEPENDENCIES = {
+    "crypto": (("Cryptodome", "pycryptodomex"),),
+    "gui": (("PyQt6", "PyQt6"),),
+}
+
+
+def ensure_dependencies(feature: str) -> None:
+    """Install missing dependencies for a selected optional feature."""
+    import importlib.util
+    import shutil
+
+    missing = [
+        package
+        for module, package in DEPENDENCIES[feature]
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(
+            f"Could not install {', '.join(missing)} for interpreter {sys.executable}"
+        ) from exc
+
+
+# GUI dependencies are installed only when GUI mode is explicitly requested.
+if "-gui" in sys.argv or "--gui" in sys.argv:
+    ensure_dependencies("gui")
+
+AES = None
+PBKDF2 = None
+get_random_bytes = None
 
 
 DEFAULT_MODEL = "gemini-2.5-flash"
@@ -3854,8 +3895,16 @@ def save_transcript(path: Path, state: Dict[str, Any]) -> str:
 
 
 def _require_api_crypto() -> None:
+    global AES, PBKDF2, get_random_bytes
     if AES is None or PBKDF2 is None or get_random_bytes is None:
-        raise RuntimeError("Encrypted API account storage requires pycryptodome.")
+        ensure_dependencies("crypto")
+        from Cryptodome.Cipher import AES as aes_module
+        from Cryptodome.Protocol.KDF import PBKDF2 as pbkdf2_function
+        from Cryptodome.Random import get_random_bytes as random_bytes_function
+
+        AES = aes_module
+        PBKDF2 = pbkdf2_function
+        get_random_bytes = random_bytes_function
 
 
 def _prompt_password(action: str) -> str:
