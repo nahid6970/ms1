@@ -5,6 +5,36 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-10] - Code Merger UX Improvements
+
+### Fix 1 — Generate Prompt Works on Empty Folder
+Removed the "Select at least one file" guard from `cmGeneratePrompt()`. When no files are checked it now generates the format guide + task section only (no `## NOW, HERE ARE MY FILES:` header), so the AI can create new files from scratch using `@@MODE: replace_file`.
+
+### Fix 2 — Clipboard Copy on HTTP
+`navigator.clipboard` is `undefined` on HTTP (non-localhost). Fixed all clipboard usages:
+- `cmCopyPrompt()` — now uses `execCommand('copy')` fallback when `navigator.clipboard` unavailable.
+- `copyFileViewerContent()` — same fallback added.
+These work without a restart.
+
+### Fix 3 — Merge Error Details + Copy All Errors
+**Backend (`app.py`):**
+- Added `_find_closest_line(needle, haystack)` helper — scores each line in the file against the first line of the needle and returns the best match with surrounding context (line number, context snippet, similarity score).
+- `insert_after`, `replace_block`, `delete_block` error results now include a `detail` dict: `anchor_text` (first 300 chars of what was searched for), `anchor_lines` count, `closest_match` (line number, context snippet, score).
+
+**Frontend (`templates/index.html`):**
+- Results area redesigned to match `code_merger` app style:
+  - **All passed** → single `✅ Applied N changes successfully.` line.
+  - **Any failed** → header with `✔ N ok  ✘ N failed` + **📋 Copy all errors** button, then a scrollable `<pre>` block with all errors in plain text (error, searched-for text, closest match with line/context). Paste straight into AI chat.
+
+### Fix 4 — Remove .bak Backups
+Removed the `.bak backups` checkbox from the MERGE tab and hardcoded `backup=false`. No more `.bak` files created on apply.
+
+**Files Modified:**
+- `app.py` — `_find_closest_line`, enriched error detail in `insert_after`, `replace_block`, `delete_block`
+- `templates/index.html` — `cmGeneratePrompt` guard removed, `cmCopyPrompt` fallback, `copyFileViewerContent` fallback, results rendering rewrite, backup checkbox removed
+
+---
+
 ## [2026-10-10] - Fix File Explorer Path Paste + Missing Workspace Folder Dialog
 
 ### Fix 1 — File Explorer Path Paste Broken
