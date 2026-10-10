@@ -1942,11 +1942,6 @@
                 <textarea id="cm-response-input" placeholder="Paste AI response here…" style="width:100%; box-sizing:border-box; height:120px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:7px 10px; font-size:0.78rem; resize:none; outline:none; font-family:'Fira Code',monospace;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
             </div>
             <!-- Options -->
-            <div style="padding:0 12px 8px; display:flex; gap:14px; align-items:center; flex-shrink:0;">
-                <label style="display:flex; align-items:center; gap:5px; font-size:0.72rem; color:var(--text-secondary); cursor:pointer; user-select:none;">
-                    <input type="checkbox" id="cm-opt-backup" checked style="cursor:pointer; accent-color:#22d3ee;"> .bak backups
-                </label>
-            </div>
             <!-- Actions -->
             <div style="padding:0 12px 10px; display:flex; gap:6px; flex-shrink:0;">
                 <button onclick="cmParseResponse()" style="flex:1; padding:6px 0; background:none; border:1px solid #22d3ee; border-radius:6px; color:#22d3ee; font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.15s;" onmouseenter="this.style.background='rgba(34,211,238,0.1)'" onmouseleave="this.style.background='none'">🔍 Parse</button>
@@ -10410,7 +10405,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             const text = document.getElementById('cm-response-input').value.trim();
             if (!text) { alert('Paste an AI response first.'); return; }
 
-            const backup = document.getElementById('cm-opt-backup').checked;
+            const backup = false;
             const resultsEl = document.getElementById('cm-results');
             resultsEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.73rem;">Applying changes…</div>';
 
