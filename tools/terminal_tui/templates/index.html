@@ -8719,15 +8719,30 @@
                 const tds = tr.querySelectorAll('td');
                 return tds[1] ? tds[1].textContent : '';
             });
-            navigator.clipboard.writeText(lines.join('\n')).then(() => {
-                const btn = document.querySelector('#file-viewer-modal button[onclick="copyFileViewerContent()"]');
+            const text = lines.join('\n');
+            const btn = document.querySelector('#file-viewer-modal button[onclick="copyFileViewerContent()"]');
+            const doConfirm = () => {
                 if (btn) {
                     const orig = btn.innerHTML;
                     btn.innerHTML = '✓ Copied';
                     btn.style.color = 'var(--green-active)';
                     setTimeout(() => { btn.innerHTML = orig; btn.style.color = ''; }, 1500);
                 }
-            });
+            };
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(doConfirm).catch(() => {});
+            } else {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    doConfirm();
+                } catch(e) {}
+            }
         }
 
         async function loadExplorerRoot() {
@@ -10205,7 +10220,6 @@
 
         async function cmGeneratePrompt() {
             if (!activeProject) { alert('No active workspace.'); return; }
-            if (_cmCheckedFiles.size === 0) { alert('Select at least one file.'); return; }
 
             const btn = document.querySelector('#cm-panel-prep button[onclick="cmGeneratePrompt()"]');
             const origText = btn.textContent;
@@ -10269,23 +10283,24 @@ Always wrap your **entire response** in a single markdown code block.`;
                 const task = document.getElementById('cm-task-input').value.trim();
                 let prompt = promptGuide + '\n\n---\n\n';
                 if (task) prompt += `## TASK\n${task}\n\n---\n\n`;
-                prompt += `## NOW, HERE ARE MY FILES:\n\n`;
 
-                // Fetch file contents
-                const fileEntries = [];
-                for (const rel of _cmCheckedFiles) {
-                    try {
-                        const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/file-content?path=${encodeURIComponent(rel)}`);
-                        if (res.ok) {
-                            const data = await res.json();
-                            fileEntries.push({ rel, content: data.content });
-                        }
-                    } catch(e) { /* skip */ }
+                // Fetch file contents (only if files are checked)
+                if (_cmCheckedFiles.size > 0) {
+                    prompt += `## NOW, HERE ARE MY FILES:\n\n`;
+                    const fileEntries = [];
+                    for (const rel of _cmCheckedFiles) {
+                        try {
+                            const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/file-content?path=${encodeURIComponent(rel)}`);
+                            if (res.ok) {
+                                const data = await res.json();
+                                fileEntries.push({ rel, content: data.content });
+                            }
+                        } catch(e) { /* skip */ }
+                    }
+                    fileEntries.forEach(({ rel, content }) => {
+                        prompt += `### ${rel}\n\`\`\`\n${content}\n\`\`\`\n\n`;
+                    });
                 }
-
-                fileEntries.forEach(({ rel, content }) => {
-                    prompt += `### ${rel}\n\`\`\`\n${content}\n\`\`\`\n\n`;
-                });
 
                 _cmPromptText = prompt;
 
@@ -10305,14 +10320,34 @@ Always wrap your **entire response** in a single markdown code block.`;
         async function cmCopyPrompt() {
             if (!_cmPromptText) { await cmGeneratePrompt(); }
             if (!_cmPromptText) return;
-            try {
-                await navigator.clipboard.writeText(_cmPromptText);
-                const btn = document.getElementById('cm-copy-btn');
-                const orig = btn.textContent;
+            const btn = document.getElementById('cm-copy-btn');
+            const orig = btn.textContent;
+            let copied = false;
+            // navigator.clipboard is only available on HTTPS / localhost — use a
+            // textarea execCommand fallback for plain HTTP (local IP access).
+            if (navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(_cmPromptText);
+                    copied = true;
+                } catch(e) {}
+            }
+            if (!copied) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = _cmPromptText;
+                    ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none;';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    copied = true;
+                } catch(e) {}
+            }
+            if (copied) {
                 btn.textContent = '✓ Copied!';
                 btn.style.color = '#22d3ee';
                 setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1800);
-            } catch(e) {
+            } else {
                 alert('Failed to copy to clipboard.');
             }
         }
