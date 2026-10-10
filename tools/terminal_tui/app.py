@@ -1876,6 +1876,88 @@ def api_git_discard(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/init', methods=['POST'])
+def api_git_init(project):
+    """
+    Initialize a new git repo for a project, optionally add a GitHub remote and push.
+    Body: { github_username, repo_name, branch, make_initial_commit }
+    """
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = proj_details["path"]
+    if not os.path.exists(path):
+        return jsonify({"error": "Project folder does not exist"}), 400
+
+    data = request.get_json() or {}
+    github_username = data.get("github_username", "").strip()
+    repo_name = data.get("repo_name", "").strip()
+    branch = data.get("branch", "main").strip() or "main"
+    make_initial_commit = data.get("make_initial_commit", True)
+
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    steps = []
+
+    def run(cmd, cwd=path):
+        result = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                                creationflags=cf, timeout=30)
+        return result.returncode == 0, (result.stdout + result.stderr).strip()
+
+    try:
+        # 1. git init
+        ok, out = run(["git", "init", "-b", branch])
+        if not ok:
+            # older git doesn't support -b, try without
+            ok, out = run(["git", "init"])
+            if not ok:
+                return jsonify({"error": f"git init failed: {out}"}), 500
+            # rename branch
+            run(["git", "checkout", "-b", branch])
+        steps.append(f"✔ git init ({branch})")
+
+        # 2. Initial commit
+        if make_initial_commit:
+            # create .gitignore if missing
+            gitignore_path = os.path.join(path, ".gitignore")
+            if not os.path.exists(gitignore_path):
+                with open(gitignore_path, "w") as f:
+                    f.write("__pycache__/\n*.pyc\n*.pyo\n*.pyd\n.env\n.venv\nenv/\nvenv/\n"
+                            "node_modules/\ndist/\nbuild/\n.next/\n*.log\n*.bak\n.DS_Store\n")
+                steps.append("✔ created .gitignore")
+            ok, out = run(["git", "add", "-A"])
+            if ok:
+                ok, out = run(["git", "commit", "-m", "Initial commit"])
+                if ok:
+                    steps.append("✔ initial commit")
+                else:
+                    steps.append(f"⚠ commit skipped: {out[:120]}")
+            else:
+                steps.append(f"⚠ git add failed: {out[:120]}")
+
+        # 3. Add remote and push (only if github_username + repo_name provided)
+        remote_url = None
+        if github_username and repo_name:
+            remote_url = f"https://github.com/{github_username}/{repo_name}.git"
+            ok, out = run(["git", "remote", "add", "origin", remote_url])
+            if not ok and "already exists" in out:
+                run(["git", "remote", "set-url", "origin", remote_url])
+            steps.append(f"✔ remote origin → {remote_url}")
+
+            ok, out = run(["git", "push", "-u", "origin", branch])
+            if ok:
+                steps.append(f"✔ pushed to origin/{branch}")
+            else:
+                steps.append(f"⚠ push failed (create the repo on GitHub first): {out[:200]}")
+
+        invalidate_git_status_cache(path)
+        return jsonify({"steps": steps, "remote_url": remote_url})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/api/project/<project>/git/suggest-commit', methods=['POST'])
 def api_git_suggest_commit(project):
     """Use AI (Google Gemini) to suggest a commit message based on git diff."""
