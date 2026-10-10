@@ -2,8 +2,8 @@ import sys
 import os
 import winreg
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-                             QGroupBox, QFormLayout, QTextEdit, QMessageBox, QDialog,
+                             QHBoxLayout, QLabel, QPushButton,
+                             QGroupBox, QFormLayout, QTextEdit,
                              QComboBox)
 from PyQt6.QtCore import Qt
 
@@ -18,30 +18,6 @@ CP_ORANGE = "#ff934b"       # Accent: Orange
 CP_DIM = "#3a3a3a"          # Dimmed/Borders/Inactive
 CP_TEXT = "#E0E0E0"         # Primary Text
 CP_SUBTEXT = "#808080"      # Secondary Text
-
-class SettingsDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("⚙ SETTINGS")
-        self.resize(300, 200)
-        self.setStyleSheet(f"""
-            QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_CYAN}; }}
-            QLabel {{ color: {CP_TEXT}; font-family: 'Consolas'; }}
-            QPushButton {{
-                background-color: {CP_DIM}; border: 1px solid {CP_DIM}; color: white; padding: 6px 12px; font-weight: bold; font-family: 'Consolas';
-            }}
-            QPushButton:hover {{
-                background-color: #2a2a2a; border: 1px solid {CP_YELLOW}; color: {CP_YELLOW};
-            }}
-        """)
-        layout = QVBoxLayout(self)
-        lbl = QLabel("⚙ CUSTOM SETTINGS\n\nNo configurable options needed for this utility.\nSettings are empty by default.")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        btn = QPushButton("CLOSE")
-        btn.clicked.connect(self.accept)
-        layout.addWidget(lbl)
-        layout.addWidget(btn)
-        layout.addWidget(btn)
 
 class App(QMainWindow):
     def __init__(self):
@@ -113,7 +89,7 @@ class App(QMainWindow):
         layout.addWidget(header)
         
         # Subtitle
-        subtitle = QLabel("System-wide protocol utility for Windows Terminal & Command Line links")
+        subtitle = QLabel("Read-only browser status. The statusbar incognito icon always targets Google Chrome.")
         subtitle.setStyleSheet(f"color: {CP_SUBTEXT}; font-size: 9pt;")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(subtitle)
@@ -145,46 +121,6 @@ class App(QMainWindow):
         
         layout.addWidget(status_grp)
 
-        # Actions Group Box
-        actions_grp = QGroupBox("REGISTRY CONTROL")
-        actions_layout = QHBoxLayout(actions_grp)
-        actions_layout.setContentsMargins(15, 20, 15, 15)
-        actions_layout.setSpacing(15)
-        
-        self.btn_enable = QPushButton("⚡ ENABLE INCOGNITO MODE")
-        self.btn_enable.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_enable.setStyleSheet(f"""
-            QPushButton {{
-                border: 1px solid {CP_GREEN};
-                color: {CP_GREEN};
-                background-color: #0c1a0e;
-            }}
-            QPushButton:hover {{
-                background-color: {CP_GREEN};
-                color: black;
-            }}
-        """)
-        self.btn_enable.clicked.connect(self.enable_incognito)
-        
-        self.btn_disable = QPushButton("❌ DISABLE INCOGNITO MODE")
-        self.btn_disable.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_disable.setStyleSheet(f"""
-            QPushButton {{
-                border: 1px solid {CP_RED};
-                color: {CP_RED};
-                background-color: #21070c;
-            }}
-            QPushButton:hover {{
-                background-color: {CP_RED};
-                color: black;
-            }}
-        """)
-        self.btn_disable.clicked.connect(self.disable_incognito)
-        
-        actions_layout.addWidget(self.btn_enable)
-        actions_layout.addWidget(self.btn_disable)
-        layout.addWidget(actions_grp)
-
         # Footer Toolbar
         footer_layout = QHBoxLayout()
         
@@ -193,16 +129,10 @@ class App(QMainWindow):
         btn_restart.setStyleSheet(f"color: {CP_YELLOW}; border-color: {CP_DIM};")
         btn_restart.clicked.connect(self.restart_app)
         
-        btn_settings = QPushButton("⚙ SETTINGS")
-        btn_settings.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_settings.setStyleSheet(f"color: {CP_CYAN}; border-color: {CP_DIM};")
-        btn_settings.clicked.connect(self.open_settings)
-        
         self.console_msg = QLabel("Ready")
         self.console_msg.setStyleSheet(f"color: {CP_SUBTEXT};")
         
         footer_layout.addWidget(btn_restart)
-        footer_layout.addWidget(btn_settings)
         footer_layout.addStretch()
         footer_layout.addWidget(self.console_msg)
         
@@ -351,7 +281,7 @@ class App(QMainWindow):
 
         self.cmd_view.setText(cmd_str)
         exe, args = self.parse_command(cmd_str)
-        arg_tokens = args.split()
+        arg_tokens = args.lower().split()
         
         flag = self.get_private_flag(exe)
         all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
@@ -364,77 +294,8 @@ class App(QMainWindow):
             self.incognito_status_label.setText("INACTIVE (NORMAL)")
             self.incognito_status_label.setStyleSheet(f"color: {CP_ORANGE}; font-weight: bold;")
 
-    def write_registry_value(self, prog_id, value):
-        path = fr"Software\Classes\{prog_id}\shell\open\command"
-        try:
-            key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, path)
-            with key:
-                winreg.SetValueEx(key, "", 0, winreg.REG_SZ, value)
-            return True
-        except OSError as e:
-            QMessageBox.critical(self, "Registry Error", f"Failed to update registry:\n{str(e)}")
-            return False
-
-    def enable_incognito(self):
-        prog_id = self.get_selected_progid()
-        if not prog_id:
-            QMessageBox.warning(self, "Warning", "Could not identify selected browser ProgID.")
-            return
-
-        cmd_str = self.get_progid_command(prog_id)
-        if not cmd_str:
-            QMessageBox.warning(self, "Warning", f"No launch command found for {prog_id}.")
-            return
-
-        exe, args = self.parse_command(cmd_str)
-        arg_tokens = args.split()
-        flag = self.get_private_flag(exe)
-        
-        # Clean any other known private flags first to avoid conflicts
-        all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
-        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
-        
-        arg_tokens.insert(0, flag)
-        new_args = " ".join(arg_tokens)
-        new_value = f'"{exe}" {new_args}'
-
-        if self.write_registry_value(prog_id, new_value):
-            self.console_msg.setText(f"Status: Private mode enabled ({flag})")
-            self.console_msg.setStyleSheet(f"color: {CP_GREEN};")
-            self.refresh_status()
-
-    def disable_incognito(self):
-        prog_id = self.get_selected_progid()
-        if not prog_id:
-            QMessageBox.warning(self, "Warning", "Could not identify selected browser ProgID.")
-            return
-
-        cmd_str = self.get_progid_command(prog_id)
-        if not cmd_str:
-            QMessageBox.warning(self, "Warning", f"No launch command found for {prog_id}.")
-            return
-
-        exe, args = self.parse_command(cmd_str)
-        arg_tokens = args.split()
-        
-        # Clean all known private flags
-        all_flags = ["--incognito", "-inprivate", "--inprivate", "-private-window", "--private-window", "--private", "-private"]
-        arg_tokens = [t for t in arg_tokens if t.lower() not in all_flags]
-        
-        new_args = " ".join(arg_tokens)
-        new_value = f'"{exe}" {new_args}'
-
-        if self.write_registry_value(prog_id, new_value):
-            self.console_msg.setText("Status: Private mode disabled")
-            self.console_msg.setStyleSheet(f"color: {CP_ORANGE};")
-            self.refresh_status()
-
     def restart_app(self):
         os.execv(sys.executable, [sys.executable] + sys.argv)
-
-    def open_settings(self):
-        dialog = SettingsDialog(self)
-        dialog.exec()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
