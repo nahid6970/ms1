@@ -13208,8 +13208,27 @@ Always wrap your **entire response** in a single markdown code block.`;
             }
         }
 
-        function triggerImportAIAccounts() {
-            document.getElementById('ai-acc-import-file').click();
+        async function triggerImportAIAccounts() {
+            try {
+                const response = await fetch('/api/select-ai-accounts-backup', {
+                    method: 'POST',
+                });
+                const responseText = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (_) {
+                    throw new Error('The app server does not have the backup picker endpoint loaded. Restart the app, refresh this page, and try again.');
+                }
+                if (!response.ok) throw new Error(result.error || 'Could not open the backup file picker.');
+                if (result.cancelled) return;
+                const binary = atob(result.contents);
+                const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+                await importAIAccountsText(new TextDecoder().decode(bytes));
+            } catch (err) {
+                console.error('Could not import AI accounts backup:', err);
+                alert('Could not open or read the backup file: ' + err.message);
+            }
         }
 
         async function importAIAccounts(e) {
@@ -13218,7 +13237,14 @@ Always wrap your **entire response** in a single markdown code block.`;
             
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                const encryptedBase64 = evt.target.result.trim();
+                await importAIAccountsText(evt.target.result);
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        async function importAIAccountsText(fileContents) {
+                const encryptedBase64 = fileContents.trim();
                 const password = prompt("Enter the password to decrypt and import the accounts:");
                 if (!password) return;
                 
@@ -13268,9 +13294,6 @@ Always wrap your **entire response** in a single markdown code block.`;
                     console.error("Decryption failed:", err);
                     alert("Import failed: Incorrect password or corrupted backup file.");
                 }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
         }
 
         function openAIAccountsManager(provider = 'gemini') {

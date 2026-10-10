@@ -3835,12 +3835,43 @@ def api_git_branch_delete(project):
 @app.route('/api/open-explorer', methods=['POST'])
 def api_open_explorer():
     data = request.json or {}
-    path = data.get('path', '')
+    # Default to this app's project folder when callers don't provide a path.
+    path = data.get('path') or os.path.dirname(os.path.abspath(__file__))
     if not path or not os.path.isdir(path):
         return jsonify({"status": "error", "message": "Invalid path"}), 400
     import subprocess
     subprocess.Popen(['explorer.exe', os.path.normpath(path)])
     return jsonify({"status": "ok"})
+
+@app.route('/api/select-ai-accounts-backup', methods=['POST'])
+def api_select_ai_accounts_backup():
+    """Show a native backup file picker rooted in this app's project folder."""
+    import base64
+    import tkinter as tk
+    from tkinter import filedialog
+
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    try:
+        selected_path = filedialog.askopenfilename(
+            parent=root,
+            title='Select AI accounts backup',
+            initialdir=os.path.dirname(os.path.abspath(__file__)),
+            filetypes=[('AI accounts backups', '*.enc *.json'), ('All files', '*.*')]
+        )
+    finally:
+        root.destroy()
+
+    if not selected_path:
+        return jsonify({"cancelled": True})
+
+    try:
+        with open(selected_path, 'rb') as backup_file:
+            contents = base64.b64encode(backup_file.read()).decode('ascii')
+        return jsonify({"cancelled": False, "name": os.path.basename(selected_path), "contents": contents})
+    except OSError as exc:
+        return jsonify({"error": f"Could not read the selected backup: {exc}"}), 500
 
 @app.route('/shutdown', methods=['POST'])
 def api_shutdown():
