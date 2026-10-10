@@ -8810,20 +8810,11 @@
                     } else {
                         const relativePath = item.rel_path;
                         if (activeProject && term) {
-                            navigator.clipboard.writeText(relativePath);
+                            try { navigator.clipboard.writeText(relativePath); } catch (_) {}
                             const origColor = nameText.style.color;
                             nameText.style.color = 'var(--green-active)';
                             setTimeout(() => { nameText.style.color = origColor; }, 500);
-
-                            if (socket && socket.connected) {
-                                const activePane = terminalPanes.find(p => p.socket === socket);
-                                const paneId = activePane ? activePane.paneId : 'main';
-                                socket.emit('pty-input', {
-                                    project: activeProject,
-                                    paneId: paneId,
-                                    data: relativePath
-                                });
-                            }
+                            term.paste(relativePath);
                         }
                     }
                 };
