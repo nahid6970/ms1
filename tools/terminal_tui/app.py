@@ -858,6 +858,32 @@ def api_projects_delete(project):
             
     return jsonify(scan_projects())
 
+@app.route('/api/project/<project>/path-check', methods=['GET'])
+def api_project_path_check(project):
+    """Return whether the workspace folder exists on disk."""
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = proj["path"]
+    return jsonify({"exists": os.path.exists(path), "path": path})
+
+@app.route('/api/project/<project>/recreate-path', methods=['POST'])
+def api_project_recreate_path(project):
+    """Recreate the workspace folder if it is missing."""
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    path = proj["path"]
+    if os.path.exists(path):
+        return jsonify({"status": "already_exists", "path": path})
+    try:
+        os.makedirs(path, exist_ok=True)
+        return jsonify({"status": "created", "path": path})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/projects/<project>/bookmarks', methods=['POST'])
 def api_add_bookmark(project):
     data = request.json

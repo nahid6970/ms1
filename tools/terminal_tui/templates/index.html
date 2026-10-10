@@ -4359,6 +4359,19 @@
         async function selectProject(projectName) {
             if (activeProject === projectName) return;
 
+            // ── Missing folder guard ──────────────────────────────────────────
+            try {
+                const chk = await fetch(`/api/project/${encodeURIComponent(projectName)}/path-check`);
+                if (chk.ok) {
+                    const chkData = await chk.json();
+                    if (!chkData.exists) {
+                        const result = await showMissingPathDialog(projectName, chkData.path);
+                        if (result !== 'recreated') return; // user removed or cancelled
+                    }
+                }
+            } catch (_) { /* non-fatal — proceed and let the session start fail naturally */ }
+            // ─────────────────────────────────────────────────────────────────
+
             const restoreGeneration = ++workspaceRestoreGeneration;
             try {
                 await restoreTerminalLayout(projectName, restoreGeneration);
@@ -5220,6 +5233,92 @@
         }
 
         // Delete project workspace directory
+        async function showMissingPathDialog(projectName, missingPath) {
+            return new Promise((resolve) => {
+                // Remove any stale instance
+                const old = document.getElementById('missing-path-dialog');
+                if (old) old.remove();
+
+                const overlay = document.createElement('div');
+                overlay.id = 'missing-path-dialog';
+                overlay.style.cssText = `
+                    position: fixed; inset: 0; z-index: 10000;
+                    display: flex; align-items: center; justify-content: center;
+                    background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+                `;
+
+                overlay.innerHTML = `
+                    <div style="background: var(--bg-card); border: 1px solid rgba(239,68,68,0.4); border-radius: 14px;
+                                padding: 28px 30px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+                                display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">Folder Not Found</span>
+                        </div>
+                        <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                            The workspace folder for <strong style="color: var(--text-primary);">${projectName}</strong> no longer exists on disk:
+                            <div style="margin-top: 8px; padding: 7px 10px; background: var(--bg-main); border-radius: 6px;
+                                        font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #f87171;
+                                        word-break: break-all; border: 1px solid var(--border-color);">${missingPath}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <button id="mpd-recreate" style="flex: 1; padding: 9px 0; background: rgba(16,185,129,0.12);
+                                border: 1px solid rgba(16,185,129,0.4); border-radius: 8px; color: #34d399;
+                                font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                                onmouseenter="this.style.background='rgba(16,185,129,0.22)'"
+                                onmouseleave="this.style.background='rgba(16,185,129,0.12)'">
+                                📁 Recreate Folder
+                            </button>
+                            <button id="mpd-remove" style="flex: 1; padding: 9px 0; background: rgba(239,68,68,0.1);
+                                border: 1px solid rgba(239,68,68,0.35); border-radius: 8px; color: #f87171;
+                                font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s;"
+                                onmouseenter="this.style.background='rgba(239,68,68,0.2)'"
+                                onmouseleave="this.style.background='rgba(239,68,68,0.1)'">
+                                🗑 Remove Workspace
+                            </button>
+                            <button id="mpd-cancel" style="padding: 9px 14px; background: none;
+                                border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary);
+                                font-size: 0.82rem; cursor: pointer; transition: all 0.2s;"
+                                onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.color='var(--text-primary)'"
+                                onmouseleave="this.style.borderColor='var(--border-color)'; this.style.color='var(--text-secondary)'">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(overlay);
+
+                const close = (result) => { overlay.remove(); resolve(result); };
+
+                document.getElementById('mpd-recreate').onclick = async () => {
+                    const btn = document.getElementById('mpd-recreate');
+                    btn.textContent = 'Creating…';
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch(`/api/project/${encodeURIComponent(projectName)}/recreate-path`, { method: 'POST' });
+                        const data = await res.json();
+                        if (res.ok) { close('recreated'); }
+                        else { alert(data.error || 'Could not create folder.'); close('cancel'); }
+                    } catch (e) { alert('Network error.'); close('cancel'); }
+                };
+
+                document.getElementById('mpd-remove').onclick = async () => {
+                    if (!confirm(`Remove workspace '${projectName}' from the list? The folder won't be deleted.`)) return;
+                    try {
+                        const res = await fetch(`/api/projects/${encodeURIComponent(projectName)}`, { method: 'DELETE' });
+                        if (res.ok) { projects = await res.json(); handleSearch(); applySidebarWorkspacesVisibility(); }
+                    } catch (e) { console.error(e); }
+                    close('removed');
+                };
+
+                document.getElementById('mpd-cancel').onclick = () => close('cancel');
+                overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close('cancel'); });
+            });
+        }
+
         async function deleteProject(projectName) {
             if (!confirm(`Are you sure you want to remove the workspace '${projectName}'? (All background terminal sessions for this workspace will be closed).`)) {
                 return;
