@@ -10433,56 +10433,73 @@ Always wrap your **entire response** in a single markdown code block.`;
                     return;
                 }
 
-                (data.results || []).forEach(r => {
-                    const ok = r.status === 'ok';
+                const allResults = data.results || [];
+                const okCount  = allResults.filter(r => r.status === 'ok').length;
+                const errCount = allResults.length - okCount;
+
+                if (errCount === 0) {
+                    // ── All passed — single summary line ──────────────────────
                     const row = document.createElement('div');
-                    row.style.cssText = `display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-main);border:1px solid ${ok ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'};border-radius:6px;font-size:0.73rem;font-family:"Fira Code",monospace;`;
-
-                    const mainRow = document.createElement('div');
-                    mainRow.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;';
-                    mainRow.innerHTML = `
-                        <span style="flex-shrink:0;">${ok ? '✅' : '❌'}</span>
-                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${ok ? '#86efac' : '#fca5a5'};">${r.file}</span>
-                        ${ok
-                            ? `<span style="color:var(--text-muted);font-size:0.65rem;">${r.mode}</span>`
-                            : `<span class="cm-err-msg" style="color:#fca5a5;font-size:0.67rem;flex-shrink:0;cursor:pointer;user-select:none;" title="Click to copy full error detail">! ${r.message}</span>`}
-                    `;
-                    row.appendChild(mainRow);
-
-                    if (!ok) {
-                        const errMsg = mainRow.querySelector('.cm-err-msg');
-                        errMsg.addEventListener('click', () => {
-                            const detail = r.detail;
-                            const lines = [
-                                `Error: ${r.message}`,
-                                `File: ${r.file}`,
-                            ];
-                            if (detail) {
-                                lines.push(`\nSearched for (${detail.anchor_lines} line${detail.anchor_lines !== 1 ? 's' : ''}):\n${detail.anchor_text}`);
-                                if (detail.closest_match) {
-                                    const cm = detail.closest_match;
-                                    lines.push(`\nClosest match in file — line ${cm.line_number} (${Math.round(cm.score * 100)}% similar):\n${cm.context_snippet}`);
+                    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-main);border:1px solid rgba(16,185,129,0.3);border-radius:6px;font-size:0.73rem;font-family:"Fira Code",monospace;';
+                    row.innerHTML = `<span>✅</span><span style="color:#86efac;">Applied ${okCount} change${okCount !== 1 ? 's' : ''} successfully.</span>`;
+                    resultsEl.appendChild(row);
+                } else {
+                    // ── Some failed — build error text block ──────────────────
+                    const errorLines = [];
+                    allResults.forEach(r => {
+                        if (r.status !== 'ok') {
+                            const d = r.detail;
+                            errorLines.push(`✘ ${r.message} → ${r.file}`);
+                            if (d) {
+                                errorLines.push(`  Searched for (${d.anchor_lines} line${d.anchor_lines !== 1 ? 's' : ''}):`);
+                                d.anchor_text.split('\n').slice(0, 8).forEach(l => errorLines.push(`    ${l}`));
+                                if (d.anchor_text.split('\n').length > 8) errorLines.push(`    …`);
+                                if (d.closest_match) {
+                                    const cm = d.closest_match;
+                                    errorLines.push(`  Closest match in file — line ${cm.line_number} (${Math.round(cm.score * 100)}% similar):`);
+                                    cm.context_snippet.split('\n').forEach(l => errorLines.push(`  ${l}`));
+                                } else {
+                                    errorLines.push(`  No close match found in file.`);
                                 }
                             }
-                            const text = lines.join('\n');
-                            const flash = () => { errMsg.style.color = '#34d399'; setTimeout(() => errMsg.style.color = '#fca5a5', 900); };
-                            if (navigator.clipboard) {
-                                navigator.clipboard.writeText(text).then(flash).catch(() => {});
-                            } else {
-                                try { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); flash(); } catch(e) {}
-                            }
-                        });
-                    }
+                            errorLines.push('');
+                        }
+                    });
+                    const errorText = errorLines.join('\n').trimEnd();
 
-                    resultsEl.appendChild(row);
-                });
+                    // Header row: X failed, Y ok + Copy all errors button
+                    const header = document.createElement('div');
+                    header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 2px;margin-bottom:4px;';
+                    header.innerHTML = `
+                        <span style="font-size:0.72rem;color:var(--text-muted);">
+                            ${okCount > 0 ? `<span style="color:#86efac;">✔ ${okCount} ok</span>  ` : ''}
+                            <span style="color:#fca5a5;">✘ ${errCount} failed</span>
+                        </span>
+                        <button id="cm-copy-errors-btn" style="background:none;border:1px solid rgba(239,68,68,0.4);border-radius:4px;color:#fca5a5;font-size:0.68rem;cursor:pointer;padding:2px 8px;font-family:inherit;transition:all 0.15s;"
+                            onmouseenter="this.style.borderColor='#fca5a5';this.style.background='rgba(239,68,68,0.1)'"
+                            onmouseleave="this.style.borderColor='rgba(239,68,68,0.4)';this.style.background='none'">
+                            📋 Copy all errors
+                        </button>
+                    `;
+                    resultsEl.appendChild(header);
 
-                const okCount  = (data.results || []).filter(r => r.status === 'ok').length;
-                const errCount = (data.results || []).length - okCount;
-                const summary  = document.createElement('div');
-                summary.style.cssText = 'font-size:0.7rem;color:var(--text-muted);padding:4px 2px;';
-                summary.textContent = `Applied ${okCount} change${okCount !== 1 ? 's' : ''}${errCount ? `, ${errCount} failed` : ''}.`;
-                resultsEl.prepend(summary);
+                    // Error text block
+                    const pre = document.createElement('pre');
+                    pre.style.cssText = 'margin:0;padding:8px 10px;background:var(--bg-main);border:1px solid rgba(239,68,68,0.25);border-radius:6px;font-size:0.68rem;font-family:"Fira Code",monospace;color:#fca5a5;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;line-height:1.5;';
+                    pre.textContent = errorText;
+                    resultsEl.appendChild(pre);
+
+                    // Copy all errors handler
+                    document.getElementById('cm-copy-errors-btn').addEventListener('click', function() {
+                        const btn = this;
+                        const doFlash = () => { btn.textContent = '✓ Copied!'; btn.style.color = '#34d399'; setTimeout(() => { btn.textContent = '📋 Copy all errors'; btn.style.color = '#fca5a5'; }, 1500); };
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(errorText).then(doFlash).catch(() => {});
+                        } else {
+                            try { const ta = document.createElement('textarea'); ta.value = errorText; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); doFlash(); } catch(e) {}
+                        }
+                    });
+                }
 
             } catch(err) {
                 resultsEl.innerHTML = `<div style="color:#ef4444;font-size:0.73rem;">Request failed: ${err.message}</div>`;
