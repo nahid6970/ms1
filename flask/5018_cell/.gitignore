@@ -31,7 +31,6 @@ instance/
 .coverage
 htmlcov/
 data.json
-custom_syntaxes.json
 
 # Project specific
 .fallow/

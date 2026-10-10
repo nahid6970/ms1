@@ -1,1 +1,1 @@
-{"width": 1200, "height": 850}
+{"width": 1200, "height": 850, "flags": [true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false], "options": [true, false], "filters": [true, false, false, false, false, false, false, false], "tools": [false, false, false, false, false, false], "command": "sync", "storage": "", "from": "gu:/song/", "to": "D:/song/", "from_enabled": true, "to_enabled": true, "filter_values": ["1", "", "", "1d", "1d", "100M", "100M", ""]}

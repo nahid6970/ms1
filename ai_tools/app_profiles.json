@@ -60,7 +60,7 @@
             "timer_enabled": false,
             "target_time": null,
             "app_name": "Rclone Config",
-            "active": false,
+            "active": true,
             "storage_path": "C:\\@delta\\ms1\\ai_tools\\profile_data\\Rclone Config\\rclone config"
         },
         {
