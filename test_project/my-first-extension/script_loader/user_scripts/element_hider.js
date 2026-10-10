@@ -44,20 +44,18 @@
 
   // ─── Floating Action Button (Shadow DOM) ──────────────────────────────────
 
-  function getFabBtn() {
-    const host = document.getElementById('__eh_host__');
-    return host && host.shadowRoot ? host.shadowRoot.getElementById('fab') : null;
-  }
-
   function updateFabState() {
-    const btn = getFabBtn();
-    if (!btn) return;
+    const host = document.getElementById('__eh_host__');
+    if (!host || !host.shadowRoot) return;
+    const btn = host.shadowRoot.getElementById('fab');
+    const icon = host.shadowRoot.getElementById('fab-icon');
+    if (!btn || !icon) return;
     if (pickerActive) {
-      btn.textContent = '✕';
+      icon.textContent = '✕';
       btn.title = 'Cancel picker (ESC)';
       btn.classList.add('picking');
     } else {
-      btn.textContent = '👁';
+      icon.textContent = '👁';
       btn.title = 'Pick element to hide';
       btn.classList.remove('picking');
     }
@@ -94,21 +92,34 @@
           width: 42px;
           height: 42px;
           border-radius: 50%;
-          border: 1px solid #555;
-          background: #2d2d30;
-          color: #d4d4d4;
-          font-size: 18px;
+          border: 2px solid #4fc3f7;
+          background: #0d1b2a;
+          color: #4fc3f7;
+          font-size: 20px;
+          line-height: 1;
+          text-align: center;
           cursor: pointer;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+          box-shadow: 0 0 10px rgba(79,195,247,0.45), 0 2px 8px rgba(0,0,0,0.7);
           pointer-events: all;
           box-sizing: border-box;
-          transition: background 0.2s, transform 0.15s;
+          transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
           user-select: none;
+          padding: 0;
+          margin: 0;
         }
-        button:hover { transform: scale(1.12); }
-        button.picking { background: #c0392b; border-color: #e74c3c; }
+        button:hover {
+          transform: scale(1.12);
+          background: #112233;
+          box-shadow: 0 0 16px rgba(79,195,247,0.7), 0 2px 8px rgba(0,0,0,0.7);
+        }
+        button.picking {
+          background: #c0392b;
+          border-color: #ff6b6b;
+          color: #fff;
+          box-shadow: 0 0 14px rgba(255,107,107,0.6), 0 2px 8px rgba(0,0,0,0.7);
+        }
       </style>
-      <button id="fab" title="Pick element to hide">👁</button>
+      <button id="fab" title="Pick element to hide"><span id="fab-icon">👁</span></button>
     `;
 
     shadow.getElementById('fab').addEventListener('click', () => {
