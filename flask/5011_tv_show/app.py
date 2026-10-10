@@ -1,11 +1,49 @@
-import sys, os
-# 1. Add the absolute path to the folder containing install_deps.py
-UTILITY_PATH = r"C:\@delta\ms1"
-if UTILITY_PATH not in sys.path: sys.path.append(UTILITY_PATH)
+"""TV show and movie tracker web application."""
 
-# 2. Import and run the bootstrap
-import install_deps
-install_deps.bootstrap(__file__)
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "APScheduler",
+#     "Flask",
+#     "requests",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
+import sys
+
+DEPENDENCIES = (
+    ("apscheduler", "APScheduler"),
+    ("flask", "Flask"),
+    ("requests", "requests"),
+)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as error:
+        raise RuntimeError(
+            f"Failed to install {', '.join(missing)} for interpreter {sys.executable}"
+        ) from error
+
+
+ensure_dependencies()
 
 import json
 import os

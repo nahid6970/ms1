@@ -1,3 +1,44 @@
+"""Watch data.json and report processes that create or hold it open."""
+
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "psutil",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
+import sys
+
+DEPENDENCIES = (("psutil", "psutil"),)
+
+
+def ensure_dependencies():
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as error:
+        raise RuntimeError(
+            f"Failed to install {', '.join(missing)} for interpreter {sys.executable}"
+        ) from error
+
+
+ensure_dependencies()
+
 import os
 import time
 import psutil
