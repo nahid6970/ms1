@@ -430,8 +430,39 @@ class EnvVariableManager(QMainWindow):
                 with open(alias_file, 'r') as f:
                     self.aliases = json.load(f)
             else:
-                self.aliases = {"ll": "ls -la", "gs": "git status", "ga": "git add", "gc": "git commit", "gp": "git push", "gl": "git log --oneline", "cls": "clear"}
-                self.save_aliases()
+                # aliases.json is missing (first run / new machine).
+                # Prefer aliases stored in data.json over hardcoded defaults so
+                # that a git pull / file deletion never silently wipes the user's
+                # configured aliases on the next startup.
+                data_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+                seeded_from_data = False
+                if os.path.exists(data_json_path):
+                    try:
+                        with open(data_json_path, 'r', encoding='utf-8') as f:
+                            saved = json.load(f)
+                        if saved.get("aliases"):
+                            self.aliases = saved["aliases"]
+                            seeded_from_data = True
+                    except Exception:
+                        pass
+
+                if not seeded_from_data:
+                    self.aliases = {"ll": "ls -la", "gs": "git status", "ga": "git add",
+                                    "gc": "git commit", "gp": "git push",
+                                    "gl": "git log --oneline", "cls": "clear"}
+
+                # Write aliases.json so future startups don't repeat this lookup.
+                # Do NOT call save_aliases() here — that would trigger export_config
+                # and overwrite data.json before the context-menu tab has loaded.
+                try:
+                    with open(alias_file, 'w') as f:
+                        json.dump(self.aliases, f, indent=2)
+                    self.generate_cmd_loader()
+                    self.generate_powershell_loader()
+                    self.generate_bash_loader()
+                except Exception:
+                    pass
+
             for name, command in self.aliases.items():
                 self.alias_list.addItem(f"{name} → {command}")
             self.set_status(f"Loaded {len(self.aliases)} aliases", CP_GREEN)
