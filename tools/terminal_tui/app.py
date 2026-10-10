@@ -2525,6 +2525,42 @@ def api_project_merge_apply(project):
         """Normalise whitespace for tolerant matching."""
         return "\n".join(line.rstrip() for line in text.splitlines())
 
+    def _find_closest_line(needle_text, haystack_text, context=3):
+        """Find the line in haystack that best matches the first line of needle.
+        Returns a dict with line_number (1-based), matched_line, and surrounding context."""
+        if not needle_text or not haystack_text:
+            return None
+        needle_first = needle_text.strip().splitlines()[0].strip().lower()
+        if not needle_first:
+            return None
+        hay_lines = haystack_text.splitlines()
+        best_score = 0
+        best_idx = -1
+        for i, line in enumerate(hay_lines):
+            stripped = line.strip().lower()
+            if not stripped:
+                continue
+            # simple character overlap ratio
+            common = sum(c in stripped for c in needle_first)
+            score = common / max(len(needle_first), len(stripped), 1)
+            if score > best_score:
+                best_score = score
+                best_idx = i
+        if best_idx < 0 or best_score < 0.3:
+            return None
+        start = max(0, best_idx - context)
+        end   = min(len(hay_lines), best_idx + context + 1)
+        ctx_lines = []
+        for i in range(start, end):
+            prefix = ">>>" if i == best_idx else "   "
+            ctx_lines.append(f"{prefix} {i+1:4d} | {hay_lines[i]}")
+        return {
+            "line_number": best_idx + 1,
+            "matched_line": hay_lines[best_idx],
+            "context_snippet": "\n".join(ctx_lines),
+            "score": round(best_score, 2),
+        }
+
     for raw in raw_blocks:
         raw = raw.strip()
         if not raw.startswith("@@FILE:"):
@@ -2572,7 +2608,13 @@ def api_project_merge_apply(project):
                     # whitespace-tolerant replace
                     updated = _norm(original).replace(_norm(old_block), _norm(new_block), 1)
                 else:
-                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found in file"})
+                    closest = _find_closest_line(old_block, original)
+                    detail = {
+                        "anchor_text": old_block[:300] + ("…" if len(old_block) > 300 else ""),
+                        "anchor_lines": len(old_block.splitlines()),
+                        "closest_match": closest,
+                    }
+                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found in file", "detail": detail})
                     continue
                 _safe_write(target, updated)
                 results.append({"file": rel_path, "status": "ok", "mode": mode})
@@ -2592,7 +2634,13 @@ def api_project_merge_apply(project):
                 if anchor in original:
                     updated = original.replace(anchor, anchor + "\n" + insert, 1)
                 else:
-                    results.append({"file": rel_path, "status": "error", "message": "@@AFTER anchor not found"})
+                    closest = _find_closest_line(anchor, original)
+                    detail = {
+                        "anchor_text": anchor[:300] + ("…" if len(anchor) > 300 else ""),
+                        "anchor_lines": len(anchor.splitlines()),
+                        "closest_match": closest,
+                    }
+                    results.append({"file": rel_path, "status": "error", "message": "@@AFTER anchor not found", "detail": detail})
                     continue
                 _safe_write(target, updated)
                 results.append({"file": rel_path, "status": "ok", "mode": mode})
@@ -2610,7 +2658,13 @@ def api_project_merge_apply(project):
                 if old_block in original:
                     updated = original.replace(old_block, "", 1)
                 else:
-                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found"})
+                    closest = _find_closest_line(old_block, original)
+                    detail = {
+                        "anchor_text": old_block[:300] + ("…" if len(old_block) > 300 else ""),
+                        "anchor_lines": len(old_block.splitlines()),
+                        "closest_match": closest,
+                    }
+                    results.append({"file": rel_path, "status": "error", "message": "@@FROM block not found", "detail": detail})
                     continue
                 _safe_write(target, updated)
                 results.append({"file": rel_path, "status": "ok", "mode": mode})
