@@ -821,6 +821,10 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Restores only the configured workspace subtree to the selected commit, stages the snapshot, removes untracked files there, and keeps ignored files and paths outside the workspace.
 - Added a confirmation that describes overwritten and removed files.
 
+## [2026-10-12] - Add Setting to Hide Git Commit Hashes
+- Added a Global Settings option to show or hide the hash column in the Git modal's past-commits list.
+- Persisted the preference in browser local storage and apply it immediately to the rendered list.
+
 ## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
 - Added a Git remote field to workspace customization and persisted it with workspace config.
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.

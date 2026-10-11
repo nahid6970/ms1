@@ -1244,6 +1244,8 @@
 
         .git-checkout-btn:active { transform: translateY(0); }
 
+        body.hide-git-commit-hash .git-commit-hash { display: none; }
+
         .git-restore-snapshot-btn {
             display: inline-flex;
             align-items: center;
@@ -3285,6 +3287,10 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="settings-diff-wrap" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                             <label for="settings-diff-wrap" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Wrap long lines in Diff &amp; Browse</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-show-git-commit-hash" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-show-git-commit-hash" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show commit hashes in Git modal</label>
                         </div>
                     </div>
                 </div>
@@ -8453,6 +8459,7 @@
 
             document.getElementById('settings-selector-btn-theme').checked = localStorage.getItem('selector-btn-theme') !== 'false';
             document.getElementById('settings-diff-wrap').checked = localStorage.getItem('diff-wrap-text') === 'true';
+            document.getElementById('settings-show-git-commit-hash').checked = localStorage.getItem('show-git-commit-hash') !== 'false';
             document.getElementById('settings-voice-continuous').checked = localStorage.getItem('voice-continuous') === 'true';
             document.getElementById('settings-voice-use-python').checked = localStorage.getItem('voice-use-python') === 'true';
             document.getElementById('settings-voice-manual-stop').checked = localStorage.getItem('voice-manual-stop') === 'true';
@@ -8677,6 +8684,9 @@
 
             localStorage.setItem('selector-btn-theme', document.getElementById('settings-selector-btn-theme').checked);
             localStorage.setItem('diff-wrap-text', document.getElementById('settings-diff-wrap').checked);
+            const showGitCommitHash = document.getElementById('settings-show-git-commit-hash').checked;
+            localStorage.setItem('show-git-commit-hash', showGitCommitHash);
+            document.body.classList.toggle('hide-git-commit-hash', !showGitCommitHash);
             localStorage.setItem('voice-continuous', document.getElementById('settings-voice-continuous').checked);
             localStorage.setItem('voice-use-python', document.getElementById('settings-voice-use-python').checked);
             localStorage.setItem('voice-manual-stop', document.getElementById('settings-voice-manual-stop').checked);
@@ -16004,7 +16014,7 @@ Always wrap your **entire response** in a single markdown code block.`;
                 }
                 el.innerHTML = commits.map((c, i) => `
                     <div id="commit-row-${c.hash}" style="padding:7px 10px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:8px; transition: background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
-                        <span style="font-family:'Fira Code',monospace; font-size:0.7rem; color:#38bdf8; min-width:46px; flex-shrink:0;">${c.hash}</span>
+                        <span class="git-commit-hash" style="font-family:'Fira Code',monospace; font-size:0.7rem; color:#38bdf8; min-width:46px; flex-shrink:0;">${c.hash}</span>
                         <span style="font-family:'Fira Code',monospace; font-size:0.68rem; color:var(--text-secondary); min-width:65px; flex-shrink:0;">${c.date}</span>
                         <div style="flex:1; min-width:0;" id="commit-msg-display-${c.hash}">
                             <span style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="${c.message}">${c.message}</span>
@@ -17522,6 +17532,7 @@ Always wrap your **entire response** in a single markdown code block.`;
         window.onload = async () => {
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
+            document.body.classList.toggle('hide-git-commit-hash', localStorage.getItem('show-git-commit-hash') === 'false');
 
             // Init tool config
             initAIToolsConfig();

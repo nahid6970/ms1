@@ -94,6 +94,7 @@
 - Stage all (`git add -A`)
 - Commit + auto-push
 - Past commits (last 10) with rename, checkout, push
+- Global setting to hide or show commit hashes in the past-commits list
 - Detached HEAD warning with "Return to latest"
 - Discard all changes (`git restore` + `git clean`)
 - Branch management (create, switch, merge, delete)
