@@ -918,6 +918,8 @@ async function openSettingsModal() {
         const autoScheduleEndInput = document.getElementById('autoScheduleEndTime');
         const discoverImageScaleInput = document.getElementById('discoverImageScale');
         const agendaCountdownToggle = document.getElementById('agendaCountdownEnabled');
+        const completedShowCardTintToggle = document.getElementById('completedShowCardTintEnabled');
+        const completedShowCardTintColor = document.getElementById('completedShowCardTintColor');
         
         if (tmdbKeyInput) tmdbKeyInput.value = settings.tmdb_api_key || '';
         if (defaultShowsSortInput) defaultShowsSortInput.value = settings.default_shows_sort || 'title';
@@ -937,6 +939,8 @@ async function openSettingsModal() {
 
         const fileIconsToggle = document.getElementById('episodeFileIconsEnabled');
         if (fileIconsToggle) fileIconsToggle.checked = settings.episode_file_icons_enabled !== false;
+        if (completedShowCardTintToggle) completedShowCardTintToggle.checked = settings.completed_show_card_tint_enabled !== false;
+        if (completedShowCardTintColor) completedShowCardTintColor.value = settings.completed_show_card_tint_color || '#1db954';
         if (agendaCountdownToggle) agendaCountdownToggle.checked = settings.agenda_countdown_enabled === true;
     } catch (e) {
         console.error('Error loading settings:', e);
@@ -1088,6 +1092,8 @@ async function saveSettings() {
     const radarrApiKey = document.getElementById('radarrApiKey').value;
     const moviesFolder = document.getElementById('rootMoviesFolder').value;
     const fileIconsEnabled = document.getElementById('episodeFileIconsEnabled')?.checked ?? true;
+    const completedShowCardTintEnabled = document.getElementById('completedShowCardTintEnabled')?.checked ?? true;
+    const completedShowCardTintColor = document.getElementById('completedShowCardTintColor')?.value || '#1db954';
     const agendaCountdownEnabled = document.getElementById('agendaCountdownEnabled')?.checked ?? false;
     const storageScanInterval = document.getElementById('storageScanInterval')?.value || 60;
     const autoScheduleStart = document.getElementById('autoScheduleStartTime')?.value || '01:00';
@@ -1113,6 +1119,8 @@ async function saveSettings() {
                 radarr_api_key: radarrApiKey,
                 root_movies_folder: moviesFolder,
                 episode_file_icons_enabled: fileIconsEnabled,
+                completed_show_card_tint_enabled: completedShowCardTintEnabled,
+                completed_show_card_tint_color: completedShowCardTintColor,
                 agenda_countdown_enabled: agendaCountdownEnabled,
                 storage_scan_interval_minutes: storageScanInterval,
                 auto_schedule_start_time: autoScheduleStart,
@@ -1122,6 +1130,8 @@ async function saveSettings() {
         });
         const data = await response.json();
         if (data.success) {
+            document.body.classList.toggle('completed-show-card-tint-enabled', completedShowCardTintEnabled);
+            document.body.style.setProperty('--completed-show-card-tint', completedShowCardTintColor);
             alert('Settings saved successfully!');
             closeSettingsModal();
         } else {

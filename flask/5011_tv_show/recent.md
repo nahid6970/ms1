@@ -37,6 +37,9 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a Settings color picker for the completed-show card tint and restored the dark text on the all-watched episode count badge.
+- `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a persisted Settings toggle for the completed-show card tint; enabled by default and applied immediately after saving.
+- `static/style.css`: Added a subtle green overlay and inset glow across the poster for shows where every released episode is watched; it strengthens on hover.
 - `app.py`, `static/script.js`: Released-episode counts now exclude episodes with no air date, so undated future episodes are preserved by retention without inflating watched/released totals.
 
 - `static/style.css`: Reduced the Agenda Run Now button to a compact 24×26 icon-sized control.

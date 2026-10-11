@@ -125,6 +125,8 @@ def load_settings():
         "radarr_api_key": "",
         "root_movies_folder": r"C:\Users\nahid\Downloads\@radarr",
         "episode_file_icons_enabled": True,
+        "completed_show_card_tint_enabled": True,
+        "completed_show_card_tint_color": "#1db954",
         "auto_schedule_start_time": "01:00",
         "auto_schedule_end_time": "23:00",
         "discover_image_scale": 1,
@@ -1825,6 +1827,9 @@ def update_show_episodes(show_id):
 @app.route('/')
 def index():
     settings = load_settings()
+    completed_tint_color = settings.get('completed_show_card_tint_color', '#1db954')
+    if not isinstance(completed_tint_color, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', completed_tint_color):
+        completed_tint_color = '#1db954'
     sort_by = request.args.get('sort_by') or settings.get('default_shows_sort', 'title')
     order = request.args.get('order') or settings.get('default_shows_order', 'asc')
     query = request.args.get('query')
@@ -1992,7 +1997,9 @@ def index():
 
     next_order = 'desc' if order == 'asc' else 'asc'
 
-    return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query)
+    return render_template('index.html', shows=shows, sort_by=sort_by, order=order, next_order=next_order, query=query,
+                           completed_show_card_tint_enabled=settings.get('completed_show_card_tint_enabled', True),
+                           completed_show_card_tint_color=completed_tint_color)
 
 @app.route('/movies')
 def movies_page():
@@ -2446,6 +2453,9 @@ def api_settings():
         settings['radarr_api_key'] = data.get('radarr_api_key', settings.get('radarr_api_key', ''))
         settings['root_movies_folder'] = data.get('root_movies_folder', settings.get('root_movies_folder', r"C:\Users\nahid\Downloads\@radarr"))
         settings['episode_file_icons_enabled'] = bool(data.get('episode_file_icons_enabled', settings.get('episode_file_icons_enabled', True)))
+        settings['completed_show_card_tint_enabled'] = bool(data.get('completed_show_card_tint_enabled', settings.get('completed_show_card_tint_enabled', True)))
+        tint_color = data.get('completed_show_card_tint_color', settings.get('completed_show_card_tint_color', '#1db954'))
+        settings['completed_show_card_tint_color'] = tint_color if isinstance(tint_color, str) and re.fullmatch(r'#[0-9a-fA-F]{6}', tint_color) else '#1db954'
         settings['agenda_countdown_enabled'] = bool(data.get('agenda_countdown_enabled', settings.get('agenda_countdown_enabled', False)))
         default_start = settings.get('auto_schedule_start_time', '01:00')
         default_end = settings.get('auto_schedule_end_time', '23:00')

@@ -301,14 +301,29 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.show-card.completed {
-    background: rgba(29, 185, 84, 0.05);
-    border-color: rgba(29, 185, 84, 0.3);
+body.completed-show-card-tint-enabled .show-card.completed {
+    background: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 5%, transparent);
+    border-color: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 30%, transparent);
 }
 
-.show-card.completed:hover {
-    background: rgba(29, 185, 84, 0.1);
-    border-color: #1db954;
+body.completed-show-card-tint-enabled .show-card.completed:hover {
+    background: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 10%, transparent);
+    border-color: var(--completed-show-card-tint, #1db954);
+}
+
+body.completed-show-card-tint-enabled .show-card.completed .img-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 14%, transparent);
+    box-shadow: inset 0 0 36px color-mix(in srgb, var(--completed-show-card-tint, #1db954) 28%, transparent);
+    pointer-events: none;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.completed-show-card-tint-enabled .show-card.completed:hover .img-wrapper::after {
+    background: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 20%, transparent);
+    box-shadow: inset 0 0 44px color-mix(in srgb, var(--completed-show-card-tint, #1db954) 36%, transparent);
 }
 
 .show-card .img-wrapper {
@@ -474,19 +489,15 @@ body {
     backdrop-filter: blur(8px);
 }
 
-.show-card.completed .card-info {
-    background: rgba(29, 185, 84, 0.85);
+body.completed-show-card-tint-enabled .show-card.completed .card-info {
+    background: color-mix(in srgb, var(--completed-show-card-tint, #1db954) 85%, transparent);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.show-card.completed .card-info p {
+body.completed-show-card-tint-enabled .show-card.completed .card-info p {
     color: #fff !important;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     font-weight: 600;
-}
-
-.show-card.completed .episode-count {
-    color: #fff !important;
 }
 
 .card-info p {
@@ -2371,6 +2382,7 @@ body::before {
 .show-card .card-info .show-status.status-ended { background: rgba(55, 65, 81, 0.96); border-color: rgba(148, 163, 184, 0.35); }
 .show-card .card-info .episode-count.all-episodes-watched,
 .movie-card .card-info .movie-status.all-episodes-watched { background: #86efac; border-color: #4ade80; color: #111827 !important; }
+.show-card.completed .card-info .episode-count.all-episodes-watched { color: #111827 !important; }
 .movie-card .card-info .movie-status.no-episodes-watched { background: rgba(127, 29, 29, 0.94); border-color: rgba(248, 113, 113, 0.45); }
 .show-card .card-info .tmdb-rating,
 .movie-card .card-info .tmdb-rating { background: rgba(67, 56, 20, 0.96); border-color: rgba(251, 191, 36, 0.4); }

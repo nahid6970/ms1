@@ -7,7 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon-shows.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body{% if completed_show_card_tint_enabled %} class="completed-show-card-tint-enabled"{% endif %} style="--completed-show-card-tint: {{ completed_show_card_tint_color }};">
     <div class="sticky-controls-wrapper">
         <div class="app-header-inner">
             <nav class="library-nav" aria-label="Library sections">
