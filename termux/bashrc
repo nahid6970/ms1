@@ -104,7 +104,7 @@ git_clone() {
 
 # OS-specific commands and startup behavior.
 if [[ "$IS_TERMUX" == true ]]; then
-    alias gg='python ~/ms1/tools/terminal_tui/gemini_terminal_cli/gemini_cli.py --password 182358 --max-output-tokens 65536'
+    alias gg='python ~/ms1/tools/Gemini_CLI/gemini_cli.py --password 182358 --max-output-tokens 65536'
     alias osx='bash ~/ms3/osx.sh'
     alias ubuntu='proot-distro login ubuntu'
     alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'
