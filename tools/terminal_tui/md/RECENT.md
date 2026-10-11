@@ -5,6 +5,55 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-11] - Workspace Management + Git Init + Git Status Optimization
+
+### Fix — File Explorer Paste (HTTP clipboard)
+Already covered in [2026-10-10] but carried forward: `try/catch` around `navigator.clipboard.writeText`, switched to `term.paste()`.
+
+### Feature — Missing Workspace Folder Dialog
+When clicking a workspace whose folder is deleted: styled modal with **📁 Recreate** / **🗑 Delete** / Cancel.
+- `GET /api/project/<project>/path-check`
+- `POST /api/project/<project>/recreate-path`
+
+### Feature — Git Init for Non-Git Projects
+- Status bar shows **⎇ Init git** button (purple) for non-git projects (shown when `data.git` is null in stats poll).
+- Clicking opens a standalone `git-init-modal` (not embedded in the git modal).
+- Fields: GitHub username, repo name (auto-slugified from project name), branch (default `main`).
+- Backend `POST /api/project/<project>/git/init`: runs `git init`, creates `.gitignore`, initial commit, adds remote, pushes.
+- If push fails (repo doesn't exist on GitHub): shows **Create on GitHub** link (opens `github.com/new?name=...`) + **↑ Push now** button.
+- `POST /api/project/<project>/git/push-init`: retry push after creating repo on GitHub.
+- Push fail message simplified to `⚠ push failed — create the repo on GitHub first`.
+
+### Feature — Delete Workspace Button
+- Red 🗑 toolbar button shown when a workspace is active (before the settings gear).
+- Opens styled checkbox modal with three options (first two checked by default):
+  - ✅ Workspace entry (remove from list)
+  - ✅ Terminal data / Project_data (history + PS profile)
+  - ☐ Project folder (actual code — marked PERMANENT in red)
+- `DELETE /api/project/<project>/full` — accepts `{ delete_entry, delete_data, delete_folder }` flags.
+- Uses `wait=True` when killing sessions so processes fully exit before `rmtree` runs on Windows.
+
+### Feature — Duplicate Workspace Modal
+Replaced `confirm()` with styled modal. Added **Empty folder** radio option alongside **Copy files** (default). Empty option creates just the directory + workspace entry with same settings, nothing copied. Backend `duplicate` route reads `empty_only` flag and skips `copytree` when true.
+
+### Feature — Duplicate Workspace Toast
+Added "Switching to project-name…" toast during `selectProject` after duplication so the transition doesn't feel frozen.
+
+### Optimization — Git Status: 5 → 3 Processes Per Scan
+- `_get_git_status_uncached` now uses 3 git processes instead of 5:
+  - `git rev-parse --show-toplevel --abbrev-ref HEAD` — gets root AND branch in one call
+  - `git status --porcelain` — staged/unstaged/untracked counts
+  - `git diff --shortstat HEAD` — total insertions/deletions in one call (replaces two separate diff calls)
+- Cache TTL reduced from 30s → 5s (status updates within ~5s of changes).
+- Poll interval kept at 3s.
+- `invalidate_git_status_cache` already called after all git modal actions so those update instantly.
+
+**Files Modified:**
+- `app.py` — `_get_git_status_uncached`, `GIT_STATUS_CACHE_SECONDS`, `api_git_init`, `api_git_push_init`, `api_project_delete_full`, `api_project_path_check`, `api_project_recreate_path`
+- `templates/index.html` — `git-init-modal`, `_showGitInitBanner`, `initGitRepo`, `retryGitPush`, `closeGitInitModal`, `monitor-git-init-btn`, `workspace-delete-btn`, `deleteActiveWorkspace`, duplicate modal + toast, missing path dialog
+
+---
+
 ## [2026-10-10] - Code Merger UX Improvements
 
 ### Fix 1 — Generate Prompt Works on Empty Folder

@@ -2,6 +2,22 @@
 
 ---
 
+## [2026-10-11] - Delete Workspace Leaves Empty Folder on Windows
+**Problem:** Checking "Project folder" in the delete workspace modal deleted files inside the folder but left the folder itself behind.
+**Root Cause:** `kill_sessions(..., wait=False)` returned before the PowerShell PTY process actually exited. The process kept the project folder as its working directory, so Windows prevented `shutil.rmtree` from removing the directory itself (only contents could be deleted).
+**Solution:** Changed to `kill_sessions(..., wait=True)` in `api_project_delete_full` so processes fully exit before `rmtree` runs. Also normalized the path with `os.path.abspath` to handle trailing slashes.
+**Files Modified:** `app.py`
+
+---
+
+## [2026-10-11] - Git Status Process Buildup (30-40 processes)
+**Problem:** Over time, 30-40 git processes would accumulate, lagging the system.
+**Root Cause:** Each stats poll triggered 5 git subprocesses. With a 30s cache and multiple workspaces, slow git operations (large repos, antivirus) could pile up faster than they resolved.
+**Solution:** Reduced to 3 git processes per scan by combining `rev-parse --show-toplevel` + `--abbrev-ref HEAD` into one call, and replacing two `diff --shortstat` calls (staged + unstaged separately) with a single `diff --shortstat HEAD`. Cache TTL reduced from 30s to 5s. Coalescing lock already prevents concurrent duplicate scans for the same repo.
+**Files Modified:** `app.py` — `_get_git_status_uncached`, `GIT_STATUS_CACHE_SECONDS`
+
+---
+
 ## [2026-10-10] - File Explorer Path Paste Silently Broken on HTTP
 **Problem:** Clicking a file in the workspace file explorer did nothing — path was not pasted into the terminal and the filename didn't flash green.
 **Root Cause:** `navigator.clipboard.writeText()` throws `TypeError: Cannot read properties of undefined (reading 'writeText')` on HTTP (non-localhost) because `navigator.clipboard` is `undefined` on insecure origins. This uncaught exception killed the onclick handler before `term.paste()` was reached. A secondary issue was that the handler still used the old `socket.emit('pty-input')` direct emit instead of `term.paste()`, which could silently drop on a momentarily disconnected socket.
