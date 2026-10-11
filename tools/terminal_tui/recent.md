@@ -1,6 +1,10 @@
 # Project DNA
 A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace management. It utilizes a unified `tui_config.json` for persistent configuration and user-defined custom button shortcuts.
 
+## [2026-10-11] Sidebar Flash on Refresh
+- The saved collapsed state and sidebar width are now applied before first paint, preventing the sidebar from flashing open during refresh.
+- `templates/index.html`
+
 # Latest Implementation
 * **[2026-10-11] Switch Terminal to pwsh (PowerShell Core)** (`app.py`):
     * Changed `TerminalSession` from `powershell.exe` to `pwsh.exe`.

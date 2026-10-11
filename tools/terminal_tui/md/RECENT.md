@@ -5,6 +5,13 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-11] - Prevent Sidebar Flash on Refresh
+- Applied the saved sidebar width and collapsed state in the early `<head>` script so refresh does not briefly show a collapsed sidebar.
+- Kept the pre-paint collapsed class synchronized with the sidebar toggle.
+- `templates/index.html`
+
+---
+
 ## [2026-10-11] - Switch Terminal to pwsh (PowerShell Core)
 
 ### Change

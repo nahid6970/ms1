@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-11] - Collapsed Sidebar Flashes on Page Refresh
+**Problem:** The workspace sidebar briefly appeared on refresh even when it had been collapsed.
+**Root Cause:** The saved `sidebar-collapsed` state was applied in `window.onload`, after the page had already painted (and after asynchronous startup work began).
+**Solution:** Read the saved sidebar width and collapsed state in the early `<head>` script, then apply a root class that collapses the sidebar before first paint. Keep that class synchronized when the sidebar toggle is used.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-10-11] - Delete Workspace Leaves Empty Folder on Windows
 **Problem:** Checking "Project folder" in the delete workspace modal deleted files inside the folder but left the folder itself behind.
 **Root Cause:** `kill_sessions(..., wait=False)` returned before the PowerShell PTY process actually exited. The process kept the project folder as its working directory, so Windows prevented `shutil.rmtree` from removing the directory itself (only contents could be deleted).

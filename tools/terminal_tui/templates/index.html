@@ -36,6 +36,15 @@
             if (savedShowSidebar === 'false') {
                 document.documentElement.classList.add('hide-sidebar-layout');
             }
+            // Apply persisted sidebar state before the browser paints the page.
+            // window.onload initializes this too, but it runs after the sidebar
+            // has already been visible and can cause a brief flash on refresh.
+            const root = document.documentElement;
+            const savedSidebarWidth = parseInt(localStorage.getItem('sidebar-width'), 10) || 250;
+            root.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+            if (localStorage.getItem('sidebar-collapsed') === 'true') {
+                root.classList.add('sidebar-collapsed-layout');
+            }
         })();
     </script>
     
@@ -80,6 +89,10 @@
         /* Prevent Sidebar layout flash of unstyled content (FOUC) */
         html.hide-sidebar-layout {
             --sidebar-width: 0px !important;
+        }
+        html.sidebar-collapsed-layout .sidebar {
+            width: 0 !important;
+            border-right: none !important;
         }
 
         /* ── AI Chat Markdown Styles ── */
@@ -7959,6 +7972,7 @@
             const sidebar = document.querySelector('.sidebar');
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
+            document.documentElement.classList.toggle('sidebar-collapsed-layout', isCollapsed);
             
             localStorage.setItem('sidebar-collapsed', isCollapsed);
             
