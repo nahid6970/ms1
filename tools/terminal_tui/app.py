@@ -219,7 +219,7 @@ sessions_lock = threading.Lock()
 _git_status_cache = {}
 _git_status_cache_locks = {}
 _git_status_cache_lock = threading.Lock()
-GIT_STATUS_CACHE_SECONDS = 30
+GIT_STATUS_CACHE_SECONDS = 5
 
 def get_git_status(path):
     if not os.path.isdir(path):
@@ -254,95 +254,73 @@ def _get_git_status_uncached(path):
     if not os.path.isdir(path):
         return None
     try:
-        # Normalize path to avoid mixed slash issues on Windows
         path = os.path.normpath(path)
         cf = 0x08000000 if sys.platform == "win32" else 0
 
-        # Find the git root so we can scope commands to this project subfolder
-        res_root = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
+        # ── Process 1: get git root AND branch in one call ────────────────────
+        res = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel", "--abbrev-ref", "HEAD"],
             cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=cf, timeout=2
+            text=True, creationflags=cf, timeout=3
         )
-        if res_root.returncode != 0:
+        if res.returncode != 0:
             return None
-        git_root = os.path.normpath((res_root.stdout or "").strip())
-
-        # Relative path of this project inside the repo (used as pathspec)
-        rel_path = os.path.relpath(path, git_root)
-        # If project IS the repo root, use '.' — otherwise use the relative subfolder
-        pathspec = "." if rel_path == "." else rel_path
-
-        # Build exclude pathspecs from saved git-exclude-patterns config.
-        # Mirrors the frontend gitExcludeMatches logic:
-        #   *.ext  → exclude by extension
-        #   name   → exclude by exact filename or path suffix
-        exclude_patterns = get_config_val("git_exclude_patterns", list) or []
-        exclude_pathspecs = []
-        for pat in exclude_patterns:
-            pat = pat.strip()
-            if not pat:
-                continue
-            if pat.startswith("*."):
-                exclude_pathspecs.append(f":(exclude,icase)**/{pat}")
-            else:
-                # Could be a filename (e.g. yarn.lock) or a path suffix
-                exclude_pathspecs.append(f":(exclude,icase)**/{pat}")
-        pathspecs = [pathspec] + exclude_pathspecs
-
-        # Get current branch name
-        res_branch = subprocess.run(
-            ["git", "branch", "--show-current"],
-            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=cf, timeout=2
-        )
-        branch = (res_branch.stdout or "").strip()
-        if not branch:
-            res_branch = subprocess.run(
+        lines = [l.strip() for l in (res.stdout or "").strip().splitlines() if l.strip()]
+        if len(lines) < 2:
+            return None
+        git_root = os.path.normpath(lines[0])
+        branch   = lines[1]
+        if branch == "HEAD":
+            res2 = subprocess.run(
                 ["git", "symbolic-ref", "--short", "HEAD"],
                 cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 text=True, creationflags=cf, timeout=2
             )
-            branch = (res_branch.stdout or "").strip()
+            branch = (res2.stdout or "").strip() or "HEAD"
 
-        if not branch:
-            return None
+        rel_path = os.path.relpath(path, git_root)
+        pathspec = "." if rel_path == "." else rel_path
 
-        # Get file statuses scoped to this project subfolder, excluding configured patterns
+        exclude_patterns = get_config_val("git_exclude_patterns", list) or []
+        exclude_pathspecs = [
+            f":(exclude,icase)**/{p.strip()}"
+            for p in exclude_patterns if p.strip()
+        ]
+        pathspecs = [pathspec] + exclude_pathspecs
+
+        # ── Process 2: status porcelain (counts staged/unstaged/untracked) ────
         res_status = subprocess.run(
             ["git", "--icase-pathspecs", "status", "--porcelain", "-uall", "--"] + pathspecs,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-            text=True, creationflags=cf, timeout=2
+            text=True, creationflags=cf, timeout=3
         )
         status_lines = [l for l in (res_status.stdout or "").strip().split("\n") if l.strip()]
         mod_count = len(status_lines)
-        staged    = len([l for l in status_lines if l[0] not in ('?', ' ')])
-        unstaged  = len([l for l in status_lines if l[1] != ' '])
-        untracked = len([l for l in status_lines if l.startswith('??')])
+        staged    = sum(1 for l in status_lines if len(l) >= 2 and l[0] not in ('?', ' ', '!'))
+        untracked = sum(1 for l in status_lines if l.startswith('??'))
 
-        # Get lines added/deleted scoped to this project subfolder, excluding configured patterns
+        # ── Process 3: diff shortstat against HEAD (staged+unstaged combined) ─
         insertions, deletions = 0, 0
-        for extra_flag in [[], ["--cached"]]:
-            res_diff = subprocess.run(
-                ["git", "--icase-pathspecs", "diff", "--shortstat"] + extra_flag + ["--"] + pathspecs,
-                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                text=True, creationflags=cf, timeout=2
-            )
-            diff_out = (res_diff.stdout or "").strip()
-            if diff_out:
-                m_ins = re.search(r'(\d+) insertion', diff_out)
-                m_del = re.search(r'(\d+) deletion', diff_out)
-                if m_ins: insertions += int(m_ins.group(1))
-                if m_del: deletions += int(m_del.group(1))
+        res_diff = subprocess.run(
+            ["git", "--icase-pathspecs", "diff", "--shortstat", "HEAD", "--"] + pathspecs,
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, creationflags=cf, timeout=3
+        )
+        diff_out = (res_diff.stdout or "").strip()
+        if diff_out:
+            m_ins = re.search(r'(\d+) insertion', diff_out)
+            m_del = re.search(r'(\d+) deletion', diff_out)
+            if m_ins: insertions = int(m_ins.group(1))
+            if m_del: deletions  = int(m_del.group(1))
 
         return {
-            "branch": branch,
+            "branch":        branch,
             "modifications": mod_count,
-            "staged": staged,
-            "unstaged": unstaged,
-            "untracked": untracked,
-            "insertions": insertions,
-            "deletions": deletions,
+            "staged":        staged,
+            "unstaged":      max(0, mod_count - staged - untracked),
+            "untracked":     untracked,
+            "insertions":    insertions,
+            "deletions":     deletions,
         }
     except Exception:
         return None
