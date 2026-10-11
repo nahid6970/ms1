@@ -3419,6 +3419,55 @@
         </div>
     </div>
 
+    <!-- Git Init Modal (standalone, shown for non-git projects) -->
+    <div class="modal-overlay" id="git-init-modal">
+        <div class="modal-content" style="width:480px; max-width:96%; padding:28px 28px 24px;">
+            <div class="modal-header" style="margin-bottom:20px; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                    <h2 style="font-size:1.05rem; font-weight:600; color:#a5b4fc; margin:0;">Initialize Git Repository</h2>
+                </div>
+                <button onclick="closeGitInitModal()" style="background:none; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer; line-height:1; padding:2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:18px; line-height:1.6;">
+                This project folder is not a git repository. Initialize one to start tracking changes and pushing to GitHub.
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-size:0.75rem; color:var(--text-muted); min-width:110px;">GitHub username</label>
+                    <input type="text" id="git-init-username" placeholder="e.g. nahid6970" autocomplete="off"
+                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.82rem; font-family:'Fira Code',monospace; outline:none;"
+                        onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-size:0.75rem; color:var(--text-muted); min-width:110px;">Repo name</label>
+                    <input type="text" id="git-init-reponame" placeholder="my-project" autocomplete="off"
+                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.82rem; font-family:'Fira Code',monospace; outline:none;"
+                        onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label style="font-size:0.75rem; color:var(--text-muted); min-width:110px;">Branch</label>
+                    <input type="text" id="git-init-branch" value="main" autocomplete="off"
+                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:6px 10px; font-size:0.82rem; font-family:'Fira Code',monospace; outline:none;"
+                        onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
+                </div>
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:16px;">
+                Leave username &amp; repo name empty to only init locally without pushing.
+            </div>
+            <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
+                <button id="git-init-btn" onclick="initGitRepo()"
+                    style="padding:8px 20px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); border-radius:8px; color:#a5b4fc; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
+                    onmouseenter="this.style.background='rgba(99,102,241,0.3)'; this.style.borderColor='rgba(99,102,241,0.75)'"
+                    onmouseleave="this.style.background='rgba(99,102,241,0.18)'; this.style.borderColor='rgba(99,102,241,0.5)'">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                    Initialize
+                </button>
+                <div id="git-init-status" style="font-size:0.75rem; color:var(--text-secondary); flex:1; min-width:0;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Git Commit & Push Modal -->
     <div class="modal-overlay" id="git-modal">
         <div class="modal-content" style="width: 600px; max-width: 96%; padding: 24px;">
@@ -3445,49 +3494,6 @@
                             Fix Now
                         </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Git Init banner (shown when project is not yet a git repo) -->
-            <div id="git-init-banner" style="display:none; margin-bottom:14px; padding:16px 18px; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.35); border-radius:10px;">
-                <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
-                    <span style="font-size:0.9rem; font-weight:600; color:#a5b4fc;">Initialize Git Repository</span>
-                </div>
-                <div style="font-size:0.78rem; color:var(--text-secondary); margin-bottom:14px; line-height:1.6;">
-                    This project folder is not a git repository. Initialize one to start tracking changes and pushing to GitHub.
-                </div>
-                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <label style="font-size:0.72rem; color:var(--text-muted); min-width:100px;">GitHub username</label>
-                        <input type="text" id="git-init-username" placeholder="e.g. nahid6970" autocomplete="off"
-                            style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
-                            onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <label style="font-size:0.72rem; color:var(--text-muted); min-width:100px;">Repo name</label>
-                        <input type="text" id="git-init-reponame" placeholder="my-project" autocomplete="off"
-                            style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
-                            onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
-                    </div>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <label style="font-size:0.72rem; color:var(--text-muted); min-width:100px;">Branch</label>
-                        <input type="text" id="git-init-branch" value="main" autocomplete="off"
-                            style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:5px 9px; font-size:0.8rem; font-family:'Fira Code',monospace; outline:none;"
-                            onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='var(--border-color)'">
-                    </div>
-                </div>
-                <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; line-height:1.5;">
-                    Leave username &amp; repo name empty to only init locally without pushing.
-                </div>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <button id="git-init-btn" onclick="initGitRepo()" style="padding:7px 18px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); border-radius:8px; color:#a5b4fc; font-size:0.82rem; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
-                        onmouseenter="this.style.background='rgba(99,102,241,0.3)'; this.style.borderColor='rgba(99,102,241,0.75)'"
-                        onmouseleave="this.style.background='rgba(99,102,241,0.18)'; this.style.borderColor='rgba(99,102,241,0.5)'">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
-                        Initialize
-                    </button>
-                    <div id="git-init-status" style="font-size:0.75rem; color:var(--text-secondary);"></div>
                 </div>
             </div>
 
@@ -9517,22 +9523,26 @@
         }
 
         function _showGitInitBanner() {
-            const initBanner = document.getElementById('git-init-banner');
-            const filesEl    = document.getElementById('git-changed-files');
-            const subtitleEl = document.getElementById('git-modal-subtitle');
-            const branchEl   = document.getElementById('git-modal-branch');
-            if (initBanner) initBanner.style.display = 'block';
-            if (filesEl)    filesEl.style.display = 'none';
-            if (subtitleEl) subtitleEl.innerText = 'Not a git repository';
-            if (branchEl)   branchEl.innerText = '—';
+            // Close the git modal and open the standalone init modal instead
+            const gitModal = document.getElementById('git-modal');
+            if (gitModal) gitModal.classList.remove('show');
+            const initModal = document.getElementById('git-init-modal');
+            if (initModal) initModal.classList.add('show');
             // Pre-fill repo name from project name (slugified)
             const repoInput = document.getElementById('git-init-reponame');
             if (repoInput && !repoInput.value) {
                 repoInput.value = activeProject.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
             }
-            // Hide bottom action buttons that make no sense yet
-            const commitBtn = document.getElementById('git-commit-btn');
-            if (commitBtn) commitBtn.style.display = 'none';
+            // Reset status
+            const statusEl = document.getElementById('git-init-status');
+            if (statusEl) statusEl.innerHTML = '';
+            const btn = document.getElementById('git-init-btn');
+            if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Initialize`; }
+        }
+
+        function closeGitInitModal() {
+            const initModal = document.getElementById('git-init-modal');
+            if (initModal) initModal.classList.remove('show');
         }
 
         async function initGitRepo() {
@@ -9596,14 +9606,9 @@
                     btn.disabled = false;
                     btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Initialize`;
                 } else {
-                    // All good — reload git modal
+                    // All good — close init modal and open git modal
                     setTimeout(() => {
-                        const initBanner = document.getElementById('git-init-banner');
-                        const filesEl    = document.getElementById('git-changed-files');
-                        const commitBtn  = document.getElementById('git-commit-btn');
-                        if (initBanner) initBanner.style.display = 'none';
-                        if (filesEl)    filesEl.style.display = '';
-                        if (commitBtn)  commitBtn.style.display = '';
+                        closeGitInitModal();
                         openGitCommitModal();
                     }, 1800);
                 }
@@ -9630,12 +9635,7 @@
                 if (data.ok) {
                     if (btn) { btn.textContent = '✓ Pushed!'; btn.style.color = '#34d399'; btn.style.borderColor = 'rgba(52,211,153,0.5)'; }
                     setTimeout(() => {
-                        const initBanner = document.getElementById('git-init-banner');
-                        const filesEl    = document.getElementById('git-changed-files');
-                        const commitBtn  = document.getElementById('git-commit-btn');
-                        if (initBanner) initBanner.style.display = 'none';
-                        if (filesEl)    filesEl.style.display = '';
-                        if (commitBtn)  commitBtn.style.display = '';
+                        closeGitInitModal();
                         openGitCommitModal();
                     }, 1000);
                 } else {
