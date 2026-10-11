@@ -833,6 +833,10 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Added a per-commit preview action that compares the selected snapshot with current HEAD, scoped to the workspace folder.
 - Scoped the Git diff API's file, stat, and patch output to the active workspace folder.
 
+## [2026-10-12] - Update Git History Limits
+- Replaced the graph/commit limit options with 25, 50, 75, 100, 150, 300, 500, and 1000.
+- Set 50 as the default and migrate unsupported previously saved values to it.
+
 ## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
 - Added a Git remote field to workspace customization and persisted it with workspace config.
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.

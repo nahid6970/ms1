@@ -3776,11 +3776,12 @@
                 <div style="display:flex; gap: 10px; justify-content: flex-end; align-items: center;">
                 <div style="display:flex; align-items:center; gap:5px; margin-right:auto;">
                     <select id="graph-limit-select" onchange="onGraphLimitChange()" title="Graph / Commits limit" style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.8rem; padding: 7px 10px; cursor: pointer; outline: none; transition: all 0.2s; height: 35px;">
-                        <option value="20">20</option>
-                        <option value="40" selected>40</option>
-                        <option value="60">60</option>
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="75">75</option>
                         <option value="100">100</option>
-                        <option value="200">200</option>
+                        <option value="150">150</option>
+                        <option value="300">300</option>
                         <option value="500">500</option>
                         <option value="1000">1000</option>
                     </select>
@@ -9738,9 +9739,13 @@
             const btn = document.getElementById('git-commit-btn');
 
             // Restore saved graph limit
-            const savedLimit = localStorage.getItem('graph-limit') || '40';
             const limitSel = document.getElementById('graph-limit-select');
-            if (limitSel) limitSel.value = savedLimit;
+            if (limitSel) {
+                const savedLimit = localStorage.getItem('graph-limit') || '50';
+                const allowedLimits = Array.from(limitSel.options, option => option.value);
+                limitSel.value = allowedLimits.includes(savedLimit) ? savedLimit : '50';
+                localStorage.setItem('graph-limit', limitSel.value);
+            }
 
             // Reset state
             msgEl.value = '';
@@ -16015,7 +16020,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             el.innerHTML = '<div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem;">Loading...</div>';
             try {
                 const sel = document.getElementById('graph-limit-select');
-                const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '40');
+                const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '50');
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/commits?limit=${limit}`);
                 if (!res.ok) {
                     const d = await res.json();
@@ -16574,7 +16579,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             }
             container.innerHTML = '<div style="padding:10px 14px; color:var(--text-secondary); font-size:0.76rem;">Loading graph...</div>';
             const sel = document.getElementById('graph-limit-select');
-            const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '40');
+            const limit = sel ? sel.value : (localStorage.getItem('graph-limit') || '50');
             try {
                 const url = `/api/project/${encodeURIComponent(activeProject)}/git/graph?limit=${limit}&_=${Date.now()}`;
                 const res = await fetch(url);
