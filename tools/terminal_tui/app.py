@@ -858,6 +858,53 @@ def api_projects_delete(project):
             
     return jsonify(scan_projects())
 
+@app.route('/api/project/<project>/full', methods=['DELETE'])
+def api_project_delete_full(project):
+    """Remove workspace entry and/or its Project_data folder and/or the actual project folder."""
+    import re as _re, shutil as _sh
+    projects_cfg = load_projects_config()
+    proj = next((p for p in projects_cfg if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    delete_entry  = data.get("delete_entry", True)
+    delete_data   = data.get("delete_data", True)
+    delete_folder = data.get("delete_folder", False)
+
+    path = proj.get("path", "")
+    safe_path = _re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
+    project_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Project_data", safe_path)
+
+    # Kill sessions first
+    kill_sessions(detach_project_sessions(project), wait=False)
+
+    errors = []
+
+    # Remove from config
+    if delete_entry:
+        filtered = [p for p in projects_cfg if p["name"].lower() != project.lower()]
+        save_projects_config(filtered)
+
+    # Delete Project_data folder
+    if delete_data and os.path.exists(project_data_dir):
+        try:
+            _sh.rmtree(project_data_dir)
+        except Exception as e:
+            errors.append(f"Could not delete Project_data: {e}")
+
+    # Delete actual project folder
+    if delete_folder and path and os.path.exists(path):
+        try:
+            _sh.rmtree(path)
+        except Exception as e:
+            errors.append(f"Could not delete project folder: {e}")
+
+    result = {"status": "done", "projects": scan_projects()}
+    if errors:
+        result["warnings"] = errors
+    return jsonify(result)
+
 @app.route('/api/project/<project>/path-check', methods=['GET'])
 def api_project_path_check(project):
     """Return whether the workspace folder exists on disk."""
