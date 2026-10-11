@@ -1982,6 +1982,21 @@ body::before {
     gap: 14px;
 }
 
+#settingsModal .settings-panel-general .completed-card-tint-setting-row {
+    grid-template-columns: minmax(0, 1fr) 48px auto;
+    gap: 10px;
+}
+
+#settingsModal .completed-card-tint-color {
+    width: 48px;
+    height: 32px;
+    padding: 2px;
+    border: 1px solid #526174;
+    border-radius: 6px;
+    background: #151c28;
+    cursor: pointer;
+}
+
 #settingsModal .settings-panel-general .setting-row > label:first-child {
     min-width: 0;
 }

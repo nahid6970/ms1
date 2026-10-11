@@ -37,6 +37,7 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `templates/_settings_modal.html`, `static/style.css`: Combined the completed-card tint toggle and color picker into a single Settings row.
 - `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a Settings color picker for the completed-show card tint and restored the dark text on the all-watched episode count badge.
 - `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a persisted Settings toggle for the completed-show card tint; enabled by default and applied immediately after saving.
 - `static/style.css`: Added a subtle green overlay and inset glow across the poster for shows where every released episode is watched; it strengthens on hover.
