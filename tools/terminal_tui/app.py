@@ -1949,7 +1949,7 @@ def api_git_init(project):
             if ok:
                 steps.append(f"✔ pushed to origin/{branch}")
             else:
-                steps.append(f"⚠ push failed (create the repo on GitHub first): {out[:200]}")
+                steps.append(f"⚠ push failed — create the repo on GitHub first")
 
         invalidate_git_status_cache(path)
         return jsonify({"steps": steps, "remote_url": remote_url, "push_failed": any(s.startswith('⚠ push') for s in steps)})
