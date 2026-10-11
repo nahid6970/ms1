@@ -1243,6 +1243,28 @@
 
         .git-checkout-btn:active { transform: translateY(0); }
 
+        .git-restore-snapshot-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 27px;
+            height: 25px;
+            padding: 0;
+            border: 1px solid rgba(251, 146, 60, 0.45);
+            border-radius: 6px;
+            background: rgba(234, 88, 12, 0.09);
+            color: #fdba74;
+            cursor: pointer;
+            transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+        }
+
+        .git-restore-snapshot-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(251, 146, 60, 0.8);
+            background: rgba(234, 88, 12, 0.2);
+            color: #ffedd5;
+        }
+
         .git-remote-btn:disabled {
             opacity: 0.48;
             cursor: not-allowed;
@@ -15999,6 +16021,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                             <button class="git-checkout-btn" onclick="checkoutCommit('${c.hash}')" title="Check out this commit in detached HEAD state">
                                 <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="3" r="2.25"/><circle cx="6" cy="21" r="2.25"/><circle cx="18" cy="6" r="2.25"/><path d="M6 5.25v13.5"/><path d="M6 9a9 9 0 0 0 9 9h.75"/></svg>
                             </button>
+                            <button class="git-restore-snapshot-btn" onclick="restoreWorkspaceFolderToCommit('${c.hash}')" title="Restore this workspace folder to this commit. Overwrites staged and unstaged changes, and removes untracked files.">
+                                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v5h5"/><path d="M4.6 15a8 8 0 1 0 .5-8.5L3 12"/><path d="M12 7v5l3 2"/></svg>
+                            </button>
                             `}
                         </div>
                     </div>
@@ -17131,6 +17156,54 @@ Always wrap your **entire response** in a single markdown code block.`;
                     // Show return bar
                     const returnBar = document.getElementById('git-checkout-returnbar');
                     if (returnBar) returnBar.style.display = 'flex';
+                }
+            } catch (e) {
+                statusEl.style.color = '#ef4444';
+                statusEl.innerText = 'Connection error.';
+            }
+        }
+
+        async function restoreWorkspaceFolderToCommit(hash) {
+            if (!activeProject) return;
+            const confirmed = confirm(
+                `Restore the entire "${activeProject}" workspace folder to commit ${hash}?\n\n` +
+                `This overwrites staged and unstaged changes in that folder, removes untracked files there, and stages the restored snapshot. ` +
+                `Files outside this workspace folder are left alone. Ignored files are kept.\n\nContinue?`
+            );
+            if (!confirmed) return;
+
+            const statusEl = document.getElementById('git-status-msg');
+            statusEl.style.color = 'var(--text-secondary)';
+            statusEl.innerText = `Restoring workspace folder to ${hash}...`;
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/restore-folder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hash })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerText = `Restore failed: ${data.error || 'Unknown error'}`;
+                    return;
+                }
+
+                statusEl.style.color = '#fb923c';
+                statusEl.innerText = `Workspace folder restored to ${hash}; snapshot changes are staged.`;
+                updateStatsMonitor();
+                refreshPastCommits();
+
+                const filesEl = document.getElementById('git-changed-files');
+                const subtitleEl = document.getElementById('git-modal-subtitle');
+                filesEl.innerHTML = '<div style="padding:10px 14px;color:var(--text-secondary);font-size:0.8rem;">Reloading...</div>';
+                const fres = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/files`);
+                if (fres.ok) {
+                    const fdata = await fres.json();
+                    const files = fdata.files || [];
+                    subtitleEl.innerText = files.length ? `${files.length} file${files.length !== 1 ? 's' : ''} changed` : 'No changes to commit';
+                    filesEl.innerHTML = files.length
+                        ? files.map(f => `<div style="display:flex;align-items:center;gap:10px;padding:6px 14px;border-bottom:1px solid var(--border-color);font-family:'Fira Code',monospace;font-size:0.78rem;"><span style="color:${f.color};font-weight:600;min-width:90px;font-size:0.7rem;text-transform:uppercase;">${f.label}</span><span style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.path}</span></div>`).join('')
+                        : '<div style="padding:10px 14px;color:var(--text-secondary);font-size:0.8rem;font-style:italic;">No changed files.</div>';
                 }
             } catch (e) {
                 statusEl.style.color = '#ef4444';

@@ -816,6 +816,11 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Cache and coalesce Git status scans to reduce repeated Git process creation.
 - Closing a tab now removes its PTY session and child process tree; bound process termination and avoid holding the session registry lock during cleanup.
 
+## [2026-10-12] - Restore Workspace Folder to a Past Commit
+- Added a per-commit restore action alongside checkout in the Git modal.
+- Restores only the configured workspace subtree to the selected commit, stages the snapshot, removes untracked files there, and keeps ignored files and paths outside the workspace.
+- Added a confirmation that describes overwritten and removed files.
+
 ## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
 - Added a Git remote field to workspace customization and persisted it with workspace config.
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.

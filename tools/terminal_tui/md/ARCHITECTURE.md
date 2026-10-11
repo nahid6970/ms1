@@ -94,6 +94,7 @@ Click git info badge in status bar to open Git modal:
 - `POST /api/project/<project>/git/checkout` - Checkout commit
 - `POST /api/project/<project>/git/return-branch` - Return to branch
 - `POST /api/project/<project>/git/push` - Push to remote
+- `POST /api/project/<project>/git/restore-folder` - Restore the workspace folder's staged and working files to a commit snapshot
 - `POST /api/project/<project>/git/discard` - Discard all changes (`git restore` + `git clean`)
 
 ### 5. Bookmarks

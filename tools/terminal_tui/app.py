@@ -1814,6 +1814,111 @@ def api_git_checkout(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/restore-folder', methods=['POST'])
+def api_git_restore_folder_to_commit(project):
+    """Restore only this workspace folder to a commit snapshot, staging the result."""
+    import re as _re
+    data = request.get_json(silent=True) or {}
+    commit_hash = str(data.get("hash", "")).strip()
+    if not _re.fullmatch(r"[0-9a-fA-F]{7,40}", commit_hash):
+        return jsonify({"error": "A valid commit hash is required."}), 400
+
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    path = os.path.normpath(proj["path"])
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        res_root = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], cwd=path,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            creationflags=cf, timeout=3
+        )
+        if res_root.returncode != 0:
+            return jsonify({"error": "Not a git repository"}), 400
+        git_root = os.path.normpath((res_root.stdout or "").strip())
+        try:
+            common_path = os.path.commonpath([os.path.abspath(path), os.path.abspath(git_root)])
+        except ValueError:
+            return jsonify({"error": "Workspace path is outside the Git repository."}), 400
+        if os.path.normcase(common_path) != os.path.normcase(os.path.abspath(git_root)):
+            return jsonify({"error": "Workspace path is outside the Git repository."}), 400
+
+        res_commit = subprocess.run(
+            ["git", "rev-parse", "--verify", "--end-of-options", f"{commit_hash}^{{commit}}"],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            creationflags=cf, timeout=5
+        )
+        if res_commit.returncode != 0:
+            return jsonify({"error": "Commit not found in this repository."}), 404
+        commit = (res_commit.stdout or "").strip()
+
+        rel_path = os.path.relpath(path, git_root).replace("\\", "/")
+        pathspec = "." if rel_path == "." else f":(top,literal){rel_path}/"
+        res_current = subprocess.run(
+            ["git", "ls-files", "-z", "--", pathspec], cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            creationflags=cf, timeout=10
+        )
+        if res_current.returncode != 0:
+            return jsonify({"error": (res_current.stderr or b"").decode("utf-8", "replace").strip() or "Could not list workspace files."}), 500
+        current_files = {os.fsdecode(item) for item in res_current.stdout.split(b"\0") if item}
+
+        res_target = subprocess.run(
+            ["git", "ls-tree", "-r", "-z", "--name-only", commit, "--", pathspec],
+            cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            creationflags=cf, timeout=10
+        )
+        if res_target.returncode != 0:
+            return jsonify({"error": (res_target.stderr or b"").decode("utf-8", "replace").strip() or "Could not read the selected commit."}), 500
+        target_files = {os.fsdecode(item) for item in res_target.stdout.split(b"\0") if item}
+
+        # Remove files tracked now but absent from the selected snapshot, then
+        # restore the snapshot into both the index and working tree.
+        obsolete_files = sorted(current_files - target_files)
+        if obsolete_files:
+            res_remove = subprocess.run(
+                ["git", "rm", "-f", "--"] + obsolete_files, cwd=git_root,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                encoding="utf-8", errors="replace", creationflags=cf, timeout=30
+            )
+            if res_remove.returncode != 0:
+                return jsonify({"error": (res_remove.stderr or "Could not remove files absent from the selected commit.").strip()}), 500
+
+        if target_files:
+            res_restore = subprocess.run(
+                ["git", "restore", "--source", commit, "--staged", "--worktree", "--", pathspec],
+                cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                encoding="utf-8", errors="replace", creationflags=cf, timeout=60
+            )
+            if res_restore.returncode != 0:
+                return jsonify({"error": (res_restore.stderr or "Could not restore workspace files.").strip()}), 500
+
+        res_clean = subprocess.run(
+            ["git", "clean", "-fd", "--", pathspec], cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", creationflags=cf, timeout=60
+        )
+        if res_clean.returncode != 0:
+            return jsonify({"error": (res_clean.stderr or "Could not remove untracked workspace files.").strip()}), 500
+
+        invalidate_git_status_cache(path)
+        return jsonify({
+            "success": True,
+            "commit": commit,
+            "path": path,
+            "restored_files": len(target_files),
+            "removed_files": len(obsolete_files),
+            "output": ((res_clean.stdout or "") + (res_clean.stderr or "")).strip()
+        })
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Git restore operation timed out."}), 504
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
 @app.route('/api/project/<project>/git/tree', methods=['GET'])
 def api_git_tree(project):
     """List all files at a specific commit (git ls-tree) — no checkout"""
