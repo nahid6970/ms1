@@ -1843,7 +1843,7 @@ def index():
         today = datetime.now().date().isoformat()
         released_episode_list = [
             episode for episode in show.get('episodes', [])
-            if not episode.get('air_date') or str(episode.get('air_date')) <= today
+            if episode.get('air_date') and str(episode.get('air_date')) <= today
         ]
         show['watched_count'] = sum(1 for episode in released_episode_list if episode.get('watched'))
         show['watched_total_count'] = sum(1 for episode in show.get('episodes', []) if episode.get('watched'))

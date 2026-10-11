@@ -37,6 +37,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `app.py`, `static/script.js`: Released-episode counts now exclude episodes with no air date, so undated future episodes are preserved by retention without inflating watched/released totals.
+
 - `static/style.css`: Reduced the Agenda Run Now button to a compact 24×26 icon-sized control.
 
 - `static/agenda.js`, `static/style.css`: Restyled the Agenda Run Now action to match the existing compact schedule buttons, including the mini play SVG and matching hover/disabled states.

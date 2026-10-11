@@ -515,7 +515,7 @@ function isReleasedAndUnwatched(episode) {
 }
 
 function isEpisodeCountedAsReleased(episode) {
-    if (!episode.air_date) return true;
+    if (!episode.air_date) return false;
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     return String(episode.air_date) <= today;
