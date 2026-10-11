@@ -118,7 +118,8 @@
         "pathColor": "#163055",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/ms1.git"
     },
     {
       "name": "db",
