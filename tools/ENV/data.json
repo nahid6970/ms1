@@ -1,6 +1,6 @@
 {
     "version": "1.3",
-    "timestamp": "2026-10-10T08:00:32.765030",
+    "timestamp": "2026-10-11T11:45:03.895740",
     "aliases": {
         "ll": "ls -la",
         "gs": "git status",
@@ -9,9 +9,9 @@
         "gp": "git push",
         "gl": "git log --oneline",
         "cls": "clear",
-        "gg": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358 --max-output-tokens 65536",
+        "gg": "python C:\\@delta\\ms1\\tools\\Gemini_CLI\\gemini_cli.py --password 182358 --max-output-tokens 65536",
         "kiro-cli-yolo": "kiro-cli chat --trust-all-tools",
-        "ggproxy": "python C:\\@delta\\ms1\\tools\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358"
+        "ggproxy": "python C:\\@delta\\ms1\\tools\\Gemini_CLI\\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358"
     },
     "context_menu": {
         "Background": {
