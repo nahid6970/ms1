@@ -815,4 +815,9 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 # [2026-10-01] - Stop Closed Pane Processes and Throttle Git Status
 - Cache and coalesce Git status scans to reduce repeated Git process creation.
 - Closing a tab now removes its PTY session and child process tree; bound process termination and avoid holding the session registry lock during cleanup.
+
+## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
+- Added a Git remote field to workspace customization and persisted it with workspace config.
+- Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.
+- Added a Restore from Git action to the missing-folder dialog and documented the new endpoint and behavior.
 - Prevent overlapping stats polls and stale workspace restores from overwriting the active workspace.

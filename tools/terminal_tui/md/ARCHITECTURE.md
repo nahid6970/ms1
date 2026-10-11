@@ -149,6 +149,7 @@ Stores all workspace metadata:
   {
     "name": "MyProject",
     "path": "C:\\path\\to\\project",
+    "gitRemote": "https://github.com/user/repo.git",
     "category": "Work",
     "pinned": false,
     "theme": {
@@ -203,6 +204,7 @@ function prompt { ... }
 - `POST /api/projects/<project>/duplicate` - Copy workspace files/settings into the next numbered sibling
 - `DELETE /api/projects/<project>` - Delete workspace
 - `POST /api/projects/customize` - Update workspace settings
+- `POST /api/project/<project>/git/sync-remote` - Clone saved remote into a missing workspace folder or fetch origin refs in an existing repository
 - `POST /api/projects/reorder` - Reorder workspace list
 - `POST /api/projects/<project>/layout` - Save split layout
 

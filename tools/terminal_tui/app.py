@@ -693,7 +693,8 @@ def scan_projects():
             "theme": theme,
             "cardTheme": card_theme,
             "bookmarks": bookmarks,
-            "layout": layout
+            "layout": layout,
+            "gitRemote": p.get("gitRemote", "")
         })
     return projects
 
@@ -922,6 +923,73 @@ def api_project_recreate_path(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/git/sync-remote', methods=['POST'])
+def api_project_git_sync_remote(project):
+    """Clone a missing workspace or fetch its configured Git remote."""
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Workspace not found"}), 404
+    remote = (proj.get("gitRemote") or "").strip()
+    if not remote:
+        return jsonify({"error": "Add a Git remote URL in Customize Workspace first."}), 400
+
+    configured_path = (proj.get("path") or "").strip()
+    if not configured_path:
+        return jsonify({"error": "The workspace path is invalid."}), 400
+    path = os.path.abspath(os.path.expanduser(configured_path))
+    if path == os.path.abspath(os.path.sep):
+        return jsonify({"error": "The workspace path cannot be a filesystem root."}), 400
+
+    cf = 0x08000000 if os.name == "nt" else 0
+    try:
+        if not os.path.exists(path):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            result = subprocess.run(
+                ["git", "clone", "--", remote, path], cwd=os.path.dirname(path),
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=600
+            )
+            action = "cloned"
+        else:
+            if not os.path.isdir(path):
+                return jsonify({"error": "The workspace path exists but is not a directory."}), 400
+            check = subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"], cwd=path,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=10
+            )
+            if check.returncode != 0:
+                return jsonify({"error": "The workspace folder exists but is not a Git repository. Move or remove it before cloning."}), 400
+            set_remote = subprocess.run(
+                ["git", "remote", "set-url", "origin", remote], cwd=path,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=10
+            )
+            if set_remote.returncode != 0:
+                add_remote = subprocess.run(
+                    ["git", "remote", "add", "origin", remote], cwd=path,
+                    capture_output=True, text=True, encoding="utf-8", errors="replace",
+                    creationflags=cf, timeout=10
+                )
+                if add_remote.returncode != 0:
+                    return jsonify({"error": add_remote.stderr.strip() or "Could not configure origin."}), 500
+            result = subprocess.run(
+                ["git", "fetch", "--prune", "origin"], cwd=path,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=600
+            )
+            action = "fetched"
+        if result.returncode != 0:
+            return jsonify({"error": (result.stderr or result.stdout or "Git operation failed.").strip()}), 500
+        return jsonify({"status": action, "path": path, "output": (result.stdout or "").strip()})
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Git operation timed out."}), 504
+    except FileNotFoundError:
+        return jsonify({"error": "Git was not found. Install Git or add it to PATH."}), 500
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
 @app.route('/api/projects/<project>/bookmarks', methods=['POST'])
 def api_add_bookmark(project):
     data = request.json
@@ -1103,6 +1171,8 @@ def api_projects_customize():
         proj["theme"] = data["theme"]
     if "cardTheme" in data:
         proj["cardTheme"] = data["cardTheme"]
+    if "gitRemote" in data:
+        proj["gitRemote"] = str(data["gitRemote"] or "").strip()
         
     save_projects_config(projects)
     

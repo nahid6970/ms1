@@ -62,6 +62,8 @@
 **Implementation:** `projects.json` stores all workspace metadata. `Project_data/<name>/profile.ps1` is auto-generated per workspace.
 **Files Involved:** `app.py` (routes: `/api/projects/*`), `templates/index.html` (sidebar UI)
 **Usage:** Click `+` in sidebar → enter name + folder path → click workspace card to spawn terminal.
+
+**Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Sub-features:**
 - Categories — group workspaces
 - Pin/unpin — keep important workspaces at top
