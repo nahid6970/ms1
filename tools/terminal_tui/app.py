@@ -510,12 +510,11 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 print(f"Error migrating profile: {e}")
         
         # Spawn PowerShell with custom profile, bypassing main user profile
-        # Wrap in curly braces script block to handle spaces/parentheses in path correctly
         profile_path_clean = profile_path.replace("\\", "/")
-        cmdline = f'powershell.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
-        
-        # Spawn PowerShell
-        self.pty.spawn("powershell.exe", cmdline=cmdline, cwd=path)
+        cmdline = f'pwsh.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
+
+        # Spawn PowerShell Core (pwsh)
+        self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
         
         self.connected_sids = set()
         self.sids_lock = threading.Lock()
