@@ -510,8 +510,11 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 print(f"Error migrating profile: {e}")
         
         # Spawn PowerShell with custom profile, bypassing main user profile
-        profile_path_clean = profile_path.replace("\\", "/")
-        cmdline = f'pwsh.exe -NoProfile -NoExit -Command "{{ . \'{profile_path_clean}\' }}"'
+        profile_path_clean = profile_path.replace("/", "\\")
+        import base64
+        ps_cmd = f". '{profile_path_clean}'"
+        encoded = base64.b64encode(ps_cmd.encode('utf-16-le')).decode('ascii')
+        cmdline = f'-NoProfile -NoExit -EncodedCommand {encoded}'
 
         # Spawn PowerShell Core (pwsh)
         self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
