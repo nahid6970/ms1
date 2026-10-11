@@ -828,6 +828,11 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 ## [2026-10-12] - Compact Past Commit Times
 - Changed the Git modal's past-commit time column to compact relative units such as `35s`, `15h`, and `11d`, without the trailing “ago”.
 
+## [2026-10-12] - Highlight Current Commit and Preview Folder Changes
+- Marked repository HEAD in the past-commits list, adding it when HEAD has no direct changes in the active workspace folder.
+- Added a per-commit preview action that compares the selected snapshot with current HEAD, scoped to the workspace folder.
+- Scoped the Git diff API's file, stat, and patch output to the active workspace folder.
+
 ## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
 - Added a Git remote field to workspace customization and persisted it with workspace config.
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.

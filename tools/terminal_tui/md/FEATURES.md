@@ -94,6 +94,8 @@
 - Stage all (`git add -A`)
 - Commit + auto-push
 - Past commits (last 10) with rename, checkout, push
+- Current repository HEAD is marked in the commit list, including when its changes were outside this workspace folder
+- Preview a past commit against current HEAD, scoped to the active workspace folder
 - Global setting to hide or show commit hashes in the past-commits list
 - Compact relative commit times (`35s`, `15h`, `11d`) without an “ago” suffix
 - Detached HEAD warning with "Return to latest"

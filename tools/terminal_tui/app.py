@@ -1511,33 +1511,57 @@ def api_git_past_commits(project):
         if res.returncode != 0:
             return jsonify({"error": "Failed to get commits"}), 500
             
+        def compact_commit_date(timestamp):
+            try:
+                age_seconds = max(0, int(time.time()) - int(timestamp))
+            except (TypeError, ValueError):
+                age_seconds = 0
+            if age_seconds < 60:
+                return f"{age_seconds}s"
+            if age_seconds < 3600:
+                return f"{age_seconds // 60}m"
+            if age_seconds < 86400:
+                return f"{age_seconds // 3600}h"
+            if age_seconds < 30 * 86400:
+                return f"{age_seconds // 86400}d"
+            if age_seconds < 365 * 86400:
+                return f"{age_seconds // (30 * 86400)}mo"
+            return f"{age_seconds // (365 * 86400)}y"
+
         commits = []
         for line in (res.stdout or "").strip().split('\n'):
             if not line.strip():
                 continue
             parts = line.split('|', 3)
             if len(parts) == 4:
-                try:
-                    age_seconds = max(0, int(time.time()) - int(parts[2]))
-                except (TypeError, ValueError):
-                    age_seconds = 0
-                if age_seconds < 60:
-                    compact_date = f"{age_seconds}s"
-                elif age_seconds < 3600:
-                    compact_date = f"{age_seconds // 60}m"
-                elif age_seconds < 86400:
-                    compact_date = f"{age_seconds // 3600}h"
-                elif age_seconds < 30 * 86400:
-                    compact_date = f"{age_seconds // 86400}d"
-                elif age_seconds < 365 * 86400:
-                    compact_date = f"{age_seconds // (30 * 86400)}mo"
-                else:
-                    compact_date = f"{age_seconds // (365 * 86400)}y"
                 commits.append({
                     "hash": parts[0],
                     "author": parts[1],
-                    "date": compact_date,
-                    "message": parts[3]
+                    "date": compact_commit_date(parts[2]),
+                    "message": parts[3],
+                    "isHead": False
+                })
+
+        # Include HEAD even if its commit changed files outside this workspace,
+        # so the current snapshot can be highlighted and previewed here.
+        res_head = subprocess.run(
+            ["git", "show", "-s", "--format=%h|%an|%ct|%s", "HEAD"], cwd=git_root,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding="utf-8", errors="replace", creationflags=cf, timeout=5
+        )
+        head_parts = (res_head.stdout or "").strip().split("|", 3)
+        if res_head.returncode == 0 and len(head_parts) == 4:
+            head_hash = head_parts[0]
+            head_commit = next((item for item in commits if item["hash"] == head_hash), None)
+            if head_commit:
+                head_commit["isHead"] = True
+            else:
+                commits.insert(0, {
+                    "hash": head_hash,
+                    "author": head_parts[1],
+                    "date": compact_commit_date(head_parts[2]),
+                    "message": head_parts[3],
+                    "isHead": True
                 })
                 
         return jsonify({"commits": commits})
@@ -1752,12 +1776,15 @@ def api_git_diff(project):
             return jsonify({"error": "Not a git repository"}), 400
         git_root = os.path.normpath((res_root.stdout or '').strip())
 
-        # Build diff command
+        rel_path = os.path.relpath(path, git_root).replace("\\", "/")
+        pathspec = "." if rel_path == "." else f":(top,literal){rel_path}/"
+
+        # Keep diff previews scoped to the active workspace folder.
         if to_ref:
-            cmd = ["git", "diff", from_ref, to_ref, "--"]
+            cmd = ["git", "diff", from_ref, to_ref, "--", pathspec]
         else:
             # diff between from_ref and working tree (includes staged+unstaged)
-            cmd = ["git", "diff", from_ref, "--"]
+            cmd = ["git", "diff", from_ref, "--", pathspec]
 
         res = subprocess.run(cmd, cwd=git_root,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -1766,13 +1793,13 @@ def api_git_diff(project):
         diff_text = (res.stdout or '')
 
         # Also get list of changed files with status
-        stat_cmd = ["git", "diff", "--stat", from_ref] if not to_ref else ["git", "diff", "--stat", from_ref, to_ref]
+        stat_cmd = (["git", "diff", "--stat", from_ref] if not to_ref else ["git", "diff", "--stat", from_ref, to_ref]) + ["--", pathspec]
         res_stat = subprocess.run(stat_cmd, cwd=git_root,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10)
 
         # Parse changed files from name-status
-        ns_cmd = ["git", "diff", "--name-status", from_ref] if not to_ref else ["git", "diff", "--name-status", from_ref, to_ref]
+        ns_cmd = (["git", "diff", "--name-status", from_ref] if not to_ref else ["git", "diff", "--name-status", from_ref, to_ref]) + ["--", pathspec]
         res_ns = subprocess.run(ns_cmd, cwd=git_root,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=10)

@@ -90,6 +90,7 @@ Click git info badge in status bar to open Git modal:
 - `GET /api/project/<project>/git/files` - Changed files
 - `POST /api/project/<project>/git/commit` - Commit + push
 - `GET /api/project/<project>/git/commits` - Last 10 commits
+- `GET /api/project/<project>/git/diff?from=<ref>&to=<ref>` - Compare refs, scoped to the workspace folder
 - `POST /api/project/<project>/git/commit/rename` - Amend HEAD commit
 - `POST /api/project/<project>/git/checkout` - Checkout commit
 - `POST /api/project/<project>/git/return-branch` - Return to branch
