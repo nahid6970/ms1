@@ -20,7 +20,7 @@
       },
       "bookmarks": [
         {
-          "command": "python C:\\@delta\\ms1\\TOOLS\\terminal_tui\\gemini_terminal_cli\\gemini_cli.py --password 182358 --max-output-tokens 65536",
+          "command": "python C:\\@delta\\ms1\\TOOLS\\Gemini_CLI\\gemini_cli.py --password 182358 --max-output-tokens 65536",
           "global": true,
           "name": " myGG",
           "windowTitle": "",
