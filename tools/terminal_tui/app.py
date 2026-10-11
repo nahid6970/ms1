@@ -1952,8 +1952,31 @@ def api_git_init(project):
                 steps.append(f"⚠ push failed (create the repo on GitHub first): {out[:200]}")
 
         invalidate_git_status_cache(path)
-        return jsonify({"steps": steps, "remote_url": remote_url})
+        return jsonify({"steps": steps, "remote_url": remote_url, "push_failed": any(s.startswith('⚠ push') for s in steps)})
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/project/<project>/git/push-init', methods=['POST'])
+def api_git_push_init(project):
+    projects = scan_projects()
+    proj_details = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if not proj_details:
+        return jsonify({"error": "Project not found"}), 404
+    path = proj_details["path"]
+    data = request.get_json() or {}
+    branch = data.get("branch", "main").strip() or "main"
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        result = subprocess.run(
+            ["git", "push", "-u", "origin", branch],
+            cwd=path, capture_output=True, text=True, creationflags=cf, timeout=30
+        )
+        ok = result.returncode == 0
+        out = (result.stdout + result.stderr).strip()
+        invalidate_git_status_cache(path)
+        return jsonify({"ok": ok, "output": out})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
