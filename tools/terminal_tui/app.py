@@ -1504,7 +1504,7 @@ def api_git_past_commits(project):
         scope_args = ["--", rel_path] if rel_path != '.' else []
 
         res = subprocess.run(
-            ["git", "log", "--pretty=format:%h|%an|%ar|%s", "-n", str(limit)] + scope_args,
+            ["git", "log", "--pretty=format:%h|%an|%ct|%s", "-n", str(limit)] + scope_args,
             cwd=git_root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
         )
         
@@ -1517,10 +1517,26 @@ def api_git_past_commits(project):
                 continue
             parts = line.split('|', 3)
             if len(parts) == 4:
+                try:
+                    age_seconds = max(0, int(time.time()) - int(parts[2]))
+                except (TypeError, ValueError):
+                    age_seconds = 0
+                if age_seconds < 60:
+                    compact_date = f"{age_seconds}s"
+                elif age_seconds < 3600:
+                    compact_date = f"{age_seconds // 60}m"
+                elif age_seconds < 86400:
+                    compact_date = f"{age_seconds // 3600}h"
+                elif age_seconds < 30 * 86400:
+                    compact_date = f"{age_seconds // 86400}d"
+                elif age_seconds < 365 * 86400:
+                    compact_date = f"{age_seconds // (30 * 86400)}mo"
+                else:
+                    compact_date = f"{age_seconds // (365 * 86400)}y"
                 commits.append({
                     "hash": parts[0],
                     "author": parts[1],
-                    "date": parts[2],
+                    "date": compact_date,
                     "message": parts[3]
                 })
                 

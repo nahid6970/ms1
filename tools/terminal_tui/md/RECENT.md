@@ -825,6 +825,9 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Added a Global Settings option to show or hide the hash column in the Git modal's past-commits list.
 - Persisted the preference in browser local storage and apply it immediately to the rendered list.
 
+## [2026-10-12] - Compact Past Commit Times
+- Changed the Git modal's past-commit time column to compact relative units such as `35s`, `15h`, and `11d`, without the trailing “ago”.
+
 ## [2026-10-11] - Save Per-Workspace Git Remotes and Restore Missing Projects
 - Added a Git remote field to workspace customization and persisted it with workspace config.
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.

@@ -16015,7 +16015,7 @@ Always wrap your **entire response** in a single markdown code block.`;
                 el.innerHTML = commits.map((c, i) => `
                     <div id="commit-row-${c.hash}" style="padding:7px 10px; border-bottom: 1px solid var(--border-color); display:flex; align-items:center; gap:8px; transition: background-color 0.15s;" onmouseenter="this.style.backgroundColor='var(--bg-sidebar)'" onmouseleave="this.style.backgroundColor='transparent'">
                         <span class="git-commit-hash" style="font-family:'Fira Code',monospace; font-size:0.7rem; color:#38bdf8; min-width:46px; flex-shrink:0;">${c.hash}</span>
-                        <span style="font-family:'Fira Code',monospace; font-size:0.68rem; color:var(--text-secondary); min-width:65px; flex-shrink:0;">${c.date}</span>
+                        <span title="${c.date}" style="font-family:'Fira Code',monospace; font-size:0.73rem; color:#a7b4c7; width:40px; min-width:40px; flex-shrink:0;">${c.date}</span>
                         <div style="flex:1; min-width:0;" id="commit-msg-display-${c.hash}">
                             <span style="font-size:0.78rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;" title="${c.message}">${c.message}</span>
                         </div>

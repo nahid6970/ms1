@@ -95,6 +95,7 @@
 - Commit + auto-push
 - Past commits (last 10) with rename, checkout, push
 - Global setting to hide or show commit hashes in the past-commits list
+- Compact relative commit times (`35s`, `15h`, `11d`) without an “ago” suffix
 - Detached HEAD warning with "Return to latest"
 - Discard all changes (`git restore` + `git clean`)
 - Branch management (create, switch, merge, delete)
