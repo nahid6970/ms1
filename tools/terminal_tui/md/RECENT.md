@@ -5,6 +5,25 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-11] - Switch Terminal to pwsh (PowerShell Core)
+
+### Change
+Switched `TerminalSession` from `powershell.exe` to `pwsh.exe` (PowerShell Core 7+).
+
+**Root cause of previous attempts failing:**
+- `cmdline` in `PTY.spawn` is parameters only — winpty adds the exe name itself. Including `pwsh.exe` in `cmdline` caused pwsh to treat it as a `-File` argument.
+- `-Command "{ . 'path' }"` works for `powershell.exe` but pwsh is stricter about scriptblock syntax in command strings.
+
+**Fix:** Use `-EncodedCommand` (Base64 UTF-16LE encoded dot-source command). Removed `-NoProfile` so the user's default `$PROFILE` loads first, then the workspace profile runs on top.
+
+**Startup order:**
+1. `$PROFILE` — user's default profile (aliases, oh-my-posh, tools)
+2. Workspace profile — sets `$PROJECT_ROOT_PATH`, custom `cd`, `HistorySavePath`, custom prompt + ttui marker
+
+**Files Modified:** `app.py` — `TerminalSession.__init__`
+
+---
+
 ## [2026-10-11] - Sidebar Close Button in Search Box + Misc UX
 
 ### Feature — Sidebar Close Button Inside Search Box
