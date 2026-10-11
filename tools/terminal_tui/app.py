@@ -514,7 +514,9 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         import base64
         ps_cmd = f". '{profile_path_clean}'"
         encoded = base64.b64encode(ps_cmd.encode('utf-16-le')).decode('ascii')
-        cmdline = f'-NoProfile -NoExit -EncodedCommand {encoded}'
+        # No -NoProfile — let pwsh load the user's default $PROFILE first,
+        # then the workspace profile (history path, custom cd, prompt) runs on top.
+        cmdline = f'-NoExit -EncodedCommand {encoded}'
 
         # Spawn PowerShell Core (pwsh)
         self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
