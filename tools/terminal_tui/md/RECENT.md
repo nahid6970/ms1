@@ -5,6 +5,45 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-11] - Sidebar Close Button in Search Box + Misc UX
+
+### Feature — Sidebar Close Button Inside Search Box
+Added a `«` button on the left side of the search input inside the sidebar. White background, black text, 42px wide, full input height, rounded left side with a divider. Clicking it calls `toggleSidebar()` so you can collapse the sidebar without moving the mouse to the header toggle button.
+
+### Feature — Duplicate Workspace: Empty Folder Option
+Replaced `confirm()` with a styled modal. Added **Empty folder** radio option alongside **Copy files** (default). Empty creates just the directory + workspace entry with same settings, no files copied. Backend `empty_only` flag skips `copytree`.
+
+### Feature — Duplicate Workspace Toast
+"Switching to project-name…" toast shown during `selectProject` after duplication.
+
+### Feature — Git Init for Non-Git Projects
+- **⎇ Init git** button in status bar (shown when `data.git` is null).
+- Standalone `git-init-modal` (not embedded in git commit modal).
+- Fields: GitHub username, repo name (auto-slugified), branch (default `main`).
+- `POST /api/project/<project>/git/init`: `git init`, `.gitignore`, initial commit, remote, push.
+- Push fail: **Create on GitHub** link + **↑ Push now** button (`POST /api/project/<project>/git/push-init`).
+- Push fail message: `⚠ push failed — create the repo on GitHub first` (no verbose git error).
+
+### Feature — Delete Workspace Button
+- Red 🗑 toolbar button (before settings gear), shown when workspace is active.
+- Styled checkbox modal: ✅ Workspace entry, ✅ Terminal data (Project_data), ☐ Project folder (PERMANENT).
+- `DELETE /api/project/<project>/full` with `{ delete_entry, delete_data, delete_folder }` flags.
+- Uses `kill_sessions(..., wait=True)` so PTY processes fully exit before `rmtree`.
+
+### Fix — Missing Workspace Folder Dialog
+`GET /api/project/<project>/path-check` + `POST /api/project/<project>/recreate-path`. Styled modal with 📁 Recreate / 🗑 Delete / Cancel on workspace click.
+
+### Optimization — Git Status: 5 → 3 Processes Per Scan
+- `rev-parse --show-toplevel --abbrev-ref HEAD` gets root+branch in one call.
+- Single `diff --shortstat HEAD` replaces two separate staged/unstaged diff calls.
+- Cache TTL: 30s → 5s. Poll interval stays at 3s.
+
+**Files Modified:**
+- `app.py` — `_get_git_status_uncached`, `GIT_STATUS_CACHE_SECONDS`, `api_git_init`, `api_git_push_init`, `api_project_delete_full`, `api_project_path_check`, `api_project_recreate_path`, `api_projects_duplicate`
+- `templates/index.html` — sidebar search close btn, git-init-modal, delete workspace modal+btn, duplicate modal+toast, missing path dialog
+
+---
+
 ## [2026-10-11] - Workspace Management + Git Init + Git Status Optimization
 
 ### Fix — File Explorer Paste (HTTP clipboard)
