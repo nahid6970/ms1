@@ -5554,10 +5554,52 @@
             const source = projects.find(project => project.name === activeProject);
             if (!source) return;
 
-            const confirmed = confirm(
-                `Copy workspace "${source.name}" into the next available numbered folder?\n\n` +
-                `The copy will omit .git, virtual environments, node_modules, caches, and common build output.`
-            );
+            const confirmed = await new Promise(resolve => {
+                const old = document.getElementById('duplicate-ws-dialog');
+                if (old) old.remove();
+                const overlay = document.createElement('div');
+                overlay.id = 'duplicate-ws-dialog';
+                overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);';
+                overlay.innerHTML = `
+                    <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:14px;padding:26px 28px 22px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.7);display:flex;flex-direction:column;gap:14px;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+                            <span style="font-size:1rem;font-weight:600;color:var(--text-primary);">Duplicate Workspace</span>
+                        </div>
+                        <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;">
+                            Copy <strong style="color:var(--text-primary);">${source.name}</strong> into the next available numbered folder.
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;transition:all 0.15s;" id="dup-opt-copy-label">
+                                <input type="radio" name="dup-mode" id="dup-mode-copy" value="copy" checked style="accent-color:var(--accent-color);cursor:pointer;">
+                                <div>
+                                    <div style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">Copy files</div>
+                                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px;">Excludes .git · venv · node_modules · __pycache__ · dist · build</div>
+                                </div>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;transition:all 0.15s;" id="dup-opt-empty-label">
+                                <input type="radio" name="dup-mode" id="dup-mode-empty" value="empty" style="accent-color:var(--accent-color);cursor:pointer;">
+                                <div>
+                                    <div style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">Empty folder</div>
+                                    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:1px;">Create a blank workspace with the same settings &amp; theme</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div style="display:flex;gap:8px;justify-content:flex-end;">
+                            <button id="dup-cancel" style="padding:8px 16px;background:none;border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);font-size:0.82rem;cursor:pointer;transition:all 0.2s;"
+                                onmouseenter="this.style.borderColor='var(--accent-color)';this.style.color='var(--text-primary)'"
+                                onmouseleave="this.style.borderColor='var(--border-color)';this.style.color='var(--text-secondary)'">Cancel</button>
+                            <button id="dup-confirm" style="padding:8px 18px;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.45);border-radius:8px;color:#60a5fa;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
+                                onmouseenter="this.style.background='rgba(37,99,235,0.28)';this.style.borderColor='rgba(37,99,235,0.7)'"
+                                onmouseleave="this.style.background='rgba(37,99,235,0.15)';this.style.borderColor='rgba(37,99,235,0.45)'">⎘ Duplicate</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(overlay);
+                const close = r => { overlay.remove(); resolve(r); };
+                document.getElementById('dup-cancel').onclick = () => close(null);
+                document.getElementById('dup-confirm').onclick = () => close(document.getElementById('dup-mode-empty').checked ? 'empty' : 'copy');
+                overlay.addEventListener('mousedown', e => { if (e.target === overlay) close(null); });
+            });
             if (!confirmed) return;
 
             const button = document.getElementById('workspace-duplicate-btn');
@@ -5571,7 +5613,7 @@
                 const response = await fetch(`/api/projects/${encodeURIComponent(activeProject)}/duplicate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({ empty_only: confirmed === 'empty' })
                 });
                 const data = await response.json();
                 if (!response.ok) {

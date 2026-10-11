@@ -803,6 +803,9 @@ def api_projects_duplicate(project):
             break
         suffix += 1
 
+    data = request.get_json(silent=True) or {}
+    empty_only = data.get("empty_only", False)
+
     ignored_copy_entries = {
         ".git", ".venv", "venv", "node_modules", "__pycache__",
         ".pytest_cache", ".mypy_cache", ".ruff_cache", "dist", "build", "target"
@@ -817,13 +820,14 @@ def api_projects_duplicate(project):
         # cannot overwrite an existing workspace folder.
         os.mkdir(new_path)
         destination_reserved = True
-        shutil.copytree(
-            source_path,
-            new_path,
-            dirs_exist_ok=True,
-            ignore=ignore_generated_entries,
-            symlinks=True
-        )
+        if not empty_only:
+            shutil.copytree(
+                source_path,
+                new_path,
+                dirs_exist_ok=True,
+                ignore=ignore_generated_entries,
+                symlinks=True
+            )
 
         duplicate = copy.deepcopy(source)
         duplicate["name"] = new_name
@@ -876,8 +880,8 @@ def api_project_delete_full(project):
     safe_path = _re.sub(r'[^a-zA-Z0-9_\-]', '_', path).strip('_')
     project_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Project_data", safe_path)
 
-    # Kill sessions first
-    kill_sessions(detach_project_sessions(project), wait=False)
+    # Kill sessions first and wait for processes to fully exit before deleting files
+    kill_sessions(detach_project_sessions(project), wait=True)
 
     errors = []
 
@@ -896,7 +900,12 @@ def api_project_delete_full(project):
     # Delete actual project folder
     if delete_folder and path and os.path.exists(path):
         try:
-            _sh.rmtree(path)
+            # Normalize to remove trailing slashes / mixed separators
+            clean_path = os.path.abspath(path.replace('/', os.sep).replace('\\', os.sep))
+            if os.path.isdir(clean_path):
+                _sh.rmtree(clean_path)
+            else:
+                errors.append(f"Project folder path is not a directory: {clean_path}")
         except Exception as e:
             errors.append(f"Could not delete project folder: {e}")
 

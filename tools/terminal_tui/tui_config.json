@@ -1052,9 +1052,9 @@
       "bookmarks": []
     },
     {
-      "name": "Temporary Project-2",
-      "path": "C:\\@delta\\temporary-2",
-      "category": "Temp",
+      "name": "T-1",
+      "path": "C:\\@delta\\T-1",
+      "category": "",
       "pinned": false,
       "theme": {
         "background": "#000000",
@@ -1069,10 +1069,7 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
-      "layout": {},
-      "duplicateBaseName": "Temporary Project",
-      "duplicateBaseFolder": "temporary"
+      "bookmarks": []
     }
   ],
   "extension_icons": {
