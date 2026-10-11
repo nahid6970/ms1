@@ -201,6 +201,20 @@ When `/test` runs in this CLI, every passing Gemini model is also synchronized i
 `C:\Users\<user>\.pi\agent\models.json` and `settings.json` under `google-failover`. Run `/reload` in Pi after the test
 to refresh its model picker. If no models pass, the existing Pi failover catalog is left unchanged.
 
+### Pi setup on Windows
+
+Restore the Pi provider files from this project's `pi` folder into `C:\Users\<user>\.pi\agent`. The saved settings use
+`google-failover/gemini-3.1-flash-lite` by default. On Windows with Scoop Git, set this in the Pi agent `settings.json`
+so Pi can find Bash for its command tool:
+
+```json
+"shellPath": "~\\scoop\\apps\\git\\current\\bin\\bash.exe"
+```
+
+If Pi says it cannot find Git Bash, verify that `C:\Users\<user>\scoop\apps\git\current\bin\bash.exe` exists,
+then restart Pi. Do not add `npm:pi-multi-account` just for this provider; Pi may try to install configured packages
+on startup. Keep other packages only when they are intentionally needed.
+
 The proxy prints safe diagnostics to its console, including `attempt`, `upstream_error`, `failover`, and `success` events
 with account names, model names, status codes, and mode. It never logs API keys or request contents.
 - `/test` is the model testing command; `/mm test` remains an alias.

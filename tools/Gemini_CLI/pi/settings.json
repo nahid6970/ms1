@@ -16,5 +16,6 @@
     "google-failover/gemini-3.6-flash",
     "google-failover/gemini-3.7-flash",
     "google-failover/gemini-3.8-flash"
-  ]
+  ],
+  "shellPath": "C:\\Users\\nahid\\scoop\\apps\\git\\current\\bin\\bash.exe"
 }

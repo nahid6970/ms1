@@ -2,7 +2,7 @@
 
 This setup connects Pi to the local Gemini failover proxy provided by:
 
-`C:\@delta\ms1\tools\terminal_tui\gemini_terminal_cli\gemini_cli.py`
+`C:\@delta\ms1\tools\Gemini_CLI\gemini_cli.py`
 
 ## Files required in this folder
 
@@ -35,12 +35,25 @@ The enabled-model list contains the synchronized `google-failover/*` models and 
 
 Otherwise the provider can exist but remain hidden from Pi's model picker.
 
+For Windows, keep a `shellPath` setting so Pi can find Git Bash when Git is installed through Scoop:
+
+```json
+"shellPath": "~\\scoop\\apps\\git\\current\\bin\\bash.exe"
+```
+
+Pi can also use Git Bash from its standard install location. If Bash commands fail with a message saying Git Bash
+could not be found, check that the path above exists and set `shellPath` in `C:\Users\<user>\.pi\agent\settings.json`.
+Restart Pi after changing it. This lets Pi run commands such as `systeminfo` through its Bash tool.
+
+Do not add `npm:pi-multi-account` to `packages` for this Gemini-only setup. Pi tries to install configured packages
+at startup, which can make the first launch appear stuck. Keep unrelated extensions only if they are intentionally used.
+
 ## Start command
 
 Run this in a separate PowerShell window:
 
 ```powershell
-python C:\@delta\ms1\tools\terminal_tui\gemini_terminal_cli\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358
+python C:\@delta\ms1\tools\Gemini_CLI\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358
 ```
 
 The proxy password unlocks the real Gemini accounts stored in the CLI's encrypted `api_accounts.lock`. Pi only sends `pi-local-secret` to the local proxy; it never receives the real Google keys or the account-store password.
