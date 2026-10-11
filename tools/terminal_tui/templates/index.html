@@ -5581,7 +5581,15 @@
 
                 projects = data.projects || projects;
                 handleSearch();
+
+                // Show a brief status so the transition doesn't feel frozen
+                const statusToast = document.createElement('div');
+                statusToast.style.cssText = 'position:fixed;bottom:54px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:8px 18px;font-size:0.78rem;color:var(--text-secondary);z-index:9999;pointer-events:none;';
+                statusToast.textContent = `Switching to ${data.name}…`;
+                document.body.appendChild(statusToast);
+
                 await selectProject(data.name);
+                statusToast.remove();
             } catch (err) {
                 console.error('Error duplicating workspace:', err);
                 alert('Could not duplicate the workspace. Check the server log for details.');
