@@ -16,8 +16,5 @@
     "google-failover/gemini-3.6-flash",
     "google-failover/gemini-3.7-flash",
     "google-failover/gemini-3.8-flash"
-  ],
-  "packages": [
-    "npm:pi-multi-account"
   ]
 }
