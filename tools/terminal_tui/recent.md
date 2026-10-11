@@ -6,6 +6,12 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 - `templates/index.html`
 
 # Latest Implementation
+* **[2026-10-11] Fix Terminal PATH Inheritance** (`app.py`):
+    * Added `_get_windows_env()` helper before `TerminalSession`. Runs `cmd.exe /c set` in a hidden window, decodes output (cp1252 → latin-1 fallback), and returns a NUL-separated `KEY=VALUE` string for pywinpty.
+    * `TerminalSession.__init__` now passes `env=_get_windows_env()` to `self.pty.spawn()` so the PTY gets the full user PATH (Tailscale, Docker, Node, etc.) instead of only what the Python interpreter inherited.
+    * Falls back to `None` (inherit from Python process) if `cmd.exe` fails.
+
+
 * **[2026-10-11] Switch Terminal to pwsh (PowerShell Core)** (`app.py`):
     * Changed `TerminalSession` from `powershell.exe` to `pwsh.exe`.
     * Uses `-EncodedCommand` (Base64 UTF-16LE) to dot-source the workspace profile — avoids all quoting/path issues.
