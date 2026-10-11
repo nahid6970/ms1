@@ -378,60 +378,6 @@ def restart_current_process(delay_seconds=1.0):
     timer.start()
 
 
-def _get_windows_env() -> str | None:
-    """Return the full Windows user environment as a NUL-separated string
-    suitable for pywinpty's PTY.spawn(env=...).
-
-    We launch a throw-away ``cmd.exe /c set`` process so Windows performs its
-    normal environment-variable expansion (merging HKLM + HKCU registry entries,
-    expanding %…% references, appending user PATH to system PATH, etc.).  This
-    ensures the spawned shell inherits every PATH entry that was registered by
-    installers such as Tailscale, Docker, Node, etc.
-
-    Returns None on any failure so the caller falls back to inheriting from the
-    Python process.
-    """
-    try:
-        cf = 0x08000000  # CREATE_NO_WINDOW
-        result = subprocess.run(
-            ["cmd.exe", "/c", "set"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=False,         # raw bytes – avoids codec issues with exotic paths
-            creationflags=cf,
-            timeout=5,
-        )
-        if result.returncode != 0:
-            return None
-
-        # ``cmd /c set`` outputs lines like:  VAR=value\r\n
-        # Decode with cp1252 (Windows ANSI) then fall back to latin-1.
-        raw = result.stdout
-        try:
-            text = raw.decode("cp1252")
-        except UnicodeDecodeError:
-            text = raw.decode("latin-1")
-
-        env_dict: dict[str, str] = {}
-        for line in text.splitlines():
-            line = line.strip()
-            if "=" not in line:
-                continue
-            key, _, value = line.partition("=")
-            if key:
-                env_dict[key] = value
-
-        if not env_dict:
-            return None
-
-        # Build NUL-separated "KEY=VALUE\0KEY=VALUE\0…" string expected by winpty
-        return "\0".join(f"{k}={v}" for k, v in env_dict.items())
-
-    except Exception as exc:
-        print(f"[terminal_tui] _get_windows_env failed ({exc}), falling back to inherited env")
-        return None
-
-
 class TerminalSession:
     def __init__(self, name, path, use_real_dir_name=False):
         self._kill_lock = threading.Lock()
@@ -572,9 +518,8 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         # then the workspace profile (history path, custom cd, prompt) runs on top.
         cmdline = f'-NoExit -EncodedCommand {encoded}'
 
-        # Spawn PowerShell Core (pwsh) with the full user environment so that
-        # PATH entries added by installers (Tailscale, Docker, etc.) are available.
-        self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path, env=_get_windows_env())
+        # Spawn PowerShell Core (pwsh)
+        self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
         
         self.connected_sids = set()
         self.sids_lock = threading.Lock()
