@@ -702,6 +702,18 @@ def scan_projects():
 def index():
     return render_template('index.html')
 
+@app.route('/api/mkdir', methods=['POST'])
+def api_mkdir():
+    data = request.json
+    path = (data.get("path", "") or "").strip()
+    if not path:
+        return jsonify({"error": "Path is required"}), 400
+    try:
+        os.makedirs(path, exist_ok=True)
+        return jsonify({"ok": True, "path": os.path.abspath(path)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/projects', methods=['GET'])
 def api_projects_get():
     return jsonify(scan_projects())
