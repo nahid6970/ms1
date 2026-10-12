@@ -40,3 +40,29 @@ Start the CLI. Send a few prompts. Press Up to cycle through them. Type `/` and 
 ## Notes on default behavior
 
 - `Escape` key uses prompt_toolkit's default behavior: dismisses the completion menu but may require more than one press depending on the terminal and prompt_toolkit version. This is intentional — the default was preferred over a custom ESC binding.
+
+---
+
+## Input display fixes (prompt width & wrap)
+
+### Issue 4: Words broken mid-word in the input line
+`wrap_lines=True` told prompt_toolkit to wrap the input text at the terminal width. This conflicted with the terminal's own hard wrap, causing a double-wrap effect where a word appeared split across lines. Fixed by setting `wrap_lines=False` — the terminal handles its own wrapping naturally.
+
+`ANSI(prompt_provider())` was used as the prompt message, passing a raw escape-code string. Even though `ANSI()` parses escape codes for display measurement, the periodic `refresh_interval=0.25` redraw could cause prompt_toolkit to recompute layout with a stale terminal width estimate mid-input. Fixed by:
+- Switching `message` to `FormattedText([("class:prompt-prefix", plain_text)])` — prompt_toolkit knows the exact visual width of the plain text with no escape parsing needed.
+- Setting `refresh_interval=0` — eliminates periodic mid-input redraws entirely. The prompt lambda still updates between turns.
+- Added `_sgr_to_pt_style()` helper to convert the `prompt_prefix_color` SGR code (e.g. `"1;32"`) to a prompt_toolkit style string (e.g. `"bold ansigreen"`) for the `prompt-prefix` style class.
+
+---
+
+## Response output wrapping
+
+### Issue 5: Words broken mid-word in AI response output
+The response text was printed via `print(text)` after `render_markdown_text()` processed the markdown. `render_markdown_text` didn't wrap normal paragraph text — it passed lines through as-is. When the API returned a long paragraph as a single line (common), the terminal hard-wrapped it at its column boundary, splitting words mid-word.
+
+Fixed in `render_markdown_text`:
+- **Plain paragraphs** (`else` branch): if `strip_ansi(rendered)` exceeds `term_width`, the plain text is wrapped with `textwrap.wrap(width=term_width, break_long_words=False, break_on_hyphens=False)` and each segment is re-rendered through `_render_inline_markdown`.
+- **Bullet points**: wrapped at `term_width - 2` with 2-space indent for continuation lines.
+- **Numbered list items**: wrapped at `term_width - prefix_len` with matching indent for continuation lines.
+- Code blocks, tables, headings, and blockquotes are left unchanged.
+- `term_width` comes from `os.get_terminal_size()` already computed at the top of `render_markdown_text`, so it adapts to terminal resizes between responses.
