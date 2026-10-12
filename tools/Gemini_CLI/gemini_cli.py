@@ -127,6 +127,11 @@ except Exception:
     termios = None
     tty = None
 
+try:
+    import readline as _readline
+except Exception:
+    _readline = None
+
 ACTIVE_DEVICE_MODE = "pc"
 
 
@@ -1262,7 +1267,12 @@ else:
 
 
 def read_posix_prompt(prompt: str) -> str:
-    """Read one POSIX prompt, preserving newlines inside bracketed pastes."""
+    """Read one POSIX prompt, preserving newlines inside bracketed pastes.
+
+    Arrow keys and other escape sequences are silently discarded instead of
+    printing raw escape bytes.  Use read_dynamic_prompt (which uses
+    prompt_toolkit when available) for full arrow-key history navigation.
+    """
     if not (sys.stdin.isatty() and termios is not None and tty is not None):
         return input(prompt)
 
@@ -1271,8 +1281,10 @@ def read_posix_prompt(prompt: str) -> str:
     text: List[str] = []
     decoder = codecs.getincrementaldecoder("utf-8")("replace")
     paste_bytes = bytearray()
-    marker_buffer = bytearray()
+    # Accumulates bytes starting with ESC until the sequence is identified.
+    esc_buffer = bytearray()
     in_paste = False
+    in_csi = False   # True after we've seen ESC [ (a CSI sequence)
     paste_start = b"\x1b[200~"
     paste_end = b"\x1b[201~"
 
@@ -1316,30 +1328,73 @@ def read_posix_prompt(prompt: str) -> str:
                 raise EOFError
             byte = data[0]
 
-            if marker_buffer:
-                marker_buffer.append(byte)
-                markers = (paste_start, paste_end)
-                if bytes(marker_buffer) == paste_start:
+            # ── ESC sequence accumulator ─────────────────────────────────────
+            if esc_buffer:
+                esc_buffer.append(byte)
+                cur = bytes(esc_buffer)
+
+                # Exact match: bracketed-paste start / end
+                if cur == paste_start:
                     in_paste = True
                     paste_bytes.clear()
-                    marker_buffer.clear()
+                    esc_buffer.clear()
+                    in_csi = False
                     continue
-                if bytes(marker_buffer) == paste_end:
+                if cur == paste_end:
                     if in_paste:
                         add_paste()
                     in_paste = False
-                    marker_buffer.clear()
+                    esc_buffer.clear()
+                    in_csi = False
                     continue
-                if any(marker.startswith(marker_buffer) for marker in markers):
+
+                # Still a valid prefix of a paste marker → keep accumulating
+                if paste_start.startswith(cur) or paste_end.startswith(cur):
                     continue
-                if in_paste:
-                    paste_bytes.extend(marker_buffer)
-                marker_buffer.clear()
+
+                # Not a paste marker.  Decide how to drain the sequence.
+                # After ESC, the next byte determines the sequence type:
+                #   ESC [  → CSI sequence, ends on byte in 0x40–0x7E
+                #   ESC O  → SS3 (F1-F4), one final byte follows
+                #   ESC anything_else → two-byte sequence, already complete
+                if len(esc_buffer) == 2:
+                    second = esc_buffer[1]
+                    if second == ord('['):
+                        in_csi = True
+                        continue   # Keep reading CSI parameter/final bytes
+                    if second == ord('O'):
+                        # SS3: one more byte and we're done — keep reading
+                        continue
+                    # Two-byte ESC sequence (e.g., ESC A) — discard and move on
+                    esc_buffer.clear()
+                    in_csi = False
+                    continue
+
+                if in_csi:
+                    # CSI final byte is in range 0x40–0x7E (@ through ~)
+                    if 0x40 <= byte <= 0x7E:
+                        esc_buffer.clear()
+                        in_csi = False
+                    # Otherwise it's a parameter/intermediate byte — keep accumulating
+                    continue
+
+                # SS3 final byte — one byte after ESC O
+                if len(esc_buffer) == 3 and esc_buffer[1] == ord('O'):
+                    esc_buffer.clear()
+                    continue
+
+                # Fallback: byte is not a recognised continuation — discard buffer
+                esc_buffer.clear()
+                in_csi = False
                 continue
+            # ── End ESC sequence accumulator ─────────────────────────────────
 
             if byte == 0x1B:
-                marker_buffer.append(byte)
+                # Start of a new escape sequence
+                esc_buffer.append(byte)
+                in_csi = False
                 continue
+
             if in_paste:
                 paste_bytes.append(byte)
                 continue
@@ -1409,20 +1464,37 @@ def read_dynamic_prompt(
     prompt_bg: str = "",
     device_mode: str = "pc",
     pt_history: Any = None,
+    pt_session: Any = None,
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh.
 
-    pt_history: an already-created prompt_toolkit InMemoryHistory instance.
-    Pass the same object on every call so arrow-key history accumulates across
-    the whole session.  If None a fresh (empty) InMemoryHistory is used.
+    pt_history: a shared InMemoryHistory instance created once before the REPL
+        loop (pre-seeded from prompt_history.txt).  Pass the same object on
+        every call so Up/Down arrow navigation accumulates across the session.
+    pt_session: a shared PromptSession instance created once before the REPL
+        loop.  Reusing the session is more stable than recreating it each turn,
+        especially on POSIX/Termux terminals.  If None a fresh session is built
+        for this call (backwards-compatible).
     """
     is_posix_device = device_mode in {"android-termux", "linux", "posix"}
 
     if pt_prompt is not None and ANSI is not None and InMemoryHistory is not None and CompleteStyle is not None and Style is not None and PromptSession is not None:
-        # Re-use the caller-supplied history object so Up/Down arrow navigation
-        # sees every prompt submitted in this session.  The REPL loop creates
-        # this once (pre-seeded with entries loaded from prompt_history.txt)
-        # and passes it on every call.
+        # ── Use the pre-built session when the caller supplies one ────────────
+        if pt_session is not None:
+            # The session already has history/completer/style baked in.
+            # Just update the message so the dynamic prompt (timestamp, model
+            # name, token count, etc.) stays current on each call.
+            try:
+                pt_session.message = lambda: ANSI(prompt_provider())
+            except Exception:
+                pass
+            if os.name == "nt" and hasattr(pt_session, "_win32_input") and pt_session._win32_input is not None:
+                response = pt_session.prompt()
+                return response + collect_windows_prompt_tail(pt_session._win32_input)
+            return pt_session.prompt()
+
+        # ── No pre-built session: build a fresh one for this call ────────────
+        # (Backwards-compatible path; the REPL loop now always supplies one.)
         session_history = pt_history if pt_history is not None else InMemoryHistory()
         completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
 
@@ -1465,9 +1537,6 @@ def read_dynamic_prompt(
         }
 
         if os.name == "nt" and Win32Input is not None:
-            # Win32Input recognizes multiline console paste. Collect any
-            # remaining keys already read in the same console batch as a
-            # fallback for terminals that split a paste across input events.
             win_input = Win32Input()
             if hasattr(win_input, "recognize_paste"):
                 win_input.recognize_paste = True
@@ -1475,19 +1544,139 @@ def read_dynamic_prompt(
             response = session.prompt()
             return response + collect_windows_prompt_tail(win_input)
 
-        # POSIX / Android Termux: use a plain PromptSession (no Win32Input).
-        # This gives Up/Down arrow history, Tab slash-completion, and
-        # prompt-toolkit's built-in bracketed-paste handling — none of which
-        # the raw read_posix_prompt() provides.
         session = PromptSession(**prompt_options)
         return session.prompt()
 
+    # ── prompt_toolkit not available ─────────────────────────────────────────
     if is_posix_device:
-        # prompt_toolkit not installed — fall back to raw reader (bracketed
-        # paste works but no arrow-key history or slash completion).
+        # Try readline first: gives Up/Down arrow history and Tab completion
+        # via the standard library, no extra install required.
+        if _readline is not None:
+            return _readline_prompt(prompt_provider(), history or [])
+        # Last resort: raw bracketed-paste reader (no history, no completion).
         return read_posix_prompt(prompt_provider())
 
     return input(prompt_provider())
+
+
+def _readline_prompt(prompt: str, history: List[str]) -> str:
+    """Use Python's readline module for a POSIX input line with history.
+
+    Loads *history* entries so Up/Down arrow navigation works immediately.
+    Also registers a simple slash-command Tab completer.
+    """
+    assert _readline is not None  # guarded by caller
+
+    # Populate readline history for this call.  readline keeps a global
+    # history; we replace it with the current in-memory list each time so it
+    # stays in sync with append_prompt_history.
+    try:
+        _readline.clear_history()
+    except AttributeError:
+        pass
+    for entry in history:
+        try:
+            _readline.add_history(entry)
+        except Exception:
+            pass
+
+    # Tab completer: slash commands when line starts with '/', else nothing.
+    slash_names = [cmd for cmd, _ in GeminiCliCompleter.SLASH_COMMANDS] if GeminiCliCompleter is not None else []
+
+    def _completer(text: str, state: int) -> Optional[str]:
+        try:
+            line = _readline.get_line_buffer()
+            if line.startswith("/") and " " not in line:
+                matches = [c for c in slash_names if c.startswith(line)]
+                if state < len(matches):
+                    return matches[state]
+        except Exception:
+            pass
+        return None
+
+    try:
+        _readline.set_completer(_completer)
+        _readline.parse_and_bind("tab: complete")
+    except Exception:
+        pass
+
+    try:
+        return input(prompt)
+    finally:
+        # Remove completer so it doesn't bleed into other input() calls.
+        try:
+            _readline.set_completer(None)
+        except Exception:
+            pass
+
+
+def build_repl_prompt_session(
+    prompt_provider: Callable[[], str],
+    pt_history: Any,
+    cwd: Optional[Path] = None,
+    prompt_fg: str = "ansired",
+    prompt_bg: str = "",
+) -> Any:
+    """Build a single PromptSession to be reused for every REPL turn.
+
+    Returns None when prompt_toolkit is not available.  The session's
+    ``message`` attribute is a lambda so it calls prompt_provider() live on
+    each prompt, keeping the dynamic prefix (model name, token count, etc.)
+    up to date without recreating the session.
+    """
+    if PromptSession is None or ANSI is None or Style is None or CompleteStyle is None:
+        return None
+
+    completer = GeminiCliCompleter(cwd=cwd) if GeminiCliCompleter is not None else None
+    lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
+
+    bg_str = (prompt_bg or "").strip()
+    fg_str = (prompt_fg or "").strip() or "ansired"
+    if bg_str and bg_str != "none":
+        if not bg_str.startswith("bg:"):
+            bg_str = f"bg:{bg_str}"
+        text_style_spec = f"{bg_str} {fg_str}"
+    else:
+        text_style_spec = fg_str
+
+    user_style = Style.from_dict({
+        'custom-user-text': text_style_spec,
+        '': fg_str,
+        'completion-menu': 'bg:#181825 #cdd6f4',
+        'completion-menu.completion': 'bg:#181825 #89dceb',
+        'completion-menu.completion.current': 'bg:#005f87 #ffffff bold',
+        'completion-menu.meta.completion': 'bg:#181825 #9399b2',
+        'completion-menu.meta.completion.current': 'bg:#005f87 #e0e0e0',
+        'scrollbar.background': 'bg:#11111b',
+        'scrollbar.button': 'bg:#313244',
+    })
+
+    opts: Dict[str, Any] = {
+        "message": lambda: ANSI(prompt_provider()),
+        "history": pt_history,
+        "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
+        "completer": completer,
+        "lexer": lexer,
+        "complete_while_typing": True,
+        "complete_style": CompleteStyle.COLUMN,
+        "mouse_support": False,
+        "wrap_lines": True,
+        "refresh_interval": 0.25,
+        "style": user_style,
+    }
+
+    try:
+        if os.name == "nt" and Win32Input is not None:
+            win_input = Win32Input()
+            if hasattr(win_input, "recognize_paste"):
+                win_input.recognize_paste = True
+            session = PromptSession(input=win_input, **opts)
+            # Stash the Win32Input so read_dynamic_prompt can drain paste tail.
+            session._win32_input = win_input  # type: ignore[attr-defined]
+            return session
+        return PromptSession(**opts)
+    except Exception:
+        return None
 
 
 def title(text: str) -> None:
@@ -6565,6 +6754,15 @@ def main() -> int:
         # Create one InMemoryHistory pre-seeded with saved entries so arrow-key
         # navigation works immediately and accumulates across the whole session.
         repl_pt_history = InMemoryHistory(list(command_history)) if InMemoryHistory is not None else None
+        # Create one PromptSession reused every turn so the terminal stays
+        # stable and the completer/history are not rebuilt on each prompt.
+        repl_pt_session = build_repl_prompt_session(
+            prompt_text,
+            repl_pt_history,
+            cwd=cwd,
+            prompt_fg=prompt_fg,
+            prompt_bg=prompt_bg,
+        )
         while True:
             try:
                 user_input = read_dynamic_prompt(
@@ -6575,6 +6773,7 @@ def main() -> int:
                     prompt_bg=prompt_bg,
                     device_mode=device_mode,
                     pt_history=repl_pt_history,
+                    pt_session=repl_pt_session,
                 ).strip()
             except (EOFError, KeyboardInterrupt):
                 print()
