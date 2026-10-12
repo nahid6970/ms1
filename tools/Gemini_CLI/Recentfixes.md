@@ -37,7 +37,6 @@ The fix creates one `PromptSession` via `build_repl_prompt_session` before enter
 
 Start the CLI. Send a few prompts. Press Up to cycle through them. Type `/` and confirm command completions appear. Paste a multiline block and confirm it appears as one request. Restart the CLI and press Up — previous session prompts should still be available. Check `/device` reports the correct environment.
 
-On Android Termux or Linux **without** `prompt_toolkit` installed, confirm:
-- Up/Down arrow cycles through previous prompts (via readline)
-- Tab after typing `/` shows slash-command completions
-- Arrow key presses do not print garbage characters
+## Notes on default behavior
+
+- `Escape` key uses prompt_toolkit's default behavior: dismisses the completion menu but may require more than one press depending on the terminal and prompt_toolkit version. This is intentional — the default was preferred over a custom ESC binding.
