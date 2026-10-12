@@ -855,6 +855,57 @@
             border-top: none;
         }
 
+        /* Workspace Bar */
+        #workspace-bar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 8px;
+            background-color: #080c14;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            flex-shrink: 0;
+            min-height: 34px;
+        }
+        #workspace-bar::-webkit-scrollbar { display: none; }
+        #workspace-bar.hidden { display: none; }
+
+        .ws-bar-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            background: transparent;
+            letter-spacing: 0.01em;
+        }
+        .ws-bar-chip:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--text-primary);
+        }
+        .ws-bar-chip.active {
+            background: rgba(59,130,246,0.13);
+            color: var(--accent-color);
+            border-color: rgba(59,130,246,0.3);
+            font-weight: 600;
+        }
+        .ws-bar-chip .ws-bar-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
         /* Terminal Tab Bar */
         .terminal-tabs-container {
             display: flex;
@@ -1947,6 +1998,7 @@
         </div>
 
         <div class="terminal-container-wrapper" id="terminal-wrapper" style="display: none; flex-direction: column;">
+            <div id="workspace-bar" class="hidden"></div>
             <div id="terminal-parent" style="flex: 1; min-height: 0;"></div>
             <div id="subprocess-monitor" style="height: 28px; background-color: var(--bg-sidebar); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: monospace; font-size: 0.72rem; color: var(--text-secondary); user-select: none;">
                 <div style="display: flex; align-items: center; gap: 16px;">
@@ -3300,6 +3352,10 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="settings-show-categories" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                             <label for="settings-show-categories" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Category Tags</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="settings-show-workspace-bar" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
+                            <label for="settings-show-workspace-bar" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspace Bar</label>
                         </div>
                     </div>
                 </div>
@@ -7303,6 +7359,34 @@
             loadScratchpadNotes();
         }
 
+        function updateWorkspaceBar() {
+            const bar = document.getElementById('workspace-bar');
+            if (!bar) return;
+            const show = localStorage.getItem('show-workspace-bar') !== 'false';
+            if (!show) { bar.classList.add('hidden'); return; }
+            bar.classList.remove('hidden');
+            bar.innerHTML = '';
+
+            // Show only running projects as chips, active one highlighted
+            const runningProjects = projects.filter(p => p.is_active || p.name === activeProject);
+            runningProjects.forEach(proj => {
+                const isActive = proj.name === activeProject;
+                const chip = document.createElement('div');
+                chip.className = 'ws-bar-chip' + (isActive ? ' active' : '');
+
+                // Dot colored with project accent
+                const dotColor = (proj.cardTheme && proj.cardTheme.accentColor)
+                    ? proj.cardTheme.accentColor
+                    : (isActive ? 'var(--accent-color)' : '#475569');
+                chip.innerHTML = `<span class="ws-bar-dot" style="background:${dotColor};"></span>${proj.name}`;
+
+                if (!isActive) {
+                    chip.onclick = () => selectProject(proj.name);
+                }
+                bar.appendChild(chip);
+            });
+        }
+
         // Close dropdown when clicking outside (using capturing phase on mousedown for absolute reliability)
         window.addEventListener('pointerdown', (e) => {
             // 1. Close workspace selector dropdown
@@ -8681,6 +8765,8 @@
             
             const savedShowCategories = localStorage.getItem('show-workspace-categories') !== 'false';
             document.getElementById('settings-show-categories').checked = savedShowCategories;
+
+            document.getElementById('settings-show-workspace-bar').checked = localStorage.getItem('show-workspace-bar') !== 'false';
             
             const savedContextMenu = localStorage.getItem('use-context-menu-actions') === 'true';
             document.getElementById('settings-context-menu').checked = savedContextMenu;
@@ -8893,6 +8979,10 @@
             
             const selectedShowCategories = document.getElementById('settings-show-categories').checked;
             localStorage.setItem('show-workspace-categories', selectedShowCategories);
+
+            const selectedShowWorkspaceBar = document.getElementById('settings-show-workspace-bar').checked;
+            localStorage.setItem('show-workspace-bar', selectedShowWorkspaceBar);
+            updateWorkspaceBar();
             
             const selectedContextMenu = document.getElementById('settings-context-menu').checked;
             localStorage.setItem('use-context-menu-actions', selectedContextMenu);
@@ -9021,6 +9111,7 @@
                 startStatsMonitoring();
                 handleSearch();
                 applySidebarWorkspacesVisibility();
+                updateWorkspaceBar();
                 
                 document.getElementById('no-workspace-placeholder').style.display = 'none';
                 document.getElementById('workspace-header').style.display = 'flex';
