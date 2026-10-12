@@ -4070,6 +4070,7 @@
     <script>
         let projects = [];
         let activeProject = null;
+        let wsfocusHistory = []; // tracks workspace focus order for fallback on close
         let autoScrollEnabled = localStorage.getItem('auto-scroll-enabled') !== 'false'; // default ON
         let allCustomBtns = [];
 
@@ -5918,15 +5919,26 @@
 
                 projects = await response.json();
                 
+                // Remove killed project from focus history
+                wsfocusHistory = wsfocusHistory.filter(n => n !== projectName);
+
                 if (activeProject === projectName) {
                     activeProject = null;
                     clearTerminalPanes();
                     document.getElementById('terminal-wrapper').style.display = 'none';
                     document.getElementById('no-workspace-placeholder').style.display = 'flex';
+
+                    // Try to focus the last previously focused running workspace
+                    const fallback = [...wsfocusHistory].reverse().find(n => projects.find(p => p.name === n && p.is_active));
+                    if (fallback) {
+                        selectProject(fallback);
+                        return;
+                    }
                 }
 
                 handleSearch();
                 applySidebarWorkspacesVisibility();
+                updateWorkspaceBar();
             } catch (err) {
                 console.error("Error stopping session:", err);
             }
@@ -7387,7 +7399,7 @@
                 chip.ondblclick = async (e) => {
                     e.stopPropagation();
                     await stopProjectSession(proj.name, { silent: true });
-                    setTimeout(updateWorkspaceBar, 300);
+                    // updateWorkspaceBar is called inside stopProjectSession now
                 };
                 bar.appendChild(chip);
             });
@@ -9114,6 +9126,9 @@
                 const currentProjDetails = projects.find(p => p.name === projectName) || {};
                 
                 activeProject = projectName;
+                // Track focus history for fallback on session close
+                wsfocusHistory = wsfocusHistory.filter(n => n !== projectName);
+                wsfocusHistory.push(projectName);
                 startStatsMonitoring();
                 handleSearch();
                 applySidebarWorkspacesVisibility();
