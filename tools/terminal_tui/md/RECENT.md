@@ -5,6 +5,25 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-12] - Bangla Inline Row Overlay (main terminal fix)
+
+Bangla text now renders correctly shaped inside the main xterm.js terminal — no separate view, no toggle button.
+
+### Problem
+xterm.js assigns each character to a fixed-width cell. Bangla shaping requires combining base chars, matras, and hasants into single glyphs that can reorder visually — impossible in the cell model. No font choice fixed this. Previous attempts: Vrinda/Nirmala UI font stack, Unicode 11 width handling, full-screen overlay panel (all failed or were read-only).
+
+### Solution — inline row overlay
+After each `pty-output` write, scroll, and resize, `renderBanglaRows(term, paneDiv)` runs:
+1. Reads only the currently **visible rows** from the xterm.js buffer via `buf.getLine(r)` / `line.getCell(c)`.
+2. For each visible row containing any Bangla character (U+0980–U+09FF), creates an absolutely-positioned `<div class="bangla-row-overlay">` inside `.xterm-screen` at the exact pixel position of that row (measured from `term._core._renderService.dimensions`).
+3. The overlay div renders the row's text with a Bangla font (`Nirmala UI`, `Vrinda`) and full color fidelity (16-color palette + RGB truecolor + bold/italic/underline via inline spans).
+4. Rows with no Bangla are untouched — xterm renders them normally.
+5. Overlays are `pointer-events: none` so all keyboard input and mouse interaction passes through to xterm.
+
+**Files Modified:** `templates/index.html` — `renderBanglaRows()`, `_banglaRowHtml()`, `BANGLA_RE`, `BANGLA_ANSI_FG`, CSS `.bangla-row-overlay`, three hook call sites (pty-output, scroll, resize). `BANGLA_TERMINAL_RENDERING.md` updated.
+
+---
+
 ## [2026-10-11] - Prevent Sidebar Flash on Refresh
 - Applied the saved sidebar width and collapsed state in the early `<head>` script so refresh does not briefly show a collapsed sidebar.
 - Kept the pre-paint collapsed class synchronized with the sidebar toggle.

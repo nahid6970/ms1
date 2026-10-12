@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-10-12] - Bangla Text Broken/Unreadable in Terminal
+**Problem:** Bangla text in the terminal appeared with broken spacing — each character isolated in its own cell, matras and hasants not combining, text completely unreadable.
+**Root Cause:** xterm.js uses a fixed-width cell grid. Bangla Unicode shaping requires combining multiple codepoints into single glyphs that can reorder visually. This is fundamentally incompatible with the cell model, regardless of font choice. Previous attempts (Vrinda/Nirmala UI font stack, Unicode 11 width handling) confirmed this — fonts supply glyphs but cannot change the cell model.
+**Solution:** Inline row overlay. After each `pty-output` write, scroll, and resize, `renderBanglaRows()` reads the visible xterm buffer rows, detects which contain Bangla (U+0980–U+09FF), and places absolutely-positioned `<div class="bangla-row-overlay">` elements inside `.xterm-screen` at the exact pixel coordinates of those rows. The divs use a Bangla-capable font so the browser shapes the text correctly. Non-Bangla rows are left completely alone. Overlays are `pointer-events: none` so all input/interaction passes through to xterm.
+**Files Modified:** `templates/index.html`
+
+---
+
 ## [2026-10-11] - Collapsed Sidebar Flashes on Page Refresh
 **Problem:** The workspace sidebar briefly appeared on refresh even when it had been collapsed.
 **Root Cause:** The saved `sidebar-collapsed` state was applied in `window.onload`, after the page had already painted (and after asynchronous startup work began).

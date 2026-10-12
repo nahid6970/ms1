@@ -74,6 +74,12 @@
 
 ---
 
+## Bangla (Complex Script) Rendering in Terminal
+**Status:** ✅ Complete
+**Description:** Bangla text displays correctly shaped in the main terminal. Matras, hasants, and conjuncts combine properly instead of appearing as broken isolated cells.
+**Implementation:** `templates/index.html` — after each `pty-output` write, scroll, and resize, `renderBanglaRows()` scans the visible xterm buffer rows and places absolutely-positioned `<div class="bangla-row-overlay">` elements inside `.xterm-screen` at the exact pixel position of any row containing Bangla characters (U+0980–U+09FF). The overlays use `Nirmala UI`/`Vrinda` fonts so the browser shapes the text correctly. Non-Bangla rows are untouched. Overlays are `pointer-events: none` so all input passes through to xterm.
+**Key functions:** `renderBanglaRows(term, paneDiv)`, `_banglaRowHtml(term, bufferRow)`
+
 ## Split Terminal Panes
 **Status:** ✅ Complete
 **Description:** Multiple terminal panes per workspace with a tabbed terminal bar shown by default.
