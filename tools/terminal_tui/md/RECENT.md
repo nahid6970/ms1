@@ -5,6 +5,36 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-12] - Fix Git Modal: Stop Foreign HEAD Injection + Fix Preview Diff Base
+
+### Problem
+Multiple workspaces can share the same git repo (each workspace = a subfolder).
+When workspace A commits, that commit becomes repo HEAD. Opening the git modal in workspace B caused two bugs:
+
+1. **Foreign HEAD injected into commit list** — the backend fetched `git show HEAD` and inserted it at the top of B's scoped commit list (which only contains commits that touched B's folder). Workspace B would always show workspace A's last commit as "CURRENT", even though it changed nothing in B's folder.
+
+2. **Preview diff showed nothing** — the preview (eye) button called `openGitDiffModal('HEAD', commit.hash)`, meaning "diff from HEAD to this commit scoped to workspace B". Since HEAD was already workspace A's commit, git saw no changes in B's folder and the diff was empty.
+
+### Fix
+
+**Backend (`app.py`) — `api_git_past_commits`:**
+- Replaced the `git show HEAD` injection block with a simple `git rev-parse --short HEAD` lookup.
+- Only marks `isHead: true` on a commit if it already exists in the scoped `git log` result.
+- If HEAD touched only other workspaces' files, it simply doesn't appear in this workspace's list — no injection.
+
+**Frontend (`templates/index.html`) — `refreshPastCommits`:**
+- Changed the preview button from `openGitDiffModal('HEAD', c.hash)` → `openGitDiffModal(c.hash + '~1', c.hash)`.
+- Now previews "what this commit itself changed in this workspace folder" (parent → commit), not "what changed between HEAD and this commit" (which was wrong cross-workspace).
+- Updated the diff modal label: `abc123~1 → abc123` is rendered as `abc123 parent  →  abc123` for readability.
+
+**Backend diff route** already accepts any git ref notation including `~1`, so no changes needed there.
+
+**Files Modified:**
+- `app.py` — `api_git_past_commits` HEAD injection removed
+- `templates/index.html` — preview button `openGitDiffModal` call + diff label display
+
+---
+
 ## [2026-10-12] - Bangla Inline Row Overlay (main terminal fix)
 
 Bangla text now renders correctly shaped inside the main xterm.js terminal — no separate view, no toggle button.

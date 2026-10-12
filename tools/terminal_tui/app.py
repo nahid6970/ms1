@@ -1554,27 +1554,20 @@ def api_git_past_commits(project):
                     "isHead": False
                 })
 
-        # Include HEAD even if its commit changed files outside this workspace,
-        # so the current snapshot can be highlighted and previewed here.
+        # Only mark HEAD if it already appears in the scoped commit list.
+        # Do NOT inject HEAD when it comes from outside this workspace's folder —
+        # that would show a foreign commit as "CURRENT" in every workspace sharing the same repo,
+        # and its ~1 preview diff would show changes from another workspace's files.
         res_head = subprocess.run(
-            ["git", "show", "-s", "--format=%h|%an|%ct|%s", "HEAD"], cwd=git_root,
+            ["git", "rev-parse", "--short", "HEAD"], cwd=git_root,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             encoding="utf-8", errors="replace", creationflags=cf, timeout=5
         )
-        head_parts = (res_head.stdout or "").strip().split("|", 3)
-        if res_head.returncode == 0 and len(head_parts) == 4:
-            head_hash = head_parts[0]
+        if res_head.returncode == 0:
+            head_hash = (res_head.stdout or "").strip()
             head_commit = next((item for item in commits if item["hash"] == head_hash), None)
             if head_commit:
                 head_commit["isHead"] = True
-            else:
-                commits.insert(0, {
-                    "hash": head_hash,
-                    "author": head_parts[1],
-                    "date": compact_commit_date(head_parts[2]),
-                    "message": head_parts[3],
-                    "isHead": True
-                })
                 
         return jsonify({"commits": commits})
     except Exception as e:

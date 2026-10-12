@@ -1,6 +1,70 @@
 {
   "projects": [
     {
+      "name": "Default",
+      "path": "C:\\Users\\nahid",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "category": ""
+    },
+    {
+      "name": "MS1",
+      "path": "C:\\@delta\\ms1",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/ms1.git"
+    },
+    {
+      "name": "db",
+      "path": "C:\\@delta\\db",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
+    },
+    {
       "name": "Terminal TUI",
       "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
       "pinned": false,
@@ -77,70 +141,6 @@
         }
       ],
       "category": "Tool"
-    },
-    {
-      "name": "Default",
-      "path": "C:\\Users\\nahid",
-      "pinned": false,
-      "theme": {
-        "background": "#0b140f",
-        "foreground": "#c8d5ce",
-        "cursor": "#ea3a1f",
-        "borderColor": "#ffffff",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffffff",
-        "textColor": "#000000",
-        "pathColor": "#163055",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "category": ""
-    },
-    {
-      "name": "MS1",
-      "path": "C:\\@delta\\ms1",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#0b140f",
-        "foreground": "#c8d5ce",
-        "cursor": "#ea3a1f",
-        "borderColor": "#ffffff",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffffff",
-        "textColor": "#000000",
-        "pathColor": "#163055",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "gitRemote": "https://github.com/nahid6970/ms1.git"
-    },
-    {
-      "name": "db",
-      "path": "C:\\@delta\\db",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#0b140f",
-        "foreground": "#c8d5ce",
-        "cursor": "#ea3a1f",
-        "borderColor": "#ffffff",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffffff",
-        "textColor": "#000000",
-        "pathColor": "#163055",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": []
     },
     {
       "name": "Code Merger",
