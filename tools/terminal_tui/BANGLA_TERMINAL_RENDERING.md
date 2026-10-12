@@ -2,35 +2,38 @@
 
 ## Status
 
-Bangla still appears with broken spacing/shaping in the main Xterm.js terminal. The separate **বাং** view renders the same terminal buffer as browser text and displays Bangla correctly. A font-only fix for the main Xterm.js renderer has not been found.
+**Working fix implemented (2026-10-12):** Bangla text now renders correctly inline in the main terminal. No toggle button, no separate view — it just works automatically.
 
-**Rollback planned:** The user said they are going to revert the implementation changes. This note records the investigation and should be kept as the issue history. Until that revert is made, the current working tree still contains the font stack and **বাং** view changes in `templates/index.html`.
+## Why xterm.js Breaks Bangla
 
-## Why the Two Views Differ
+xterm.js assigns each character to a fixed-width cell. Bangla shaping requires combining multiple codepoints (base chars + matras + hasants) into single glyphs that can reorder visually — this is fundamentally incompatible with the cell model. No font choice fixes this.
 
-The **বাং** view reads text from Xterm.js's active buffer and puts the resulting text in a normal HTML `<pre>` element. The browser can shape a whole Bangla text run using Vrinda or Nirmala UI.
+Previous attempts that did not work:
+1. Vrinda / Nirmala UI in the terminal font stack — glyphs present but spacing broken.
+2. xterm.js Unicode 11 width handling — no effect on shaping.
+3. Canvas/WebGL renderer — still cell-based.
+4. Full-screen overlay panel — worked for reading but was a separate view, not inline.
 
-The main terminal is a VT-style terminal emulator. It assigns output to fixed character cells so it can track the cursor, columns, scrolling, colors, and terminal control sequences. Bangla shaping can reorder marks and combine glyphs across characters, which does not fit reliably into those independent cells. Selecting a Bangla font supplies glyphs but does not change this cell model.
+## The Inline Row Overlay Fix
 
-Xterm.js 5.3 already uses its built-in DOM renderer by default. Its Canvas and WebGL renderers still render terminal cells, so switching among those renderers is not expected to provide full Bangla shaping.
+After each `pty-output` write and on every scroll/resize, `renderBanglaRows(term, paneDiv)` runs. It:
 
-## Attempts So Far
+1. Reads the xterm.js buffer for only the **currently visible rows** via `buf.getLine(r)` / `line.getCell(c)`.
+2. For each visible row, builds an HTML string by concatenating cell characters with inline SGR color spans (16-color palette + RGB truecolor + bold/italic/underline).
+3. If the row contains **any Bangla character** (U+0980–U+09FF), creates an absolutely-positioned `<div class="bangla-row-overlay">` inside `.xterm-screen` at the exact pixel position of that row, using the cell height from `term._core._renderService.dimensions`.
+4. The overlay div uses `font-family: 'Nirmala UI', 'Vrinda', ...` so the browser shapes the entire Bangla text run correctly.
+5. Rows with no Bangla are left completely alone — xterm.js renders them normally.
+6. Overlays are `pointer-events: none` so all keyboard input and mouse interaction passes through to xterm.
 
-1. Added Vrinda and Nirmala UI to the terminal font fallback stack. Bangla glyphs remained incorrectly spaced/shaped in the main terminal.
-2. Tried Xterm.js Unicode 11 width handling. It did not fix shaping and was removed after terminal initialization trouble.
-3. Added the **বাং** view. It reads up to 3,000 rows from the active Xterm.js buffer and renders them as browser text. This displays Bangla correctly, but it is read-only and does not preserve ANSI colors or interactive TUI behavior.
-4. Checked renderer alternatives available in the current Xterm.js setup. The default is already the DOM renderer; Canvas/WebGL are not complex-script shaping renderers.
+The result: Bangla rows show correctly shaped text in the main terminal. English rows, prompts, ANSI box-drawing, colors — everything else is untouched.
 
-## Files Involved
+## Hooks
 
-- `templates/index.html` — terminal font stack and **বাং** buffer view
-- `md/RECENT.md` — session history
-- `md/PROBLEMS_AND_FIXES.md` — issue history
+- `pty-output` write callback → `renderBanglaRows`
+- `.xterm-viewport` scroll event → `renderBanglaRows`
+- `paneTerm.onResize` → `renderBanglaRows`
 
-## Rollback Scope
+## Files Modified
 
-When reverting the implementation, remove the terminal font-stack helper/application and the **বাং** button, buffer-view functions, and related CSS from `templates/index.html`. Keep this document if the goal is to retain the diagnosis and record of attempted approaches. The issue will remain unresolved in the main terminal after rollback.
-
-## What a Full Main-Terminal Fix Would Require
-
-A full fix needs a renderer that supports complex-script shaping while preserving terminal cursor and cell behavior, or a custom HTML overlay that mirrors the terminal buffer and reproduces terminal colors, cursor behavior, selection, and scrolling. Neither is a font setting or a small Xterm.js configuration change. The current **বাং** view is the working reading view for Bangla output; use the main terminal for input and interactive terminal programs.
+- `templates/index.html` — CSS (`.bangla-row-overlay`), `renderBanglaRows()`, `_banglaRowHtml()`, `BANGLA_RE`, `BANGLA_ANSI_FG` constants, three hook call sites.
+- `BANGLA_TERMINAL_RENDERING.md` — this file.

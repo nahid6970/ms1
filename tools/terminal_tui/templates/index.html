@@ -948,6 +948,24 @@
             display: flex !important;
         }
 
+        /* ── Bangla inline row overlay ───────────────────────────── */
+        /* Transparent divs positioned over xterm rows that contain   */
+        /* Bangla text. They cover the broken xterm cell rendering    */
+        /* and let the browser shape Bangla glyphs correctly.         */
+        .bangla-row-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            z-index: 5;
+            pointer-events: none;   /* pass mouse/keyboard through to xterm */
+            overflow: hidden;
+            white-space: pre;
+            font-family: 'Nirmala UI', 'Vrinda', 'SolaimanLipi', 'Kalpurush', sans-serif;
+            color: #d1d5db;
+            display: flex;
+            align-items: center;
+        }
+
         .terminal-pane {
             flex: 1;
             min-width: 0;
@@ -4890,9 +4908,6 @@
             paneTerm.open(paneDiv);
 
 
-
-
-
             // ── Add custom button (+ button for adding custom shortcuts)
             const addBtn = document.createElement('button');
             addBtn.type = 'button';
@@ -4930,6 +4945,8 @@
                 
                 // Light up on scrolling or moving mouse over the pane
                 viewport.addEventListener('scroll', activateScrollbar);
+                // Re-render Bangla row overlays when the user scrolls
+                viewport.addEventListener('scroll', () => renderBanglaRows(paneTerm, paneDiv));
                 paneDiv.addEventListener('mousemove', activateScrollbar);
             }
 
@@ -4980,6 +4997,7 @@
                     if (paneSocket && paneSocket.connected) {
                         paneSocket.emit('resize', { project: projectName, paneId, cols: size.cols, rows: size.rows });
                     }
+                    renderBanglaRows(paneTerm, paneDiv);
                 }, 50);
             });
 
@@ -5011,6 +5029,8 @@
                             if (isAtBottom || autoScrollEnabled) {
                                 paneTerm.scrollToBottom();
                             }
+                            // Re-render Bangla inline row overlays after xterm writes
+                            renderBanglaRows(paneTerm, paneDiv);
                         });
                     }
                 } else if (msg.eof) {
@@ -5348,6 +5368,165 @@
                 output += remaining;
             }
             return output;
+        }
+
+        // ── Bangla inline row overlay ─────────────────────────────────────────
+        //
+        // xterm.js cell model prevents Bangla from shaping correctly — each char
+        // is isolated in its own cell so matras and hasants never combine.
+        //
+        // This approach reads the xterm buffer for ONLY the currently visible
+        // rows, detects which rows contain Bangla (U+0980–U+09FF), and places
+        // absolutely-positioned <div> overlays directly over those rows inside
+        // the xterm container. The divs use a Bangla-capable font so the browser
+        // shapes the text correctly. Non-Bangla rows are left completely alone.
+        //
+        // The overlays are pointer-events:none so all keyboard input and mouse
+        // interaction passes through to xterm normally.
+
+        const BANGLA_RE = /[\u0980-\u09FF]/;
+
+        const BANGLA_ANSI_FG = [
+            '#4a4a4a','#f87171','#4ade80','#fbbf24',
+            '#60a5fa','#c084fc','#22d3ee','#d1d5db',
+            '#6b7280','#fca5a5','#86efac','#fde68a',
+            '#93c5fd','#d8b4fe','#67e8f9','#f9fafb'
+        ];
+
+        function _banglaRowHtml(term, bufferRow) {
+            const buf  = term.buffer.active;
+            const line = buf.getLine(bufferRow);
+            if (!line) return null;
+
+            // Read all cells, concatenate chars, track style runs
+            const cols = term.cols;
+            let html = '';
+            let curStyle = '';
+            let curText  = '';
+            let hasBangla = false;
+
+            const flush = () => {
+                if (!curText) return;
+                const safe = curText
+                    .replace(/&/g,'&amp;')
+                    .replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;');
+                html += curStyle ? `<span style="${curStyle}">${safe}</span>` : safe;
+                curText = '';
+            };
+
+            for (let c = 0; c < cols; c++) {
+                const cell = line.getCell(c);
+                if (!cell) continue;
+                const ch = cell.getChars() || ' ';
+                if (BANGLA_RE.test(ch)) hasBangla = true;
+
+                // Build inline style from cell SGR attributes
+                let s = '';
+                const fgi = cell.getFgColor();
+                const bgi = cell.getBgColor();
+                if (cell.isFgRGB()) {
+                    s += `color:rgb(${(fgi>>16)&0xff},${(fgi>>8)&0xff},${fgi&0xff});`;
+                } else if (cell.isFgPalette() && fgi < 16) {
+                    s += `color:${BANGLA_ANSI_FG[fgi]};`;
+                }
+                if (cell.isBgRGB()) {
+                    s += `background:rgb(${(bgi>>16)&0xff},${(bgi>>8)&0xff},${bgi&0xff});`;
+                } else if (cell.isBgPalette() && bgi < 16 && bgi !== 0) {
+                    s += `background:${BANGLA_ANSI_FG[bgi]};`;
+                }
+                if (cell.isBold())      s += 'font-weight:700;';
+                if (cell.isItalic())    s += 'font-style:italic;';
+                if (cell.isUnderline()) s += 'text-decoration:underline;';
+
+                if (s !== curStyle) { flush(); curStyle = s; }
+                curText += ch;
+            }
+            flush();
+
+            if (!hasBangla) return null;   // skip rows with no Bangla
+            return html.trimEnd();
+        }
+
+        function renderBanglaRows(term, paneDiv) {
+            // ── Get the xterm screen container and measurements ──────────────
+            // xterm 5.x DOM renderer puts rows in .xterm-rows inside .xterm-screen
+            const screen = paneDiv.querySelector('.xterm-screen');
+            if (!screen) return;
+
+            // Cell dimensions — try internal API first, fall back to DOM measurement
+            let cellH = 0, cellW = 0, cellPadTop = 0, cellPadLeft = 0;
+            try {
+                const dims = term._core._renderService.dimensions;
+                cellH       = dims.css.cell.height;
+                cellW       = dims.css.cell.width;
+                cellPadTop  = dims.css.canvas.top  || 0;
+                cellPadLeft = dims.css.canvas.left || 0;
+            } catch (e) {
+                // Fallback: measure from first row div
+                const firstRow = screen.querySelector('.xterm-rows > div');
+                if (!firstRow) return;
+                cellH = firstRow.getBoundingClientRect().height;
+                cellW = cellH * 0.6; // approximate
+            }
+
+            if (cellH < 1) return;
+
+            // ── Which buffer rows are currently visible? ─────────────────────
+            const buf        = term.buffer.active;
+            const viewportY  = buf.viewportY;   // top scrollback row of viewport
+            const visRows    = term.rows;
+
+            // ── Remove old overlays, rebuild only for visible Bangla rows ────
+            // Reuse existing overlay divs by key (row index) to avoid thrash
+            const existing = {};
+            paneDiv.querySelectorAll('.bangla-row-overlay').forEach(el => {
+                existing[el.dataset.row] = el;
+            });
+            const seen = new Set();
+
+            for (let vi = 0; vi < visRows; vi++) {
+                const bufRow = viewportY + vi;
+                const html   = _banglaRowHtml(term, bufRow);
+
+                if (html === null) {
+                    // No Bangla on this row — remove overlay if it exists
+                    if (existing[bufRow]) {
+                        existing[bufRow].remove();
+                        delete existing[bufRow];
+                    }
+                    continue;
+                }
+
+                // Position: top of this visible row inside .xterm-screen
+                const topPx = cellPadTop + vi * cellH;
+
+                let overlay = existing[bufRow];
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.className = 'bangla-row-overlay';
+                    overlay.dataset.row = bufRow;
+                    screen.appendChild(overlay);
+                }
+                seen.add(String(bufRow));
+
+                // Get background color from terminal theme or default to black
+                let termBg = '#000';
+                try { termBg = term.options.theme.background || '#000'; } catch (e) {}
+
+                overlay.style.top        = `${topPx}px`;
+                overlay.style.height     = `${cellH}px`;
+                overlay.style.fontSize   = `${term.options.fontSize || 14}px`;
+                overlay.style.lineHeight = `${cellH}px`;
+                overlay.style.background = termBg;
+                overlay.style.paddingLeft = `${cellPadLeft}px`;
+                overlay.innerHTML = html;
+            }
+
+            // Remove overlays for rows that scrolled out of view
+            Object.keys(existing).forEach(key => {
+                if (!seen.has(key)) existing[key].remove();
+            });
         }
 
         function splitTerminal(direction, initialCommand = null) {
