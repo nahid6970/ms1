@@ -1564,7 +1564,7 @@ def read_dynamic_prompt(
             "complete_while_typing": True,
             "complete_style": CompleteStyle.COLUMN,
             "mouse_support": False,
-            "wrap_lines": False,
+            "wrap_lines": True,
             "refresh_interval": 0,
             "style": user_style,
         }
@@ -1695,7 +1695,7 @@ def build_repl_prompt_session(
         "complete_while_typing": True,
         "complete_style": CompleteStyle.COLUMN,
         "mouse_support": False,
-        "wrap_lines": False,
+        "wrap_lines": True,
         "refresh_interval": 0,
         "style": user_style,
     }
