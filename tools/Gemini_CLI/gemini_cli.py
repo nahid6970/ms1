@@ -1564,7 +1564,7 @@ def read_dynamic_prompt(
             "complete_while_typing": True,
             "complete_style": CompleteStyle.COLUMN,
             "mouse_support": False,
-            "wrap_lines": True,
+            "wrap_lines": False,
             "refresh_interval": 0,
             "style": user_style,
         }
@@ -1695,7 +1695,7 @@ def build_repl_prompt_session(
         "complete_while_typing": True,
         "complete_style": CompleteStyle.COLUMN,
         "mouse_support": False,
-        "wrap_lines": True,
+        "wrap_lines": False,
         "refresh_interval": 0,
         "style": user_style,
     }
@@ -3933,15 +3933,51 @@ def render_markdown_text(text: str) -> str:
             else:
                 lines.append(_render_inline_markdown(line))
         elif re.match(r"^\s*[-*+]\s+", line):
-            lines.append(f"• {_render_inline_markdown(stripped_line.lstrip('-*+ '))}")
+            bullet_content = _render_inline_markdown(stripped_line.lstrip('-*+ '))
+            bullet_rendered = f"• {bullet_content}"
+            visible = strip_ansi(bullet_rendered)
+            if term_width > 0 and len(visible) > term_width:
+                plain_content = strip_ansi(bullet_content)
+                plain_wrapped = textwrap.wrap(plain_content, width=term_width - 2, break_long_words=False, break_on_hyphens=False)
+                for i, segment in enumerate(plain_wrapped):
+                    prefix = "• " if i == 0 else "  "
+                    lines.append(f"{prefix}{_render_inline_markdown(segment)}")
+            else:
+                lines.append(bullet_rendered)
         elif re.match(r"^\s*\d+\.\s+", line):
-            lines.append(_render_inline_markdown(line))
+            num_rendered = _render_inline_markdown(line)
+            visible = strip_ansi(num_rendered)
+            if term_width > 0 and len(visible) > term_width:
+                m = re.match(r"^(\s*\d+\.\s+)(.*)", line)
+                if m:
+                    prefix_str, rest = m.group(1), m.group(2)
+                    indent = " " * len(prefix_str)
+                    plain_wrapped = textwrap.wrap(strip_ansi(_render_inline_markdown(rest)), width=term_width - len(prefix_str), break_long_words=False, break_on_hyphens=False)
+                    for i, segment in enumerate(plain_wrapped):
+                        p = prefix_str if i == 0 else indent
+                        lines.append(f"{p}{_render_inline_markdown(segment)}")
+                else:
+                    lines.append(num_rendered)
+            else:
+                lines.append(num_rendered)
         elif stripped_line.startswith(">"):
             lines.append(f"{_style_text('> ', '90')}{_render_inline_markdown(stripped_line[1:].strip())}")
         elif re.match(r"^\s*(?:-{3,}|\*{3,}|_{3,})\s*$", stripped_line):
             lines.append(_style_text("─" * 32, "90"))
         else:
-            lines.append(_render_inline_markdown(line))
+            rendered = _render_inline_markdown(line)
+            # Wrap long paragraph lines to the terminal width so words are
+            # never split mid-word by the terminal's own hard wrap.
+            # _visible_len strips ANSI codes when measuring, but textwrap
+            # doesn't know about them, so we wrap the plain text and re-apply
+            # inline styling to each wrapped segment.
+            visible = strip_ansi(rendered)
+            if term_width > 0 and len(visible) > term_width:
+                plain_wrapped = textwrap.wrap(visible, width=term_width, break_long_words=False, break_on_hyphens=False)
+                for segment in plain_wrapped:
+                    lines.append(_render_inline_markdown(segment))
+            else:
+                lines.append(rendered)
         
         idx += 1
 
