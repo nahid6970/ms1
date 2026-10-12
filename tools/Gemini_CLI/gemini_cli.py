@@ -557,7 +557,7 @@ try:
     from prompt_toolkit import PromptSession
     from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
     from prompt_toolkit.completion import Completer, Completion
-    from prompt_toolkit.formatted_text import ANSI
+    from prompt_toolkit.formatted_text import ANSI, FormattedText
     from prompt_toolkit.history import FileHistory
     from prompt_toolkit.history import InMemoryHistory
     from prompt_toolkit.lexers import Lexer
@@ -570,6 +570,7 @@ except Exception:
     Completer = None
     Completion = None
     ANSI = None
+    FormattedText = None
     FileHistory = None
     InMemoryHistory = None
     Lexer = None
@@ -995,6 +996,30 @@ def _ansi_wrap(text: str, code: str) -> str:
     if not sys.stdout.isatty():
         return text
     return f"\033[{code}m{text}\033[0m"
+
+
+def _sgr_to_pt_style(sgr: str) -> str:
+    """Convert an ANSI SGR code string like '1;32' to a prompt_toolkit style string.
+
+    Supports bold (1), standard foreground colors (30-37), and bright
+    foreground colors (90-97).  Unknown tokens are ignored.
+    """
+    _FG = {
+        "30": "ansiblack",   "31": "ansired",    "32": "ansigreen",
+        "33": "ansiyellow",  "34": "ansiblue",   "35": "ansimagenta",
+        "36": "ansicyan",    "37": "ansiwhite",
+        "90": "ansibrightblack",  "91": "ansibrightred",   "92": "ansibrightgreen",
+        "93": "ansibrightyellow", "94": "ansibrightblue",  "95": "ansibrightmagenta",
+        "96": "ansibrightcyan",   "97": "ansibrightwhite",
+    }
+    parts = []
+    for token in sgr.split(";"):
+        token = token.strip()
+        if token == "1":
+            parts.append("bold")
+        elif token in _FG:
+            parts.append(_FG[token])
+    return " ".join(parts) if parts else "ansiwhite"
 
 
 def _char_width(char: str) -> int:
@@ -1471,6 +1496,7 @@ def read_dynamic_prompt(
     device_mode: str = "pc",
     pt_history: Any = None,
     pt_session: Any = None,
+    prompt_prefix_color: str = "1;32",
 ) -> str:
     """Read a line while allowing a time-sensitive prompt to refresh.
 
@@ -1491,7 +1517,7 @@ def read_dynamic_prompt(
             # Just update the message so the dynamic prompt (timestamp, model
             # name, token count, etc.) stays current on each call.
             try:
-                pt_session.message = lambda: ANSI(prompt_provider())
+                pt_session.message = lambda: FormattedText([("class:prompt-prefix", strip_ansi(prompt_provider()))]) if FormattedText is not None else ANSI(prompt_provider())
             except Exception:
                 pass
             if os.name == "nt" and hasattr(pt_session, "_win32_input") and pt_session._win32_input is not None:
@@ -1514,6 +1540,7 @@ def read_dynamic_prompt(
             text_style_spec = fg_str
 
         user_style = Style.from_dict({
+            'prompt-prefix': _sgr_to_pt_style(prompt_prefix_color),
             'custom-user-text': text_style_spec,
             '': fg_str,
             # Sleek dark-mode completion popup theme
@@ -1529,7 +1556,7 @@ def read_dynamic_prompt(
         lexer = CustomUserTextLexer() if CustomUserTextLexer is not None else None
 
         prompt_options = {
-            "message": lambda: ANSI(prompt_provider()),
+            "message": lambda: FormattedText([("class:prompt-prefix", strip_ansi(prompt_provider()))]) if FormattedText is not None else ANSI(prompt_provider()),
             "history": session_history,
             "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
             "completer": completer,
@@ -1538,7 +1565,7 @@ def read_dynamic_prompt(
             "complete_style": CompleteStyle.COLUMN,
             "mouse_support": False,
             "wrap_lines": True,
-            "refresh_interval": 0.25,
+            "refresh_interval": 0,
             "style": user_style,
         }
 
@@ -1622,6 +1649,7 @@ def build_repl_prompt_session(
     cwd: Optional[Path] = None,
     prompt_fg: str = "ansired",
     prompt_bg: str = "",
+    prompt_prefix_color: str = "1;32",
 ) -> Any:
     """Build a single PromptSession to be reused for every REPL turn.
 
@@ -1646,6 +1674,7 @@ def build_repl_prompt_session(
         text_style_spec = fg_str
 
     user_style = Style.from_dict({
+        'prompt-prefix': _sgr_to_pt_style(prompt_prefix_color),
         'custom-user-text': text_style_spec,
         '': fg_str,
         'completion-menu': 'bg:#181825 #cdd6f4',
@@ -1658,7 +1687,7 @@ def build_repl_prompt_session(
     })
 
     opts: Dict[str, Any] = {
-        "message": lambda: ANSI(prompt_provider()),
+        "message": lambda: FormattedText([("class:prompt-prefix", strip_ansi(prompt_provider()))]) if FormattedText is not None else ANSI(prompt_provider()),
         "history": pt_history,
         "auto_suggest": AutoSuggestFromHistory() if AutoSuggestFromHistory is not None else None,
         "completer": completer,
@@ -1667,7 +1696,7 @@ def build_repl_prompt_session(
         "complete_style": CompleteStyle.COLUMN,
         "mouse_support": False,
         "wrap_lines": True,
-        "refresh_interval": 0.25,
+        "refresh_interval": 0,
         "style": user_style,
     }
 
@@ -6768,6 +6797,7 @@ def main() -> int:
             cwd=cwd,
             prompt_fg=prompt_fg,
             prompt_bg=prompt_bg,
+            prompt_prefix_color=prompt_prefix_color,
         )
         while True:
             try:
