@@ -5900,8 +5900,8 @@
         }
 
         // Stop individual project session
-        async function stopProjectSession(projectName) {
-            if (!confirm(`Are you sure you want to stop the terminal session for '${projectName}'?`)) {
+        async function stopProjectSession(projectName, options = {}) {
+            if (!options?.silent && !confirm(`Are you sure you want to stop the terminal session for '${projectName}'?`)) {
                 return;
             }
 
@@ -7383,6 +7383,12 @@
                 if (!isActive) {
                     chip.onclick = () => selectProject(proj.name);
                 }
+                // Double-click kills the session (like Notepad++ tab close)
+                chip.ondblclick = async (e) => {
+                    e.stopPropagation();
+                    await stopProjectSession(proj.name, { silent: true });
+                    setTimeout(updateWorkspaceBar, 300);
+                };
                 bar.appendChild(chip);
             });
         }
