@@ -72,6 +72,12 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 - `+` tab creates a new terminal tab using the existing tabbed split path.
 - Closing tabs keeps the remaining single terminal in tabbed mode.
 
+### Workspace Bar
+- Thin strip above the terminal area showing a chip per running workspace.
+- Auto-hides when only one workspace is running; reappears when a second one starts.
+- Clicking a chip switches to that workspace. Double-clicking kills its session.
+- Can also be toggled off globally via the "Show Workspace Bar" setting.
+
 ---
 
 ## Component Patterns

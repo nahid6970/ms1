@@ -5,6 +5,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-12] - Workspace Bar Auto-Hides With One Workspace
+
+`updateWorkspaceBar()` now hides `#workspace-bar` when only one workspace is running (the only running workspace is the active one — no switching needed). The bar reappears automatically as soon as a second workspace session is opened. The existing "Show Workspace Bar" global setting still suppresses it entirely when disabled.
+
+**Files Modified:** `templates/index.html` — `updateWorkspaceBar()`
+
+---
+
 ## [2026-10-12] - Fix Git Modal: Stop Foreign HEAD Injection + Fix Preview Diff Base
 
 ### Problem

@@ -71,6 +71,7 @@
 - Drag-to-reorder — custom ordering persisted
 - Custom PowerShell profiles with project-specific prompt, aliases, history
 - Duplicate the active workspace into the next available `-2`, `-3`, … sibling folder, copying workspace settings and files while omitting Git metadata and common generated folders
+- **Workspace bar** (top of terminal area) shows running workspace chips for quick switching — auto-hides when only one workspace is running, reappears as soon as a second one opens
 
 ---
 
@@ -100,8 +101,8 @@
 - Stage all (`git add -A`)
 - Commit + auto-push
 - Past commits (last 10) with rename, checkout, push
-- Current repository HEAD is marked in the commit list, including when its changes were outside this workspace folder
-- Preview a past commit against current HEAD, scoped to the active workspace folder
+- HEAD is marked in the commit list only when that commit actually touched files in the active workspace folder — foreign commits from other workspaces sharing the same repo are not injected
+- Preview a past commit's own changes scoped to the workspace folder (parent → commit diff, not HEAD → commit)
 - Global setting to hide or show commit hashes in the past-commits list
 - Compact relative commit times (`35s`, `15h`, `11d`) without an “ago” suffix
 - Detached HEAD warning with "Return to latest"

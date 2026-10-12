@@ -7376,11 +7376,15 @@
             if (!bar) return;
             const show = localStorage.getItem('show-workspace-bar') !== 'false';
             if (!show) { bar.classList.add('hidden'); return; }
-            bar.classList.remove('hidden');
-            bar.innerHTML = '';
 
             // Show only running projects as chips, active one highlighted
             const runningProjects = projects.filter(p => p.is_active || p.name === activeProject);
+
+            // No point showing the bar for a single workspace — hide it
+            if (runningProjects.length <= 1) { bar.classList.add('hidden'); bar.innerHTML = ''; return; }
+
+            bar.classList.remove('hidden');
+            bar.innerHTML = '';
             runningProjects.forEach(proj => {
                 const isActive = proj.name === activeProject;
                 const chip = document.createElement('div');
