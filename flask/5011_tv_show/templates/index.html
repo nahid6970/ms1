@@ -302,12 +302,15 @@
             <h2 id="randomScheduleOptionsTitle" class="modal-title">Random Schedule Options</h2>
             <p class="random-schedule-intro">Assign new random days and times to your eligible library items.</p>
             <div class="random-schedule-rules">
-                <div><span class="random-rule-icon">▶</span><span><strong>Continuing shows</strong><small>Weekly · random weekday and time</small></span></div>
-                <div><span class="random-rule-icon">✓</span><span><strong>Ended shows</strong><small>Monthly · random date and time</small></span></div>
+                <div><span class="random-rule-icon">▶</span><span class="random-rule-copy"><strong>Continuing shows</strong></span>
+                    <select id="randomContinuingFrequency" class="random-rule-frequency" aria-label="Continuing show random schedule frequency"><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+                </div>
+                <div><span class="random-rule-icon">✓</span><span class="random-rule-copy"><strong>Ended shows</strong></span>
+                    <select id="randomEndedFrequency" class="random-rule-frequency" aria-label="Ended show random schedule frequency"><option value="monthly">Monthly</option><option value="weekly">Weekly</option></select>
+                </div>
             </div>
             <p class="random-schedule-window">Random times use your configured Auto Schedule window.</p>
             <p id="randomScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
-            <p class="random-schedule-movie-note">Movie schedules can be randomized from Scheduled Movie Metadata.</p>
             <button id="randomizeAllSchedulesBtn" class="random-schedule-apply" type="button" onclick="randomizeAllSchedules()">RANDOMIZE TV SHOWS</button>
         </div>
     </div>

@@ -2295,11 +2295,12 @@ body::before {
 .random-schedule-rules { display: grid; gap: 8px; margin: 16px 0; }
 .random-schedule-rules > div { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid rgba(168, 85, 247, 0.25); background: rgba(168, 85, 247, 0.07); }
 .random-rule-icon { width: 22px; color: #c084fc; text-align: center; }
+.random-rule-copy { flex: 1; }
 .random-schedule-rules strong, .random-schedule-rules small { display: block; }
 .random-schedule-rules strong { color: #e9d5ff; font-size: 0.8rem; }
 .random-schedule-rules small { margin-top: 3px; color: #98a2b3; font-size: 0.72rem; }
+.random-rule-frequency { flex: 0 0 112px; width: 112px; min-width: 112px; margin: 0; padding: 6px 26px 6px 7px; color: #eee3fb; background: #14111b; border: 1px solid #68428b; border-radius: 0; font-size: 0.75rem; }
 .random-schedule-window { margin: 8px 0 0; font-size: 0.72rem; }
-.random-schedule-movie-note { margin: 8px 0 12px; padding: 9px 10px; color: #aab4c4; background: rgba(56, 189, 248, 0.07); border-left: 2px solid #38bdf8; font-size: 0.75rem; }
 .random-schedule-content .schedule-bulk-status { min-height: 1.2em; }
 .random-schedule-apply { width: 100%; padding: 11px 14px; color: #170c22; background: #c084fc; border: 1px solid #e9d5ff; font-family: Consolas, "Courier New", monospace; font-weight: 800; letter-spacing: 0.7px; cursor: pointer; }
 .random-schedule-apply:hover { background: #d8b4fe; box-shadow: 0 0 16px rgba(192, 132, 252, 0.4); }

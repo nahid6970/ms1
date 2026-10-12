@@ -4,7 +4,7 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
-- `templates/index.html`, `templates/movies.html`, `static/script.js`, `static/movies.js`, `static/style.css`, `app.py`: Added random schedule controls in the TV episode and movie metadata windows. Continuing shows randomize weekly, ended shows monthly, and movies awaiting digital release randomize at a selected weekly/monthly cadence; digitally released movies are unscheduled. Random times use the configured Auto Schedule window.
+- `templates/index.html`, `templates/movies.html`, `static/script.js`, `static/movies.js`, `static/style.css`, `app.py`: Added random schedule controls in the TV episode and movie metadata windows. Continuing and ended TV shows can each be randomized at a selected weekly/monthly cadence. Movies awaiting digital release use a selected weekly/monthly cadence; digitally released movies are unscheduled. Random times use the configured Auto Schedule window.
 
 - `templates/_settings_modal.html`, `static/script.js`, `app.py`: Added configurable Auto Schedule Start/End times. The Scheduled Episode Updates header action is now `RESCHEDULE`, which redistributes every active show across that time window, assigns Weekly weekdays and Monthly dates, and preserves `None` shows.
 - `templates/discover.html`, `static/discover.js`, `static/style.css`: Discover search controls are sticky and use the neon UI. Non-search modes hide the query box; browse-mode controls shrink and center. The preset button now uses mode-specific icons plus a compact region label, with the mode text hidden.

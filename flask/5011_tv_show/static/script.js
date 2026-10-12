@@ -268,6 +268,8 @@ async function applyBulkSchedule() {
 async function randomizeAllSchedules() {
     const button = document.getElementById('randomizeAllSchedulesBtn');
     const status = document.getElementById('randomScheduleStatus');
+    const continuingFrequency = document.getElementById('randomContinuingFrequency')?.value || 'weekly';
+    const endedFrequency = document.getElementById('randomEndedFrequency')?.value || 'monthly';
     if (button) {
         button.disabled = true;
         button.textContent = 'WORKING';
@@ -277,7 +279,7 @@ async function randomizeAllSchedules() {
         const response = await fetch('/api/schedules/randomize', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({target: 'tv'})
+            body: JSON.stringify({target: 'tv', continuing_frequency: continuingFrequency, ended_frequency: endedFrequency})
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.message || 'Unable to randomize schedules');

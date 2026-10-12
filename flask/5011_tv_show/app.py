@@ -1423,6 +1423,10 @@ def randomize_all_schedules():
     movie_frequency = str(payload.get('movie_frequency', 'monthly')).strip().lower()
     if movie_frequency not in {'weekly', 'monthly'}:
         return jsonify({'success': False, 'message': 'Movie frequency must be weekly or monthly'}), 400
+    continuing_frequency = str(payload.get('continuing_frequency', 'weekly')).strip().lower()
+    ended_frequency = str(payload.get('ended_frequency', 'monthly')).strip().lower()
+    if continuing_frequency not in {'weekly', 'monthly'} or ended_frequency not in {'weekly', 'monthly'}:
+        return jsonify({'success': False, 'message': 'TV show frequencies must be weekly or monthly'}), 400
 
     settings = load_settings()
     try:
@@ -1442,7 +1446,7 @@ def randomize_all_schedules():
         shows = load_data()
         eligible_shows = [show for show in shows if str(show.get('status', '')).lower() in {'continuing', 'ended'}]
         for show in eligible_shows:
-            frequency = 'monthly' if str(show.get('status', '')).lower() == 'ended' else 'weekly'
+            frequency = ended_frequency if str(show.get('status', '')).lower() == 'ended' else continuing_frequency
             minute = random.randint(start_minutes, end_minutes)
             show['episode_update_frequency'] = frequency
             show['episode_update_time'] = f'{minute // 60:02d}:{minute % 60:02d}'
