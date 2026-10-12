@@ -359,6 +359,49 @@ async function applyMovieMetadataSchedule() {
     }
 }
 
+async function randomizeMovieSchedules() {
+    const button = document.getElementById('randomizeMoviesBtn');
+    const status = document.getElementById('randomMovieScheduleStatus');
+    const movieFrequency = document.getElementById('randomMovieFrequency')?.value || 'monthly';
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'WORKING';
+    }
+    if (status) status.textContent = '';
+    try {
+        const response = await fetch('/api/schedules/randomize', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({target: 'movies', movie_frequency: movieFrequency})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to randomize movie schedules');
+        if (status) status.textContent = `Randomized ${data.movies_updated} movies.`;
+        await loadMovieMetadataSchedules();
+    } catch (error) {
+        if (status) status.textContent = error.message;
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'RANDOMIZE MOVIES';
+        }
+    }
+}
+
+function openRandomMovieScheduleOptions() {
+    const modal = document.getElementById('randomMovieScheduleOptionsModal');
+    if (modal) modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+}
+
+function closeRandomMovieScheduleOptions() {
+    const modal = document.getElementById('randomMovieScheduleOptionsModal');
+    if (modal) modal.style.display = 'none';
+    if (document.getElementById('movieMetadataModal')?.style.display !== 'block') {
+        document.body.classList.remove('modal-open');
+    }
+}
+
 async function runMovieMetadataNow(movieId, button) {
     if (button) button.disabled = true;
     try {

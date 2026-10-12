@@ -277,6 +277,9 @@
             <span class="close" onclick="closeScheduledUpdatesModal()">&times;</span>
             <button id="applyBulkScheduleBtn" class="schedule-top-save" type="button" onclick="applyBulkSchedule()">RESCHEDULE</button>
             <button id="clearAllRunStatsTop" class="schedule-top-clear" type="button" onclick="clearAllRunStats(this)" hidden>CLEAR</button>
+            <button class="schedule-top-options" type="button" onclick="openRandomScheduleOptions()" title="Random schedule options" aria-label="Open random schedule options">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3m5 0h8M13 4v6M7 14v6"/></svg>
+            </button>
             <div class="schedule-sort-wrap">
                 <button id="scheduledSortBtn" class="schedule-top-sort" type="button" onclick="toggleScheduledSortMenu(event)">SORT</button>
                 <div id="scheduledSortMenu" class="schedule-sort-menu" hidden>
@@ -290,6 +293,22 @@
             <div id="scheduledUpdatesList" class="scheduled-updates-list">
                 <p>Loading schedules...</p>
             </div>
+        </div>
+    </div>
+
+    <div id="randomScheduleOptionsModal" class="modal random-schedule-modal" role="dialog" aria-modal="true" aria-labelledby="randomScheduleOptionsTitle">
+        <div class="modal-content random-schedule-content">
+            <button class="random-schedule-close" type="button" onclick="closeRandomScheduleOptions()" aria-label="Close random schedule options">&times;</button>
+            <h2 id="randomScheduleOptionsTitle" class="modal-title">Random Schedule Options</h2>
+            <p class="random-schedule-intro">Assign new random days and times to your eligible library items.</p>
+            <div class="random-schedule-rules">
+                <div><span class="random-rule-icon">▶</span><span><strong>Continuing shows</strong><small>Weekly · random weekday and time</small></span></div>
+                <div><span class="random-rule-icon">✓</span><span><strong>Ended shows</strong><small>Monthly · random date and time</small></span></div>
+            </div>
+            <p class="random-schedule-window">Random times use your configured Auto Schedule window.</p>
+            <p id="randomScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
+            <p class="random-schedule-movie-note">Movie schedules can be randomized from Scheduled Movie Metadata.</p>
+            <button id="randomizeAllSchedulesBtn" class="random-schedule-apply" type="button" onclick="randomizeAllSchedules()">RANDOMIZE TV SHOWS</button>
         </div>
     </div>
 

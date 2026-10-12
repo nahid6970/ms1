@@ -241,12 +241,31 @@
         <div class="modal-content scheduled-updates-content movie-metadata-content">
             <span class="close" onclick="closeMovieMetadataModal()">&times;</span>
             <button id="applyMovieMetadataScheduleBtn" class="schedule-top-save" type="button" onclick="applyMovieMetadataSchedule()">RESCHEDULE</button>
+            <button class="schedule-top-options movie-schedule-options" type="button" onclick="openRandomMovieScheduleOptions()" title="Random movie schedule options" aria-label="Open random movie schedule options">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3m5 0h8M13 4v6M7 14v6"/></svg>
+            </button>
             <h2 class="modal-title">Scheduled Movie Metadata</h2>
             <input id="movieMetadataSearch" class="schedule-search-input" type="search" placeholder="Search movies..." aria-label="Search scheduled movies">
             <p id="movieMetadataStatus" class="schedule-bulk-status" aria-live="polite"></p>
             <div id="movieMetadataList" class="scheduled-updates-list">
                 <p>Loading movie schedules...</p>
             </div>
+        </div>
+    </div>
+
+    <div id="randomMovieScheduleOptionsModal" class="modal random-schedule-modal" role="dialog" aria-modal="true" aria-labelledby="randomMovieScheduleOptionsTitle">
+        <div class="modal-content random-schedule-content">
+            <button class="random-schedule-close" type="button" onclick="closeRandomMovieScheduleOptions()" aria-label="Close random movie schedule options">&times;</button>
+            <h2 id="randomMovieScheduleOptionsTitle" class="modal-title">Random Movie Schedules</h2>
+            <p class="random-schedule-intro">Choose how often to check movies that are still waiting for a digital release.</p>
+            <label class="random-movie-frequency-label" for="randomMovieFrequency">Update frequency</label>
+            <select id="randomMovieFrequency" class="modal-input">
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+            </select>
+            <p class="random-schedule-window">Digitally released movies stay unscheduled. Random times use your configured Auto Schedule window.</p>
+            <p id="randomMovieScheduleStatus" class="schedule-bulk-status" aria-live="polite"></p>
+            <button id="randomizeMoviesBtn" class="random-schedule-apply" type="button" onclick="randomizeMovieSchedules()">RANDOMIZE MOVIES</button>
         </div>
     </div>
 

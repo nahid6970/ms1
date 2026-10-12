@@ -10,6 +10,7 @@
 # ///
 
 import importlib.util
+import random
 import shutil
 import subprocess
 import sys
@@ -1410,6 +1411,66 @@ def update_all_show_schedules():
         updated += 1
     save_data(shows)
     return jsonify({'success': True, 'updated': updated})
+
+
+@app.route('/api/schedules/randomize', methods=['POST'])
+def randomize_all_schedules():
+    """Assign randomized update schedules to eligible shows and movies."""
+    payload = request.get_json(silent=True) or {}
+    target = str(payload.get('target', 'all')).strip().lower()
+    if target not in {'all', 'tv', 'movies'}:
+        return jsonify({'success': False, 'message': 'Target must be all, tv, or movies'}), 400
+    movie_frequency = str(payload.get('movie_frequency', 'monthly')).strip().lower()
+    if movie_frequency not in {'weekly', 'monthly'}:
+        return jsonify({'success': False, 'message': 'Movie frequency must be weekly or monthly'}), 400
+
+    settings = load_settings()
+    try:
+        start_value = settings.get('auto_schedule_start_time', '01:00')
+        end_value = settings.get('auto_schedule_end_time', '23:00')
+        start_time = datetime.strptime(start_value, '%H:%M')
+        end_time = datetime.strptime(end_value, '%H:%M')
+        start_minutes = start_time.hour * 60 + start_time.minute
+        end_minutes = end_time.hour * 60 + end_time.minute
+        if start_minutes >= end_minutes:
+            raise ValueError
+    except (TypeError, ValueError):
+        start_minutes, end_minutes = 60, 23 * 60
+
+    show_count = movie_count = 0
+    if target in {'all', 'tv'}:
+        shows = load_data()
+        eligible_shows = [show for show in shows if str(show.get('status', '')).lower() in {'continuing', 'ended'}]
+        for show in eligible_shows:
+            frequency = 'monthly' if str(show.get('status', '')).lower() == 'ended' else 'weekly'
+            minute = random.randint(start_minutes, end_minutes)
+            show['episode_update_frequency'] = frequency
+            show['episode_update_time'] = f'{minute // 60:02d}:{minute % 60:02d}'
+            if frequency == 'weekly':
+                show['episode_update_weekday'] = random.randrange(7)
+            else:
+                show['episode_update_month_day'] = random.randint(1, 28)
+        save_data(shows)
+        show_count = len(eligible_shows)
+
+    if target in {'all', 'movies'}:
+        movies = load_movies()
+        eligible_movies = [movie for movie in movies if not movie.get('digital_release_date') and movie.get('tmdb_id')]
+        for movie in movies:
+            if movie.get('digital_release_date'):
+                movie['metadata_update_time'] = ''
+        for movie in eligible_movies:
+            minute = random.randint(start_minutes, end_minutes)
+            movie['metadata_update_frequency'] = movie_frequency
+            movie['metadata_update_time'] = f'{minute // 60:02d}:{minute % 60:02d}'
+            if movie_frequency == 'weekly':
+                movie['metadata_update_weekday'] = random.randrange(7)
+            else:
+                movie['metadata_update_month_day'] = random.randint(1, 28)
+        save_movies(movies)
+        movie_count = len(eligible_movies)
+
+    return jsonify({'success': True, 'shows_updated': show_count, 'movies_updated': movie_count})
 
 
 @app.route('/api/show/<int:show_id>/episodes/run_scheduled', methods=['POST'])

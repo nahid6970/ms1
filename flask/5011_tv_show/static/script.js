@@ -265,6 +265,49 @@ async function applyBulkSchedule() {
     }
 }
 
+async function randomizeAllSchedules() {
+    const button = document.getElementById('randomizeAllSchedulesBtn');
+    const status = document.getElementById('randomScheduleStatus');
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'WORKING';
+    }
+    if (status) status.textContent = '';
+    try {
+        const response = await fetch('/api/schedules/randomize', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({target: 'tv'})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Unable to randomize schedules');
+        if (status) status.textContent = `Randomized ${data.shows_updated} TV shows.`;
+        const list = document.getElementById('scheduledUpdatesList');
+        if (list) await loadScheduledUpdatesList(list);
+    } catch (error) {
+        if (status) status.textContent = error.message;
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'RANDOM';
+        }
+    }
+}
+
+function openRandomScheduleOptions() {
+    const modal = document.getElementById('randomScheduleOptionsModal');
+    if (modal) modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+}
+
+function closeRandomScheduleOptions() {
+    const modal = document.getElementById('randomScheduleOptionsModal');
+    if (modal) modal.style.display = 'none';
+    if (document.getElementById('scheduledUpdatesModal')?.style.display !== 'block') {
+        document.body.classList.remove('modal-open');
+    }
+}
+
 let scheduledSortMode = 'period';
 
 function toggleScheduledSortMenu(event) {
