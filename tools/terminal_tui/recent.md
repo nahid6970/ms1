@@ -6,6 +6,21 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 - `templates/index.html`
 
 # Latest Implementation
+
+* **[2026-10-12] Workspace Bar** (`templates/index.html`):
+    * Slim `#workspace-bar` (34px, `#080c14`) sits between the toolbar and `#terminal-parent` inside `.terminal-container-wrapper`.
+    * Shows only running workspaces (`p.is_active`) as chips with colored dot (uses `cardTheme.accentColor`). Active chip is highlighted in blue.
+    * Single-click on inactive chip → `selectProject()`. Double-click → `stopProjectSession(name, { silent: true })` (no confirm dialog).
+    * After killing a session, automatically focuses the last previously visited running workspace via `wsfocusHistory[]` stack, or falls back to homepage.
+    * `updateWorkspaceBar()` is called from `restoreTerminalLayout` and `stopProjectSession`.
+    * Togglable via Settings → Layout tab → "Show Workspace Bar" checkbox (`localStorage` key `show-workspace-bar`, default `true`).
+
+* **[2026-10-12] Create Folder on Add Workspace** (`app.py`, `templates/index.html`):
+    * New `/api/mkdir` endpoint: calls `os.makedirs(path, exist_ok=True)`.
+    * When "Add Workspace" fails with "does not exist" error, a dashed "📁 Create Folder & Add Workspace" button appears below the error.
+    * Clicking it calls `/api/mkdir`, shows a spinner, then auto-submits the form on success.
+    * `#create-folder-hint` div hidden by default, reset on `openAddModal()`.
+
 * **[2026-10-11] Switch Terminal to pwsh (PowerShell Core)** (`app.py`):
     * Changed `TerminalSession` from `powershell.exe` to `pwsh.exe`.
     * Uses `-EncodedCommand` (Base64 UTF-16LE) to dot-source the workspace profile — avoids all quoting/path issues.
@@ -29,6 +44,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 * Git status: 3 processes/scan, 5s cache TTL, coalescing lock.
 * File explorer paste uses `term.paste()` — clipboard write in `try/catch` (HTTP safe).
 * Code merger: no `.bak`, error `detail` has `anchor_text` + `closest_match`, clipboard has `execCommand` fallback.
+* `stopProjectSession(name, options={})` — pass `{ silent: true }` to skip the confirm dialog.
+* `wsfocusHistory[]` — array tracking workspace focus order; used to auto-focus last visited workspace after a session is killed.
+* Workspace bar chips: single-click = switch, double-click = kill (silent). Bar hidden when `localStorage['show-workspace-bar'] === 'false'`.
+* `/api/mkdir` endpoint creates directories via `os.makedirs(path, exist_ok=True)`. Requires server restart to activate.
 
 # Pending Task
 None.
