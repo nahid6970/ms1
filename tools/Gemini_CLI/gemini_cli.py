@@ -7,6 +7,7 @@ from __future__ import annotations
 # dependencies = [
 #     "pycryptodomex",
 #     "PyQt6",
+#     "prompt_toolkit",
 # ]
 # ///
 
@@ -37,6 +38,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 DEPENDENCIES = {
     "crypto": (("Cryptodome", "pycryptodomex"),),
     "gui": (("PyQt6", "PyQt6"),),
+    "prompt_toolkit": (("prompt_toolkit", "prompt_toolkit"),),
 }
 
 
@@ -69,6 +71,10 @@ def ensure_dependencies(feature: str) -> None:
 # GUI dependencies are installed only when GUI mode is explicitly requested.
 if "-gui" in sys.argv or "--gui" in sys.argv:
     ensure_dependencies("gui")
+
+# prompt_toolkit is installed automatically on first run if missing.
+# It powers arrow-key history, Tab slash-completion, and the completion UI.
+ensure_dependencies("prompt_toolkit")
 
 AES = None
 PBKDF2 = None
