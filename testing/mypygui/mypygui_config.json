@@ -510,7 +510,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\scripts\\color\\color_pallet_rand_fg_bgFF00.py"
+                    "cmd": "C:\\@delta\\ms1\\scripts\\color\\color_pallet.py"
                 },
                 "Control-Button-3": {
                     "type": "subprocess",
