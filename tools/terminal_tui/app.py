@@ -754,6 +754,28 @@ def api_local_directories():
         parent = None
     return jsonify({'path': path, 'parent': parent, 'directories': directories, 'is_roots': False})
 
+
+@app.route('/api/local/directories/create', methods=['POST'])
+def api_local_directory_create():
+    """Create a child folder from the Add Workspace directory picker."""
+    data = request.json or {}
+    parent = os.path.abspath(os.path.expanduser((data.get('path') or '').strip()))
+    name = (data.get('name') or '').strip()
+    if not os.path.isdir(parent):
+        return jsonify({'error': 'Choose a folder before creating a new folder.'}), 400
+    if not name or name in {'.', '..'} or '/' in name or '\\' in name:
+        return jsonify({'error': 'Enter a folder name without path separators.'}), 400
+    target = os.path.abspath(os.path.join(parent, name))
+    if os.path.commonpath([parent, target]) != parent:
+        return jsonify({'error': 'The folder must be created inside the current directory.'}), 403
+    try:
+        os.mkdir(target)
+        return jsonify({'path': target, 'name': name}), 201
+    except FileExistsError:
+        return jsonify({'error': 'A folder with that name already exists here.'}), 409
+    except OSError as exc:
+        return jsonify({'error': f'Could not create folder: {exc}'}), 400
+
 @app.route('/api/projects', methods=['POST'])
 def api_projects_post():
     data = request.json

@@ -2679,7 +2679,15 @@
             </div>
             <div id="local-dir-picker-error" style="display:none; color:#f87171; font-size:0.76rem;"></div>
             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                <button id="local-dir-picker-up" type="button" class="btn btn-secondary" onclick="navigateLocalDirectoryUp()">↑ Up</button>
+                <div style="display:flex; gap:7px; align-items:center;">
+                    <button id="local-dir-picker-up" type="button" class="btn btn-secondary" onclick="navigateLocalDirectoryUp()" title="Go to parent folder" aria-label="Go to parent folder" style="width:36px; height:34px; padding:0; display:flex; align-items:center; justify-content:center;">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+                    </button>
+                    <button id="local-dir-picker-new-folder" type="button" class="btn btn-secondary" onclick="createLocalDirectory()" title="Create a folder here" style="display:flex; align-items:center; gap:6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v6M9 14h6"/></svg>
+                        New Folder
+                    </button>
+                </div>
                 <div style="display:flex; gap:8px;">
                     <button type="button" class="btn btn-secondary" onclick="closeLocalDirectoryPicker()">Cancel</button>
                     <button type="button" class="btn btn-primary" onclick="selectLocalDirectory()">Select This Folder</button>
@@ -6179,6 +6187,7 @@
             localDirectoryPickerIsRoots = !!data.is_roots;
             document.getElementById('local-dir-picker-path').value = localDirectoryPickerCurrent;
             document.getElementById('local-dir-picker-up').disabled = localDirectoryPickerIsRoots || !data.parent;
+            document.getElementById('local-dir-picker-new-folder').disabled = localDirectoryPickerIsRoots;
             list.innerHTML = '';
 
             if (!data.directories.length) {
@@ -6218,6 +6227,27 @@
             const parent = path.slice(0, separatorIndex) || path.slice(0, separatorIndex + 1);
             if (/^[a-z]:$/i.test(parent)) return loadLocalDirectories(parent + '\\');
             loadLocalDirectories(parent).catch(showLocalDirectoryPickerError);
+        }
+
+        async function createLocalDirectory() {
+            if (localDirectoryPickerIsRoots || !localDirectoryPickerCurrent) return;
+            const name = prompt('New folder name:');
+            if (name === null) return;
+            try {
+                const response = await fetch('/api/local/directories/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: localDirectoryPickerCurrent, name })
+                });
+                const raw = await response.text();
+                let data;
+                try { data = raw ? JSON.parse(raw) : {}; }
+                catch (_) { throw new Error(`Folder creation returned ${response.status} ${response.statusText}.`); }
+                if (!response.ok) throw new Error(data.error || 'Could not create folder.');
+                await loadLocalDirectories(data.path);
+            } catch (err) {
+                showLocalDirectoryPickerError(err);
+            }
         }
 
         function selectLocalDirectory() {
