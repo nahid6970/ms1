@@ -2371,6 +2371,8 @@
                 <input id="rclone-dst" type="text"
                     style="width:100%; box-sizing:border-box; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:9px 12px; color:var(--text-primary); font-family:'Fira Code',monospace; font-size:0.82rem; outline:none; transition:border-color 0.2s;"
                     placeholder="remote:path  or  D:\backup"
+                    title="Press Tab to browse local folders and configured Rclone remotes"
+                    onkeydown="if(event.key==='Tab'){event.preventDefault();event.stopPropagation();openRcloneDestinationPicker();}"
                     onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
 
@@ -2436,6 +2438,35 @@
             </button>
         </div>
       </div>
+    </div>
+
+    <div id="rclone-dst-picker-modal" class="modal-overlay" style="z-index:660;">
+        <div class="modal-content" style="width:620px; max-width:94vw; max-height:88dvh; padding:20px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div>
+                    <h2 style="font-size:1.05rem; margin:0;">Choose Rclone Destination</h2>
+                    <div style="font-size:0.74rem; color:var(--text-secondary); margin-top:4px;">Browse local folders or configured Rclone remotes.</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="closeRcloneDestinationPicker()" style="padding:4px 9px;">✕</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <input id="rclone-dst-picker-path" class="form-input" type="text" placeholder="Select a local folder or remote path" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();navigateRcloneDestinationInput();}" style="flex:1; min-width:0; font-family:'Fira Code',monospace; font-size:0.78rem;">
+                <button type="button" class="btn btn-secondary" onclick="navigateRcloneDestinationInput()">Go</button>
+            </div>
+            <div id="rclone-dst-picker-error" style="display:none; color:#f87171; font-size:0.76rem;"></div>
+            <div id="rclone-dst-picker-list" style="height:300px; min-height:160px; overflow:auto; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); padding:6px;">
+                <div style="padding:10px; color:var(--text-secondary); font-size:0.78rem;">Loading folders…</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <button id="rclone-dst-picker-up" type="button" class="btn btn-secondary" onclick="navigateRcloneDestinationUp()" title="Go to parent folder" aria-label="Go to parent folder" style="width:36px; height:34px; padding:0; display:flex; align-items:center; justify-content:center;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeRcloneDestinationPicker()">Cancel</button>
+                    <button id="rclone-dst-picker-select" type="button" class="btn btn-primary" onclick="selectRcloneDestinationFolder()">Select This Folder</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="ai-copilot-popover" class="statusbar-popover" style="right:84px; width:380px; overflow:visible;">
@@ -4407,6 +4438,7 @@
                 const id = e.target.id;
                 if (id === 'add-modal') closeAddModal();
                 else if (id === 'local-dir-picker-modal') closeLocalDirectoryPicker();
+                else if (id === 'rclone-dst-picker-modal') closeRcloneDestinationPicker();
                 else if (id === 'split-select-modal') closeSplitSelectModal();
                 else if (id === 'framework-select-modal') closeFrameworkSelectModal();
                 else if (id === 'extension-icons-modal') closeExtensionIconsModal();
@@ -11124,6 +11156,91 @@
             }
         }
 
+        let rcloneDestinationPickerCurrentPath = '';
+        let rcloneDestinationPickerParent = null;
+
+        async function openRcloneDestinationPicker() {
+            document.getElementById('rclone-dst-picker-modal').classList.add('show');
+            let startPath = document.getElementById('rclone-dst').value.trim();
+            if (/^[a-zA-Z]:$/.test(startPath)) startPath += '/';
+            else if (startPath.includes(':') && !/^[a-zA-Z]:[\\/]/.test(startPath) && !startPath.endsWith('/')) startPath += '/';
+            await loadRcloneDestinationDirectories(startPath);
+        }
+
+        function closeRcloneDestinationPicker() {
+            document.getElementById('rclone-dst-picker-modal').classList.remove('show');
+        }
+
+        async function navigateRcloneDestinationInput() {
+            let path = document.getElementById('rclone-dst-picker-path').value.trim();
+            if (/^[a-zA-Z]:$/.test(path)) path += '/';
+            else if (path.includes(':') && !/^[a-zA-Z]:[\\/]/.test(path) && !path.endsWith('/')) path += '/';
+            await loadRcloneDestinationDirectories(path);
+        }
+
+        async function loadRcloneDestinationDirectories(path = '') {
+            const list = document.getElementById('rclone-dst-picker-list');
+            const error = document.getElementById('rclone-dst-picker-error');
+            list.innerHTML = '<div style="padding:10px; color:var(--text-secondary); font-size:0.78rem;">Loading folders…</div>';
+            error.style.display = 'none';
+            try {
+                const query = new URLSearchParams();
+                if (path) query.set('path', path);
+                const response = await fetch(`/api/rclone/destination-directories?${query.toString()}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not list this folder.');
+
+                rcloneDestinationPickerCurrentPath = data.path || '';
+                rcloneDestinationPickerParent = data.parent;
+                document.getElementById('rclone-dst-picker-path').value = rcloneDestinationPickerCurrentPath;
+                document.getElementById('rclone-dst-picker-up').disabled = !rcloneDestinationPickerCurrentPath || rcloneDestinationPickerParent === null;
+                document.getElementById('rclone-dst-picker-select').disabled = !rcloneDestinationPickerCurrentPath;
+                list.innerHTML = '';
+
+                if (data.warning) {
+                    error.textContent = data.warning;
+                    error.style.display = 'block';
+                    error.style.color = 'var(--text-secondary)';
+                }
+                if (!data.directories?.length) {
+                    list.innerHTML = `<div style="padding:10px; color:var(--text-muted); font-size:0.78rem;">${rcloneDestinationPickerCurrentPath ? 'No subfolders here. Select this folder to use it.' : 'No local drives or configured remotes were found.'}</div>`;
+                    return;
+                }
+                data.directories.forEach(item => {
+                    const row = document.createElement('button');
+                    row.type = 'button';
+                    row.style.cssText = 'width:100%; display:flex; align-items:center; gap:9px; padding:8px 10px; border:0; border-radius:6px; background:transparent; color:var(--text-primary); text-align:left; cursor:pointer; font:inherit; font-size:0.8rem;';
+                    row.innerHTML = `<span style="color:${item.kind === 'remote' ? '#a78bfa' : '#60a5fa'};">${item.kind === 'remote' ? '☁' : '📁'}</span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</span><span style="margin-left:auto; color:var(--text-muted); font-size:0.68rem;">${item.kind === 'remote' ? 'Remote' : 'Open'}</span>`;
+                    row.onmouseenter = () => { row.style.background = 'var(--bg-card-hover)'; };
+                    row.onmouseleave = () => { row.style.background = 'transparent'; };
+                    row.onclick = () => loadRcloneDestinationDirectories(item.path);
+                    list.appendChild(row);
+                });
+            } catch (err) {
+                list.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:0.78rem;">Could not load folders.</div>';
+                error.textContent = err.message;
+                error.style.display = 'block';
+                error.style.color = '#f87171';
+            }
+        }
+
+        function navigateRcloneDestinationUp() {
+            if (rcloneDestinationPickerParent !== null) {
+                loadRcloneDestinationDirectories(rcloneDestinationPickerParent || '');
+            }
+        }
+
+        function selectRcloneDestinationFolder() {
+            let selectedPath = rcloneDestinationPickerCurrentPath;
+            if (!selectedPath) return;
+            if (selectedPath.includes(':') && !/^[a-zA-Z]:[\\/]/.test(selectedPath) && !selectedPath.endsWith('/')) selectedPath += '/';
+            const destination = document.getElementById('rclone-dst');
+            destination.value = selectedPath;
+            destination.dispatchEvent(new Event('input', { bubbles: true }));
+            destination.dispatchEvent(new Event('change', { bubbles: true }));
+            closeRcloneDestinationPicker();
+        }
+
         function closeRclonePopover() {
             document.getElementById('rclone-popover').classList.remove('show');
             const btn = document.getElementById('rclone-btn');
@@ -12358,6 +12475,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const rcloneDestinationPicker = document.getElementById('rclone-dst-picker-modal');
+                if (rcloneDestinationPicker && rcloneDestinationPicker.classList.contains('show')) { closeRcloneDestinationPicker(); return; }
                 const rcloneModal = document.getElementById('rclone-popover');
                 if (rcloneModal && rcloneModal.classList.contains('show')) { closeRclonePopover(); return; }
                 const localDirPicker = document.getElementById('local-dir-picker-modal');

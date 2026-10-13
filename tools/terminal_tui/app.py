@@ -776,6 +776,107 @@ def api_local_directory_create():
     except OSError as exc:
         return jsonify({'error': f'Could not create folder: {exc}'}), 400
 
+
+@app.route('/api/rclone/destination-directories', methods=['GET'])
+def api_rclone_destination_directories():
+    """List local folders or folders on a configured rclone remote for the destination picker."""
+    requested_path = request.args.get('path', '').strip()
+    windows_drive_path = bool(re.match(r'^[a-zA-Z]:(?:[\\/]|$)', requested_path))
+    remote_path = bool(requested_path and ':' in requested_path and not windows_drive_path and not os.path.isabs(requested_path))
+    cf = 0x08000000 if os.name == 'nt' else 0
+
+    if not requested_path:
+        if os.name == 'nt':
+            import ctypes
+            drive_mask = ctypes.windll.kernel32.GetLogicalDrives()
+            roots = [f'{chr(65 + index)}:/' for index in range(26) if drive_mask & (1 << index)]
+        else:
+            roots = ['/']
+        directories = [{'name': path, 'path': path, 'kind': 'local'} for path in roots]
+
+        rclone_bin = shutil.which('rclone')
+        if rclone_bin:
+            try:
+                result = subprocess.run(
+                    [rclone_bin, 'listremotes'], capture_output=True, text=True,
+                    encoding='utf-8', errors='replace', creationflags=cf, timeout=10
+                )
+                if result.returncode == 0:
+                    for remote in sorted({line.strip().rstrip(':') for line in result.stdout.splitlines() if line.strip()}):
+                        root = f'{remote}:/'
+                        directories.append({'name': root, 'path': root, 'kind': 'remote'})
+                else:
+                    return jsonify({'path': '', 'parent': None, 'directories': directories,
+                                    'warning': result.stderr.strip() or 'Could not list configured Rclone remotes.'})
+            except subprocess.TimeoutExpired:
+                return jsonify({'path': '', 'parent': None, 'directories': directories,
+                                'warning': 'Listing Rclone remotes timed out.'})
+        else:
+            return jsonify({'path': '', 'parent': None, 'directories': directories,
+                            'warning': 'Rclone was not found; local folders are still available.'})
+        return jsonify({'path': '', 'parent': None, 'directories': directories})
+
+    if remote_path:
+        remote, _, remote_subpath = requested_path.partition(':')
+        rclone_bin = shutil.which('rclone')
+        if not rclone_bin:
+            return jsonify({'error': 'Rclone was not found. Add it to PATH to browse remote folders.'}), 503
+        try:
+            remotes_result = subprocess.run(
+                [rclone_bin, 'listremotes'], capture_output=True, text=True,
+                encoding='utf-8', errors='replace', creationflags=cf, timeout=10
+            )
+            if remotes_result.returncode != 0:
+                return jsonify({'error': remotes_result.stderr.strip() or 'Could not read configured Rclone remotes.'}), 502
+            configured_remotes = {line.strip().rstrip(':') for line in remotes_result.stdout.splitlines() if line.strip()}
+            if remote not in configured_remotes:
+                return jsonify({'error': f'"{remote}" is not a configured Rclone remote.'}), 400
+
+            relative = remote_subpath.replace('\\', '/').strip('/')
+            current_path = f'{remote}:/{relative}/' if relative else f'{remote}:/'
+            result = subprocess.run(
+                [rclone_bin, 'lsf', '--dirs-only', '--max-depth', '1', '--format', 'p', current_path],
+                capture_output=True, text=True, encoding='utf-8', errors='replace',
+                creationflags=cf, timeout=25
+            )
+            if result.returncode != 0:
+                return jsonify({'error': result.stderr.strip() or 'Could not list this Rclone folder.'}), 502
+
+            directories = []
+            for item in result.stdout.splitlines()[:500]:
+                child = item.strip().replace('\\', '/').strip('/')
+                if child:
+                    child_path = current_path + child + '/'
+                    directories.append({'name': child, 'path': child_path, 'kind': 'remote'})
+
+            parts = relative.split('/') if relative else []
+            parent = f"{remote}:/{'/'.join(parts[:-1])}/" if len(parts) > 1 else (f'{remote}:/' if parts else '')
+            return jsonify({'path': current_path, 'parent': parent, 'directories': directories})
+        except subprocess.TimeoutExpired:
+            return jsonify({'error': 'Browsing this Rclone folder timed out.'}), 504
+        except OSError as exc:
+            return jsonify({'error': f'Could not run Rclone: {exc}'}), 500
+
+    path = os.path.abspath(os.path.expanduser(requested_path))
+    if not os.path.isdir(path):
+        return jsonify({'error': 'That local folder does not exist or cannot be opened.'}), 400
+    directories = []
+    try:
+        with os.scandir(path) as entries:
+            for entry in entries:
+                try:
+                    if entry.is_dir(follow_symlinks=False):
+                        directories.append({'name': entry.name, 'path': entry.path, 'kind': 'local'})
+                except OSError:
+                    continue
+    except OSError as exc:
+        return jsonify({'error': f'Could not read this folder: {exc}'}), 403
+    directories.sort(key=lambda item: item['name'].casefold())
+    parent = os.path.dirname(os.path.normpath(path))
+    if parent == os.path.normpath(path):
+        parent = None
+    return jsonify({'path': path, 'parent': parent, 'directories': directories})
+
 @app.route('/api/projects', methods=['POST'])
 def api_projects_post():
     data = request.json

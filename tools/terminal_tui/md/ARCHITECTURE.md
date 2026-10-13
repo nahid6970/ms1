@@ -35,6 +35,9 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 1.1 Rclone Workspace Sync
 - Frontend builds `rclone check` and directional `rclone sync` commands for the active workspace and starts them in a new terminal tab.
+- The centered Rclone modal sizes to its contents, grows when the ignore suggestion preview appears, and keeps the action footer visible while the content area scrolls.
+- The header button reflects the active workspace's saved destination. Its configured foreground and background colors support presets and custom colors stored in browser local storage.
+- Pressing Tab in the destination field opens a combined local/Rclone folder browser. Local browsing uses the filesystem; remote browsing lists only configured Rclone remotes through `GET /api/rclone/destination-directories`.
 - Project-specific destination, flags, transfer count, and ignorelist path are stored with workspace settings.
 - The AI ignore suggester calls `GET /api/project/<project>/rclone/scan` to collect a bounded directory inventory and then `POST /api/project/<project>/rclone/suggest-ignore` to call Gemini with the selected model.
 - The scanner records directory paths and immediate file/subfolder counts at all depths, plus a bounded extension and top-level filename summary. It prunes known heavy and hidden directories, and sends at most 500 directory records rather than individual file paths.
