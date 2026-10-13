@@ -1,10 +1,67 @@
+"""Show information about the window under the mouse cursor."""
+from __future__ import annotations
+
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "pywin32",
+#     "psutil",
+#     "pyperclip",
+#     "keyboard",
+# ]
+# ///
+
+import importlib.util
+import shutil
+import subprocess
+import sys
+
+DEPENDENCIES = (
+    ("win32gui", "pywin32"),
+    ("win32process", "pywin32"),
+    ("psutil", "psutil"),
+    ("pyperclip", "pyperclip"),
+    ("keyboard", "keyboard"),
+)
+
+
+def ensure_dependencies() -> None:
+    missing = [
+        package
+        for module, package in DEPENDENCIES
+        if importlib.util.find_spec(module) is None
+    ]
+    # Preserve order while avoiding duplicate packages (pywin32 backs two modules).
+    missing = list(dict.fromkeys(missing))
+    if not missing:
+        return
+
+    uv = shutil.which("uv")
+    if uv:
+        command = [uv, "pip", "install", "--python", sys.executable, *missing]
+    else:
+        command = [sys.executable, "-m", "pip", "install", *missing]
+
+    try:
+        subprocess.check_call(command)
+    except subprocess.CalledProcessError as error:
+        package_list = ", ".join(missing)
+        raise SystemExit(
+            f"Could not install dependencies ({package_list}) for interpreter "
+            f"{sys.executable!r}. Install them with: {' '.join(command)}"
+        ) from error
+
+
+ensure_dependencies()
+
 import tkinter as tk
+import textwrap
+
+import keyboard
+import psutil
+import pyperclip
 import win32gui
 import win32process
-import psutil
-import textwrap
-import pyperclip
-import keyboard
 
 ROOT = tk.Tk()
 ROOT.title("Python GUI")

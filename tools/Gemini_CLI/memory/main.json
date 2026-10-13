@@ -40,6 +40,10 @@
     "dob_and_age_limit": {
       "content": "Date of birth: 1999-01-01. Eligible for jobs up to 32 years old.",
       "updated_at": "2026-09-09-09:17:41.954728"
+    },
+    "assistant_name": {
+      "content": "User named assistant Jason",
+      "updated_at": "2026-10-13-19:47:34.740888"
     }
   },
   "sub_memories": {}
