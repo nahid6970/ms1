@@ -4372,7 +4372,7 @@ def api_rclone_save_settings(project):
 
 @app.route('/api/project/<project>/rclone/scan', methods=['GET'])
 def api_rclone_scan(project):
-    """Scan workspace: return top-level folder names, unique file extensions, and .gitignore contents."""
+    """Return a compact, depth-aware workspace inventory for rclone ignore suggestions."""
     projects_cfg = load_projects_config()
     proj = next((p for p in projects_cfg if p.get('name') == project), None)
     if proj is None:
@@ -4382,29 +4382,60 @@ def api_rclone_scan(project):
     if not os.path.isdir(base):
         return jsonify({'error': 'Workspace folder does not exist'}), 404
 
-    SKIP_DIRS = {'.git', '__pycache__', 'node_modules', '.uv-envs', 'venv', '.venv', 'env',
+    import heapq
+
+    skip_dirs = {'.git', '__pycache__', 'node_modules', '.uv-envs', 'venv', '.venv', 'env',
                  'dist', 'build', 'out', '.next', '.nuxt', 'target', 'coverage', '.cache'}
+    max_inventory = 500
+    max_skipped = 100
+    top_dirs, top_files, extensions = [], [], set()
+    inventory_heap, skipped_dirs = [], []
+    directory_count = skipped_count = files_seen = sequence = 0
+    # Iterative scandir avoids os.walk's per-directory files list, which can be
+    # very large for generated/cache folders. Only aggregate names and counts.
+    pending = [(base, '')]
+    while pending:
+        current_path, relative_dir = pending.pop()
+        direct_files = child_dirs = 0
+        try:
+            with os.scandir(current_path) as entries:
+                for entry in entries:
+                    try:
+                        is_dir = entry.is_dir(follow_symlinks=False)
+                    except OSError:
+                        continue
+                    if is_dir:
+                        child_dirs += 1
+                        child_rel = f'{relative_dir}/{entry.name}'.strip('/')
+                        if not relative_dir and len(top_dirs) < 100:
+                            top_dirs.append(entry.name)
+                        if entry.name in skip_dirs or entry.name.startswith('.'):
+                            skipped_count += 1
+                            if len(skipped_dirs) < max_skipped:
+                                skipped_dirs.append(child_rel)
+                        else:
+                            pending.append((entry.path, child_rel))
+                    else:
+                        direct_files += 1
+                        files_seen += 1
+                        if not relative_dir and len(top_files) < 40:
+                            top_files.append(entry.name)
+                        _, ext = os.path.splitext(entry.name)
+                        if ext:
+                            extensions.add(ext.lower())
+        except OSError:
+            continue
 
-    top_dirs = []
-    top_files = []
-    extensions = set()
-
-    for entry in os.scandir(base):
-        if entry.is_dir(follow_symlinks=False):
-            top_dirs.append(entry.name)
-        else:
-            top_files.append(entry.name)
-            _, ext = os.path.splitext(entry.name)
-            if ext:
-                extensions.add(ext.lower())
-
-    # Walk deeper for extensions only (skip heavy dirs)
-    for root, dirs, files in os.walk(base):
-        dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('.')]
-        for f in files:
-            _, ext = os.path.splitext(f)
-            if ext:
-                extensions.add(ext.lower())
+        if relative_dir:
+            directory_count += 1
+            record = {'path': relative_dir, 'files': direct_files, 'child_dirs': child_dirs}
+            score = direct_files * 1000 + child_dirs
+            item = (score, sequence, record)
+            sequence += 1
+            if len(inventory_heap) < max_inventory:
+                heapq.heappush(inventory_heap, item)
+            elif score > inventory_heap[0][0]:
+                heapq.heapreplace(inventory_heap, item)
 
     # Read .gitignore if present
     gitignore_content = ''
@@ -4412,14 +4443,20 @@ def api_rclone_scan(project):
     if os.path.isfile(gitignore_path):
         try:
             with open(gitignore_path, 'r', encoding='utf-8', errors='replace') as f:
-                gitignore_content = f.read()
+                gitignore_content = f.read(12000)
         except OSError:
             pass
 
     return jsonify({
         'top_dirs': sorted(top_dirs),
         'top_files': sorted(top_files),
-        'extensions': sorted(extensions),
+        'directories': [item[2] for item in sorted(inventory_heap, key=lambda item: item[2]['path'].lower())],
+        'directory_count': directory_count,
+        'directory_inventory_truncated': max(0, directory_count - len(inventory_heap)),
+        'skipped_dirs': sorted(skipped_dirs),
+        'skipped_dir_count': skipped_count,
+        'files_scanned': files_seen,
+        'extensions': sorted(extensions)[:200],
         'gitignore': gitignore_content,
     })
 
@@ -4433,6 +4470,10 @@ def api_rclone_suggest_ignore(project):
     top_dirs   = data.get('top_dirs', [])
     top_files  = data.get('top_files', [])
     extensions = data.get('extensions', [])
+    directories = data.get('directories', [])
+    skipped_dirs = data.get('skipped_dirs', [])
+    directory_count = data.get('directory_count', 0)
+    files_scanned = data.get('files_scanned', 0)
     gitignore  = data.get('gitignore', '')
 
     if not api_key:
@@ -4446,8 +4487,13 @@ def api_rclone_suggest_ignore(project):
         + "\n".join(f"  {f}" for f in top_files[:40]) + "\n\n"
         "Unique file extensions found in the project:\n"
         + "  " + "  ".join(extensions) + "\n\n"
+        + f"Directories inventoried at all depths: {directory_count}; files counted outside pruned folders: {files_scanned}.\n"
+        + "Directory inventory (relative path, immediate file count, child directory count):\n"
+        + "\n".join(f"  {d.get('path', '')} — {d.get('files', 0)} files, {d.get('child_dirs', 0)} subfolders" for d in directories[:500])
+        + ("\nInventory truncated to the busiest folders.\n" if data.get('directory_inventory_truncated') else "\n")
+        + ("Known heavy or hidden folders were pruned from the recursive scan; examples:\n" + "\n".join(f"  {d}/" for d in skipped_dirs[:100]) + "\n\n" if skipped_dirs else "")
         + (f"Existing .gitignore rules:\n{gitignore}\n\n" if gitignore else "")
-        + "Based on this, output ONLY a newline-separated list of rclone --exclude glob patterns "
+        + "Use the directory paths and counts to identify obvious generated, cache, dependency, or build folders, including deeply nested ones. Do not exclude a folder only because it contains many files if it may hold user data. Output ONLY a newline-separated list of rclone --exclude glob patterns "
         "to skip generated, cache, dependency, and build files. "
         "Use patterns like: node_modules/** or *.pyc or .git/** "
         "Do NOT include explanations, comments, or any other text. "

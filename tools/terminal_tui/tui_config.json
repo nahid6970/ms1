@@ -185,7 +185,19 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "rclone": {
+        "dest": "",
+        "ignorelist": "C:/@delta/ms1/tools/code_merger/ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
     },
     {
       "name": "Github Manager",
