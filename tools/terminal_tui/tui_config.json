@@ -1178,18 +1178,18 @@
       "raw_data": "Commit & Push the changes to github and also commit when i explicitly say to commit again\\r"
     },
     {
+      "label": "Recent.md",
+      "data": "read md files about the project",
+      "raw_data": "read md files about the project",
       "bg": "#ffffff",
-      "bold": false,
-      "borderColor": "#334155",
-      "borderRadius": "",
-      "borderWidth": "",
-      "data": "here read recent.md",
       "fg": "#000000",
       "fontFamily": "",
       "fontSize": "",
+      "bold": false,
       "italic": false,
-      "label": "Recent.md",
-      "raw_data": "here read recent.md"
+      "borderColor": "#334155",
+      "borderWidth": "",
+      "borderRadius": ""
     },
     {
       "bg": "#ffffff",
@@ -1234,46 +1234,46 @@
       "raw_data": "\\x03"
     },
     {
-      "label": "↑",
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
       "data": "\u001b[A",
-      "raw_data": "\\x1b[A",
-      "bg": "#0f172a",
       "fg": "#ffffff",
       "fontFamily": "",
       "fontSize": "",
-      "bold": false,
       "italic": false,
-      "borderColor": "#334155",
-      "borderWidth": "",
-      "borderRadius": ""
+      "label": "↑",
+      "raw_data": "\\x1b[A"
     },
     {
-      "label": "↓",
+      "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
       "data": "\u001b[B",
-      "raw_data": "\\x1b[B",
-      "bg": "#0f172a",
       "fg": "#ffffff",
       "fontFamily": "",
       "fontSize": "",
-      "bold": false,
       "italic": false,
-      "borderColor": "#334155",
-      "borderWidth": "",
-      "borderRadius": ""
+      "label": "↓",
+      "raw_data": "\\x1b[B"
     },
     {
-      "label": "→",
-      "data": "\u001b[C",
-      "raw_data": "\\x1b[C",
       "bg": "#0f172a",
+      "bold": false,
+      "borderColor": "#334155",
+      "borderRadius": "",
+      "borderWidth": "",
+      "data": "\u001b[C",
       "fg": "#ffffff",
       "fontFamily": "",
       "fontSize": "",
-      "bold": false,
       "italic": false,
-      "borderColor": "#334155",
-      "borderWidth": "",
-      "borderRadius": ""
+      "label": "→",
+      "raw_data": "\\x1b[C"
     },
     {
       "bg": "#0f172a",
