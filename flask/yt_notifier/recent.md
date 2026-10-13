@@ -118,5 +118,22 @@ Convex Database I/O was at **6.09 GB / 6 GB** (free tier limit). Root cause: `co
 - Deletion is permanent unless the video is fetched again from YouTube during a later refresh.
 - Channel refreshes use canonical ID-to-title mapping and update existing records when metadata changes.
 
+## 10. Shorts Detection Fix — 180s Default (2026-10-13)
+
+| File | What changed |
+|---|---|
+| `convex/videos.ts` | Default `shortsThresholdSeconds` fallback changed from 60 → 180. `isShortVideo` default parameter updated to 180. All `?? 60` fallbacks replaced with `?? 180`. |
+| `convex/channels.ts` | `shortsThresholdSeconds ?? 60` in `list` query updated to `?? 180`. |
+| `convex/stats.ts` | `shortsThresholdById` and `isShortVideo` default updated to 180. |
+| `public/js/app.js` | Settings description updated ("under 3 minutes"). Badge and gear-button highlight condition changed from `!== 60` to `!== 180`. Default threshold JS variable updated to 180. |
+
+### Why
+YouTube extended Shorts to up to **3 minutes (180 seconds)** in 2024. The previous 60s hard cutoff let Shorts between 61–180s slip through into the main feed. Channels with a stored custom threshold retain their value; channels with no stored threshold now default to 180s instead of 60s.
+
+### Key Behavioral Notes
+- The per-channel stopwatch badge still appears when the threshold differs from the default (now 180).
+- Existing channels with a stored `shortsThresholdSeconds` value are not affected — their stored value takes precedence.
+- Channels with no stored value (null/undefined) now use 180s as the effective cutoff.
+
 ## 9. Pending Task
 Deploy to production. Verify playlist views and video deletion load correctly end-to-end.

@@ -256,7 +256,7 @@ const POPUP_PAGES = {
         <div class="flex items-center justify-between gap-6 border-t border-slate-800 pt-6">
           <div>
             <h2 class="text-white font-medium">Hide YouTube Shorts</h2>
-            <p class="text-slate-500 text-xs">Automatically hide Shorts (videos under 60 seconds or with #shorts in title) from your feed.</p>
+            <p class="text-slate-500 text-xs">Automatically hide Shorts (videos under 3 minutes or with #shorts in title) from your feed.</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="hideShortsToggle" name="hide_shorts" class="sr-only peer">
@@ -1194,7 +1194,7 @@ function channelRow(channel, categories = []) {
   const initialRulesText = rulesText || (filters.length ? `:Allow-Rules:\n${filters.join("\n")}\n\n:Block-Rules:\n\n:Playlists:` : DEFAULT_RULES_TEMPLATE);
   const category = channel.category ?? "";
   const folderOnly = Boolean(channel.folderOnly);
-  const shortsThreshold = Number(channel.shortsThresholdSeconds ?? 60);
+  const shortsThreshold = Number(channel.shortsThresholdSeconds ?? 180);
 
   const optionsHtml = categories.map((cat) => `
     <option value="${esc(cat)}" ${cat.toLowerCase() === category.toLowerCase() ? "selected" : ""}>${esc(cat)}</option>
@@ -1215,7 +1215,7 @@ function channelRow(channel, categories = []) {
             </a>
             ${category ? `<span class="rounded bg-red-950/80 border border-red-800/60 px-2 py-0.5 text-[10px] font-bold text-red-300 shadow"><i class="fa-solid fa-folder text-[9px] mr-1"></i>${esc(category)}</span>` : ""}
             ${folderOnly ? `<span class="inline-flex h-5 w-6 items-center justify-center rounded bg-amber-950/80 border border-amber-800/60 text-[10px] font-bold text-amber-300 shadow" title="Folder Only"><i class="fa-solid fa-folder-tree text-[9px]"></i></span>` : ""}
-            ${shortsThreshold !== 60 ? `<span class="inline-flex items-center gap-1 rounded bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 shadow" title="Automatic Shorts cutoff: ${shortsThreshold} seconds"><i class="fa-solid fa-stopwatch text-[9px]"></i>≤ ${shortsThreshold}s</span>` : ""}
+            ${shortsThreshold !== 180 ? `<span class="inline-flex items-center gap-1 rounded bg-purple-950/80 border border-purple-800/60 px-2 py-0.5 text-[10px] font-bold text-purple-300 shadow" title="Automatic Shorts cutoff: ${shortsThreshold} seconds"><i class="fa-solid fa-stopwatch text-[9px]"></i>≤ ${shortsThreshold}s</span>` : ""}
             ${disabled ? `<span class="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-400">Disabled</span>` : ""}
             ${inactivityBadge(channel.lastUpload)}
             ${ruleCount ? `<span class="rounded bg-sky-950 px-2 py-0.5 text-[10px] font-bold uppercase text-sky-300">${ruleCount} Rule${ruleCount === 1 ? "" : "s"}</span>` : ""}
@@ -1230,7 +1230,7 @@ function channelRow(channel, categories = []) {
         <button onclick="toggleChannelFolderBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${category ? "text-red-400 hover:bg-red-950/40" : "text-slate-500 hover:bg-slate-800 hover:text-white"}" title="${category ? "Folder: " + esc(category) : "Assign Folder/Category"}" aria-label="Assign Folder">
           <i class="fa-solid fa-folder-plus"></i>
         </button>
-        <button onclick="toggleChannelShortsBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${shortsThreshold !== 60 ? "text-purple-400 hover:bg-purple-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-purple-300"}" title="Configure Shorts cutoff" aria-label="Configure Shorts cutoff">
+        <button onclick="toggleChannelShortsBox('${esc(channel.channelId)}')" class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${shortsThreshold !== 180 ? "text-purple-400 hover:bg-purple-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-purple-300"}" title="Configure Shorts cutoff" aria-label="Configure Shorts cutoff">
           <i class="fa-solid fa-gear"></i>
         </button>
         <button onclick="toggleChannelFolderOnly('${esc(channel.channelId)}')" ${!category ? "disabled" : ""} class="inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${!category ? "text-slate-700 cursor-not-allowed" : folderOnly ? "text-amber-400 hover:bg-amber-950/50" : "text-slate-500 hover:bg-slate-800 hover:text-amber-300"}" title="${folderOnly ? "Show this channel in all feeds" : category ? "Only show videos in the " + esc(category) + " folder" : "Assign a folder first"}" aria-label="${folderOnly ? "Disable Folder Only" : "Enable Folder Only"}">

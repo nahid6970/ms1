@@ -23,7 +23,7 @@ export const list = query({
         rulesText: channel.rulesText ?? "",
         category: channel.category ?? "",
         folderOnly: channel.folderOnly ?? false,
-        shortsThresholdSeconds: channel.shortsThresholdSeconds ?? 60,
+        shortsThresholdSeconds: channel.shortsThresholdSeconds ?? 180,
         lastUpload: latestVideo?.published ?? null,
       });
     }
