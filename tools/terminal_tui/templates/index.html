@@ -1731,10 +1731,6 @@
             animation: rclone-spin 0.7s linear infinite;
             flex-shrink: 0;
         }
-        #rclone-output .rclone-line-error { color: #f87171; }
-        #rclone-output .rclone-line-warn  { color: #fbbf24; }
-        #rclone-output .rclone-line-ok    { color: #4ade80; }
-        #rclone-output .rclone-line-cmd   { color: #a78bfa; font-weight: 600; }
 
         /* Scheduled commands list */
         .sched-item {
@@ -10956,9 +10952,6 @@
         // ── RCLONE ────────────────────────────────────────────────────────────
         // ══════════════════════════════════════════════════════════════════════
 
-        let _rcloneAbortController = null;
-
-        // ── Open / close ──────────────────────────────────────────────────────
         async function toggleRclonePopover(e) {
             if (e) e.stopPropagation();
             const pop = document.getElementById('rclone-popover');
@@ -11068,8 +11061,8 @@
             }
         }
 
-        // ── Run rclone command ────────────────────────────────────────────────
-        async function rcloneRun(operation) {
+        // ── Run rclone command — sends to active terminal ─────────────────────
+        function rcloneRun(operation) {
             const project = activeProject;
             if (!project) { alert('No active workspace selected.'); return; }
 
@@ -11078,125 +11071,49 @@
             if (!src) { alert('Source path is empty. Open a workspace first.'); return; }
             if (!dst) { alert('Destination is empty. Enter a destination path or remote.'); document.getElementById('rclone-dst').focus(); return; }
 
-            // Warn before destructive operations (not dry-run)
-            const isDryRun = document.getElementById('rcflag-dry-run').checked;
-            if (!isDryRun && operation !== 'check') {
-                const dir = operation === 'src_to_dst' ? `${src}  →  ${dst}` : `${dst}  →  ${src}`;
-                if (!confirm(`⚠️  This will sync:\n\n${dir}\n\nAre you sure?`)) return;
+            const isDryRun  = document.getElementById('rcflag-dry-run').checked;
+            const fastList  = document.getElementById('rcflag-fast-list').checked;
+            const progress  = document.getElementById('rcflag-progress').checked;
+            const sizeOnly  = document.getElementById('rcflag-size-only').checked;
+            const trackRen  = document.getElementById('rcflag-track-renames').checked;
+            const transfers = document.getElementById('rcflag-transfers').value.trim();
+            const ignorelist = document.getElementById('rclone-ignorelist').value.trim();
+
+            let cmd;
+            if (operation === 'check') {
+                cmd = `rclone check "${src}" "${dst}"`;
+                if (fastList) cmd += ' --fast-list';
+                if (sizeOnly)  cmd += ' --size-only';
+                if (isDryRun)  cmd += ' --dry-run';
+                cmd += ' -v';
+            } else {
+                const [from, to] = operation === 'src_to_dst' ? [src, dst] : [dst, src];
+                cmd = `rclone sync "${from}" "${to}"`;
+                if (fastList)  cmd += ' --fast-list';
+                if (progress)  cmd += ' -P';
+                if (sizeOnly)  cmd += ' --size-only';
+                if (trackRen)  cmd += ' --track-renames';
+                if (isDryRun)  cmd += ' --dry-run';
+                const t = parseInt(transfers);
+                if (t > 0)     cmd += ` --transfers ${t}`;
             }
+            if (ignorelist) cmd += ` --filter-from "${ignorelist}"`;
 
-            // Save settings before running
+            // Save settings then send to terminal
             rcloneSaveSettings();
+            closeRclonePopover();
 
-            // Build payload
-            const payload = {
-                operation,
-                src,
-                dst,
-                ignorelist: document.getElementById('rclone-ignorelist').value.trim(),
-                transfers:  document.getElementById('rcflag-transfers').value.trim(),
-                flags: {
-                    '--fast-list':     document.getElementById('rcflag-fast-list').checked,
-                    '-P':              document.getElementById('rcflag-progress').checked,
-                    '--size-only':     document.getElementById('rcflag-size-only').checked,
-                    '--track-renames': document.getElementById('rcflag-track-renames').checked,
-                    '--dry-run':       isDryRun,
-                }
-            };
-
-            // Show running state
-            const runBar  = document.getElementById('rclone-running-bar');
-            const runLabel = document.getElementById('rclone-running-label');
-            const output  = document.getElementById('rclone-output');
-            const labels  = { check: 'Checking…', src_to_dst: 'Syncing  Src → Dst…', dst_to_src: 'Syncing  Dst → Src…' };
-            runLabel.textContent = labels[operation] || 'Running…';
-            runBar.style.display = 'flex';
-            rcloneSetBtnsDisabled(true);
-            output.innerHTML = '';
-
-            _rcloneAbortController = new AbortController();
-
-            try {
-                const res = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/run`, {
+            if (socket && socket.connected) {
+                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
+                const paneId = activePane ? activePane.paneId : 'main';
+                socket.emit('pty-input', { project: activeProject, paneId, data: cmd + '\r' });
+            } else {
+                fetch(`/input/${activeProject}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: _rcloneAbortController.signal
-                });
-
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({ error: res.statusText }));
-                    rcloneAppendLine(output, `ERROR: ${err.error || res.statusText}`, 'error');
-                    return;
-                }
-
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    buffer += decoder.decode(value, { stream: true });
-                    const parts = buffer.split('\n');
-                    buffer = parts.pop(); // keep incomplete last line
-                    for (const line of parts) {
-                        rcloneAppendLine(output, line);
-                    }
-                }
-                if (buffer) rcloneAppendLine(output, buffer);
-
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    rcloneAppendLine(output, `ERROR: ${err.message}`, 'error');
-                } else {
-                    rcloneAppendLine(output, '[aborted]', 'warn');
-                }
-            } finally {
-                runBar.style.display = 'none';
-                rcloneSetBtnsDisabled(false);
-                _rcloneAbortController = null;
-                // Scroll output to bottom
-                output.scrollTop = output.scrollHeight;
+                    body: JSON.stringify({ data: cmd + '\r' })
+                }).catch(() => {});
             }
-        }
-
-        function rcloneAbort() {
-            if (_rcloneAbortController) _rcloneAbortController.abort();
-        }
-
-        function rcloneSetBtnsDisabled(disabled) {
-            ['rclone-check-btn', 'rclone-s2d-btn', 'rclone-d2s-btn'].forEach(id => {
-                document.getElementById(id).disabled = disabled;
-            });
-        }
-
-        function rcloneAppendLine(outputEl, text, forceClass) {
-            const span = document.createElement('span');
-            const cls = forceClass ? `rclone-line-${forceClass}` : _rcloneLineClass(text);
-            if (cls) span.className = cls;
-            span.textContent = text;
-            outputEl.appendChild(span);
-            outputEl.appendChild(document.createTextNode('\n'));
-            // Auto-scroll if near bottom
-            if (outputEl.scrollHeight - outputEl.scrollTop < outputEl.clientHeight + 60) {
-                outputEl.scrollTop = outputEl.scrollHeight;
-            }
-        }
-
-        function _rcloneLineClass(line) {
-            const l = line.toLowerCase();
-            if (l.startsWith('$')) return 'rclone-line-cmd';
-            if (l.includes('error') || l.includes('failed') || l.includes('exit code: 1')) return 'rclone-line-error';
-            if (l.includes('warn') || l.includes('skipping') || l.includes('[aborted]')) return 'rclone-line-warn';
-            if (l.includes('transferred') || l.includes('no differences') || l.includes('exit code: 0')) return 'rclone-line-ok';
-            return '';
-        }
-
-        function rcloneClearOutput() {
-            const el = document.getElementById('rclone-output');
-            el.innerHTML = '';
-            el.textContent = '(no output yet)';
         }
 
         // ══════════════════════════════════════════════════════════════════════
