@@ -74,7 +74,19 @@
         "pathColor": "#163055",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "rclone": {
+        "dest": "gu:/db",
+        "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
     },
     {
       "name": "Terminal TUI",

@@ -3522,6 +3522,18 @@
                             <input type="number" id="settings-dropdown-height" min="100" max="800" step="10" style="width: 50px; height: 26px; padding: 2px 4px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px; outline: none; text-align: center;">
                         </div>
                     </div>
+                    <div style="margin-bottom:14px; padding:12px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:8px;">
+                        <div style="font-size:0.72rem; font-weight:600; color:var(--text-secondary); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Rclone Button Colors</div>
+                        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:12px;">
+                            <label for="settings-rclone-color-preset" style="font-size:0.78rem; color:var(--text-primary);">Preset</label>
+                            <select id="settings-rclone-color-preset" onchange="setRcloneButtonColorPreset(this.value)" style="height:30px; padding:3px 8px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:0.78rem;">
+                                <option value="blue">Blue</option><option value="purple">Purple</option><option value="green">Green</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="custom">Custom</option>
+                            </select>
+                            <label for="settings-rclone-color-fg" style="display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--text-primary);">Foreground <input id="settings-rclone-color-fg" type="color" value="#60a5fa" oninput="saveRcloneButtonColors(true)" style="width:30px; height:26px; padding:0; border:0; background:none; cursor:pointer;"></label>
+                            <label for="settings-rclone-color-bg" style="display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--text-primary);">Background <input id="settings-rclone-color-bg" type="color" value="#1e3a5f" oninput="saveRcloneButtonColors(true)" style="width:30px; height:26px; padding:0; border:0; background:none; cursor:pointer;"></label>
+                        </div>
+                        <div style="font-size:0.68rem; color:var(--text-muted); margin-top:7px;">Applies when a destination is set. Changes are saved automatically.</div>
+                    </div>
                 </div>
 
                 <!-- Tab 2: Sidebar & Layout -->
@@ -9076,6 +9088,12 @@
         }
 
         function openSettingsModal() {
+            const rcloneFg = localStorage.getItem('rclone-button-fg') || '#60a5fa';
+            const rcloneBg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
+            document.getElementById('settings-rclone-color-fg').value = rcloneFg;
+            document.getElementById('settings-rclone-color-bg').value = rcloneBg;
+            document.getElementById('settings-rclone-color-preset').value = getRcloneButtonColorPreset(rcloneFg, rcloneBg);
+
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
             updateSelectedFontUI();
@@ -11121,22 +11139,55 @@
             if (!btn || !dst) return;
             const configured = !!dst.value.trim();
             const active = btn.classList.contains('active');
-            const color = configured ? '#60a5fa' : '#94a3b8';
+            const fg = localStorage.getItem('rclone-button-fg') || '#60a5fa';
+            const bg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
+            const color = configured ? fg : '#94a3b8';
             btn.style.color = color;
-            btn.style.borderColor = configured ? 'rgba(96,165,250,0.55)' : 'rgba(148,163,184,0.35)';
-            btn.style.backgroundColor = active
-                ? (configured ? 'rgba(96,165,250,0.14)' : 'rgba(148,163,184,0.1)')
-                : 'var(--bg-sidebar)';
+            btn.style.borderColor = configured ? `color-mix(in srgb, ${fg} 55%, transparent)` : 'rgba(148,163,184,0.35)';
+            btn.style.backgroundColor = configured
+                ? bg
+                : (active ? 'rgba(148,163,184,0.1)' : 'var(--bg-sidebar)');
             btn.title = configured
                 ? 'Rclone — sync workspace to/from destination'
                 : 'Rclone — add a destination to enable sync';
+        }
+
+        const rcloneButtonColorPresets = {
+            blue:   { fg: '#60a5fa', bg: '#1e3a5f' },
+            purple: { fg: '#c084fc', bg: '#3b1d5a' },
+            green:  { fg: '#4ade80', bg: '#16452d' },
+            amber:  { fg: '#fbbf24', bg: '#594117' },
+            rose:   { fg: '#fb7185', bg: '#5b2432' }
+        };
+
+        function getRcloneButtonColorPreset(fg, bg) {
+            return Object.entries(rcloneButtonColorPresets).find(([, colors]) => colors.fg === fg && colors.bg === bg)?.[0] || 'custom';
+        }
+
+        function saveRcloneButtonColors(fromPicker = false) {
+            const fgEl = document.getElementById('settings-rclone-color-fg');
+            const bgEl = document.getElementById('settings-rclone-color-bg');
+            if (!fgEl || !bgEl) return;
+            localStorage.setItem('rclone-button-fg', fgEl.value);
+            localStorage.setItem('rclone-button-bg', bgEl.value);
+            if (fromPicker) document.getElementById('settings-rclone-color-preset').value = 'custom';
+            rcloneUpdateButtonState();
+        }
+
+        function setRcloneButtonColorPreset(preset) {
+            const colors = rcloneButtonColorPresets[preset];
+            if (!colors) return;
+            document.getElementById('settings-rclone-color-fg').value = colors.fg;
+            document.getElementById('settings-rclone-color-bg').value = colors.bg;
+            saveRcloneButtonColors();
         }
 
         const rcloneButtonEl = document.getElementById('rclone-btn');
         if (rcloneButtonEl) {
             rcloneButtonEl.addEventListener('mouseenter', () => {
                 const configured = !!document.getElementById('rclone-dst').value.trim();
-                rcloneButtonEl.style.backgroundColor = configured ? 'rgba(96,165,250,0.1)' : 'rgba(148,163,184,0.1)';
+                const bg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
+                rcloneButtonEl.style.backgroundColor = configured ? bg : 'rgba(148,163,184,0.1)';
             });
             rcloneButtonEl.addEventListener('mouseleave', rcloneUpdateButtonState);
         }

@@ -12,6 +12,8 @@ Read this file only when relevant to the current task. When reading, reference t
 - Suggested patterns can be reviewed and saved. If the configured absolute ignorelist path is outside the workspace, saving writes `<workspace>/ignorelist.txt` and updates the setting to that path.
 - Added a local folder picker to Add Workspace. Press Tab in Local Directory Path to browse drives/folders, select the current folder, or create a folder in the current location. Workspace Name is filled from the selected folder when blank.
 - Added `GET /api/local/directories` and `POST /api/local/directories/create` for local browsing and folder creation.
+- Changed the Rclone controls to open in a centered modal and made the header button color update as each workspace's saved destination loads.
+- Added Rclone button foreground/background color presets and custom color pickers under Global Settings → General; selections apply immediately and persist in local storage.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
 
