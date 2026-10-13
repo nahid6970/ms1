@@ -11034,7 +11034,7 @@
         }
 
         // ── Run rclone command — sends to active terminal ─────────────────────
-        function rcloneRun(operation) {
+        async function rcloneRun(operation) {
             const project = activeProject;
             if (!project) { alert('No active workspace selected.'); return; }
 
@@ -11043,49 +11043,54 @@
             if (!src) { alert('Source path is empty. Open a workspace first.'); return; }
             if (!dst) { alert('Destination is empty. Enter a destination path or remote.'); document.getElementById('rclone-dst').focus(); return; }
 
-            const isDryRun  = document.getElementById('rcflag-dry-run').checked;
-            const fastList  = document.getElementById('rcflag-fast-list').checked;
-            const progress  = document.getElementById('rcflag-progress').checked;
-            const sizeOnly  = document.getElementById('rcflag-size-only').checked;
-            const trackRen  = document.getElementById('rcflag-track-renames').checked;
-            const transfers = document.getElementById('rcflag-transfers').value.trim();
+            const isDryRun   = document.getElementById('rcflag-dry-run').checked;
+            const fastList   = document.getElementById('rcflag-fast-list').checked;
+            const progress   = document.getElementById('rcflag-progress').checked;
+            const sizeOnly   = document.getElementById('rcflag-size-only').checked;
+            const trackRen   = document.getElementById('rcflag-track-renames').checked;
+            const transfers  = document.getElementById('rcflag-transfers').value.trim();
             const ignorelist = document.getElementById('rclone-ignorelist').value.trim();
+
+            // Fetch ignorelist and convert bare glob lines → --exclude flags
+            // (rclone --filter-from requires "+ / -" prefixed lines; --exclude accepts bare globs)
+            let excludeFlags = '';
+            if (ignorelist) {
+                try {
+                    const res = await fetch(`/api/rclone/read-filter-file?path=${encodeURIComponent(ignorelist)}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const lines = (data.content || '').split('\n')
+                            .map(l => l.trim())
+                            .filter(l => l && !l.startsWith('#'));
+                        excludeFlags = lines.map(l => ` --exclude "${l}"`).join('');
+                    }
+                } catch (_) {}
+            }
 
             let cmd;
             if (operation === 'check') {
                 cmd = `rclone check "${src}" "${dst}"`;
                 if (fastList) cmd += ' --fast-list';
-                if (sizeOnly)  cmd += ' --size-only';
-                if (isDryRun)  cmd += ' --dry-run';
+                if (sizeOnly) cmd += ' --size-only';
+                if (isDryRun) cmd += ' --dry-run';
                 cmd += ' -v';
             } else {
                 const [from, to] = operation === 'src_to_dst' ? [src, dst] : [dst, src];
                 cmd = `rclone sync "${from}" "${to}"`;
-                if (fastList)  cmd += ' --fast-list';
-                if (progress)  cmd += ' -P';
-                if (sizeOnly)  cmd += ' --size-only';
-                if (trackRen)  cmd += ' --track-renames';
-                if (isDryRun)  cmd += ' --dry-run';
+                if (fastList) cmd += ' --fast-list';
+                if (progress) cmd += ' -P';
+                if (sizeOnly) cmd += ' --size-only';
+                if (trackRen) cmd += ' --track-renames';
+                if (isDryRun) cmd += ' --dry-run';
                 const t = parseInt(transfers);
-                if (t > 0)     cmd += ` --transfers ${t}`;
+                if (t > 0)    cmd += ` --transfers ${t}`;
             }
-            if (ignorelist) cmd += ` --filter-from "${ignorelist}"`;
+            cmd += excludeFlags;
 
-            // Save settings then send to terminal
+            // Save settings then open in a new terminal tab
             rcloneSaveSettings();
             closeRclonePopover();
-
-            if (socket && socket.connected) {
-                const activePane = terminalPanes && terminalPanes.find(p => p.socket === socket);
-                const paneId = activePane ? activePane.paneId : 'main';
-                socket.emit('pty-input', { project: activeProject, paneId, data: cmd + '\r' });
-            } else {
-                fetch(`/input/${activeProject}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: cmd + '\r' })
-                }).catch(() => {});
-            }
+            splitTerminal('tabs', cmd);
         }
 
         // ══════════════════════════════════════════════════════════════════════

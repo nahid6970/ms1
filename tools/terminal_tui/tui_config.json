@@ -44,7 +44,7 @@
       "gitRemote": "https://github.com/nahid6970/ms1.git",
       "rclone": {
         "dest": "gu:/ms1",
-        "ignorelist": "",
+        "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "flags": {
           "--fast-list": true,
           "-P": true,
