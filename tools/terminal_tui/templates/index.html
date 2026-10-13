@@ -2638,7 +2638,10 @@
                 </div>
                 <div class="form-group">
                     <label for="proj-path">Local Directory Path</label>
-                    <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" required autocomplete="off">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" required autocomplete="off" style="flex:1; min-width:0;" title="Press Tab or click Browse to choose a local folder" onkeydown="if(event.key==='Tab'){event.preventDefault();openLocalDirectoryPicker();}">
+                        <button type="button" class="btn btn-secondary" onclick="openLocalDirectoryPicker()" title="Browse local folders (or press Tab in the path field)" style="white-space:nowrap;">Browse…</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="proj-category">Category</label>
@@ -2656,6 +2659,33 @@
                     <button type="submit" class="btn btn-primary">Add Workspace</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="local-dir-picker-modal" style="z-index:120;">
+        <div class="modal-content" style="width:620px; max-width:94vw; padding:20px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div>
+                    <h2 style="font-size:1.05rem; margin:0;">Choose Local Folder</h2>
+                    <div style="font-size:0.74rem; color:var(--text-secondary); margin-top:4px;">Browse this computer and select the workspace directory.</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="closeLocalDirectoryPicker()" style="padding:4px 9px;">✕</button>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <input id="local-dir-picker-path" class="form-input" type="text" placeholder="Choose a drive or enter a local path" autocomplete="off" style="flex:1; min-width:0; font-family:'Fira Code',monospace; font-size:0.78rem;">
+                <button type="button" class="btn btn-secondary" onclick="navigateLocalDirectoryInput()">Go</button>
+            </div>
+            <div id="local-dir-picker-list" style="height:300px; overflow:auto; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-main); padding:6px;">
+                <div style="padding:10px; color:var(--text-secondary); font-size:0.78rem;">Loading folders…</div>
+            </div>
+            <div id="local-dir-picker-error" style="display:none; color:#f87171; font-size:0.76rem;"></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <button id="local-dir-picker-up" type="button" class="btn btn-secondary" onclick="navigateLocalDirectoryUp()">↑ Up</button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeLocalDirectoryPicker()">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="selectLocalDirectory()">Select This Folder</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -4357,6 +4387,7 @@
             if (e.target.classList.contains('modal-overlay')) {
                 const id = e.target.id;
                 if (id === 'add-modal') closeAddModal();
+                else if (id === 'local-dir-picker-modal') closeLocalDirectoryPicker();
                 else if (id === 'split-select-modal') closeSplitSelectModal();
                 else if (id === 'framework-select-modal') closeFrameworkSelectModal();
                 else if (id === 'extension-icons-modal') closeExtensionIconsModal();
@@ -6105,6 +6136,103 @@
 
         function closeAddModal() {
             document.getElementById('add-modal').classList.remove('show');
+        }
+
+        let localDirectoryPickerCurrent = '';
+        let localDirectoryPickerIsRoots = true;
+
+        async function openLocalDirectoryPicker() {
+            document.getElementById('local-dir-picker-modal').classList.add('show');
+            document.getElementById('local-dir-picker-error').style.display = 'none';
+            const startingPath = document.getElementById('proj-path').value.trim();
+            try {
+                await loadLocalDirectories(startingPath);
+            } catch (err) {
+                if (!startingPath) {
+                    showLocalDirectoryPickerError(err);
+                    return;
+                }
+                document.getElementById('local-dir-picker-error').textContent = `${err.message} Showing available drives instead.`;
+                document.getElementById('local-dir-picker-error').style.display = 'block';
+                await loadLocalDirectories('');
+            }
+        }
+
+        function closeLocalDirectoryPicker() {
+            document.getElementById('local-dir-picker-modal').classList.remove('show');
+        }
+
+        async function loadLocalDirectories(path) {
+            const list = document.getElementById('local-dir-picker-list');
+            const error = document.getElementById('local-dir-picker-error');
+            list.innerHTML = '<div style="padding:10px; color:var(--text-secondary); font-size:0.78rem;">Loading folders…</div>';
+            error.style.display = 'none';
+            const query = new URLSearchParams();
+            if (path) query.set('path', path);
+            const response = await fetch(`/api/local/directories?${query.toString()}`);
+            const raw = await response.text();
+            let data;
+            try { data = raw ? JSON.parse(raw) : {}; }
+            catch (_) { throw new Error(`Folder browser returned ${response.status} ${response.statusText}.`); }
+            if (!response.ok) throw new Error(data.error || 'Could not list this folder.');
+
+            localDirectoryPickerCurrent = data.path || '';
+            localDirectoryPickerIsRoots = !!data.is_roots;
+            document.getElementById('local-dir-picker-path').value = localDirectoryPickerCurrent;
+            document.getElementById('local-dir-picker-up').disabled = localDirectoryPickerIsRoots || !data.parent;
+            list.innerHTML = '';
+
+            if (!data.directories.length) {
+                list.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:0.78rem;">No subfolders here. You can select this folder.</div>';
+                return;
+            }
+            data.directories.forEach(item => {
+                const entry = typeof item === 'string' ? { name: item, path: item } : item;
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.style.cssText = 'width:100%; display:flex; align-items:center; gap:9px; padding:8px 10px; border:0; border-radius:6px; background:transparent; color:var(--text-primary); text-align:left; cursor:pointer; font:inherit; font-size:0.8rem;';
+                row.innerHTML = '<span style="color:#60a5fa;">📁</span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span><span style="margin-left:auto; color:var(--text-muted); font-size:0.68rem;">Open</span>';
+                row.children[1].textContent = entry.name;
+                row.onmouseenter = () => { row.style.background = 'var(--bg-card-hover)'; };
+                row.onmouseleave = () => { row.style.background = 'transparent'; };
+                row.onclick = () => loadLocalDirectories(entry.path).catch(showLocalDirectoryPickerError);
+                list.appendChild(row);
+            });
+        }
+
+        function showLocalDirectoryPickerError(err) {
+            const error = document.getElementById('local-dir-picker-error');
+            error.textContent = err.message;
+            error.style.display = 'block';
+        }
+
+        function navigateLocalDirectoryInput() {
+            const path = document.getElementById('local-dir-picker-path').value.trim();
+            loadLocalDirectories(path).catch(showLocalDirectoryPickerError);
+        }
+
+        function navigateLocalDirectoryUp() {
+            if (!localDirectoryPickerCurrent) return;
+            const path = localDirectoryPickerCurrent.replace(/[\\/]+$/, '');
+            const separatorIndex = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+            if (separatorIndex < 0) return loadLocalDirectories('');
+            const parent = path.slice(0, separatorIndex) || path.slice(0, separatorIndex + 1);
+            if (/^[a-z]:$/i.test(parent)) return loadLocalDirectories(parent + '\\');
+            loadLocalDirectories(parent).catch(showLocalDirectoryPickerError);
+        }
+
+        function selectLocalDirectory() {
+            if (localDirectoryPickerIsRoots || !localDirectoryPickerCurrent) return;
+            const pathInput = document.getElementById('proj-path');
+            pathInput.value = localDirectoryPickerCurrent;
+            const nameInput = document.getElementById('proj-name');
+            if (!nameInput.value.trim()) {
+                const normalized = localDirectoryPickerCurrent.replace(/[\\/]+$/, '');
+                const leaf = normalized.split(/[\\/]/).pop();
+                if (leaf && !/^[a-z]:$/i.test(leaf)) nameInput.value = leaf;
+            }
+            closeLocalDirectoryPicker();
+            pathInput.focus();
         }
 
         async function duplicateActiveProject() {
@@ -12089,6 +12217,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const localDirPicker = document.getElementById('local-dir-picker-modal');
+                if (localDirPicker && localDirPicker.classList.contains('show')) { closeLocalDirectoryPicker(); return; }
                 const pop1 = document.getElementById('sched-popover');
                 const pop2 = document.getElementById('qtools-popover');
                 const pop3 = document.getElementById('snippets-popover');

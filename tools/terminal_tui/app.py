@@ -718,6 +718,42 @@ def api_mkdir():
 def api_projects_get():
     return jsonify(scan_projects())
 
+
+@app.route('/api/local/directories', methods=['GET'])
+def api_local_directories():
+    """List local filesystem folders for the Add Workspace directory picker."""
+    requested_path = request.args.get('path', '').strip()
+    if not requested_path:
+        if os.name == 'nt':
+            import ctypes
+            drive_mask = ctypes.windll.kernel32.GetLogicalDrives()
+            roots = [f'{chr(65 + index)}:/' for index in range(26) if drive_mask & (1 << index)]
+        else:
+            roots = ['/']
+        return jsonify({'path': '', 'parent': None, 'directories': roots, 'is_roots': True})
+
+    path = os.path.abspath(os.path.expanduser(requested_path))
+    if not os.path.isdir(path):
+        return jsonify({'error': 'That folder does not exist or cannot be opened.'}), 400
+
+    directories = []
+    try:
+        with os.scandir(path) as entries:
+            for entry in entries:
+                try:
+                    if entry.is_dir(follow_symlinks=False):
+                        directories.append({'name': entry.name, 'path': entry.path})
+                except OSError:
+                    continue
+    except OSError as exc:
+        return jsonify({'error': f'Could not read this folder: {exc}'}), 403
+
+    directories.sort(key=lambda item: item['name'].casefold())
+    parent = os.path.dirname(os.path.normpath(path))
+    if parent == path:
+        parent = None
+    return jsonify({'path': path, 'parent': parent, 'directories': directories, 'is_roots': False})
+
 @app.route('/api/projects', methods=['POST'])
 def api_projects_post():
     data = request.json
