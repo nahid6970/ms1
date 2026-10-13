@@ -41,7 +41,19 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": [],
-      "gitRemote": "https://github.com/nahid6970/ms1.git"
+      "gitRemote": "https://github.com/nahid6970/ms1.git",
+      "rclone": {
+        "dest": "gu:/ms1",
+        "ignorelist": "",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
     },
     {
       "name": "db",
