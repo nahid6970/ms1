@@ -198,7 +198,7 @@
       ],
       "category": "Tool",
       "rclone": {
-        "dest": "gu:/",
+        "dest": "",
         "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
         "flags": {
           "--fast-list": true,
