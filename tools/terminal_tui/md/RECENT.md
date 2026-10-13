@@ -5,6 +5,18 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-13] - Rclone Ignore Suggestions and Local Workspace Folder Picker
+
+- Added an AI ignorelist suggester to the Rclone popover with a selectable, remembered Gemini model.
+- Workspace scans collect directory paths and immediate file/subfolder counts at all depths, plus capped top-level filenames and extensions. Known heavy and hidden folders are pruned; the AI receives no individual file paths and at most 500 directory records.
+- Suggested patterns can be reviewed and saved. If the configured absolute ignorelist path is outside the workspace, saving writes `<workspace>/ignorelist.txt` and updates the setting to that path.
+- Added a local folder picker to Add Workspace. Press Tab in Local Directory Path to browse drives/folders, select the current folder, or create a folder in the current location. Workspace Name is filled from the selected folder when blank.
+- Added `GET /api/local/directories` and `POST /api/local/directories/create` for local browsing and folder creation.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
+---
+
 ## [2026-10-12] - Workspace Bar Auto-Hides With One Workspace
 
 `updateWorkspaceBar()` now hides `#workspace-bar` when only one workspace is running (the only running workspace is the active one — no switching needed). The bar reappears automatically as soon as a second workspace session is opened. The existing "Show Workspace Bar" global setting still suppresses it entirely when disabled.

@@ -63,6 +63,8 @@
 **Files Involved:** `app.py` (routes: `/api/projects/*`), `templates/index.html` (sidebar UI)
 **Usage:** Click `+` in sidebar → enter name + folder path → click workspace card to spawn terminal.
 
+**Local path picker:** In the Add Workspace modal, focus Local Directory Path and press Tab to browse local drives and folders. Select the current folder to fill the path; if Workspace Name is empty, it is filled from the selected folder name. The picker can create a new folder in the current directory.
+
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.
 **Sub-features:**
@@ -72,6 +74,16 @@
 - Custom PowerShell profiles with project-specific prompt, aliases, history
 - Duplicate the active workspace into the next available `-2`, `-3`, … sibling folder, copying workspace settings and files while omitting Git metadata and common generated folders
 - **Workspace bar** (top of terminal area) shows running workspace chips for quick switching — auto-hides when only one workspace is running, reappears as soon as a second one opens
+
+---
+
+## Rclone Workspace Sync
+**Status:** ✅ Complete
+**Description:** Compare or sync the active workspace with a local folder or rclone remote. Commands open in a new terminal tab.
+**Implementation:** `templates/index.html` builds `rclone check` or directional `rclone sync` commands; `app.py` provides workspace scanning and Gemini ignore suggestions.
+**Usage:** Open the orange Rclone toolbar button, set Destination and optional ignorelist, then use Check, SRC → DST, or DST → SRC. Ignorelist patterns are read from the configured file and passed as individual `--exclude` flags.
+**AI ignore suggestions:** The ✨ action scans folder names at all depths and immediate file/subfolder counts, plus up to 40 top-level filenames, up to 200 extensions, and up to 12,000 characters of `.gitignore`. Known heavy and hidden folders are reported as pruned and not recursively scanned. The AI receives at most 500 directory records (favoring folders with more immediate files), never individual file paths. Suggestions appear in the preview before the user saves them. The Gemini model is selectable and remembered locally. An absolute ignorelist path outside the workspace falls back to `<workspace>/ignorelist.txt` and updates the field.
+**Files Involved:** `app.py` (`/api/project/<project>/rclone/scan`, `/api/project/<project>/rclone/suggest-ignore`, `/api/local/directories`, `/api/local/directories/create`), `templates/index.html` (rclone popover and local folder picker)
 
 ---
 
