@@ -81,7 +81,7 @@
 **Status:** ✅ Complete
 **Description:** Compare or sync the active workspace with a local folder or rclone remote. Commands open in a new terminal tab.
 **Implementation:** `templates/index.html` builds `rclone check` or directional `rclone sync` commands; `app.py` provides workspace scanning and Gemini ignore suggestions.
-**Usage:** Open the orange Rclone toolbar button, set Destination and optional ignorelist, then use Check, SRC → DST, or DST → SRC. Ignorelist patterns are read from the configured file and passed as individual `--exclude` flags.
+**Usage:** Open the blue Rclone button in the workspace header (before Delete), set Destination and optional ignorelist, then use Check, SRC → DST, or DST → SRC. Ignorelist patterns are read from the configured file and passed as individual `--exclude` flags.
 **AI ignore suggestions:** The ✨ action scans folder names at all depths and immediate file/subfolder counts, plus up to 40 top-level filenames, up to 200 extensions, and up to 12,000 characters of `.gitignore`. Known heavy and hidden folders are reported as pruned and not recursively scanned. The AI receives at most 500 directory records (favoring folders with more immediate files), never individual file paths. Suggestions appear in the preview before the user saves them. The Gemini model is selectable and remembered locally. An absolute ignorelist path outside the workspace falls back to `<workspace>/ignorelist.txt` and updates the field.
 **Files Involved:** `app.py` (`/api/project/<project>/rclone/scan`, `/api/project/<project>/rclone/suggest-ignore`, `/api/local/directories`, `/api/local/directories/create`), `templates/index.html` (rclone popover and local folder picker)
 

@@ -1839,6 +1839,7 @@
         }
         .sbicon-btn:hover { color: var(--text-primary); border-color: var(--accent-color); background: rgba(37,99,235,0.1); }
         .sbicon-btn.active { color: var(--accent-color); border-color: var(--accent-color); }
+        #rclone-btn.active { color: #60a5fa; border-color: #60a5fa; background: rgba(96,165,250,0.12); }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -1896,6 +1897,9 @@
                         <div id="workspace-selector-options-list" style="overflow-y: auto; flex: 1; padding: 4px 0; max-height: 240px;"></div>
                     </div>
                 </div>
+                <button class="action-btn" id="rclone-btn" onclick="toggleRclonePopover(event)" title="Rclone — sync workspace to/from remote" aria-label="Rclone sync" style="height:34px; width:34px; padding:0; display:flex; align-items:center; justify-content:center; background-color:var(--bg-sidebar); border:1px solid rgba(96,165,250,0.45); border-radius:8px; cursor:pointer; color:#60a5fa; transition:all 0.2s;" onmouseenter="this.style.borderColor='#60a5fa'; this.style.backgroundColor='rgba(96,165,250,0.1)'" onmouseleave="this.style.borderColor=this.classList.contains('active')?'#60a5fa':'rgba(96,165,250,0.45)'; this.style.backgroundColor=this.classList.contains('active')?'rgba(96,165,250,0.12)':'var(--bg-sidebar)'">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                </button>
                 <button class="action-btn" id="workspace-delete-btn" onclick="deleteActiveWorkspace()" title="Delete workspace &amp; its storage" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f87171; transition: all 0.2s;" onmouseenter="this.style.borderColor='#ef4444'; this.style.backgroundColor='rgba(239,68,68,0.1)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
@@ -2075,10 +2079,6 @@
                     <!-- AI Copilot Button -->
                     <button id="ai-copilot-btn" class="sbicon-btn" onclick="toggleAICopilotPopover(event)" title="AI Copilot (Ctrl+I)" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
-                    </button>
-                    <!-- Rclone Sync Button -->
-                    <button id="rclone-btn" class="sbicon-btn" onclick="toggleRclonePopover(event)" title="Rclone — sync workspace to/from remote" style="color: #fb923c; border-color: rgba(251, 146, 60, 0.4);">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
                     </button>
                     <!-- Code Merger Button -->
                     <button id="code-merger-btn" class="sbicon-btn" onclick="toggleCodeMergerPopover(event)" title="Code Merger — prep files & apply AI responses" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.4);">
@@ -11094,8 +11094,13 @@
                 closeRclonePopover();
             } else {
                 closeAllStatusPopovers();
+                const anchor = document.getElementById('rclone-btn');
+                const rect = anchor.getBoundingClientRect();
+                pop.style.top = `${rect.bottom + 8}px`;
+                pop.style.bottom = 'auto';
+                pop.style.right = `${Math.max(10, window.innerWidth - rect.right)}px`;
                 pop.classList.add('show');
-                document.getElementById('rclone-btn').classList.add('active');
+                anchor.classList.add('active');
                 await rcloneLoadSettings();
                 if (typeof fetchDynamicModels === 'function') await fetchDynamicModels('gemini');
                 populateRcloneAIModelDropdown();
@@ -11105,7 +11110,10 @@
 
         function closeRclonePopover() {
             document.getElementById('rclone-popover').classList.remove('show');
-            document.getElementById('rclone-btn').classList.remove('active');
+            const btn = document.getElementById('rclone-btn');
+            btn.classList.remove('active');
+            btn.style.borderColor = 'rgba(96,165,250,0.45)';
+            btn.style.backgroundColor = 'var(--bg-sidebar)';
         }
 
         // ── Load settings from backend ────────────────────────────────────────
