@@ -5,6 +5,26 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-13] - Git Modal AI .gitignore Suggestion
+
+- Added an AI action beside the Git modal heading to scan all workspace file and folder paths and suggest a root `.gitignore`.
+- The scan skips `.git` internals, does not follow symlinks, reads no file contents, and sends Gemini a bounded inventory plus the existing `.gitignore` when available.
+- Suggestions open in an editable preview. Saving explicitly creates or updates the workspace root `.gitignore` atomically, invalidates cached Git status, and refreshes the changed-file list.
+- Added `POST /api/project/<project>/git/suggest-ignore` and `POST /api/project/<project>/git/gitignore`.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
+---
+
+## [2026-10-13] - Keep AI .gitignore Suggestions Project-Specific
+
+- Tightened the Git ignore suggestion prompt to require evidence for each rule and avoid generic ecosystem templates.
+- Added a 30-line maximum and instructed Gemini to return an empty file when the scan supports no ignore patterns. Existing meaningful rules must still be preserved.
+
+**Files Modified:** `app.py`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
+---
+
 ## [2026-10-13] - Rclone Ignore Suggestions and Local Workspace Folder Picker
 
 - Added an AI ignorelist suggester to the centered Rclone modal with a selectable, remembered Gemini model.

@@ -85,6 +85,13 @@
 **AI ignore suggestions:** The ✨ action scans folder names at all depths and immediate file/subfolder counts, plus up to 40 top-level filenames, up to 200 extensions, and up to 12,000 characters of `.gitignore`. Known heavy and hidden folders are reported as pruned and not recursively scanned. The AI receives at most 500 directory records (favoring folders with more immediate files), never individual file paths. Suggestions appear in the preview before the user saves them. The modal expands to fit the preview when possible; on smaller screens, its content scrolls while the action buttons stay visible. The Gemini model is selectable and remembered locally. An absolute ignorelist path outside the workspace falls back to `<workspace>/ignorelist.txt` and updates the field.
 **Files Involved:** `app.py` (`/api/project/<project>/rclone/scan`, `/api/project/<project>/rclone/suggest-ignore`, `/api/rclone/destination-directories`, `/api/local/directories`, `/api/local/directories/create`), `templates/index.html` (Rclone modal, color settings, and local folder pickers)
 
+## Git .gitignore AI Suggestion
+**Status:** ✅ Complete
+**Description:** An AI action beside the Git modal heading scans the workspace file and folder paths, then suggests a project-specific `.gitignore` or updates the existing one.
+**Implementation:** `POST /api/project/<project>/git/suggest-ignore` scans paths locally while skipping `.git` internals and symlink traversal. Gemini receives the existing root `.gitignore` (if present) and a compact bounded inventory of extensions, directory names, busy directories, and sampled paths; file contents are not read. The prompt favors concise, evidence-based rules and rejects generic boilerplate for ecosystems or tools absent from the inventory. The result opens in an editable preview. `POST /api/project/<project>/git/gitignore` atomically writes the reviewed contents to the workspace root and invalidates Git status cache.
+**Usage:** Open the Git modal, select the `.gitignore` AI button beside its heading, review and edit the proposal, then choose Create or Update to save. The changed-file list refreshes after saving.
+**Files Involved:** `app.py` (Git suggestion and save endpoints), `templates/index.html` (Git modal action, editable preview, and refresh), `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
 ---
 
 ## Bangla (Complex Script) Rendering in Terminal

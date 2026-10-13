@@ -2513,6 +2513,217 @@ def api_git_suggest_commit(project):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/project/<project>/git/suggest-ignore', methods=['POST'])
+def api_git_suggest_ignore(project):
+    """Scan the workspace tree and ask Gemini for a complete .gitignore proposal."""
+    data = request.get_json() or {}
+    api_key = (data.get('api_key') or '').strip()
+    model = (data.get('model') or 'gemini-2.5-flash').strip()
+    if not api_key:
+        return jsonify({'error': 'No Gemini API key found. Add one in AI Copilot settings.'}), 400
+    if not re.fullmatch(r'[A-Za-z0-9._-]{1,100}', model):
+        return jsonify({'error': 'Invalid Gemini model name.'}), 400
+
+    projects_list = scan_projects()
+    proj = next((item for item in projects_list if item['name'].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({'error': 'Project not found'}), 404
+    workspace = os.path.abspath(os.path.normpath(proj.get('path') or ''))
+    if not os.path.isdir(workspace):
+        return jsonify({'error': 'Workspace folder does not exist.'}), 404
+
+    cf = 0x08000000 if sys.platform == 'win32' else 0
+    try:
+        git_check = subprocess.run(
+            ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
+            capture_output=True, text=True, encoding='utf-8', errors='replace',
+            creationflags=cf, timeout=5
+        )
+        if git_check.returncode != 0:
+            return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
+
+        import heapq
+        import random
+        from collections import Counter
+
+        gitignore_path = os.path.join(workspace, '.gitignore')
+        existing_gitignore = ''
+        if os.path.isfile(gitignore_path):
+            if os.path.getsize(gitignore_path) > 128 * 1024:
+                return jsonify({'error': 'The existing .gitignore is larger than 128 KB; shorten it before asking AI to merge it safely.'}), 413
+            with open(gitignore_path, 'r', encoding='utf-8', errors='replace') as handle:
+                existing_gitignore = handle.read()
+
+        files_scanned = directories_scanned = sequence = 0
+        extension_counts = Counter()
+        directory_name_counts = Counter()
+        top_level_files = []
+        top_level_directories = []
+        sampled_paths = []
+        busiest_heap = []
+        pending = [(workspace, '')]
+        max_path_samples = 120
+        max_directory_names = 5000
+        max_extensions = 2000
+
+        while pending:
+            current_path, relative_dir = pending.pop()
+            direct_files = child_dirs = 0
+            try:
+                with os.scandir(current_path) as entries:
+                    for entry in entries:
+                        if entry.name == '.git':
+                            continue
+                        try:
+                            is_dir = entry.is_dir(follow_symlinks=False)
+                        except OSError:
+                            continue
+                        relative_path = f'{relative_dir}/{entry.name}'.strip('/')
+                        if is_dir:
+                            child_dirs += 1
+                            directories_scanned += 1
+                            if len(directory_name_counts) < max_directory_names or entry.name in directory_name_counts:
+                                directory_name_counts[entry.name] += 1
+                            if not relative_dir and len(top_level_directories) < 100:
+                                top_level_directories.append(entry.name)
+                            pending.append((entry.path, relative_path))
+                        else:
+                            direct_files += 1
+                            files_scanned += 1
+                            if not relative_dir and len(top_level_files) < 100:
+                                top_level_files.append(entry.name)
+                            _, extension = os.path.splitext(entry.name)
+                            if extension and (len(extension_counts) < max_extensions or extension.lower() in extension_counts):
+                                extension_counts[extension.lower()] += 1
+                            if len(sampled_paths) < max_path_samples:
+                                sampled_paths.append(relative_path)
+                            else:
+                                sample_index = random.randrange(files_scanned)
+                                if sample_index < max_path_samples:
+                                    sampled_paths[sample_index] = relative_path
+            except OSError:
+                continue
+
+            if relative_dir:
+                record = {'path': relative_dir, 'files': direct_files, 'child_dirs': child_dirs}
+                heap_item = (direct_files, sequence, record)
+                sequence += 1
+                if len(busiest_heap) < 80:
+                    heapq.heappush(busiest_heap, heap_item)
+                elif direct_files > busiest_heap[0][0]:
+                    heapq.heapreplace(busiest_heap, heap_item)
+
+        inventory = {
+            'files_scanned': files_scanned,
+            'directories_scanned': directories_scanned,
+            'top_level_directories': sorted(top_level_directories),
+            'top_level_files': sorted(top_level_files),
+            'common_directory_names': [
+                {'name': name, 'count': count}
+                for name, count in directory_name_counts.most_common(120)
+            ],
+            'file_extensions': [
+                {'extension': extension, 'count': count}
+                for extension, count in extension_counts.most_common(120)
+            ],
+            'busiest_directories': [item[2] for item in sorted(busiest_heap, key=lambda item: (-item[0], item[2]['path'].casefold()))],
+            'sample_file_paths': sorted(sampled_paths),
+        }
+
+        prompt = (
+            "Suggest a concise, project-specific .gitignore using the supplied inventory. The inventory was built by scanning every file and folder path in the workspace; .git internals were skipped. "
+            "Only names, paths, folder counts, and file extensions were scanned. No file contents were read or sent.\n\n"
+            "Be conservative: add a rule only when the inventory provides evidence that the project uses or creates the matching artifact, or when it is a small, standard runtime cache for a language clearly present in the inventory. "
+            "Do not output a generic ecosystem template or lists of hypothetical rules. In particular, do not add packaging, distribution, test/coverage, IDE, OS, database, or framework rules unless matching files or directories are present in the inventory. "
+            "Never ignore source files, user data, or configuration needed to build and run the project. Prefer a few precise patterns over broad catch-all patterns. "
+            "Preserve every meaningful existing rule, but do not add boilerplate around it. Aim for 3-15 nonblank lines and never exceed 30 lines including comments. "
+            "If the scan does not support any ignore rules, return an empty file. Return only the .gitignore text, with no markdown fence or explanation.\n\n"
+            f"Existing .gitignore (empty means it does not exist):\n{existing_gitignore or '(none)'}\n\n"
+            "Compact inventory from the complete scan:\n"
+            + json.dumps(inventory, ensure_ascii=False, separators=(',', ':'))
+        )
+
+        import requests as _requests
+        gemini_url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}'
+        response = _requests.post(
+            gemini_url,
+            json={
+                'contents': [{'role': 'user', 'parts': [{'text': prompt}]}],
+                'generationConfig': {'temperature': 0.2, 'maxOutputTokens': 8192},
+            },
+            headers={'Content-Type': 'application/json'}, timeout=90
+        )
+        response_data = response.json()
+        if not response.ok:
+            message = response_data.get('error', {}).get('message', response.text[:400])
+            return jsonify({'error': f'Gemini API error: {message}'}), 502
+        try:
+            proposal = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+        except (KeyError, IndexError, TypeError):
+            return jsonify({'error': 'Gemini returned an empty or unexpected response.'}), 502
+        if proposal.startswith('```'):
+            proposal = '\n'.join(line for line in proposal.splitlines() if not line.strip().startswith('```')).strip()
+        if not proposal:
+            return jsonify({'error': 'Gemini returned an empty .gitignore proposal.'}), 502
+
+        return jsonify({
+            'content': proposal,
+            'path': gitignore_path,
+            'exists': os.path.isfile(gitignore_path),
+            'files_scanned': files_scanned,
+            'directories_scanned': directories_scanned,
+        })
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Git repository lookup timed out.'}), 504
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
+@app.route('/api/project/<project>/git/gitignore', methods=['POST'])
+def api_git_save_ignore(project):
+    """Save a reviewed .gitignore proposal at the active workspace root."""
+    data = request.get_json() or {}
+    content = data.get('content')
+    if not isinstance(content, str):
+        return jsonify({'error': 'GitIgnore content is required.'}), 400
+    if len(content.encode('utf-8')) > 512 * 1024:
+        return jsonify({'error': '.gitignore content exceeds 512 KB.'}), 413
+
+    projects_list = scan_projects()
+    proj = next((item for item in projects_list if item['name'].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({'error': 'Project not found'}), 404
+    workspace = os.path.abspath(os.path.normpath(proj.get('path') or ''))
+    if not os.path.isdir(workspace):
+        return jsonify({'error': 'Workspace folder does not exist.'}), 404
+    cf = 0x08000000 if sys.platform == 'win32' else 0
+    try:
+        git_check = subprocess.run(
+            ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
+            capture_output=True, text=True, encoding='utf-8', errors='replace',
+            creationflags=cf, timeout=5
+        )
+        if git_check.returncode != 0:
+            return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
+
+        import tempfile
+        gitignore_path = os.path.join(workspace, '.gitignore')
+        fd, temporary_path = tempfile.mkstemp(prefix='.gitignore-', suffix='.tmp', dir=workspace)
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8', newline='') as handle:
+                handle.write(content)
+            os.replace(temporary_path, gitignore_path)
+        finally:
+            if os.path.exists(temporary_path):
+                os.remove(temporary_path)
+        invalidate_git_status_cache(workspace)
+        return jsonify({'status': 'ok', 'path': gitignore_path})
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Git repository lookup timed out.'}), 504
+    except OSError as exc:
+        return jsonify({'error': f'Could not write .gitignore: {exc}'}), 500
+
+
 @app.route('/api/project/<project>/git/ignorecase-check', methods=['GET'])
 def api_git_ignorecase_check(project):
     """Check if core.ignoreCase is true and detect case-only renames in the working tree."""

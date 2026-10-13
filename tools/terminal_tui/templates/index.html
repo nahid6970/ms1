@@ -3928,6 +3928,9 @@
                     <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 8px;">
                         <span style="color:#38bdf8;">⎇</span>
                         <span id="git-modal-branch">main</span>
+                        <button id="gitignore-ai-suggest-btn" onclick="suggestGitIgnore()" title="Scan workspace paths and suggest a .gitignore file" style="display:inline-flex; align-items:center; gap:5px; padding:4px 8px; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.35); border-radius:6px; color:#c084fc; font-size:0.68rem; font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s; white-space:nowrap;" onmouseenter="this.style.background='rgba(168,85,247,0.2)'" onmouseleave="this.style.background='rgba(168,85,247,0.1)'">
+                            <span id="gitignore-ai-suggest-icon">✨</span> .gitignore
+                        </button>
                     </h2>
                     <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;" id="git-modal-subtitle">Loading changes...</div>
                 </div>
@@ -4125,6 +4128,30 @@
                 </button>
                 </div>
                 <div id="git-status-msg" style="font-size: 0.78rem; color: var(--text-secondary); height: 20px; line-height: 20px; text-align: center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="gitignore-ai-preview-modal" style="z-index:700;">
+        <div class="modal-content" style="width:760px; max-width:95vw; max-height:90dvh; padding:0; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="padding:16px 20px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                <div>
+                    <h2 style="font-size:1rem; font-weight:600; color:var(--text-primary); margin:0;">Review AI .gitignore</h2>
+                    <div id="gitignore-ai-preview-location" style="font-size:0.72rem; color:var(--text-secondary); margin-top:4px; word-break:break-all;"></div>
+                </div>
+                <button type="button" onclick="closeGitIgnorePreview()" style="background:none; border:none; font-size:1.25rem; color:var(--text-secondary); cursor:pointer; line-height:1; padding:2px 5px;">&times;</button>
+            </div>
+            <div style="padding:12px 20px 0; font-size:0.76rem; color:var(--text-secondary);">
+                <div id="gitignore-ai-scan-summary"></div>
+                <div style="margin-top:5px; color:var(--text-muted);">The scan reads every workspace path, folder name, and file extension. File contents are not read or sent.</div>
+            </div>
+            <textarea id="gitignore-ai-preview-content" spellcheck="false" aria-label="Suggested .gitignore contents" style="flex:1; min-height:260px; margin:12px 20px; padding:12px; resize:vertical; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font:0.8rem/1.55 'Fira Code',monospace; outline:none; white-space:pre; overflow:auto;"></textarea>
+            <div style="padding:10px 20px 16px; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <div id="gitignore-ai-save-status" style="font-size:0.76rem; color:var(--text-secondary);"></div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeGitIgnorePreview()">Cancel</button>
+                    <button type="button" id="gitignore-ai-save-btn" class="btn btn-primary" onclick="saveGitIgnoreProposal()">Save .gitignore</button>
+                </div>
             </div>
         </div>
     </div>
@@ -4452,6 +4479,7 @@
                 else if (id === 'ai-model-tester-modal') closeAIModelTesterModal();
                 else if (id === 'manager-modal') closeManagerModal();
                 else if (id === 'git-modal') closeGitModal();
+                else if (id === 'gitignore-ai-preview-modal') closeGitIgnorePreview();
                 else if (id === 'rclone-popover') closeRclonePopover();
                 else if (id === 'custom-btn-modal') closeCustomButtonModal();
                 else if (id === 'file-viewer-modal') closeFileViewer();
@@ -12475,6 +12503,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const gitIgnorePreview = document.getElementById('gitignore-ai-preview-modal');
+                if (gitIgnorePreview && gitIgnorePreview.classList.contains('show')) { closeGitIgnorePreview(); return; }
                 const rcloneDestinationPicker = document.getElementById('rclone-dst-picker-modal');
                 if (rcloneDestinationPicker && rcloneDestinationPicker.classList.contains('show')) { closeRcloneDestinationPicker(); return; }
                 const rcloneModal = document.getElementById('rclone-popover');
@@ -17146,6 +17176,134 @@ Always wrap your **entire response** in a single markdown code block.`;
             } finally {
                 btn.disabled = false;
                 iconEl.textContent = '✨';
+            }
+        }
+
+        let gitIgnoreProposalProject = null;
+
+        async function suggestGitIgnore() {
+            if (!activeProject) return;
+            const project = activeProject;
+            const button = document.getElementById('gitignore-ai-suggest-btn');
+            const icon = document.getElementById('gitignore-ai-suggest-icon');
+            const status = document.getElementById('git-status-msg');
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            if (!apiKey) {
+                status.style.color = '#ef4444';
+                status.textContent = 'No Gemini API key found. Add one in AI Copilot settings.';
+                return;
+            }
+
+            const model = document.getElementById('git-ai-model-select')?.value || 'gemini-2.5-flash';
+            button.disabled = true;
+            icon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+            status.style.color = 'var(--text-secondary)';
+            status.textContent = 'Scanning all workspace paths and preparing .gitignore…';
+
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(project)}/git/suggest-ignore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey, model })
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'GitIgnore suggestion failed.');
+                if (activeProject !== project) throw new Error('The active workspace changed before the suggestion finished.');
+
+                gitIgnoreProposalProject = project;
+                document.getElementById('gitignore-ai-preview-location').textContent = `${data.exists ? 'Update existing' : 'Create new'} file: ${data.path}`;
+                document.getElementById('gitignore-ai-scan-summary').textContent = `Scanned ${Number(data.files_scanned || 0).toLocaleString()} files in ${Number(data.directories_scanned || 0).toLocaleString()} folders.`;
+                document.getElementById('gitignore-ai-preview-content').value = data.content || '';
+                document.getElementById('gitignore-ai-save-status').textContent = data.exists
+                    ? 'Review the merged rules before replacing the existing file.'
+                    : 'Review the suggested rules before creating this file.';
+                document.getElementById('gitignore-ai-save-status').style.color = 'var(--text-secondary)';
+                document.getElementById('gitignore-ai-save-btn').textContent = data.exists ? 'Update .gitignore' : 'Create .gitignore';
+                document.getElementById('gitignore-ai-preview-modal').classList.add('show');
+                status.style.color = '#22c55e';
+                status.textContent = 'GitIgnore suggestion ready for review.';
+            } catch (error) {
+                status.style.color = '#ef4444';
+                status.textContent = `AI GitIgnore failed: ${error.message}`;
+            } finally {
+                button.disabled = false;
+                icon.textContent = '✨';
+            }
+        }
+
+        function closeGitIgnorePreview() {
+            document.getElementById('gitignore-ai-preview-modal').classList.remove('show');
+        }
+
+        async function saveGitIgnoreProposal() {
+            const project = gitIgnoreProposalProject;
+            if (!project) return;
+            const button = document.getElementById('gitignore-ai-save-btn');
+            const status = document.getElementById('gitignore-ai-save-status');
+            button.disabled = true;
+            status.style.color = 'var(--text-secondary)';
+            status.textContent = 'Saving .gitignore…';
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(project)}/git/gitignore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: document.getElementById('gitignore-ai-preview-content').value })
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Could not save .gitignore.');
+                closeGitIgnorePreview();
+                await refreshGitChangedFilesAfterIgnoreSave(project);
+                const gitStatus = document.getElementById('git-status-msg');
+                gitStatus.style.color = '#22c55e';
+                gitStatus.textContent = '.gitignore saved and changed files refreshed.';
+                if (typeof updateStatsMonitor === 'function') updateStatsMonitor();
+            } catch (error) {
+                status.style.color = '#ef4444';
+                status.textContent = error.message;
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        async function refreshGitChangedFilesAfterIgnoreSave(project) {
+            if (activeProject !== project) return;
+            const filesEl = document.getElementById('git-changed-files');
+            const subtitleEl = document.getElementById('git-modal-subtitle');
+            if (!filesEl || !subtitleEl) return;
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(project)}/git/files`);
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Could not refresh changed files.');
+                const files = data.files || [];
+                const previousSelection = window._gitCheckedFiles instanceof Set ? window._gitCheckedFiles : new Set();
+                const patterns = gitExcludeGetPatterns();
+                window._gitCheckedFiles = new Set(files
+                    .filter(file => previousSelection.has(file.path) || (!previousSelection.size && !gitExcludeMatches(file.path, patterns)))
+                    .map(file => file.path));
+                if (!files.length) {
+                    filesEl.innerHTML = '<div style="padding: 10px 14px; color: var(--text-secondary); font-size: 0.8rem; font-style: italic;">No changed files in this workspace folder.</div>';
+                    subtitleEl.innerText = 'No changes to commit';
+                    return;
+                }
+                subtitleEl.innerText = `${files.length} file${files.length !== 1 ? 's' : ''} changed`;
+                const selected = window._gitCheckedFiles;
+                filesEl.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; padding:5px 14px; border-bottom:1px solid var(--border-color); background:var(--bg-sidebar);">
+                        <input type="checkbox" id="git-files-check-all" ${selected.size === files.length ? 'checked' : ''} title="Select / deselect all"
+                            style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;" onchange="gitToggleAllFiles(this.checked)">
+                        <span style="font-size:0.72rem;color:var(--text-muted);user-select:none;"><span id="git-files-checked-count">${selected.size}</span> / ${files.length} selected</span>
+                    </div>
+                    ${files.map(file => `
+                    <div style="display:flex; align-items:center; gap:10px; padding:6px 14px; border-bottom:1px solid var(--border-color); font-family:'Fira Code',monospace; font-size:0.78rem;">
+                        <input type="checkbox" class="git-file-check" data-path="${escapeHtml(file.path)}" ${selected.has(file.path) ? 'checked' : ''}
+                            style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;" onchange="gitFileCheckChanged()">
+                        <span style="color:${escapeHtml(file.color)};font-weight:600;min-width:90px;font-size:0.7rem;text-transform:uppercase;">${escapeHtml(file.label)}</span>
+                        <span style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(file.path)}</span>
+                    </div>`).join('')}`;
+                const allCheckbox = document.getElementById('git-files-check-all');
+                if (allCheckbox && selected.size > 0 && selected.size < files.length) allCheckbox.indeterminate = true;
+            } catch (error) {
+                console.warn('Could not refresh Git changed files after saving .gitignore:', error);
             }
         }
 
