@@ -1672,6 +1672,87 @@
         .sbpop-close:hover { color: var(--text-primary); }
         .sbpop-body { padding: 12px 14px; overflow-y: auto; max-height: 280px; }
 
+        /* ── Rclone Popover ──────────────────────────────────────────────────── */
+        .rclone-field-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .rclone-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            min-width: 78px;
+            flex-shrink: 0;
+        }
+        .rclone-flag-chk {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            user-select: none;
+            transition: color 0.15s;
+        }
+        .rclone-flag-chk:hover { color: var(--text-primary); }
+        .rclone-flag-chk input[type="checkbox"] { accent-color: #fb923c; cursor: pointer; }
+        .rclone-flag-danger span { color: #f87171; }
+        .rclone-flag-danger:hover span { color: #fca5a5; }
+        .rclone-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 7px 6px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .rclone-action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .rclone-btn-check {
+            background: rgba(96,165,250,0.08);
+            border-color: rgba(96,165,250,0.4);
+            color: #60a5fa;
+        }
+        .rclone-btn-check:hover:not(:disabled) { background: rgba(96,165,250,0.18); border-color: #60a5fa; }
+        .rclone-btn-s2d {
+            background: rgba(34,197,94,0.08);
+            border-color: rgba(34,197,94,0.4);
+            color: #4ade80;
+        }
+        .rclone-btn-s2d:hover:not(:disabled) { background: rgba(34,197,94,0.18); border-color: #4ade80; }
+        .rclone-btn-d2s {
+            background: rgba(251,146,60,0.08);
+            border-color: rgba(251,146,60,0.4);
+            color: #fb923c;
+        }
+        .rclone-btn-d2s:hover:not(:disabled) { background: rgba(251,146,60,0.18); border-color: #fb923c; }
+        @keyframes rclone-spin { to { transform: rotate(360deg); } }
+        .rclone-spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(251,146,60,0.25);
+            border-top-color: #fb923c;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rclone-spin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        #rclone-output .rclone-line-error { color: #f87171; }
+        #rclone-output .rclone-line-warn  { color: #fbbf24; }
+        #rclone-output .rclone-line-ok    { color: #4ade80; }
+        #rclone-output .rclone-line-cmd   { color: #a78bfa; font-weight: 600; }
+
         /* Scheduled commands list */
         .sched-item {
             display: flex; align-items: center; gap: 8px;
@@ -2027,6 +2108,10 @@
                     <button id="ai-copilot-btn" class="sbicon-btn" onclick="toggleAICopilotPopover(event)" title="AI Copilot (Ctrl+I)" style="color: #a855f7; border-color: rgba(168, 85, 247, 0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="22" x2="15" y2="22"/></svg>
                     </button>
+                    <!-- Rclone Sync Button -->
+                    <button id="rclone-btn" class="sbicon-btn" onclick="toggleRclonePopover(event)" title="Rclone — sync workspace to/from remote" style="color: #fb923c; border-color: rgba(251, 146, 60, 0.4);">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                    </button>
                     <!-- Code Merger Button -->
                     <button id="code-merger-btn" class="sbicon-btn" onclick="toggleCodeMergerPopover(event)" title="Code Merger — prep files & apply AI responses" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
@@ -2287,6 +2372,131 @@
         <!-- Snippet list -->
         <div class="sbpop-body" id="snippets-list" style="min-height:40px; padding:8px 10px;">
             <div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:12px 0;">No snippets yet. Add one above.</div>
+        </div>
+    </div>
+
+    <!-- ═══ Rclone Sync Popover ══════════════════════════════════════════════ -->
+    <div id="rclone-popover" class="statusbar-popover" style="right:100px; width:500px; max-width:96vw;">
+        <div class="sbpop-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                <span style="color:#fb923c;">Rclone Sync</span>
+                <span id="rclone-project-label" style="font-size:0.68rem; color:var(--text-muted); font-weight:400; font-family:'Fira Code',monospace;"></span>
+            </div>
+            <button class="sbpop-close" onclick="closeRclonePopover()">✕</button>
+        </div>
+
+        <div class="sbpop-body" style="display:flex; flex-direction:column; gap:10px; padding:12px 14px;">
+
+            <!-- Source (workspace path, read-only) -->
+            <div class="rclone-field-row">
+                <label class="rclone-label">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    Source
+                </label>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                    <input id="rclone-src" type="text" readonly
+                        style="flex:1; min-width:0; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:#94a3b8; padding:5px 9px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none; cursor:default;"
+                        placeholder="(workspace path auto-filled)" title="Current workspace path (source)">
+                </div>
+            </div>
+
+            <!-- Destination -->
+            <div class="rclone-field-row">
+                <label class="rclone-label">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    Destination
+                </label>
+                <input id="rclone-dst" type="text"
+                    style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); padding:5px 9px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none; transition:border-color 0.15s;"
+                    placeholder="remote:path  or  D:\backup"
+                    onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+
+            <!-- Ignorelist -->
+            <div class="rclone-field-row">
+                <label class="rclone-label">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    Ignorelist
+                </label>
+                <div style="display:flex; gap:5px; align-items:center; flex:1;">
+                    <input id="rclone-ignorelist" type="text"
+                        style="flex:1; background:var(--bg-main); border:1px solid var(--border-color); border-radius:5px; color:var(--text-primary); padding:5px 9px; font-size:0.75rem; font-family:'Fira Code',monospace; outline:none; transition:border-color 0.15s;"
+                        placeholder="path to filter file (optional)"
+                        onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'">
+                    <button onclick="rcloneToggleIgnorelist()" title="View/edit ignorelist contents"
+                        style="padding:3px 8px; background:none; border:1px solid rgba(251,146,60,0.35); border-radius:5px; color:#fb923c; font-size:0.68rem; cursor:pointer; white-space:nowrap; transition:all 0.15s;"
+                        onmouseenter="this.style.background='rgba(251,146,60,0.1)'" onmouseleave="this.style.background='none'">
+                        View
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ignorelist contents (hidden by default) -->
+            <div id="rclone-ignorelist-panel" style="display:none; flex-direction:column; gap:5px; padding:8px; background:var(--bg-main); border:1px solid rgba(251,146,60,0.25); border-radius:6px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                    <span style="font-size:0.65rem; color:#fb923c; font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Filter file contents</span>
+                    <span style="font-size:0.62rem; color:var(--text-muted);">read-only preview</span>
+                </div>
+                <pre id="rclone-ignorelist-content"
+                    style="margin:0; padding:6px 8px; background:rgba(0,0,0,0.3); border-radius:4px; font-size:0.7rem; font-family:'Fira Code',monospace; color:#94a3b8; white-space:pre-wrap; word-break:break-all; max-height:120px; overflow-y:auto; line-height:1.5;"></pre>
+            </div>
+
+            <!-- Flags row -->
+            <div style="display:flex; flex-direction:column; gap:6px; padding:8px 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px;">
+                <span style="font-size:0.65rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Flags</span>
+                <div style="display:flex; flex-wrap:wrap; gap:6px 14px;">
+                    <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-fast-list" value="--fast-list" onchange="rcloneSaveSettings()"> <span>--fast-list</span></label>
+                    <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-progress" value="-P" onchange="rcloneSaveSettings()"> <span>-P (progress)</span></label>
+                    <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-size-only" value="--size-only" onchange="rcloneSaveSettings()"> <span>--size-only</span></label>
+                    <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-track-renames" value="--track-renames" onchange="rcloneSaveSettings()"> <span>--track-renames</span></label>
+                    <label class="rclone-flag-chk rclone-flag-danger"><input type="checkbox" id="rcflag-dry-run" value="--dry-run" onchange="rcloneSaveSettings()"> <span>--dry-run</span></label>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                    <span style="font-size:0.72rem; color:var(--text-secondary);">--transfers</span>
+                    <input id="rcflag-transfers" type="number" min="1" max="64" value="10"
+                        style="width:56px; background:var(--bg-sidebar); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); padding:3px 6px; font-size:0.72rem; font-family:'Fira Code',monospace; outline:none; transition:border-color 0.15s; text-align:center;"
+                        onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'; rcloneSaveSettings()">
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px;">
+                <button id="rclone-check-btn" class="rclone-action-btn rclone-btn-check" onclick="rcloneRun('check')" title="Check differences between source and destination">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Check diff
+                </button>
+                <button id="rclone-s2d-btn" class="rclone-action-btn rclone-btn-s2d" onclick="rcloneRun('src_to_dst')" title="Sync source → destination">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    Src → Dst
+                </button>
+                <button id="rclone-d2s-btn" class="rclone-action-btn rclone-btn-d2s" onclick="rcloneRun('dst_to_src')" title="Sync destination → source">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    Dst → Src
+                </button>
+            </div>
+
+            <!-- Running indicator + abort -->
+            <div id="rclone-running-bar" style="display:none; align-items:center; gap:8px;">
+                <span class="rclone-spinner"></span>
+                <span id="rclone-running-label" style="font-size:0.72rem; color:#fb923c;">Running…</span>
+                <button onclick="rcloneAbort()" style="margin-left:auto; padding:2px 8px; background:none; border:1px solid rgba(239,68,68,0.4); border-radius:4px; color:#ef4444; font-size:0.65rem; cursor:pointer; transition:all 0.15s;"
+                    onmouseenter="this.style.background='rgba(239,68,68,0.1)'" onmouseleave="this.style.background='none'">
+                    ✕ Abort
+                </button>
+            </div>
+
+            <!-- Output area -->
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.65rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em;">Output</span>
+                    <button onclick="rcloneClearOutput()" style="font-size:0.62rem; background:none; border:none; color:var(--text-muted); cursor:pointer; padding:0; transition:color 0.15s;"
+                        onmouseenter="this.style.color='var(--text-secondary)'" onmouseleave="this.style.color='var(--text-muted)'">Clear</button>
+                </div>
+                <pre id="rclone-output"
+                    style="margin:0; padding:8px 10px; background:rgba(0,0,0,0.4); border:1px solid var(--border-color); border-radius:6px; font-size:0.7rem; font-family:'Fira Code',monospace; color:#d1d5db; white-space:pre-wrap; word-break:break-all; min-height:80px; max-height:240px; overflow-y:auto; line-height:1.5;">(no output yet)</pre>
+            </div>
+
         </div>
     </div>
 
@@ -10779,6 +10989,253 @@
         }
 
         // ══════════════════════════════════════════════════════════════════════
+        // ── RCLONE ────────────────────────────────────────────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+
+        let _rcloneAbortController = null;
+
+        // ── Open / close ──────────────────────────────────────────────────────
+        async function toggleRclonePopover(e) {
+            if (e) e.stopPropagation();
+            const pop = document.getElementById('rclone-popover');
+            if (pop.classList.contains('show')) {
+                closeRclonePopover();
+            } else {
+                closeAllStatusPopovers();
+                pop.classList.add('show');
+                document.getElementById('rclone-btn').classList.add('active');
+                await rcloneLoadSettings();
+                _popoverOutside('rclone-popover', 'rclone-btn', closeRclonePopover);
+            }
+        }
+
+        function closeRclonePopover() {
+            document.getElementById('rclone-popover').classList.remove('show');
+            document.getElementById('rclone-btn').classList.remove('active');
+        }
+
+        // ── Load settings from backend ────────────────────────────────────────
+        async function rcloneLoadSettings() {
+            const project = activeProject;
+            if (!project) return;
+
+            // Fill source from current workspace path
+            const proj = projects ? projects.find(p => p.name === project) : null;
+            const srcEl = document.getElementById('rclone-src');
+            if (proj && proj.path) srcEl.value = proj.path;
+            else srcEl.value = '';
+
+            document.getElementById('rclone-project-label').textContent = project;
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/settings`);
+                if (!res.ok) return;
+                const s = await res.json();
+
+                document.getElementById('rclone-dst').value = s.dest || '';
+                document.getElementById('rclone-ignorelist').value = s.ignorelist || '';
+
+                const flags = s.flags || {};
+                document.getElementById('rcflag-fast-list').checked    = !!flags['--fast-list'];
+                document.getElementById('rcflag-progress').checked      = !!flags['-P'];
+                document.getElementById('rcflag-size-only').checked     = !!flags['--size-only'];
+                document.getElementById('rcflag-track-renames').checked = !!flags['--track-renames'];
+                document.getElementById('rcflag-dry-run').checked       = !!flags['--dry-run'];
+                document.getElementById('rcflag-transfers').value       = s.transfers || '10';
+            } catch (_) {}
+        }
+
+        // ── Save settings to backend (debounced) ──────────────────────────────
+        let _rcloneSaveTimer = null;
+        function rcloneSaveSettings() {
+            clearTimeout(_rcloneSaveTimer);
+            _rcloneSaveTimer = setTimeout(async () => {
+                const project = activeProject;
+                if (!project) return;
+                const payload = {
+                    dest:       document.getElementById('rclone-dst').value.trim(),
+                    ignorelist: document.getElementById('rclone-ignorelist').value.trim(),
+                    transfers:  document.getElementById('rcflag-transfers').value.trim(),
+                    flags: {
+                        '--fast-list':     document.getElementById('rcflag-fast-list').checked,
+                        '-P':              document.getElementById('rcflag-progress').checked,
+                        '--size-only':     document.getElementById('rcflag-size-only').checked,
+                        '--track-renames': document.getElementById('rcflag-track-renames').checked,
+                        '--dry-run':       document.getElementById('rcflag-dry-run').checked,
+                    }
+                };
+                try {
+                    await fetch(`/api/project/${encodeURIComponent(project)}/rclone/settings`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (_) {}
+            }, 600);
+        }
+
+        // Auto-save when dst or ignorelist changes
+        document.getElementById('rclone-dst').addEventListener('change', rcloneSaveSettings);
+        document.getElementById('rclone-ignorelist').addEventListener('change', rcloneSaveSettings);
+
+        // ── Ignorelist view toggle ────────────────────────────────────────────
+        async function rcloneToggleIgnorelist() {
+            const panel = document.getElementById('rclone-ignorelist-panel');
+            const isOpen = panel.style.display === 'flex';
+            if (isOpen) {
+                panel.style.display = 'none';
+                return;
+            }
+            panel.style.display = 'flex';
+            const path = document.getElementById('rclone-ignorelist').value.trim();
+            const contentEl = document.getElementById('rclone-ignorelist-content');
+            if (!path) {
+                contentEl.textContent = '(no ignorelist path set)';
+                return;
+            }
+            contentEl.textContent = 'Loading…';
+            try {
+                const res = await fetch(`/api/rclone/read-filter-file?path=${encodeURIComponent(path)}`);
+                if (!res.ok) throw new Error((await res.json()).error || res.statusText);
+                const data = await res.json();
+                contentEl.textContent = data.content || '(empty file)';
+            } catch (err) {
+                contentEl.textContent = `Could not read file:\n${err.message}`;
+            }
+        }
+
+        // ── Run rclone command ────────────────────────────────────────────────
+        async function rcloneRun(operation) {
+            const project = activeProject;
+            if (!project) { alert('No active workspace selected.'); return; }
+
+            const src = document.getElementById('rclone-src').value.trim();
+            const dst = document.getElementById('rclone-dst').value.trim();
+            if (!src) { alert('Source path is empty. Open a workspace first.'); return; }
+            if (!dst) { alert('Destination is empty. Enter a destination path or remote.'); document.getElementById('rclone-dst').focus(); return; }
+
+            // Warn before destructive operations (not dry-run)
+            const isDryRun = document.getElementById('rcflag-dry-run').checked;
+            if (!isDryRun && operation !== 'check') {
+                const dir = operation === 'src_to_dst' ? `${src}  →  ${dst}` : `${dst}  →  ${src}`;
+                if (!confirm(`⚠️  This will sync:\n\n${dir}\n\nAre you sure?`)) return;
+            }
+
+            // Save settings before running
+            rcloneSaveSettings();
+
+            // Build payload
+            const payload = {
+                operation,
+                src,
+                dst,
+                ignorelist: document.getElementById('rclone-ignorelist').value.trim(),
+                transfers:  document.getElementById('rcflag-transfers').value.trim(),
+                flags: {
+                    '--fast-list':     document.getElementById('rcflag-fast-list').checked,
+                    '-P':              document.getElementById('rcflag-progress').checked,
+                    '--size-only':     document.getElementById('rcflag-size-only').checked,
+                    '--track-renames': document.getElementById('rcflag-track-renames').checked,
+                    '--dry-run':       isDryRun,
+                }
+            };
+
+            // Show running state
+            const runBar  = document.getElementById('rclone-running-bar');
+            const runLabel = document.getElementById('rclone-running-label');
+            const output  = document.getElementById('rclone-output');
+            const labels  = { check: 'Checking…', src_to_dst: 'Syncing  Src → Dst…', dst_to_src: 'Syncing  Dst → Src…' };
+            runLabel.textContent = labels[operation] || 'Running…';
+            runBar.style.display = 'flex';
+            rcloneSetBtnsDisabled(true);
+            output.innerHTML = '';
+
+            _rcloneAbortController = new AbortController();
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: _rcloneAbortController.signal
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: res.statusText }));
+                    rcloneAppendLine(output, `ERROR: ${err.error || res.statusText}`, 'error');
+                    return;
+                }
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const parts = buffer.split('\n');
+                    buffer = parts.pop(); // keep incomplete last line
+                    for (const line of parts) {
+                        rcloneAppendLine(output, line);
+                    }
+                }
+                if (buffer) rcloneAppendLine(output, buffer);
+
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    rcloneAppendLine(output, `ERROR: ${err.message}`, 'error');
+                } else {
+                    rcloneAppendLine(output, '[aborted]', 'warn');
+                }
+            } finally {
+                runBar.style.display = 'none';
+                rcloneSetBtnsDisabled(false);
+                _rcloneAbortController = null;
+                // Scroll output to bottom
+                output.scrollTop = output.scrollHeight;
+            }
+        }
+
+        function rcloneAbort() {
+            if (_rcloneAbortController) _rcloneAbortController.abort();
+        }
+
+        function rcloneSetBtnsDisabled(disabled) {
+            ['rclone-check-btn', 'rclone-s2d-btn', 'rclone-d2s-btn'].forEach(id => {
+                document.getElementById(id).disabled = disabled;
+            });
+        }
+
+        function rcloneAppendLine(outputEl, text, forceClass) {
+            const span = document.createElement('span');
+            const cls = forceClass ? `rclone-line-${forceClass}` : _rcloneLineClass(text);
+            if (cls) span.className = cls;
+            span.textContent = text;
+            outputEl.appendChild(span);
+            outputEl.appendChild(document.createTextNode('\n'));
+            // Auto-scroll if near bottom
+            if (outputEl.scrollHeight - outputEl.scrollTop < outputEl.clientHeight + 60) {
+                outputEl.scrollTop = outputEl.scrollHeight;
+            }
+        }
+
+        function _rcloneLineClass(line) {
+            const l = line.toLowerCase();
+            if (l.startsWith('$')) return 'rclone-line-cmd';
+            if (l.includes('error') || l.includes('failed') || l.includes('exit code: 1')) return 'rclone-line-error';
+            if (l.includes('warn') || l.includes('skipping') || l.includes('[aborted]')) return 'rclone-line-warn';
+            if (l.includes('transferred') || l.includes('no differences') || l.includes('exit code: 0')) return 'rclone-line-ok';
+            return '';
+        }
+
+        function rcloneClearOutput() {
+            const el = document.getElementById('rclone-output');
+            el.innerHTML = '';
+            el.textContent = '(no output yet)';
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
         // ── SNIPPETS ──────────────────────────────────────────────────────────
         // Format: "command ;; description"  →  only "command" is sent to terminal
         // ══════════════════════════════════════════════════════════════════════
@@ -11576,6 +12033,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             closeMobileInputTray();
             closeAICopilotPopover();
             closeCodeMergerPopover();
+            closeRclonePopover();
         }
 
         function _popoverOutside(popId, btnId, closeFn) {

@@ -4319,6 +4319,175 @@ def api_select_ai_accounts_backup():
     except OSError as exc:
         return jsonify({"error": f"Could not read the selected backup: {exc}"}), 500
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Rclone integration
+# ─────────────────────────────────────────────────────────────────────────────
+
+DEFAULT_IGNORELIST = r"C:\@delta\ms1\scripts\rclone\rclone_status\ignorelist.txt"
+
+@app.route('/api/project/<project>/rclone/settings', methods=['GET'])
+def api_rclone_get_settings(project):
+    """Return saved rclone settings for this project (destination, flags, ignorelist)."""
+    projects = load_projects_config()
+    proj = next((p for p in projects if p.get('name') == project), None)
+    if proj is None:
+        return jsonify({'error': 'Project not found'}), 404
+    rclone = proj.get('rclone', {})
+    result = {
+        'dest': rclone.get('dest', ''),
+        'ignorelist': rclone.get('ignorelist', DEFAULT_IGNORELIST),
+        'flags': rclone.get('flags', {
+            '--fast-list': True,
+            '-P': True,
+            '--size-only': True,
+            '--track-renames': False,
+            '--dry-run': False,
+        }),
+        'transfers': rclone.get('transfers', '10'),
+    }
+    return jsonify(result)
+
+
+@app.route('/api/project/<project>/rclone/settings', methods=['POST'])
+def api_rclone_save_settings(project):
+    """Save rclone settings for this project."""
+    data = request.json or {}
+    projects = load_projects_config()
+    proj = next((p for p in projects if p.get('name') == project), None)
+    if proj is None:
+        return jsonify({'error': 'Project not found'}), 404
+    if 'rclone' not in proj:
+        proj['rclone'] = {}
+    if 'dest' in data:
+        proj['rclone']['dest'] = data['dest']
+    if 'ignorelist' in data:
+        proj['rclone']['ignorelist'] = data['ignorelist']
+    if 'flags' in data:
+        proj['rclone']['flags'] = data['flags']
+    if 'transfers' in data:
+        proj['rclone']['transfers'] = data['transfers']
+    save_projects_config(projects)
+    return jsonify({'status': 'ok'})
+
+
+@app.route('/api/project/<project>/rclone/run', methods=['POST'])
+def api_rclone_run(project):
+    """Run an rclone command and stream output line by line.
+
+    Expected JSON body:
+    {
+        "operation": "check" | "src_to_dst" | "dst_to_src",
+        "src": "C:\\path\\to\\source",
+        "dst": "remote:path",
+        "ignorelist": "C:\\path\\to\\ignorelist.txt",
+        "flags": {"--fast-list": true, "-P": true, "--size-only": true, ...},
+        "transfers": "10"
+    }
+    """
+    data = request.json or {}
+    operation = data.get('operation', 'check')
+    src = data.get('src', '')
+    dst = data.get('dst', '')
+    ignorelist = data.get('ignorelist', '')
+    flags_map = data.get('flags', {})
+    transfers = data.get('transfers', '10')
+
+    if not src or not dst:
+        return jsonify({'error': 'src and dst are required'}), 400
+
+    # Build command
+    if operation == 'check':
+        cmd = ['rclone', 'check', src, dst]
+        # check supports fewer flags — strip progress flag and track-renames
+        if flags_map.get('--fast-list'):
+            cmd.append('--fast-list')
+        if flags_map.get('--size-only'):
+            cmd.append('--size-only')
+        if flags_map.get('--dry-run'):
+            cmd.append('--dry-run')
+        cmd += ['-v']
+    elif operation == 'src_to_dst':
+        cmd = ['rclone', 'sync', src, dst]
+        _append_sync_flags(cmd, flags_map, transfers)
+    elif operation == 'dst_to_src':
+        cmd = ['rclone', 'sync', dst, src]
+        _append_sync_flags(cmd, flags_map, transfers)
+    else:
+        return jsonify({'error': f'Unknown operation: {operation}'}), 400
+
+    # Add ignorelist / filter file
+    if ignorelist and os.path.isfile(ignorelist):
+        cmd += ['--filter-from', ignorelist]
+
+    def generate():
+        try:
+            yield f"$ {' '.join(cmd)}\n"
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding='utf-8',
+                errors='replace',
+                creationflags=0x08000000,  # CREATE_NO_WINDOW
+            )
+            for line in iter(proc.stdout.readline, ''):
+                yield line
+            proc.stdout.close()
+            proc.wait()
+            rc = proc.returncode
+            yield f"\n[exit code: {rc}]\n"
+        except FileNotFoundError:
+            yield "ERROR: rclone not found. Make sure rclone is installed and on your PATH.\n"
+        except Exception as exc:
+            yield f"ERROR: {exc}\n"
+
+    return Response(
+        stream_with_context(generate()),
+        content_type='text/plain; charset=utf-8',
+        headers={'X-Accel-Buffering': 'no', 'Cache-Control': 'no-cache'},
+    )
+
+
+def _append_sync_flags(cmd, flags_map, transfers):
+    """Append rclone sync flags to the command list."""
+    if flags_map.get('--fast-list'):
+        cmd.append('--fast-list')
+    if flags_map.get('-P'):
+        cmd.append('-P')
+    if flags_map.get('--size-only'):
+        cmd.append('--size-only')
+    if flags_map.get('--track-renames'):
+        cmd.append('--track-renames')
+    if flags_map.get('--dry-run'):
+        cmd.append('--dry-run')
+    try:
+        t = int(transfers)
+        if t > 0:
+            cmd += ['--transfers', str(t)]
+    except (TypeError, ValueError):
+        pass
+
+
+@app.route('/api/rclone/read-filter-file', methods=['GET'])
+def api_rclone_read_filter_file():
+    """Read the contents of an rclone filter/ignorelist file (absolute path)."""
+    path = request.args.get('path', '').strip()
+    if not path:
+        return jsonify({'error': 'No path provided'}), 400
+    path = os.path.abspath(path)
+    if not os.path.isfile(path):
+        return jsonify({'error': f'File not found: {path}'}), 404
+    if os.path.getsize(path) > 512 * 1024:
+        return jsonify({'error': 'File too large (> 512 KB)'}), 413
+    try:
+        with open(path, 'r', encoding='utf-8', errors='replace') as f:
+            content = f.read()
+        return jsonify({'content': content})
+    except OSError as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
 @app.route('/shutdown', methods=['POST'])
 def api_shutdown():
     import signal

@@ -140,7 +140,19 @@
           "color": ""
         }
       ],
-      "category": "Tool"
+      "category": "Tool",
+      "rclone": {
+        "dest": "",
+        "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
     },
     {
       "name": "Code Merger",
