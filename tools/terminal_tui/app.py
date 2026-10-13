@@ -4370,6 +4370,112 @@ def api_rclone_save_settings(project):
     return jsonify({'status': 'ok'})
 
 
+@app.route('/api/project/<project>/rclone/scan', methods=['GET'])
+def api_rclone_scan(project):
+    """Scan workspace: return top-level folder names, unique file extensions, and .gitignore contents."""
+    projects_cfg = load_projects_config()
+    proj = next((p for p in projects_cfg if p.get('name') == project), None)
+    if proj is None:
+        return jsonify({'error': 'Project not found'}), 404
+
+    base = os.path.abspath(proj['path'])
+    if not os.path.isdir(base):
+        return jsonify({'error': 'Workspace folder does not exist'}), 404
+
+    SKIP_DIRS = {'.git', '__pycache__', 'node_modules', '.uv-envs', 'venv', '.venv', 'env',
+                 'dist', 'build', 'out', '.next', '.nuxt', 'target', 'coverage', '.cache'}
+
+    top_dirs = []
+    top_files = []
+    extensions = set()
+
+    for entry in os.scandir(base):
+        if entry.is_dir(follow_symlinks=False):
+            top_dirs.append(entry.name)
+        else:
+            top_files.append(entry.name)
+            _, ext = os.path.splitext(entry.name)
+            if ext:
+                extensions.add(ext.lower())
+
+    # Walk deeper for extensions only (skip heavy dirs)
+    for root, dirs, files in os.walk(base):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith('.')]
+        for f in files:
+            _, ext = os.path.splitext(f)
+            if ext:
+                extensions.add(ext.lower())
+
+    # Read .gitignore if present
+    gitignore_content = ''
+    gitignore_path = os.path.join(base, '.gitignore')
+    if os.path.isfile(gitignore_path):
+        try:
+            with open(gitignore_path, 'r', encoding='utf-8', errors='replace') as f:
+                gitignore_content = f.read()
+        except OSError:
+            pass
+
+    return jsonify({
+        'top_dirs': sorted(top_dirs),
+        'top_files': sorted(top_files),
+        'extensions': sorted(extensions),
+        'gitignore': gitignore_content,
+    })
+
+
+@app.route('/api/project/<project>/rclone/suggest-ignore', methods=['POST'])
+def api_rclone_suggest_ignore(project):
+    """Call Gemini to suggest rclone --exclude patterns from workspace scan."""
+    data = request.json or {}
+    api_key = data.get('api_key', '').strip()
+    model   = data.get('model', 'gemini-2.5-flash').strip()
+    top_dirs   = data.get('top_dirs', [])
+    top_files  = data.get('top_files', [])
+    extensions = data.get('extensions', [])
+    gitignore  = data.get('gitignore', '')
+
+    if not api_key:
+        return jsonify({'error': 'No Gemini API key provided'}), 400
+
+    prompt = (
+        "You are helping configure rclone sync exclude patterns for a project workspace.\n\n"
+        "The workspace has these top-level folders:\n"
+        + "\n".join(f"  {d}/" for d in top_dirs) + "\n\n"
+        "Top-level files include:\n"
+        + "\n".join(f"  {f}" for f in top_files[:40]) + "\n\n"
+        "Unique file extensions found in the project:\n"
+        + "  " + "  ".join(extensions) + "\n\n"
+        + (f"Existing .gitignore rules:\n{gitignore}\n\n" if gitignore else "")
+        + "Based on this, output ONLY a newline-separated list of rclone --exclude glob patterns "
+        "to skip generated, cache, dependency, and build files. "
+        "Use patterns like: node_modules/** or *.pyc or .git/** "
+        "Do NOT include explanations, comments, or any other text. "
+        "Output only the patterns, one per line."
+    )
+
+    try:
+        import requests
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = {"contents": [{"parts": [{"text": prompt}]}]}
+        res = requests.post(url, json=payload, timeout=30)
+        if res.status_code != 200:
+            err = res.json().get('error', {}).get('message', res.text)
+            return jsonify({'error': err}), res.status_code
+        result = res.json()
+        text = result['candidates'][0]['content']['parts'][0]['text'].strip()
+        # Clean up any accidental markdown fences
+        if text.startswith('```'):
+            text = '\n'.join(
+                l for l in text.splitlines()
+                if not l.strip().startswith('```')
+            ).strip()
+        return jsonify({'patterns': text})
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
 @app.route('/api/rclone/read-filter-file', methods=['GET'])
 def api_rclone_read_filter_file():
     """Read the contents of an rclone filter/ignorelist file (absolute path)."""

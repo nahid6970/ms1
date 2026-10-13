@@ -2377,7 +2377,13 @@
             <div>
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
                     <label style="font-size:0.78rem; font-weight:500; color:var(--text-secondary);">Ignorelist <span style="font-size:0.7rem; color:var(--text-muted); font-weight:400;">(filter file)</span></label>
-                    <button onclick="rcloneToggleIgnorelist()" style="background:none; border:1px solid rgba(251,146,60,0.35); border-radius:5px; color:#fb923c; font-size:0.68rem; padding:2px 8px; cursor:pointer; transition:all 0.15s;" onmouseenter="this.style.background='rgba(251,146,60,0.1)'" onmouseleave="this.style.background='none'">View</button>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <select id="rclone-ai-model-select" title="Gemini model for ignorelist suggestions" style="background:var(--bg-main); border:1px solid rgba(168,85,247,0.35); border-radius:5px; color:var(--text-primary); font-size:0.68rem; padding:2px 5px; outline:none; cursor:pointer; max-width:145px; height:24px;"><option value="gemini-2.5-flash">Gemini 2.5 Flash</option></select>
+                        <button id="rclone-ai-suggest-btn" onclick="rcloneSuggestIgnore()" title="AI suggest patterns from workspace scan" style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.35); border-radius:5px; color:#a855f7; font-size:0.9rem; padding:1px 7px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; height:24px; width:28px;" onmouseenter="this.style.background='rgba(168,85,247,0.22)'" onmouseleave="this.style.background='rgba(168,85,247,0.1)'">
+                            <span id="rclone-ai-suggest-icon">✨</span>
+                        </button>
+                        <button onclick="rcloneToggleIgnorelist()" style="background:none; border:1px solid rgba(251,146,60,0.35); border-radius:5px; color:#fb923c; font-size:0.68rem; padding:2px 8px; cursor:pointer; transition:all 0.15s;" onmouseenter="this.style.background='rgba(251,146,60,0.1)'" onmouseleave="this.style.background='none'">View</button>
+                    </div>
                 </div>
                 <input id="rclone-ignorelist" type="text"
                     style="width:100%; box-sizing:border-box; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:9px 12px; color:var(--text-primary); font-family:'Fira Code',monospace; font-size:0.82rem; outline:none; transition:border-color 0.2s;"
@@ -10934,6 +10940,8 @@
                 pop.classList.add('show');
                 document.getElementById('rclone-btn').classList.add('active');
                 await rcloneLoadSettings();
+                if (typeof fetchDynamicModels === 'function') await fetchDynamicModels('gemini');
+                populateRcloneAIModelDropdown();
                 _popoverOutside('rclone-popover', 'rclone-btn', closeRclonePopover);
             }
         }
@@ -11030,6 +11038,144 @@
                 contentEl.textContent = data.content || '(empty file)';
             } catch (err) {
                 contentEl.textContent = `Could not read file:\n${err.message}`;
+            }
+        }
+
+        // ── AI suggest ignorelist patterns ────────────────────────────────────
+        async function rcloneSuggestIgnore() {
+            const project = activeProject;
+            if (!project) { alert('No active workspace selected.'); return; }
+
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            if (!apiKey) {
+                alert('No Gemini API key found. Add it in AI Copilot settings.');
+                return;
+            }
+
+            const btn    = document.getElementById('rclone-ai-suggest-btn');
+            const iconEl = document.getElementById('rclone-ai-suggest-icon');
+            const modelSelect = document.getElementById('rclone-ai-model-select');
+            const readResponse = async response => {
+                const raw = await response.text();
+                let data;
+                try { data = raw ? JSON.parse(raw) : {}; }
+                catch (_) { throw new Error(`Server returned ${response.status} ${response.statusText} instead of JSON. Restart the app if the new rclone API routes are not loaded.`); }
+                if (!response.ok) throw new Error(data.error || `${response.status} ${response.statusText}`);
+                return data;
+            };
+            btn.disabled = true;
+            iconEl.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+
+            try {
+                // Step 1: scan workspace
+                const scanRes = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/scan`);
+                const scan = await readResponse(scanRes);
+
+                // Step 2: ask Gemini
+                const model = modelSelect?.value || localStorage.getItem('rclone-ai-model') || 'gemini-2.5-flash';
+                const suggestRes = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/suggest-ignore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        api_key:    apiKey,
+                        model:      model,
+                        top_dirs:   scan.top_dirs,
+                        top_files:  scan.top_files,
+                        extensions: scan.extensions,
+                        gitignore:  scan.gitignore,
+                    })
+                });
+                const result = await readResponse(suggestRes);
+
+                // Step 3: determine output path — workspace root/ignorelist.txt
+                const proj = projects ? projects.find(p => p.name === project) : null;
+                const workspacePath = proj ? proj.path.replace(/\\/g, '/') : '';
+                const suggestedPath = workspacePath ? workspacePath.replace(/\/$/, '') + '/ignorelist.txt' : '';
+
+                // Fill ignorelist path if empty
+                const ignorelistEl = document.getElementById('rclone-ignorelist');
+                if (!ignorelistEl.value.trim() && suggestedPath) {
+                    ignorelistEl.value = suggestedPath;
+                    rcloneSaveSettings();
+                }
+
+                // Show patterns in the view panel
+                const panel = document.getElementById('rclone-ignorelist-panel');
+                const contentEl = document.getElementById('rclone-ignorelist-content');
+                panel.style.display = 'flex';
+                contentEl.textContent = result.patterns;
+
+                // Add a Save button if not already there
+                if (!document.getElementById('rclone-save-patterns-btn')) {
+                    const saveBtn = document.createElement('button');
+                    saveBtn.id = 'rclone-save-patterns-btn';
+                    saveBtn.textContent = '💾 Save to ignorelist.txt';
+                    saveBtn.style.cssText = 'margin-top:6px; padding:5px 12px; background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.4); border-radius:6px; color:#fb923c; font-size:0.75rem; cursor:pointer; font-weight:600; transition:all 0.15s; align-self:flex-start;';
+                    saveBtn.onmouseenter = () => saveBtn.style.background = 'rgba(251,146,60,0.22)';
+                    saveBtn.onmouseleave = () => saveBtn.style.background = 'rgba(251,146,60,0.12)';
+                    saveBtn.onclick = () => rcloneSavePatterns(result.patterns);
+                    panel.appendChild(saveBtn);
+                } else {
+                    // Update onclick with fresh patterns
+                    document.getElementById('rclone-save-patterns-btn').onclick = () => rcloneSavePatterns(result.patterns);
+                }
+
+            } catch (err) {
+                alert('AI suggest failed: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                iconEl.textContent = '✨';
+            }
+        }
+
+        function populateRcloneAIModelDropdown() {
+            const sel = document.getElementById('rclone-ai-model-select');
+            if (!sel) return;
+            const fallback = [
+                { val: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                { val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                { val: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' }
+            ];
+            const models = (typeof DYNAMIC_AI_MODELS !== 'undefined' && DYNAMIC_AI_MODELS.gemini?.length)
+                ? DYNAMIC_AI_MODELS.gemini : fallback;
+            const hidden = (typeof getHiddenModels === 'function') ? (getHiddenModels().gemini || []) : [];
+            const visible = models.filter(m => !hidden.includes(m.val));
+            const preferred = localStorage.getItem('rclone-ai-model') || localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+            sel.innerHTML = '';
+            (visible.length ? visible : fallback).forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.val;
+                option.textContent = model.label || model.val;
+                sel.appendChild(option);
+            });
+            if ([...sel.options].some(o => o.value === preferred)) sel.value = preferred;
+            sel.onchange = () => localStorage.setItem('rclone-ai-model', sel.value);
+        }
+        async function rcloneSavePatterns(patterns) {
+            const project = activeProject;
+            if (!project) return;
+            const ignorelistPath = document.getElementById('rclone-ignorelist').value.trim();
+            if (!ignorelistPath) { alert('No ignorelist path set.'); return; }
+
+            // Use file-overwrite API — but that's relative to project. Use a dedicated save via the filter-file path.
+            // POST to /api/project/<project>/file-overwrite with absolute path stripped to rel
+            const proj = projects ? projects.find(p => p.name === project) : null;
+            if (!proj) return;
+            const base = proj.path.replace(/\\/g, '/').replace(/\/$/, '');
+            const rel = ignorelistPath.replace(/\\/g, '/').replace(base + '/', '');
+
+            try {
+                const res = await fetch(`/api/project/${encodeURIComponent(project)}/file-overwrite`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: rel, content: patterns })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Save failed');
+                const btn = document.getElementById('rclone-save-patterns-btn');
+                if (btn) { btn.textContent = '✅ Saved!'; setTimeout(() => { btn.textContent = '💾 Save to ignorelist.txt'; }, 2000); }
+            } catch (err) {
+                alert('Save failed: ' + err.message);
             }
         }
 
