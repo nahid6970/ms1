@@ -15501,8 +15501,6 @@ Always wrap your **entire response** in a single markdown code block.`;
             }
             // Sync filter modal list if open
             if (typeof renderFilterModelsList === 'function') renderFilterModelsList();
-            // Sync the model dropdown in copilot
-            if (typeof handleAIProviderChange === 'function') handleAIProviderChange();
         }
 
         function _renderTesterCard(model, status, detail, timeMs) {
@@ -15675,9 +15673,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                     if (!res.ok) {
                         failed++;
                         if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', data.error || `HTTP ${res.status}`, elapsed);
-                        // Auto-hide failed model if not already hidden
-                        if (!_isModelHidden(model.val)) {
-                            _toggleTesterModelVisibility(model.val);
+                        // Auto-ignore failed model in tester (does NOT touch the global hidden/visible list)
+                        if (!_isModelTesterIgnored(model.val)) {
+                            _toggleTesterModelIgnore(model.val);
                             autoHidden++;
                         }
                     } else {
@@ -15689,6 +15687,18 @@ Always wrap your **entire response** in a single markdown code block.`;
                         if (!speeds[provider]) speeds[provider] = {};
                         speeds[provider][model.val] = autoSpeed;
                         saveModelSpeeds(speeds);
+                        // Model passed — remove from ignore list (include in future tests) and unhide from dropdown
+                        if (_isModelTesterIgnored(model.val)) {
+                            _toggleTesterModelIgnore(model.val);
+                        }
+                        if (_isModelHidden(model.val)) {
+                            // Remove from hidden list so it reappears in the copilot dropdown
+                            const hidden = getHiddenModels();
+                            if (!hidden[provider]) hidden[provider] = [];
+                            const hidIdx = hidden[provider].indexOf(model.val);
+                            if (hidIdx >= 0) hidden[provider].splice(hidIdx, 1);
+                            saveHiddenModels(hidden);
+                        }
                         if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'success', reply, elapsed);
                     }
                 } catch (err) {
@@ -15696,9 +15706,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                     failed++;
                     const updatedCard = resultsEl.querySelector(`[data-model="${model.val}"]`);
                     if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', err.message, elapsed);
-                    // Auto-hide failed model if not already hidden
-                    if (!_isModelHidden(model.val)) {
-                        _toggleTesterModelVisibility(model.val);
+                    // Auto-ignore failed model in tester (does NOT touch the global hidden/visible list)
+                    if (!_isModelTesterIgnored(model.val)) {
+                        _toggleTesterModelIgnore(model.val);
                         autoHidden++;
                     }
                 }
@@ -15706,13 +15716,15 @@ Always wrap your **entire response** in a single markdown code block.`;
 
             const totalTested = passed + failed;
             counterEl.textContent = `${passed} ✅  ${failed} ❌  (${totalTested}/${models.length})`;
-            const hiddenNote = autoHidden > 0 ? `  ·  ${autoHidden} failed model${autoHidden > 1 ? 's' : ''} auto-hidden` : '';
+            const hiddenNote = autoHidden > 0 ? `  ·  ${autoHidden} failed model${autoHidden > 1 ? 's' : ''} auto-ignored in tester` : '';
             statusEl.textContent = (_modelTesterAbort ? 'Stopped by user' : 'Complete') + hiddenNote;
             runBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'none';
             _modelTesterRunning = false;
             // Sync speed tags in the AI copilot model dropdown
             if (typeof syncAIModelDropdown === 'function') syncAIModelDropdown();
+            // Rebuild copilot dropdown once (picks up any manual eye-toggles done during the test)
+            if (typeof handleAIProviderChange === 'function') handleAIProviderChange();
             // Refresh git modal model dropdown if open
             if (typeof populateGitAIModelDropdown === 'function') {
                 const gitModal = document.getElementById('git-modal');
