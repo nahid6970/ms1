@@ -15673,9 +15673,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                     if (!res.ok) {
                         failed++;
                         if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', data.error || `HTTP ${res.status}`, elapsed);
-                        // Auto-ignore failed model in tester (does NOT touch the global hidden/visible list)
-                        if (!_isModelTesterIgnored(model.val)) {
-                            _toggleTesterModelIgnore(model.val);
+                        // Auto-hide failed model from dropdown
+                        if (!_isModelHidden(model.val)) {
+                            _toggleTesterModelVisibility(model.val);
                             autoHidden++;
                         }
                     } else {
@@ -15706,9 +15706,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                     failed++;
                     const updatedCard = resultsEl.querySelector(`[data-model="${model.val}"]`);
                     if (updatedCard) updatedCard.outerHTML = _renderTesterCard(model, 'error', err.message, elapsed);
-                    // Auto-ignore failed model in tester (does NOT touch the global hidden/visible list)
-                    if (!_isModelTesterIgnored(model.val)) {
-                        _toggleTesterModelIgnore(model.val);
+                    // Auto-hide failed model from dropdown
+                    if (!_isModelHidden(model.val)) {
+                        _toggleTesterModelVisibility(model.val);
                         autoHidden++;
                     }
                 }
@@ -15716,7 +15716,7 @@ Always wrap your **entire response** in a single markdown code block.`;
 
             const totalTested = passed + failed;
             counterEl.textContent = `${passed} ✅  ${failed} ❌  (${totalTested}/${models.length})`;
-            const hiddenNote = autoHidden > 0 ? `  ·  ${autoHidden} failed model${autoHidden > 1 ? 's' : ''} auto-ignored in tester` : '';
+            const hiddenNote = autoHidden > 0 ? `  ·  ${autoHidden} failed model${autoHidden > 1 ? 's' : ''} auto-hidden` : '';
             statusEl.textContent = (_modelTesterAbort ? 'Stopped by user' : 'Complete') + hiddenNote;
             runBtn.style.display = 'inline-flex';
             stopBtn.style.display = 'none';
