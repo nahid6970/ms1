@@ -5,6 +5,15 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-14] - Warn When Adding an Existing Workspace Path
+
+- The add-workspace endpoint now rejects a folder path already registered to another workspace, comparing normalized resolved paths case-insensitively.
+- The existing inline add-workspace error area displays the warning and names the workspace already using that folder.
+
+**Files Modified:** `app.py`, `md/FEATURES.md`, `md/RECENT.md`
+
+---
+
 ## [2026-10-13] - Git Modal AI .gitignore Suggestion
 
 - Added an AI action beside the Git modal heading to scan all workspace file and folder paths and suggest a root `.gitignore`.

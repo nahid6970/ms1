@@ -65,6 +65,8 @@
 
 **Local path picker:** In the Add Workspace modal, focus Local Directory Path and press Tab to browse local drives and folders. Select the current folder to fill the path; if Workspace Name is empty, it is filled from the selected folder name. The picker can create a new folder in the current directory.
 
+**Duplicate path warning:** Adding a workspace whose folder path is already registered is rejected with a warning naming the existing workspace. Path comparison ignores case and separator differences and resolves equivalent filesystem paths.
+
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.
 **Sub-features:**

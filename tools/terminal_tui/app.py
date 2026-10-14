@@ -890,6 +890,16 @@ def api_projects_post():
         return jsonify({"error": f"The directory path '{path}' does not exist."}), 400
         
     projects = load_projects_config()
+
+    # A folder should only be registered as one workspace, even when the
+    # existing entry uses a different path casing or separator style.
+    normalized_path = os.path.normcase(os.path.realpath(os.path.abspath(path)))
+    duplicate = next((
+        p for p in projects
+        if p.get("path") and os.path.normcase(os.path.realpath(os.path.abspath(p["path"]))) == normalized_path
+    ), None)
+    if duplicate:
+        return jsonify({"error": f"This project path is already added as '{duplicate['name']}'."}), 400
     
     # Check duplicate name
     if any(p["name"].lower() == name.lower() for p in projects):
