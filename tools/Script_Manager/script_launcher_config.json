@@ -4760,7 +4760,7 @@
                     "keep_open": true,
                     "kill_window": false,
                     "new_terminal": true,
-                    "run_admin": false,
+                    "run_admin": true,
                     "ctrl_left_cmd": "",
                     "ctrl_right_cmd": "",
                     "use_inline": false,
@@ -4789,28 +4789,28 @@
                     "inline_blocks": [
                         {
                             "comment": "install the OpenSSH Server capability",
-                            "type": "python",
+                            "type": "powershell",
                             "code": "Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0",
                             "comment_size": 11,
                             "comment_color": "#FF5500"
                         },
                         {
                             "comment": "start the SSH service",
-                            "type": "cmd",
+                            "type": "powershell",
                             "code": "Start-Service sshd",
                             "comment_size": 11,
                             "comment_color": "#FF5500"
                         },
                         {
                             "comment": "Set the service startup to Automatic",
-                            "type": "cmd",
+                            "type": "powershell",
                             "code": "Set-Service -Name sshd -StartupType Automatic",
                             "comment_size": 11,
                             "comment_color": "#FF5500"
                         },
                         {
                             "comment": "",
-                            "type": "cmd",
+                            "type": "powershell",
                             "code": "sshd",
                             "comment_size": 14,
                             "comment_color": "#FF5500"
@@ -4818,7 +4818,8 @@
                     ],
                     "edit_on_click": false,
                     "auto_wrap": false,
-                    "hover_transparent_bg": false
+                    "hover_transparent_bg": false,
+                    "_runtime_text_align": "left"
                 },
                 {
                     "name": "Chrome Flag Fix",
@@ -6923,7 +6924,8 @@
             "_runtime_font_size": 14,
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
             "_runtime_is_bold": true,
-            "_runtime_is_italic": false
+            "_runtime_is_italic": false,
+            "_runtime_text_align": "left"
         },
         {
             "name": "Defender Disable",
