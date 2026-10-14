@@ -1,5 +1,15 @@
 # Feature Specifications
 
+## Restart and Refresh Requirements
+
+When reporting completed work, end the response with the required next action:
+
+- **Python server/backend changes** (for example, `app.py` routes or session handling): restart the Flask app; refresh the browser too if the page needs updated frontend code.
+- **Frontend-only changes** (`templates/index.html`, CSS, or browser JavaScript): refresh the browser; restarting the app is not needed.
+- **Configuration/data-only changes:** normally neither. Mention a new terminal session or other action when the feature requires it.
+
+Always state one clear outcome at the end of the response. Do not say “restart required” without naming what must be restarted.
+
 ## Code Merger
 **Status:** ✅ Complete
 **Description:** Built-in Code Merger panel accessible from the status bar. Packages project files into structured AI prompts (PREP tab) and applies AI responses back to disk (MERGE tab) using the `@@FILE / @@MODE / @@END` format. Completely self-contained inside terminal_tui — no external tools required.
@@ -66,6 +76,8 @@
 **Local path picker:** In the Add Workspace modal, focus Local Directory Path and press Tab to browse local drives and folders. Select the current folder to fill the path; if Workspace Name is empty, it is filled from the selected folder name. The picker can create a new folder in the current directory.
 
 **Duplicate path warning:** Adding a workspace whose folder path is already registered is rejected with a warning naming the existing workspace. Path comparison ignores case and separator differences and resolves equivalent filesystem paths.
+
+**Closing the last terminal tab:** Closing the last pane stops that workspace session, clears its saved tab layout, and returns to Home. Home selection is persisted so a page refresh does not reopen the previously active workspace.
 
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.

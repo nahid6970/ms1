@@ -88,6 +88,12 @@ terminal_tui/
 2. Document in `md/PROBLEMS_AND_FIXES.md` with root cause
 3. Log in `md/RECENT.md`
 
+### Restart and Refresh Guidance
+- Changes to `app.py` or other Python server code require restarting the Flask app for the running process to load them.
+- Changes to `templates/index.html` or other browser-side assets require a browser refresh, not an app restart.
+- Configuration/data changes usually need neither; if the change depends on startup-only loading, a new terminal session, or another action, state that explicitly.
+- End every AI response with a concise note naming the required action: app restart, browser refresh, new terminal session, or no restart/refresh. Be specific when both an app restart and browser refresh are needed.
+
 ### Code Patterns
 - **Modals**: `.modal-overlay` + `.modal-content` + `.show` class toggle
 - **Card selections**: Grid of clickable cards (see split-select-modal pattern)

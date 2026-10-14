@@ -44,4 +44,5 @@ A **web-based multi-workspace terminal dashboard** for Windows. Each workspace m
 ## Preferred Workflow
 1. **New features**: Add HTML (modal/UI) → Add JS functions → Add backend API route if needed.
 2. **Bug fixes**: Document in `md/PROBLEMS_AND_FIXES.md` with root cause.
-3. **Always test** by reloading the browser — no build step needed.
+3. **No build step:** Frontend changes take effect after refreshing the browser; backend Python changes generally need the Flask app restarted.
+4. **End every user-facing response with an action note** stating whether the change requires an app restart, only a browser refresh, or neither. If a new terminal session or another step is needed instead, say that clearly. Do not claim an app restart is required for frontend-only changes.

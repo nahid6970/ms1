@@ -5,6 +5,24 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ---
 
+## [2026-10-14] - Document Restart Guidance for AI Responses
+
+- Added project guidance to end completion responses with the exact next action: restart the Flask app, refresh the browser, start a new terminal session, or take no restart action.
+- Documented that Python backend changes require an app restart, while frontend-only changes require a browser refresh.
+
+**Files Modified:** `md/AI_CONTEXT.md`, `dev.md`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
+---
+
+## [2026-10-14] - Return Home After Closing the Last Terminal Pane
+
+- Closing the final terminal pane now stops the workspace session, removes its saved pane and active-tab IDs, and returns to Home.
+- Home removes the saved active-workspace selection, preventing that workspace from reopening after a page refresh.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
+---
+
 ## [2026-10-14] - Warn When Adding an Existing Workspace Path
 
 - The add-workspace endpoint now rejects a folder path already registered to another workspace, comparing normalized resolved paths case-insensitively.

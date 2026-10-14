@@ -5103,7 +5103,7 @@
         function closeTerminalPane(paneId) {
             if (terminalPanes.length <= 1) {
                 if (activeProject) {
-                    stopProjectSession(activeProject);
+                    stopProjectSession(activeProject, { returnHome: true });
                 }
                 return;
             }
@@ -6182,14 +6182,20 @@
                 wsfocusHistory = wsfocusHistory.filter(n => n !== projectName);
 
                 if (activeProject === projectName) {
-                    activeProject = null;
-                    clearTerminalPanes();
-                    document.getElementById('terminal-wrapper').style.display = 'none';
-                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                    if (options.returnHome) {
+                        localStorage.removeItem(terminalTabsStoragePrefix + projectName);
+                        localStorage.removeItem(terminalActiveTabStoragePrefix + projectName);
+                        goHome();
+                    } else {
+                        activeProject = null;
+                        clearTerminalPanes();
+                        document.getElementById('terminal-wrapper').style.display = 'none';
+                        document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                    }
 
                     // Try to focus the last previously focused running workspace
                     const fallback = [...wsfocusHistory].reverse().find(n => projects.find(p => p.name === n && p.is_active));
-                    if (fallback) {
+                    if (fallback && !options.returnHome) {
                         selectProject(fallback);
                         return;
                     }
@@ -9725,6 +9731,7 @@
         function goHome() {
             // Deselect active workspace and return to the landing/placeholder screen
             activeProject = null;
+            localStorage.removeItem('active-project');
             stopStatsMonitoring();
             clearTerminalPanes();
             closeAllStatusPopovers();
@@ -9739,6 +9746,9 @@
             if (projNameDd) projNameDd.style.display = 'none';
             // Update placeholder content (shows active sessions if any)
             updateEmptyStatePlaceholder();
+            updateWorkspaceBar();
+            applySidebarWorkspacesVisibility();
+            handleSearch();
         }
 
         function toggleExplorer(event) {

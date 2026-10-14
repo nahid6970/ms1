@@ -1,5 +1,9 @@
 # Terminal TUI - Multi-Workspace Terminal Dashboard
 
+## Applying Code Changes
+
+The Flask server serves the frontend template, so browser-side changes in `templates/index.html` take effect after a browser refresh. Python backend changes require restarting the Flask process. When a change includes both backend and frontend work, restart the app and then refresh the browser. State the required action at the end of the user-facing completion response; for session-only or data-only changes, name the needed action or say no restart is needed.
+
 A web-based terminal dashboard application that provides multiple persistent PowerShell workspace sessions with advanced git integration, customizable UI, and mobile-friendly controls.
 
 ## Architecture Overview
