@@ -86,7 +86,8 @@
           "--dry-run": false
         },
         "transfers": "10"
-      }
+      },
+      "gitRemote": "https://github.com/nahid6970/db.git"
     },
     {
       "name": "msBackups",
