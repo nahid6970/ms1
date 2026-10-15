@@ -11,6 +11,7 @@ let currentRightClickedTabId = null;
 let currentTabView = 'all';
 let currentSearchQuery = '';
 let outdatedThresholdDays = 2;
+let activeNotePopover = null;
 const customContextMenu = document.getElementById('customContextMenu');
 const deadlineModal = document.getElementById('deadlineModal');
 const editDeadlineDays = document.getElementById('editDeadlineDays');
@@ -262,7 +263,7 @@ function displayTabs(tabs) {
     if (tab.docLink) {
       docLinkHTML = `<a class="tab-doc-link" href="${tab.docLink}" target="_blank" title="${tab.docLink}" onclick="event.stopPropagation()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>`;
     }
-    const noteHTML = tab.note?.trim() ? '<span class="tab-note" title="Note" aria-label="Has note"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></span>' : '';
+    const noteHTML = tab.note?.trim() ? '<button type="button" class="tab-note" title="Show note" aria-label="Show note"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></button>' : '';
 
     // Tag HTML
     let tagHTML = '';
@@ -330,7 +331,12 @@ function displayTabs(tabs) {
     const tabInfo = tabItem.querySelector('.tab-info');
     tabInfo.title = `${headerTitle}\n${tab.url}`;
     const noteBadge = tabItem.querySelector('.tab-note');
-    if (noteBadge) noteBadge.title = tab.note;
+    if (noteBadge) {
+      noteBadge.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showNotePopover(noteBadge, tab.note, headerTitle);
+      });
+    }
     tabInfo.addEventListener('click', () => {
       chrome.tabs.create({ url: tab.url });
     });
@@ -343,6 +349,60 @@ function displayTabs(tabs) {
     
     tabList.appendChild(tabItem);
   });
+}
+
+function showNotePopover(anchor, note, title) {
+  closeNotePopover();
+
+  const popover = document.createElement('div');
+  popover.className = 'note-popover';
+  popover.setAttribute('role', 'dialog');
+  popover.setAttribute('aria-label', 'Tab note');
+
+  const heading = document.createElement('div');
+  heading.className = 'note-popover-heading';
+  heading.textContent = title || 'Saved note';
+  const closeButton = document.createElement('button');
+  closeButton.type = 'button';
+  closeButton.className = 'note-popover-close';
+  closeButton.setAttribute('aria-label', 'Close note');
+  closeButton.textContent = '×';
+  heading.appendChild(closeButton);
+
+  const body = document.createElement('div');
+  body.className = 'note-popover-body';
+  body.textContent = note;
+  popover.append(heading, body);
+  document.body.appendChild(popover);
+
+  const rect = anchor.getBoundingClientRect();
+  const popoverRect = popover.getBoundingClientRect();
+  const left = Math.max(12, Math.min(rect.right - popoverRect.width, window.innerWidth - popoverRect.width - 12));
+  const belowTop = rect.bottom + 8;
+  const top = belowTop + popoverRect.height > window.innerHeight - 12
+    ? Math.max(12, rect.top - popoverRect.height - 8)
+    : belowTop;
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+
+  const onOutsideClick = (event) => {
+    if (!popover.contains(event.target) && event.target !== anchor) closeNotePopover();
+  };
+  const onKeyDown = (event) => {
+    if (event.key === 'Escape') closeNotePopover();
+  };
+  activeNotePopover = { element: popover, onOutsideClick, onKeyDown };
+  document.addEventListener('pointerdown', onOutsideClick);
+  document.addEventListener('keydown', onKeyDown);
+  closeButton.addEventListener('click', closeNotePopover);
+}
+
+function closeNotePopover() {
+  if (!activeNotePopover) return;
+  document.removeEventListener('pointerdown', activeNotePopover.onOutsideClick);
+  document.removeEventListener('keydown', activeNotePopover.onKeyDown);
+  activeNotePopover.element.remove();
+  activeNotePopover = null;
 }
 
 function isOutdatedDeadline(tab) {

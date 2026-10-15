@@ -288,6 +288,15 @@ body {
   color: #8a6d00;
   cursor: default;
   flex-shrink: 0;
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tab-note:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 7px rgba(138, 109, 0, 0.2);
 }
 
 .tab-note svg {
@@ -300,6 +309,55 @@ body {
   min-height: 68px;
   resize: vertical;
   font: inherit;
+}
+
+.note-popover {
+  position: fixed;
+  z-index: 10000;
+  width: min(280px, calc(100vw - 24px));
+  max-height: min(320px, calc(100vh - 24px));
+  overflow: auto;
+  box-sizing: border-box;
+  border: 1px solid #f0d56b;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fff9dc, #fff2b8);
+  color: #3d3520;
+  box-shadow: 0 12px 30px rgba(54, 43, 8, 0.2), 0 2px 6px rgba(54, 43, 8, 0.1);
+  animation: note-pop-in 0.16s ease-out;
+}
+
+.note-popover-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 13px 8px;
+  color: #796000;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.note-popover-close {
+  border: 0;
+  padding: 0 2px;
+  background: transparent;
+  color: #796000;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.note-popover-body {
+  padding: 0 13px 13px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@keyframes note-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .tab-deadline.urgent {
