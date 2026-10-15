@@ -260,7 +260,7 @@ function displayTabs(tabs) {
     if (tab.docLink) {
       docLinkHTML = `<a class="tab-doc-link" href="${tab.docLink}" target="_blank" title="${tab.docLink}" onclick="event.stopPropagation()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>`;
     }
-    const noteHTML = tab.note?.trim() ? '<span class="tab-note" title="Note">Note</span>' : '';
+    const noteHTML = tab.note?.trim() ? '<span class="tab-note" title="Note" aria-label="Has note"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></span>' : '';
 
     // Tag HTML
     let tagHTML = '';

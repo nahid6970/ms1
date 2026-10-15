@@ -279,16 +279,21 @@ body {
 .tab-note {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   margin-left: 4px;
-  padding: 3px 7px;
+  width: 22px;
+  height: 22px;
   border: 1px solid #c8d2f5;
   background: #eef1ff;
   color: #4056a1;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  white-space: nowrap;
   cursor: default;
+  flex-shrink: 0;
+}
+
+.tab-note svg {
+  display: block;
+  width: 14px;
+  height: 14px;
 }
 
 .modal-textarea {
