@@ -56,6 +56,8 @@ function loadTags() {
     }
     populateTagDropdown();
     renderManageTags();
+    // Tabs may render before storage returns the saved tag colors.
+    loadTabs();
   });
 }
 
