@@ -351,6 +351,105 @@ function displayTabs(tabs) {
   });
 }
 
+function escapeMarkdownHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[character]);
+}
+
+function renderInlineMarkdown(value) {
+  const codeParts = [];
+  let html = escapeMarkdownHtml(value).replace(/`([^`]+)`/g, (_, code) => {
+    const token = `\u0000${codeParts.length}\u0000`;
+    codeParts.push(`<code>${code}</code>`);
+    return token;
+  });
+
+  html = html
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>')
+    .replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|mailto:[^\s)]+)\)/gi,
+    (_, label, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`);
+
+  return html.replace(/\u0000(\d+)\u0000/g, (_, index) => codeParts[Number(index)]);
+}
+
+function renderMarkdown(note) {
+  const lines = note.replace(/\r\n?/g, '\n').split('\n');
+  const output = [];
+  let paragraph = [];
+  let listType = null;
+  let codeLines = null;
+
+  const flushParagraph = () => {
+    if (paragraph.length) {
+      output.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+      paragraph = [];
+    }
+  };
+  const closeList = () => {
+    if (listType) {
+      output.push(`</${listType}>`);
+      listType = null;
+    }
+  };
+
+  for (const line of lines) {
+    if (line.trim().startsWith('```')) {
+      flushParagraph();
+      closeList();
+      if (codeLines) {
+        output.push(`<pre><code>${escapeMarkdownHtml(codeLines.join('\n'))}</code></pre>`);
+        codeLines = null;
+      } else {
+        codeLines = [];
+      }
+      continue;
+    }
+    if (codeLines) {
+      codeLines.push(line);
+      continue;
+    }
+    if (!line.trim()) {
+      flushParagraph();
+      closeList();
+      continue;
+    }
+
+    const heading = line.match(/^\s{0,3}(#{1,6})\s+(.+)$/);
+    const quote = line.match(/^\s{0,3}>\s?(.*)$/);
+    const list = line.match(/^\s*(?:[-*+]\s+|\d+\.\s+)(.*)$/);
+    if (heading || quote || list) flushParagraph();
+
+    if (heading) {
+      closeList();
+      const level = heading[1].length;
+      output.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
+    } else if (quote) {
+      closeList();
+      output.push(`<blockquote>${renderInlineMarkdown(quote[1])}</blockquote>`);
+    } else if (list) {
+      const type = /^\s*\d+\.\s+/.test(line) ? 'ol' : 'ul';
+      if (listType !== type) {
+        closeList();
+        output.push(`<${type}>`);
+        listType = type;
+      }
+      output.push(`<li>${renderInlineMarkdown(list[1])}</li>`);
+    } else {
+      closeList();
+      paragraph.push(line);
+    }
+  }
+
+  if (codeLines) output.push(`<pre><code>${escapeMarkdownHtml(codeLines.join('\n'))}</code></pre>`);
+  flushParagraph();
+  closeList();
+  return output.join('');
+}
+
 function showNotePopover(anchor, note, title) {
   closeNotePopover();
 
@@ -371,7 +470,7 @@ function showNotePopover(anchor, note, title) {
 
   const body = document.createElement('div');
   body.className = 'note-popover-body';
-  body.textContent = note;
+  body.innerHTML = renderMarkdown(note);
   popover.append(heading, body);
   document.body.appendChild(popover);
 

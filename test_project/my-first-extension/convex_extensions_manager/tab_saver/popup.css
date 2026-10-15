@@ -351,9 +351,49 @@ body {
   padding: 0 13px 13px;
   font-size: 13px;
   line-height: 1.5;
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.note-popover-body > :first-child { margin-top: 0; }
+.note-popover-body > :last-child { margin-bottom: 0; }
+.note-popover-body p { margin: 8px 0; }
+.note-popover-body h1,
+.note-popover-body h2,
+.note-popover-body h3,
+.note-popover-body h4,
+.note-popover-body h5,
+.note-popover-body h6 { margin: 10px 0 5px; line-height: 1.25; }
+.note-popover-body h1 { font-size: 19px; }
+.note-popover-body h2 { font-size: 17px; }
+.note-popover-body h3 { font-size: 15px; }
+.note-popover-body h4,
+.note-popover-body h5,
+.note-popover-body h6 { font-size: 14px; }
+.note-popover-body ul,
+.note-popover-body ol { margin: 7px 0; padding-left: 21px; }
+.note-popover-body li { margin: 3px 0; }
+.note-popover-body blockquote {
+  margin: 8px 0;
+  padding: 2px 0 2px 10px;
+  border-left: 3px solid #e4c44b;
+  color: #65582e;
+}
+.note-popover-body code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(123, 96, 0, 0.1);
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px;
+}
+.note-popover-body pre {
+  overflow-x: auto;
+  margin: 8px 0;
+  padding: 9px;
+  border-radius: 7px;
+  background: rgba(123, 96, 0, 0.1);
+}
+.note-popover-body pre code { padding: 0; background: transparent; }
+.note-popover-body a { color: #665000; text-decoration-thickness: 1px; }
 
 @keyframes note-pop-in {
   from { opacity: 0; transform: translateY(-4px) scale(0.98); }
