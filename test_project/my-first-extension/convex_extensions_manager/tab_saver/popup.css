@@ -276,6 +276,27 @@ body {
   transform: translateY(-1px);
 }
 
+.tab-note {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  padding: 3px 7px;
+  border: 1px solid #c8d2f5;
+  background: #eef1ff;
+  color: #4056a1;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.modal-textarea {
+  min-height: 68px;
+  resize: vertical;
+  font: inherit;
+}
+
 .tab-deadline.urgent {
   background: #ff4757;
   color: #ffffff;
