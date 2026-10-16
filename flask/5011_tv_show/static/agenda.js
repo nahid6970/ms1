@@ -64,6 +64,14 @@
         return !Number.isNaN(date.getTime()) && date.toDateString() === now.toDateString();
     }
 
+    function isYesterday(value) {
+        if (!value) return false;
+        const date = new Date(value);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return !Number.isNaN(date.getTime()) && date.toDateString() === yesterday.toDateString();
+    }
+
     function isAfterwards(value) {
         if (!value) return false;
         const date = new Date(value);
@@ -104,7 +112,7 @@
             const type = item.type.toLocaleLowerCase();
             const filterMatch = filter === 'all' || filter === type || (filter === 'movie-pending' && type === 'movie' && !item.completed) || (filter === 'scheduled' && !item.completed && !!item.next_run) || (filter === 'complete' && item.completed);
             const pendingMovieWithoutRelease = filter === 'movie-pending' && type === 'movie' && !item.release_date;
-            const timeMatch = pendingMovieWithoutRelease || timeFilters.has('all') || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
+            const timeMatch = pendingMovieWithoutRelease || timeFilters.has('all') || (timeFilters.has('yesterday') && isYesterday(item.release_date)) || (timeFilters.has('today') && isToday(item.release_date)) || (timeFilters.has('afterwards') && isAfterwards(item.release_date));
             return filterMatch && timeMatch && (!skipComplete || !item.skip_complete) && (!query || item.title.toLocaleLowerCase().includes(query));
         });
         if (!visible.length) {

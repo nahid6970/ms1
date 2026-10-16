@@ -39,6 +39,8 @@ TMDb is metadata-only; imports do not call Sonarr/Radarr. Movie imports retain f
 
 # 4. Latest Changes
 
+- `templates/agenda.html`, `static/agenda.js`: Added a persistent Yesterday date filter immediately before Today in Agenda. Yesterday, Today, and Afterwards can be selected together and match release dates using the browser's local calendar date; All Dates clears the date selection.
+
 - `templates/_settings_modal.html`, `static/style.css`: Combined the completed-card tint toggle and color picker into a single Settings row.
 - `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a Settings color picker for the completed-show card tint and restored the dark text on the all-watched episode count badge.
 - `app.py`, `templates/_settings_modal.html`, `templates/index.html`, `static/script.js`, `static/style.css`: Added a persisted Settings toggle for the completed-show card tint; enabled by default and applied immediately after saving.
