@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets, cursorSites, currentHost) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
@@ -209,6 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="settings-hint" style="flex:1;overflow-wrap:anywhere;">${target.host}: ${target.selector}</span>
           <button class="cursor-target-remove toggle-btn inactive" data-index="${index}" style="min-width:48px;padding:3px 7px;">REMOVE</button>
         </div>`).join('');
+      const siteEntries = (cursorSites || []).map((site, index) => `
+        <div style="display:flex;align-items:center;gap:6px;margin:5px 0;">
+          <span class="settings-hint" style="flex:1;overflow-wrap:anywhere;">${site}</span>
+          <button class="cursor-site-remove toggle-btn inactive" data-index="${index}" style="min-width:48px;padding:3px 7px;">REMOVE</button>
+        </div>`).join('');
       const cursorSettingsDiv = document.createElement('div');
       cursorSettingsDiv.className = 'fallback-settings hidden';
       cursorSettingsDiv.innerHTML = `
@@ -222,8 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <input id="visibleCursorColor" class="settings-input" type="color" value="${cursorColor}">
         <label class="settings-label" for="visibleCursorSize">Cursor size: <span id="visibleCursorSizeValue">${cursorSize}%</span></label>
         <input id="visibleCursorSize" class="settings-input" type="range" min="60" max="200" step="10" value="${cursorSize}">
+        <label class="settings-label">Allowed websites</label>
+        <div class="settings-hint">Cursor overlay runs only on websites listed here.</div>
+        <button class="settings-btn cursor-site-add" type="button" ${currentHost ? '' : 'disabled'} ${(cursorSites || []).includes(currentHost) ? 'disabled' : ''}>${(cursorSites || []).includes(currentHost) ? 'WEBSITE ADDED' : `ADD ${currentHost || 'CURRENT WEBSITE'}`}</button>
+        <div class="cursor-site-list">${siteEntries || '<div class="settings-hint">No websites added yet.</div>'}</div>
         <label class="settings-label">Target elements (optional)</label>
-        <button class="settings-btn cursor-target-pick" type="button">PICK ELEMENT ON PAGE</button>
+        <button class="settings-btn cursor-target-pick" type="button" ${currentHost && (cursorSites || []).includes(currentHost) ? '' : 'disabled'}>PICK ELEMENT ON PAGE</button>
+        ${currentHost && !(cursorSites || []).includes(currentHost) ? '<div class="settings-hint">Add this website above before picking a target.</div>' : ''}
         <div class="settings-hint">${targetEntries ? 'When this site has targets, the overlay is limited to them.' : 'No targets saved. The overlay works across the whole page.'}</div>
         <div class="cursor-target-list">${targetEntries}</div>
         <div class="settings-hint">These settings update the pointer overlay while this script is enabled.</div>
@@ -293,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings, cursorTargets) {
+  function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings, cursorTargets, cursorSites, currentHost) {
     const localServerInput = scriptItem.querySelector('#localServerUrl');
     const siteUrlInput = scriptItem.querySelector('#siteUrl');
     const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
@@ -384,6 +394,24 @@ document.addEventListener('DOMContentLoaded', () => {
       button.addEventListener('click', () => {
         const nextTargets = (cursorTargets || []).filter((_, index) => index !== Number(button.dataset.index));
         chrome.storage.local.set({ visibleCursorTargets: nextTargets }, loadScriptList);
+      });
+    });
+
+    const addCursorSiteButton = scriptItem.querySelector('.cursor-site-add');
+    if (addCursorSiteButton && currentHost && !(cursorSites || []).includes(currentHost)) {
+      addCursorSiteButton.addEventListener('click', () => {
+        chrome.storage.local.get(['visibleCursorSites'], (result) => {
+          const sites = Array.isArray(result.visibleCursorSites) ? result.visibleCursorSites : [];
+          if (!sites.includes(currentHost)) sites.push(currentHost);
+          chrome.storage.local.set({ visibleCursorSites: sites }, loadScriptList);
+        });
+      });
+    }
+
+    scriptItem.querySelectorAll('.cursor-site-remove').forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextSites = (cursorSites || []).filter((_, index) => index !== Number(button.dataset.index));
+        chrome.storage.local.set({ visibleCursorSites: nextSites }, loadScriptList);
       });
     });
 
@@ -535,7 +563,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets'], (result) => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      let currentHost = '';
+      try {
+        const activeUrl = new URL(tabs[0]?.url || '');
+        if (activeUrl.protocol === 'http:' || activeUrl.protocol === 'https:') currentHost = activeUrl.hostname;
+      } catch {}
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets', 'visibleCursorSites'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
@@ -545,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cursorColor = /^#[0-9a-f]{6}$/i.test(result.visibleCursorColor || '') ? result.visibleCursorColor : '#ffffff';
         const cursorSize = Number.isFinite(Number(result.visibleCursorSize)) ? Math.min(200, Math.max(60, Number(result.visibleCursorSize))) : 100;
         const cursorTargets = Array.isArray(result.visibleCursorTargets) ? result.visibleCursorTargets : [];
+        const cursorSites = Array.isArray(result.visibleCursorSites) ? result.visibleCursorSites : [];
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -552,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets, cursorSites, currentHost);
           
           // Add click handler to toggle button (only the main ON/OFF in script-actions)
           const toggleBtn = scriptItem.querySelector('.script-actions .toggle-btn');
@@ -560,13 +595,14 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleScript(scriptPath, isEnabled);
           });
 
-          attachSettingsHandlers(scriptItem, fallbackSettings, domainWhitelist, cursorTargets);
+          attachSettingsHandlers(scriptItem, fallbackSettings, domainWhitelist, cursorTargets, cursorSites, currentHost);
           
           scriptListDiv.appendChild(scriptItem);
         });
         
         // Update status
         updateStatus(enabledScripts, availableScripts.length);
+      });
       });
     } catch (error) {
       console.error('Error loading scripts:', error);

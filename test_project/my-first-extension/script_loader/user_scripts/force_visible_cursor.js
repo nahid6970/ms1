@@ -4,6 +4,7 @@
 
   const scriptPath = 'user_scripts/force_visible_cursor.js';
   let enabled = true;
+  let domainAllowed = false;
   let cursorStyle = 'arrow';
   let cursorColor = '#ffffff';
   let cursorSize = 100;
@@ -102,13 +103,21 @@
     if (changes.visibleCursorTargets) {
       cursorTargets = Array.isArray(changes.visibleCursorTargets.newValue) ? changes.visibleCursorTargets.newValue : [];
     }
+    if (changes.visibleCursorSites) {
+      const sites = Array.isArray(changes.visibleCursorSites.newValue) ? changes.visibleCursorSites.newValue : [];
+      domainAllowed = sites.includes(location.hostname);
+      if (!domainAllowed) restoreCursors();
+    }
     if (changes.enabledScripts) {
       enabled = Boolean(changes.enabledScripts.newValue?.[scriptPath]);
       if (!enabled) restoreCursors();
     }
   });
 
-  chrome.storage.local.get(['visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets'], (result) => {
+  chrome.storage.local.get(['enabledScripts', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets', 'visibleCursorSites'], (result) => {
+    enabled = Boolean(result.enabledScripts?.[scriptPath]);
+    const sites = Array.isArray(result.visibleCursorSites) ? result.visibleCursorSites : [];
+    domainAllowed = sites.includes(location.hostname);
     if (cursorOptions[result.visibleCursorStyle]) {
       cursorStyle = result.visibleCursorStyle;
     }
@@ -119,7 +128,7 @@
   });
 
   document.addEventListener('pointermove', (event) => {
-    if (!enabled) return;
+    if (!enabled || !domainAllowed) return;
     if (!isTargetActive(event)) {
       if (cursorHost) cursorHost.style.setProperty('display', 'none', 'important');
       return;
