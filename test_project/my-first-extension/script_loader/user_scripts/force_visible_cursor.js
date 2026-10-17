@@ -5,6 +5,8 @@
   const scriptPath = 'user_scripts/force_visible_cursor.js';
   let enabled = true;
   let cursorStyle = 'arrow';
+  let cursorColor = '#ffffff';
+  let cursorSize = 100;
   const changedElements = new Map();
   let cursorHost = null;
   let cursorShadow = null;
@@ -31,21 +33,28 @@
   function renderCursor() {
     if (!cursorShadow) return;
     const option = cursorOptions[cursorStyle] || cursorOptions.arrow;
-    cursorShadow.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${option.width}" height="${option.height}" viewBox="0 0 ${option.width} ${option.height}" aria-hidden="true" style="display:block;overflow:visible">${option.svg}</svg>`;
+    const scale = cursorSize / 100;
+    const width = option.width * scale;
+    const height = option.height * scale;
+    const svg = option.svg.replaceAll('white', cursorColor);
+    cursorHost.style.setProperty('width', `${width}px`, 'important');
+    cursorHost.style.setProperty('height', `${height}px`, 'important');
+    cursorShadow.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${option.width} ${option.height}" aria-hidden="true" style="display:block;overflow:visible">${svg}</svg>`;
   }
 
   function showOverlayCursor(event) {
     if (!cursorHost) {
       cursorHost = document.createElement('div');
       cursorHost.id = '__force_visible_cursor_overlay__';
-      cursorHost.style.cssText = 'position:fixed !important;inset:0 auto auto 0 !important;width:32px !important;height:40px !important;z-index:2147483647 !important;pointer-events:none !important;contain:strict !important;';
+      cursorHost.style.cssText = 'position:fixed !important;inset:0 auto auto 0 !important;width:32px !important;height:40px !important;z-index:2147483647 !important;pointer-events:none !important;contain:layout style !important;';
       cursorShadow = cursorHost.attachShadow({ mode: 'closed' });
       renderCursor();
       (document.documentElement || document).appendChild(cursorHost);
     }
 
     const option = cursorOptions[cursorStyle] || cursorOptions.arrow;
-    cursorHost.style.setProperty('transform', `translate3d(${event.clientX - option.hotspotX}px, ${event.clientY - option.hotspotY}px, 0)`, 'important');
+    const scale = cursorSize / 100;
+    cursorHost.style.setProperty('transform', `translate3d(${event.clientX - option.hotspotX * scale}px, ${event.clientY - option.hotspotY * scale}px, 0)`, 'important');
     cursorHost.style.setProperty('display', 'block', 'important');
   }
 
@@ -70,17 +79,28 @@
       cursorStyle = cursorOptions[selectedStyle] ? selectedStyle : 'arrow';
       renderCursor();
     }
+    if (changes.visibleCursorColor) {
+      const selectedColor = changes.visibleCursorColor.newValue;
+      cursorColor = /^#[0-9a-f]{6}$/i.test(selectedColor || '') ? selectedColor : '#ffffff';
+      renderCursor();
+    }
+    if (changes.visibleCursorSize) {
+      cursorSize = Math.min(200, Math.max(60, Number(changes.visibleCursorSize.newValue) || 100));
+      renderCursor();
+    }
     if (changes.enabledScripts) {
       enabled = Boolean(changes.enabledScripts.newValue?.[scriptPath]);
       if (!enabled) restoreCursors();
     }
   });
 
-  chrome.storage.local.get(['visibleCursorStyle'], (result) => {
+  chrome.storage.local.get(['visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize'], (result) => {
     if (cursorOptions[result.visibleCursorStyle]) {
       cursorStyle = result.visibleCursorStyle;
-      renderCursor();
     }
+    if (/^#[0-9a-f]{6}$/i.test(result.visibleCursorColor || '')) cursorColor = result.visibleCursorColor;
+    if (Number.isFinite(Number(result.visibleCursorSize))) cursorSize = Math.min(200, Math.max(60, Number(result.visibleCursorSize)));
+    renderCursor();
   });
 
   document.addEventListener('pointermove', (event) => {

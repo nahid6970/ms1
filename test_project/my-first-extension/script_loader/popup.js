@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
@@ -214,7 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <option value="crosshair" ${cursorStyle === 'crosshair' ? 'selected' : ''}>Crosshair</option>
           <option value="dot" ${cursorStyle === 'dot' ? 'selected' : ''}>Dot</option>
         </select>
-        <div class="settings-hint">Choose the pointer overlay used while this script is enabled.</div>
+        <label class="settings-label" for="visibleCursorColor">Cursor color</label>
+        <input id="visibleCursorColor" class="settings-input" type="color" value="${cursorColor}">
+        <label class="settings-label" for="visibleCursorSize">Cursor size: <span id="visibleCursorSizeValue">${cursorSize}%</span></label>
+        <input id="visibleCursorSize" class="settings-input" type="range" min="60" max="200" step="10" value="${cursorSize}">
+        <div class="settings-hint">These settings update the pointer overlay while this script is enabled.</div>
       `;
       scriptItem.appendChild(cursorSettingsDiv);
     }
@@ -287,6 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
     const ytHotkeyInput = scriptItem.querySelector('#ytHotkeyInput');
     const visibleCursorStyle = scriptItem.querySelector('#visibleCursorStyle');
+    const visibleCursorColor = scriptItem.querySelector('#visibleCursorColor');
+    const visibleCursorSize = scriptItem.querySelector('#visibleCursorSize');
+    const visibleCursorSizeValue = scriptItem.querySelector('#visibleCursorSizeValue');
     const modeButton = scriptItem.querySelector('.mode-btn');
     const settingsButton = scriptItem.querySelector('.settings-btn');
     const settingsPanel = scriptItem.querySelector('.fallback-settings');
@@ -335,6 +342,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (visibleCursorStyle) {
       visibleCursorStyle.addEventListener('change', () => {
         chrome.storage.local.set({ visibleCursorStyle: visibleCursorStyle.value });
+      });
+    }
+
+    if (visibleCursorColor) {
+      visibleCursorColor.addEventListener('input', () => {
+        chrome.storage.local.set({ visibleCursorColor: visibleCursorColor.value });
+      });
+    }
+
+    if (visibleCursorSize) {
+      visibleCursorSize.addEventListener('input', () => {
+        visibleCursorSizeValue.textContent = `${visibleCursorSize.value}%`;
+        chrome.storage.local.set({ visibleCursorSize: Number(visibleCursorSize.value) });
       });
     }
 
@@ -401,13 +421,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
         const ytAnalyzerHotkey = result.ytAnalyzerHotkey || 'F9';
         const elementHiderRules = result.element_hider_rules || {};
         const cursorStyle = ['arrow', 'hand', 'crosshair', 'dot'].includes(result.visibleCursorStyle) ? result.visibleCursorStyle : 'arrow';
+        const cursorColor = /^#[0-9a-f]{6}$/i.test(result.visibleCursorColor || '') ? result.visibleCursorColor : '#ffffff';
+        const cursorSize = Number.isFinite(Number(result.visibleCursorSize)) ? Math.min(200, Math.max(60, Number(result.visibleCursorSize))) : 100;
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -415,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize);
           
           // Add click handler to toggle button (only the main ON/OFF in script-actions)
           const toggleBtn = scriptItem.querySelector('.script-actions .toggle-btn');
