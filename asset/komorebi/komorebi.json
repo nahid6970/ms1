@@ -404,6 +404,11 @@
             "kind": "Exe",
             "id": "Kimi.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "netbird-ui.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -545,6 +550,11 @@
         {
             "kind": "Exe",
             "id": "Kimi.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "netbird-ui.exe",
             "matching_strategy": "Equals"
         }
     ],
