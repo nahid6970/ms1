@@ -93,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'link_text_extractor': 'Link Text Extractor - Copies the text of a link to your clipboard when holding Ctrl and clicking',
       'ai_studio_quick_delete': 'AI Studio Quick Tools - Delete, copy code blocks & bookmark turns in Google AI Studio',
       'youtube_swap_sections': 'YouTube Swap Sections - Swaps comments & video sidebar (Shortcut: Shift+F)',
-      'element_hider': 'Element Hider - Hide any page element by port; click 👁 to pick elements visually'
+      'element_hider': 'Element Hider - Hide any page element by port; click 👁 to pick elements visually',
+      'force_visible_cursor': 'Force Visible Cursor - Restore the normal cursor when a page hides it'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];
@@ -220,6 +221,16 @@ document.addEventListener('DOMContentLoaded', () => {
       
       chrome.storage.local.set({ enabledScripts }, () => {
         console.log(`Script ${scriptPath} ${newState ? 'enabled' : 'disabled'}`);
+        if (newState && scriptPath === 'user_scripts/force_visible_cursor.js') {
+          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            const tab = tabs[0];
+            if (!tab?.id || !/^https?:/.test(tab.url || '')) return;
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              files: [scriptPath]
+            }).catch((error) => console.error(`Failed to inject ${scriptPath}:`, error));
+          });
+        }
         loadScriptList(); // Refresh the UI
       });
     });
