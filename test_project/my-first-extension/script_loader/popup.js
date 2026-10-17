@@ -104,12 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
     const isYtAnalyzer = scriptPath === 'user_scripts/yt_analyzer.js';
     const isElementHider = scriptPath === 'user_scripts/element_hider.js';
+    const isVisibleCursor = scriptPath === 'user_scripts/force_visible_cursor.js';
     
     const modeLabels = {
       local: 'LOCAL',
@@ -132,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div class="script-actions">
-          ${(isFallbackScript || isWhitelistScript || isYtAnalyzer || isElementHider) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
+          ${(isFallbackScript || isWhitelistScript || isYtAnalyzer || isElementHider || isVisibleCursor) ? `<button class="settings-btn" data-script="${scriptPath}" aria-expanded="false">SET</button>` : ''}
           ${isFallbackScript ? `<button class="mode-btn ${fallbackSettings.mode}" data-script="${scriptPath}">${modeLabel}</button>` : ''}
           <button class="toggle-btn ${isEnabled ? 'active' : 'inactive'}" data-script="${scriptPath}">
             ${isEnabled ? 'ON' : 'OFF'}
@@ -202,6 +203,20 @@ document.addEventListener('DOMContentLoaded', () => {
         <div id="ehPortRules">${rulesHtml}</div>
       `;
       scriptItem.appendChild(ehSettingsDiv);
+    } else if (isVisibleCursor) {
+      const cursorSettingsDiv = document.createElement('div');
+      cursorSettingsDiv.className = 'fallback-settings hidden';
+      cursorSettingsDiv.innerHTML = `
+        <label class="settings-label" for="visibleCursorStyle">Cursor shown over the page</label>
+        <select id="visibleCursorStyle" class="settings-input">
+          <option value="arrow" ${cursorStyle === 'arrow' ? 'selected' : ''}>Arrow</option>
+          <option value="hand" ${cursorStyle === 'hand' ? 'selected' : ''}>Hand</option>
+          <option value="crosshair" ${cursorStyle === 'crosshair' ? 'selected' : ''}>Crosshair</option>
+          <option value="dot" ${cursorStyle === 'dot' ? 'selected' : ''}>Dot</option>
+        </select>
+        <div class="settings-hint">Choose the pointer overlay used while this script is enabled.</div>
+      `;
+      scriptItem.appendChild(cursorSettingsDiv);
     }
 
     return scriptItem;
@@ -271,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const siteUrlInput = scriptItem.querySelector('#siteUrl');
     const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
     const ytHotkeyInput = scriptItem.querySelector('#ytHotkeyInput');
+    const visibleCursorStyle = scriptItem.querySelector('#visibleCursorStyle');
     const modeButton = scriptItem.querySelector('.mode-btn');
     const settingsButton = scriptItem.querySelector('.settings-btn');
     const settingsPanel = scriptItem.querySelector('.fallback-settings');
@@ -313,6 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const key = e.key;
         ytHotkeyInput.value = key;
         chrome.storage.local.set({ ytAnalyzerHotkey: key });
+      });
+    }
+
+    if (visibleCursorStyle) {
+      visibleCursorStyle.addEventListener('change', () => {
+        chrome.storage.local.set({ visibleCursorStyle: visibleCursorStyle.value });
       });
     }
 
@@ -379,12 +401,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
         const ytAnalyzerHotkey = result.ytAnalyzerHotkey || 'F9';
         const elementHiderRules = result.element_hider_rules || {};
+        const cursorStyle = ['arrow', 'hand', 'crosshair', 'dot'].includes(result.visibleCursorStyle) ? result.visibleCursorStyle : 'arrow';
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -392,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle);
           
           // Add click handler to toggle button (only the main ON/OFF in script-actions)
           const toggleBtn = scriptItem.querySelector('.script-actions .toggle-btn');
