@@ -60,6 +60,7 @@ The Rust setup guide in `C:\@delta\ms1\md\rustup.md` selects **GNU**. Tauri's cu
 
 | Symptom | Likely cause | Basic strategy |
 |---|---|---|
+| `icons/icon.ico` not found | The app icon file is missing from the project. This is a project asset issue, not proof of a GNU linker problem. | Add a valid Windows `.ico` at the configured path, then retry the build. |
 | `link.exe` missing, MSVC linker errors, or Windows SDK libraries not found | The MSVC C++ build tools or Windows SDK are missing. | Install Visual Studio Build Tools with **Desktop development with C++** and the Windows SDK, then open a fresh terminal. |
 | `rustup show active-toolchain` reports `...windows-gnu` inside the Tauri project | Cargo is using the GNU toolchain. | Use a project-local MSVC toolchain override (steps below), then confirm the active toolchain again. |
 | Missing resource compiler (`rc.exe`/`windres`) or resource compilation fails | The selected toolchain cannot find a compatible Windows resource compiler. | Prefer the MSVC toolchain and Windows SDK. There is an experimental MinGW binutils workaround below, but it is not a supported general fix. |
@@ -98,6 +99,12 @@ A Tauri maintainer has documented a workaround for a default app that lacked a r
 - For the existing GNU-only installation and a Rust-first custom GUI, keep using **egui + eframe** (or try Slint/iced).
 - For Tauri, use the **project-local MSVC strategy** above. This avoids changing the global GNU default while matching Tauri's documented Windows setup.
 - Use the GNU workaround only when you have a specific reason to keep every build tool on GNU and are willing to troubleshoot unsupported cases.
+
+### Result from the RustBuildCheck demo
+
+The simple Tauri demo in `C:\Users\nahid\Desktop\RustBuildCheck` was reported to build and launch successfully with the active `x86_64-pc-windows-gnu` toolchain. Its first build stopped because `icons/icon.ico` was missing; after adding the icon, the app ran. Since Tauri renders the HTML/CSS/JavaScript frontend in WebView2, this also confirms WebView2 worked for this demo on this machine.
+
+This is useful evidence that a basic Tauri app can run in this GNU environment. It does not establish support for every Tauri plugin, native dependency, or installer workflow. Tauri's official Windows support guidance still specifies MSVC.
 
 ## Suggested learning order
 
