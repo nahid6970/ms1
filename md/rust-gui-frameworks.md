@@ -52,9 +52,52 @@ The trade-off is that egui is immediate mode: the UI is described during each fr
 - You want to use a web frontend framework or existing web UI skills.
 - You are comfortable maintaining a frontend and Rust backend together.
 
-## Note for this Windows Rust setup
+## Tauri on Windows with the GNU toolchain
 
-The Rust installation guide in `C:\@delta\ms1\md\rustup.md` selects the **GNU** toolchain. The current Tauri Windows prerequisites guide recommends the **MSVC** Rust toolchain and requires Microsoft's C++ Build Tools and Edge WebView2. If you choose Tauri on Windows, plan to install/select the MSVC toolchain and required build tools too. The GNU-only setup is a better match for trying a small eframe app first.
+The Rust setup guide in `C:\@delta\ms1\md\rustup.md` selects **GNU**. Tauri's current Windows documentation recommends **MSVC**, requires Microsoft's C++ Build Tools, and uses Edge WebView2. Tauri's Windows installer guide says it officially supports the MSVC Windows target. A GNU configuration may work for some projects, but it is outside Tauri's documented support path and can fail during linking or resource/installer generation.
+
+### Common problems
+
+| Symptom | Likely cause | Basic strategy |
+|---|---|---|
+| `link.exe` missing, MSVC linker errors, or Windows SDK libraries not found | The MSVC C++ build tools or Windows SDK are missing. | Install Visual Studio Build Tools with **Desktop development with C++** and the Windows SDK, then open a fresh terminal. |
+| `rustup show active-toolchain` reports `...windows-gnu` inside the Tauri project | Cargo is using the GNU toolchain. | Use a project-local MSVC toolchain override (steps below), then confirm the active toolchain again. |
+| Missing resource compiler (`rc.exe`/`windres`) or resource compilation fails | The selected toolchain cannot find a compatible Windows resource compiler. | Prefer the MSVC toolchain and Windows SDK. There is an experimental MinGW binutils workaround below, but it is not a supported general fix. |
+| Linker errors mention missing `.lib` files, unresolved symbols, or incompatible libraries | A dependency may provide binaries for a different toolchain or ABI. | Rebuild native dependencies for the same target/toolchain as the app, or use MSVC consistently. Avoid mixing MSVC-built and GNU-built native libraries. |
+| The app builds but does not start because WebView2 is unavailable | The Edge WebView2 runtime is missing or damaged. | Install or repair the WebView2 Evergreen Runtime. It is already present on most supported Windows 10 and Windows 11 systems. |
+| The app builds but installer bundling fails | Packaging tools or Windows-specific requirements are missing. | First verify `tauri dev`/`tauri build`; then follow Tauri's Windows installer guide. MSI creation may also require the Windows VBScript optional feature. |
+
+### Recommended strategy: keep GNU globally, use MSVC in Tauri projects
+
+You can keep GNU as your normal Rust toolchain and add MSVC alongside it. In PowerShell, inside the Tauri project's folder, run these commands yourself:
+
+```powershell
+rustup toolchain install stable-x86_64-pc-windows-msvc
+rustup override set stable-x86_64-pc-windows-msvc
+rustup show active-toolchain
+```
+
+The override applies only to that project folder and its subfolders. It leaves your global default unchanged. Also install Microsoft's C++ Build Tools with **Desktop development with C++** and a Windows SDK. WebView2 is usually already installed on Windows 10/11; install its Evergreen Runtime if it is missing.
+
+### Build Tools disk space
+
+You do not need the full Visual Studio IDE. Microsoft's current Visual Studio Build Tools requirements list **2.3–60 GB**, depending on selected features; this is the range for Build Tools overall, not a fixed size for the C++ workload by itself. For a smaller install, select only the C++ workload, the MSVC x64/x86 toolset, and one Windows SDK, and leave optional tools unchecked. The Visual Studio Installer shows the specific disk-space estimate for your selection before installation.
+
+To remove the project-local override later, run this from the same project folder:
+
+```powershell
+rustup override unset
+```
+
+### If you must experiment with GNU
+
+A Tauri maintainer has documented a workaround for a default app that lacked a resource compiler: install MSYS2's MinGW64 binutils package and add its `mingw64\bin` directory to `PATH` for the build. That can provide tools such as `windres`, but it does not make GNU an officially supported Tauri Windows target. Other link, dependency, or packaging failures may remain. Treat it as a project-specific experiment and keep a working MSVC setup available for reliable development and releases.
+
+### Which route fits this setup?
+
+- For the existing GNU-only installation and a Rust-first custom GUI, keep using **egui + eframe** (or try Slint/iced).
+- For Tauri, use the **project-local MSVC strategy** above. This avoids changing the global GNU default while matching Tauri's documented Windows setup.
+- Use the GNU workaround only when you have a specific reason to keep every build tool on GNU and are willing to troubleshoot unsupported cases.
 
 ## Suggested learning order
 
@@ -72,5 +115,8 @@ The first build of a GUI project will download its Rust dependencies, so it need
 - [iced documentation](https://docs.iced.rs/iced/) — application patterns, themes, widget styling, and custom widgets.
 - [Tauri overview](https://tauri.app/start/) — Rust backend with web frontend.
 - [Tauri frontend configuration](https://tauri.app/start/frontend/) — supported frontend approaches.
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) — platform build requirements, including Windows/MSVC.
+- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) — Windows dependencies and the recommended MSVC Rust toolchain.
+- [Tauri Windows installer guide](https://v2.tauri.app/distribute/windows-installer/) — states the supported Windows target and installer notes.
+- [Tauri GNU toolchain discussion](https://github.com/tauri-apps/tauri/issues/12716) — maintainer-described MinGW binutils workaround for a resource compiler issue.
+- [Visual Studio Build Tools system requirements](https://learn.microsoft.com/en-us/visualstudio/releases/2026/vs-system-requirements) — current overall disk-space range for Build Tools.
 
