@@ -951,7 +951,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1792208749.511553
   },
   {
     "name": "RobloxPlayerBeta",
@@ -989,5 +990,16 @@
     "hide_terminal": false,
     "script_enabled": false,
     "added_at": 1791095066.1299007
+  },
+  {
+    "name": "netbird",
+    "paths": [
+      "C:\\Program Files\\Netbird\\netbird-ui.exe"
+    ],
+    "Command": "",
+    "type": "App",
+    "added_at": 1792208754.1700678,
+    "registry_hive": "HKCU",
+    "registry_key_path": "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
   }
 ]
