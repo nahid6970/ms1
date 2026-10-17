@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize) {
+  function createScriptItem(scriptPath, isEnabled, fallbackSettings, whitelistSettings, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets) {
     const scriptInfo = generateScriptInfo(scriptPath);
     const isFallbackScript = scriptPath === fallbackScriptPath;
     const isWhitelistScript = scriptPath === 'user_scripts/open_links_in_new_tab.js';
@@ -204,13 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       scriptItem.appendChild(ehSettingsDiv);
     } else if (isVisibleCursor) {
+      const targetEntries = (cursorTargets || []).map((target, index) => `
+        <div style="display:flex;align-items:center;gap:6px;margin:5px 0;">
+          <span class="settings-hint" style="flex:1;overflow-wrap:anywhere;">${target.host}: ${target.selector}</span>
+          <button class="cursor-target-remove toggle-btn inactive" data-index="${index}" style="min-width:48px;padding:3px 7px;">REMOVE</button>
+        </div>`).join('');
       const cursorSettingsDiv = document.createElement('div');
       cursorSettingsDiv.className = 'fallback-settings hidden';
       cursorSettingsDiv.innerHTML = `
         <label class="settings-label" for="visibleCursorStyle">Cursor shown over the page</label>
         <select id="visibleCursorStyle" class="settings-input">
           <option value="arrow" ${cursorStyle === 'arrow' ? 'selected' : ''}>Arrow</option>
-          <option value="hand" ${cursorStyle === 'hand' ? 'selected' : ''}>Hand</option>
           <option value="crosshair" ${cursorStyle === 'crosshair' ? 'selected' : ''}>Crosshair</option>
           <option value="dot" ${cursorStyle === 'dot' ? 'selected' : ''}>Dot</option>
         </select>
@@ -218,6 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <input id="visibleCursorColor" class="settings-input" type="color" value="${cursorColor}">
         <label class="settings-label" for="visibleCursorSize">Cursor size: <span id="visibleCursorSizeValue">${cursorSize}%</span></label>
         <input id="visibleCursorSize" class="settings-input" type="range" min="60" max="200" step="10" value="${cursorSize}">
+        <label class="settings-label">Target elements (optional)</label>
+        <button class="settings-btn cursor-target-pick" type="button">PICK ELEMENT ON PAGE</button>
+        <div class="settings-hint">${targetEntries ? 'When this site has targets, the overlay is limited to them.' : 'No targets saved. The overlay works across the whole page.'}</div>
+        <div class="cursor-target-list">${targetEntries}</div>
         <div class="settings-hint">These settings update the pointer overlay while this script is enabled.</div>
       `;
       scriptItem.appendChild(cursorSettingsDiv);
@@ -285,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings) {
+  function attachSettingsHandlers(scriptItem, fallbackSettings, whitelistSettings, cursorTargets) {
     const localServerInput = scriptItem.querySelector('#localServerUrl');
     const siteUrlInput = scriptItem.querySelector('#siteUrl');
     const domainWhitelistInput = scriptItem.querySelector('#domainWhitelist');
@@ -358,6 +366,27 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    const pickCursorTargetButton = scriptItem.querySelector('.cursor-target-pick');
+    if (pickCursorTargetButton) {
+      pickCursorTargetButton.addEventListener('click', () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const tab = tabs[0];
+          if (!tab?.id || !/^https?:/.test(tab.url || '')) return;
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: activateCursorTargetPicker
+          }).catch((error) => console.error('Failed to start cursor target picker:', error));
+        });
+      });
+    }
+
+    scriptItem.querySelectorAll('.cursor-target-remove').forEach((button) => {
+      button.addEventListener('click', () => {
+        const nextTargets = (cursorTargets || []).filter((_, index) => index !== Number(button.dataset.index));
+        chrome.storage.local.set({ visibleCursorTargets: nextTargets }, loadScriptList);
+      });
+    });
+
     if (modeButton) {
       modeButton.addEventListener('click', () => {
         toggleFallbackMode(fallbackSettings);
@@ -408,6 +437,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function activateCursorTargetPicker() {
+    if (window.__cursorTargetPickerActive) return;
+    window.__cursorTargetPickerActive = true;
+
+    const highlight = document.createElement('div');
+    highlight.style.cssText = 'position:fixed !important;z-index:2147483647 !important;pointer-events:none !important;border:2px solid #ff3b30 !important;background:rgba(255,59,48,.12) !important;box-sizing:border-box !important;display:none !important;';
+    const banner = document.createElement('div');
+    banner.textContent = 'Click an element to save it as a cursor target · Esc to cancel';
+    banner.style.cssText = 'position:fixed !important;top:12px !important;left:50% !important;transform:translateX(-50%) !important;z-index:2147483647 !important;padding:10px 14px !important;border-radius:6px !important;background:#202124 !important;color:white !important;font:14px sans-serif !important;box-shadow:0 2px 12px #0008 !important;pointer-events:none !important;';
+    (document.documentElement || document).append(highlight, banner);
+
+    function selectorFor(element) {
+      if (element.id) return `#${CSS.escape(element.id)}`;
+      const parts = [];
+      let current = element;
+      while (current && current.nodeType === Node.ELEMENT_NODE && current !== document.documentElement) {
+        if (current.id) {
+          parts.unshift(`#${CSS.escape(current.id)}`);
+          break;
+        }
+        const tag = current.localName;
+        let index = 1;
+        for (let sibling = current.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+          if (sibling.localName === tag) index += 1;
+        }
+        parts.unshift(`${tag}:nth-of-type(${index})`);
+        current = current.parentElement;
+      }
+      return parts.join(' > ');
+    }
+
+    function elementAt(event) {
+      const element = document.elementFromPoint(event.clientX, event.clientY);
+      return element && element !== highlight && element !== banner ? element : null;
+    }
+
+    function onMove(event) {
+      const element = elementAt(event);
+      if (!element) return;
+      const rect = element.getBoundingClientRect();
+      highlight.style.setProperty('display', 'block', 'important');
+      highlight.style.setProperty('left', `${rect.left}px`, 'important');
+      highlight.style.setProperty('top', `${rect.top}px`, 'important');
+      highlight.style.setProperty('width', `${rect.width}px`, 'important');
+      highlight.style.setProperty('height', `${rect.height}px`, 'important');
+    }
+
+    function cleanup() {
+      document.removeEventListener('pointermove', onMove, true);
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+      highlight.remove();
+      banner.remove();
+      window.__cursorTargetPickerActive = false;
+    }
+
+    function onClick(event) {
+      const element = elementAt(event);
+      if (!element) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const selector = selectorFor(element);
+      chrome.storage.local.get(['visibleCursorTargets'], (result) => {
+        const targets = result.visibleCursorTargets || [];
+        const target = { host: location.hostname, selector };
+        if (!targets.some((entry) => entry.host === target.host && entry.selector === target.selector)) {
+          targets.push(target);
+          chrome.storage.local.set({ visibleCursorTargets: targets });
+        }
+        cleanup();
+      });
+    }
+
+    function onKeyDown(event) {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      cleanup();
+    }
+
+    document.addEventListener('pointermove', onMove, true);
+    document.addEventListener('click', onClick, true);
+    document.addEventListener('keydown', onKeyDown, true);
+  }
+
   async function loadScriptList() {
     try {
       statusText.textContent = 'Discovering scripts...';
@@ -421,15 +535,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
-      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize'], (result) => {
+      chrome.storage.local.get(['enabledScripts', 'fallbackSettings', 'domainWhitelist', 'ytAnalyzerHotkey', 'element_hider_rules', 'visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets'], (result) => {
         const enabledScripts = result.enabledScripts || {};
         const fallbackSettings = normalizeSettings(result.fallbackSettings);
         const domainWhitelist = result.domainWhitelist || '';
         const ytAnalyzerHotkey = result.ytAnalyzerHotkey || 'F9';
         const elementHiderRules = result.element_hider_rules || {};
-        const cursorStyle = ['arrow', 'hand', 'crosshair', 'dot'].includes(result.visibleCursorStyle) ? result.visibleCursorStyle : 'arrow';
+        const cursorStyle = ['arrow', 'crosshair', 'dot'].includes(result.visibleCursorStyle) ? result.visibleCursorStyle : 'arrow';
         const cursorColor = /^#[0-9a-f]{6}$/i.test(result.visibleCursorColor || '') ? result.visibleCursorColor : '#ffffff';
         const cursorSize = Number.isFinite(Number(result.visibleCursorSize)) ? Math.min(200, Math.max(60, Number(result.visibleCursorSize))) : 100;
+        const cursorTargets = Array.isArray(result.visibleCursorTargets) ? result.visibleCursorTargets : [];
         
         // Clear existing items
         scriptListDiv.innerHTML = '';
@@ -437,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create script items
         availableScripts.forEach(scriptPath => {
           const isEnabled = enabledScripts[scriptPath] || false;
-          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize);
+          const scriptItem = createScriptItem(scriptPath, isEnabled, fallbackSettings, domainWhitelist, ytAnalyzerHotkey, elementHiderRules, cursorStyle, cursorColor, cursorSize, cursorTargets);
           
           // Add click handler to toggle button (only the main ON/OFF in script-actions)
           const toggleBtn = scriptItem.querySelector('.script-actions .toggle-btn');
@@ -445,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleScript(scriptPath, isEnabled);
           });
 
-          attachSettingsHandlers(scriptItem, fallbackSettings, domainWhitelist);
+          attachSettingsHandlers(scriptItem, fallbackSettings, domainWhitelist, cursorTargets);
           
           scriptListDiv.appendChild(scriptItem);
         });

@@ -7,6 +7,7 @@
   let cursorStyle = 'arrow';
   let cursorColor = '#ffffff';
   let cursorSize = 100;
+  let cursorTargets = [];
   const changedElements = new Map();
   let cursorHost = null;
   let cursorShadow = null;
@@ -15,10 +16,6 @@
     arrow: {
       width: 28, height: 36, hotspotX: 0, hotspotY: 0,
       svg: '<path d="M2 1.5v27l7-7 5 11 5-2.2-5-10.8h10L2 1.5z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round"/>'
-    },
-    hand: {
-      width: 28, height: 36, hotspotX: 7, hotspotY: 2,
-      svg: '<path d="M7 17V5a2 2 0 0 1 4 0v8-9a2 2 0 0 1 4 0v9-7a2 2 0 0 1 4 0v9-5a2 2 0 0 1 4 0v11c0 7-4 12-11 12h-1c-4 0-6-2-8-5l-3-5a2 2 0 0 1 3-3l4 3z" fill="white" stroke="black" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
     },
     crosshair: {
       width: 28, height: 28, hotspotX: 14, hotspotY: 14,
@@ -72,6 +69,20 @@
     cursorShadow = null;
   }
 
+  function isTargetActive(event) {
+    const siteTargets = cursorTargets.filter((target) => target.host === location.hostname);
+    if (siteTargets.length === 0) return true;
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+    return siteTargets.some((target) => path.some((node) => {
+      if (!(node instanceof Element)) return false;
+      try {
+        return node.matches(target.selector);
+      } catch {
+        return false;
+      }
+    }));
+  }
+
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') return;
     if (changes.visibleCursorStyle) {
@@ -88,23 +99,31 @@
       cursorSize = Math.min(200, Math.max(60, Number(changes.visibleCursorSize.newValue) || 100));
       renderCursor();
     }
+    if (changes.visibleCursorTargets) {
+      cursorTargets = Array.isArray(changes.visibleCursorTargets.newValue) ? changes.visibleCursorTargets.newValue : [];
+    }
     if (changes.enabledScripts) {
       enabled = Boolean(changes.enabledScripts.newValue?.[scriptPath]);
       if (!enabled) restoreCursors();
     }
   });
 
-  chrome.storage.local.get(['visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize'], (result) => {
+  chrome.storage.local.get(['visibleCursorStyle', 'visibleCursorColor', 'visibleCursorSize', 'visibleCursorTargets'], (result) => {
     if (cursorOptions[result.visibleCursorStyle]) {
       cursorStyle = result.visibleCursorStyle;
     }
     if (/^#[0-9a-f]{6}$/i.test(result.visibleCursorColor || '')) cursorColor = result.visibleCursorColor;
     if (Number.isFinite(Number(result.visibleCursorSize))) cursorSize = Math.min(200, Math.max(60, Number(result.visibleCursorSize)));
+    cursorTargets = Array.isArray(result.visibleCursorTargets) ? result.visibleCursorTargets : [];
     renderCursor();
   });
 
   document.addEventListener('pointermove', (event) => {
     if (!enabled) return;
+    if (!isTargetActive(event)) {
+      if (cursorHost) cursorHost.style.setProperty('display', 'none', 'important');
+      return;
+    }
     showOverlayCursor(event);
 
     const target = event.target;
