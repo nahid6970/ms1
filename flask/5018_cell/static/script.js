@@ -2731,7 +2731,11 @@ function updateCell(rowIndex, colIndex, value, inputElement = null) {
 const CELL_AI_API_KEY_STORAGE_KEY = 'cell-ai-gemini-api-key';
 const CELL_AI_MODEL_STORAGE_KEY = 'cell-ai-gemini-model';
 const CELL_AI_WORKING_MODELS_STORAGE_KEY = 'cell-ai-working-models';
+const CELL_AI_MODEL_CATALOG_STORAGE_KEY = 'cell-ai-model-catalog';
 const CELL_AI_DEFAULT_MODEL = 'gemini-2.5-flash';
+let cellAiModelTestCatalog = [];
+let cellAiModelTestAbort = false;
+let cellAiModelTestRunning = false;
 
 function saveCellAiApiKey() {
     const input = document.getElementById('cellAiApiKey');
@@ -2740,6 +2744,7 @@ function saveCellAiApiKey() {
     if (!apiKey) {
         localStorage.removeItem(CELL_AI_API_KEY_STORAGE_KEY);
         localStorage.removeItem(CELL_AI_WORKING_MODELS_STORAGE_KEY);
+        localStorage.removeItem(CELL_AI_MODEL_CATALOG_STORAGE_KEY);
         populateCellAiModelSelect([]);
         showToast('Gemini API key cleared', 'info');
         return;
@@ -2747,8 +2752,9 @@ function saveCellAiApiKey() {
     localStorage.setItem(CELL_AI_API_KEY_STORAGE_KEY, apiKey);
     if (previousKey !== apiKey) {
         localStorage.removeItem(CELL_AI_WORKING_MODELS_STORAGE_KEY);
+        localStorage.removeItem(CELL_AI_MODEL_CATALOG_STORAGE_KEY);
         populateCellAiModelSelect([]);
-        setCellAiModelStatus('API key saved. Find working models to verify which models this key can use.', '');
+        setCellAiModelStatus('API key saved. Open the model tester to check the models available to this key.');
     }
     showToast('Gemini API key saved in this browser', 'success');
 }
@@ -2775,7 +2781,7 @@ function populateCellAiModelSelect(models, preferredModel = getCellAiModel()) {
     const select = document.getElementById('cellAiModelSelect');
     if (!select) return;
 
-    const options = models.length ? models : [{ id: preferredModel || CELL_AI_DEFAULT_MODEL, displayName: `${preferredModel || CELL_AI_DEFAULT_MODEL} (not tested)` }];
+    const options = models.length ? models : [{ id: '', displayName: 'Run the model tester first' }];
     select.replaceChildren();
     options.forEach(model => {
         const option = document.createElement('option');
@@ -2785,7 +2791,7 @@ function populateCellAiModelSelect(models, preferredModel = getCellAiModel()) {
     });
     const selected = options.some(model => model.id === preferredModel) ? preferredModel : options[0].id;
     select.value = selected;
-    saveCellAiModelPreference(selected);
+    if (selected) saveCellAiModelPreference(selected);
 }
 
 function setCellAiModelStatus(message, type = 'info') {
@@ -2795,14 +2801,7 @@ function setCellAiModelStatus(message, type = 'info') {
     status.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#218838' : '#666';
 }
 
-function setCellAiModelControlsDisabled(disabled) {
-    ['cellAiTestModelBtn', 'cellAiFindModelsBtn'].forEach(id => {
-        const button = document.getElementById(id);
-        if (button) button.disabled = disabled;
-    });
-}
-
-async function requestCellAiGeneration(apiKey, model, prompt, maxOutputTokens = 4) {
+async function requestCellAiGeneration(apiKey, model, prompt, maxOutputTokens = 256) {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2819,35 +2818,75 @@ async function requestCellAiGeneration(apiKey, model, prompt, maxOutputTokens = 
     return data;
 }
 
-async function testSelectedCellAiModel() {
-    const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
-    const model = document.getElementById('cellAiModelSelect')?.value || getCellAiModel();
-    if (!apiKey) {
-        setCellAiModelStatus('Save a Gemini API key first.', 'error');
-        document.getElementById('cellAiApiKey')?.focus();
-        return;
-    }
-
-    setCellAiModelControlsDisabled(true);
-    setCellAiModelStatus(`Testing ${model}…`);
-    try {
-        await requestCellAiGeneration(apiKey, model, 'Reply with OK.', 4);
-        const working = getCellAiWorkingModels();
-        if (!working.some(item => item.id === model)) working.push({ id: model, displayName: model });
-        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
-        populateCellAiModelSelect(working, model);
-        setCellAiModelStatus(`${model} is working and is available in the model list.`, 'success');
-    } catch (error) {
-        const working = getCellAiWorkingModels().filter(item => item.id !== model);
-        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
-        populateCellAiModelSelect(working, working[0]?.id || model);
-        setCellAiModelStatus(`${model} did not pass the test: ${error.message}`, 'error');
-    } finally {
-        setCellAiModelControlsDisabled(false);
-    }
+function extractCellAiResponseText(data) {
+    return (data.candidates?.[0]?.content?.parts || [])
+        .map(part => typeof part.text === 'string' ? part.text : '')
+        .join('');
 }
 
-async function findWorkingCellAiModels() {
+function renderCellAiModelTestCards(models, status = 'pending') {
+    const results = document.getElementById('cellAiModelTesterResults');
+    if (!results) return;
+    results.replaceChildren();
+    if (!models.length) {
+        const empty = document.createElement('div');
+        empty.textContent = 'No Gemini models available for this API key.';
+        empty.style.cssText = 'text-align:center;color:#777;font-size:13px;padding:24px;';
+        results.appendChild(empty);
+        return;
+    }
+
+    models.forEach(model => {
+        const card = document.createElement('div');
+        card.dataset.model = model.id;
+        card.dataset.state = status;
+        card.style.cssText = 'background:#f8f9fa;border:1px solid #d7dce1;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;';
+
+        const heading = document.createElement('div');
+        heading.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
+        const name = document.createElement('strong');
+        name.textContent = model.displayName || model.id;
+        name.style.cssText = 'font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;';
+        name.title = model.id;
+        const result = document.createElement('span');
+        result.className = 'cell-ai-model-test-state';
+        result.textContent = status === 'pending' ? '⏳ Waiting' : status;
+        result.style.cssText = 'font-size:12px;color:#666;flex-shrink:0;';
+        heading.append(name, result);
+
+        const detail = document.createElement('div');
+        detail.className = 'cell-ai-model-test-detail';
+        detail.style.cssText = 'font-size:12px;color:#666;white-space:pre-wrap;overflow-wrap:anywhere;max-height:72px;overflow:auto;';
+        card.append(heading, detail);
+        results.appendChild(card);
+    });
+}
+
+function updateCellAiModelTestCard(modelId, state, detail, elapsedMs) {
+    const cards = [...document.querySelectorAll('#cellAiModelTesterResults [data-model]')];
+    const card = cards.find(item => item.dataset.model === modelId);
+    if (!card) return;
+    const stateEl = card.querySelector('.cell-ai-model-test-state');
+    const detailEl = card.querySelector('.cell-ai-model-test-detail');
+    const styles = {
+        pending: ['⏳ Waiting', '#666', '#d7dce1', '#f8f9fa'],
+        running: ['⏳ Testing…', '#007bff', '#007bff', '#eff6ff'],
+        success: [`✅ Working${elapsedMs == null ? '' : ` · ${(elapsedMs / 1000).toFixed(2)}s`}`, '#218838', '#28a745', '#f0fff4'],
+        error: [`❌ Failed${elapsedMs == null ? '' : ` · ${(elapsedMs / 1000).toFixed(2)}s`}`, '#dc3545', '#dc3545', '#fff5f5']
+    };
+    const [label, color, border, background] = styles[state] || styles.pending;
+    card.dataset.state = state;
+    card.style.borderColor = border;
+    card.style.background = background;
+    if (stateEl) {
+        stateEl.textContent = label;
+        stateEl.style.color = color;
+    }
+    if (detailEl) detailEl.textContent = detail || '';
+}
+
+async function openCellAiModelTester() {
+    if (cellAiModelTestRunning) return;
     const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
     if (!apiKey) {
         setCellAiModelStatus('Save a Gemini API key first.', 'error');
@@ -2855,52 +2894,114 @@ async function findWorkingCellAiModels() {
         return;
     }
 
-    setCellAiModelControlsDisabled(true);
-    setCellAiModelStatus('Loading Gemini models available to this key…');
+    const modal = document.getElementById('cellAiModelTesterModal');
+    const prompt = document.getElementById('cellAiModelTesterPrompt');
+    if (prompt && !prompt.value.trim()) prompt.value = 'Reply with exactly: TEST_OK';
+    modal.style.display = 'block';
+    document.getElementById('cellAiModelTesterRun').disabled = true;
+    document.getElementById('cellAiModelTesterStop').style.display = 'none';
+    document.getElementById('cellAiModelTesterProgress').textContent = 'Loading models…';
+    document.getElementById('cellAiModelTesterProgress').style.color = '#666';
+    document.getElementById('cellAiModelTesterCounter').textContent = '';
+    cellAiModelTestCatalog = [];
+    const results = document.getElementById('cellAiModelTesterResults');
+    results.innerHTML = '<div style="text-align:center;color:#777;font-size:13px;padding:24px;">Loading available Gemini models…</div>';
+
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(apiKey)}`);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error?.message || `Could not list models (HTTP ${response.status})`);
 
-        const candidates = (data.models || [])
+        cellAiModelTestCatalog = (data.models || [])
             .filter(model => model.name?.startsWith('models/gemini-') && model.supportedGenerationMethods?.includes('generateContent'))
             .map(model => ({ id: model.name.replace(/^models\//, ''), displayName: model.displayName || model.name.replace(/^models\//, '') }));
-        if (!candidates.length) throw new Error('This key has no Gemini models supporting text generation.');
-
-        const working = [];
-        let completed = 0;
-        let nextIndex = 0;
-        const worker = async () => {
-            while (nextIndex < candidates.length) {
-                const model = candidates[nextIndex++];
-                try {
-                    await requestCellAiGeneration(apiKey, model.id, 'Reply with OK.', 4);
-                    working.push(model);
-                } catch (error) {
-                    console.info(`Gemini model ${model.id} did not pass the availability check:`, error.message);
-                }
-                completed++;
-                setCellAiModelStatus(`Testing Gemini models: ${completed}/${candidates.length}…`);
-            }
-        };
-        await Promise.all(Array.from({ length: Math.min(3, candidates.length) }, worker));
-
-        working.sort((a, b) => a.id.localeCompare(b.id));
-        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
-        const preferred = working.some(model => model.id === getCellAiModel()) ? getCellAiModel() : working[0]?.id;
-        populateCellAiModelSelect(working, preferred);
-
-        if (working.length) {
-            setCellAiModelStatus(`Found ${working.length} working model${working.length === 1 ? '' : 's'}. The list now shows only models that passed the test.`, 'success');
-        } else {
-            populateCellAiModelSelect([]);
-            setCellAiModelStatus('No models passed the test. Check the API key, model access, or quota and try again.', 'error');
-        }
+        localStorage.setItem(CELL_AI_MODEL_CATALOG_STORAGE_KEY, JSON.stringify(cellAiModelTestCatalog));
+        renderCellAiModelTestCards(cellAiModelTestCatalog);
+        document.getElementById('cellAiModelTesterCounter').textContent = `${cellAiModelTestCatalog.length} models`;
+        document.getElementById('cellAiModelTesterProgress').textContent = cellAiModelTestCatalog.length
+            ? 'Model list loaded. Enter a prompt and choose Run Test.'
+            : 'No text-generation models were listed for this key.';
+        document.getElementById('cellAiModelTesterRun').disabled = !cellAiModelTestCatalog.length;
     } catch (error) {
-        setCellAiModelStatus(error.message || 'Could not find working models.', 'error');
-    } finally {
-        setCellAiModelControlsDisabled(false);
+        document.getElementById('cellAiModelTesterProgress').textContent = error.message || 'Could not load models.';
+        document.getElementById('cellAiModelTesterProgress').style.color = '#dc3545';
+        renderCellAiModelTestCards([]);
     }
+}
+
+function closeCellAiModelTester() {
+    cellAiModelTestAbort = true;
+    const modal = document.getElementById('cellAiModelTesterModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function stopCellAiModelBatchTest() {
+    cellAiModelTestAbort = true;
+    const progress = document.getElementById('cellAiModelTesterProgress');
+    if (progress) progress.textContent = 'Stopping after the current model…';
+}
+
+async function runCellAiModelBatchTest() {
+    const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
+    if (!apiKey) {
+        document.getElementById('cellAiModelTesterProgress').textContent = 'Save a Gemini API key in Settings first.';
+        return;
+    }
+    if (cellAiModelTestRunning) return;
+
+    const prompt = document.getElementById('cellAiModelTesterPrompt').value.trim();
+    if (!prompt) {
+        document.getElementById('cellAiModelTesterProgress').textContent = 'Enter a test prompt first.';
+        return;
+    }
+
+    const candidates = cellAiModelTestCatalog;
+    if (!candidates.length) return;
+    cellAiModelTestAbort = false;
+    cellAiModelTestRunning = true;
+    document.getElementById('cellAiModelTesterRun').style.display = 'none';
+    document.getElementById('cellAiModelTesterStop').style.display = 'inline-flex';
+    renderCellAiModelTestCards(candidates, 'pending');
+
+    const working = [];
+    let passed = 0;
+    let failed = 0;
+    for (let index = 0; index < candidates.length; index++) {
+        if (cellAiModelTestAbort) break;
+        const model = candidates[index];
+        document.getElementById('cellAiModelTesterProgress').textContent = `Testing ${index + 1} of ${candidates.length}: ${model.displayName}…`;
+        document.getElementById('cellAiModelTesterCounter').textContent = `${passed} ✅  ${failed} ❌  (${index}/${candidates.length})`;
+        updateCellAiModelTestCard(model.id, 'running', 'Sending test prompt…');
+
+        const startedAt = performance.now();
+        try {
+            const data = await requestCellAiGeneration(apiKey, model.id, prompt, 256);
+            const reply = extractCellAiResponseText(data) || '(empty response)';
+            const elapsed = performance.now() - startedAt;
+            working.push(model);
+            passed++;
+            updateCellAiModelTestCard(model.id, 'success', reply, elapsed);
+        } catch (error) {
+            const elapsed = performance.now() - startedAt;
+            failed++;
+            updateCellAiModelTestCard(model.id, 'error', error.message || 'Model request failed.', elapsed);
+        }
+    }
+
+    localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
+    const preferred = working.some(model => model.id === getCellAiModel()) ? getCellAiModel() : working[0]?.id;
+    populateCellAiModelSelect(working, preferred);
+    const tested = passed + failed;
+    document.getElementById('cellAiModelTesterCounter').textContent = `${passed} ✅  ${failed} ❌  (${tested}/${candidates.length})`;
+    document.getElementById('cellAiModelTesterProgress').textContent = cellAiModelTestAbort
+        ? `Stopped. ${passed} working model${passed === 1 ? '' : 's'} added to the picker.`
+        : `Complete. ${passed} working model${passed === 1 ? '' : 's'} added to the picker.`;
+    document.getElementById('cellAiModelTesterProgress').style.color = passed ? '#218838' : '#dc3545';
+    document.getElementById('cellAiModelTesterRun').style.display = 'inline-flex';
+    document.getElementById('cellAiModelTesterRun').disabled = !candidates.length;
+    document.getElementById('cellAiModelTesterStop').style.display = 'none';
+    cellAiModelTestRunning = false;
+    setCellAiModelStatus(`${passed} working model${passed === 1 ? '' : 's'} saved to the picker after testing ${tested} of ${candidates.length}.`, passed ? 'success' : 'error');
 }
 
 function appendCellAiInstructionButton(td, rowIndex, colIndex) {
@@ -2944,12 +3045,18 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
 
     const cellContent = firstLineEnd < 0 ? '' : originalValue.slice(firstLineEnd + 1);
     const instruction = instructionMatch[1];
+    const model = document.getElementById('cellAiModelSelect')?.value || '';
+    if (!model) {
+        openSettings();
+        showToast('Run the Gemini model tester and select a working model first', 'warning');
+        return;
+    }
     button.disabled = true;
     button.dataset.previousText = button.textContent;
     button.textContent = '…';
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(getCellAiModel())}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
