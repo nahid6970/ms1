@@ -3064,15 +3064,79 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
         }
         runCellAiInstruction(rowIndex, colIndex, button, instruction, editor);
     };
+    const micButton = document.createElement('button');
+    micButton.type = 'button';
+    micButton.className = 'cell-ai-instruction-mic';
+    micButton.textContent = '🎙️';
+    micButton.title = `Speak instruction (${voiceLang === 'bn-BD' ? 'Bengali' : 'English'})`;
+    micButton.setAttribute('aria-label', 'Speak instruction');
+    micButton.onclick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        startCellAiVoiceInput(instructionInput, micButton);
+    };
     const cancelButton = document.createElement('button');
     cancelButton.type = 'button';
     cancelButton.className = 'cell-ai-instruction-cancel';
     cancelButton.textContent = 'Cancel';
     cancelButton.onclick = () => editor.remove();
-    actions.append(updateButton, cancelButton);
+    actions.append(micButton, updateButton, cancelButton);
     editor.append(instructionInput, actions);
     td.appendChild(editor);
     instructionInput.focus();
+}
+
+function startCellAiVoiceInput(textarea, micButton) {
+    const SpeechRecognitionApi = window.webkitSpeechRecognition || window.SpeechRecognition;
+    if (!SpeechRecognitionApi) {
+        showToast('Voice input is not supported in this browser', 'error');
+        return;
+    }
+    if (micButton.dataset.listening === 'true') {
+        micButton._cellAiRecognition?.stop();
+        return;
+    }
+
+    const recognition = new SpeechRecognitionApi();
+    const initialText = textarea.value.trim();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = typeof voiceLang === 'string' ? voiceLang : 'en-US';
+    micButton._cellAiRecognition = recognition;
+
+    recognition.onstart = () => {
+        micButton.dataset.listening = 'true';
+        micButton.classList.add('listening');
+        micButton.title = 'Listening… click to stop';
+    };
+    recognition.onresult = event => {
+        const finalParts = [];
+        let interim = '';
+        for (let index = 0; index < event.results.length; index++) {
+            const transcript = event.results[index][0]?.transcript || '';
+            if (event.results[index].isFinal) finalParts.push(transcript);
+            else interim += transcript;
+        }
+        textarea.value = [initialText, finalParts.join(' '), interim].filter(Boolean).join(' ');
+    };
+    recognition.onerror = event => {
+        if (event.error === 'not-allowed') showToast('Microphone access denied', 'error');
+        else if (event.error !== 'no-speech' && event.error !== 'aborted') showToast(`Voice error: ${event.error}`, 'error');
+    };
+    recognition.onend = () => {
+        delete micButton.dataset.listening;
+        micButton.classList.remove('listening');
+        micButton.title = `Speak instruction (${voiceLang === 'bn-BD' ? 'Bengali' : 'English'})`;
+        delete micButton._cellAiRecognition;
+        textarea.focus();
+    };
+
+    try {
+        recognition.start();
+    } catch (error) {
+        delete micButton._cellAiRecognition;
+        showToast(error.message || 'Could not start voice input', 'error');
+    }
 }
 
 async function runCellAiInstruction(rowIndex, colIndex, button, instruction, editor) {

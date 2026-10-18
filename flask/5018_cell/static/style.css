@@ -1562,6 +1562,21 @@ td:hover > .cell-ai-instruction-btn,
     cursor: pointer;
 }
 
+.cell-ai-instruction-actions .cell-ai-instruction-mic {
+    min-width: 32px;
+    padding: 4px 7px;
+    border: 0;
+    background: #adb5bd;
+    color: #fff;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.cell-ai-instruction-actions .cell-ai-instruction-mic.listening {
+    background: #dc3545;
+    animation: pulse 1.5s infinite;
+}
+
 .cell-ai-instruction-actions .cell-ai-instruction-update {
     border-color: #8b36c9;
     background: #8b36c9;
