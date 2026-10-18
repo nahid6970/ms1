@@ -4993,6 +4993,30 @@ mark {
     padding: 10px 0;
 }
 
+/* Keep the tree view scrollbar subtle against the dark sidebar. */
+#sidebar .sidebar-tree {
+    scrollbar-width: thin;
+    scrollbar-color: #596579 #10131a;
+}
+
+#sidebar .sidebar-tree::-webkit-scrollbar {
+    width: 8px;
+}
+
+#sidebar .sidebar-tree::-webkit-scrollbar-track {
+    background: #10131a;
+}
+
+#sidebar .sidebar-tree::-webkit-scrollbar-thumb {
+    border: 2px solid #10131a;
+    border-radius: 8px;
+    background: #596579;
+}
+
+#sidebar .sidebar-tree::-webkit-scrollbar-thumb:hover {
+    background: #7d8ba2;
+}
+
 /* Tree Items - Cyberpunk Theme */
 .tree-item {
     display: flex;
