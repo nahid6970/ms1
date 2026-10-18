@@ -2908,7 +2908,7 @@
         "main": "#00FF00"
     },
     "git_indicator_style": "underline",
-    "git_right_click": "menu",
+    "git_right_click": "lazygit",
     "komorebi_item_indent": 50,
     "audio_rec_source": "System Audio (Loopback)",
     "audio_rec_device": "audio=Microphone (High Definition Audio Device)",

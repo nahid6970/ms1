@@ -5513,6 +5513,8 @@ class StatusBar(QMainWindow):
                 for _lbl in getattr(self, "_git_labels", {}).values():
                     if hasattr(_lbl, "set_indicator_style"):
                         _lbl.set_indicator_style(cfg.get("git_indicator_style", "dot"))
+                if hasattr(self, "_update_git_mode_button"):
+                    self._update_git_mode_button(cfg.get("git_right_click", "menu"))
                 
                 if rclone_enabled_chk.isChecked():
                     self._rclone_toggle.show()
@@ -5605,7 +5607,27 @@ class StatusBar(QMainWindow):
 
         git_frame = QFrame(); git_frame.setStyleSheet(f"QFrame {{ border: 1px solid #888888; border-radius: 0px; background: transparent; }} QLabel {{ border: none; }}")
         git_row = QHBoxLayout(git_frame); git_row.setContentsMargins(4, 0, 4, 0); git_row.setSpacing(2); ll.addWidget(git_frame)
-        bkup = QLabel("\udb80\udea2"); bkup.setStyleSheet(f"color: {CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;"); git_row.addWidget(bkup)
+        bkup = QLabel("\udb80\udea2")
+        bkup.setCursor(Qt.CursorShape.PointingHandCursor)
+        git_row.addWidget(bkup)
+        self._git_mode_btn = bkup
+        def update_git_mode_button(mode=None):
+            mode = mode or str(load_config().get("git_right_click", "menu")).lower()
+            is_menu = mode != "lazygit"
+            bkup.setStyleSheet(f"color: {'#00ff21' if is_menu else CP_CYAN}; font-family: 'JetBrainsMono NFP'; font-size: 18pt; font-weight: bold;")
+            bkup.setToolTip(f"Git right-click: {'Context Menu' if is_menu else 'Lazygit'}\nClick to switch mode")
+        self._update_git_mode_button = update_git_mode_button
+        def toggle_git_mode(event):
+            if event.button() != Qt.MouseButton.LeftButton:
+                return
+            cfg = load_config()
+            mode = "menu" if str(cfg.get("git_right_click", "menu")).lower() == "lazygit" else "lazygit"
+            cfg["git_right_click"] = mode
+            save_config(cfg)
+            self._config = cfg
+            update_git_mode_button(mode)
+        bkup.mousePressEvent = toggle_git_mode
+        update_git_mode_button()
         for idx, repo in enumerate(repos):
             lbl = GitIconLabel(repo["label"], repo); apply_git_style(lbl, repo); lbl.setContentsMargins(2, 0, 2, 0); _install_tip_filter(lbl); p = repo["path"]
             def _make_click(path, _cfg, _idx, lbl):

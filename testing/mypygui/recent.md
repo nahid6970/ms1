@@ -54,6 +54,7 @@ All in `mypygui_qt.py`:
 - Right-click power menu `_show_git_menu`: Commit&Push, Pull, Push, Stash, Pop, Discard, Force Push (overwrite remote), Force Pull (overwrite local), Force Checkout (lazygit-F style, discards edits keeps commits), Delete Lock Files, Status&Diff, lazygit, GitHub, Switch Branch, Set/Reset Branch Dot Color.
 - Branch indicator `GitIconLabel`: dot (bottom-right) or underline (Settings → BRANCH INDICATOR), colored via `branch_color` (config override → fixed palette → hash).
 - **NEW Git right-click mode** (Settings → GIT STATUS COLORS → RIGHT CLICK): `Context Menu` (code default) or `Lazygit`. Config key `git_right_click`; when `lazygit`, right-clicking a repo label opens lazygit directly instead of the power menu (Ctrl+Right-click still = git restore).
+- Git icon in the status bar is now a mode toggle: click it to switch repo right-click behavior between `Context Menu` and `Lazygit`. Green indicates Context Menu; cyan indicates Lazygit. Tooltip shows the active mode. The Settings dropdown remains synchronized with the icon.
 - **FIX: Komorebi tasklist font & Bangla text layout alignment**:
   - `_menu_rich_action()`: set `lbl.setFixedHeight(22)` and `Qt.AlignmentFlag.AlignVCenter` to guarantee uniform 22px row height and centered baseline regardless of script fallbacks.
   - Set font family stack to `'JetBrainsMono NFP', 'Consolas', 'Segoe UI', 'Kalpurush', 'Vrinda', sans-serif` across `_menu_rich_action` and `_tip_label`.
