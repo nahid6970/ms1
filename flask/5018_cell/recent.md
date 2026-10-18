@@ -6,7 +6,8 @@ Flask-based web app with a vanilla JavaScript/CSS frontend (`static/script.js` i
 
 - `static/script.js` — Improved F3 outside-edit selection: visible selection movement now skips hidden Markdown syntax; Shift+Left/Right extends the correct rendered edge; unmodified arrows contract from the inside edge; typing, Backspace, Delete, Shift+Enter, and Tab edit the selected range directly; F3 edits pass the live input through `updateCell()` so previews refresh.
 - Cell AI instructions — Each cell's sparkle button opens an inline instruction editor and sends the instruction with the cell's current content to the selected, tested Gemini model. The response replaces the same cell. This implementation does not use Tavily or another web search provider. See `md/AI_CELL_INSTRUCTIONS.md`.
-- Documentation — Added the AI cell instructions guide and linked it from `md/CELL_FEATURES.md` and `md/README.md`; recorded the documentation update in `md/RECENT.md`.
+- Cell AI editor — Added microphone dictation in the app's selected voice language, automatic multiline textarea growth, and purple focus styling. Excluded the editor textarea from wrap-mode cell sizing rules so it can grow.
+- Documentation — Added the AI cell instructions guide and linked it from `md/CELL_FEATURES.md` and `md/README.md`; recorded documentation and UI updates in `md/RECENT.md`.
 
 # Critical Context
 

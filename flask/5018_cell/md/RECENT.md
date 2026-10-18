@@ -1,5 +1,30 @@
 # Recent Development Log
 
+## [2026-10-18 09:49] - Improve AI Cell Voice and Multiline Editor
+
+**Session Duration:** 0.2 hours
+
+**What We Accomplished:**
+- Added a vector microphone icon before the AI cell Update button, with a listening state.
+- Connected voice input to the app's selected English or Bengali speech-recognition language.
+- Made the instruction textarea expand for multiline text and excluded it from table wrap-mode height rules that had kept it collapsed.
+- Refined the instruction box border and focus ring to use the app's purple accent.
+- Updated the AI cell guide and cell feature summary to include voice input and multiline behavior.
+
+**Files Modified:**
+- `static/script.js` — voice recognition for cell instructions and transcription-driven auto-resize
+- `static/style.css` — microphone icon styling, prompt sizing, and focus appearance
+- `md/AI_CELL_INSTRUCTIONS.md` — documented microphone access and multiline editor behavior
+- `md/CELL_FEATURES.md` — added voice and multiline editor summary
+- `md/RECENT.md` — recorded this session
+
+**Current Status:**
+- ✅ The instruction editor supports typed and spoken multiline instructions.
+- ✅ The prompt textarea is excluded from table textarea rules that overrode its dynamic height.
+- ✅ No app server restart is required; refresh the browser to load frontend changes.
+
+---
+
 ## [2026-10-18 09:24] - Document AI Cell Instructions
 
 **Session Duration:** 0.1 hours

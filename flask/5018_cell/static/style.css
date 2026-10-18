@@ -1541,11 +1541,17 @@ td:hover > .cell-ai-instruction-btn,
     overflow-y: hidden;
     resize: none;
     padding: 7px 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #d5c0e5;
     border-radius: 5px;
     font-family: inherit;
     font-size: 13px;
     line-height: 1.4;
+}
+
+.cell-ai-instruction-prompt:focus {
+    outline: none;
+    border-color: #8b36c9;
+    box-shadow: 0 0 0 2px rgba(139, 54, 201, 0.16);
 }
 
 .cell-ai-instruction-actions {
