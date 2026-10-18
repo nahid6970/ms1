@@ -1484,6 +1484,41 @@ td {
     height: auto;
 }
 
+.cell-ai-instruction-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 120;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-radius: 5px;
+    background: rgba(168, 85, 247, 0.12);
+    color: #8b36c9;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+td:hover > .cell-ai-instruction-btn,
+.cell-ai-instruction-btn:focus-visible {
+    opacity: 1;
+    background: rgba(168, 85, 247, 0.22);
+    border-color: rgba(168, 85, 247, 0.7);
+    outline: none;
+}
+
+.cell-ai-instruction-btn:disabled {
+    cursor: wait;
+    opacity: 1;
+}
+
 /* Cell complete checkmark */
 td.cell-complete::before {
     content: "✓";
