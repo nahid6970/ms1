@@ -11092,6 +11092,7 @@ function renderTable(preserveScroll = true) {
                 if (col.color) {
                     td.style.backgroundColor = col.color;
                 }
+                td.style.backgroundColor = getAlternateRowColor(rowIndex, col.color, cellStyle);
                 if (cellStyle.bold) textarea.style.fontWeight = 'bold';
                 if (cellStyle.italic) textarea.style.fontStyle = 'italic';
                 if (cellStyle.center) textarea.style.textAlign = 'center';
@@ -11253,6 +11254,7 @@ function renderTable(preserveScroll = true) {
             if (col.color) {
                 td.style.backgroundColor = col.color;
             }
+            td.style.backgroundColor = getAlternateRowColor(rowIndex, col.color, cellStyle);
             if (cellStyle.bold) input.style.fontWeight = 'bold';
             if (cellStyle.italic) input.style.fontStyle = 'italic';
             if (cellStyle.center) input.style.textAlign = 'center';
@@ -20240,6 +20242,24 @@ function copyToClipboardFallback(text) {
 
 let globalSettings = {};
 
+function updateAlternateRowColors() {
+    const first = document.getElementById('alternateRowColor1');
+    const second = document.getElementById('alternateRowColor2');
+    if (!first || !second) return;
+    globalSettings.alternateRowColors = [first.value, second.value];
+    saveSettings();
+    renderTable();
+}
+
+function getAlternateRowColor(rowIndex, columnColor, cellStyle) {
+    // A manually assigned per-cell background always takes priority.
+    if (cellStyle?.bgColor) return '';
+    const colors = globalSettings.alternateRowColors;
+    return Array.isArray(colors) && colors.length >= 2
+        ? colors[rowIndex % 2]
+        : (rowIndex % 2 === 0 ? '#ffffff' : '#f2f5f9');
+}
+
 function updateLineHeightSettings(type, value) {
     const root = document.documentElement;
     // Ensure value is a number
@@ -20278,6 +20298,14 @@ function loadLineHeightSettings() {
             globalSettings = settings;
             const root = document.documentElement;
 
+            const rowColors = Array.isArray(settings.alternateRowColors) && settings.alternateRowColors.length >= 2
+                ? settings.alternateRowColors
+                : ['#ffffff', '#f2f5f9'];
+            const rowColor1 = document.getElementById('alternateRowColor1');
+            const rowColor2 = document.getElementById('alternateRowColor2');
+            if (rowColor1) rowColor1.value = rowColors[0];
+            if (rowColor2) rowColor2.value = rowColors[1];
+
             // Load Table Edit Line Height
             if (settings.tableEditLineHeight) {
                 root.style.setProperty('--table-edit-line-height', settings.tableEditLineHeight);
@@ -20291,6 +20319,7 @@ function loadLineHeightSettings() {
                 const input = document.getElementById('markdownPreviewLineHeight');
                 if (input) input.value = settings.markdownPreviewLineHeight;
             }
+            if (typeof renderTable === 'function') renderTable();
         })
         .catch(console.error);
 }

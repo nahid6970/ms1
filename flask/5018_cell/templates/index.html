@@ -554,6 +554,17 @@
 
                     <div class="settings-item" style="margin-top: 20px;">
                         <div class="settings-item-header">
+                            <span class="settings-label">Alternating Row Colors</span>
+                        </div>
+                        <p class="settings-description">Choose two colors to alternate across rows. Existing column and cell background colors are preserved.</p>
+                        <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:10px;">
+                            <label style="display:flex; align-items:center; gap:8px;">Row 1 <input type="color" id="alternateRowColor1" value="#ffffff" onchange="updateAlternateRowColors()"></label>
+                            <label style="display:flex; align-items:center; gap:8px;">Row 2 <input type="color" id="alternateRowColor2" value="#f2f5f9" onchange="updateAlternateRowColors()"></label>
+                        </div>
+                    </div>
+
+                    <div class="settings-item" style="margin-top: 20px;">
+                        <div class="settings-item-header">
                             <label for="vrindaFontToggle" class="settings-label">Use Vrinda Font for Bangla</label>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="vrindaFontToggle" onchange="toggleVrindaFont(this.checked)"
