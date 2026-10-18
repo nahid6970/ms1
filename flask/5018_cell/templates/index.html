@@ -498,13 +498,9 @@
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content settings-modal">
-            <div class="modal-header">
-                <h2>Settings</h2>
-                <span class="close" onclick="closeSettingsModal()">&times;</span>
-            </div>
             <div class="settings-shell">
+                <button type="button" class="settings-close" aria-label="Close settings" onclick="closeSettingsModal()">&times;</button>
                 <aside class="settings-sidebar" aria-label="Settings categories">
-                    <div class="settings-brand"><span>⚙</span><div><b>Settings</b><small>Personalize your workspace</small></div></div>
                     <label class="settings-search"><span>⌕</span><input type="search" placeholder="Search settings" oninput="searchSettings(this.value)" aria-label="Search settings"></label>
                     <button class="settings-nav-item active" data-target="view" onclick="showSettingsCategory('view', this)"><span>◫</span> View</button>
                     <button class="settings-nav-item" data-target="markdown" onclick="showSettingsCategory('markdown', this)"><span>✎</span> Markdown</button>
