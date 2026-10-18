@@ -520,6 +520,16 @@
                         <input id="cellAiApiKey" type="password" autocomplete="off" placeholder="Gemini API key" aria-label="Gemini API key" style="flex:1; min-width:0; padding:8px 10px; border:1px solid #ccc; border-radius:5px; font-family:monospace;">
                         <button class="btn btn-primary" type="button" onclick="saveCellAiApiKey()">Save</button>
                     </div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+                        <label for="cellAiModelSelect" style="font-size:13px; color:#555;">Model</label>
+                        <select id="cellAiModelSelect" onchange="saveCellAiModelPreference(this.value)" style="flex:1; min-width:180px; padding:7px 8px; border:1px solid #ccc; border-radius:5px; background:#fff; color:#333;">
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (not tested)</option>
+                        </select>
+                        <button id="cellAiTestModelBtn" class="btn btn-secondary" type="button" onclick="testSelectedCellAiModel()" style="padding:7px 10px;">Test Selected</button>
+                        <button id="cellAiFindModelsBtn" class="btn btn-secondary" type="button" onclick="findWorkingCellAiModels()" style="padding:7px 10px;">Find Working Models</button>
+                    </div>
+                    <p id="cellAiModelStatus" class="settings-description" role="status" aria-live="polite" style="margin-top:8px;"></p>
+                    <p class="settings-description" style="margin-top:4px;">Find Working Models sends a short test request to each Gemini text model listed for your key and may use API quota.</p>
                 </div>
 
                 <div class="settings-section">

@@ -2729,18 +2729,178 @@ function updateCell(rowIndex, colIndex, value, inputElement = null) {
 }
 
 const CELL_AI_API_KEY_STORAGE_KEY = 'cell-ai-gemini-api-key';
-const CELL_AI_MODEL = 'gemini-2.5-flash';
+const CELL_AI_MODEL_STORAGE_KEY = 'cell-ai-gemini-model';
+const CELL_AI_WORKING_MODELS_STORAGE_KEY = 'cell-ai-working-models';
+const CELL_AI_DEFAULT_MODEL = 'gemini-2.5-flash';
 
 function saveCellAiApiKey() {
     const input = document.getElementById('cellAiApiKey');
     const apiKey = input?.value.trim() || '';
+    const previousKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
     if (!apiKey) {
         localStorage.removeItem(CELL_AI_API_KEY_STORAGE_KEY);
+        localStorage.removeItem(CELL_AI_WORKING_MODELS_STORAGE_KEY);
+        populateCellAiModelSelect([]);
         showToast('Gemini API key cleared', 'info');
         return;
     }
     localStorage.setItem(CELL_AI_API_KEY_STORAGE_KEY, apiKey);
+    if (previousKey !== apiKey) {
+        localStorage.removeItem(CELL_AI_WORKING_MODELS_STORAGE_KEY);
+        populateCellAiModelSelect([]);
+        setCellAiModelStatus('API key saved. Find working models to verify which models this key can use.', '');
+    }
     showToast('Gemini API key saved in this browser', 'success');
+}
+
+function getCellAiModel() {
+    return localStorage.getItem(CELL_AI_MODEL_STORAGE_KEY) ||
+        document.getElementById('cellAiModelSelect')?.value || CELL_AI_DEFAULT_MODEL;
+}
+
+function saveCellAiModelPreference(model) {
+    if (model) localStorage.setItem(CELL_AI_MODEL_STORAGE_KEY, model);
+}
+
+function getCellAiWorkingModels() {
+    try {
+        const models = JSON.parse(localStorage.getItem(CELL_AI_WORKING_MODELS_STORAGE_KEY) || '[]');
+        return Array.isArray(models) ? models : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function populateCellAiModelSelect(models, preferredModel = getCellAiModel()) {
+    const select = document.getElementById('cellAiModelSelect');
+    if (!select) return;
+
+    const options = models.length ? models : [{ id: preferredModel || CELL_AI_DEFAULT_MODEL, displayName: `${preferredModel || CELL_AI_DEFAULT_MODEL} (not tested)` }];
+    select.replaceChildren();
+    options.forEach(model => {
+        const option = document.createElement('option');
+        option.value = model.id;
+        option.textContent = models.length ? `${model.displayName || model.id} (${model.id})` : model.displayName;
+        select.appendChild(option);
+    });
+    const selected = options.some(model => model.id === preferredModel) ? preferredModel : options[0].id;
+    select.value = selected;
+    saveCellAiModelPreference(selected);
+}
+
+function setCellAiModelStatus(message, type = 'info') {
+    const status = document.getElementById('cellAiModelStatus');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#218838' : '#666';
+}
+
+function setCellAiModelControlsDisabled(disabled) {
+    ['cellAiTestModelBtn', 'cellAiFindModelsBtn'].forEach(id => {
+        const button = document.getElementById(id);
+        if (button) button.disabled = disabled;
+    });
+}
+
+async function requestCellAiGeneration(apiKey, model, prompt, maxOutputTokens = 4) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0, maxOutputTokens }
+        })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || `Gemini request failed (HTTP ${response.status})`);
+    if (!data.candidates?.[0]?.content?.parts?.some(part => typeof part.text === 'string')) {
+        throw new Error(data.promptFeedback?.blockReason || 'The model returned no text response.');
+    }
+    return data;
+}
+
+async function testSelectedCellAiModel() {
+    const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
+    const model = document.getElementById('cellAiModelSelect')?.value || getCellAiModel();
+    if (!apiKey) {
+        setCellAiModelStatus('Save a Gemini API key first.', 'error');
+        document.getElementById('cellAiApiKey')?.focus();
+        return;
+    }
+
+    setCellAiModelControlsDisabled(true);
+    setCellAiModelStatus(`Testing ${model}…`);
+    try {
+        await requestCellAiGeneration(apiKey, model, 'Reply with OK.', 4);
+        const working = getCellAiWorkingModels();
+        if (!working.some(item => item.id === model)) working.push({ id: model, displayName: model });
+        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
+        populateCellAiModelSelect(working, model);
+        setCellAiModelStatus(`${model} is working and is available in the model list.`, 'success');
+    } catch (error) {
+        const working = getCellAiWorkingModels().filter(item => item.id !== model);
+        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
+        populateCellAiModelSelect(working, working[0]?.id || model);
+        setCellAiModelStatus(`${model} did not pass the test: ${error.message}`, 'error');
+    } finally {
+        setCellAiModelControlsDisabled(false);
+    }
+}
+
+async function findWorkingCellAiModels() {
+    const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
+    if (!apiKey) {
+        setCellAiModelStatus('Save a Gemini API key first.', 'error');
+        document.getElementById('cellAiApiKey')?.focus();
+        return;
+    }
+
+    setCellAiModelControlsDisabled(true);
+    setCellAiModelStatus('Loading Gemini models available to this key…');
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${encodeURIComponent(apiKey)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || `Could not list models (HTTP ${response.status})`);
+
+        const candidates = (data.models || [])
+            .filter(model => model.name?.startsWith('models/gemini-') && model.supportedGenerationMethods?.includes('generateContent'))
+            .map(model => ({ id: model.name.replace(/^models\//, ''), displayName: model.displayName || model.name.replace(/^models\//, '') }));
+        if (!candidates.length) throw new Error('This key has no Gemini models supporting text generation.');
+
+        const working = [];
+        let completed = 0;
+        let nextIndex = 0;
+        const worker = async () => {
+            while (nextIndex < candidates.length) {
+                const model = candidates[nextIndex++];
+                try {
+                    await requestCellAiGeneration(apiKey, model.id, 'Reply with OK.', 4);
+                    working.push(model);
+                } catch (error) {
+                    console.info(`Gemini model ${model.id} did not pass the availability check:`, error.message);
+                }
+                completed++;
+                setCellAiModelStatus(`Testing Gemini models: ${completed}/${candidates.length}…`);
+            }
+        };
+        await Promise.all(Array.from({ length: Math.min(3, candidates.length) }, worker));
+
+        working.sort((a, b) => a.id.localeCompare(b.id));
+        localStorage.setItem(CELL_AI_WORKING_MODELS_STORAGE_KEY, JSON.stringify(working));
+        const preferred = working.some(model => model.id === getCellAiModel()) ? getCellAiModel() : working[0]?.id;
+        populateCellAiModelSelect(working, preferred);
+
+        if (working.length) {
+            setCellAiModelStatus(`Found ${working.length} working model${working.length === 1 ? '' : 's'}. The list now shows only models that passed the test.`, 'success');
+        } else {
+            populateCellAiModelSelect([]);
+            setCellAiModelStatus('No models passed the test. Check the API key, model access, or quota and try again.', 'error');
+        }
+    } catch (error) {
+        setCellAiModelStatus(error.message || 'Could not find working models.', 'error');
+    } finally {
+        setCellAiModelControlsDisabled(false);
+    }
 }
 
 function appendCellAiInstructionButton(td, rowIndex, colIndex) {
@@ -2789,7 +2949,7 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
     button.textContent = '…';
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${CELL_AI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(getCellAiModel())}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -17140,6 +17300,11 @@ function openSettings() {
         document.getElementById('gridLineColorText').value = currentColor.substring(1).toUpperCase();
         const cellAiApiKey = document.getElementById('cellAiApiKey');
         if (cellAiApiKey) cellAiApiKey.value = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
+        const savedCellAiModels = getCellAiWorkingModels();
+        populateCellAiModelSelect(savedCellAiModels, localStorage.getItem(CELL_AI_MODEL_STORAGE_KEY) || CELL_AI_DEFAULT_MODEL);
+        if (savedCellAiModels.length) {
+            setCellAiModelStatus(`${savedCellAiModels.length} tested working model${savedCellAiModels.length === 1 ? '' : 's'} saved in this browser.`);
+        }
 
         // Load Vrinda font toggle state
         const vrindaEnabled = localStorage.getItem('vrindaFontEnabled') !== 'false'; // Default true
