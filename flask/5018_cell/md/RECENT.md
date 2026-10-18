@@ -1,5 +1,26 @@
 # Recent Development Log
 
+## [2026-10-18 09:24] - Document AI Cell Instructions
+
+**Session Duration:** 0.1 hours
+
+**What We Accomplished:**
+- Added `md/AI_CELL_INSTRUCTIONS.md` with Gemini setup, model testing, per-cell update behavior, and restart guidance.
+- Linked the AI cell instructions guide from `md/CELL_FEATURES.md` and `md/README.md`.
+- Documented that the current implementation sends updates directly to Gemini and does not currently use Tavily or another web search provider.
+
+**Files Modified:**
+- `md/AI_CELL_INSTRUCTIONS.md` — new user and developer reference
+- `md/CELL_FEATURES.md` — added AI cell feature summary and guide link
+- `md/README.md` — listed the new guide
+- `md/RECENT.md` — recorded this documentation update
+
+**Current Status:**
+- ✅ Documentation reflects the current Gemini-based cell update implementation.
+- ✅ No application code was changed in this documentation update.
+
+---
+
 ## [2026-08-23 12:14] - F3 Outside-Edit Selection and F10 Shortcut Removal
 
 **Session Duration:** 0.2 hours

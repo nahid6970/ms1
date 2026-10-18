@@ -1,5 +1,10 @@
 # Cell Features & Individual Styling
 
+## AI Cell Instructions
+Each cell's **✨** button opens an inline instruction box. The selected Gemini model applies the instruction to the cell's existing content and replaces that same cell. Configure the API key and test/select a working model under **Settings → AI Cell Instructions**.
+
+See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md) for setup, behavior, search limitations, and restart requirements.
+
 ## Cell Complete Checkmark
 **Access:** Right-click context menu → "Mark Complete"
 **Visual:** 

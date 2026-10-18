@@ -8,6 +8,8 @@ This folder contains feature documentation, test cases, and specifications for t
 - **SEPARATOR_BACKGROUND_COLOR.md** - Separator background color feature guide with examples
 - **KATEX_MATH.md** - Complete guide to mathematical expressions using KaTeX/LaTeX syntax
 - **CUSTOM_SYNTAX.md** - Redesigned Custom Color Syntax and Color Picker guide
+- **AI_CELL_INSTRUCTIONS.md** - Gemini model setup, per-cell instruction updates, and current search limitations
+- **CELL_FEATURES.md** - Cell actions and individual styling, including AI cell instructions
 - **UX_NAVIGATION.md** - Guide to sidebar, sub-sheets, and F1-F9 keyboard shortcuts
 - **EDITING_EXTENSIONS.md** - Multi-term search, F8 word pick, F9 swap, and Alt+Up/Down line tools.
 
