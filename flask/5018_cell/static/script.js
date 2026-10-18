@@ -2777,6 +2777,16 @@ function getCellAiWorkingModels() {
     }
 }
 
+function getCellAiSelectedModel() {
+    const workingModels = getCellAiWorkingModels();
+    const selectedModel = document.getElementById('cellAiModelSelect')?.value || '';
+    if (selectedModel && workingModels.some(model => model.id === selectedModel)) return selectedModel;
+
+    const savedPreference = localStorage.getItem(CELL_AI_MODEL_STORAGE_KEY) || '';
+    if (savedPreference && workingModels.some(model => model.id === savedPreference)) return savedPreference;
+    return workingModels[0]?.id || '';
+}
+
 function populateCellAiModelSelect(models, preferredModel = getCellAiModel()) {
     const select = document.getElementById('cellAiModelSelect');
     if (!select) return;
@@ -3028,17 +3038,14 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
 
     const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
     if (!apiKey) {
-        openSettings();
-        document.getElementById('cellAiApiKey')?.focus();
         showToast('Add a Gemini API key in Settings to run cell instructions', 'warning');
         return;
     }
 
     const cellContent = firstLineEnd < 0 ? '' : originalValue.slice(firstLineEnd + 1);
     const instruction = instructionMatch[1];
-    const model = document.getElementById('cellAiModelSelect')?.value || '';
+    const model = getCellAiSelectedModel();
     if (!model) {
-        openSettings();
         showToast('Run the Gemini model tester and select a working model first', 'warning');
         return;
     }
