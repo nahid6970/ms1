@@ -5241,6 +5241,10 @@ ll Rank Badge */
     opacity: 0.85;
 }
 
+td.has-cell-ai-rank > .cell-rank-badge {
+    right: 27px;
+}
+
 /* Custom Color Syntax Settings */
 /* Settings Modal Specific */
 .settings-modal {

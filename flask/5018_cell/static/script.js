@@ -3006,6 +3006,9 @@ async function runCellAiModelBatchTest() {
 }
 
 function appendCellAiInstructionButton(td, rowIndex, colIndex) {
+    if (td.querySelector('.cell-rank-badge')) {
+        td.classList.add('has-cell-ai-rank');
+    }
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'cell-ai-instruction-btn';
