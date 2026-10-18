@@ -3016,12 +3016,66 @@ function appendCellAiInstructionButton(td, rowIndex, colIndex) {
     button.onclick = event => {
         event.preventDefault();
         event.stopPropagation();
-        runCellAiInstruction(rowIndex, colIndex, button);
+        toggleCellAiInstructionEditor(rowIndex, colIndex, button);
     };
     td.appendChild(button);
 }
 
-async function runCellAiInstruction(rowIndex, colIndex, button) {
+function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
+    const td = button.closest('td');
+    const existing = td?.querySelector('.cell-ai-instruction-editor');
+    if (existing) {
+        existing.remove();
+        return;
+    }
+    if (!td) return;
+
+    const rawValue = String(tableData.sheets[currentSheet]?.rows?.[rowIndex]?.[colIndex] ?? '');
+    const lineBreak = rawValue.indexOf('\n');
+    const firstLine = lineBreak < 0 ? rawValue : rawValue.slice(0, lineBreak);
+    const match = firstLine.match(/^\s*Instruction\s*:\s*(.*?)\s*$/i);
+
+    const editor = document.createElement('div');
+    editor.className = 'cell-ai-instruction-editor';
+    editor.onclick = event => event.stopPropagation();
+    editor.onmousedown = event => event.stopPropagation();
+
+    const instructionInput = document.createElement('textarea');
+    instructionInput.className = 'cell-ai-instruction-prompt';
+    instructionInput.rows = 3;
+    instructionInput.placeholder = 'What should be changed or updated?';
+    instructionInput.setAttribute('aria-label', 'Instruction for updating this cell');
+    instructionInput.value = match?.[1] || '';
+
+    const actions = document.createElement('div');
+    actions.className = 'cell-ai-instruction-actions';
+    const updateButton = document.createElement('button');
+    updateButton.type = 'button';
+    updateButton.className = 'cell-ai-instruction-update';
+    updateButton.textContent = 'Update';
+    updateButton.onclick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const instruction = instructionInput.value.trim();
+        if (!instruction) {
+            instructionInput.focus();
+            showToast('Enter an instruction for this cell', 'warning');
+            return;
+        }
+        runCellAiInstruction(rowIndex, colIndex, button, instruction, editor);
+    };
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'cell-ai-instruction-cancel';
+    cancelButton.textContent = 'Cancel';
+    cancelButton.onclick = () => editor.remove();
+    actions.append(updateButton, cancelButton);
+    editor.append(instructionInput, actions);
+    td.appendChild(editor);
+    instructionInput.focus();
+}
+
+async function runCellAiInstruction(rowIndex, colIndex, button, instruction, editor) {
     const sheetIndex = currentSheet;
     const sheet = tableData.sheets[sheetIndex];
     const originalRow = sheet?.rows?.[rowIndex];
@@ -3031,10 +3085,6 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
     const firstLineEnd = originalValue.indexOf('\n');
     const instructionLine = firstLineEnd < 0 ? originalValue : originalValue.slice(0, firstLineEnd);
     const instructionMatch = instructionLine.match(/^\s*Instruction\s*:\s*(.*?)\s*$/i);
-    if (!instructionMatch || !instructionMatch[1]) {
-        showToast('Start this cell with "Instruction: your request"', 'warning');
-        return;
-    }
 
     const apiKey = localStorage.getItem(CELL_AI_API_KEY_STORAGE_KEY) || '';
     if (!apiKey) {
@@ -3042,8 +3092,9 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
         return;
     }
 
-    const cellContent = firstLineEnd < 0 ? '' : originalValue.slice(firstLineEnd + 1);
-    const instruction = instructionMatch[1];
+    const cellContent = instructionMatch
+        ? (firstLineEnd < 0 ? '' : originalValue.slice(firstLineEnd + 1))
+        : originalValue;
     const model = getCellAiSelectedModel();
     if (!model) {
         showToast('Run the Gemini model tester and select a working model first', 'warning');
@@ -3052,6 +3103,7 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
     button.disabled = true;
     button.dataset.previousText = button.textContent;
     button.textContent = '…';
+    editor.querySelectorAll('button, textarea').forEach(control => { control.disabled = true; });
 
     try {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -3102,6 +3154,7 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
             button.textContent = button.dataset.previousText || '✨';
             delete button.dataset.previousText;
         }
+        if (editor.isConnected) editor.querySelectorAll('button, textarea').forEach(control => { control.disabled = false; });
     }
 }
 

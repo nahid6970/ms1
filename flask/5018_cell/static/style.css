@@ -1519,6 +1519,55 @@ td:hover > .cell-ai-instruction-btn,
     opacity: 1;
 }
 
+.cell-ai-instruction-editor {
+    position: absolute;
+    top: 27px;
+    right: 2px;
+    z-index: 125;
+    width: min(320px, calc(100vw - 32px));
+    padding: 9px;
+    border: 1px solid #c9a2e8;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(35, 20, 45, 0.22);
+    white-space: normal;
+}
+
+.cell-ai-instruction-prompt {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 62px;
+    resize: vertical;
+    padding: 7px 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.cell-ai-instruction-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+.cell-ai-instruction-actions button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+}
+
+.cell-ai-instruction-actions .cell-ai-instruction-update {
+    border-color: #8b36c9;
+    background: #8b36c9;
+    color: white;
+}
+
 /* Cell complete checkmark */
 td.cell-complete::before {
     content: "✓";
