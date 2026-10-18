@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "My TV Shows",
+  "short_name": "TV Shows",
+  "description": "Track your TV shows and movies",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#101820",
+  "theme_color": "#101820",
+  "icons": [
+    {
+      "src": "/static/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

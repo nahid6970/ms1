@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My TV Shows</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon-shows.svg') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+    <meta name="theme-color" content="#101820">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body{% if completed_show_card_tint_enabled %} class="completed-show-card-tint-enabled"{% endif %} style="--completed-show-card-tint: {{ completed_show_card_tint_color }};">
