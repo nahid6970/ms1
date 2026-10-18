@@ -1536,8 +1536,10 @@ td:hover > .cell-ai-instruction-btn,
 .cell-ai-instruction-prompt {
     box-sizing: border-box;
     width: 100%;
-    min-height: 62px;
-    resize: vertical;
+    min-height: 38px;
+    max-height: none;
+    overflow-y: hidden;
+    resize: none;
     padding: 7px 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -1563,13 +1565,32 @@ td:hover > .cell-ai-instruction-btn,
 }
 
 .cell-ai-instruction-actions .cell-ai-instruction-mic {
-    min-width: 32px;
-    padding: 4px 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    padding: 0;
     border: 0;
-    background: #adb5bd;
+    border-radius: 5px;
+    background: #8b36c9;
     color: #fff;
-    font-size: 16px;
-    line-height: 1.2;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.cell-ai-instruction-actions .cell-ai-instruction-mic svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cell-ai-instruction-actions .cell-ai-instruction-mic:hover {
+    background: #7327ad;
+    transform: translateY(-1px);
 }
 
 .cell-ai-instruction-actions .cell-ai-instruction-mic.listening {
@@ -1673,7 +1694,7 @@ td:not(:focus-within).has-markdown-preview {
     vertical-align: top;
 }
 
-.wrap-enabled td textarea:not(.merged-cell textarea) {
+.wrap-enabled td textarea:not(.merged-cell textarea):not(.cell-ai-instruction-prompt) {
     width: 100%;
     border: none;
     padding: 4px;
@@ -1695,7 +1716,7 @@ td:not(:focus-within).has-markdown-preview {
     scroll-behavior: auto !important;
 }
 
-.wrap-enabled td textarea:not(.merged-cell textarea):focus {
+.wrap-enabled td textarea:not(.merged-cell textarea):not(.cell-ai-instruction-prompt):focus {
     outline: none;
     background: transparent;
 }
@@ -1716,7 +1737,7 @@ td:not(:focus-within).has-markdown-preview {
 }
 
 /* For rows without wrapped content, keep textareas at exact input height */
-.wrap-enabled tr:not(.has-wrapped-content) td textarea:not(.merged-cell textarea) {
+.wrap-enabled tr:not(.has-wrapped-content) td textarea:not(.merged-cell textarea):not(.cell-ai-instruction-prompt) {
     height: 22px !important;
     min-height: 22px !important;
     overflow: hidden;

@@ -3042,10 +3042,15 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
 
     const instructionInput = document.createElement('textarea');
     instructionInput.className = 'cell-ai-instruction-prompt';
-    instructionInput.rows = 3;
+    instructionInput.rows = 1;
     instructionInput.placeholder = 'What should be changed or updated?';
     instructionInput.setAttribute('aria-label', 'Instruction for updating this cell');
     instructionInput.value = match?.[1] || '';
+    const resizeInstructionInput = () => {
+        instructionInput.style.height = 'auto';
+        instructionInput.style.height = `${instructionInput.scrollHeight}px`;
+    };
+    instructionInput.addEventListener('input', resizeInstructionInput);
 
     const actions = document.createElement('div');
     actions.className = 'cell-ai-instruction-actions';
@@ -3067,7 +3072,7 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
     const micButton = document.createElement('button');
     micButton.type = 'button';
     micButton.className = 'cell-ai-instruction-mic';
-    micButton.textContent = '🎙️';
+    micButton.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="6" y="1.5" width="4" height="8" rx="2"></rect><path d="M4.25 7.25v.8a3.75 3.75 0 0 0 7.5 0v-.8M8 11.8v2.1m-2 0h4"></path></svg>';
     micButton.title = `Speak instruction (${voiceLang === 'bn-BD' ? 'Bengali' : 'English'})`;
     micButton.setAttribute('aria-label', 'Speak instruction');
     micButton.onclick = event => {
@@ -3083,6 +3088,7 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
     actions.append(micButton, updateButton, cancelButton);
     editor.append(instructionInput, actions);
     td.appendChild(editor);
+    resizeInstructionInput();
     instructionInput.focus();
 }
 
@@ -3118,6 +3124,7 @@ function startCellAiVoiceInput(textarea, micButton) {
             else interim += transcript;
         }
         textarea.value = [initialText, finalParts.join(' '), interim].filter(Boolean).join(' ');
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
     };
     recognition.onerror = event => {
         if (event.error === 'not-allowed') showToast('Microphone access denied', 'error');

@@ -16,7 +16,7 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 ## Updating a cell
 
 1. Click the cell's **✨** button.
-2. Enter the change you want in the instruction box, or click the **🎙️** button to dictate it in the voice language selected for the app. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
+2. Enter the change you want in the instruction box, or click the microphone button to dictate it in the voice language selected for the app. The box grows automatically for multiline instructions. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
 3. Click **Update**. Gemini uses the instruction and the cell's current content, then replaces the content in the same cell.
 
 When a cell begins with an `Instruction:` line, that first line is treated as the instruction metadata; the remaining lines are sent as the cell content. For cells without that prefix, the whole current value is sent as content.
