@@ -5242,7 +5242,17 @@ ll Rank Badge */
 }
 
 td.has-cell-ai-rank > .cell-rank-badge {
-    right: 27px;
+    right: auto;
+    left: 2px;
+}
+
+td.has-cell-ai-rank > input,
+td.has-cell-ai-rank > textarea {
+    padding-left: 30px !important;
+}
+
+td.has-cell-ai-rank > .markdown-preview {
+    padding-left: 32px !important;
 }
 
 /* Custom Color Syntax Settings */
