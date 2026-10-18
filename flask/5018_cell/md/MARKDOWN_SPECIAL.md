@@ -1,5 +1,21 @@
 # Special Markdown & Highlight Syntaxes
 
+## Cell Formatting Reference
+
+Use these project-specific forms for common cell text formatting:
+
+| Syntax | Meaning |
+| --- | --- |
+| `#1.5#text#/#` | Extra-large text |
+| `##text##` | Large text |
+| `**text**` | Bold text |
+| `@@text@@` | Italic text |
+| `__text__` | Underline |
+| `- text`, `-- text`, `--- text` | List levels 1, 2, and 3 |
+| `| H1 | H2 |` then `| --- | --- |` | Pipe table |
+
+Do not use single-star emphasis (`*text*`) or asterisk bullets; these are not project syntax. AI cell instructions follow the same formatting rules. See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md).
+
 ## Text Stroke
 **Syntax:** `ŝŝthickness:textŝŝ` or `ŝŝtextŝŝ` (default 2px)
 **Output:** Text with a thick outline/border around letters

@@ -23,6 +23,24 @@ When a cell begins with an `Instruction:` line, that first line is treated as th
 
 The table refreshes immediately after a successful update, and the normal cell save flow persists the result.
 
+## Formatting syntax for Gemini output
+
+The cell instruction prompt tells Gemini to use these project-specific forms:
+
+| Use | Syntax | Meaning |
+| --- | --- | --- |
+| Extra-large text | `#1.5#text#/#` | 1.5× text |
+| Large text | `##text##` | Larger text |
+| Bold | `**text**` | Bold text |
+| Italic | `@@text@@` | Italic text |
+| Underline | `__text__` | Underlined text |
+| List level 1 | `- text` | First list level |
+| List level 2 | `-- text` | Nested list level |
+| List level 3 | `--- text` | Third list level |
+| Table | `| H1 | H2 |` with `| --- | --- |` separator | Pipe table |
+
+Single-star emphasis (`*text*`) and asterisk bullets are not supported. Before saving, the AI instruction converts common single-star emphasis to the project's `@@text@@` italic syntax and asterisk bullets to hyphen bullets. It also converts Markdown heading lines such as `### Heading` to `##Heading##`, removes standalone horizontal divider lines, normalizes spaced nested bullets (`- - item`) to contiguous list markers, and removes zero-width spaces. Pipe table separators are preserved.
+
 ## Current search behavior
 
 Cell updates currently call Gemini's `generateContent` endpoint directly. They do **not** perform Tavily or other web searches, so they cannot guarantee the latest online information. A request to update time-sensitive facts may rely on the selected model's existing knowledge.
