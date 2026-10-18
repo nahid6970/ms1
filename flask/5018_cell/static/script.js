@@ -2840,24 +2840,17 @@ function renderCellAiModelTestCards(models, status = 'pending') {
         const card = document.createElement('div');
         card.dataset.model = model.id;
         card.dataset.state = status;
-        card.style.cssText = 'background:#f8f9fa;border:1px solid #d7dce1;border-radius:6px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;';
+        card.style.cssText = 'background:#f8f9fa;border:1px solid #d7dce1;border-radius:6px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
 
-        const heading = document.createElement('div');
-        heading.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
         const name = document.createElement('strong');
         name.textContent = model.displayName || model.id;
-        name.style.cssText = 'font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;';
+        name.style.cssText = 'font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
         name.title = model.id;
         const result = document.createElement('span');
         result.className = 'cell-ai-model-test-state';
-        result.textContent = status === 'pending' ? '⏳ Waiting' : status;
+        result.textContent = status === 'pending' ? 'Waiting' : status;
         result.style.cssText = 'font-size:12px;color:#666;flex-shrink:0;';
-        heading.append(name, result);
-
-        const detail = document.createElement('div');
-        detail.className = 'cell-ai-model-test-detail';
-        detail.style.cssText = 'font-size:12px;color:#666;white-space:pre-wrap;overflow-wrap:anywhere;max-height:72px;overflow:auto;';
-        card.append(heading, detail);
+        card.append(name, result);
         results.appendChild(card);
     });
 }
@@ -2867,12 +2860,11 @@ function updateCellAiModelTestCard(modelId, state, detail, elapsedMs) {
     const card = cards.find(item => item.dataset.model === modelId);
     if (!card) return;
     const stateEl = card.querySelector('.cell-ai-model-test-state');
-    const detailEl = card.querySelector('.cell-ai-model-test-detail');
     const styles = {
-        pending: ['⏳ Waiting', '#666', '#d7dce1', '#f8f9fa'],
-        running: ['⏳ Testing…', '#007bff', '#007bff', '#eff6ff'],
-        success: [`✅ Working${elapsedMs == null ? '' : ` · ${(elapsedMs / 1000).toFixed(2)}s`}`, '#218838', '#28a745', '#f0fff4'],
-        error: [`❌ Failed${elapsedMs == null ? '' : ` · ${(elapsedMs / 1000).toFixed(2)}s`}`, '#dc3545', '#dc3545', '#fff5f5']
+        pending: ['Waiting', '#666', '#d7dce1', '#f8f9fa'],
+        running: ['Testing…', '#007bff', '#007bff', '#eff6ff'],
+        success: ['Passed', '#218838', '#28a745', '#f0fff4'],
+        error: ['Failed', '#dc3545', '#dc3545', '#fff5f5']
     };
     const [label, color, border, background] = styles[state] || styles.pending;
     card.dataset.state = state;
@@ -2882,7 +2874,6 @@ function updateCellAiModelTestCard(modelId, state, detail, elapsedMs) {
         stateEl.textContent = label;
         stateEl.style.color = color;
     }
-    if (detailEl) detailEl.textContent = detail || '';
 }
 
 async function openCellAiModelTester() {
