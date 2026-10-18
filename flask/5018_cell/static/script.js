@@ -3082,6 +3082,9 @@ async function runCellAiInstruction(rowIndex, colIndex, button) {
         }
 
         updateCell(rowIndex, colIndex, result);
+        // AI updates do not originate from the cell's input element, so rebuild
+        // the visible cell from the updated sheet data immediately.
+        renderTable();
         showToast('Cell instruction completed', 'success');
     } catch (error) {
         console.error('Cell AI instruction failed:', error);
