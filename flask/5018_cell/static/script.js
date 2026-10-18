@@ -17550,10 +17550,48 @@ function saveQuickText(event) {
 
 // ==================== SETTINGS MODAL ====================
 
+function showSettingsCategory(category, button) {
+    document.querySelectorAll('#settingsModal .settings-nav-item').forEach(item => item.classList.toggle('active', item === button));
+    document.querySelectorAll('#settingsModal [data-settings-page]').forEach(page => {
+        page.classList.toggle('active', page.dataset.settingsPage === category);
+    });
+    const search = document.getElementById('settingsSearch');
+    if (search) search.value = '';
+    document.querySelectorAll('#settingsModal .settings-item').forEach(item => item.hidden = false);
+    const empty = document.getElementById('settingsSearchEmpty');
+    if (empty) empty.style.display = 'none';
+}
+
+function searchSettings(query) {
+    const term = query.trim().toLowerCase();
+    if (!term) {
+        const active = document.querySelector('#settingsModal .settings-nav-item.active');
+        showSettingsCategory(active?.dataset.target || 'view', active);
+        return;
+    }
+    let firstMatch = null;
+    document.querySelectorAll('#settingsModal [data-settings-page]').forEach(page => {
+        let pageMatches = false;
+        page.querySelectorAll('.settings-item').forEach(item => {
+            const matches = `${item.textContent} ${item.dataset.search || ''}`.toLowerCase().includes(term);
+            item.hidden = !matches;
+            if (matches) pageMatches = true;
+        });
+        pageMatches ||= page.textContent.toLowerCase().includes(term);
+        page.classList.toggle('active', pageMatches);
+        if (pageMatches && !firstMatch) firstMatch = page.dataset.settingsPage;
+    });
+    document.querySelectorAll('#settingsModal .settings-nav-item').forEach(item => item.classList.toggle('active', item.dataset.target === firstMatch));
+    const empty = document.getElementById('settingsSearchEmpty');
+    if (empty) empty.style.display = firstMatch ? 'none' : 'block';
+}
+
 function openSettings() {
     const modal = document.getElementById('settingsModal');
     if (modal) {
         modal.style.display = 'block';
+        const defaultNav = modal.querySelector('.settings-nav-item[data-target="view"]');
+        if (defaultNav) showSettingsCategory('view', defaultNav);
 
         // Load current grid line color
         const currentColor = getGridLineColor();

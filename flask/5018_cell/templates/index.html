@@ -502,37 +502,53 @@
                 <h2>Settings</h2>
                 <span class="close" onclick="closeSettingsModal()">&times;</span>
             </div>
-            <div class="settings-content">
-                <div class="settings-section">
-                    <h3 class="settings-section-title">📚 Help & Documentation</h3>
-                    <button class="btn btn-primary btn-full-width" onclick="showMarkdownGuide()">
-                        📝 View Markdown Guide
-                    </button>
-                    <button class="btn btn-primary btn-full-width" style="margin-top: 8px;" onclick="showKeyboardShortcuts()">
-                        ⌨️ View Keyboard Shortcuts
-                    </button>
+            <div class="settings-shell">
+                <aside class="settings-sidebar" aria-label="Settings categories">
+                    <div class="settings-brand"><span>⚙</span><div><b>Settings</b><small>Personalize your workspace</small></div></div>
+                    <label class="settings-search"><span>⌕</span><input type="search" placeholder="Search settings" oninput="searchSettings(this.value)" aria-label="Search settings"></label>
+                    <label class="settings-search"><span>⌕</span><input type="search" placeholder="Search settings" oninput="searchSettings(this.value)" aria-label="Search settings"></label>
+                    <button class="settings-nav-item active" data-target="view" onclick="showSettingsCategory('view', this)"><span>◫</span> View</button>
+                    <button class="settings-nav-item" data-target="markdown" onclick="showSettingsCategory('markdown', this)"><span>✎</span> Markdown</button>
+                    <button class="settings-nav-item" data-target="shortcuts" onclick="showSettingsCategory('shortcuts', this)"><span>⌨</span> Shortcuts</button>
+                    <button class="settings-nav-item" data-target="ai" onclick="showSettingsCategory('ai', this)"><span>✦</span> AI instructions</button>
+                </aside>
+                <div class="settings-content">
+                <div class="settings-section settings-page" data-settings-page="markdown">
+                    <div class="settings-page-heading"><div class="settings-eyebrow">REFERENCE</div><h3 class="settings-section-title">Markdown</h3><p class="settings-description">Explore formatting syntax and custom color markers.</p></div>
+                    <div class="settings-item settings-action-card"><div><strong>Markdown formatting guide</strong><p class="settings-description">Browse syntax examples and formatting options.</p></div><button class="settings-action-button" onclick="showMarkdownGuide()">Open guide <span>↗</span></button></div>
+                </div>
+                <div class="settings-section settings-page" data-settings-page="shortcuts">
+                    <div class="settings-page-heading"><div class="settings-eyebrow">QUICK REFERENCE</div><h3 class="settings-section-title">Shortcuts</h3><p class="settings-description">Keyboard commands for editing and navigating.</p></div>
+                    <div class="settings-item settings-action-card"><div><strong>Keyboard shortcuts</strong><p class="settings-description">Open the complete shortcut reference.</p></div><button class="settings-action-button" onclick="showKeyboardShortcuts()">View shortcuts <span>↗</span></button></div>
                 </div>
 
-                <div class="settings-section">
-                    <h3 class="settings-section-title">✨ AI Cell Instructions</h3>
-                    <p class="settings-description" style="margin-bottom: 10px;">Add a Gemini API key to run cell instructions. The key is saved in this browser only.</p>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input id="cellAiApiKey" type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" placeholder="Gemini API key" aria-label="Gemini API key" style="flex:1; min-width:0; padding:8px 10px; border:1px solid #ccc; border-radius:5px; font-family:monospace;">
-                        <button class="btn btn-primary" type="button" onclick="saveCellAiApiKey()">Save</button>
+                <div class="settings-section settings-page" data-settings-page="ai">
+                    <div class="settings-page-heading"><div class="settings-eyebrow">CELL ASSISTANT</div><h3 class="settings-section-title">AI instructions</h3><p class="settings-description">Connect a model for cell level instructions.</p></div>
+                    <div class="settings-item">
+                        <label for="cellAiApiKey" class="settings-label">Gemini API key</label>
+                        <p class="settings-description" style="margin-bottom: 10px;">The key is saved in this browser only.</p>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <input id="cellAiApiKey" type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" placeholder="Paste API key" aria-label="Gemini API key" style="flex:1; min-width:0; padding:8px 10px; border:1px solid #ccc; border-radius:5px; font-family:monospace;">
+                            <button class="btn btn-primary" type="button" onclick="saveCellAiApiKey()">Save key</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+                    <div class="settings-item" style="margin-top:12px;">
+                        <label class="settings-label" for="cellAiModelSelect">Model</label>
+                        <p class="settings-description" style="margin-bottom:10px;">Test models and select one that works for you.</p>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                         <label for="cellAiModelSelect" style="font-size:13px; color:#555;">Model</label>
                         <select id="cellAiModelSelect" onchange="saveCellAiModelPreference(this.value)" style="flex:1; min-width:180px; padding:7px 8px; border:1px solid #ccc; border-radius:5px; background:#fff; color:#333;">
                             <option value="">Run the model tester first</option>
                         </select>
                         <button id="cellAiOpenModelTesterBtn" class="btn btn-secondary" type="button" onclick="openCellAiModelTester()" style="padding:7px 10px;">🧪 Test All Models</button>
-                    </div>
+                        </div>
                     <p id="cellAiModelStatus" class="settings-description" role="status" aria-live="polite" style="margin-top:8px;"></p>
                     <p class="settings-description" style="margin-top:4px;">The tester shows a result for every model and adds only models that pass to the picker. Each test sends your prompt and may use API quota.</p>
+                    </div>
                 </div>
 
-                <div class="settings-section">
-                    <h3 class="settings-section-title">🎨 Appearance</h3>
+                <div class="settings-section settings-page active" data-settings-page="view">
+                    <div class="settings-page-heading"><div class="settings-eyebrow">PREFERENCES</div><h3 class="settings-section-title">View</h3><p class="settings-description">Adjust how your sheet looks and behaves.</p></div>
 
                     <div class="settings-item" style="padding: 12px 0;">
                         <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -556,7 +572,7 @@
                         <div class="settings-item-header">
                             <span class="settings-label">Alternating Row Colors</span>
                         </div>
-                        <p class="settings-description">Choose two colors to alternate across rows. Existing column and cell background colors are preserved.</p>
+                        <p class="settings-description">Choose two colors to alternate across rows. Cells with their own background color keep it.</p>
                         <div style="display:flex; gap:18px; flex-wrap:wrap; margin-top:10px;">
                             <label style="display:flex; align-items:center; gap:8px;">Row 1 <input type="color" id="alternateRowColor1" value="#ffffff" onchange="updateAlternateRowColors()"></label>
                             <label style="display:flex; align-items:center; gap:8px;">Row 2 <input type="color" id="alternateRowColor2" value="#f2f5f9" onchange="updateAlternateRowColors()"></label>
@@ -627,8 +643,8 @@
                     </div>
                 </div>
 
-                <div class="settings-section">
-                    <h3 class="settings-section-title">🎨 Custom Color Syntax</h3>
+                <div class="settings-section settings-page" data-settings-page="markdown">
+                    <h3 class="settings-section-title">Custom Color Syntax</h3>
                     <p class="settings-description" style="margin-bottom: 15px;">Add custom color highlight syntaxes.
                         Use any characters (e.g., ++, $$, %%, etc.) with custom colors.</p>
 
@@ -640,6 +656,8 @@
                         style="margin-top: 10px;">
                         ➕ Add Custom Syntax
                     </button>
+                </div>
+                <div id="settingsSearchEmpty" class="settings-empty" style="display:none;">No matching settings found.</div>
                 </div>
             </div>
         </div>

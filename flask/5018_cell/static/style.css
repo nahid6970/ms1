@@ -5258,8 +5258,95 @@ td.has-cell-ai-rank > .markdown-preview {
 /* Custom Color Syntax Settings */
 /* Settings Modal Specific */
 .settings-modal {
-    max-width: 800px !important;
-    width: 90% !important;
+    max-width: 1020px !important;
+    width: min(94vw, 1020px) !important;
+    height: min(760px, 88vh);
+    max-height: 88vh;
+    border-radius: 18px;
+    box-shadow: 0 28px 90px rgba(15, 23, 42, 0.28);
+}
+
+#settingsModal .modal-header {
+    min-height: 58px;
+    padding: 15px 22px;
+    background: #fff;
+    border-bottom: 1px solid #edf0f4;
+}
+
+#settingsModal .modal-header h2 { font-size: 16px; color: #263247; }
+#settingsModal .modal-header .close { padding-left: 0 !important; justify-content: center; }
+
+.settings-shell {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    min-height: 0;
+    flex: 1;
+    background: #f7f8fb;
+}
+
+.settings-sidebar {
+    padding: 24px 14px;
+    background: #f2f4f8;
+    border-right: 1px solid #e7eaf0;
+}
+
+.settings-brand { display: flex; gap: 11px; align-items: center; padding: 3px 10px 26px; color: #263247; }
+.settings-brand > span { display:grid; place-items:center; width:36px; height:36px; border-radius:11px; color:#fff; background:#5969d8; font-size:19px; }
+.settings-brand b, .settings-brand small { display:block; }
+.settings-brand b { font-size:15px; }
+.settings-brand small { margin-top:3px; color:#858da0; font-size:11px; }
+.settings-search { display:flex; align-items:center; gap:8px; margin:0 0 16px; padding:0 10px; height:37px; border:1px solid #e0e4ec; border-radius:9px; background:#fff; color:#8a93a3; }
+.settings-search input { min-width:0; width:100%; border:0; outline:0; background:transparent; color:#344056; font-family:inherit; font-size:12px; }
+.settings-nav-item { display:flex; align-items:center; gap:11px; width:100%; padding:11px 12px; margin:3px 0; border:0; border-radius:9px; background:transparent; color:#5f6879; text-align:left; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:background .16s,color .16s,transform .16s; }
+.settings-nav-item > span { display:grid; place-items:center; width:22px; color:#8891a3; font-size:17px; }
+.settings-nav-item:hover { background:#e8ebf3; color:#30394c; }
+.settings-nav-item.active { background:#e1e5fb; color:#4455c5; }
+.settings-nav-item.active > span { color:#4455c5; }
+
+.settings-content { padding:30px clamp(20px, 4vw, 46px); overflow-y:auto; max-height:none; }
+.settings-page { display:none; max-width:720px; margin:0 auto; }
+.settings-page.active { display:block; }
+.settings-page-heading { margin-bottom:23px; }
+.settings-eyebrow { margin-bottom:8px; color:#6573d6; font-size:10px; font-weight:800; letter-spacing:.13em; }
+.settings-page-heading .settings-section-title { margin:0 0 5px; font-size:25px; color:#202b3d; }
+.settings-page-heading .settings-description { font-size:13px; }
+.settings-section { padding:0; margin:0; border:0; }
+.settings-item, .settings-card { padding:18px 20px; margin:0 0 12px; border:1px solid #e8ebf1; border-radius:12px; background:#fff; box-shadow:0 2px 8px rgba(26,39,68,.035); }
+.settings-item-header { margin:0; gap:18px; }
+.settings-label { color:#293449; font-size:13px; }
+.settings-description { margin-top:5px; color:#7b8494; font-size:12px; }
+.settings-action-card { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+.settings-action-card strong { color:#293449; font-size:13px; }
+.settings-action-button { flex-shrink:0; padding:9px 12px; border:1px solid #dfe3f1; border-radius:8px; background:#f8f9ff; color:#4e5fc6; font-size:12px; font-weight:700; cursor:pointer; }
+.settings-action-button:hover { background:#e9ecff; }
+.settings-action-button span { margin-left:5px; }
+.settings-inline-controls { display:flex; align-items:center; gap:10px; margin-top:14px; }
+.settings-inline-controls input[type="color"], .settings-color-pair input[type="color"] { width:42px; height:36px; padding:3px; border:1px solid #e0e4eb; border-radius:8px; background:white; cursor:pointer; }
+.settings-hex-input { display:flex; align-items:center; gap:4px; padding:0 9px; height:35px; border:1px solid #e0e4eb; border-radius:8px; color:#8a92a1; font:12px monospace; }
+.settings-hex-input input { width:68px; border:0; outline:0; color:#384258; font:12px monospace; }
+.settings-color-pair { display:flex; align-items:center; gap:16px; margin-top:14px; }
+.settings-color-pair label { display:flex; align-items:center; gap:8px; color:#6c7585; font-size:12px; }
+.settings-row-preview { display:flex; gap:3px; margin-left:auto; }
+.settings-row-preview i { width:19px; height:31px; border:1px solid #e3e7ee; border-radius:4px; background:#fff; }
+.settings-row-preview i:nth-child(even) { background:#f2f5f9; }
+.settings-line-height-grid { display:flex; gap:14px; margin-top:15px; }
+.settings-line-height-grid label { display:grid; gap:7px; color:#737d8e; font-size:11px; }
+.settings-line-height-grid input { width:100px; padding:8px 9px; border:1px solid #e0e4eb; border-radius:7px; color:#374258; }
+.settings-ai-key-row, .settings-ai-model-row { display:flex; gap:9px; margin-top:12px; }
+.settings-ai-key-row input, .settings-ai-model-row select { min-width:0; flex:1; padding:10px 11px; border:1px solid #e0e4eb; border-radius:8px; background:#fff; }
+.settings-footnote { margin:9px 0 0; color:#9299a7; font-size:11px; }
+.settings-empty { padding:35px 12px; color:#8790a0; text-align:center; font-size:13px; }
+.settings-content .custom-syntax-list { margin-top:16px; }
+.settings-content [hidden] { display:none !important; }
+
+@media (max-width: 640px) {
+    .settings-modal { width:96vw !important; height:90vh; max-height:90vh; }
+    .settings-shell { grid-template-columns:1fr; grid-template-rows:auto minmax(0,1fr); }
+    .settings-sidebar { display:flex; gap:5px; padding:10px; overflow-x:auto; border-right:0; border-bottom:1px solid #e7eaf0; }
+    .settings-brand { display:none; }
+    .settings-nav-item { width:auto; flex-shrink:0; margin:0; padding:9px 10px; }
+    .settings-content { padding:20px 14px; }
+    .settings-action-card { align-items:flex-start; flex-direction:column; }
 }
 
 /* Custom Color Syntax Settings - Table Layout */
