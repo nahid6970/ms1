@@ -5291,7 +5291,7 @@ td.has-cell-ai-rank > .markdown-preview {
     position: relative;
 }
 
-.settings-close { position:absolute; z-index:5; top:12px; right:14px; display:grid; place-items:center; width:32px; height:32px; border:0; border-radius:8px; background:transparent; color:#7c8595; font-size:24px; line-height:1; cursor:pointer; }
+.settings-close { position:absolute; z-index:30; top:12px; right:4px; display:grid; place-items:center; width:32px; height:32px; border:0; border-radius:8px; background:transparent; color:#7c8595; font-size:24px; line-height:1; cursor:pointer; }
 .settings-close:hover { background:#eef0f5; color:#30394c; }
 
 #settingsModal .modal-header {
@@ -5307,6 +5307,7 @@ td.has-cell-ai-rank > .markdown-preview {
 .settings-shell {
     display: grid;
     grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     min-height: 0;
     flex: 1;
     background: #f7f8fb;
@@ -5331,7 +5332,20 @@ td.has-cell-ai-rank > .markdown-preview {
 .settings-nav-item.active { background:#e1e5fb; color:#4455c5; }
 .settings-nav-item.active > span { color:#4455c5; }
 
-.settings-content { padding:30px clamp(20px, 4vw, 46px); overflow-y:auto; max-height:none; }
+.settings-content {
+    box-sizing: border-box;
+    height: calc(100% - 48px);
+    max-height: none;
+    margin-top: 48px;
+    padding: 18px clamp(20px, 4vw, 46px) 30px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #aab3c2 #eef0f4;
+}
+.settings-content::-webkit-scrollbar { width: 8px; }
+.settings-content::-webkit-scrollbar-track { background: #eef0f4; }
+.settings-content::-webkit-scrollbar-thumb { border: 2px solid #eef0f4; border-radius: 8px; background: #aab3c2; }
+.settings-content::-webkit-scrollbar-thumb:hover { background: #7e899b; }
 .settings-page { display:none; max-width:720px; margin:0 auto; }
 .settings-page.active { display:block; }
 .settings-page-heading { margin-bottom:23px; }
@@ -5373,7 +5387,7 @@ td.has-cell-ai-rank > .markdown-preview {
     .settings-sidebar { display:flex; gap:5px; padding:10px; overflow-x:auto; border-right:0; border-bottom:1px solid #e7eaf0; }
     .settings-brand { display:none; }
     .settings-nav-item { width:auto; flex-shrink:0; margin:0; padding:9px 10px; }
-    .settings-content { padding:20px 14px; }
+    .settings-content { height:calc(100% - 48px); margin-top:48px; padding:16px 14px 20px; }
     .settings-action-card { align-items:flex-start; flex-direction:column; }
 }
 
