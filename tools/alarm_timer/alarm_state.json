@@ -19,7 +19,7 @@
       },
       {
         "name": "Codex",
-        "pattern": "%H:%M on %d %b"
+        "pattern": "%H:%M %p on %d %b"
       }
     ]
   },
@@ -54,10 +54,10 @@
         {
           "id": "76eb1b0f",
           "label": "03",
-          "fires_at": 1792646460.0,
-          "created_at": 1790054595.0849547,
+          "fires_at": 1794860880.0,
+          "created_at": 1792312171.438594,
           "input_mode": "custom_3",
-          "input_value": "11:21 on 22 Oct",
+          "input_value": "2:28 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
           "secondary_mode": true
@@ -98,10 +98,10 @@
         {
           "id": "ed31453c",
           "label": "04",
-          "fires_at": 1793684760.0,
-          "created_at": 1791092964.551397,
+          "fires_at": 1794861180.0,
+          "created_at": 1792312442.9743586,
           "input_mode": "custom_3",
-          "input_value": "11:46 on 3 Nov",
+          "input_value": "2:33 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
           "secondary_mode": true
@@ -131,10 +131,10 @@
         {
           "id": "3ca619ac",
           "label": "07",
-          "fires_at": 1792564740.0,
-          "created_at": 1789972781.0604827,
+          "fires_at": 1794881820.0,
+          "created_at": 1792311843.1598673,
           "input_mode": "custom_3",
-          "input_value": "12:39 on 21 Oct",
+          "input_value": "8:17 AM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
           "secondary_mode": true
@@ -142,10 +142,10 @@
         {
           "id": "b8ccf04d",
           "label": "08",
-          "fires_at": 1793248800.0,
-          "created_at": 1790658604.433556,
+          "fires_at": 1794861000.0,
+          "created_at": 1792312278.3698044,
           "input_mode": "custom_3",
-          "input_value": "10:40 on 29 Oct",
+          "input_value": "2:30 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
           "secondary_mode": true
@@ -153,13 +153,13 @@
         {
           "id": "523e5c0e",
           "label": "BS-6970",
-          "fires_at": 1791950700.0,
-          "created_at": 1789358799.6665027,
+          "fires_at": 1794860760.0,
+          "created_at": 1792312008.5213642,
           "input_mode": "custom_3",
-          "input_value": "10:05 on 14 Oct",
+          "input_value": "2:26 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": false
+          "secondary_mode": true
         }
       ]
     },
