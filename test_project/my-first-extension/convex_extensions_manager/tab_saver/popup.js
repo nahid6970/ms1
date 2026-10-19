@@ -606,8 +606,8 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
     const savedTabs = result.savedTabs || [];
     const updatedTabs = savedTabs.map(tab => {
       if (tab.id === currentRightClickedTabId) {
-        // Keep existing deadline if no new one provided
-        const finalDeadline = (deadline !== null) ? deadline : tab.deadline;
+        // An empty deadline input clears this tab's existing deadline.
+        const finalDeadline = deadline;
         return { ...tab, headerTitle: headerTitle || null, docLink: docLink || null, note: note || null, deadline: finalDeadline, tag: tag };
       }
       return tab;
