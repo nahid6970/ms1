@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meet Timesheet</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body id="meet-timesheet-popup">
+  <main id="meet-timesheet-view">
+    <header id="popup-header">
+      <div><p class="eyebrow">TIMESHEET</p><h1>Meet activity</h1></div>
+      <span id="meeting-count" aria-label="Meeting count">0</span>
+    </header>
+    <section id="active-meeting-panel" aria-live="polite">
+      <span class="status-dot" id="active-status-dot"></span>
+      <div><strong id="active-status">No active meeting</strong><p id="active-detail">Meetings are tracked automatically.</p></div>
+    </section>
+    <section id="history-section" aria-labelledby="history-heading">
+      <div class="section-heading"><h2 id="history-heading">Recent meetings</h2><button id="refresh-meetings" type="button" aria-label="Refresh meeting list">↻</button></div>
+      <div id="meeting-list" role="list" aria-label="Recorded meetings"></div>
+      <p id="empty-state">Your completed meetings will appear here.</p>
+    </section>
+    <footer id="sync-footer">
+      <span id="sync-status">Local records</span>
+      <div class="sync-actions"><button id="clear-meetings" type="button">Clear</button><button id="restore-from-convex" type="button">Restore</button><button id="sync-to-convex" type="button">Sync now</button></div>
+    </footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

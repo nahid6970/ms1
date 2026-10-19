@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "Meet Timesheet",
+  "version": "1.0.0",
+  "description": "Automatically record Google Meet meeting names, start and end times, and durations.",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://meet.google.com/*", "https://*.convex.cloud/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "content_scripts": [{
+    "matches": ["https://meet.google.com/*"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "action": { "default_title": "Meet Timesheet", "default_popup": "popup.html" }
+}
