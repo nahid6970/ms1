@@ -235,3 +235,27 @@ body {
 .fb-hint a:hover {
   color: #ffaa00;
 }
+
+/* Editable title / filename field */
+.title-input {
+  width: 100%;
+  background-color: #10161d;
+  border: 1px solid #00ff9f;
+  padding: 8px;
+  color: #00ff9f;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 9pt;
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: #00f0ff;
+  color: #e0e0e0;
+}
+
+.help-text {
+  color: #555;
+  font-size: 8.5pt;
+  margin-top: 4px;
+}

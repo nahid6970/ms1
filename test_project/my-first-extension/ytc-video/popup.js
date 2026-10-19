@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   // Restore saved state for this URL
-  chrome.storage.local.get(['videoFormats', 'audioFormats', 'combinedFormats', 'selectedVideo', 'selectedAudio', 'lastUrl'], (data) => {
+  chrome.storage.local.get(['videoFormats', 'audioFormats', 'combinedFormats', 'selectedVideo', 'selectedAudio', 'savedTitle', 'lastUrl'], (data) => {
     if (data.lastUrl === currentUrl && data.videoFormats && data.audioFormats) {
       videoFormats = data.videoFormats;
       audioFormats = data.audioFormats;
@@ -61,6 +61,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('videoFormat').disabled = false;
       document.getElementById('audioFormat').disabled = false;
       document.getElementById('download').disabled = false;
+
+      // Restore title field
+      if (data.savedTitle !== undefined) {
+        document.getElementById('titleSection').style.display = 'block';
+        document.getElementById('videoTitle').value = data.savedTitle;
+      }
       
       if (data.selectedVideo) document.getElementById('videoFormat').value = data.selectedVideo;
       if (data.selectedAudio) document.getElementById('audioFormat').value = data.selectedAudio;
@@ -166,6 +172,7 @@ document.getElementById('fetchFormats').addEventListener('click', async () => {
         videoFormats,
         audioFormats,
         combinedFormats,
+        savedTitle: response.title || '',
         lastUrl: url
       });
       
@@ -174,6 +181,12 @@ document.getElementById('fetchFormats').addEventListener('click', async () => {
       document.getElementById('videoFormat').disabled = false;
       document.getElementById('audioFormat').disabled = false;
       document.getElementById('download').disabled = false;
+
+      // Show and populate the title field
+      const titleSection = document.getElementById('titleSection');
+      const titleInput = document.getElementById('videoTitle');
+      titleSection.style.display = 'block';
+      titleInput.value = response.title || '';
       
       const totalFormats = videoFormats.length + audioFormats.length + combinedFormats.length;
       const hint = combinedFormats.length > 0
@@ -227,7 +240,8 @@ document.getElementById('download').addEventListener('click', async () => {
       audioFormat,
       downloadSubs,
       subLang,
-      saveDir: settings.saveDir
+      saveDir: settings.saveDir,
+      customTitle: document.getElementById('videoTitle').value.trim()
     }
   }, (response) => {
     downloadBtn.disabled = false;

@@ -112,6 +112,7 @@ async function downloadVideo(data, sendResponse) {
     downloadSubs: data.downloadSubs,
     subLang: data.subLang,
     saveDir: data.saveDir,
+    customTitle: data.customTitle || '',
     // Auth settings passed so native_host.py can build --cookies-from-browser / --cookies args
     authMethod: auth.authMethod,
     browser: auth.browser,

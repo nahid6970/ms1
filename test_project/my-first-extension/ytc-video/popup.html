@@ -22,6 +22,13 @@
 
     <button id="fetchFormats" class="action-btn">[ FETCH FORMATS ]</button>
 
+    <!-- Title field: shown after formats are fetched, editable -->
+    <div class="section" id="titleSection" style="display: none;">
+      <label class="section-title">TITLE / FILENAME:</label>
+      <input type="text" id="videoTitle" class="title-input" placeholder="Video title...">
+      <p class="help-text">Edit to rename the output file</p>
+    </div>
+
     <div class="section">
       <label class="section-title">VIDEO FORMAT:</label>
       <select id="videoFormat" class="select" disabled>

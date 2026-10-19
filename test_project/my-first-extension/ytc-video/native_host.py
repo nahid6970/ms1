@@ -231,6 +231,7 @@ def fetch_formats(message):
         
         send_message({
             "success": True,
+            "title": video_info.get('title', ''),
             "videoFormats": video_formats,
             "audioFormats": audio_formats,
             "combinedFormats": combined_formats
@@ -249,6 +250,15 @@ def download_video(message):
         download_subs = message.get('downloadSubs', False)
         sub_lang = message.get('subLang', 'en')
         save_dir = message['saveDir']
+        custom_title = message.get('customTitle', '').strip()
+
+        # Build output template — use custom title if provided, otherwise yt-dlp's %(title)s
+        if custom_title:
+            # Sanitize: remove characters not allowed in filenames
+            safe_title = re.sub(r'[\\/*?:"<>|]', '', custom_title).strip()
+            output_template = f'{save_dir}/{safe_title}.%(ext)s'
+        else:
+            output_template = f'{save_dir}/%(title)s.%(ext)s'
         
         # Build format string
         if video_format == 'best' and audio_format == 'best':
@@ -268,7 +278,7 @@ def download_video(message):
             'yt-dlp',
             '--no-playlist',
             '-f', format_str,
-            '-o', f'{save_dir}/%(title)s.%(ext)s',
+            '-o', output_template,
             '--newline'
         ]
         
