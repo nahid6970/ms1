@@ -35,21 +35,26 @@
         </label>
       </div>
       <p class="help-text">
-        ℹ️ Authentication is also recommended for <strong>Facebook page videos</strong>.
-        Many Facebook page videos are not publicly accessible. Use Browser Cookies
-        (log in to Facebook in Chrome) or a Cookie File to download them.
+        ℹ️ Required for <strong>private Facebook groups</strong> and many page videos.
+        <br><br>
+        <strong>Recommended for private groups:</strong><br>
+        1. <strong>Firefox</strong> Browser Cookies — most reliable (Chrome’s cookie store is often encrypted and unreadable by yt-dlp).<br>
+        2. Or export a <strong>Cookie File</strong> while logged into Facebook (use “Get cookies.txt LOCALLY” extension).
+        <br><br>
+        Log into Facebook in the chosen browser first, then save settings.
       </p>
     </div>
 
     <div class="section" id="browserSection" style="display: none;">
       <label class="section-title">BROWSER:</label>
       <select id="browser" class="select">
+        <option value="firefox">Firefox (recommended for Facebook)</option>
         <option value="chrome">Chrome</option>
-        <option value="firefox">Firefox</option>
         <option value="edge">Edge</option>
         <option value="opera">Opera</option>
         <option value="brave">Brave</option>
       </select>
+      <p class="help-text">For private Facebook groups prefer Firefox. Close the browser if cookie extraction fails.</p>
     </div>
 
     <div class="section" id="cookieFileSection" style="display: none;">

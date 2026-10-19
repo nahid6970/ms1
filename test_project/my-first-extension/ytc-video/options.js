@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.sync.get({
     saveDir: '',
     authMethod: 'none',
-    browser: 'chrome',
+    browser: 'firefox',
     cookieFile: ''
   }, (settings) => {
     document.getElementById('saveDir').value = settings.saveDir;

@@ -41,35 +41,60 @@ def is_youtube_url(url):
 
 
 def is_facebook_url(url):
-    """Check if URL is a Facebook video URL"""
+    """Check if URL is a Facebook video / group / reel / post URL"""
     facebook_patterns = [
         r'^(https?://)?(www\.)?facebook\.com/',
         r'^(https?://)?(www\.)?fb\.watch/',
         r'^(https?://)?(www\.)?fb\.com/',
         r'^(https?://)?m\.facebook\.com/',
         r'^(https?://)?web\.facebook\.com/',
+        r'^(https?://)?(www\.)?facebook\.com/groups/',
+        r'^(https?://)?(www\.)?facebook\.com/.*/videos/',
+        r'^(https?://)?(www\.)?facebook\.com/.*/posts/',
+        r'^(https?://)?(www\.)?facebook\.com/reel/',
+        r'^(https?://)?(www\.)?facebook\.com/watch',
     ]
-    return any(re.match(pattern, url, re.IGNORECASE) for pattern in facebook_patterns)
+    return any(re.search(pattern, url, re.IGNORECASE) for pattern in facebook_patterns)
+
+
+def is_facebook_group_url(url):
+    """Detect private/public Facebook group content (needs auth more often)"""
+    return bool(re.search(
+        r'facebook\.com/groups/|facebook\.com/.*/permalink|facebook\.com/.*/posts/',
+        url, re.IGNORECASE
+    ))
 
 
 def build_extractor_args(url):
-    """Build extractor-args only for YouTube URLs"""
+    """Build extractor-args for YouTube and Facebook"""
+    args = []
     if is_youtube_url(url):
-        return ['--extractor-args', 'youtube:player_client=default']
-    return []
+        args.extend(['--extractor-args', 'youtube:player_client=default'])
+    # Facebook (especially private groups) often needs browser impersonation
+    # to avoid "Cannot parse data" / login walls when cookies are present
+    if is_facebook_url(url):
+        args.extend(['--impersonate', 'chrome'])
+    return args
 
 
 def build_auth_args(message):
-    """Build authentication arguments from the message (passed by the extension)"""
+    """Build authentication arguments from the message (passed by the extension).
+
+    For private Facebook groups, cookies are required.
+    Prefer Firefox or a cookies.txt file — Chrome's cookie store is often
+    unreadable by yt-dlp due to app-bound encryption (since ~2024).
+    """
     auth_method = message.get('authMethod', 'none')
     
     if auth_method == 'browser':
         browser = message.get('browser', 'chrome')
+        # Firefox is more reliable for Facebook private content
         return ['--cookies-from-browser', browser]
     elif auth_method == 'file':
         cookie_file = message.get('cookieFile', '')
-        if cookie_file:
+        if cookie_file and os.path.isfile(cookie_file):
             return ['--cookies', cookie_file]
+        # Fall through so caller sees a clear error later
     
     return []
 
@@ -78,6 +103,22 @@ def fetch_formats(message):
     """Fetch available video, audio, and combined formats"""
     try:
         url = message['url']
+        auth_method = message.get('authMethod', 'none')
+        
+        # Private Facebook groups almost always need auth
+        if is_facebook_group_url(url) and auth_method == 'none':
+            send_message({
+                "success": False,
+                "error": (
+                    "This looks like a Facebook group/post URL. Private group videos "
+                    "require authentication.\n\n"
+                    "Go to Settings → Authentication → choose:\n"
+                    "• Browser Cookies (prefer Firefox — Chrome cookies often fail)\n"
+                    "• or Cookie File (export with 'Get cookies.txt LOCALLY')\n\n"
+                    "Then try FETCH FORMATS again."
+                )
+            })
+            return
         
         command = ['yt-dlp', '--no-playlist', '--dump-json']
         command.extend(build_extractor_args(url))
@@ -95,7 +136,22 @@ def fetch_formats(message):
         stdout, stderr = process.communicate()
         
         if process.returncode != 0:
-            send_message({"success": False, "error": stderr})
+            err = (stderr or '').strip() or 'Unknown yt-dlp error'
+            # Friendlier hints for common Facebook auth failures
+            lower = err.lower()
+            if any(x in lower for x in (
+                'login required', 'only available for registered',
+                'cannot parse data', 'content isn\'t available',
+                'please log in', 'cookies'
+            )):
+                err = (
+                    f"{err}\n\n"
+                    "Tip for private Facebook groups:\n"
+                    "1. Prefer Firefox cookies (Chrome often fails due to encryption)\n"
+                    "2. Or export cookies.txt while logged into Facebook and use Cookie File\n"
+                    "3. Update yt-dlp: yt-dlp -U"
+                )
+            send_message({"success": False, "error": err})
             return
         
         video_info = json.loads(stdout)
@@ -113,7 +169,6 @@ def fetch_formats(message):
             has_audio = f.get('acodec') and f.get('acodec') != 'none'
             
             if has_video and not has_audio:
-                # Video-only stream
                 video_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
@@ -122,7 +177,6 @@ def fetch_formats(message):
                     'type': 'video'
                 })
             elif has_audio and not has_video:
-                # Audio-only stream
                 audio_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
@@ -131,7 +185,6 @@ def fetch_formats(message):
                     'type': 'audio'
                 })
             elif has_video and has_audio:
-                # Combined video+audio stream (common on Facebook)
                 combined_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
@@ -171,7 +224,7 @@ def download_video(message):
         else:
             format_str = f'{video_format}+{audio_format}'
         
-        # Add /best fallback for combined-format sites (e.g. Facebook)
+        # Facebook (especially groups) often only exposes combined streams
         if is_facebook_url(url):
             format_str = f'{format_str}/best'
         

@@ -67,19 +67,23 @@ Two methods:
 1. **Browser Cookies**: Use cookies from your logged-in browser
 2. **Cookie File**: Export cookies using "Get cookies.txt LOCALLY" extension
 
-### Facebook Page Videos
+### Facebook Page & Private Group Videos
 
-Many Facebook page videos (e.g. `https://www.facebook.com/<page>/videos/<id>/`)
-are not publicly accessible and **require authentication**:
+Private Facebook **group** videos and many page videos are not publicly
+accessible and **require authentication**:
 
-- **Browser Cookies** — log in to Facebook in your browser, then select
-  "Browser Cookies → Chrome" in Settings. This is the easiest option.
-- **Cookie File** — export a `cookies.txt` from your logged-in Facebook
-  session using the "Get cookies.txt LOCALLY" extension, then point to it
-  in Settings.
+1. **Firefox Browser Cookies (recommended)**  
+   Log into Facebook in Firefox, then in extension Settings choose  
+   Authentication → Browser Cookies → **Firefox**.  
+   Chrome’s cookie store is often encrypted and unreadable by yt-dlp.
 
-The popup will show a "FACEBOOK VIDEO DETECTED" hint when you're on a
-Facebook video page to remind you to configure authentication.
+2. **Cookie File**  
+   While logged into Facebook, use the “Get cookies.txt LOCALLY” extension  
+   to export `cookies.txt`, then point to that file in Settings.
+
+3. Update yt-dlp regularly: `yt-dlp -U`
+
+The popup shows a stronger warning when a group/post URL is detected.
 
 ## Troubleshooting
 

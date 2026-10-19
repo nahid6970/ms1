@@ -6,6 +6,10 @@ function isFacebookUrl(url) {
   return /^(https?:\/\/)?(www\.|m\.|web\.)?facebook\.com\/|^(https?:\/\/)?fb\.(watch|com)\//i.test(url);
 }
 
+function isFacebookGroupUrl(url) {
+  return /facebook\.com\/groups\/|facebook\.com\/.*\/(permalink|posts)\//i.test(url);
+}
+
 function isYouTubeUrl(url) {
   return /^(https?:\/\/)?(www\.)?youtube\.com\/|^(https?:\/\/)?youtu\.be\//i.test(url);
 }
@@ -16,7 +20,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('url').value = currentUrl;
 
   // Site-specific status hints
-  if (isFacebookUrl(currentUrl)) {
+  if (isFacebookGroupUrl(currentUrl)) {
+    setStatus('PRIVATE GROUP VIDEO? ENABLE AUTH IN SETTINGS (Firefox or Cookie File recommended)');
+    document.getElementById('fbAuthHint').style.display = 'block';
+    const hint = document.getElementById('fbAuthHint');
+    if (hint) {
+      hint.innerHTML =
+        '⚠️ Private Facebook <strong>group</strong> videos require authentication.<br>' +
+        'Use <strong>Firefox cookies</strong> or a <strong>Cookie File</strong> (Chrome cookies often fail).<br>' +
+        '<a href="#" id="settingsLinkHint">Open Settings →</a>';
+      document.getElementById('settingsLinkHint')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        chrome.runtime.openOptionsPage();
+      });
+    }
+  } else if (isFacebookUrl(currentUrl)) {
     setStatus('FACEBOOK VIDEO DETECTED — AUTH RECOMMENDED IN SETTINGS');
     document.getElementById('fbAuthHint').style.display = 'block';
   } else if (isYouTubeUrl(currentUrl)) {
