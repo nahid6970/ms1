@@ -409,6 +409,16 @@
             "kind": "Exe",
             "id": "netbird-ui.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "cheatengine-x86_64-SSE4-AVX2.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "FarCry4.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
