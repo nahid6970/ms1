@@ -65,15 +65,39 @@ def is_facebook_group_url(url):
     ))
 
 
+def _impersonate_available():
+    """Return True if yt-dlp has a usable Chrome impersonate target (needs curl_cffi)."""
+    try:
+        result = subprocess.run(
+            ['yt-dlp', '--list-impersonate-targets'],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+        )
+        out = (result.stdout or '') + (result.stderr or '')
+        # Look for a Chrome target that is NOT marked unavailable
+        for line in out.splitlines():
+            lower = line.lower()
+            if 'chrome' in lower and 'curl_cffi' in lower and 'not available' not in lower:
+                return True
+    except Exception:
+        pass
+    return False
+
+
 def build_extractor_args(url):
-    """Build extractor-args for YouTube and Facebook"""
+    """Build extractor-args for YouTube and Facebook.
+
+    Facebook private/group videos often need --impersonate (curl_cffi)
+    in addition to cookies, otherwise yt-dlp gets "Cannot parse data".
+    """
     args = []
     if is_youtube_url(url):
         args.extend(['--extractor-args', 'youtube:player_client=default'])
-    # Facebook (especially private groups) often needs browser impersonation
-    # to avoid "Cannot parse data" / login walls when cookies are present
-    if is_facebook_url(url):
-        args.extend(['--impersonate', 'chrome'])
+    if is_facebook_url(url) and _impersonate_available():
+        # chrome-99 is the target that most often works with Facebook + cookies
+        args.extend(['--impersonate', 'chrome-99'])
     return args
 
 
@@ -142,14 +166,16 @@ def fetch_formats(message):
             if any(x in lower for x in (
                 'login required', 'only available for registered',
                 'cannot parse data', 'content isn\'t available',
-                'please log in', 'cookies'
+                'please log in', 'cookies', 'impersonate'
             )):
                 err = (
                     f"{err}\n\n"
                     "Tip for private Facebook groups:\n"
-                    "1. Prefer Firefox cookies (Chrome often fails due to encryption)\n"
-                    "2. Or export cookies.txt while logged into Facebook and use Cookie File\n"
-                    "3. Update yt-dlp: yt-dlp -U"
+                    "1. Install browser impersonation support:\n"
+                    "   pip install -U \"yt-dlp[default,curl-cffi]\"\n"
+                    "2. Use Cookie File (export while logged into Facebook) or Firefox cookies\n"
+                    "3. Update yt-dlp: yt-dlp -U\n"
+                    "4. Confirm: yt-dlp --list-impersonate-targets  (Chrome should NOT say 'not available')"
                 )
             send_message({"success": False, "error": err})
             return
