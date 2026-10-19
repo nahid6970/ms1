@@ -64,6 +64,9 @@ Example links section (after table):
 | Midland Bank PLC | Trainee Assistant Officer | Fresher — CGPA ≥ 2.75, SSC/HSC GPA ≥ 4.00 | ✅ Suitable | Oct 20, 2026 |
 | ICBI Asset Management PLC (IAMPLC) | Senior Officer (Grade-9) | Fresher, MBA Finance | ✅ Suitable | Oct 29, 2026 |
 | ICBI Asset Management PLC (IAMPLC) | Officer (Grade-10) | Fresher, BBA Finance | ✅ Suitable | Oct 29, 2026 |
+| Bangladesh Bank | Senior Officer (Financial Analyst) Grade-9 | Fresher, MBA Finance | ✅ WAS eligible — MISSED deadline | Oct 18, 2026 — EXPIRED |
+| Bangladesh Bank | Financial Analyst Grade-9 | Fresher, BBA+MBA Finance | ✅ WAS eligible — MISSED deadline | Oct 18, 2026 — EXPIRED |
+| Bangladesh Bank | Protocol Officer Grade-10 | Fresher, 4-yr BBA | ✅ WAS eligible — MISSED deadline | Oct 18, 2026 — EXPIRED |
 
 ---
 
@@ -84,8 +87,8 @@ Example links section (after table):
 | Check Agrani Bank post details | Sept 10, 2026 | ⚠️ Verify eligibility |
 | Check BIBM post details | Sept 23, 2026 | ⚠️ Verify eligibility |
 | Check EBL post details | Sept 12, 2026 | ⚠️ Verify eligibility |
-| Check Bangladesh Bank erecruitment for Finance/General Officer circular | Ongoing | 🔁 Periodic check |
+| Check Bangladesh Bank erecruitment for Finance/General Officer circular | Ongoing | 🔴 High priority — MISSED Oct 18 circular (Sr Officer Financial Analyst, Financial Analyst — perfect match). Watch erecruitment.bb.org.bd for next batch |
 | Watch BSCS for Job ID 26102 & 26103 (Officer G / Officer Cash) | Ongoing | 🔴 High priority — new batch expected |
 | Check Dhaka University post details (jobs.du.ac.bd) | Sept 13–15, Nov 2 | ⚠️ Verify post names |
-| Apply Midland Bank PLC (Probationary Officer / TAO) via bdjobs.com/mdb | Oct 20, 2026 | 🟡 Apply |
+| Apply Midland Bank PLC (Probationary Officer / TAO) via bdjobs.com/mdb | Oct 20, 2026 | 🔴 URGENT — deadline tomorrow |
 | Apply IAMPLC Senior Officer (Grade-9) + Officer (Grade-10) — portal opens Oct 1 | Oct 29, 2026 | 🟡 Apply from Oct 1 at icb.org.bd/iamcl/career/cindex.php |
