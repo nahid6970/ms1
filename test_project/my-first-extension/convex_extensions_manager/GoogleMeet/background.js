@@ -11,6 +11,26 @@ async function saveState(meetings, activeMeetings) {
   await chrome.storage.local.set({ meetings, activeMeetings });
 }
 
+function collapseOverlappingSessions(meetings) {
+  const sorted = [...meetings].sort((a, b) => a.startedAt - b.startedAt);
+  const result = [];
+  for (const meeting of sorted) {
+    const prior = result.find((item) => {
+      if (!item.meetingUrl || item.meetingUrl !== meeting.meetingUrl) return false;
+      const gap = Math.max(item.startedAt, meeting.startedAt) - Math.min(item.endedAt, meeting.endedAt);
+      return gap <= 15000;
+    });
+    if (prior) {
+      prior.startedAt = Math.min(prior.startedAt, meeting.startedAt);
+      prior.endedAt = Math.max(prior.endedAt, meeting.endedAt);
+      prior.durationMs = prior.endedAt - prior.startedAt;
+    } else {
+      result.push({ ...meeting });
+    }
+  }
+  return result.sort((a, b) => b.startedAt - a.startedAt);
+}
+
 async function syncMeetings(meetings) {
   if (!CONVEX_URL || CONVEX_URL.includes('YOUR_CONVEX_URL')) return { success: false, error: 'Configure the Convex URL in background.js.' };
   try {
@@ -45,8 +65,9 @@ async function finalize(tabId, endedAt = Date.now()) {
   };
   delete activeMeetings[String(tabId)];
   meetings.unshift(record);
-  await saveState(meetings.slice(0, MAX_MEETINGS), activeMeetings);
-  await syncMeetings(meetings.slice(0, MAX_MEETINGS));
+  const normalizedMeetings = collapseOverlappingSessions(meetings).slice(0, MAX_MEETINGS);
+  await saveState(normalizedMeetings, activeMeetings);
+  await syncMeetings(normalizedMeetings);
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

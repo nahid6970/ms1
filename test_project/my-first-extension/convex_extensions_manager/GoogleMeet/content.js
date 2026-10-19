@@ -1,6 +1,9 @@
 (() => {
   let previousActive = null;
+  let candidateActive = null;
+  let candidateSince = 0;
   let lastName = '';
+  let transitionTimer = null;
 
   function isInMeeting() {
     const labels = [...document.querySelectorAll('[aria-label]')]
@@ -28,16 +31,26 @@
   function report() {
     const active = isInMeeting();
     const name = getMeetingName();
-    if (active !== previousActive || name !== lastName) {
+    if (active !== candidateActive) {
+      candidateActive = active;
+      candidateSince = Date.now();
+      clearTimeout(transitionTimer);
+      // Meet's controls can briefly disappear while its call UI rerenders.
+      transitionTimer = setTimeout(report, active ? 4000 : 12000);
+      return;
+    }
+
+    const requiredStableMs = active ? 4000 : 12000;
+    if (active !== previousActive && Date.now() - candidateSince < requiredStableMs) {
+      clearTimeout(transitionTimer);
+      transitionTimer = setTimeout(report, requiredStableMs - (Date.now() - candidateSince));
+      return;
+    }
+
+    if (active !== previousActive || (active && name !== lastName)) {
       previousActive = active;
       lastName = name;
-      chrome.runtime.sendMessage({
-        action: 'meetingState',
-        active,
-        name,
-        url: location.href,
-        observedAt: Date.now()
-      }).catch(() => {});
+      chrome.runtime.sendMessage({ action: 'meetingState', active, name, url: location.href, observedAt: Date.now() }).catch(() => {});
     }
   }
 

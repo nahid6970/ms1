@@ -12,6 +12,25 @@ function formatDate(timestamp) {
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(timestamp);
 }
 
+function collapseDuplicateRows(meetings) {
+  const sorted = [...meetings].sort((a, b) => a.startedAt - b.startedAt);
+  const rows = [];
+  for (const meeting of sorted) {
+    const duplicate = rows.find((row) => {
+      if (!row.meetingUrl || row.meetingUrl !== meeting.meetingUrl) return false;
+      return Math.max(row.startedAt, meeting.startedAt) - Math.min(row.endedAt, meeting.endedAt) <= 15000;
+    });
+    if (duplicate) {
+      duplicate.startedAt = Math.min(duplicate.startedAt, meeting.startedAt);
+      duplicate.endedAt = Math.max(duplicate.endedAt, meeting.endedAt);
+      duplicate.durationMs = duplicate.endedAt - duplicate.startedAt;
+    } else {
+      rows.push({ ...meeting });
+    }
+  }
+  return rows.sort((a, b) => b.startedAt - a.startedAt);
+}
+
 function render(state) {
   const meetings = state.meetings || [];
   const activeMeetings = Object.values(state.activeMeetings || {});
@@ -54,7 +73,17 @@ function render(state) {
 }
 
 function refresh() {
-  chrome.storage.local.get({ meetings: [], activeMeetings: {}, lastSyncedAt: null, syncError: '' }, render);
+  chrome.storage.local.get({ meetings: [], activeMeetings: {}, lastSyncedAt: null, syncError: '' }, (state) => {
+    const meetings = collapseDuplicateRows(state.meetings || []);
+    if (meetings.length !== (state.meetings || []).length) {
+      chrome.storage.local.set({ meetings }, () => {
+        chrome.runtime.sendMessage({ action: 'syncNow' });
+        render({ ...state, meetings });
+      });
+      return;
+    }
+    render({ ...state, meetings });
+  });
 }
 
 document.getElementById('refresh-meetings').addEventListener('click', refresh);
