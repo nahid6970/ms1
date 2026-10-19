@@ -18,6 +18,7 @@ button { border: 0; cursor: pointer; font: inherit; }
 #refresh-meetings { width: 28px; height: 28px; border-radius: 8px; background: #e9eef7; color: #50617e; font-size: 18px; }
 #meeting-list { max-height: 300px; overflow: auto; }
 .meeting-card { margin-bottom: 8px; padding: 11px 12px; border: 1px solid #e8ebf2; border-radius: 11px; background: #fff; }
+.meeting-card.is-live { border-color: #a7e7c9; background: #f7fffb; }
 .meeting-name { overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .meeting-meta { display: flex; justify-content: space-between; margin-top: 6px; color: #71809b; font-size: 11px; }
 .meeting-duration { color: #315ec8; font-weight: 700; }

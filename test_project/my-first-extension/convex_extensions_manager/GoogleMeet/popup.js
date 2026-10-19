@@ -2,10 +2,13 @@ const meetingList = document.getElementById('meeting-list');
 const emptyState = document.getElementById('empty-state');
 
 function formatDuration(ms) {
-  const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return hours ? `${hours}h ${minutes}m` : `${minutes}m`;
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 }
 
 function formatDate(timestamp) {
@@ -41,19 +44,24 @@ function render(state) {
   if (activeMeetings.length) {
     dot.classList.add('is-active');
     status.textContent = activeMeetings[0].meetingName || 'Meeting in progress';
-    detail.textContent = `Started ${formatDate(activeMeetings[0].startedAt)}`;
+    const elapsed = formatDuration(Date.now() - activeMeetings[0].startedAt);
+    detail.textContent = `Started ${formatDate(activeMeetings[0].startedAt)} · ${elapsed} elapsed`;
   } else {
     dot.classList.remove('is-active');
     status.textContent = 'No active meeting';
     detail.textContent = 'Meetings are tracked automatically.';
   }
   meetingList.replaceChildren();
-  emptyState.hidden = meetings.length > 0;
-  for (const meeting of meetings.slice(0, 30)) {
+  emptyState.hidden = meetings.length > 0 || activeMeetings.length > 0;
+  const displayedMeetings = [
+    ...activeMeetings.map((meeting) => ({ ...meeting, isLive: true })),
+    ...meetings.slice(0, 30)
+  ];
+  for (const meeting of displayedMeetings) {
     const card = document.createElement('article');
-    card.className = 'meeting-card';
+    card.className = meeting.isLive ? 'meeting-card is-live' : 'meeting-card';
     card.setAttribute('role', 'listitem');
-    card.dataset.testid = 'meeting-record';
+    card.dataset.testid = meeting.isLive ? 'active-meeting-record' : 'meeting-record';
     const name = document.createElement('div');
     name.className = 'meeting-name';
     name.textContent = meeting.meetingName || 'Google Meet';
@@ -63,7 +71,9 @@ function render(state) {
     date.textContent = formatDate(meeting.startedAt);
     const duration = document.createElement('span');
     duration.className = 'meeting-duration';
-    duration.textContent = formatDuration(meeting.durationMs);
+    duration.textContent = meeting.isLive
+      ? `LIVE · ${formatDuration(Date.now() - meeting.startedAt)}`
+      : formatDuration(meeting.durationMs);
     meta.append(date, duration);
     card.append(name, meta);
     meetingList.append(card);
@@ -124,3 +134,4 @@ document.getElementById('restore-from-convex').addEventListener('click', () => {
 
 chrome.storage.onChanged.addListener(refresh);
 refresh();
+setInterval(refresh, 1000);
