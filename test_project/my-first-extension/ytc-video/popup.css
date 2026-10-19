@@ -213,3 +213,25 @@ body {
   font-size: 10pt;
   margin-top: 5px;
 }
+
+/* Facebook auth hint banner */
+.fb-hint {
+  background-color: #1a1206;
+  border: 1px solid #ffaa00;
+  color: #ffcc44;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 9pt;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.fb-hint a {
+  color: #ffcc44;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.fb-hint a:hover {
+  color: #ffaa00;
+}

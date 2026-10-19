@@ -1,42 +1,51 @@
 let videoFormats = [];
 let audioFormats = [];
+let combinedFormats = [];
+
+function isFacebookUrl(url) {
+  return /^(https?:\/\/)?(www\.|m\.|web\.)?facebook\.com\/|^(https?:\/\/)?fb\.(watch|com)\//i.test(url);
+}
+
+function isYouTubeUrl(url) {
+  return /^(https?:\/\/)?(www\.)?youtube\.com\/|^(https?:\/\/)?youtu\.be\//i.test(url);
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const currentUrl = tab.url;
   document.getElementById('url').value = currentUrl;
 
-  // Check if it's a playlist URL
-  if (currentUrl.includes('list=')) {
-    if (!currentUrl.includes('v=')) {
-      setStatus('PLAYLISTS ARE IGNORED. Only individual videos are supported.');
-      document.getElementById('fetchFormats').disabled = true;
-    } else {
-      setStatus('READY (Playlist detected - only this video will be downloaded)');
+  // Site-specific status hints
+  if (isFacebookUrl(currentUrl)) {
+    setStatus('FACEBOOK VIDEO DETECTED — AUTH RECOMMENDED IN SETTINGS');
+    document.getElementById('fbAuthHint').style.display = 'block';
+  } else if (isYouTubeUrl(currentUrl)) {
+    // Check if it's a playlist URL
+    if (currentUrl.includes('list=')) {
+      if (!currentUrl.includes('v=')) {
+        setStatus('PLAYLISTS ARE IGNORED. Only individual videos are supported.');
+        document.getElementById('fetchFormats').disabled = true;
+      } else {
+        setStatus('READY (Playlist detected - only this video will be downloaded)');
+      }
     }
   }
   
   // Restore saved state for this URL
-  chrome.storage.local.get(['videoFormats', 'audioFormats', 'selectedVideo', 'selectedAudio', 'lastUrl'], (data) => {
+  chrome.storage.local.get(['videoFormats', 'audioFormats', 'combinedFormats', 'selectedVideo', 'selectedAudio', 'lastUrl'], (data) => {
     if (data.lastUrl === currentUrl && data.videoFormats && data.audioFormats) {
       videoFormats = data.videoFormats;
       audioFormats = data.audioFormats;
+      combinedFormats = data.combinedFormats || [];
       
-      const videoSelect = document.getElementById('videoFormat');
-      const audioSelect = document.getElementById('audioFormat');
+      populateFormatSelects();
       
-      videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
-      
-      audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
-      
-      videoSelect.disabled = false;
-      audioSelect.disabled = false;
+      document.getElementById('videoFormat').disabled = false;
+      document.getElementById('audioFormat').disabled = false;
       document.getElementById('download').disabled = false;
       
-      if (data.selectedVideo) videoSelect.value = data.selectedVideo;
-      if (data.selectedAudio) audioSelect.value = data.selectedAudio;
+      if (data.selectedVideo) document.getElementById('videoFormat').value = data.selectedVideo;
+      if (data.selectedAudio) document.getElementById('audioFormat').value = data.selectedAudio;
       
       setStatus('READY');
     }
@@ -51,6 +60,57 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleSubLangSection();
   });
 });
+
+/**
+ * Populate video and audio format dropdowns.
+ * Combined (A+V) formats are shown at the top of the video list labeled [A+V].
+ * When a combined format is selected as the video, the audio select is hidden
+ * since the combined format already contains audio.
+ */
+function populateFormatSelects() {
+  const videoSelect = document.getElementById('videoFormat');
+  const audioSelect = document.getElementById('audioFormat');
+
+  // Video dropdown: combined formats first (labeled [A+V]), then video-only
+  const combinedOptions = combinedFormats.map(f =>
+    `<option value="${f.id}" data-combined="true">[A+V] ${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`
+  ).join('');
+
+  const videoOnlyOptions = videoFormats.map(f =>
+    `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`
+  ).join('');
+
+  videoSelect.innerHTML =
+    '<option value="best">best</option>' +
+    combinedOptions +
+    videoOnlyOptions;
+
+  // Audio dropdown
+  audioSelect.innerHTML =
+    '<option value="best">best</option>' +
+    audioFormats.map(f =>
+      `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`
+    ).join('');
+
+  updateAudioSelectVisibility();
+}
+
+/**
+ * Hide the audio format section when a combined [A+V] format is selected
+ * as the video, since it already has audio.
+ */
+function updateAudioSelectVisibility() {
+  const videoSelect = document.getElementById('videoFormat');
+  const selectedOption = videoSelect.options[videoSelect.selectedIndex];
+  const isCombined = selectedOption && selectedOption.dataset.combined === 'true';
+
+  document.getElementById('audioSection').style.display = isCombined ? 'none' : 'block';
+
+  if (isCombined) {
+    // Set audio to "best" internally so the format string works cleanly
+    document.getElementById('audioFormat').value = 'best';
+  }
+}
 
 document.getElementById('downloadSubs').addEventListener('change', toggleSubLangSection);
 
@@ -81,38 +141,48 @@ document.getElementById('fetchFormats').addEventListener('click', async () => {
     if (response.success) {
       videoFormats = response.videoFormats;
       audioFormats = response.audioFormats;
+      combinedFormats = response.combinedFormats || [];
       
       // Save state
       chrome.storage.local.set({
         videoFormats,
         audioFormats,
+        combinedFormats,
         lastUrl: url
       });
       
-      const videoSelect = document.getElementById('videoFormat');
-      const audioSelect = document.getElementById('audioFormat');
+      populateFormatSelects();
       
-      videoSelect.innerHTML = '<option value="best">best</option>' + 
-        videoFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.resolution} | ${f.size}</option>`).join('');
-      
-      audioSelect.innerHTML = '<option value="best">best</option>' + 
-        audioFormats.map(f => `<option value="${f.id}">${f.id} | ${f.ext} | ${f.abr}k | ${f.size}</option>`).join('');
-      
-      videoSelect.disabled = false;
-      audioSelect.disabled = false;
+      document.getElementById('videoFormat').disabled = false;
+      document.getElementById('audioFormat').disabled = false;
       document.getElementById('download').disabled = false;
       
-      setStatus('FORMATS FETCHED SUCCESSFULLY');
+      const totalFormats = videoFormats.length + audioFormats.length + combinedFormats.length;
+      const hint = combinedFormats.length > 0
+        ? ` (${combinedFormats.length} combined [A+V] format${combinedFormats.length > 1 ? 's' : ''} available)`
+        : '';
+      setStatus(`FORMATS FETCHED SUCCESSFULLY${hint}`);
     } else {
       setStatus(`ERROR: ${response.error}`);
     }
   });
 });
 
+document.getElementById('videoFormat').addEventListener('change', () => {
+  updateAudioSelectVisibility();
+  chrome.storage.local.set({ selectedVideo: document.getElementById('videoFormat').value });
+});
+
 document.getElementById('download').addEventListener('click', async () => {
   const url = document.getElementById('url').value;
-  const videoFormat = document.getElementById('videoFormat').value;
-  const audioFormat = document.getElementById('audioFormat').value;
+  const videoSelect = document.getElementById('videoFormat');
+  const selectedOption = videoSelect.options[videoSelect.selectedIndex];
+  const isCombined = selectedOption && selectedOption.dataset.combined === 'true';
+
+  const videoFormat = videoSelect.value;
+  // If combined format selected, pass it as both video and audio so format string = "id+best/best"
+  // native_host.py will handle it with the /best fallback
+  const audioFormat = isCombined ? 'best' : document.getElementById('audioFormat').value;
   const downloadSubs = document.getElementById('downloadSubs').checked;
   const subLang = document.getElementById('subLang').value;
   
@@ -174,15 +244,16 @@ document.getElementById('settingsLink').addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
+document.getElementById('settingsLinkHint')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});
+
 function setStatus(message) {
   document.getElementById('status').textContent = message;
 }
 
-// Save selection changes
-document.getElementById('videoFormat')?.addEventListener('change', () => {
-  chrome.storage.local.set({ selectedVideo: document.getElementById('videoFormat').value });
-});
-
+// Save audio selection changes
 document.getElementById('audioFormat')?.addEventListener('change', () => {
   chrome.storage.local.set({ selectedAudio: document.getElementById('audioFormat').value });
 });

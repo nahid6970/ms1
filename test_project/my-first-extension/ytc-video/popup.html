@@ -14,6 +14,12 @@
       <input type="text" id="url" class="url-input" readonly>
     </div>
 
+    <!-- Shown when a Facebook URL is detected -->
+    <div id="fbAuthHint" class="fb-hint" style="display: none;">
+      ⚠️ Facebook page videos may require authentication.
+      <a href="#" id="settingsLinkHint">Enable cookies in Settings →</a>
+    </div>
+
     <button id="fetchFormats" class="action-btn">[ FETCH FORMATS ]</button>
 
     <div class="section">
@@ -23,7 +29,7 @@
       </select>
     </div>
 
-    <div class="section">
+    <div class="section" id="audioSection">
       <label class="section-title">AUDIO FORMAT:</label>
       <select id="audioFormat" class="select" disabled>
         <option value="">Fetch formats first...</option>

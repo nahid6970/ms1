@@ -8,6 +8,7 @@ import json
 import struct
 import subprocess
 import os
+import re
 
 
 def send_message(message):
@@ -29,16 +30,44 @@ def read_message():
     return json.loads(text)
 
 
-def build_auth_args():
-    """Build authentication arguments from settings"""
-    settings = chrome.storage.sync.get(['authMethod', 'browser', 'cookieFile'])
-    auth_method = settings.get('authMethod', 'none')
+def is_youtube_url(url):
+    """Check if URL is a YouTube video URL"""
+    youtube_patterns = [
+        r'^(https?://)?(www\.)?youtube\.com/',
+        r'^(https?://)?(www\.)?youtu\.be/',
+        r'^(https?://)?(www\.)?youtube-nocookie\.com/',
+    ]
+    return any(re.match(pattern, url, re.IGNORECASE) for pattern in youtube_patterns)
+
+
+def is_facebook_url(url):
+    """Check if URL is a Facebook video URL"""
+    facebook_patterns = [
+        r'^(https?://)?(www\.)?facebook\.com/',
+        r'^(https?://)?(www\.)?fb\.watch/',
+        r'^(https?://)?(www\.)?fb\.com/',
+        r'^(https?://)?m\.facebook\.com/',
+        r'^(https?://)?web\.facebook\.com/',
+    ]
+    return any(re.match(pattern, url, re.IGNORECASE) for pattern in facebook_patterns)
+
+
+def build_extractor_args(url):
+    """Build extractor-args only for YouTube URLs"""
+    if is_youtube_url(url):
+        return ['--extractor-args', 'youtube:player_client=default']
+    return []
+
+
+def build_auth_args(message):
+    """Build authentication arguments from the message (passed by the extension)"""
+    auth_method = message.get('authMethod', 'none')
     
     if auth_method == 'browser':
-        browser = settings.get('browser', 'chrome')
+        browser = message.get('browser', 'chrome')
         return ['--cookies-from-browser', browser]
     elif auth_method == 'file':
-        cookie_file = settings.get('cookieFile', '')
+        cookie_file = message.get('cookieFile', '')
         if cookie_file:
             return ['--cookies', cookie_file]
     
@@ -46,11 +75,14 @@ def build_auth_args():
 
 
 def fetch_formats(message):
-    """Fetch available video and audio formats"""
+    """Fetch available video, audio, and combined formats"""
     try:
         url = message['url']
         
-        command = ['yt-dlp', '--no-playlist', '--dump-json', '--extractor-args', 'youtube:player_client=default', url]
+        command = ['yt-dlp', '--no-playlist', '--dump-json']
+        command.extend(build_extractor_args(url))
+        command.extend(build_auth_args(message))
+        command.append(url)
         
         process = subprocess.Popen(
             command,
@@ -71,31 +103,48 @@ def fetch_formats(message):
         
         video_formats = []
         audio_formats = []
+        combined_formats = []
         
         for f in formats:
-            if f.get('vcodec') != 'none' and f.get('acodec') == 'none':
-                filesize = f.get('filesize') or f.get('filesize_approx', 0)
-                size_mb = f"{filesize / (1024*1024):.1f}MB" if filesize else "N/A"
+            filesize = f.get('filesize') or f.get('filesize_approx', 0)
+            size_mb = f"{filesize / (1024*1024):.1f}MB" if filesize else "N/A"
+            
+            has_video = f.get('vcodec') and f.get('vcodec') != 'none'
+            has_audio = f.get('acodec') and f.get('acodec') != 'none'
+            
+            if has_video and not has_audio:
+                # Video-only stream
                 video_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
                     'resolution': f.get('resolution', 'N/A'),
-                    'size': size_mb
+                    'size': size_mb,
+                    'type': 'video'
                 })
-            elif f.get('acodec') != 'none' and f.get('vcodec') == 'none':
-                filesize = f.get('filesize') or f.get('filesize_approx', 0)
-                size_mb = f"{filesize / (1024*1024):.1f}MB" if filesize else "N/A"
+            elif has_audio and not has_video:
+                # Audio-only stream
                 audio_formats.append({
                     'id': f['format_id'],
                     'ext': f['ext'],
                     'abr': f.get('abr', 'N/A'),
-                    'size': size_mb
+                    'size': size_mb,
+                    'type': 'audio'
+                })
+            elif has_video and has_audio:
+                # Combined video+audio stream (common on Facebook)
+                combined_formats.append({
+                    'id': f['format_id'],
+                    'ext': f['ext'],
+                    'resolution': f.get('resolution', 'N/A'),
+                    'size': size_mb,
+                    'type': 'combined'
                 })
         
         send_message({
             "success": True,
             "videoFormats": video_formats,
-            "audioFormats": audio_formats
+            "audioFormats": audio_formats,
+            "combinedFormats": combined_formats
         })
         
     except Exception as e:
@@ -122,14 +171,23 @@ def download_video(message):
         else:
             format_str = f'{video_format}+{audio_format}'
         
+        # Add /best fallback for combined-format sites (e.g. Facebook)
+        if is_facebook_url(url):
+            format_str = f'{format_str}/best'
+        
         command = [
             'yt-dlp',
             '--no-playlist',
             '-f', format_str,
             '-o', f'{save_dir}/%(title)s.%(ext)s',
-            '--extractor-args', 'youtube:player_client=default',
             '--newline'
         ]
+        
+        # Add extractor-args only for YouTube URLs
+        command.extend(build_extractor_args(url))
+        
+        # Add authentication
+        command.extend(build_auth_args(message))
         
         # Add subtitle options
         if download_subs:
@@ -146,7 +204,6 @@ def download_video(message):
         )
         
         # Parse progress
-        import re
         while True:
             line = process.stdout.readline()
             if not line and process.poll() is not None:

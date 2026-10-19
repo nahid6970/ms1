@@ -11,13 +11,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-function fetchFormats(data, sendResponse) {
+/**
+ * Read auth settings from chrome.storage.sync and return them as a flat object.
+ * These get merged into the native message so native_host.py can build auth args.
+ */
+function getAuthSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get({
+      authMethod: 'none',
+      browser: 'chrome',
+      cookieFile: ''
+    }, (settings) => {
+      resolve({
+        authMethod: settings.authMethod,
+        browser: settings.browser,
+        cookieFile: settings.cookieFile
+      });
+    });
+  });
+}
+
+async function fetchFormats(data, sendResponse) {
+  const auth = await getAuthSettings();
+
   chrome.runtime.sendNativeMessage(
     'com.ytc.video_downloader',
     {
       action: 'fetchFormats',
       url: data.url,
-      saveDir: data.saveDir
+      saveDir: data.saveDir,
+      // Auth settings passed so native_host.py can build --cookies-from-browser / --cookies args
+      authMethod: auth.authMethod,
+      browser: auth.browser,
+      cookieFile: auth.cookieFile
     },
     (response) => {
       if (chrome.runtime.lastError) {
@@ -29,7 +55,9 @@ function fetchFormats(data, sendResponse) {
   );
 }
 
-function downloadVideo(data, sendResponse) {
+async function downloadVideo(data, sendResponse) {
+  const auth = await getAuthSettings();
+
   downloadCallback = sendResponse;
   downloadPort = chrome.runtime.connectNative('com.ytc.video_downloader');
   
@@ -83,6 +111,10 @@ function downloadVideo(data, sendResponse) {
     audioFormat: data.audioFormat,
     downloadSubs: data.downloadSubs,
     subLang: data.subLang,
-    saveDir: data.saveDir
+    saveDir: data.saveDir,
+    // Auth settings passed so native_host.py can build --cookies-from-browser / --cookies args
+    authMethod: auth.authMethod,
+    browser: auth.browser,
+    cookieFile: auth.cookieFile
   });
 }
