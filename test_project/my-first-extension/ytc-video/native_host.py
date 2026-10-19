@@ -161,11 +161,11 @@ def fetch_formats(message):
         
         if process.returncode != 0:
             err = (stderr or '').strip() or 'Unknown yt-dlp error'
-            # Friendlier hints for common Facebook auth failures
             lower = err.lower()
-            if any(x in lower for x in (
+            # Only show Facebook-specific hints for Facebook URLs
+            if is_facebook_url(url) and any(x in lower for x in (
                 'login required', 'only available for registered',
-                'cannot parse data', 'content isn\'t available',
+                'cannot parse data', "content isn't available",
                 'please log in', 'cookies', 'impersonate'
             )):
                 err = (
@@ -176,6 +176,16 @@ def fetch_formats(message):
                     "2. Use Cookie File (export while logged into Facebook) or Firefox cookies\n"
                     "3. Update yt-dlp: yt-dlp -U\n"
                     "4. Confirm: yt-dlp --list-impersonate-targets  (Chrome should NOT say 'not available')"
+                )
+            elif is_youtube_url(url) and any(x in lower for x in (
+                'sign in', 'bot', '429', 'too many requests', 'cookies'
+            )):
+                err = (
+                    f"{err}\n\n"
+                    "Tip for YouTube bot detection:\n"
+                    "1. In Settings → Authentication → Browser Cookies → Chrome or Firefox\n"
+                    "2. Make sure you are logged into YouTube in that browser\n"
+                    "3. If rate-limited (429), wait a few minutes and try again"
                 )
             send_message({"success": False, "error": err})
             return
