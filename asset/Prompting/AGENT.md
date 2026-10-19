@@ -21,7 +21,7 @@
 
 # HTML Projects — Element_Copy Compatibility [ACTIVE]
 - For HTML projects, give every meaningful page, view, dialog/window, panel, navigation item, and interactive element a stable, unique, readable CSS selector so the user's `Element_Copy` browser extension can identify it. Prefer descriptive IDs for unique targets (for example, `#settings-dialog`, `#save-settings`, `#dashboard-view`) and descriptive classes or `data-testid` attributes for repeated targets (for example, `.task-row[data-testid="task-row"]`). Avoid generated/framework-only class names, positional selectors such as `:nth-child()`, and selectors that depend on fragile DOM nesting.
-- Make sure targets exist in the rendered DOM for every route, tab, modal, and application state, including hidden/inactive views when appropriate. Assign stable identifiers to dynamically created elements when they are created. Do not add an in-app selector readout, selector copy button, or duplicate picker; the user uses `Element_Copy` for selecting and copying selectors.
+- Make sure targets exist in the rendered DOM for every route, tab, modal, and application state, including hidden/inactive views when appropriate. Assign stable identifiers to dynamically created elements when they are created.
 - Keep selectors unique where an element is meant to be a single target, and ensure they continue to resolve to the intended elements after rendering and state changes.
 
 # AI WORKFLOW STYLE
