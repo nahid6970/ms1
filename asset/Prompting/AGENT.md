@@ -19,6 +19,12 @@
 # Android Projects [ACTIVE]
 - For Android projects I have android-cli installed, so you can utilize it to build, run, etc.
 
+# HTML Projects — Copyable CSS Selectors [ACTIVE]
+- For HTML projects, give every meaningful page, view, dialog/window, panel, navigation item, and interactive element a stable, unique, readable CSS selector. Prefer descriptive IDs for unique targets (for example, `#settings-dialog`, `#save-settings`, `#dashboard-view`) and descriptive classes or `data-testid` attributes for repeated targets (for example, `.task-row[data-testid="task-row"]`). Avoid generated/framework-only class names, positional selectors such as `:nth-child()`, and selectors that depend on fragile DOM nesting.
+- Make sure selector targets exist in the rendered DOM for every route, tab, modal, and application state, including hidden/inactive views when appropriate. Do not omit selectors for dynamically created elements; assign them when the elements are created.
+- When building or changing an HTML app, include a small, accessible selector readout/copy affordance in its developer/debug mode. It should let the user select or identify any rendered element, display the exact CSS selector to use with the `Element_Copy` browser extension, and copy that selector. Keep this tool out of the normal end-user flow (for example, behind a debug toggle or keyboard shortcut), and make sure it works for page sections and windows as well as buttons and inputs.
+- When a selector is ambiguous or cannot be generated reliably, give the target a stable ID or `data-testid` and show that exact selector in the readout. Verify that selectors are unique and still resolve to the intended element after rendering and state changes.
+
 # AI WORKFLOW STYLE
 ## Suggestion Style — Proactive Approaches [INACTIVE]
 - Before implementing a solution, offer 2–3 different approaches or ideas (including unconventional ones) and let the user choose.
