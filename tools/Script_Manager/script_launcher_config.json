@@ -2787,7 +2787,7 @@
             "corner_radius": 0,
             "font_family": "JetBrainsMono Nerd Font Propo",
             "font_size": 14,
-            "grid_btn_height": 250,
+            "grid_btn_height": 100,
             "grid_columns": 4,
             "height": 0,
             "icon_gap": 2,
@@ -2821,7 +2821,8 @@
                     "row_span": 1,
                     "run_admin": false,
                     "type": "script",
-                    "use_inline": false
+                    "use_inline": false,
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2843,7 +2844,8 @@
                     "row_span": 1,
                     "run_admin": false,
                     "type": "script",
-                    "use_inline": false
+                    "use_inline": false,
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2856,7 +2858,8 @@
                     "name": "IMG-Dimension",
                     "path": "C:/@delta/ms1/scripts/ffmpeg/image_dimension.ps1",
                     "row_span": 1,
-                    "type": "script"
+                    "type": "script",
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2868,7 +2871,40 @@
                     "name": "Merge",
                     "path": "C:/@delta/ms1/scripts/ffmpeg/merge.ps1",
                     "row_span": 1,
-                    "type": "script"
+                    "type": "script",
+                    "nf_char": "",
+                    "icon_path": "",
+                    "tags": [],
+                    "icon_width": 0,
+                    "icon_height": 0,
+                    "icon_gap": 2,
+                    "icon_position": "top",
+                    "hide_terminal": false,
+                    "keep_open": false,
+                    "kill_window": false,
+                    "new_terminal": false,
+                    "run_admin": false,
+                    "ctrl_left_cmd": "explorer \"{dir}\"",
+                    "ctrl_right_cmd": "",
+                    "use_inline": false,
+                    "use_multi_block": false,
+                    "inline_type": "cmd",
+                    "inline_script": "",
+                    "inline_blocks": [],
+                    "edit_on_click": false,
+                    "require_password": false,
+                    "font_family": "JetBrainsMono Nerd Font Propo",
+                    "font_size": 14,
+                    "is_bold": true,
+                    "is_italic": false,
+                    "text_align": "center",
+                    "auto_wrap": false,
+                    "transparent_bg": false,
+                    "hover_transparent_bg": false,
+                    "width": 0,
+                    "height": 0,
+                    "corner_radius": 0,
+                    "border_width": 0
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2880,7 +2916,8 @@
                     "name": "Trim",
                     "path": "C:/@delta/ms1/scripts/ffmpeg/trim.ps1",
                     "row_span": 1,
-                    "type": "script"
+                    "type": "script",
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2893,7 +2930,8 @@
                     "name": "VID-Dimension",
                     "path": "C:/@delta/ms1/scripts/ffmpeg/vid_dim.ps1",
                     "row_span": 1,
-                    "type": "script"
+                    "type": "script",
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2929,7 +2967,8 @@
                     "run_admin": false,
                     "type": "script",
                     "use_inline": false,
-                    "width": 0
+                    "width": 0,
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -2966,7 +3005,8 @@
                     "run_admin": false,
                     "type": "script",
                     "use_inline": false,
-                    "width": 0
+                    "width": 0,
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -3042,7 +3082,8 @@
                     "run_admin": false,
                     "type": "script",
                     "use_inline": false,
-                    "width": 0
+                    "width": 0,
+                    "text_align": "center"
                 },
                 {
                     "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -3079,7 +3120,8 @@
                     "run_admin": false,
                     "type": "script",
                     "use_inline": false,
-                    "width": 0
+                    "width": 0,
+                    "text_align": "center"
                 }
             ],
             "type": "folder",
@@ -3092,7 +3134,8 @@
             "hover_transparent_bg": false,
             "text_align": "center",
             "tags": [],
-            "edit_on_click": false
+            "edit_on_click": false,
+            "auto_wrap": false
         },
         {
             "_runtime_font_family": "JetBrainsMono Nerd Font Propo",
@@ -6985,7 +7028,7 @@
             "keep_open": false,
             "kill_window": false,
             "new_terminal": true,
-            "run_admin": true,
+            "run_admin": false,
             "ctrl_left_cmd": "explorer \"{dir}\"",
             "ctrl_right_cmd": "",
             "use_inline": false,

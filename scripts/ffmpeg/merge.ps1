@@ -1,32 +1,87 @@
-param (
-    [Parameter(Mandatory=$true)]
-    [string]$videofolder
-)
-# Get the list of video files in the provided folder
-$videoFiles = Get-ChildItem -Path $videofolder -Filter *.mp4
-# Check if ffmpeg is installed
+function Write-GreenText {
+    param([string]$Text)
+    Write-Host $Text -ForegroundColor Green
+}
+
 $ffmpegPath = "D:\software\@MustApp\ffmpeg\bin\ffmpeg.exe"
-if (-not (Test-Path $ffmpegPath)) {
-    Write-Host "ffmpeg not found. Please make sure ffmpeg is installed at 'C:/ffmpeg/bin/'."
-    exit
+if (-not (Test-Path -LiteralPath $ffmpegPath)) {
+    # Fall back to ffmpeg on PATH so the script can also run on another machine.
+    $ffmpegCommand = Get-Command ffmpeg.exe -ErrorAction SilentlyContinue
+    if ($ffmpegCommand) {
+        $ffmpegPath = $ffmpegCommand.Source
+    }
+    else {
+        Write-Host "ffmpeg.exe was not found at '$ffmpegPath' or on PATH." -ForegroundColor Red
+        Pause
+        exit 1
+    }
 }
-# Set the output file path
-$outputPath = Join-Path $videofolder "merged.mp4"
-# Build the ffmpeg command
-$command = "$ffmpegPath -y"
-# Add input options for each video file
-foreach ($file in $videoFiles) {
-    $command += " -i `"$($file.FullName)`""
-}
-# Specify the filter_complex to concatenate the videos and audios
-$command += " -filter_complex `"[0:v]concat=n=$($videoFiles.Count):v=1:a=1[outv][outa]`""
-# Specify the lower frame rate
-$command += " -map `[outv]` -map `[outa]` -r 30"
-# Set the output codec and options
-$command += " -c:v libx264 -c:a aac -preset veryfast -crf 18"
-# Specify the output file path
-$command += " `"$outputPath`""
-# Execute the ffmpeg command
-Write-Host "Merging videos..."
-Invoke-Expression -Command $command
-Write-Host "Videos merged successfully. Output file: $outputPath"
+
+# Accept an optional starting folder, like trim.ps1 accepts an optional file.
+$folder = if ($args.Count -gt 0) { $args[0] } else { "" }
+$folder = $folder.Replace('"', '').Trim()
+
+do {
+    if (-not $folder) {
+        Write-GreenText "Enter the folder containing the MP4 videos to merge"
+        $folder = (Read-Host).Replace('"', '').Trim()
+    }
+
+    if (-not (Test-Path -LiteralPath $folder -PathType Container)) {
+        Write-Host "Folder not found: $folder" -ForegroundColor Red
+    }
+    else {
+        # Exclude the previous output so rerunning the script won't merge it again.
+        $videoFiles = @(
+            Get-ChildItem -LiteralPath $folder -File -Filter *.mp4 |
+                Where-Object { $_.Name -ne "merged.mp4" } |
+                Sort-Object Name
+        )
+
+        if ($videoFiles.Count -lt 2) {
+            Write-Host "Please provide at least two MP4 files in the folder." -ForegroundColor Yellow
+        }
+        else {
+            $outputPath = Join-Path $folder "merged.mp4"
+            $ffmpegArgs = @("-y")
+            foreach ($file in $videoFiles) {
+                $ffmpegArgs += @("-i", $file.FullName)
+            }
+
+            # Reset each clip's timestamps before joining. OBS clips can have
+            # timestamps that restart at zero, which breaks stream-copy joins.
+            $filterParts = @()
+            for ($i = 0; $i -lt $videoFiles.Count; $i++) {
+                $filterParts += "[$($i):v:0]setpts=PTS-STARTPTS,format=yuv420p[v$i]"
+                $filterParts += "[$($i):a:0]aresample=async=1:first_pts=0,asetpts=PTS-STARTPTS[a$i]"
+            }
+            $concatInputs = ""
+            for ($i = 0; $i -lt $videoFiles.Count; $i++) {
+                $concatInputs += "[v$i][a$i]"
+            }
+            $filterParts += "${concatInputs}concat=n=$($videoFiles.Count):v=1:a=1[outv][outa]"
+            $filter = $filterParts -join ";"
+
+            $videoEncoderArgs = @("-c:v", "libx264", "-preset", "veryfast", "-crf", "18")
+            Write-Host "Using libx264 software encoding after correcting clip timestamps."
+
+            $ffmpegArgs += @("-filter_complex", $filter, "-map", "[outv]", "-map", "[outa]")
+            $ffmpegArgs += $videoEncoderArgs
+            $ffmpegArgs += @("-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", $outputPath)
+
+            Write-Host "Merging $($videoFiles.Count) videos from '$folder' with corrected timestamps..."
+            & $ffmpegPath @ffmpegArgs
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "Videos merged successfully. Output file: $outputPath" -ForegroundColor Green
+            }
+            else {
+                Write-Host "FFmpeg failed with exit code $LASTEXITCODE." -ForegroundColor Red
+            }
+        }
+    }
+
+    Write-GreenText "Enter another folder to merge, or press Enter to finish"
+    $folder = (Read-Host).Replace('"', '').Trim()
+} while ($folder)
+
+Pause
