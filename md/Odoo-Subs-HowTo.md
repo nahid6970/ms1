@@ -47,14 +47,61 @@ Download from https://www.python.org/downloads/ — version 3.8 or higher is fin
 
 Go to the course URL, e.g.:
 ```
-https://www.odoo.com/slides/subscription-20
+https://www.odoo.com/slides/marketing-27
 ```
 
-The page lists all lessons. There are two approaches for finding the YouTube videos:
+> **CRITICAL — Odoo course pages are JavaScript-rendered:**
+>
+> The course landing page loads the lesson list, slide thumbnails, and YouTube embeds dynamically via JavaScript/AJAX. A plain HTTP GET (e.g. `Invoke-WebRequest`, `curl`, `requests.get`) will only return the static HTML shell — **the lesson links and video embeds will NOT be present in the raw HTML.**
+>
+> Do NOT attempt to regex-parse the raw HTML for slide links or YouTube URLs — they are not there. Instead, use one of the approaches below.
 
 ### Approach A — Use the Odoo YouTube Playlist (Recommended)
 
-Most Odoo courses link to a YouTube playlist in the video description. Fetch the playlist URL and use yt-dlp to list all video IDs:
+Most Odoo courses link to one or more YouTube playlists in the lesson description text. The description text IS server-rendered in the HTML of individual lesson pages (not the course landing page).
+
+**Step 1a: Find the lesson URLs from the course page.**
+
+Use a content-rendering fetch tool (e.g. `web_fetch`, Playwright, Puppeteer, or a headless browser) to read the course page. The lesson links follow this URL pattern:
+
+```
+https://www.odoo.com/slides/slide/{slug}-{id}
+```
+
+For example, the Marketing course (`/slides/marketing-27`) has 18 lessons including:
+```
+https://www.odoo.com/slides/slide/marketing-basics-10769
+https://www.odoo.com/slides/slide/email-marketing-essentials-989
+https://www.odoo.com/slides/slide/sms-marketing-852
+...
+```
+
+> **If you cannot render the page** (e.g. you only have `Invoke-WebRequest` or `curl`): Open **any one** lesson page directly. The lesson description text — which contains YouTube playlist URLs — is server-rendered and will appear in the raw HTML. You do NOT need to fetch every lesson page; just one is enough to find the playlist links.
+
+**Step 1b: Extract YouTube playlist URLs from a lesson page.**
+
+Fetch any lesson page and look for YouTube playlist links in the description text. They look like:
+
+```
+https://www.youtube.com/playlist?list=PL1-aSABtP6AD9xnhZvBgXWx8scXC8UnqR
+```
+
+A single lesson description often links to multiple playlists (one per topic category). For example, the Marketing Basics lesson description contains:
+```
+Email Marketing: https://www.youtube.com/playlist?list=PL1-aSABtP6AD9xnhZvBgXWx8scXC8UnqR
+Marketing Automation: https://www.youtube.com/playlist?list=PL1-aSABtP6ADaFgzGaKnQ2VNgpQ70Xpnr
+SMS Marketing: https://www.youtube.com/playlist?list=PL1-aSABtP6AC3vq8te-0Fcu8iPkQXGaLA
+Social Marketing: https://www.youtube.com/playlist?list=PL1-aSABtP6ACAB8pOArywKprID3V3n2fb
+```
+
+Regex to extract playlist IDs from raw HTML:
+```
+(?:youtube\.com/playlist\?list=|youtu\.be/.+list=)([A-Za-z0-9_-]+)
+```
+
+**Step 1c: List all videos in each playlist.**
+
+For each playlist, use yt-dlp to extract video IDs and titles:
 
 ```bash
 yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android" \
@@ -64,9 +111,26 @@ yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android" \
 
 This gives you exact video IDs and titles — no search guessing involved.
 
-### Approach B — Search YouTube by Title
+**Step 1d: Match playlist videos to course lessons.**
 
-You can also search YouTube directly by title:
+The playlist may contain extra videos not in the course, or duplicate uploads. Match by title:
+- The course page lists lesson titles (e.g. "Email Marketing Essentials", "A/B Testing")
+- The playlist video titles include the lesson name (e.g. "Email Marketing Essentials | Odoo Email Marketing")
+- Match each course lesson to the correct playlist video by checking if the lesson title appears in the video title
+- If a lesson is not in any playlist (rare), use Approach B to search for it
+
+> **Worked Example — Marketing Course (`marketing-27`):**
+>
+> 1. Fetched the course page with `web_fetch` — got 18 lesson URLs
+> 2. Fetched the first lesson (`/slides/slide/marketing-basics-10769`) — found 5 YouTube playlist links in the description
+> 3. Listed all 5 playlists with `yt-dlp --flat-playlist` — got ~30 videos total
+> 4. Matched 17 of 18 lessons to playlist videos by title
+> 5. For "Push Notifications and Live Chat" (not in any playlist), used Approach B search
+> 6. Final result: 18 video IDs ready for subtitle download
+
+### Approach B — Search YouTube by Title (Fallback)
+
+If a lesson is not found in any playlist, or if you cannot access the Odoo page at all, search YouTube directly by title:
 
 > **Tip:** Add `Odoo tutorial` to the end of each search query. This helps yt-dlp find the right video and prefer the official Odoo channel.
 
@@ -342,15 +406,19 @@ Then in `main()`, call `get_video_id(query)` before `download_subtitles()`.
 ## How to Use It for Any Other Odoo Course
 
 1. Go to the course page on `odoo.com/slides/...`
-2. Open any lesson — the video description usually links to a YouTube playlist
-3. List the playlist with:
+   > **Do NOT use `Invoke-WebRequest`, `curl`, or `requests.get`** — the lesson list is JavaScript-rendered and will not appear in raw HTML. Use a content-rendering fetch tool (e.g. `web_fetch`), a headless browser (Playwright/Puppeteer), or proceed to step 2 directly.
+2. If you cannot render the page, open **any one lesson** directly — the lesson description (which contains YouTube playlist links) IS server-rendered in the raw HTML
+3. Extract the YouTube playlist URL(s) from the lesson description text
+4. List the playlist(s) with:
    ```bash
    yt-dlp --js-runtimes node --extractor-args "youtube:player_client=android" \
      --flat-playlist --print "%(id)s|||%(title)s" "PLAYLIST_URL"
    ```
-4. Build a `VIDEOS` list using the exact video IDs and titles from the playlist
-5. Change `OUTPUT_FILE` to your desired output path
-6. Run: `python fetch_odoo_subtitles.py`
+5. Match playlist videos to course lessons by title (lesson titles appear within the playlist video titles)
+6. For any lesson not found in a playlist, use Approach B (YouTube search) as a fallback
+7. Build a `VIDEOS` list using the exact video IDs and titles from the playlist
+8. Change `OUTPUT_FILE` to your desired output path
+9. Run: `python fetch_odoo_subtitles.py`
 
 ---
 
@@ -358,6 +426,7 @@ Then in `main()`, call `get_video_id(query)` before `download_subtitles()`.
 
 | Problem | Fix |
 |---------|-----|
+| **Odoo page has no lesson links in raw HTML** | Odoo pages are JavaScript-rendered. Do NOT use `Invoke-WebRequest`/`curl`/`requests.get` and expect lesson links. Use a content-rendering fetch tool, OR fetch a single lesson page directly (lesson descriptions with playlist links ARE server-rendered). See Step 1. |
 | **HTTP 429: Too Many Requests** | Add `--extractor-args "youtube:player_client=android"` — this bypasses YouTube's rate limiting |
 | **No supported JavaScript runtime** | Install Node.js and add `--js-runtimes node` — yt-dlp now requires a JS runtime for YouTube |
 | **PO Token / Visitor Data warning** | Use `--extractor-args "youtube:player_client=android"` to bypass PO token requirements |
