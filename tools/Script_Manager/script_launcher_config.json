@@ -7026,7 +7026,7 @@
             "icon_position": "top",
             "hide_terminal": true,
             "keep_open": false,
-            "kill_window": false,
+            "kill_window": true,
             "new_terminal": true,
             "run_admin": false,
             "ctrl_left_cmd": "explorer \"{dir}\"",
