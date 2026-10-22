@@ -71,9 +71,7 @@ powershell -Command "Remove-NetFirewallRule -DisplayName 'LDPlayer Ad Block - ld
 
 ---
 
-## Layer 4 — Disable the LDPlayer App Store (confirmed working)
-
-The user confirmed the ads were gone after this step. On this installation, direct ADB showed the emulator as offline; LDPlayer's console ADB worked.
+## Layer 4 — Remove the LDPlayer TOP UP promotion
 
 ### A) Enable local ADB debugging
 
@@ -82,7 +80,6 @@ The user confirmed the ads were gone after this step. On this installation, dire
 3. Set `basicSettings.adbDebug` to `1` in that config.
 4. Start instance 0 again.
 
-The backup made during the fix is `C:\LDPlayer\LDPlayer9\vms\config\leidian0.config.before-adb-fix`.
 
 ### B) Disable the LD App Store
 
@@ -92,7 +89,14 @@ Run:
 C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell pm disable-user --user 0 com.android.ld.appstore"
 ```
 
-Confirmed result: `Package com.android.ld.appstore new state: disabled-user`.
+### C) Refresh the launcher so the promoted tile disappears
+
+```cmd
+C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell am force-stop com.ldmnq.launcher3"
+C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell monkey -p com.ldmnq.launcher3 1"
+```
+
+The launcher restarts to the home screen. Restarting the LDPlayer instance also refreshes it.
 
 ### To undo
 
@@ -100,8 +104,7 @@ Confirmed result: `Package com.android.ld.appstore new state: disabled-user`.
 C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell pm enable com.android.ld.appstore"
 ```
 
-The launcher package `com.ldmnq.launcher3` was found and left enabled; only `com.android.ld.appstore` was disabled.
-
+Leave the launcher enabled; only disable the LD App Store.
 ---
 ## Optional — Block in-app ads
 
@@ -120,5 +123,11 @@ This blocks ads inside regular Android apps too (separate from LDPlayer's own ad
 - [Kill ads on LDPlayer — Full Guide (GitHub Gist)](https://gist.github.com/minanagehsalalma/e6497ad1db67929593ce8af7d5688a13)
 - [LDPlayer_Debloater (GitHub)](https://github.com/Red0Hood/LDPlayer_Debloater)
 - [Block-ads-for-LDplayer (GitHub)](https://github.com/HideCM/Block-ads-for-LDplayer)
+
+
+
+
+
+
 
 
