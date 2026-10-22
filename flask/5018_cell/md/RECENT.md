@@ -1,5 +1,27 @@
 # Recent Development Log
 
+## [2026-10-22 15:03] - Keep Gemini Cell Controls Visible While Scrolling
+
+**What We Accomplished:**
+- Made the per-cell Gemini sparkle button stay beneath the sticky table header while scrolling through a cell.
+- Made the instruction editor stick below its button and layered both controls above the table cells.
+- Kept prompt focus from scrolling the page to the top when the editor opens.
+- Updated the AI cell guide and cell feature summary to describe the scrolling behavior.
+
+**Files Modified:**
+- `static/script.js` — insert the editor next to its cell button and focus the prompt without scrolling
+- `static/style.css` — sticky positioning for the Gemini button and prompt editor
+- `md/AI_CELL_INSTRUCTIONS.md` — document the sticky controls and no-jump behavior
+- `md/CELL_FEATURES.md` — summarize the updated cell controls
+- `md/RECENT.md` — record this session
+
+**Current Status:**
+- ✅ The button and editor use the measured table header offset while scrolling.
+- ✅ `git diff --check` passes.
+- ⏳ Browser behavior has not been manually verified.
+
+---
+
 ## [2026-10-18 09:49] - Improve AI Cell Voice and Multiline Editor
 
 **Session Duration:** 0.2 hours

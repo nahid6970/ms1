@@ -4,6 +4,8 @@
 
 Each table cell has a sparkle button that opens a small instruction editor. The instruction and the cell's current content are sent to the selected Gemini model. Gemini's response replaces the contents of that cell.
 
+The sparkle button stays visible beneath the sticky table header as its cell scrolls. When opened, the instruction editor stays directly below the button while scrolling through that cell. Opening the editor focuses the prompt without jumping the page to the top.
+
 ## Setup
 
 1. Open **Settings → AI Cell Instructions**.

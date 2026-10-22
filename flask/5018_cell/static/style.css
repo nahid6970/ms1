@@ -1520,11 +1520,11 @@ td:hover > .cell-ai-instruction-btn,
 }
 
 .cell-ai-instruction-editor {
-    position: absolute;
-    top: 27px;
-    right: 2px;
-    z-index: 125;
+    position: sticky;
+    top: calc(var(--cell-ai-sticky-offset, 48px) + 26px);
+    z-index: 240;
     width: min(320px, calc(100vw - 32px));
+    margin: 0 2px 8px auto;
     padding: 9px;
     border: 1px solid #c9a2e8;
     border-radius: 7px;

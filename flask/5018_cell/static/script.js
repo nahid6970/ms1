@@ -3054,12 +3054,13 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
 
     const editor = document.createElement('div');
     editor.className = 'cell-ai-instruction-editor';
-    editor.style.top = `${button.getBoundingClientRect().bottom - td.getBoundingClientRect().top + 4}px`;
+    editor.dataset.testid = 'cell-ai-instruction-editor';
     editor.onclick = event => event.stopPropagation();
     editor.onmousedown = event => event.stopPropagation();
 
     const instructionInput = document.createElement('textarea');
     instructionInput.className = 'cell-ai-instruction-prompt';
+    instructionInput.dataset.testid = 'cell-ai-instruction-prompt';
     instructionInput.rows = 1;
     instructionInput.placeholder = 'What should be changed or updated?';
     instructionInput.setAttribute('aria-label', 'Instruction for updating this cell');
@@ -3105,7 +3106,7 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
     cancelButton.onclick = () => editor.remove();
     actions.append(micButton, updateButton, cancelButton);
     editor.append(instructionInput, actions);
-    td.appendChild(editor);
+    button.insertAdjacentElement('afterend', editor);
     resizeInstructionInput();
     instructionInput.focus({ preventScroll: true });
 }
