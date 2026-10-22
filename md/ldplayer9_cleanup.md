@@ -11,7 +11,7 @@ LDPlayer 9 injects ads through multiple channels:
 1. **Ad cache folder** (`%AppData%\XuanZhi9\cache`) — stores downloaded ad wallpapers and promo images from `ldrescdn.com`
 2. **`ldplayerpartner.exe`** — the ad/partner delivery module bundled with LDPlayer
 3. **Ad domains** — `res.ldrescdn.com`, `cdn.ldplayer.net`, `en.ldplayer.net`, `ldmnq.com`, `www.ldmnq.com` serve ad assets
-4. **In-emulator LD apps** — `com.android.ld.appstore` and `com.android.launcher3` inject the home screen ad strip
+4. **In-emulator LD apps** — `com.android.ld.appstore` can provide LDPlayer promotions; disabling it removed the reported ad issue
 
 ---
 
@@ -71,59 +71,38 @@ powershell -Command "Remove-NetFirewallRule -DisplayName 'LDPlayer Ad Block - ld
 
 ---
 
-## Layer 4 — Remove in-emulator ad apps (requires LDPlayer running)
+## Layer 4 — Disable the LDPlayer App Store (confirmed working)
 
-This removes the home screen ad strip and LD App Store from inside the emulator.
+The user confirmed the ads were gone after this step. On this installation, direct ADB showed the emulator as offline; LDPlayer's console ADB worked.
 
-### A) Connect ADB
+### A) Enable local ADB debugging
 
-```cmd
-C:\LDPlayer\LDPlayer9\adb.exe connect 127.0.0.1:5555
-```
+1. Close instance 0.
+2. Back up `C:\LDPlayer\LDPlayer9\vms\config\leidian0.config`.
+3. Set `basicSettings.adbDebug` to `1` in that config.
+4. Start instance 0 again.
 
-### B) List suspicious packages
+The backup made during the fix is `C:\LDPlayer\LDPlayer9\vms\config\leidian0.config.before-adb-fix`.
 
-```cmd
-C:\LDPlayer\LDPlayer9\adb.exe shell pm list packages | findstr /i "ld appstore market recommend"
-```
+### B) Disable the LD App Store
 
-### C) Disable ad packages
-
-```cmd
-C:\LDPlayer\LDPlayer9\adb.exe shell pm disable-user --user 0 com.android.ld.appstore
-C:\LDPlayer\LDPlayer9\adb.exe shell pm disable-user --user 0 com.android.launcher3
-```
-
-### D) Force stop them
+Run:
 
 ```cmd
-C:\LDPlayer\LDPlayer9\adb.exe shell am force-stop com.android.ld.appstore
-C:\LDPlayer\LDPlayer9\adb.exe shell am force-stop com.android.launcher3
+C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell pm disable-user --user 0 com.android.ld.appstore"
 ```
 
-### E) Deny overlay permission
-
-```cmd
-C:\LDPlayer\LDPlayer9\adb.exe shell appops set com.android.ld.appstore SYSTEM_ALERT_WINDOW deny
-C:\LDPlayer\LDPlayer9\adb.exe shell appops set com.android.launcher3 SYSTEM_ALERT_WINDOW deny
-```
-
-### F) Install a clean launcher
-
-1. Open Play Store inside LDPlayer
-2. Install **Nova Launcher** (or Smart Launcher)
-3. Go to Settings → Apps → Default apps → Home app → Nova Launcher
-4. Press Home to confirm
+Confirmed result: `Package com.android.ld.appstore new state: disabled-user`.
 
 ### To undo
 
 ```cmd
-C:\LDPlayer\LDPlayer9\adb.exe shell pm enable com.android.ld.appstore
-C:\LDPlayer\LDPlayer9\adb.exe shell pm enable com.android.launcher3
+C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell pm enable com.android.ld.appstore"
 ```
 
----
+The launcher package `com.ldmnq.launcher3` was found and left enabled; only `com.android.ld.appstore` was disabled.
 
+---
 ## Optional — Block in-app ads
 
 Inside LDPlayer, go to **Settings → Network & Internet → Private DNS** and set:
@@ -136,29 +115,10 @@ This blocks ads inside regular Android apps too (separate from LDPlayer's own ad
 
 ---
 
-## Optional — Persistent ad-kill script
-
-If LDPlayer re-enables packages after reboot, create a `kill-ld-ads.bat`:
-
-```bat
-@echo off
-C:\LDPlayer\LDPlayer9\adb.exe connect 127.0.0.1:5555
-C:\LDPlayer\LDPlayer9\adb.exe shell pm disable-user --user 0 com.android.ld.appstore
-C:\LDPlayer\LDPlayer9\adb.exe shell pm disable-user --user 0 com.android.launcher3
-C:\LDPlayer\LDPlayer9\adb.exe shell am force-stop com.android.ld.appstore
-C:\LDPlayer\LDPlayer9\adb.exe shell am force-stop com.android.launcher3
-C:\LDPlayer\LDPlayer9\adb.exe shell appops set com.android.ld.appstore SYSTEM_ALERT_WINDOW deny
-C:\LDPlayer\LDPlayer9\adb.exe shell appops set com.android.launcher3 SYSTEM_ALERT_WINDOW deny
-echo Done. Ads killed.
-pause
-```
-
-Run it after LDPlayer starts, or add it to Task Scheduler (trigger: at log on).
-
----
-
 ## Sources
 
 - [Kill ads on LDPlayer — Full Guide (GitHub Gist)](https://gist.github.com/minanagehsalalma/e6497ad1db67929593ce8af7d5688a13)
 - [LDPlayer_Debloater (GitHub)](https://github.com/Red0Hood/LDPlayer_Debloater)
 - [Block-ads-for-LDplayer (GitHub)](https://github.com/HideCM/Block-ads-for-LDplayer)
+
+
