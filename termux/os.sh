@@ -28,6 +28,7 @@ NVIM_CONFIG_DEST="$HOME/.config/nvim"
 menu_items=(
     "Git Pull [ms1]              : update_ms1_repo                         :$BLUE"
     "Copy Files                  : copy_files                              :$BLUE"
+    "Move Downloads to PC Folder : move_downloads_to_shared_pictures        :$GREEN"
     "Install Necessary Packages  : install_packages    setup_storage_passwd:$BLUE"
     "Font Setup                  : install_font_with_oh_my_posh            :$BLUE"
     "Rclone-Dycrypt              : rclone_decrypt                          :$RED"
@@ -178,6 +179,75 @@ copy_files() {
     cp "$TERMUX_PROPERTIES_SOURCE" "$TERMUX_PROPERTIES_DEST"
     termux-reload-settings
     echo -e "${CYAN}Files copied and settings reloaded.${NC}"
+}
+
+# Move completed downloads into LDPlayer's Android Shared Folder (Pictures).
+# LDPlayer maps this Android folder to the configured PC Shared Folder.
+move_downloads_to_shared_pictures() {
+    clear
+
+    local download_dir="$HOME/storage/shared/Download"
+    local pictures_dir="$HOME/storage/shared/Pictures"
+
+    if [ ! -d "$HOME/storage/shared" ]; then
+        echo -e "${YELLOW}Termux storage access is not set up yet.${NC}"
+        echo -e "${CYAN}Choose 'Install Necessary Packages' and allow storage access, then try again.${NC}"
+        return 1
+    fi
+
+    if [ ! -d "$download_dir" ]; then
+        echo -e "${RED}Android Downloads folder not found: $download_dir${NC}"
+        return 1
+    fi
+
+    if [ ! -d "$pictures_dir" ]; then
+        echo -e "${RED}LDPlayer shared Pictures folder not found: $pictures_dir${NC}"
+        return 1
+    fi
+
+    shopt -s dotglob nullglob
+    local item name target stem suffix moved=0 skipped=0
+    for item in "$download_dir"/*; do
+        name="${item##*/}"
+
+        # Leave common temporary/in-progress download files in Downloads.
+        case "$name" in
+            *.crdownload|*.part|*.partial|*.download|*.tmp)
+                echo -e "${YELLOW}Skipping temporary download: $name${NC}"
+                ((skipped++))
+                continue
+                ;;
+        esac
+
+        target="$pictures_dir/$name"
+        if [ -e "$target" ]; then
+            stem="$name"
+            suffix=1
+            while [ -e "$pictures_dir/$stem ($suffix)" ]; do
+                ((suffix++))
+            done
+            target="$pictures_dir/$stem ($suffix)"
+        fi
+
+        if mv -- "$item" "$target"; then
+            echo -e "${GREEN}Moved: $name${NC}"
+            ((moved++))
+        else
+            echo -e "${RED}Could not move: $name${NC}"
+            ((skipped++))
+        fi
+    done
+    shopt -u dotglob nullglob
+
+    echo ""
+    if (( moved == 0 && skipped == 0 )); then
+        echo -e "${YELLOW}Downloads folder is empty.${NC}"
+    else
+        echo -e "${GREEN}Moved $moved item(s) to the LDPlayer shared Pictures folder.${NC}"
+        if (( skipped > 0 )); then
+            echo -e "${YELLOW}Skipped $skipped item(s). Temporary or failed items remain in Downloads.${NC}"
+        fi
+    fi
 }
 
 # Function to remove the repository
