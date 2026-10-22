@@ -22,13 +22,15 @@ BASHRC_DEST="$HOME/.bashrc"
 TERMUX_PROPERTIES_DEST="$HOME/.termux/termux.properties"
 NVIM_INIT_SOURCE="$REPO_DIR/dotfiles/neovim/init.lua"
 NVIM_CONFIG_DEST="$HOME/.config/nvim"
+OS_SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
+DOWNLOAD_SYNC_PID_FILE="$HOME/.local/state/ldplayer-download-sync.pid"
 
 
 # Declare a combined array of menu options and function bindings
 menu_items=(
     "Git Pull [ms1]              : update_ms1_repo                         :$BLUE"
     "Copy Files                  : copy_files                              :$BLUE"
-    "Move Downloads to PC Folder : move_downloads_to_shared_pictures        :$GREEN"
+    "Downloads to PC Folder      : downloads_transfer_menu                 :$GREEN"
     "Install Necessary Packages  : install_packages    setup_storage_passwd:$BLUE"
     "Font Setup                  : install_font_with_oh_my_posh            :$BLUE"
     "Rclone-Dycrypt              : rclone_decrypt                          :$RED"
@@ -248,6 +250,126 @@ move_downloads_to_shared_pictures() {
             echo -e "${YELLOW}Skipped $skipped item(s). Temporary or failed items remain in Downloads.${NC}"
         fi
     fi
+}
+
+downloads_transfer_menu() {
+    while true; do
+        clear
+        echo -e "${GREEN}LDPlayer Downloads → PC Shared Folder${NC}"
+        echo ""
+        echo " 1) Sync Downloads to Pictures now"
+        if download_sync_is_running; then
+            echo " 2) Stop background syncing"
+        else
+            echo " 2) Keep syncing in the background"
+        fi
+        echo " 0) Back"
+        echo ""
+        read -p "Choose an option: " sync_choice
+
+        case "$sync_choice" in
+            1)
+                move_downloads_to_shared_pictures
+                read -p "Press Enter to return to the menu..." _
+                ;;
+            2)
+                toggle_download_sync_background
+                read -p "Press Enter to return to the menu..." _
+                ;;
+            0|q|Q)
+                return 0
+                ;;
+            *)
+                echo -e "${RED}Invalid option.${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+download_sync_is_running() {
+    if [ -f "$DOWNLOAD_SYNC_PID_FILE" ]; then
+        local pid
+        read -r pid < "$DOWNLOAD_SYNC_PID_FILE"
+        [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null
+        return $?
+    fi
+    return 1
+}
+
+toggle_download_sync_background() {
+    if download_sync_is_running; then
+        local pid
+        read -r pid < "$DOWNLOAD_SYNC_PID_FILE"
+        kill "$pid" 2>/dev/null
+        rm -f "$DOWNLOAD_SYNC_PID_FILE"
+        echo -e "${YELLOW}Background syncing stopped.${NC}"
+        return 0
+    fi
+
+    if [ ! -d "$HOME/storage/shared/Download" ] || [ ! -d "$HOME/storage/shared/Pictures" ]; then
+        echo -e "${RED}Termux storage access is not ready.${NC}"
+        echo -e "${CYAN}Run 'termux-setup-storage' and allow access, then try again.${NC}"
+        return 1
+    fi
+
+    mkdir -p "$(dirname "$DOWNLOAD_SYNC_PID_FILE")"
+    nohup bash "$OS_SCRIPT_PATH" --download-sync-worker >/dev/null 2>&1 </dev/null &
+    local pid=$!
+    printf '%s\n' "$pid" > "$DOWNLOAD_SYNC_PID_FILE"
+    sleep 1
+
+    if kill -0 "$pid" 2>/dev/null; then
+        echo -e "${GREEN}Background syncing started.${NC}"
+        echo -e "${CYAN}It checks every 15 seconds and moves files after their size stays unchanged for one check.${NC}"
+        echo -e "${YELLOW}Android may stop background apps; allow Termux to run unrestricted in battery settings for better reliability.${NC}"
+    else
+        rm -f "$DOWNLOAD_SYNC_PID_FILE"
+        echo -e "${RED}Could not start the background sync worker.${NC}"
+        return 1
+    fi
+}
+
+download_sync_worker() {
+    local download_dir="$HOME/storage/shared/Download"
+    local pictures_dir="$HOME/storage/shared/Pictures"
+    local item name size old_size target suffix
+    declare -A observed_sizes=()
+    shopt -s dotglob nullglob
+    trap 'rm -f "$DOWNLOAD_SYNC_PID_FILE"' EXIT
+    trap 'exit 0' INT TERM
+
+    while true; do
+        for item in "$download_dir"/*; do
+            [ -f "$item" ] || continue
+            name="${item##*/}"
+            case "$name" in
+                *.crdownload|*.part|*.partial|*.download|*.tmp)
+                    observed_sizes["$item"]=""
+                    continue
+                    ;;
+            esac
+
+            size="$(stat -c '%s' -- "$item" 2>/dev/null)" || continue
+            old_size="${observed_sizes["$item"]-}"
+            if [ "$old_size" != "size:$size" ]; then
+                observed_sizes["$item"]="size:$size"
+                continue
+            fi
+
+            target="$pictures_dir/$name"
+            suffix=1
+            while [ -e "$target" ]; do
+                target="$pictures_dir/$name ($suffix)"
+                ((suffix++))
+            done
+
+            if mv -- "$item" "$target" 2>/dev/null; then
+                observed_sizes["$item"]=""
+            fi
+        done
+        sleep 15
+    done
 }
 
 # Function to remove the repository
@@ -1014,6 +1136,10 @@ _mirror_auto_pick() {
     _apply_mirror "$best_label" "$best_url"
 }
 
+if [ "${1:-}" = "--download-sync-worker" ]; then
+    download_sync_worker
+    exit 0
+fi
 
 while true; do
     echo ""
