@@ -1,7 +1,9 @@
 # recent.md — Job Search Handoff
 
 ## 1. Profile & Goal (Permanent)
-BBA/MBA in Finance. Looking for fresher or no-experience-required jobs in Bangladesh — banking, financial institutions, and government investment authorities (like BEPZA, BEZA, BIDA). Prefers reputable organizations with growth potential.
+BBA and MBA in Finance; SSC and HSC in Commerce. Looking for fresher or no-experience-required jobs in Bangladesh — banking, financial institutions, and government investment authorities (like BEPZA, BEZA, BIDA). Prefers reputable organizations with growth potential.
+
+**Date of Birth:** 1 January 1999
 
 **Academic Scores:**
 - BBA CGPA: 3.30 / 4.00
