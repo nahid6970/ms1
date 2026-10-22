@@ -1488,7 +1488,7 @@ td {
     position: absolute;
     top: 2px;
     right: 2px;
-    z-index: 120;
+    z-index: 250;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1512,6 +1512,14 @@ td:hover > .cell-ai-instruction-btn,
     background: rgba(168, 85, 247, 0.22);
     border-color: rgba(168, 85, 247, 0.7);
     outline: none;
+}
+
+.cell-ai-instruction-btn.scroll-following {
+    opacity: 1;
+    background: rgba(168, 85, 247, 0.24);
+    border-color: rgba(168, 85, 247, 0.78);
+    box-shadow: 0 2px 8px rgba(58, 24, 82, 0.2);
+    will-change: transform;
 }
 
 .cell-ai-instruction-btn:disabled {
