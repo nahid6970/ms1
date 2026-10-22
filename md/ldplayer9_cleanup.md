@@ -106,6 +106,19 @@ C:\LDPlayer\LDPlayer9\ldconsole.exe adb --index 0 --command "shell pm enable com
 
 Leave the launcher enabled; only disable the LD App Store.
 ---
+## Layer 5 — Remove the bottom recommended-game carousel
+
+The game carousel is part of LDPlayer's home launcher. Replace the home screen with a launcher that does not show LDPlayer's recommendations:
+
+1. In **System Apps**, open **Play Store** and install [**Lawnchair**](https://play.google.com/store/apps/details?id=app.lawnchair.play) (the free home screen app).
+2. Open Lawnchair and choose it as the default Home app when prompted.
+3. If Android does not prompt, open **Settings → Apps → Default apps → Home app** and select **Lawnchair**.
+
+### To undo
+
+Open **Settings → Apps → Default apps → Home app** and select **Launcher3** to return to LDPlayer's home screen and its recommendation carousel.
+
+---
 ## Optional — Block in-app ads
 
 Inside LDPlayer, go to **Settings → Network & Internet → Private DNS** and set:
@@ -123,6 +136,8 @@ This blocks ads inside regular Android apps too (separate from LDPlayer's own ad
 - [Kill ads on LDPlayer — Full Guide (GitHub Gist)](https://gist.github.com/minanagehsalalma/e6497ad1db67929593ce8af7d5688a13)
 - [LDPlayer_Debloater (GitHub)](https://github.com/Red0Hood/LDPlayer_Debloater)
 - [Block-ads-for-LDplayer (GitHub)](https://github.com/HideCM/Block-ads-for-LDplayer)
+
+
 
 
 
