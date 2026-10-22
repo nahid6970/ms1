@@ -3005,88 +3005,20 @@ async function runCellAiModelBatchTest() {
     setCellAiModelStatus(`${passed} working model${passed === 1 ? '' : 's'} saved to the picker after testing ${tested} of ${candidates.length}.`, passed ? 'success' : 'error');
 }
 
-let cellAiButtonScrollTrackingReady = false;
-let cellAiButtonScrollFrame = 0;
-let lastCellAiScrollTarget = null;
-let lastStyledCellAiButton = null;
+let cellAiHeaderResizeObserver = null;
 
-function rememberCellAiScrollTarget(event) {
-    const cell = event.target?.closest?.('td');
-    if (cell?.querySelector('.cell-ai-instruction-btn')) lastCellAiScrollTarget = cell;
-    scheduleVisibleCellAiButtonUpdate();
-}
-
-function updateVisibleCellAiButton() {
-    cellAiButtonScrollFrame = 0;
-    if (!lastCellAiScrollTarget?.isConnected) lastCellAiScrollTarget = null;
-    const activeCell = lastCellAiScrollTarget;
-    const activeButton = activeCell?.querySelector('.cell-ai-instruction-btn');
-    if (lastStyledCellAiButton && lastStyledCellAiButton !== activeButton) {
-        lastStyledCellAiButton.style.transform = '';
-        lastStyledCellAiButton.dataset.scrollOffsetY = '0';
-        lastStyledCellAiButton.style.visibility = '';
-        lastStyledCellAiButton.classList.remove('scroll-following');
+function updateCellAiStickyOffset() {
+    const headerRow = document.getElementById('headerRow');
+    if (!headerRow) return;
+    const headerHeight = Math.max(0, ...Array.from(headerRow.cells, cell => cell.getBoundingClientRect().height));
+    document.documentElement.style.setProperty('--cell-ai-sticky-offset', `${Math.ceil(headerHeight) + 2}px`);
+    if (!cellAiHeaderResizeObserver && window.ResizeObserver) {
+        cellAiHeaderResizeObserver = new ResizeObserver(updateCellAiStickyOffset);
+        cellAiHeaderResizeObserver.observe(headerRow);
     }
-    lastStyledCellAiButton = activeButton || null;
-    if (!activeCell || !activeButton) return;
-
-    const scrollContainer = document.querySelector('.table-container');
-    if (!scrollContainer) return;
-    const cellRect = activeCell.getBoundingClientRect();
-    const containerRect = scrollContainer.getBoundingClientRect();
-    const headerCells = document.querySelectorAll('#headerRow > th');
-    const headerBottom = headerCells.length
-        ? Math.max(...Array.from(headerCells, cell => cell.getBoundingClientRect().bottom))
-        : containerRect.top;
-    const visibleTop = Math.max(containerRect.top + scrollContainer.clientTop, headerBottom) + 2;
-    const visibleBottom = containerRect.top + scrollContainer.clientTop + scrollContainer.clientHeight;
-    const buttonHeight = activeButton.offsetHeight || 22;
-
-    if (cellRect.bottom < visibleTop + buttonHeight || cellRect.top >= visibleBottom) {
-        activeButton.style.visibility = 'hidden';
-        activeButton.classList.remove('scroll-following');
-        return;
-    }
-
-    activeButton.style.visibility = '';
-    activeButton.classList.toggle('scroll-following', cellRect.top < visibleTop);
-    let targetTop = cellRect.top < visibleTop
-        ? Math.min(visibleTop - cellRect.top, cellRect.height - buttonHeight - 2)
-        : 2;
-    targetTop = Math.max(2, targetTop);
-    let offsetY = targetTop - 2;
-    activeButton.style.transform = `translate3d(0, ${offsetY}px, 0)`;
-    activeButton.dataset.scrollOffsetY = String(offsetY);
-    // Correct for table cell borders and padding so the button never sits on the sticky header.
-    const buttonRect = activeButton.getBoundingClientRect();
-    if (buttonRect.top < visibleTop) {
-        offsetY += visibleTop - buttonRect.top;
-        activeButton.style.transform = `translate3d(0, ${offsetY}px, 0)`;
-        activeButton.dataset.scrollOffsetY = String(offsetY);
-    }
-}
-
-function scheduleVisibleCellAiButtonUpdate() {
-    if (cellAiButtonScrollFrame) return;
-    cellAiButtonScrollFrame = requestAnimationFrame(updateVisibleCellAiButton);
-}
-
-function initCellAiButtonScrollTracking() {
-    if (cellAiButtonScrollTrackingReady) return;
-    const scrollContainer = document.querySelector('.table-container');
-    if (!scrollContainer) return;
-    cellAiButtonScrollTrackingReady = true;
-    scrollContainer.addEventListener('scroll', scheduleVisibleCellAiButtonUpdate, { passive: true });
-    // Capture scroll events from nested textareas and markdown previews too.
-    scrollContainer.addEventListener('scroll', scheduleVisibleCellAiButtonUpdate, { capture: true, passive: true });
-    scrollContainer.addEventListener('focusin', rememberCellAiScrollTarget);
-    scrollContainer.addEventListener('pointermove', rememberCellAiScrollTarget, { passive: true });
-    window.addEventListener('scroll', scheduleVisibleCellAiButtonUpdate, { passive: true });
-    window.addEventListener('resize', scheduleVisibleCellAiButtonUpdate, { passive: true });
 }
 
 function appendCellAiInstructionButton(td, rowIndex, colIndex) {
-    initCellAiButtonScrollTracking();
     if (td.querySelector('.cell-rank-badge')) {
         td.classList.add('has-cell-ai-rank');
     }
@@ -11076,6 +11008,7 @@ function renderTable(preserveScroll = true) {
         headerRow.appendChild(th);
     });
 
+    updateCellAiStickyOffset();
     const wrapEnabled = localStorage.getItem('rowWrapEnabled') === 'true';
 
     // Determine which rows to render based on Single Row Mode
