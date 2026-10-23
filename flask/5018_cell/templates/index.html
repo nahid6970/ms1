@@ -1639,6 +1639,34 @@
         </div>
     </div>
 
+    <div id="cellAiResearchReviewModal" class="modal" aria-hidden="true">
+        <section class="modal-content cell-ai-research-modal" role="dialog" aria-modal="true" aria-labelledby="cellAiResearchReviewTitle">
+            <header class="modal-header">
+                <h2 id="cellAiResearchReviewTitle">Review web-researched update</h2>
+                <button id="closeCellAiResearchReview" class="close" type="button" aria-label="Close review">&times;</button>
+            </header>
+            <div class="cell-ai-research-review-body">
+                <p id="cellAiResearchReviewNote" class="cell-ai-research-review-note"></p>
+                <section id="cellAiResearchResultSection" aria-labelledby="cellAiResearchResultHeading">
+                    <h3 id="cellAiResearchResultHeading">Proposed cell content</h3>
+                    <pre id="cellAiResearchResultPreview"></pre>
+                </section>
+                <section id="cellAiResearchSourcesSection" aria-labelledby="cellAiResearchSourcesHeading">
+                    <h3 id="cellAiResearchSourcesHeading">Sources</h3>
+                    <ol id="cellAiResearchSourceList"></ol>
+                </section>
+                <section id="cellAiResearchSuggestionsSection" aria-labelledby="cellAiResearchSuggestionsHeading">
+                    <h3 id="cellAiResearchSuggestionsHeading">Google Search suggestions</h3>
+                    <div id="cellAiResearchSearchSuggestions"></div>
+                </section>
+            </div>
+            <footer class="cell-ai-research-review-footer">
+                <button id="cancelCellAiResearchReview" class="btn btn-secondary" type="button">Cancel</button>
+                <button id="applyCellAiResearchUpdate" class="btn btn-primary" type="button">Apply to cell</button>
+            </footer>
+        </section>
+    </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='recent_edits.js') }}"></script>
     <script src="{{ url_for('static', filename='temp_notepad.js') }}"></script>

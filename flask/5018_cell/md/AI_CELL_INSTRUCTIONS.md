@@ -6,6 +6,8 @@ Each table cell has a sparkle button that opens a small instruction editor. The 
 
 The sparkle button stays visible beneath the sticky table header as its cell scrolls. When opened, the instruction editor stays directly below the button while scrolling through that cell. The controls float over the cell without pushing its content down, and opening the editor does not jump the page to the top.
 
+The floating editor is capped at 420px (or 70% of the viewport height) and scrolls internally when prompt history is long. Its Google Search checkbox has a fixed compact width so it cannot squeeze the label text into a tall, narrow column.
+
 ## Setup
 
 1. Open **Settings → AI Cell Instructions**.
@@ -20,6 +22,16 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 1. Click the cell's **✨** button.
 2. Enter the change you want in the instruction box, choose a previous prompt from **Recent prompts**, or click the microphone button to dictate it in the voice language selected for the app. The browser may request microphone access. The box grows automatically for multiline instructions. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
 3. Click **Update**. Gemini uses the instruction and the cell's current content, then replaces the content in the same cell.
+4. To use live web sources, enable **Web research (Google Search)** before clicking Update. The feature splits large cells into sections and researches them sequentially. It shows a review with the proposed cell content, source links, inline citations, and Google's search suggestions. Click **Apply to cell** to save the result, or **Cancel** to discard it. Research never changes the cell before you apply the preview.
+
+### Web research, citations, and large cells
+
+- Web research is opt-in for each request. It uses Gemini's Google Search grounding tool; ordinary updates keep their existing behavior.
+- Input is divided at paragraph, line, or word boundaries into sections of at most 24,000 characters, then checked with Gemini's token-count endpoint and subdivided as needed to stay under 12,000 input tokens. At most 12 sections are researched in one operation. Very long unbroken lines or cells requiring more sections need a narrower request or added line breaks.
+- Sections are processed one at a time to keep requests bounded. Each section may trigger Google Search grounding and consume API quota. Source references are merged, deduplicated, added beside supported text, and listed as clickable links at the end of the proposed cell content.
+- The review shows Google's returned Search suggestions separately from the cell content. Google requires these suggestions to be shown with grounded answers; the app displays the returned suggestion HTML in a sandboxed frame.
+- If a section fails, no part of the cell is saved. The cell is checked again when **Apply to cell** is clicked; if it changed during research, the stale result is rejected.
+- Research requests send the relevant cell text and instruction to Google. Review Google's current [Gemini API terms](https://ai.google.dev/gemini-api/terms) before using sensitive content. See the [Google Search grounding guide](https://ai.google.dev/gemini-api/docs/generate-content/google-search) and [token-counting guide](https://ai.google.dev/gemini-api/docs/tokens).
 
 ## Recent prompts and pinned prompts
 
@@ -53,9 +65,9 @@ The cell instruction prompt tells Gemini to use these project-specific forms:
 
 Single-star emphasis (`*text*`) and asterisk bullets are not supported. Before saving, the AI instruction converts common single-star emphasis to the project's `@@text@@` italic syntax and asterisk bullets to hyphen bullets. It also converts Markdown heading lines such as `### Heading` to `##Heading##`, removes standalone horizontal divider lines, normalizes spaced nested bullets (`- - item`) to contiguous list markers, and removes zero-width spaces. Pipe table separators are preserved.
 
-## Current search behavior
+## Search behavior
 
-Cell updates currently call Gemini's `generateContent` endpoint directly. They do **not** perform Tavily or other web searches, so they cannot guarantee the latest online information. A request to update time-sensitive facts may rely on the selected model's existing knowledge.
+Regular cell updates do not perform a web search. Enable **Web research (Google Search)** when you want Gemini's Google Search grounding for current or source-backed information. Search results can still be incomplete or imperfect; review the proposed content and linked sources before applying it.
 
 ## Restart and refresh
 

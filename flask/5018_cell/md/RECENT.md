@@ -1,5 +1,29 @@
 # Recent Development Log
 
+## [2026-10-23] - Add Opt-in Web Research for Cell AI
+
+**What We Accomplished:**
+- Added optional Google Search grounding to AI cell instructions, leaving ordinary updates unchanged.
+- Split large cell contents into bounded, token-counted sections and process each section sequentially (maximum 12 sections).
+- Added inline source references, a deduplicated clickable source list, and Google's search suggestions to a review dialog.
+- Made research results opt-in to apply; failed or stale requests leave the cell unchanged.
+- Fixed the research checkbox sizing inside table cells and capped the floating editor height with internal scrolling.
+- Documented source review, request limits, quota implications, and Google API references.
+
+**Files Modified:**
+- `static/script.js` — token-counted chunking, Google Search grounding, citations, and review/apply flow
+- `static/style.css` — research toggle and review dialog styling; compact checkbox and bounded editor height
+- `templates/index.html` — research controls and review dialog
+- `md/AI_CELL_INSTRUCTIONS.md` — setup, behavior, limits, and Google references
+- `md/CELL_FEATURES.md` — feature summary
+- `md/RECENT.md` — recorded this feature
+
+**Current Status:**
+- Research output is previewed before it is applied to a cell.
+- Browser behavior and live Gemini API integration have not been manually verified.
+
+---
+
 ## [2026-10-23] - Reuse and Pin Cell AI Prompts
 
 **What We Accomplished:**

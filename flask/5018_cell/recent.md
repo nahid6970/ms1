@@ -4,6 +4,8 @@ Flask-based web app with a vanilla JavaScript/CSS frontend (`static/script.js` i
 
 # Latest Implementation
 
+- Cell AI web research — Added an opt-in Google Search grounding mode. Large cell inputs are divided at natural boundaries, token-counted, and researched sequentially (maximum 12 sections); the user reviews inline citations, source links, and Google's search suggestions before applying. See `md/AI_CELL_INSTRUCTIONS.md`.
+
 - `static/script.js` — Improved F3 outside-edit selection: visible selection movement now skips hidden Markdown syntax; Shift+Left/Right extends the correct rendered edge; unmodified arrows contract from the inside edge; typing, Backspace, Delete, Shift+Enter, and Tab edit the selected range directly; F3 edits pass the live input through `updateCell()` so previews refresh.
 - Cell AI instructions — Each cell's sparkle button opens a floating inline instruction editor that does not push cell content down, and sends the instruction with the cell's current content to the selected, tested Gemini model. The response replaces the same cell. This implementation does not use Tavily or another web search provider. See `md/AI_CELL_INSTRUCTIONS.md`.
 - Cell AI prompt history — Successful instructions are saved in browser `localStorage` and appear as reusable suggestions. Prompts can be pinned or removed with **×**. Up to 20 unpinned prompts are kept; pinned prompts do not count toward the limit. See `md/AI_CELL_INSTRUCTIONS.md`.

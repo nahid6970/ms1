@@ -3,6 +3,8 @@
 ## AI Cell Instructions
 Each cell's **✨** button stays visible beneath the sticky table header while scrolling through its cell. It opens an instruction box below the button that floats over the cell without pushing the content down. The editor includes microphone dictation and a text area that grows to show multiline instructions. Opening it does not jump the page. The selected Gemini model applies the instruction to the cell's existing content and replaces that same cell. Configure the API key and test/select a working model under **Settings → AI Cell Instructions**.
 
+Enable **Web research (Google Search)** for current, source-backed updates. Large cells are divided into bounded sections and researched sequentially (up to 12 sections); the app shows a cited result and Google's search suggestions for review before applying it. Failed research leaves the cell unchanged.
+
 Successful instructions are saved as recent prompts in this browser. Select one to reuse it, pin it to keep it at the top, or remove it with **×**. It keeps up to 20 unpinned prompts; pinned prompts do not count toward that limit.
 
 See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md) for setup, behavior, search limitations, and restart requirements.

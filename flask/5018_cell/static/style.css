@@ -1534,7 +1534,10 @@ td:hover .cell-ai-instruction-btn,
     top: 26px;
     right: 2px;
     z-index: 251;
-    width: min(320px, calc(100vw - 32px));
+    box-sizing: border-box;
+    width: min(340px, calc(100vw - 32px));
+    max-height: min(70vh, 420px);
+    overflow-y: auto;
     padding: 9px;
     border: 1px solid #c9a2e8;
     border-radius: 7px;
@@ -2025,6 +2028,159 @@ td input::-moz-selection {
     margin-left: -24px;
     margin-right: -24px;
     margin-bottom: -24px;
+}
+
+.cell-ai-research-modal {
+    width: min(920px, 94vw);
+    max-width: 920px;
+    max-height: 90vh;
+}
+
+.cell-ai-research-review-body {
+    overflow-y: auto;
+    padding: 18px 24px;
+}
+
+.cell-ai-research-review-note {
+    margin: 0 0 14px;
+    color: #625b6e;
+    font-size: 13px;
+}
+
+.cell-ai-research-review-body h3 {
+    margin: 18px 0 8px;
+    color: #312b3a;
+    font-size: 14px;
+}
+
+#cellAiResearchResultPreview {
+    max-height: 320px;
+    overflow: auto;
+    margin: 0;
+    padding: 12px;
+    border: 1px solid #e4dfeb;
+    border-radius: 7px;
+    background: #faf9fc;
+    color: #332d3c;
+    font: 12px/1.55 Consolas, 'Courier New', monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+#cellAiResearchSourceList {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding-left: 24px;
+    color: #5b5264;
+    font-size: 12px;
+}
+
+#cellAiResearchSourceList a {
+    color: #5d3db5;
+    overflow-wrap: anywhere;
+}
+
+#cellAiResearchSearchSuggestions {
+    display: grid;
+    gap: 12px;
+}
+
+.cell-ai-research-search-suggestion {
+    overflow: hidden;
+    border: 1px solid #e5e1ea;
+    border-radius: 7px;
+    background: #fff;
+}
+
+.cell-ai-research-search-suggestion h4 {
+    margin: 0;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eeeaf2;
+    color: #6d6575;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.cell-ai-research-search-suggestion iframe {
+    display: block;
+    width: 100%;
+    min-height: 150px;
+    border: 0;
+    background: #fff;
+}
+
+.cell-ai-research-review-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    padding: 14px 24px;
+    border-top: 1px solid #e9ecef;
+    background: #fff;
+}
+
+.cell-ai-research-toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin: 7px 0 0;
+    color: #5d466c;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.cell-ai-research-toggle-row input {
+    flex: 0 0 14px;
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+    min-height: 14px;
+    margin: 1px 0 0;
+    padding: 0;
+    accent-color: #8b36c9;
+}
+
+.cell-ai-research-toggle-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.cell-ai-research-toggle-copy strong {
+    display: block;
+    margin-bottom: 2px;
+    color: #613482;
+    font-size: 12px;
+}
+
+.cell-ai-research-toggle-copy span {
+    display: block;
+    color: #756d7e;
+}
+
+.cell-ai-research-progress {
+    margin-top: 5px;
+    color: #704c85;
+    font-size: 10px;
+}
+
+.cell-ai-research-progress:empty {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .cell-ai-research-modal {
+        width: 96vw;
+        max-height: 94vh;
+        margin: 3vh auto;
+    }
+
+    .cell-ai-research-review-body {
+        padding: 14px;
+    }
+
+    .cell-ai-research-review-footer {
+        padding: 12px 14px;
+    }
 }
 
 .btn-secondary {
