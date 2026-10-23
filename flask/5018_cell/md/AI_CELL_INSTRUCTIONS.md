@@ -18,8 +18,17 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 ## Updating a cell
 
 1. Click the cell's **✨** button.
-2. Enter the change you want in the instruction box, or click the microphone button to dictate it in the voice language selected for the app. The browser may request microphone access. The box grows automatically for multiline instructions. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
+2. Enter the change you want in the instruction box, choose a previous prompt from **Recent prompts**, or click the microphone button to dictate it in the voice language selected for the app. The browser may request microphone access. The box grows automatically for multiline instructions. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
 3. Click **Update**. Gemini uses the instruction and the cell's current content, then replaces the content in the same cell.
+
+## Recent prompts and pinned prompts
+
+- After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.
+- Click a prompt to put it back into the instruction box. You can edit it before running it again.
+- Click the star beside a prompt to pin or unpin it. Pinned prompts stay at the top of the list.
+- The app keeps up to 20 unpinned prompts. Pinned prompts do not count toward this limit, and there is no limit on pinned prompts. Reusing a prompt moves it to the top of its group.
+- Prompt history is stored in this browser's `localStorage`; it is available on this browser, not synced between browsers or devices.
+- Clearing this browser's site data removes saved prompts.
 
 When a cell begins with an `Instruction:` line, that first line is treated as the instruction metadata; the remaining lines are sent as the cell content. For cells without that prefix, the whole current value is sent as content.
 

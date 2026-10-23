@@ -3,6 +3,8 @@
 ## AI Cell Instructions
 Each cell's **✨** button stays visible beneath the sticky table header while scrolling through its cell. It opens an inline instruction box that stays below the button, with microphone dictation and a text area that grows to show multiline instructions. Opening the editor does not jump the page. The selected Gemini model applies the instruction to the cell's existing content and replaces that same cell. Configure the API key and test/select a working model under **Settings → AI Cell Instructions**.
 
+Successful instructions are saved as recent prompts in this browser. Select one to reuse it, or pin it to keep it at the top of the prompt list. It keeps up to 20 unpinned prompts; pinned prompts do not count toward that limit.
+
 See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md) for setup, behavior, search limitations, and restart requirements.
 
 ## Cell Complete Checkmark

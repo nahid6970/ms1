@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Suggestions — UI Smoke Test</title>
+  <style>
+    :root { color-scheme: dark; --ink:#f4f1ff; --muted:#a6a0bc; --line:#ffffff19; --panel:#151326; --panel2:#1d1932; --violet:#a88bff; --cyan:#79e3d7; --pink:#ff8fc7; }
+    * { box-sizing:border-box }
+    body { margin:0; padding:30px; color:var(--ink); font:15px/1.45 Inter, ui-sans-serif, system-ui, Segoe UI, sans-serif; background:radial-gradient(ellipse at 15% 0%,#40306b 0,transparent 35%),radial-gradient(ellipse at 90% 15%,#143e4b 0,transparent 32%),linear-gradient(145deg,#0c0b16,#111020 55%,#0b171d); overflow-x:hidden }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.18; background-image:radial-gradient(#fff 0.6px,transparent .6px); background-size:24px 24px; mask-image:linear-gradient(to bottom,#000,transparent 85%) }
+    .shell { max-width:1200px; margin:auto; position:relative }
+    .eyebrow { color:var(--cyan); letter-spacing:.17em; text-transform:uppercase; font-size:11px; font-weight:800 }
+    h1 { margin:7px 0 8px; font-size:clamp(30px,5vw,48px); letter-spacing:-.045em; line-height:1.08 }
+    .lede { color:var(--muted); max-width:720px; margin:0 0 23px }
+    .topline { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:24px }
+    .badge { white-space:nowrap; color:#d9ceff; border:1px solid #b29aff55; background:#a88bff14; border-radius:999px; padding:8px 12px; font-size:12px; box-shadow:0 0 22px #a88bff22 }
+    .layout { display:grid; grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); gap:18px; align-items:stretch }
+    .card { border:1px solid var(--line); background:linear-gradient(160deg,#ffffff0b,#ffffff04); border-radius:20px; box-shadow:0 22px 70px #0007; overflow:hidden; backdrop-filter:blur(15px); animation:rise .7s both }
+    .card:nth-child(2) { animation-delay:.12s }
+    .card-head { padding:18px 20px 14px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px }
+    .card-head h2 { margin:0; font-size:15px; letter-spacing:.01em }
+    .step { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.12em }
+    .preview { padding:20px; min-height:460px }
+    .toolbar { display:flex; align-items:center; gap:7px; margin-bottom:18px; color:#aaa4bd; font-size:12px }
+    .dot { width:8px; height:8px; border-radius:50%; background:#ff8f9a; box-shadow:13px 0 #f8cc79,26px 0 #7ce2ad; margin-right:26px }
+    .sheet { border:1px solid #ffffff18; border-radius:13px; background:#0e0d19b8; padding:14px; position:relative; overflow:hidden }
+    .sheet:after { content:""; position:absolute; width:170px; height:170px; border-radius:50%; right:-90px; top:-100px; background:#a88bff22; filter:blur(18px); animation:float 5s ease-in-out infinite alternate }
+    .sheet-title { font-size:12px; color:#c9c2db; padding:2px 2px 12px; display:flex; justify-content:space-between; border-bottom:1px solid #ffffff16 }
+    .row { display:grid; grid-template-columns:28px 1fr; gap:9px; padding:11px 4px; border-bottom:1px solid #ffffff0d; align-items:start; font-size:13px; color:#d9d5e4 }
+    .row:last-child { border:0 }
+    .row-index { color:#756e89; font:11px ui-monospace,monospace }
+    .sparkle { color:#cfbaff; float:right; filter:drop-shadow(0 0 8px #bba4ff) }
+    .editor { margin:13px 0 0 36px; background:linear-gradient(135deg,#211d3a,#18182b); border:1px solid #ad91ff62; border-radius:14px; padding:13px; box-shadow:0 0 30px #9674ff1d; position:relative; z-index:1 }
+    .editor-label { font-size:11px; color:#bcb1d7; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center }
+    .textarea { border:1px solid #ffffff20; border-radius:10px; padding:12px; min-height:65px; color:#f3efff; background:#0c0b16; font-size:13px; box-shadow:inset 0 1px 8px #0005 }
+    .prompt-text { display:block; color:#e8e1ff; animation:softpulse 3s ease-in-out infinite }
+    .editor-foot { display:flex; justify-content:space-between; align-items:center; margin-top:11px; gap:8px }
+    .hint { font-size:10px; color:#8f89a3 }
+    button { color:inherit; font:inherit; cursor:pointer }
+    .primary { border:0; border-radius:9px; background:linear-gradient(115deg,#9d7af8,#7257d9); color:white; padding:9px 14px; font-size:12px; font-weight:750; box-shadow:0 6px 18px #8061e855; transition:transform .2s,box-shadow .2s }
+    .primary:hover { transform:translateY(-2px); box-shadow:0 9px 24px #8061e899 }
+    .mini { border:1px solid #ffffff1b; background:#ffffff09; color:#cfc9df; border-radius:8px; padding:6px 9px; font-size:11px }
+    .suggestions { margin-top:12px; padding-top:11px; border-top:1px solid #ffffff14; animation:fadein .55s .25s both }
+    .suggestion-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:#9c94ad }
+    .suggestion { display:flex; gap:10px; align-items:center; justify-content:space-between; border:1px solid transparent; padding:8px 9px; border-radius:9px; color:#d7d1e3; font-size:11px; cursor:pointer; transition:all .2s }
+    .suggestion:hover,.suggestion.active { border-color:#ab92ff45; background:#a88bff13; transform:translateX(2px) }
+    .sug-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .pin { border:0; background:none; color:#89829a; padding:2px 4px; font-size:15px; transition:color .2s,transform .2s }
+    .pin.pinned { color:#f8cf83; transform:rotate(-18deg) scale(1.1); text-shadow:0 0 11px #f2be60aa }
+    .list-scroll { max-height:94px; overflow:auto; scrollbar-width:thin; scrollbar-color:#544975 transparent }
+    .library-top { display:flex; gap:8px; margin-bottom:12px }
+    .search { flex:1; padding:9px 11px; border:1px solid #ffffff1c; border-radius:9px; background:#0c0b16; color:#eee; font-size:12px; outline:none }
+    .search:focus { border-color:#a88bff88; box-shadow:0 0 0 3px #a88bff1b }
+    .mode-tabs { display:flex; gap:7px; padding:11px 18px 0 }
+    .tab { border:1px solid transparent; background:transparent; color:#9690a6; padding:8px 10px; border-radius:9px; font-size:11px }
+    .tab[aria-selected="true"] { color:#e9e1ff; background:#a88bff19; border-color:#a88bff40 }
+    .library { padding:14px 18px 18px }
+    .library-empty { border:1px dashed #ffffff26; border-radius:12px; padding:19px; color:#9d96ad; text-align:center; font-size:12px }
+    .prompt-card { border:1px solid #ffffff14; background:#ffffff06; padding:12px; border-radius:12px; margin-bottom:9px; transition:transform .2s,border .2s }
+    .prompt-card:hover { transform:translateY(-2px); border-color:#9f85e655 }
+    .prompt-card h3 { font-size:12px; margin:0 0 5px; display:flex; justify-content:space-between; gap:8px; align-items:center }
+    .prompt-card p { color:#aaa4b9; margin:0; font-size:11px; line-height:1.5 }
+    .tag { font-size:9px; color:#8de0d4; background:#75e2d215; padding:3px 6px; border-radius:999px }
+    .option-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px }
+    .option { border:1px solid var(--line); border-radius:15px; padding:15px; background:#ffffff06; transition:all .25s; cursor:pointer; min-height:130px }
+    .option:hover { transform:translateY(-3px); border-color:#a88bff66; background:#a88bff0c }
+    .option.selected { border-color:#a88bff91; background:linear-gradient(140deg,#a88bff1b,#78e0d50a); box-shadow:0 0 24px #9b7de61b }
+    .option strong { display:block; margin:7px 0 5px; font-size:13px }
+    .option p { color:#a9a2b9; font-size:11px; margin:0; line-height:1.5 }
+    .option-kicker { color:var(--cyan); font-size:10px; text-transform:uppercase; letter-spacing:.1em }
+    .footnote { color:#888199; font-size:10px; margin:13px 2px 0 }
+    @keyframes rise { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadein { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes float { to{transform:translate(-28px,30px)} }
+    @keyframes softpulse { 50%{text-shadow:0 0 12px #cbb7ff55} }
+    @media (max-width:850px) { body{padding:20px}.layout{grid-template-columns:1fr}.preview{min-height:auto}.option-grid{grid-template-columns:1fr}.topline{align-items:flex-start;flex-direction:column} }
+    @media (prefers-reduced-motion:reduce) { *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important} }
+  </style>
+</head>
+<body>
+  <main class="shell" id="prompt-preview">
+    <header class="topline" id="preview-header">
+      <div><div class="eyebrow">Cell assistant · concept smoke test</div><h1>Keep your best prompts close.</h1><p class="lede">Compare three ways recurring Gemini instructions could appear when you open a cell’s ✨ editor. Pick a prompt to preview how it fills the editor; pin controls are interactive.</p></div>
+      <div class="badge" id="preview-status">Interactive concept · sample data only</div>
+    </header>
+    <section class="layout" id="prompt-preview-layout" aria-label="Prompt management concepts">
+      <article class="card" id="cell-editor-preview">
+        <div class="card-head"><h2>Cell editor preview</h2><span class="step" id="active-concept">Option A</span></div>
+        <div class="preview">
+          <div class="toolbar"><span class="dot"></span><span>Study Notes</span><span style="margin-left:auto">Row 12 · Column B</span></div>
+          <div class="sheet" id="sample-sheet">
+            <div class="sheet-title"><span>Cell content</span><span>Markdown sheet</span></div>
+            <div class="row"><span class="row-index">12</span><div>Photosynthesis converts light energy into chemical energy. <span class="sparkle">✦</span></div></div>
+            <div class="editor" id="ai-instruction-editor">
+              <div class="editor-label"><span>Instruction for this cell</span><button class="mini" id="saved-prompts-button" type="button">▤ Saved prompts</button></div>
+              <div class="textarea" id="prompt-input-preview"><span class="prompt-text" id="selected-prompt-text">Explain this in simple language and add a short example.</span></div>
+              <div class="editor-foot"><span class="hint" id="prompt-hint">Recent · click a suggestion to reuse</span><button class="primary" id="update-cell-button" type="button">Update cell ↗</button></div>
+              <div class="suggestions" id="prompt-suggestions-panel">
+                <div class="suggestion-title"><span id="suggestion-heading">Recent prompts</span><span>↓</span></div>
+                <div class="list-scroll" id="suggestion-list">
+                  <div class="suggestion active" id="suggestion-simple"><span class="sug-text">Explain this in simple language and add a short example.</span><button class="pin pinned" id="pin-simple" aria-label="Unpin simple explanation prompt" title="Pinned favorite">◆</button></div>
+                  <div class="suggestion" id="suggestion-bullets"><span class="sug-text">Turn this into 3 concise bullet points.</span><button class="pin" id="pin-bullets" aria-label="Pin bullet points prompt" title="Pin prompt">◇</button></div>
+                  <div class="suggestion" id="suggestion-quiz"><span class="sug-text">Create one review question and put the answer on the next line.</span><button class="pin" id="pin-quiz" aria-label="Pin review question prompt" title="Pin prompt">◇</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+      <article class="card" id="prompt-library-preview">
+        <div class="card-head"><h2>Saved prompt experience</h2><span class="step">Reusable prompt shelf</span></div>
+        <div class="mode-tabs" id="prompt-mode-tabs" role="tablist" aria-label="Prompt list modes">
+          <button class="tab" id="tab-recent" role="tab" aria-selected="true">Recent</button>
+          <button class="tab" id="tab-pinned" role="tab" aria-selected="false">Pinned ★</button>
+          <button class="tab" id="tab-library" role="tab" aria-selected="false">Library</button>
+        </div>
+        <div class="library" id="prompt-library-panel">
+          <div class="library-top"><input class="search" id="prompt-search" type="search" placeholder="Search saved prompts…" aria-label="Search saved prompts"><button class="mini" id="add-prompt-button" type="button">＋ Add</button></div>
+          <div id="prompt-library-items">
+            <div class="prompt-card" id="library-simple"><h3>Simple explanation <span class="tag">PINNED</span></h3><p>Explain this in simple language and add a short example.</p></div>
+            <div class="prompt-card" id="library-bullets"><h3>Quick bullets <span class="tag">RECENT</span></h3><p>Turn this into 3 concise bullet points.</p></div>
+            <div class="prompt-card" id="library-quiz"><h3>Review question <span class="tag">RECENT</span></h3><p>Create one review question and put the answer on the next line.</p></div>
+          </div>
+          <p class="footnote" id="storage-note">Concept only: prompts would be saved in this browser and available when you reopen the editor.</p>
+        </div>
+      </article>
+    </section>
+    <section class="option-grid" id="option-chooser" aria-label="Choose a prompt design concept">
+      <button class="option selected" id="option-a" data-option="a"><span class="option-kicker">Option A · recommended</span><strong>Recent + pinning</strong><p>Prompts appear after use. Pin favorites to keep them at the top.</p></button>
+      <button class="option" id="option-b" data-option="b"><span class="option-kicker">Option B</span><strong>Manual library</strong><p>Name and organize reusable prompts yourself; keep history out of the way.</p></button>
+      <button class="option" id="option-c" data-option="c"><span class="option-kicker">Option C</span><strong>History + library</strong><p>Auto-save recent prompts, pin or rename them, and search the full collection.</p></button>
+    </section>
+  </main>
+  <script>
+    const promptExamples = {
+      simple: 'Explain this in simple language and add a short example.',
+      bullets: 'Turn this into 3 concise bullet points.',
+      quiz: 'Create one review question and put the answer on the next line.'
+    };
+    const selectedText = document.getElementById('selected-prompt-text');
+    const hint = document.getElementById('prompt-hint');
+    document.querySelectorAll('.suggestion').forEach(item => {
+      item.addEventListener('click', event => {
+        if (event.target.closest('.pin')) return;
+        document.querySelectorAll('.suggestion').forEach(row => row.classList.remove('active'));
+        item.classList.add('active');
+        const key = item.id.replace('suggestion-', '');
+        selectedText.textContent = promptExamples[key];
+        hint.textContent = 'Selected · ready to reuse';
+      });
+    });
+    document.querySelectorAll('.pin').forEach(button => button.addEventListener('click', () => {
+      const pinned = button.classList.toggle('pinned');
+      button.textContent = pinned ? '◆' : '◇';
+      button.title = pinned ? 'Pinned favorite' : 'Pin prompt';
+      button.setAttribute('aria-label', `${pinned ? 'Unpin' : 'Pin'} ${button.id.replace('pin-', '')} prompt`);
+    }));
+    document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(other => other.setAttribute('aria-selected', String(other === tab)));
+      const mode = tab.id.replace('tab-', '');
+      const labels = { recent: 'Recent prompts', pinned: 'Pinned prompts', library: 'Prompt library' };
+      document.getElementById('suggestion-heading').textContent = labels[mode];
+      hint.textContent = mode === 'pinned' ? 'Pinned favorites · always at hand' : mode === 'library' ? 'All saved prompts · searchable' : 'Recent · click a suggestion to reuse';
+    }));
+    document.querySelectorAll('.option').forEach(option => option.addEventListener('click', () => {
+      document.querySelectorAll('.option').forEach(other => other.classList.toggle('selected', other === option));
+      const choice = option.dataset.option;
+      document.getElementById('active-concept').textContent = `Option ${choice.toUpperCase()}`;
+      document.getElementById('suggestion-heading').textContent = choice === 'b' ? 'Saved prompts' : choice === 'c' ? 'Recent + pinned prompts' : 'Recent prompts';
+      document.getElementById('prompt-suggestions-panel').style.display = choice === 'b' ? 'none' : 'block';
+      document.getElementById('prompt-library-preview').style.opacity = choice === 'a' ? '.78' : '1';
+      hint.textContent = choice === 'a' ? 'Recent · click a suggestion to reuse' : choice === 'b' ? 'Manual library · choose from saved prompts' : 'Recent + library · filter or pin any prompt';
+    }));
+    document.getElementById('prompt-search').addEventListener('input', event => {
+      const term = event.target.value.toLowerCase();
+      document.querySelectorAll('.prompt-card').forEach(card => card.hidden = !card.textContent.toLowerCase().includes(term));
+    });
+    document.getElementById('saved-prompts-button').addEventListener('click', () => document.getElementById('prompt-library-panel').scrollIntoView({behavior:'smooth',block:'center'}));
+    document.getElementById('add-prompt-button').addEventListener('click', () => {
+      document.getElementById('storage-note').textContent = 'Add prompt clicked · this is a visual concept, no data is being saved.';
+      document.getElementById('storage-note').style.color = '#8de0d4';
+    });
+    document.getElementById('update-cell-button').addEventListener('click', () => {
+      document.getElementById('preview-status').textContent = 'Preview only · no Gemini request sent';
+      document.getElementById('preview-status').style.borderColor = '#79e3d777';
+    });
+  </script>
+</body>
+</html>

@@ -2732,10 +2732,126 @@ const CELL_AI_API_KEY_STORAGE_KEY = 'cell-ai-gemini-api-key';
 const CELL_AI_MODEL_STORAGE_KEY = 'cell-ai-gemini-model';
 const CELL_AI_WORKING_MODELS_STORAGE_KEY = 'cell-ai-working-models';
 const CELL_AI_MODEL_CATALOG_STORAGE_KEY = 'cell-ai-model-catalog';
+const CELL_AI_PROMPT_HISTORY_STORAGE_KEY = 'cell-ai-prompt-history';
 const CELL_AI_DEFAULT_MODEL = 'gemini-2.5-flash';
+const CELL_AI_RECENT_PROMPT_LIMIT = 20;
 let cellAiModelTestCatalog = [];
 let cellAiModelTestAbort = false;
 let cellAiModelTestRunning = false;
+
+function getCellAiPromptHistory() {
+    try {
+        const prompts = JSON.parse(localStorage.getItem(CELL_AI_PROMPT_HISTORY_STORAGE_KEY) || '[]');
+        if (!Array.isArray(prompts)) return [];
+        return prompts
+            .filter(prompt => prompt && typeof prompt.text === 'string' && prompt.text.trim())
+            .map(prompt => ({
+                text: prompt.text.trim(),
+                pinned: prompt.pinned === true,
+                usedAt: Number.isFinite(Number(prompt.usedAt)) ? Number(prompt.usedAt) : 0
+            }))
+            .sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.usedAt - a.usedAt);
+    } catch (_) {
+        return [];
+    }
+}
+
+function saveCellAiPromptHistory(prompts) {
+    try {
+        localStorage.setItem(CELL_AI_PROMPT_HISTORY_STORAGE_KEY, JSON.stringify(prompts));
+        return true;
+    } catch (error) {
+        console.warn('Could not save cell AI prompt history:', error);
+        return false;
+    }
+}
+
+function rememberCellAiPrompt(instruction) {
+    const text = String(instruction || '').trim();
+    if (!text) return;
+
+    const prompts = getCellAiPromptHistory();
+    const existingIndex = prompts.findIndex(prompt => prompt.text.toLocaleLowerCase() === text.toLocaleLowerCase());
+    const existing = existingIndex >= 0 ? prompts.splice(existingIndex, 1)[0] : null;
+    prompts.push({ text, pinned: existing?.pinned === true, usedAt: Date.now() });
+
+    const pinned = prompts.filter(prompt => prompt.pinned);
+    const recent = prompts.filter(prompt => !prompt.pinned)
+        .sort((a, b) => b.usedAt - a.usedAt)
+        .slice(0, CELL_AI_RECENT_PROMPT_LIMIT);
+    saveCellAiPromptHistory([...pinned.sort((a, b) => b.usedAt - a.usedAt), ...recent]);
+}
+
+function setCellAiPromptPinned(instruction, pinned) {
+    const normalizedText = String(instruction || '').trim().toLocaleLowerCase();
+    const prompts = getCellAiPromptHistory();
+    const prompt = prompts.find(item => item.text.toLocaleLowerCase() === normalizedText);
+    if (!prompt) return false;
+    prompt.pinned = pinned === true;
+    saveCellAiPromptHistory(prompts);
+    return true;
+}
+
+function renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput) {
+    const safeCellId = `r${rowIndex + 1}-c${colIndex + 1}`;
+    const list = document.getElementById(`cell-ai-prompt-list-${safeCellId}`);
+    if (!list) return;
+    list.replaceChildren();
+
+    const prompts = getCellAiPromptHistory();
+    if (!prompts.length) {
+        const empty = document.createElement('div');
+        empty.className = 'cell-ai-prompt-empty';
+        empty.dataset.testid = 'cell-ai-prompt-empty';
+        empty.textContent = 'Prompts you use successfully will appear here. Pin favorites to keep them at the top.';
+        list.appendChild(empty);
+        return;
+    }
+
+    prompts.forEach((prompt, index) => {
+        const row = document.createElement('div');
+        row.className = 'cell-ai-prompt-suggestion-row';
+        row.id = `cell-ai-prompt-row-${safeCellId}-${index + 1}`;
+        row.dataset.testid = 'cell-ai-prompt-suggestion-row';
+
+        const useButton = document.createElement('button');
+        useButton.type = 'button';
+        useButton.className = 'cell-ai-prompt-suggestion';
+        useButton.id = `cell-ai-prompt-use-${safeCellId}-${index + 1}`;
+        useButton.dataset.testid = 'cell-ai-prompt-suggestion';
+        useButton.textContent = prompt.text;
+        useButton.title = prompt.text;
+        useButton.setAttribute('aria-label', `Use saved prompt: ${prompt.text}`);
+        useButton.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            instructionInput.value = prompt.text;
+            instructionInput.style.height = 'auto';
+            instructionInput.style.height = `${instructionInput.scrollHeight}px`;
+            instructionInput.focus({ preventScroll: true });
+            instructionInput.setSelectionRange(instructionInput.value.length, instructionInput.value.length);
+        };
+
+        const pinButton = document.createElement('button');
+        pinButton.type = 'button';
+        pinButton.className = `cell-ai-prompt-pin${prompt.pinned ? ' is-pinned' : ''}`;
+        pinButton.id = `cell-ai-prompt-pin-${safeCellId}-${index + 1}`;
+        pinButton.dataset.testid = 'cell-ai-prompt-pin';
+        pinButton.textContent = prompt.pinned ? '★' : '☆';
+        pinButton.title = prompt.pinned ? 'Unpin prompt' : 'Pin prompt';
+        pinButton.setAttribute('aria-label', `${prompt.pinned ? 'Unpin' : 'Pin'} prompt: ${prompt.text}`);
+        pinButton.setAttribute('aria-pressed', String(prompt.pinned));
+        pinButton.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            setCellAiPromptPinned(prompt.text, !prompt.pinned);
+            renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput);
+        };
+
+        row.append(useButton, pinButton);
+        list.appendChild(row);
+    });
+}
 
 function saveCellAiApiKey() {
     const input = document.getElementById('cellAiApiKey');
@@ -3054,12 +3170,14 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
 
     const editor = document.createElement('div');
     editor.className = 'cell-ai-instruction-editor';
+    editor.id = `cell-ai-instruction-editor-r${rowIndex + 1}-c${colIndex + 1}`;
     editor.dataset.testid = 'cell-ai-instruction-editor';
     editor.onclick = event => event.stopPropagation();
     editor.onmousedown = event => event.stopPropagation();
 
     const instructionInput = document.createElement('textarea');
     instructionInput.className = 'cell-ai-instruction-prompt';
+    instructionInput.id = `cell-ai-instruction-prompt-r${rowIndex + 1}-c${colIndex + 1}`;
     instructionInput.dataset.testid = 'cell-ai-instruction-prompt';
     instructionInput.rows = 1;
     instructionInput.placeholder = 'What should be changed or updated?';
@@ -3070,6 +3188,20 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
         instructionInput.style.height = `${instructionInput.scrollHeight}px`;
     };
     instructionInput.addEventListener('input', resizeInstructionInput);
+
+    const suggestions = document.createElement('div');
+    suggestions.className = 'cell-ai-prompt-suggestions';
+    suggestions.id = `cell-ai-prompt-suggestions-r${rowIndex + 1}-c${colIndex + 1}`;
+    suggestions.dataset.testid = 'cell-ai-prompt-suggestions';
+    const suggestionsHeading = document.createElement('div');
+    suggestionsHeading.className = 'cell-ai-prompt-suggestions-heading';
+    suggestionsHeading.id = `cell-ai-prompt-suggestions-heading-r${rowIndex + 1}-c${colIndex + 1}`;
+    suggestionsHeading.textContent = 'Recent prompts';
+    const suggestionList = document.createElement('div');
+    suggestionList.className = 'cell-ai-prompt-list';
+    suggestionList.id = `cell-ai-prompt-list-r${rowIndex + 1}-c${colIndex + 1}`;
+    suggestionList.dataset.testid = 'cell-ai-prompt-list';
+    suggestions.append(suggestionsHeading, suggestionList);
 
     const actions = document.createElement('div');
     actions.className = 'cell-ai-instruction-actions';
@@ -3105,8 +3237,9 @@ function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
     cancelButton.textContent = 'Cancel';
     cancelButton.onclick = () => editor.remove();
     actions.append(micButton, updateButton, cancelButton);
-    editor.append(instructionInput, actions);
+    editor.append(instructionInput, suggestions, actions);
     button.insertAdjacentElement('afterend', editor);
+    renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput);
     resizeInstructionInput();
     instructionInput.focus({ preventScroll: true });
 }
@@ -3255,6 +3388,7 @@ When adding emphasis, lists, headings, or tables, use only these forms. Preserve
         }
 
         updateCell(rowIndex, colIndex, result);
+        rememberCellAiPrompt(instruction);
         // AI updates do not originate from the cell's input element, so rebuild
         // the visible cell from the updated sheet data immediately.
         renderTable();
