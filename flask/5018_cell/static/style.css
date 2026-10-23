@@ -1585,7 +1585,8 @@ td:hover > .cell-ai-instruction-btn,
 }
 
 .cell-ai-prompt-suggestion,
-.cell-ai-prompt-pin {
+.cell-ai-prompt-pin,
+.cell-ai-prompt-remove {
     border: 1px solid transparent;
     border-radius: 4px;
     background: transparent;
@@ -1621,11 +1622,26 @@ td:hover > .cell-ai-instruction-btn,
     line-height: 1;
 }
 
+.cell-ai-prompt-remove {
+    flex: 0 0 25px;
+    padding: 1px;
+    color: #a05c5c;
+    font-size: 19px;
+    line-height: 1;
+}
+
 .cell-ai-prompt-pin:hover,
-.cell-ai-prompt-pin:focus-visible {
+.cell-ai-prompt-pin:focus-visible,
+.cell-ai-prompt-remove:hover,
+.cell-ai-prompt-remove:focus-visible {
     border-color: #decbea;
     background: #f8f2fc;
     outline: none;
+}
+
+.cell-ai-prompt-remove:hover,
+.cell-ai-prompt-remove:focus-visible {
+    color: #b42318;
 }
 
 .cell-ai-prompt-pin.is-pinned {

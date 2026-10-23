@@ -4,13 +4,13 @@
 
 **What We Accomplished:**
 - Saved successful Gemini cell instructions in browser storage and showed them as suggestions whenever a cell's AI editor opens.
-- Added one-click prompt reuse and pin/unpin controls, with pinned prompts sorted above recent prompts.
+- Added one-click prompt reuse, pin/unpin controls, and an **×** button to remove saved prompts. Pinned prompts are sorted above recent prompts.
 - Kept up to 20 unpinned prompts; pinned prompts do not count toward the limit.
 - Updated the AI cell instructions and feature guide.
 
 **Files Modified:**
 - `static/script.js` — local prompt history, suggestion rendering, reuse, and pinning
-- `static/style.css` — prompt suggestion list and pin controls
+- `static/style.css` — prompt suggestion list, pin controls, and remove button
 - `md/AI_CELL_INSTRUCTIONS.md` — documented prompt history behavior and limits
 - `md/CELL_FEATURES.md` — summarized reusable AI prompts
 - `md/RECENT.md` — recorded this feature

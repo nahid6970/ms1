@@ -26,6 +26,7 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 - After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.
 - Click a prompt to put it back into the instruction box. You can edit it before running it again.
 - Click the star beside a prompt to pin or unpin it. Pinned prompts stay at the top of the list.
+- Click **×** beside a prompt to remove it from saved prompt history.
 - The app keeps up to 20 unpinned prompts. Pinned prompts do not count toward this limit, and there is no limit on pinned prompts. Reusing a prompt moves it to the top of its group.
 - Prompt history is stored in this browser's `localStorage`; it is available on this browser, not synced between browsers or devices.
 - Clearing this browser's site data removes saved prompts.

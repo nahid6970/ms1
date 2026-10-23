@@ -2792,6 +2792,14 @@ function setCellAiPromptPinned(instruction, pinned) {
     return true;
 }
 
+function removeCellAiPrompt(instruction) {
+    const normalizedText = String(instruction || '').trim().toLocaleLowerCase();
+    const prompts = getCellAiPromptHistory();
+    const remaining = prompts.filter(prompt => prompt.text.toLocaleLowerCase() !== normalizedText);
+    if (remaining.length === prompts.length) return false;
+    return saveCellAiPromptHistory(remaining);
+}
+
 function renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput) {
     const safeCellId = `r${rowIndex + 1}-c${colIndex + 1}`;
     const list = document.getElementById(`cell-ai-prompt-list-${safeCellId}`);
@@ -2848,7 +2856,22 @@ function renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput) {
             renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput);
         };
 
-        row.append(useButton, pinButton);
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'cell-ai-prompt-remove';
+        removeButton.id = `cell-ai-prompt-remove-${safeCellId}-${index + 1}`;
+        removeButton.dataset.testid = 'cell-ai-prompt-remove';
+        removeButton.textContent = '×';
+        removeButton.title = 'Remove prompt';
+        removeButton.setAttribute('aria-label', `Remove saved prompt: ${prompt.text}`);
+        removeButton.onclick = event => {
+            event.preventDefault();
+            event.stopPropagation();
+            removeCellAiPrompt(prompt.text);
+            renderCellAiPromptSuggestions(rowIndex, colIndex, instructionInput);
+        };
+
+        row.append(useButton, pinButton, removeButton);
         list.appendChild(row);
     });
 }
