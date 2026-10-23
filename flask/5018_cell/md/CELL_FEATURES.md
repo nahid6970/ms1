@@ -1,7 +1,7 @@
 # Cell Features & Individual Styling
 
 ## AI Cell Instructions
-Each cell's **✨** button stays visible beneath the sticky table header while scrolling through its cell. It opens an inline instruction box that stays below the button, with microphone dictation and a text area that grows to show multiline instructions. Opening the editor does not jump the page. The selected Gemini model applies the instruction to the cell's existing content and replaces that same cell. Configure the API key and test/select a working model under **Settings → AI Cell Instructions**.
+Each cell's **✨** button stays visible beneath the sticky table header while scrolling through its cell. It opens an instruction box below the button that floats over the cell without pushing the content down. The editor includes microphone dictation and a text area that grows to show multiline instructions. Opening it does not jump the page. The selected Gemini model applies the instruction to the cell's existing content and replaces that same cell. Configure the API key and test/select a working model under **Settings → AI Cell Instructions**.
 
 Successful instructions are saved as recent prompts in this browser. Select one to reuse it, pin it to keep it at the top, or remove it with **×**. It keeps up to 20 unpinned prompts; pinned prompts do not count toward that limit.
 

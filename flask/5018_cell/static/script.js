@@ -3161,9 +3161,16 @@ function appendCellAiInstructionButton(td, rowIndex, colIndex) {
     if (td.querySelector('.cell-rank-badge')) {
         td.classList.add('has-cell-ai-rank');
     }
+    const safeCellId = `r${rowIndex + 1}-c${colIndex + 1}`;
+    const controls = document.createElement('div');
+    controls.className = 'cell-ai-controls';
+    controls.id = `cell-ai-controls-${safeCellId}`;
+    controls.dataset.testid = 'cell-ai-controls';
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'cell-ai-instruction-btn';
+    button.id = `cell-ai-instruction-button-${safeCellId}`;
     button.dataset.testid = 'cell-ai-instruction-button';
     button.textContent = '✨';
     button.title = 'Run the Instruction: in this cell with Gemini';
@@ -3174,7 +3181,8 @@ function appendCellAiInstructionButton(td, rowIndex, colIndex) {
         event.stopPropagation();
         toggleCellAiInstructionEditor(rowIndex, colIndex, button);
     };
-    td.insertBefore(button, td.firstChild);
+    controls.appendChild(button);
+    td.insertBefore(controls, td.firstChild);
 }
 
 function toggleCellAiInstructionEditor(rowIndex, colIndex, button) {
