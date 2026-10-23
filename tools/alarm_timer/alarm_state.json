@@ -159,7 +159,7 @@
           "input_value": "2:26 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": true
+          "secondary_mode": false
         }
       ]
     },
