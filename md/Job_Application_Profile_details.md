@@ -10,7 +10,7 @@ Use this file as my source of truth when helping complete job application forms.
 - Some information may have changed since this profile was made. If a value looks outdated or a form asks for something not listed, ask me to confirm.
 
 ## Contact information
-- Full name: Nahid Ahmed
+- Full name: Nahid Ahmed / in Bangla: নাহিদ আহমেদ
 - Email: nahid6970@gmail.com
 - Mobile: 01779787186
 - Alternate contact: 01757294248
@@ -34,25 +34,27 @@ Use this file as my source of truth when helping complete job application forms.
 - Marital status: Unmarried
 - Blood group: AB+
 - National ID (NID): 1505190676
-- Father's name: MD NURUL AMIN
+- Father's name: MD NURUL AMIN / in Bangla: নুরুল আমিন
 - Father's profession: Retired Government Employee
-- Mother's name: NAZMA BEGUM
+- Mother's name: NAZMA BEGUM / in Bangla: নাজমা বেগম
 - Mother's profession: House Maker
 
 ## Education
 1. MBA in Finance, University of Dhaka, Faculty of Business Studies
    - Year: 2021
    - CGPA: 3.23 / 4.00
-   - Duration shown on profile: 1 year
+   - Duration: 1 year
 2. BBA in Finance, University of Dhaka, Faculty of Business Studies
    - Year: 2020
    - CGPA: 3.30 / 4.00
-   - Duration shown on profile: 4 years
+   - Duration: 4 years
 3. HSC in Commerce (Bangla Version), Notre Dame College, Dhaka Board
    - Year: 2016
+   - Roll: 510014
    - GPA: 5.00 / 5.00
 4. SSC in Commerce (Bangla Version), Provati Uchya Bidyanikaton, Dhaka Board
    - Year: 2014
+   - Roll: 402206
    - GPA: 5.00 / 5.00
 
 ## Employment history
