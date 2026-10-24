@@ -11147,7 +11147,7 @@ function renderTable(preserveScroll = true) {
 
         const editItem = document.createElement('div');
         editItem.className = 'column-menu-item';
-        editItem.innerHTML = '<span>✏️</span> Edit';
+        editItem.innerHTML = '<span class="column-menu-icon" aria-hidden="true">✎</span> Edit';
         editItem.onclick = () => {
             editColumn(index);
             closeAllColumnMenus();
@@ -11155,7 +11155,7 @@ function renderTable(preserveScroll = true) {
 
         const deleteItem = document.createElement('div');
         deleteItem.className = 'column-menu-item delete';
-        deleteItem.innerHTML = '<span>🗑️</span> Delete';
+        deleteItem.innerHTML = '<span class="column-menu-icon" aria-hidden="true">×</span> Delete';
         deleteItem.onclick = () => {
             deleteColumn(index);
             closeAllColumnMenus();

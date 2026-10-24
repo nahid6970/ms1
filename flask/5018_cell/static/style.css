@@ -2671,6 +2671,21 @@ td input::-moz-selection {
     font-size: 16px;
 }
 
+.column-menu-item > span:first-child:not(.submenu-arrow) {
+    display: inline-flex;
+    flex: 0 0 14px;
+    width: 14px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.column-menu-item > .column-menu-icon {
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1;
+}
+
 .column-menu-item.has-submenu {
     position: relative;
     display: flex;
