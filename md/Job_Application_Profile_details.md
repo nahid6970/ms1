@@ -7,6 +7,7 @@ Use this file as my source of truth when helping complete job application forms.
 - Match each form field to the information below and fill only fields that are clearly supported.
 - Do not guess missing details, alter facts, or submit an application. Leave uncertain fields blank and ask me.
 - Before filling any sensitive field (such as NID), use the exact value below. Before final submission, show me a summary and wait for my instruction.
+- **Form UI Interaction Note**: On some sites/forms, optional or additional sections (such as Masters/MBA or Employment History / Experience) require ticking a checkmark (e.g., "If applicable [Masters]" or "If applicable [Experience]") to enable and reveal the input fields. Always check for and tick these checkboxes first before attempting to fill out those sections.
 - Some information may have changed since this profile was made. If a value looks outdated or a form asks for something not listed, ask me to confirm.
 
 ## Contact information
@@ -40,7 +41,7 @@ Use this file as my source of truth when helping complete job application forms.
 - Mother's profession: House Maker
 
 ## Education
-1. MBA in Finance, University of Dhaka, Faculty of Business Studies
+1. MBA in Finance, University of Dhaka, Faculty of Business Studies *(Note: on some sites, requires ticking the Masters "If applicable" checkmark first to enable fields)*
    - Year: 2021
    - CGPA: 3.23 / 4.00
    - Duration: 1 year
@@ -58,7 +59,7 @@ Use this file as my source of truth when helping complete job application forms.
    - GPA: 5.00 / 5.00
 
 ## Employment history
-- Status shown on profile: Fresher
+- Status shown on profile: Fresher *(Note: on some sites, checking the Experience "If applicable" checkmark is required before filling experience details)*
 
 ## Skills and language
 - Computer skills: MS Word, MS Excel, MS PowerPoint, MS Outlook, Bijoy Bangla
@@ -88,4 +89,3 @@ Use this file as my source of truth when helping complete job application forms.
 
 ## Not listed / ask me
 Ask me rather than guessing if an application requests details not listed here, such as current salary, expected salary, notice period, work authorization, certificates, portfolio, or updated experience.
-
