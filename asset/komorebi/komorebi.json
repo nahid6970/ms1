@@ -419,6 +419,11 @@
             "kind": "Exe",
             "id": "Wand.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Nightly).exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -565,6 +570,11 @@
         {
             "kind": "Exe",
             "id": "Wand.exe",
+            "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Nightly).exe",
             "matching_strategy": "Equals"
         }
     ],
