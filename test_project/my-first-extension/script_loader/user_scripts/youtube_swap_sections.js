@@ -35,7 +35,19 @@
         return !!document.querySelector('ytd-watch-flexy[theater]');
     }
 
+    function isFullscreen() {
+        return !!(document.fullscreenElement
+            || document.querySelector('ytd-watch-flexy[fullscreen]')
+            || document.querySelector('.html5-video-player.ytp-fullscreen'));
+    }
+
     function ensureTheaterMode(enabled, attempts = 20) {
+        // Changing the player size while YouTube is entering fullscreen can
+        // cancel the fullscreen transition (especially in a non-maximized window).
+        if (isFullscreen()) {
+            clearTimeout(theaterTimer);
+            return;
+        }
         if (theaterTarget !== enabled) {
             clearTimeout(theaterTimer);
             theaterTarget = enabled;
@@ -163,7 +175,7 @@
     }
 
     function applyAutomaticLayout() {
-        if (!location.pathname.includes('/watch') || manualOverride) return;
+        if (!location.pathname.includes('/watch') || manualOverride || isFullscreen()) return;
         if (window.innerWidth >= THEATER_WIDTH_THRESHOLD) {
             ensureTheaterMode(false);
             startSwapRetry();
@@ -220,6 +232,7 @@
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
+                if (isFullscreen()) return;
                 manualOverride = false;
                 applyAutomaticLayout();
             }, RESIZE_DEBOUNCE_MS);
