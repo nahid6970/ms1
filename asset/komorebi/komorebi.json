@@ -347,11 +347,6 @@
         },
         {
             "kind": "Exe",
-            "id": "T3 Code (Alpha).exe",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
             "id": "input-leap.exe",
             "matching_strategy": "Equals"
         },
@@ -510,11 +505,6 @@
         {
             "kind": "Title",
             "id": "Bitwarden",
-            "matching_strategy": "Equals"
-        },
-        {
-            "kind": "Exe",
-            "id": "T3 Code (Alpha).exe",
             "matching_strategy": "Equals"
         },
         {

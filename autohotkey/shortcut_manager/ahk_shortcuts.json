@@ -1142,6 +1142,20 @@
             "excluded_hotkeys": "^b",
             "enabled": true,
             "favourite": true
+        },
+        {
+            "name": "T3code",
+            "category": "General",
+            "description": "",
+            "window_title": "",
+            "process_name": "T3 Code (Nightly).exe",
+            "window_class": "",
+            "window_title_enabled": false,
+            "process_name_enabled": true,
+            "window_class_enabled": false,
+            "excluded_hotkeys": "",
+            "enabled": true,
+            "favourite": true
         }
     ],
     "remap_shortcuts": [],
