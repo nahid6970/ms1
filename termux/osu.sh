@@ -208,11 +208,16 @@ ubuntu_home_dir() {
 }
 
 simplify_ubuntu_terminal() {
+    local ubuntu_home bashrc_dir
     clear
     echo -e "${CYAN}Simplifying Ubuntu terminal startup...${NC}"
-    run_in_ubuntu 'sed -i -e "/command -v fastfetch/,+2d" -e "/fastfetch/d" ~/.bashrc && printf '\''%s\n'\'' '\''PS1="\w\$ "'\'' >> ~/.bashrc' || return 1
-    echo -e "${GREEN}Ubuntu startup banner disabled and prompt set to the current directory.${NC}"
-    echo -e "Changes apply to new Ubuntu shells. Restart Ubuntu to see the clean prompt."
+    ubuntu_home=$(ubuntu_home_dir) || return 1
+    bashrc_dir="$ubuntu_home/.bashrc"
+    touch "$bashrc_dir" || return 1
+    sed -i -e '/if .*fastfetch/,/^[[:space:]]*fi[[:space:]]*$/d' -e '/fastfetch/d' "$bashrc_dir" || return 1
+    printf '\n%s\n' '# Simple Ubuntu prompt: current directory only' 'PS1="\w\$ "' >> "$bashrc_dir" || return 1
+    echo -e "${GREEN}Removed Fastfetch startup lines from $bashrc_dir and set a current-directory-only prompt.${NC}"
+    echo -e "Exit Ubuntu and start it again to see the change."
 }
 
 configure_ubuntu_environment() {

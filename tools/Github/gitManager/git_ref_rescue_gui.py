@@ -368,7 +368,7 @@ class GitRefRescueApp(QMainWindow):
             buttons.addWidget(button)
         outer.addLayout(buttons)
         repair_buttons = QHBoxLayout()
-        recovery_actions = (("CHECK REPO HEALTH", self.check_repo_health), ("MOVE STALE LOCKS", self.move_stale_locks), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart))
+        recovery_actions = (("CHECK REPO HEALTH", self.check_repo_health), ("REBUILD CORRUPT INDEX", self.rebuild_corrupt_index), ("MOVE STALE LOCKS", self.move_stale_locks), ("⚙ SETTINGS", self.open_settings), ("↺ RESTART", self.restart))
         for text, handler in recovery_actions:
             button = QPushButton(text)
             button.clicked.connect(handler)
@@ -478,6 +478,13 @@ class GitRefRescueApp(QMainWindow):
 
     def check_repo_health(self) -> None:
         def action(repo: Path) -> None:
+            index_path = git_dir(repo) / "index"
+            try:
+                index_header = index_path.read_bytes()[:4]
+                index_state = "valid DIRC signature" if index_header == b"DIRC" else f"invalid signature {index_header.hex() or '(missing)'}"
+            except OSError as exc:
+                index_state = f"unreadable/missing ({exc})"
+            self.append_log(f"index: {index_state}; path={index_path}")
             locks = lock_files(repo)
             operations = interrupted_operations(repo)
             self.append_log("health check: index/worktree are read-only during this operation")
@@ -494,6 +501,52 @@ class GitRefRescueApp(QMainWindow):
             if operations:
                 self.append_log("An interrupted operation was detected. Resolve it manually with Git after reviewing conflicts; this tool will not run merge --abort or reset automatically.")
         self.run_action("check repository health", action)
+
+    def rebuild_corrupt_index(self) -> None:
+        repo = self.repo_path()
+        if repo is None:
+            return
+        index_path = git_dir(repo) / "index"
+        try:
+            header = index_path.read_bytes()[:4]
+        except OSError:
+            header = b""
+        if header == b"DIRC":
+            QMessageBox.information(self, "Git Ref Rescue", "The index has a valid DIRC signature; no repair was made.")
+            return
+        if git_process_running():
+            QMessageBox.warning(self, "Git Ref Rescue", "A git.exe process is currently running. Close it and retry; the index was not changed.")
+            return
+        if interrupted_operations(repo):
+            QMessageBox.warning(self, "Git Ref Rescue", "An interrupted merge/rebase/cherry-pick is present. Resolve that operation first; the index was not changed.")
+            return
+        answer = QMessageBox.question(
+            self, "Rebuild corrupt Git index",
+            "The index signature is invalid. This will copy the damaged index into .git/git-ref-rescue-backups, then rebuild the index from HEAD. Working files will remain untouched. Staged changes that were only recorded in the damaged index may be lost. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        backup: Optional[Path] = None
+        try:
+            if index_path.exists():
+                backup = git_dir(repo) / "git-ref-rescue-backups" / datetime.now().strftime("%Y%m%d-%H%M%S-%f") / "index"
+                backup.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(index_path, backup)
+            result = run_git(repo, "read-tree", "HEAD", timeout=30)
+            if result.returncode != 0:
+                if backup and backup.exists():
+                    shutil.copy2(backup, index_path)
+                raise RuntimeError((result.stderr or result.stdout or "git read-tree HEAD failed").strip())
+            self.append_log(f"rebuilt index from HEAD; damaged index backup: {backup or '(no prior index)'}")
+            self.append_log("working tree files were not changed; review git status and re-stage intended changes")
+            QMessageBox.information(self, "Git Ref Rescue", f"Index rebuilt from HEAD.\n\nDamaged index backup:\n{backup or '(none)'}\n\nWorking files were preserved. Re-stage intended changes.")
+        except Exception as exc:
+            self.append_log(f"index rebuild failed: {exc}")
+            QMessageBox.critical(self, "Git Ref Rescue", f"Index rebuild failed.\n\n{exc}\n\nBackup: {backup or '(not created)'}")
+        finally:
+            self.refresh_status()
 
     def move_stale_locks(self) -> None:
         repo = self.repo_path()
