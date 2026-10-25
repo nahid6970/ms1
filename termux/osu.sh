@@ -210,7 +210,7 @@ ubuntu_home_dir() {
 simplify_ubuntu_terminal() {
     clear
     echo -e "${CYAN}Simplifying Ubuntu terminal startup...${NC}"
-    run_in_ubuntu 'sed -i "/command -v fastfetch/,+2d" ~/.bashrc && printf '\''%s\n'\'' '\''PS1="\w\$ "'\'' >> ~/.bashrc' || return 1
+    run_in_ubuntu 'sed -i -e "/command -v fastfetch/,+2d" -e "/fastfetch/d" ~/.bashrc && printf '\''%s\n'\'' '\''PS1="\w\$ "'\'' >> ~/.bashrc' || return 1
     echo -e "${GREEN}Ubuntu startup banner disabled and prompt set to the current directory.${NC}"
     echo -e "Changes apply to new Ubuntu shells. Restart Ubuntu to see the clean prompt."
 }
