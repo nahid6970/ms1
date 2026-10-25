@@ -694,7 +694,8 @@ def scan_projects():
             "cardTheme": card_theme,
             "bookmarks": bookmarks,
             "layout": layout,
-            "gitRemote": p.get("gitRemote", "")
+            "gitRemote": p.get("gitRemote", ""),
+            "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip())
         })
     return projects
 

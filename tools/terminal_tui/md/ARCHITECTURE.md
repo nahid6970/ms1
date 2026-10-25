@@ -36,6 +36,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 - **Categories**: Group workspaces by category
 - **Pin/unpin**: Keep important workspaces at the top
 - **Drag-to-reorder**: Custom ordering persists in `projects.json`
+- **Workspace filters**: A synchronized All / GitHub / Rclone toggle filters the sidebar and workspace dropdown; GitHub uses saved `gitRemote` URLs containing `github.com`, and Rclone uses a saved destination.
 
 ### 1.1 Rclone Workspace Sync
 - Frontend builds `rclone check` and directional `rclone sync` commands for the active workspace and starts them in a new terminal tab.

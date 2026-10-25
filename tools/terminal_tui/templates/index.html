@@ -464,6 +464,15 @@
             gap: 8px;
         }
 
+        .project-filter-toggle {
+            width: 100%; height: 28px; display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; padding: 0 9px; background: var(--bg-main); border: 1px solid var(--border-color);
+            border-radius: 6px; color: var(--text-secondary); cursor: pointer; font: inherit;
+            font-size: 0.72rem; transition: all 0.15s;
+        }
+        .project-filter-toggle:hover, .project-filter-toggle:focus-visible { color: var(--text-primary); border-color: var(--accent-color); outline: none; }
+        .project-filter-toggle strong { color: var(--text-primary); font-weight: 600; }
+
         /* Project Card item */
         .project-card {
             background-color: var(--bg-card);
@@ -1848,11 +1857,14 @@
     <!-- Left Sidebar: Workspaces -->
     <div class="sidebar">
         <div class="sidebar-inner-wrapper" style="flex-shrink: 0; display: flex; flex-direction: column; height: 100%;">
-            <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px;">
+            <div class="sidebar-header" style="gap: 8px; padding: 16px 16px 12px 16px; flex-direction: column; align-items: stretch;">
                 <div style="position:relative; flex:1; min-width:0; display:flex; align-items:center;">
                     <button onclick="toggleSidebar()" title="Hide sidebar" style="position:absolute; left:0; top:0; bottom:0; width:42px; background:rgba(255,255,255,0.9); border:none; border-right:1px solid var(--border-color); cursor:pointer; color:#111; display:flex; align-items:center; justify-content:center; transition:all 0.15s; border-radius:6px 0 0 6px; z-index:1;" onmouseenter="this.style.background='rgba(255,255,255,1)'" onmouseleave="this.style.background='rgba(255,255,255,0.9)'">«</button>
                     <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; width:100%; height: 32px; padding: 6px 10px 6px 48px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
                 </div>
+                <button type="button" class="project-filter-toggle" id="sidebar-project-filter" onclick="cycleProjectFilter()" title="Filter projects: All → GitHub → Rclone" aria-label="Project filter: All">
+                    <span>Projects</span><strong data-project-filter-label>All</strong><span aria-hidden="true">↻</span>
+                </button>
             </div>
 
             <div class="project-list" id="project-list-container" style="flex: 1; overflow-y: auto;">
@@ -1891,7 +1903,10 @@
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0; opacity:0.6;"><path d="M6 9l6 6 6-6"/></svg>
                     </button>
                     <div class="custom-dropdown-content" id="workspace-selector-dropdown-content" style="display: none; position: absolute; left: 0; top: 38px; width: 260px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; max-height: none; flex-direction: column;">
-                        <div style="padding: 8px; border-bottom: 1px solid var(--border-color); display: flex; flex-shrink: 0;">
+                        <div style="padding: 8px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;">
+                            <button type="button" class="project-filter-toggle" id="dropdown-project-filter" onclick="cycleProjectFilter()" title="Filter projects: All → GitHub → Rclone" aria-label="Project filter: All">
+                                <span>Show</span><strong data-project-filter-label>All</strong><span aria-hidden="true">↻</span>
+                            </button>
                             <input type="text" id="workspace-dropdown-search" placeholder="Search workspaces..." oninput="filterWorkspaceDropdownOptions(event)" style="width: 100%; height: 28px; padding: 4px 8px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); outline: none;" autocomplete="off">
                         </div>
                         <div id="workspace-selector-options-list" style="overflow-y: auto; flex: 1; padding: 4px 0; max-height: 240px;"></div>
@@ -4326,6 +4341,35 @@
         let projects = [];
         let activeProject = null;
         let wsfocusHistory = []; // tracks workspace focus order for fallback on close
+        const PROJECT_FILTERS = ['all', 'github', 'rclone'];
+        let projectFilterMode = localStorage.getItem('project-filter-mode') || 'all';
+        if (!PROJECT_FILTERS.includes(projectFilterMode)) projectFilterMode = 'all';
+
+        function projectMatchesFilter(project) {
+            if (projectFilterMode === 'github') return /github\.com/i.test(project.gitRemote || '');
+            if (projectFilterMode === 'rclone') return !!project.hasRcloneDestination;
+            return true;
+        }
+
+        function updateProjectFilterButtons() {
+            const labels = { all: 'All', github: 'GitHub', rclone: 'Rclone' };
+            const label = labels[projectFilterMode] || labels.all;
+            document.querySelectorAll('[data-project-filter-label]').forEach(el => el.textContent = label);
+            document.querySelectorAll('.project-filter-toggle').forEach(btn => {
+                btn.setAttribute('aria-label', `Project filter: ${label}`);
+                btn.title = `Project filter: ${label}. Click to switch to the next filter.`;
+            });
+        }
+
+        function cycleProjectFilter() {
+            const currentIndex = PROJECT_FILTERS.indexOf(projectFilterMode);
+            projectFilterMode = PROJECT_FILTERS[(currentIndex + 1) % PROJECT_FILTERS.length];
+            localStorage.setItem('project-filter-mode', projectFilterMode);
+            updateProjectFilterButtons();
+            handleSearch();
+            const dropdownSearch = document.getElementById('workspace-dropdown-search');
+            if (dropdownSearch) updateWorkspaceSelectorDropdown(dropdownSearch.value.toLowerCase().trim());
+        }
         let autoScrollEnabled = localStorage.getItem('auto-scroll-enabled') !== 'false'; // default ON
         let allCustomBtns = [];
 
@@ -4577,6 +4621,7 @@
 
         // Search trigger
         function handleSearch() {
+            updateProjectFilterButtons();
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             renderSidebar(query);
             updateEmptyStatePlaceholder();
@@ -4627,11 +4672,11 @@
                 };
             }
 
-            const filtered = projects.filter(p => 
+            const filtered = projects.filter(p => projectMatchesFilter(p) && (
                 p.name.toLowerCase().includes(searchQuery) || 
                 p.path.toLowerCase().includes(searchQuery) ||
                 (p.category && p.category.toLowerCase().includes(searchQuery))
-            );
+            ));
 
             // Sort so that currently active project is at the top, then active (running) projects
             filtered.sort((a, b) => {
@@ -7529,10 +7574,10 @@
                 return (0.299*r + 0.587*g + 0.114*b)/255 > 0.5 ? '#111111' : '#ffffff';
             }
             
-            const filtered = projects.filter(proj => 
+            const filtered = projects.filter(proj => projectMatchesFilter(proj) && (
                 proj.name.toLowerCase().includes(filterText) ||
                 (proj.category && proj.category.toLowerCase().includes(filterText))
-            );
+            ));
 
             // Active/running workspaces first
             filtered.sort((a, b) => {
@@ -11426,11 +11471,23 @@
                     }
                 };
                 try {
-                    await fetch(`/api/project/${encodeURIComponent(project)}/rclone/settings`, {
+                    const response = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/settings`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
+                    if (response.ok) {
+                        const projectInfo = projects.find(item => item.name === project);
+                        const hasDestination = !!payload.dest;
+                        if (projectInfo && projectInfo.hasRcloneDestination !== hasDestination) {
+                            projectInfo.hasRcloneDestination = hasDestination;
+                            handleSearch();
+                            const dropdownSearch = document.getElementById('workspace-dropdown-search');
+                            if (dropdownSearch && document.getElementById('workspace-selector-dropdown-content')?.style.display === 'flex') {
+                                updateWorkspaceSelectorDropdown(dropdownSearch.value.toLowerCase().trim());
+                            }
+                        }
+                    }
                 } catch (_) {}
             }, 600);
         }

@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-10-25] - Add Synchronized Workspace Filters
+
+- Added a three-state project filter (All, GitHub, Rclone) to the sidebar and workspace dropdown.
+- Persisted the selected filter in browser local storage; both project lists stay synchronized.
+- GitHub matches projects with a saved Git remote. Rclone matches projects with a saved destination; the projects API exposes that boolean and a saved destination updates the current UI immediately.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`, `md/ARCHITECTURE.md`
+
 ---
 
 ## [2026-10-14] - Document Restart Guidance for AI Responses

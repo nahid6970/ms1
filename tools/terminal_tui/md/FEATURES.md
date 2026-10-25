@@ -79,6 +79,11 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 **Closing the last terminal tab:** Closing the last pane stops that workspace session, clears its saved tab layout, and returns to Home. Home selection is persisted so a page refresh does not reopen the previously active workspace.
 
+### Workspace List Filters
+**Status:** ✅ Complete
+**Description:** A synchronized three-state toggle filters projects in both the sidebar and workspace dropdown: All, GitHub (saved GitHub remote URL), and Rclone (saved Rclone destination).
+**Implementation:** `templates/index.html` stores the selected filter in `localStorage` and applies it to both project renderers. `app.py` includes a `hasRcloneDestination` flag in the projects response; successful Rclone destination saves update the current client-side project data immediately.
+
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.
 **Sub-features:**
