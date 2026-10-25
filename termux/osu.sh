@@ -28,21 +28,19 @@ show_menu() {
     echo
     echo -e "  ${GREEN}1)${NC} Install Ubuntu in Termux (proot-distro)"
     echo -e "  ${CYAN}2)${NC} Set up Ubuntu environment (bashrc, nano, packages)"
-    echo -e "  ${RED}3)${NC} Remove Ubuntu completely (Termux only)"
-    echo -e "  ${BLUE}4)${NC} Install AI coding agents"
-    echo -e "  ${CYAN}5)${NC} Configure Ubuntu environment variables"
-    echo -e "  ${GREEN}6)${NC} Simplify Ubuntu terminal startup"
+    echo -e "  ${BLUE}3)${NC} Install AI coding agents"
+    echo -e "  ${CYAN}4)${NC} Configure Ubuntu environment variables"
+    echo -e "  ${GREEN}5)${NC} Simplify Ubuntu terminal startup"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/4/5/6/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
         2) setup_ubuntu_environment ;;
-        3) remove_ubuntu ;;
-        4) install_ai_agents ;;
-        5) configure_ubuntu_environment ;;
-        6) simplify_ubuntu_terminal ;;
+        3) install_ai_agents ;;
+        4) configure_ubuntu_environment ;;
+        5) simplify_ubuntu_terminal ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -83,35 +81,6 @@ install_ubuntu() {
         echo "Ubuntu ready. Run: proot-distro login ubuntu"
     '
     echo -e "${GREEN}Done! Launch Ubuntu with:${NC} proot-distro login ubuntu"
-}
-
-remove_ubuntu() {
-    clear
-    if inside_ubuntu; then
-        echo -e "${RED}Run this option from Termux, not inside Ubuntu.${NC}"
-        return 1
-    fi
-    if ! command -v proot-distro >/dev/null 2>&1; then
-        echo -e "${YELLOW}proot-distro is not installed; there is no Ubuntu installation to remove.${NC}"
-        return 0
-    fi
-    if ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' && \
-       [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; then
-        echo -e "${YELLOW}Ubuntu is not installed.${NC}"
-        return 0
-    fi
-
-    echo -e "${RED}This will permanently remove the Ubuntu root filesystem and its files.${NC}"
-    read -r -p 'Remove Ubuntu? [y/N]: ' confirmation
-    case "$confirmation" in
-        y|Y|yes|YES)
-            proot-distro remove ubuntu && echo -e "${GREEN}Ubuntu has been removed.${NC}" || {
-                echo -e "${RED}Failed to remove Ubuntu.${NC}"
-                return 1
-            }
-            ;;
-        *) echo -e "${YELLOW}Removal cancelled.${NC}" ;;
-    esac
 }
 
 setup_ubuntu_environment() {

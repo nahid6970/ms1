@@ -45,6 +45,7 @@ menu_items=(
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Pkg Search & Install        : pkg_search_install                      :$CYAN"
     "Pkg Uninstall               : pkg_uninstall                           :$CYAN"
+    "Remove Ubuntu [proot]       : remove_ubuntu                            :$RED"
     "Termux UI Restore           : termux_ui_restore                       :$MAGENTA"
     "Welcome Page                : welcome_remove                          :$RED"
     "Close                       : Close_script                            :$RED"
@@ -948,6 +949,31 @@ pkg_uninstall() {
     else
         echo -e "${YELLOW}Cancelled.${NC}"
     fi
+}
+
+remove_ubuntu() {
+    clear
+    if ! command -v proot-distro >/dev/null 2>&1; then
+        echo -e "${YELLOW}proot-distro is not installed; there is no Ubuntu installation to remove.${NC}"
+        return 0
+    fi
+    if ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' && \
+       [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; then
+        echo -e "${YELLOW}Ubuntu is not installed.${NC}"
+        return 0
+    fi
+
+    echo -e "${RED}This permanently removes the Ubuntu root filesystem and all files inside it.${NC}"
+    read -r -p 'Remove Ubuntu? [y/N]: ' confirmation
+    case "$confirmation" in
+        y|Y|yes|YES)
+            proot-distro remove ubuntu && echo -e "${GREEN}Ubuntu has been removed.${NC}" || {
+                echo -e "${RED}Failed to remove Ubuntu.${NC}"
+                return 1
+            }
+            ;;
+        *) echo -e "${YELLOW}Removal cancelled.${NC}" ;;
+    esac
 }
 
 # ─── Termux UI Restore ─────────────────────────────────────────────────────────
