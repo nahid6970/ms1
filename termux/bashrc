@@ -110,6 +110,7 @@ if [[ "$IS_TERMUX" == true ]]; then
     alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'
     alias rb='termux-reload-settings'
     alias rc='bash ~/ms3/Remote_Control_rclone/rclone_rmote_control.sh'
+    alias u='proot-distro login ubuntu'
     alias rm='rm -f -r'
     alias ro='rclone cat g00:/Remote_Control/output.txt'
     alias update='pkg update && pkg upgrade -y'
