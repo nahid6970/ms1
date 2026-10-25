@@ -312,10 +312,13 @@ install_ai_agents() {
     echo -e "  ${GREEN}1)${NC} Install Kiro CLI"
     echo -e "  ${CYAN}2)${NC} Install Codex CLI"
     echo -e "  ${BLUE}3)${NC} Install T3 Code"
-    echo -e "  ${MAGENTA}4)${NC} Install all three"
+    echo -e "  ${MAGENTA}4)${NC} Install Pi AI coding agent"
+    echo -e "  ${YELLOW}5)${NC} Install OpenCode"
+    echo -e "  ${CYAN}6)${NC} Install Pi and OpenCode"
+    echo -e "  ${RED}7)${NC} Install all five agents"
     echo -e "  ${YELLOW}q)${NC} Back"
     echo
-    read -r -p 'Enter choice [1/2/3/4/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/6/7/q]: ' choice
 
     case "$choice" in
         1)
@@ -331,12 +334,30 @@ install_ai_agents() {
             run_in_ubuntu 'curl -fsSL https://t3.codes/install.sh | sh'
             ;;
         4)
+            echo -e "${CYAN}Installing Pi AI coding agent in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://pi.dev/install.sh | sh'
+            ;;
+        5)
+            echo -e "${CYAN}Installing OpenCode in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://opencode.ai/install | bash'
+            ;;
+        6)
+            echo -e "${CYAN}Installing Pi AI coding agent in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://pi.dev/install.sh | sh' || return 1
+            echo -e "${CYAN}Installing OpenCode in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://opencode.ai/install | bash'
+            ;;
+        7)
             echo -e "${CYAN}Installing Kiro CLI in Ubuntu...${NC}"
             run_in_ubuntu 'curl -fsSL https://cli.kiro.dev/install | bash' || return 1
             echo -e "${CYAN}Installing Codex CLI in Ubuntu...${NC}"
             run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh' || return 1
             echo -e "${CYAN}Installing T3 Code in Ubuntu...${NC}"
-            run_in_ubuntu 'curl -fsSL https://t3.codes/install.sh | sh'
+            run_in_ubuntu 'curl -fsSL https://t3.codes/install.sh | sh' || return 1
+            echo -e "${CYAN}Installing Pi AI coding agent in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://pi.dev/install.sh | sh' || return 1
+            echo -e "${CYAN}Installing OpenCode in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://opencode.ai/install | bash'
             ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}"; return 1 ;;
