@@ -3,6 +3,8 @@
 ## What It Does
 A cyberpunk-themed PyQt6 GUI for managing Windows startup items. It replaces manual registry editing and startup folder management with a unified interface that supports two launch methods, cloud backup, and live testing of startup entries.
 
+The **GEMINI** toolbar button opens API and model settings. The API key is stored in Windows Credential Manager. **TEST AVAILABLE MODELS** checks generation-capable models returned for that key. In a new or edit item window, **GEMINI // ANALYZE** reviews the path, arguments, item type, and PowerShell command, then shows suggested changes for review. Nothing changes until you apply the suggestions.
+
 ---
 
 ## Two Modes

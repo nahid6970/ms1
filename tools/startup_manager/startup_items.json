@@ -1001,5 +1001,18 @@
     "added_at": 1792208754.1700678,
     "registry_hive": "HKCU",
     "registry_key_path": "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+  },
+  {
+    "name": "ggproxy",
+    "type": "App",
+    "paths": [
+      "python.exe"
+    ],
+    "Command": "C:\\@delta\\ms1\\tools\\Gemini_CLI\\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358",
+    "ps1_command": "Start-Process python.exe -ArgumentList 'C:\\@delta\\ms1\\tools\\Gemini_CLI\\gemini_cli.py --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358' -NoNewWindow",
+    "ExecutableType": "other",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false
   }
 ]

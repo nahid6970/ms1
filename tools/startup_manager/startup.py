@@ -63,10 +63,13 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QScrollArea, QFrame, QMessageBox, QDialog, 
                              QComboBox, QFileDialog, QSplitter, QGraphicsEffect,
                              QGraphicsDropShadowEffect, QMenu, QCheckBox,
-                             QRadioButton, QButtonGroup)
-from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve, QByteArray, QSettings
+                             QRadioButton, QButtonGroup, QListWidget, QPlainTextEdit,
+                             QTableWidget, QTableWidgetItem, QHeaderView)
+from PyQt6.QtCore import Qt, QSize, QTimer, pyqtSignal, QPropertyAnimation, QEasingCurve, QByteArray, QSettings, QThread
 from PyQt6.QtGui import QFont, QColor, QPalette, QCursor, QPainter, QPen, QAction, QIcon, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
+from gemini_credentials import load_gemini_api_key, save_gemini_api_key, delete_gemini_api_key
+from gemini_support import GeminiApiError, GeminiClient
 
 # Constants
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -180,6 +183,231 @@ class CyberInput(QLineEdit):
                 border: 1px solid {CP_CYAN};
             }}
         """)
+
+
+class ModelTestWorker(QThread):
+    model_result = pyqtSignal(str, bool, str)
+    completed = pyqtSignal(list, str)
+
+    def __init__(self, api_key, parent=None):
+        super().__init__(parent)
+        self.api_key = api_key
+
+    def run(self):
+        try:
+            client = GeminiClient(self.api_key)
+            models = client.list_generation_models()
+            if not models:
+                self.completed.emit([], "No models with text generation are available for this key.")
+                return
+            working = []
+            for model in models:
+                name = model.get("name", "")
+                if not name:
+                    continue
+                try:
+                    client.test_model(name)
+                    model_id = name.removeprefix("models/")
+                    working.append(model_id)
+                    self.model_result.emit(model_id, True, "Responded successfully")
+                except Exception as exc:
+                    self.model_result.emit(name.removeprefix("models/"), False, str(exc))
+            self.completed.emit(working, "Model check finished.")
+        except Exception as exc:
+            self.completed.emit([], str(exc))
+
+
+class GeminiAnalysisWorker(QThread):
+    completed = pyqtSignal(object, str)
+
+    def __init__(self, api_key, model, item, parent=None):
+        super().__init__(parent)
+        self.api_key = api_key
+        self.model = model
+        self.item = item
+
+    def run(self):
+        try:
+            result = GeminiClient(self.api_key).analyze_startup_item(self.model, self.item)
+            self.completed.emit(result, "")
+        except Exception as exc:
+            self.completed.emit(None, str(exc))
+
+
+class GeminiSettingsDialog(QDialog):
+    def __init__(self, settings, parent=None):
+        super().__init__(parent)
+        self.settings = settings
+        self.worker = None
+        self.setWindowTitle("GEMINI // API AND MODEL SETTINGS")
+        self.resize(700, 560)
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }} QLabel {{ color: {CP_CYAN}; font-family: 'Consolas'; }} QListWidget {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; font-family: 'Consolas'; }}")
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("GEMINI API KEY // STORED IN WINDOWS CREDENTIAL MANAGER"))
+        self.key_input = CyberInput("Paste API key; leave blank to keep the saved key...")
+        self.key_input.setEchoMode(QLineEdit.EchoMode.Password)
+        layout.addWidget(self.key_input)
+        self.key_status = QLabel("A key is saved." if load_gemini_api_key() else "No key saved yet.")
+        layout.addWidget(self.key_status)
+
+        model_row = QHBoxLayout()
+        model_row.addWidget(QLabel("DEFAULT MODEL"))
+        self.model_combo = QComboBox()
+        self.model_combo.setStyleSheet(f"QComboBox {{ background: {CP_PANEL}; color: {CP_TEXT}; border: 1px solid {CP_DIM}; padding: 5px; }}")
+        saved_model = str(self.settings.value("gemini_model", ""))
+        if saved_model:
+            self.model_combo.addItem(saved_model)
+        model_row.addWidget(self.model_combo, stretch=1)
+        layout.addLayout(model_row)
+
+        self.test_button = CyberButton("TEST AVAILABLE MODELS", color=CP_CYAN, is_outlined=True)
+        self.test_button.clicked.connect(self.test_models)
+        layout.addWidget(self.test_button)
+        self.results_list = QListWidget()
+        layout.addWidget(self.results_list, stretch=1)
+        self.status_label = QLabel("Model tests make a short request to each generation-capable model returned for your key.")
+        self.status_label.setWordWrap(True)
+        layout.addWidget(self.status_label)
+
+        buttons = QHBoxLayout()
+        self.delete_key_button = CyberButton("DELETE SAVED KEY", color=CP_RED, is_outlined=True)
+        self.delete_key_button.clicked.connect(self.delete_key)
+        self.save_button = CyberButton("SAVE SETTINGS", color=CP_YELLOW)
+        self.save_button.clicked.connect(self.save_settings)
+        self.close_button = CyberButton("CLOSE", color=CP_RED, is_outlined=True)
+        self.close_button.clicked.connect(self.reject)
+        buttons.addWidget(self.delete_key_button)
+        buttons.addStretch()
+        buttons.addWidget(self.save_button)
+        buttons.addWidget(self.close_button)
+        layout.addLayout(buttons)
+
+    def test_models(self):
+        api_key = self.key_input.text().strip() or load_gemini_api_key()
+        if not api_key:
+            QMessageBox.warning(self, "API KEY REQUIRED", "Enter your Gemini API key first.")
+            return
+        if self.key_input.text().strip():
+            try:
+                save_gemini_api_key(api_key)
+                self.key_input.clear()
+                self.key_status.setText("API key saved securely in Windows Credential Manager.")
+            except Exception as exc:
+                QMessageBox.critical(self, "KEY SAVE FAILED", str(exc))
+                return
+        self.results_list.clear()
+        self.model_combo.clear()
+        self.status_label.setText("Loading models and sending a short test prompt to each; Google API usage may be billed.")
+        self.test_button.setEnabled(False)
+        self.save_button.setEnabled(False)
+        self.delete_key_button.setEnabled(False)
+        self.close_button.setEnabled(False)
+        self.worker = ModelTestWorker(api_key, self)
+        self.worker.model_result.connect(self.show_model_result)
+        self.worker.completed.connect(self.finish_model_test)
+        self.worker.start()
+
+    def show_model_result(self, model, success, detail):
+        label = "WORKS" if success else "FAILED"
+        self.results_list.addItem(f"[{label}] {model} — {detail}")
+
+    def finish_model_test(self, working_models, message):
+        previous = self.settings.value("gemini_model", "")
+        self.model_combo.clear()
+        self.model_combo.addItems(working_models)
+        if previous in working_models:
+            self.model_combo.setCurrentText(previous)
+        elif working_models:
+            self.model_combo.setCurrentIndex(0)
+        self.status_label.setText(f"{message} {len(working_models)} model(s) responded successfully.")
+        self.test_button.setEnabled(True)
+        self.save_button.setEnabled(True)
+        self.delete_key_button.setEnabled(True)
+        self.close_button.setEnabled(True)
+
+    def save_settings(self):
+        if self.key_input.text().strip():
+            try:
+                save_gemini_api_key(self.key_input.text())
+                self.key_input.clear()
+                self.key_status.setText("API key saved securely in Windows Credential Manager.")
+            except Exception as exc:
+                QMessageBox.critical(self, "KEY SAVE FAILED", str(exc))
+                return
+        model = self.model_combo.currentText().strip()
+        if model:
+            self.settings.setValue("gemini_model", model.removeprefix("models/"))
+        self.accept()
+
+    def delete_key(self):
+        try:
+            delete_gemini_api_key()
+            self.key_input.clear()
+            self.key_status.setText("Saved API key deleted.")
+        except Exception as exc:
+            QMessageBox.critical(self, "KEY DELETE FAILED", str(exc))
+
+    def reject(self):
+        if self.worker and self.worker.isRunning():
+            self.status_label.setText("Wait for the model check to finish before closing.")
+            return
+        super().reject()
+
+    def closeEvent(self, event):
+        if self.worker and self.worker.isRunning():
+            event.ignore()
+            self.status_label.setText("Wait for the model check to finish before closing.")
+            return
+        super().closeEvent(event)
+
+
+class GeminiReviewDialog(QDialog):
+    def __init__(self, current, result, parent=None):
+        super().__init__(parent)
+        self.suggested = result["suggested"]
+        self.setWindowTitle("GEMINI // REVIEW COMMAND FIXES")
+        self.resize(850, 620)
+        self.setStyleSheet(f"QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }} QLabel {{ color: {CP_CYAN}; font-family: 'Consolas'; }} QTableWidget {{ background: {CP_PANEL}; color: {CP_TEXT}; gridline-color: {CP_DIM}; font-family: 'Consolas'; }}")
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("ISSUES FOUND"))
+        issues = QPlainTextEdit("\n".join(result.get("issues", [])) or "No clear issues found.")
+        issues.setReadOnly(True)
+        issues.setMaximumHeight(100)
+        layout.addWidget(issues)
+        explanation = QPlainTextEdit(result.get("explanation", ""))
+        explanation.setReadOnly(True)
+        explanation.setMaximumHeight(80)
+        layout.addWidget(explanation)
+
+        keys = ["name", "type", "exec_type", "path", "arguments", "ps1_command"]
+        self.table = QTableWidget(len(keys), 3)
+        self.table.setHorizontalHeaderLabels(["FIELD", "CURRENT", "SUGGESTED"])
+        self.table.verticalHeader().hide()
+        self.table.setWordWrap(True)
+        self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        for row, key in enumerate(keys):
+            self.table.setItem(row, 0, QTableWidgetItem(key.upper()))
+            self.table.setItem(row, 1, QTableWidgetItem(str(current.get(key, ""))))
+            self.table.setItem(row, 2, QTableWidgetItem(str(self.suggested.get(key, ""))))
+        self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.resizeRowsToContents()
+        layout.addWidget(self.table, stretch=1)
+        note = QLabel("Nothing changes until you choose APPLY SUGGESTED FIXES.")
+        layout.addWidget(note)
+        buttons = QHBoxLayout()
+        apply_button = CyberButton("APPLY SUGGESTED FIXES", color=CP_GREEN)
+        apply_button.clicked.connect(self.accept)
+        cancel_button = CyberButton("KEEP CURRENT COMMAND", color=CP_RED, is_outlined=True)
+        cancel_button.clicked.connect(self.reject)
+        buttons.addStretch()
+        buttons.addWidget(apply_button)
+        buttons.addWidget(cancel_button)
+        layout.addLayout(buttons)
 
 class StartupItemWidget(QFrame):
     toggled = pyqtSignal(dict, bool)
@@ -308,8 +536,9 @@ class ItemDialog(QDialog):
         super().__init__(parent)
         self.item = item
         self.result_data = None
+        self.analysis_worker = None
         self.setWindowTitle("SYSTEM // EDIT" if item else "SYSTEM // NEW")
-        self.setFixedSize(600, 600)
+        self.setFixedSize(600, 650)
         self.setStyleSheet(f"""
             QDialog {{ background-color: {CP_BG}; border: 1px solid {CP_DIM}; }}
             QLabel {{ color: {CP_CYAN}; font-family: 'Consolas'; font-weight: bold; font-size: 12px; }}
@@ -374,9 +603,18 @@ class ItemDialog(QDialog):
         self.args_input = CyberInput("Optional arguments for Registry...")
         layout.addWidget(self.args_input)
         
-        layout.addWidget(QLabel("CUSTOM COMMAND // PS1 SCRIPT"))
+        command_heading = QHBoxLayout()
+        command_heading.addWidget(QLabel("CUSTOM COMMAND // PS1 SCRIPT"))
+        command_heading.addStretch()
+        self.gemini_analyze_button = CyberButton("GEMINI // ANALYZE", color=CP_CYAN, is_outlined=True)
+        self.gemini_analyze_button.clicked.connect(self.analyze_with_gemini)
+        command_heading.addWidget(self.gemini_analyze_button)
+        layout.addLayout(command_heading)
         self.ps1_input = CyberInput("Complete PowerShell command line...")
         layout.addWidget(self.ps1_input)
+        self.gemini_status = QLabel("")
+        self.gemini_status.setStyleSheet(f"color: {CP_SUBTEXT}; font-family: 'Consolas'; font-size: 9px;")
+        layout.addWidget(self.gemini_status)
 
         checks_layout = QHBoxLayout()
         self.admin_check = QCheckBox("RUN AS ADMIN")
@@ -398,17 +636,80 @@ class ItemDialog(QDialog):
         layout.addStretch()
 
         btn_layout = QHBoxLayout()
-        save_btn = CyberButton("SAVE", color=CP_YELLOW)
-        save_btn.clicked.connect(self.save_item)
-        cancel_btn = CyberButton("ABORT", color=CP_RED, is_outlined=True)
-        cancel_btn.clicked.connect(self.reject)
-        btn_layout.addWidget(save_btn)
-        btn_layout.addWidget(cancel_btn)
+        self.save_button = CyberButton("SAVE", color=CP_YELLOW)
+        self.save_button.clicked.connect(self.save_item)
+        self.cancel_button = CyberButton("ABORT", color=CP_RED, is_outlined=True)
+        self.cancel_button.clicked.connect(self.reject)
+        btn_layout.addWidget(self.save_button)
+        btn_layout.addWidget(self.cancel_button)
         layout.addLayout(btn_layout)
 
     def browse_file(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Select Executable", "", "Executables (*.exe);;All Files (*.*)")
         if filename: self.path_input.setText(filename)
+
+    def analyze_with_gemini(self):
+        api_key = load_gemini_api_key()
+        settings = self.parent().settings if hasattr(self.parent(), "settings") else QSettings("nahid6970", "StartupManager")
+        model = str(settings.value("gemini_model", "")).strip()
+        if not api_key or not model:
+            QMessageBox.information(
+                self,
+                "GEMINI SETUP REQUIRED",
+                "Add your Gemini API key and test/select a working model in GEMINI settings first.",
+            )
+            settings_dialog = GeminiSettingsDialog(settings, self)
+            settings_dialog.exec()
+            return
+
+        item = {
+            "name": self.name_input.text(),
+            "type": self.type_combo.currentText(),
+            "ExecutableType": "ahk_v2" if self.radio_ahk.isChecked() else "other",
+            "paths": [self.path_input.text()],
+            "Command": self.args_input.text(),
+            "ps1_command": self.ps1_input.text(),
+        }
+        self.gemini_analyze_button.setEnabled(False)
+        self.save_button.setEnabled(False)
+        self.cancel_button.setEnabled(False)
+        self.gemini_status.setText(f"Analyzing with {model}...")
+        self.analysis_worker = GeminiAnalysisWorker(api_key, model, item, self)
+        self.analysis_worker.completed.connect(lambda result, error: self.finish_gemini_analysis(item, result, error))
+        self.analysis_worker.start()
+
+    def finish_gemini_analysis(self, current, result, error):
+        self.gemini_analyze_button.setEnabled(True)
+        self.save_button.setEnabled(True)
+        self.cancel_button.setEnabled(True)
+        if error:
+            self.gemini_status.setText("Gemini analysis failed.")
+            QMessageBox.warning(self, "GEMINI ANALYSIS FAILED", error)
+            return
+        review = GeminiReviewDialog(current, result, self)
+        if review.exec() == QDialog.DialogCode.Accepted:
+            suggested = review.suggested
+            self.name_input.setText(suggested["name"])
+            self.type_combo.setCurrentText(suggested["type"])
+            self.path_input.setText(suggested["path"])
+            self.args_input.setText(suggested["arguments"])
+            self.ps1_input.setText(suggested["ps1_command"])
+            self.radio_ahk.setChecked(suggested["exec_type"] == "ahk_v2")
+            self.radio_other.setChecked(suggested["exec_type"] != "ahk_v2")
+            self.gemini_status.setText("Suggested fields applied. Review them before saving.")
+        else:
+            self.gemini_status.setText("Current command kept unchanged.")
+
+    def reject(self):
+        if self.analysis_worker and self.analysis_worker.isRunning():
+            return
+        super().reject()
+
+    def closeEvent(self, event):
+        if self.analysis_worker and self.analysis_worker.isRunning():
+            event.ignore()
+            return
+        super().closeEvent(event)
 
     def load_data(self):
         self.name_input.setText(self.item["name"])
@@ -510,6 +811,7 @@ class MainWindow(QMainWindow):
         self.dirs_btn = CyberButton(" DIRS", color=CP_YELLOW, is_outlined=True, svg_data=SVGS["FOLDER"]); self.dirs_btn.clicked.connect(self.open_startup_dirs); row1_layout.addWidget(self.dirs_btn)
         self.copy_reg_btn = CyberButton(" REG_PATH", color=CP_CYAN, is_outlined=True, svg_data=SVGS["COPY"]); self.copy_reg_btn.clicked.connect(self.copy_registry_path); row1_layout.addWidget(self.copy_reg_btn)
         self.ps1_btn = CyberButton(" PS1", color="#00FF00", is_outlined=True, svg_data=SVGS["TERMINAL"]); self.ps1_btn.clicked.connect(self.select_ps1_path); row1_layout.addWidget(self.ps1_btn)
+        self.gemini_btn = CyberButton(" GEMINI", color=CP_CYAN, is_outlined=True); self.gemini_btn.clicked.connect(self.open_gemini_settings); row1_layout.addWidget(self.gemini_btn)
         row1_layout.addStretch()
         self.sort_combo = QComboBox(); self.sort_combo.addItems(["Name", "Date"]); self.sort_combo.setCurrentText(self.sort_by); self.sort_combo.setFixedWidth(80)
         self.sort_combo.setStyleSheet(self.get_combo_style()); self.sort_combo.currentTextChanged.connect(self.change_sort); row1_layout.addWidget(self.sort_combo)
@@ -857,6 +1159,10 @@ class MainWindow(QMainWindow):
     def update_status(self, text): self.status_label.setText(text); QTimer.singleShot(3000, lambda: self.status_label.setText("SYSTEM READY"))
     def select_ps1_path(self):
         if (p := QFileDialog.getSaveFileName(self, "SELECT PS1", self.ps1_file_path, "PS1 (*.ps1)")[0]): self.ps1_file_path = p; self.settings.setValue("ps1_file_path", p)
+
+    def open_gemini_settings(self):
+        dialog = GeminiSettingsDialog(self.settings, self)
+        dialog.exec()
 
 def make_app_icon():
     svg = b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="10" fill="#050505"/><path d="M32 6 C22 6 14 18 14 30 L14 38 L20 44 L20 52 L26 52 L26 46 L38 46 L38 52 L44 52 L44 44 L50 38 L50 30 C50 18 42 6 32 6Z" fill="#FCEE0A"/><circle cx="32" cy="26" r="6" fill="#050505"/><path d="M20 44 L16 54 L26 50Z" fill="#FF003C"/><path d="M44 44 L48 54 L38 50Z" fill="#FF003C"/><circle cx="32" cy="26" r="3" fill="#00F0FF"/></svg>'
