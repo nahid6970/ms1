@@ -31,9 +31,10 @@ show_menu() {
     echo -e "  ${RED}3)${NC} Remove Ubuntu completely (Termux only)"
     echo -e "  ${BLUE}4)${NC} Install AI coding agents"
     echo -e "  ${CYAN}5)${NC} Configure Ubuntu environment variables"
+    echo -e "  ${GREEN}6)${NC} Simplify Ubuntu terminal startup"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/4/5/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/6/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
@@ -41,6 +42,7 @@ show_menu() {
         3) remove_ubuntu ;;
         4) install_ai_agents ;;
         5) configure_ubuntu_environment ;;
+        6) simplify_ubuntu_terminal ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -203,6 +205,14 @@ ubuntu_home_dir() {
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}" >&2
         return 1
     fi
+}
+
+simplify_ubuntu_terminal() {
+    clear
+    echo -e "${CYAN}Simplifying Ubuntu terminal startup...${NC}"
+    run_in_ubuntu 'sed -i "/command -v fastfetch/,+2d" ~/.bashrc && printf '\''%s\n'\'' '\''PS1="\w\$ "'\'' >> ~/.bashrc' || return 1
+    echo -e "${GREEN}Ubuntu startup banner disabled and prompt set to the current directory.${NC}"
+    echo -e "Changes apply to new Ubuntu shells. Restart Ubuntu to see the clean prompt."
 }
 
 configure_ubuntu_environment() {
