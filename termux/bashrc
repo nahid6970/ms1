@@ -101,9 +101,8 @@ git_clone() {
         git clone "$repo_url"
     fi
 }
-ggproxy() {
+_gemini_cli_script() {
     local gemini_cli="$HOME/ms1/tools/Gemini_CLI/gemini_cli.py"
-    local python_cmd
     if [[ ! -f "$gemini_cli" && -f "/data/data/com.termux/files/home/ms1/tools/Gemini_CLI/gemini_cli.py" ]]; then
         gemini_cli="/data/data/com.termux/files/home/ms1/tools/Gemini_CLI/gemini_cli.py"
     fi
@@ -111,6 +110,12 @@ ggproxy() {
         echo "Gemini CLI not found at $gemini_cli."
         return 1
     fi
+    printf '%s\n' "$gemini_cli"
+}
+
+gg() {
+    local gemini_cli python_cmd
+    gemini_cli=$(_gemini_cli_script) || return 1
     if command -v python >/dev/null 2>&1; then
         python_cmd=python
     elif command -v python3 >/dev/null 2>&1; then
@@ -119,12 +124,25 @@ ggproxy() {
         echo "Python is not installed."
         return 1
     fi
-    "$python_cmd" "$gemini_cli" --proxy --proxy-port 8765 --proxy-key pi-local-secret --password 182358 "$@"
+    "$python_cmd" "$gemini_cli" --password 182358 --max-output-tokens 65536 "$@"
+}
+
+ggproxy() {
+    local gemini_cli python_cmd
+    gemini_cli=$(_gemini_cli_script) || return 1
+    if command -v python >/dev/null 2>&1; then
+        python_cmd=python
+    elif command -v python3 >/dev/null 2>&1; then
+        python_cmd=python3
+    else
+        echo "Python is not installed."
+        return 1
+    fi
+    "$python_cmd" "$gemini_cli" --proxy --proxy-host 127.0.0.1 --proxy-port 8765 --proxy-key pi-local-secret --password 182358 "$@"
 }
 
 # OS-specific commands and startup behavior.
 if [[ "$IS_TERMUX" == true ]]; then
-    alias gg='python ~/ms1/tools/Gemini_CLI/gemini_cli.py --password 182358 --max-output-tokens 65536'
     alias osx='bash ~/ms3/osx.sh'
     alias ubuntu='proot-distro login ubuntu'
     alias playwwe='echo "playwwe" && mpv /storage/emulated/0/song/wwe/ww.mp3'

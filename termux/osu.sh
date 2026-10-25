@@ -31,9 +31,10 @@ show_menu() {
     echo -e "  ${BLUE}3)${NC} Install AI coding agents"
     echo -e "  ${CYAN}4)${NC} Configure Ubuntu environment variables"
     echo -e "  ${GREEN}5)${NC} Simplify Ubuntu terminal startup"
+    echo -e "  ${MAGENTA}6)${NC} Configure Pi Gemini proxy"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/4/5/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/6/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
@@ -41,6 +42,7 @@ show_menu() {
         3) install_ai_agents ;;
         4) configure_ubuntu_environment ;;
         5) simplify_ubuntu_terminal ;;
+        6) configure_pi_gemini_proxy ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -271,6 +273,114 @@ configure_ubuntu_environment() {
             *) echo -e "${RED}Invalid choice.${NC}"; read -r -p 'Press Enter to continue...' ;;
         esac
     done
+}
+
+configure_pi_gemini_proxy() {
+    local ubuntu_home pi_agent_dir pi_source_dir bashrc_path escaped_bashrc_source
+    clear
+    echo -e "${CYAN}Configuring Pi's Gemini failover provider for Ubuntu...${NC}"
+    ubuntu_home=$(ubuntu_home_dir) || return 1
+    pi_agent_dir="$ubuntu_home/.pi/agent"
+    bashrc_path="$ubuntu_home/.bashrc"
+
+    if [[ -d "$REPO_DIR/tools/Gemini_CLI/pi" ]]; then
+        pi_source_dir="$REPO_DIR/tools/Gemini_CLI/pi"
+    elif [[ -d "$SCRIPT_DIR/../tools/Gemini_CLI/pi" ]]; then
+        pi_source_dir="$SCRIPT_DIR/../tools/Gemini_CLI/pi"
+    else
+        echo -e "${RED}Gemini CLI Pi config folder was not found.${NC}"
+        return 1
+    fi
+
+    command -v python3 >/dev/null 2>&1 || {
+        echo -e "${RED}python3 is required. Set up the Ubuntu environment first.${NC}"
+        return 1
+    }
+    mkdir -p "$pi_agent_dir" || return 1
+    touch "$bashrc_path" || return 1
+
+    python3 - "$pi_source_dir" "$pi_agent_dir" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+source_dir, target_dir = map(Path, sys.argv[1:3])
+
+def read_json(path):
+    if not path.exists():
+        return {}
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"Expected a JSON object in {path}")
+    return value
+
+source_models = read_json(source_dir / "models.json")
+source_settings = read_json(source_dir / "settings.json")
+source_auth = read_json(source_dir / "auth.json")
+source_provider = source_models.get("providers", {}).get("google-failover")
+source_credential = source_auth.get("google-failover")
+if not isinstance(source_provider, dict) or not isinstance(source_credential, dict):
+    raise ValueError("The project Pi config is missing its Google failover provider or credential.")
+
+models_path = target_dir / "models.json"
+models = read_json(models_path)
+providers = models.setdefault("providers", {})
+if not isinstance(providers, dict):
+    raise ValueError(f"Expected providers to be an object in {models_path}")
+provider = dict(source_provider)
+existing_provider = providers.get("google-failover", {})
+if isinstance(existing_provider, dict):
+    provider.update(existing_provider)
+provider.update({
+    "api": "google-generative-ai",
+    "baseUrl": "http://127.0.0.1:8765/v1beta",
+    "apiKey": source_provider.get("apiKey", "pi-local-secret"),
+})
+providers["google-failover"] = provider
+
+settings_path = target_dir / "settings.json"
+settings = read_json(settings_path)
+enabled = settings.get("enabledModels", [])
+if not isinstance(enabled, list):
+    raise ValueError(f"Expected enabledModels to be a list in {settings_path}")
+source_enabled = source_settings.get("enabledModels", [])
+settings["enabledModels"] = list(dict.fromkeys(
+    [*enabled, *(item for item in source_enabled if str(item).startswith("google-failover/"))]
+))
+settings.setdefault("defaultProvider", "google-failover")
+settings.setdefault("defaultModel", source_settings.get("defaultModel", "gemini-3.1-flash-lite"))
+
+auth_path = target_dir / "auth.json"
+auth = read_json(auth_path)
+auth["google-failover"] = source_credential
+
+for path, data in ((models_path, models), (settings_path, settings), (auth_path, auth)):
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temp_path.replace(path)
+PY
+    local result=$?
+    if (( result != 0 )); then
+        echo -e "${RED}Could not merge Pi's Gemini provider config.${NC}"
+        return "$result"
+    fi
+
+    if [[ ! -f "$BASHRC_SOURCE" ]]; then
+        echo -e "${RED}Shared bashrc was not found: $BASHRC_SOURCE${NC}"
+        return 1
+    fi
+    if ! grep -Fq "# osu shared bashrc: $BASHRC_SOURCE" "$bashrc_path"; then
+        printf -v escaped_bashrc_source '%q' "$BASHRC_SOURCE"
+        {
+            printf '\n# osu shared bashrc: %s\n' "$BASHRC_SOURCE"
+            printf 'if [[ -r %s ]]; then source %s; fi\n' "$escaped_bashrc_source" "$escaped_bashrc_source"
+        } >> "$bashrc_path" || return 1
+    fi
+
+    echo -e "${GREEN}Pi's Gemini provider is configured for Ubuntu.${NC}"
+    echo -e "${GREEN}Ubuntu's bashrc now loads the shared config, including ${CYAN}gg${GREEN} and ${CYAN}ggproxy${GREEN}.${NC}"
+    echo -e "In Ubuntu, run ${CYAN}ggproxy${NC} in one shell, then run Gemini CLI and enter ${CYAN}/test${NC} in another."
+    echo -e "After testing, open Pi in Ubuntu and run ${CYAN}/reload${NC}."
 }
 
 install_ai_agents() {
