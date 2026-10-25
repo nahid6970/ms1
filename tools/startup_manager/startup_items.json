@@ -1013,6 +1013,21 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": true,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1792934191.936769
+  },
+  {
+    "name": "Microsoft Defender",
+    "type": "App",
+    "paths": [
+      "explorer.exe"
+    ],
+    "Command": "windowsdefender:",
+    "ps1_command": "Start-Process explorer.exe -ArgumentList 'windowsdefender:'",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false,
+    "added_at": 1792934220.167357
   }
 ]
