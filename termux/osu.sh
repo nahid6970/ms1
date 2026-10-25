@@ -30,15 +30,17 @@ show_menu() {
     echo -e "  ${CYAN}2)${NC} Set up Ubuntu environment (bashrc, nano, packages)"
     echo -e "  ${RED}3)${NC} Remove Ubuntu completely (Termux only)"
     echo -e "  ${BLUE}4)${NC} Install AI coding agents"
+    echo -e "  ${CYAN}5)${NC} Configure Ubuntu environment variables"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/4/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
         2) setup_ubuntu_environment ;;
         3) remove_ubuntu ;;
         4) install_ai_agents ;;
+        5) configure_ubuntu_environment ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -190,6 +192,87 @@ run_in_ubuntu() {
     fi
 }
 
+ubuntu_home_dir() {
+    if inside_ubuntu; then
+        printf '%s\n' "$HOME"
+    elif command -v proot-distro >/dev/null 2>&1 && \
+         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
+           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
+        printf '%s\n' "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu/root"
+    else
+        echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}" >&2
+        return 1
+    fi
+}
+
+configure_ubuntu_environment() {
+    local choice ubuntu_home bashrc_dir entry escaped_entry var_name var_value escaped_value
+    while true; do
+        clear
+        echo -e "${MAGENTA}Ubuntu Environment Settings${NC}"
+        echo
+        echo -e "  ${GREEN}1)${NC} Add a directory to PATH"
+        echo -e "  ${CYAN}2)${NC} Set or update an exported variable"
+        echo -e "  ${BLUE}3)${NC} Show current PATH"
+        echo -e "  ${YELLOW}q)${NC} Back"
+        echo
+        read -r -p 'Enter choice [1/2/3/q]: ' choice
+
+        case "$choice" in
+            1)
+                read -r -p 'Directory to add to PATH (e.g. /root/bin): ' entry
+                [[ -n "$entry" ]] || { echo -e "${RED}Directory cannot be empty.${NC}"; read -r -p 'Press Enter to continue...'; continue; }
+                ubuntu_home=$(ubuntu_home_dir) || { read -r -p 'Press Enter to continue...'; continue; }
+                bashrc_dir="$ubuntu_home/.bashrc"
+                mkdir -p "$ubuntu_home" || return 1
+                touch "$bashrc_dir" || return 1
+                printf -v escaped_entry '%q' "$entry"
+                if grep -Fq -- "# osu PATH entry: $entry" "$bashrc_dir"; then
+                    echo -e "${YELLOW}$entry is already configured in $bashrc_dir.${NC}"
+                else
+                    {
+                        printf '\n# osu PATH entry: %s\n' "$entry"
+                        printf 'case ":$PATH:" in *":%s:"*) ;; *) export PATH=%s:"$PATH" ;; esac\n' "$escaped_entry" "$escaped_entry"
+                    } >> "$bashrc_dir" || return 1
+                    echo -e "${GREEN}Added $entry to PATH in $bashrc_dir.${NC}"
+                    echo -e "Apply it now with: ${CYAN}source ~/.bashrc${NC}"
+                fi
+                read -r -p 'Press Enter to continue...'
+                ;;
+            2)
+                read -r -p 'Variable name (e.g. ANDROID_HOME): ' var_name
+                if [[ ! "$var_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+                    echo -e "${RED}Invalid variable name.${NC}"
+                    read -r -p 'Press Enter to continue...'
+                    continue
+                fi
+                read -r -p "Value for $var_name: " var_value
+                ubuntu_home=$(ubuntu_home_dir) || { read -r -p 'Press Enter to continue...'; continue; }
+                bashrc_dir="$ubuntu_home/.bashrc"
+                mkdir -p "$ubuntu_home" || return 1
+                touch "$bashrc_dir" || return 1
+                printf -v escaped_value '%q' "$var_value"
+                if grep -Fq "# osu environment variable: $var_name" "$bashrc_dir"; then
+                    sed -i "/^# osu environment variable: ${var_name}$/,+1d" "$bashrc_dir" || return 1
+                fi
+                {
+                    printf '\n# osu environment variable: %s\n' "$var_name"
+                    printf 'export %s=%s\n' "$var_name" "$escaped_value"
+                } >> "$bashrc_dir" || return 1
+                echo -e "${GREEN}Saved $var_name in $bashrc_dir.${NC}"
+                echo -e "Apply it now with: ${CYAN}source ~/.bashrc${NC}"
+                read -r -p 'Press Enter to continue...'
+                ;;
+            3)
+                run_in_ubuntu 'printf "PATH entries:\\n"; printf "%s\\n" "$PATH" | tr ":" "\\n"'
+                read -r -p 'Press Enter to continue...'
+                ;;
+            q|Q) return 0 ;;
+            *) echo -e "${RED}Invalid choice.${NC}"; read -r -p 'Press Enter to continue...' ;;
+        esac
+    done
+}
+
 install_ai_agents() {
     local choice
     clear
@@ -197,10 +280,11 @@ install_ai_agents() {
     echo
     echo -e "  ${GREEN}1)${NC} Install Kiro CLI"
     echo -e "  ${CYAN}2)${NC} Install Codex CLI"
-    echo -e "  ${BLUE}3)${NC} Install both"
+    echo -e "  ${BLUE}3)${NC} Install T3 Code"
+    echo -e "  ${MAGENTA}4)${NC} Install all three"
     echo -e "  ${YELLOW}q)${NC} Back"
     echo
-    read -r -p 'Enter choice [1/2/3/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/q]: ' choice
 
     case "$choice" in
         1)
@@ -212,10 +296,16 @@ install_ai_agents() {
             run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
             ;;
         3)
+            echo -e "${CYAN}Installing T3 Code in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://t3.codes/install.sh | sh'
+            ;;
+        4)
             echo -e "${CYAN}Installing Kiro CLI in Ubuntu...${NC}"
             run_in_ubuntu 'curl -fsSL https://cli.kiro.dev/install | bash' || return 1
             echo -e "${CYAN}Installing Codex CLI in Ubuntu...${NC}"
-            run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+            run_in_ubuntu 'curl -fsSL https://chatgpt.com/codex/install.sh | sh' || return 1
+            echo -e "${CYAN}Installing T3 Code in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://t3.codes/install.sh | sh'
             ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}"; return 1 ;;
