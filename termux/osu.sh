@@ -226,7 +226,7 @@ configure_ubuntu_environment() {
             1)
                 ubuntu_home=$(ubuntu_home_dir) || { read -r -p 'Press Enter to continue...'; continue; }
                 bashrc_dir="$ubuntu_home/.bashrc"
-                for path_entry in "$ubuntu_home/bin" "$ubuntu_home/.local/bin" "$ubuntu_home/.cargo/bin" "$ubuntu_home/go/bin"; do
+                for path_entry in "$ubuntu_home/bin" "$ubuntu_home/.local/bin" "$ubuntu_home/.opencode/bin" "$ubuntu_home/.cargo/bin" "$ubuntu_home/go/bin"; do
                     add_ubuntu_path_entry "$bashrc_dir" "$path_entry" || return 1
                 done
                 echo -e "Apply changes now with: ${CYAN}source ~/.bashrc${NC}"

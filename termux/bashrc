@@ -185,6 +185,13 @@ else
     PS1='\[\033[0;34m\]\w\[\033[0m\] \[\033[0;36m\]❯\[\033[0m\] '
 fi
 
+if [[ "$IS_TERMUX" != true ]]; then
+    for _osu_bin in "${OPENCODE_INSTALL_DIR:-}" "${XDG_BIN_DIR:-}" "$HOME/.opencode/bin" "$HOME/.local/bin"; do
+        [[ -n "$_osu_bin" ]] || continue
+        case ":$PATH:" in *":$_osu_bin:"*) ;; *) PATH="$_osu_bin:$PATH" ;; esac
+    done
+    unset _osu_bin
+fi
 export PATH="$HOME/bin:$PATH"
 
 # Optional prompt, directory jump, and startup tools.
