@@ -6,6 +6,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-10-25] - Add Synchronized Workspace Filters
 
 - Added a three-state project filter (All, GitHub, Rclone) to the sidebar and workspace dropdown.
+- Presented the choices as connected rounded icon buttons (no visible labels) with direct selection and white, yellow, and blue active states.
 - Persisted the selected filter in browser local storage; both project lists stay synchronized.
 - GitHub matches projects with a saved Git remote. Rclone matches projects with a saved destination; the projects API exposes that boolean and a saved destination updates the current UI immediately.
 

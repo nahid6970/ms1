@@ -287,7 +287,7 @@
       "bookmarks": []
     },
     {
-      "name": "myWizTree_Directory_Scanner",
+      "name": "myWizTree",
       "path": "C:\\@delta\\myWizTree_Directory_Scanner",
       "category": "",
       "pinned": false,
@@ -295,6 +295,7 @@
         "background": "#000000",
         "foreground": "#d1d5db",
         "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
         "scrollbarColor": "#475569",
         "scrollbarIdleColor": "#2d3748"
       },
@@ -304,7 +305,8 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/mywiztree-directory-scanner.git"
     },
     {
       "name": "mklink",

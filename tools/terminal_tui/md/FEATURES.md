@@ -81,7 +81,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ### Workspace List Filters
 **Status:** ✅ Complete
-**Description:** A synchronized three-state toggle filters projects in both the sidebar and workspace dropdown: All, GitHub (saved GitHub remote URL), and Rclone (saved Rclone destination).
+**Description:** A synchronized connected three-option icon control filters projects in both the sidebar and workspace dropdown. The provided All layers, GitHub, and Rclone SVGs are embedded inline; each icon can be selected directly and includes an accessible name and tooltip.
 **Implementation:** `templates/index.html` stores the selected filter in `localStorage` and applies it to both project renderers. `app.py` includes a `hasRcloneDestination` flag in the projects response; successful Rclone destination saves update the current client-side project data immediately.
 
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.

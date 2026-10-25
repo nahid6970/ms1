@@ -465,13 +465,30 @@
         }
 
         .project-filter-toggle {
-            width: 100%; height: 28px; display: flex; align-items: center; justify-content: space-between;
-            gap: 8px; padding: 0 9px; background: var(--bg-main); border: 1px solid var(--border-color);
-            border-radius: 6px; color: var(--text-secondary); cursor: pointer; font: inherit;
-            font-size: 0.72rem; transition: all 0.15s;
+            width: 100%; height: 38px; display: flex; align-items: center; justify-content: space-between; position: relative;
+            isolation: isolate; border: 1px solid var(--border-color); border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.035), transparent), var(--bg-main);
+            overflow: hidden; padding: 0 10px;
         }
-        .project-filter-toggle:hover, .project-filter-toggle:focus-visible { color: var(--text-primary); border-color: var(--accent-color); outline: none; }
-        .project-filter-toggle strong { color: var(--text-primary); font-weight: 600; }
+        .project-filter-toggle::before {
+            content: ''; position: absolute; z-index: -1; left: 23%; right: 23%; top: 50%;
+            height: 2px; transform: translateY(-50%); background: linear-gradient(90deg, #f8fafc 0%, #facc15 50%, #60a5fa 100%);
+            opacity: 0.55; box-shadow: 0 0 5px rgba(148,163,184,0.28);
+        }
+        .project-filter-option {
+            position: relative; flex: 0 0 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            border: 1px solid transparent; border-radius: 50%; padding: 0;
+            background: var(--bg-main); cursor: pointer; transition: transform 0.16s, background-color 0.16s, box-shadow 0.16s, border-color 0.16s;
+        }
+        .project-filter-option svg { width: 14px; height: 14px; display: block; }
+        .project-filter-option[data-filter="all"] { color: #f8fafc; }
+        .project-filter-option[data-filter="github"] { color: #facc15; }
+        .project-filter-option[data-filter="rclone"] { color: #60a5fa; }
+        .project-filter-option:hover { transform: scale(1.1); }
+        .project-filter-option:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; z-index: 1; }
+        .project-filter-option[aria-pressed="true"][data-filter="all"] { color: #111827; background: #f8fafc; border-color: #ffffff; box-shadow: 0 0 11px rgba(248,250,252,0.38); }
+        .project-filter-option[aria-pressed="true"][data-filter="github"] { color: #422006; background: #facc15; border-color: #fde047; box-shadow: 0 0 11px rgba(250,204,21,0.38); }
+        .project-filter-option[aria-pressed="true"][data-filter="rclone"] { color: #082f49; background: #60a5fa; border-color: #93c5fd; box-shadow: 0 0 11px rgba(96,165,250,0.4); }
 
         /* Project Card item */
         .project-card {
@@ -1862,9 +1879,11 @@
                     <button onclick="toggleSidebar()" title="Hide sidebar" style="position:absolute; left:0; top:0; bottom:0; width:42px; background:rgba(255,255,255,0.9); border:none; border-right:1px solid var(--border-color); cursor:pointer; color:#111; display:flex; align-items:center; justify-content:center; transition:all 0.15s; border-radius:6px 0 0 6px; z-index:1;" onmouseenter="this.style.background='rgba(255,255,255,1)'" onmouseleave="this.style.background='rgba(255,255,255,0.9)'">«</button>
                     <input type="text" id="search-input" class="search-input" placeholder="Search workspaces..." oninput="handleSearch()" autocomplete="off" style="flex: 1; width:100%; height: 32px; padding: 6px 10px 6px 48px; font-size: 0.85rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;">
                 </div>
-                <button type="button" class="project-filter-toggle" id="sidebar-project-filter" onclick="cycleProjectFilter()" title="Filter projects: All → GitHub → Rclone" aria-label="Project filter: All">
-                    <span>Projects</span><strong data-project-filter-label>All</strong><span aria-hidden="true">↻</span>
-                </button>
+                <div class="project-filter-toggle" id="sidebar-project-filter" role="group" aria-label="Filter projects">
+                    <button type="button" class="project-filter-option" data-filter="all" onclick="setProjectFilter('all')" title="Show all projects" aria-label="Show all projects" aria-pressed="true"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><g transform="matrix(1.1485 0 0 1.2471 -1.233 -1.917)"><path d="M8.04 10.471 2.938 7.953l2.085-1.03-.932-.46-3.017 1.49L8.04 11.39l6.965-3.437-3.017-1.49-.93.46 2.084 1.03z"/><path d="M8.04 13.448 2.938 10.93 5.023 9.9l-.932-.46-3.017 1.49 6.966 3.437 6.965-3.437-3.017-1.49-.93.46 2.084 1.03z"/><path d="M8.04 1.537 1.074 4.974 8.04 8.41l6.965-3.437zm0 .919 5.102 2.518L8.04 7.492 2.938 4.974z"/></g></svg></button>
+                    <button type="button" class="project-filter-option" data-filter="github" onclick="setProjectFilter('github')" title="Show projects with a GitHub repository link" aria-label="Show GitHub projects" aria-pressed="false"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path transform="translate(-84 -7399)" d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399"/></svg></button>
+                    <button type="button" class="project-filter-option" data-filter="rclone" onclick="setProjectFilter('rclone')" title="Show projects with an Rclone destination" aria-label="Show Rclone projects" aria-pressed="false"><svg viewBox="0 0 64 64" aria-hidden="true"><g transform="matrix(1.3422256,0,0,1.3422256,0,3.8420351)"><path d="m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673" fill="#70caf2"/><path d="M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-0.000683 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543" fill="#b4e3f9"/><path d="m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 0,21.074248 0,29.12381 c 0,8.050246 6.5254965,14.57642 14.57575,14.57642 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183" fill="#3f79ad"/></g></svg></button>
+                </div>
             </div>
 
             <div class="project-list" id="project-list-container" style="flex: 1; overflow-y: auto;">
@@ -1904,9 +1923,11 @@
                     </button>
                     <div class="custom-dropdown-content" id="workspace-selector-dropdown-content" style="display: none; position: absolute; left: 0; top: 38px; width: 260px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 1000; padding: 0; max-height: none; flex-direction: column;">
                         <div style="padding: 8px; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;">
-                            <button type="button" class="project-filter-toggle" id="dropdown-project-filter" onclick="cycleProjectFilter()" title="Filter projects: All → GitHub → Rclone" aria-label="Project filter: All">
-                                <span>Show</span><strong data-project-filter-label>All</strong><span aria-hidden="true">↻</span>
-                            </button>
+                            <div class="project-filter-toggle" id="dropdown-project-filter" role="group" aria-label="Filter projects">
+                                <button type="button" class="project-filter-option" data-filter="all" onclick="setProjectFilter('all')" title="Show all projects" aria-label="Show all projects" aria-pressed="true"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><g transform="matrix(1.1485 0 0 1.2471 -1.233 -1.917)"><path d="M8.04 10.471 2.938 7.953l2.085-1.03-.932-.46-3.017 1.49L8.04 11.39l6.965-3.437-3.017-1.49-.93.46 2.084 1.03z"/><path d="M8.04 13.448 2.938 10.93 5.023 9.9l-.932-.46-3.017 1.49 6.966 3.437 6.965-3.437-3.017-1.49-.93.46 2.084 1.03z"/><path d="M8.04 1.537 1.074 4.974 8.04 8.41l6.965-3.437zm0 .919 5.102 2.518L8.04 7.492 2.938 4.974z"/></g></svg></button>
+                                <button type="button" class="project-filter-option" data-filter="github" onclick="setProjectFilter('github')" title="Show projects with a GitHub repository link" aria-label="Show GitHub projects" aria-pressed="false"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path transform="translate(-84 -7399)" d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399"/></svg></button>
+                                <button type="button" class="project-filter-option" data-filter="rclone" onclick="setProjectFilter('rclone')" title="Show projects with an Rclone destination" aria-label="Show Rclone projects" aria-pressed="false"><svg viewBox="0 0 64 64" aria-hidden="true"><g transform="matrix(1.3422256,0,0,1.3422256,0,3.8420351)"><path d="m 45.726917,21.83581 c -1.507672,-2.611426 -3.701518,-4.579735 -6.222732,-5.808561 -0.322585,1.72227 -0.932898,3.419936 -1.857594,5.021921 l -1.459147,2.532147 c 0.971853,0.539918 1.817954,1.334759 2.414598,2.368122 1.753027,3.035842 0.712146,6.919151 -2.324383,8.672176 -3.035847,1.753025 -6.919159,0.712829 -8.672186,-2.323698 l -2.944264,-5.091631 h -4.751283 l -2.375642,4.114312 2.946315,5.090948 c 4.025469,6.971776 12.939592,9.360401 19.911375,5.334937 6.971101,-4.024782 9.359727,-12.938896 5.334943,-19.910673" fill="#70caf2"/><path d="M 31.127807,0.45456543 C 24.156023,-3.5702158 15.2419,-1.1815912 11.217114,5.7895021 9.7087599,8.4009285 9.1018638,11.285048 9.2980112,14.083052 10.950572,13.501445 12.726153,13.180911 14.576228,13.180911 l 2.921711,-0.0027 c -0.01845,-1.111274 0.247406,-2.241684 0.843367,-3.2743635 1.75371,-3.036526 5.636339,-4.0774059 8.672868,-2.3236971 3.03653,1.7530242 4.076727,5.6356506 2.323701,8.6721766 l -2.936747,5.095732 2.374958,4.114995 4.751283,-0.000683 2.93538,-5.097099 C 40.488218,13.394145 38.099591,4.4793466 31.127807,0.45456543" fill="#b4e3f9"/><path d="m 19.297646,37.095505 -1.463932,-2.529413 c -0.9534,0.57204 -2.064675,0.906925 -3.25728,0.906925 -3.506736,0 -6.3491688,-2.842428 -6.3491688,-6.349162 0,-3.50605 2.8424328,-6.348479 6.3491688,-6.348479 l 5.881011,-0.0041 2.376326,-4.114312 -2.376326,-4.114312 -5.881695,0.0055 C 6.5254965,14.548074 0,21.074248 0,29.12381 c 0,8.050246 6.5254965,14.57642 14.57575,14.57642 3.014659,0 5.814718,-0.915811 8.139101,-2.48294 -1.329976,-1.140662 -2.49251,-2.520528 -3.417205,-4.12183" fill="#3f79ad"/></g></svg></button>
+                            </div>
                             <input type="text" id="workspace-dropdown-search" placeholder="Search workspaces..." oninput="filterWorkspaceDropdownOptions(event)" style="width: 100%; height: 28px; padding: 4px 8px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary); outline: none;" autocomplete="off">
                         </div>
                         <div id="workspace-selector-options-list" style="overflow-y: auto; flex: 1; padding: 4px 0; max-height: 240px;"></div>
@@ -4352,18 +4373,14 @@
         }
 
         function updateProjectFilterButtons() {
-            const labels = { all: 'All', github: 'GitHub', rclone: 'Rclone' };
-            const label = labels[projectFilterMode] || labels.all;
-            document.querySelectorAll('[data-project-filter-label]').forEach(el => el.textContent = label);
-            document.querySelectorAll('.project-filter-toggle').forEach(btn => {
-                btn.setAttribute('aria-label', `Project filter: ${label}`);
-                btn.title = `Project filter: ${label}. Click to switch to the next filter.`;
+            document.querySelectorAll('.project-filter-option').forEach(btn => {
+                btn.setAttribute('aria-pressed', String(btn.dataset.filter === projectFilterMode));
             });
         }
 
-        function cycleProjectFilter() {
-            const currentIndex = PROJECT_FILTERS.indexOf(projectFilterMode);
-            projectFilterMode = PROJECT_FILTERS[(currentIndex + 1) % PROJECT_FILTERS.length];
+        function setProjectFilter(mode) {
+            if (!PROJECT_FILTERS.includes(mode)) return;
+            projectFilterMode = mode;
             localStorage.setItem('project-filter-mode', projectFilterMode);
             updateProjectFilterButtons();
             handleSearch();
