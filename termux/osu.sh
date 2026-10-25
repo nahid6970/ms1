@@ -215,46 +215,62 @@ simplify_ubuntu_terminal() {
     bashrc_dir="$ubuntu_home/.bashrc"
     touch "$bashrc_dir" || return 1
     sed -i -e '/if .*fastfetch/,/^[[:space:]]*fi[[:space:]]*$/d' -e '/fastfetch/d' "$bashrc_dir" || return 1
-    printf '\n%s\n' '# Simple Ubuntu prompt: current directory only' 'PS1="\w\$ "' >> "$bashrc_dir" || return 1
-    echo -e "${GREEN}Removed Fastfetch startup lines from $bashrc_dir and set a current-directory-only prompt.${NC}"
+    sed -i '/^# Simple Ubuntu prompt:/,+1d' "$bashrc_dir" || return 1
+    printf '\n%s\n' '# Simple Ubuntu prompt: current directory and arrow' "PS1='\[\033[0;34m\]\w\[\033[0m\] \[\033[0;36m\]❯\[\033[0m\] '" >> "$bashrc_dir" || return 1
+    echo -e "${GREEN}Removed Fastfetch startup lines from $bashrc_dir and set a current-directory prompt with an arrow.${NC}"
     echo -e "Exit Ubuntu and start it again to see the change."
 }
 
+add_ubuntu_path_entry() {
+    local bashrc_dir="$1" entry="$2" escaped_entry
+    mkdir -p "$(dirname "$bashrc_dir")" || return 1
+    touch "$bashrc_dir" || return 1
+    printf -v escaped_entry '%q' "$entry"
+    if grep -Fq -- "# osu PATH entry: $entry" "$bashrc_dir"; then
+        echo -e "${YELLOW}$entry is already configured.${NC}"
+        return 0
+    fi
+    {
+        printf '\n# osu PATH entry: %s\n' "$entry"
+        printf 'case ":$PATH:" in *":%s:"*) ;; *) export PATH=%s:"$PATH" ;; esac\n' "$escaped_entry" "$escaped_entry"
+    } >> "$bashrc_dir" || return 1
+    echo -e "${GREEN}Added $entry to PATH.${NC}"
+}
+
 configure_ubuntu_environment() {
-    local choice ubuntu_home bashrc_dir entry escaped_entry var_name var_value escaped_value
+    local choice ubuntu_home bashrc_dir entry var_name var_value escaped_value path_entry
     while true; do
         clear
         echo -e "${MAGENTA}Ubuntu Environment Settings${NC}"
         echo
-        echo -e "  ${GREEN}1)${NC} Add a directory to PATH"
-        echo -e "  ${CYAN}2)${NC} Set or update an exported variable"
-        echo -e "  ${BLUE}3)${NC} Show current PATH"
+        echo -e "  ${GREEN}1)${NC} Add common CLI folders to PATH"
+        echo -e "  ${CYAN}2)${NC} Add a custom directory to PATH"
+        echo -e "  ${BLUE}3)${NC} Set or update an exported variable"
+        echo -e "  ${MAGENTA}4)${NC} Show current PATH"
         echo -e "  ${YELLOW}q)${NC} Back"
         echo
-        read -r -p 'Enter choice [1/2/3/q]: ' choice
+        read -r -p 'Enter choice [1/2/3/4/q]: ' choice
 
         case "$choice" in
             1)
+                ubuntu_home=$(ubuntu_home_dir) || { read -r -p 'Press Enter to continue...'; continue; }
+                bashrc_dir="$ubuntu_home/.bashrc"
+                for path_entry in "$ubuntu_home/bin" "$ubuntu_home/.local/bin" "$ubuntu_home/.cargo/bin" "$ubuntu_home/go/bin"; do
+                    add_ubuntu_path_entry "$bashrc_dir" "$path_entry" || return 1
+                done
+                echo -e "Apply changes now with: ${CYAN}source ~/.bashrc${NC}"
+                read -r -p 'Press Enter to continue...'
+                ;;
+            2)
                 read -r -p 'Directory to add to PATH (e.g. /root/bin): ' entry
                 [[ -n "$entry" ]] || { echo -e "${RED}Directory cannot be empty.${NC}"; read -r -p 'Press Enter to continue...'; continue; }
                 ubuntu_home=$(ubuntu_home_dir) || { read -r -p 'Press Enter to continue...'; continue; }
                 bashrc_dir="$ubuntu_home/.bashrc"
-                mkdir -p "$ubuntu_home" || return 1
-                touch "$bashrc_dir" || return 1
-                printf -v escaped_entry '%q' "$entry"
-                if grep -Fq -- "# osu PATH entry: $entry" "$bashrc_dir"; then
-                    echo -e "${YELLOW}$entry is already configured in $bashrc_dir.${NC}"
-                else
-                    {
-                        printf '\n# osu PATH entry: %s\n' "$entry"
-                        printf 'case ":$PATH:" in *":%s:"*) ;; *) export PATH=%s:"$PATH" ;; esac\n' "$escaped_entry" "$escaped_entry"
-                    } >> "$bashrc_dir" || return 1
-                    echo -e "${GREEN}Added $entry to PATH in $bashrc_dir.${NC}"
-                    echo -e "Apply it now with: ${CYAN}source ~/.bashrc${NC}"
-                fi
+                add_ubuntu_path_entry "$bashrc_dir" "$entry" || return 1
+                echo -e "Apply it now with: ${CYAN}source ~/.bashrc${NC}"
                 read -r -p 'Press Enter to continue...'
                 ;;
-            2)
+            3)
                 read -r -p 'Variable name (e.g. ANDROID_HOME): ' var_name
                 if [[ ! "$var_name" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
                     echo -e "${RED}Invalid variable name.${NC}"
@@ -278,7 +294,7 @@ configure_ubuntu_environment() {
                 echo -e "Apply it now with: ${CYAN}source ~/.bashrc${NC}"
                 read -r -p 'Press Enter to continue...'
                 ;;
-            3)
+            4)
                 run_in_ubuntu 'printf "PATH entries:\\n"; printf "%s\\n" "$PATH" | tr ":" "\\n"'
                 read -r -p 'Press Enter to continue...'
                 ;;
