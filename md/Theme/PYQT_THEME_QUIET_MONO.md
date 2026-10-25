@@ -44,7 +44,13 @@ QCheckBox::indicator { width: 15px; height: 15px; background: #1B1E20; border: 1
 QCheckBox::indicator:checked { background: #B7D9C7; border-color: #B7D9C7; }
 QScrollBar:vertical { background: #121416; width: 9px; }
 QScrollBar::handle:vertical { background: #4A5052; min-height: 22px; border-radius: 4px; }
+QPushButton#restartAction { background: transparent; color: #B7D9C7; border: 1px solid #B7D9C7; border-radius: 5px; padding: 8px 12px; font-weight: 600; }
+QPushButton#restartAction:hover { background: #B7D9C7; color: #121416; border-color: #B7D9C7; }
+QPushButton#restartAction:pressed { background: #24282A; color: #B7D9C7; }
+
 ```
+
+Set the Restart button's `objectName` to `restartAction` to use this outlined accent treatment; it fills with the theme accent on hover.
 
 ## Implementation notes
 

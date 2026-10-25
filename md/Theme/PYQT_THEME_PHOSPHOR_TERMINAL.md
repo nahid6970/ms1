@@ -44,7 +44,13 @@ QProgressBar { background: #0B1510; border: 1px solid #1C4229; text-align: cente
 QProgressBar::chunk { background: #70F59B; }
 QScrollBar:vertical { background: #050B08; width: 9px; }
 QScrollBar::handle:vertical { background: #28633B; min-height: 22px; }
+QPushButton#restartAction { background: transparent; color: #70F59B; border: 1px solid #70F59B; border-radius: 1px; padding: 8px 12px; font-weight: 600; }
+QPushButton#restartAction:hover { background: #70F59B; color: #050B08; border-color: #70F59B; }
+QPushButton#restartAction:pressed { background: #102017; color: #70F59B; }
+
 ```
+
+Set the Restart button's `objectName` to `restartAction` to use this outlined accent treatment; it fills with the theme accent on hover.
 
 ## Implementation notes
 

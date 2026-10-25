@@ -35,6 +35,12 @@ QPushButton:hover { background: #DADADA; border-color: #0067C0; }
 QPushButton:pressed, QPushButton#primaryAction { background: #0067C0; color: #FFFFFF; border-color: #0067C0; }
 QProgressBar { background: #E5E5E5; border: 0; border-radius: 4px; text-align: center; }
 QProgressBar::chunk { background: #0067C0; border-radius: 4px; }
+QPushButton#restartAction { background: transparent; color: #0067C0; border: 1px solid #0067C0; border-radius: 4px; padding: 8px 12px; font-weight: 600; }
+QPushButton#restartAction:hover { background: #0067C0; color: #FAFAFA; border-color: #0067C0; }
+QPushButton#restartAction:pressed { background: #E5E5E5; color: #0067C0; }
+
 ```
+
+Set the Restart button's `objectName` to `restartAction` to use this outlined accent treatment; it fills with the theme accent on hover.
 
 Set the primary button's `objectName` to `primaryAction`. Test text contrast at typical scaling and retain visible keyboard focus. Use relative paths, include **⚙ Settings** with an extensible empty `SettingsDialog`, and implement **↺ Restart** with `os.execv(sys.executable, [sys.executable] + sys.argv)`.

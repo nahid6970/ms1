@@ -37,6 +37,12 @@ QPushButton:hover { background: #F6F3FC; border-color: #6750A4; }
 QPushButton:pressed, QPushButton#primaryAction { background: #6750A4; color: #FFFFFF; border-color: #6750A4; }
 QProgressBar { background: #E7E9EC; border: 0; border-radius: 5px; text-align: center; }
 QProgressBar::chunk { background: #6750A4; border-radius: 5px; }
+QPushButton#restartAction { background: transparent; color: #6750A4; border: 1px solid #6750A4; border-radius: 7px; padding: 8px 12px; font-weight: 600; }
+QPushButton#restartAction:hover { background: #6750A4; color: #F4F5F7; border-color: #6750A4; }
+QPushButton#restartAction:pressed { background: #E7E9EC; color: #6750A4; }
+
 ```
+
+Set the Restart button's `objectName` to `restartAction` to use this outlined accent treatment; it fills with the theme accent on hover.
 
 Set `objectName="card"` on card frames and `objectName="primaryAction"` on the main button. Add shadow effects sparingly so dense utility screens stay clear. Use relative paths, include **⚙ Settings** with an extensible empty `SettingsDialog`, and implement **↺ Restart** with `os.execv(sys.executable, [sys.executable] + sys.argv)`.

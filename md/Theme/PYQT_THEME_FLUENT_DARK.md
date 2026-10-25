@@ -35,6 +35,12 @@ QPushButton:hover { border-color: #60CDFF; }
 QPushButton:pressed, QPushButton#primaryAction { background: #60CDFF; color: #202020; }
 QCheckBox::indicator { width: 16px; height: 16px; border: 1px solid #777; border-radius: 3px; background: #2B2B2B; }
 QCheckBox::indicator:checked { background: #60CDFF; border-color: #60CDFF; }
+QPushButton#restartAction { background: transparent; color: #60CDFF; border: 1px solid #60CDFF; border-radius: 4px; padding: 8px 12px; font-weight: 600; }
+QPushButton#restartAction:hover { background: #60CDFF; color: #202020; border-color: #60CDFF; }
+QPushButton#restartAction:pressed { background: #393939; color: #60CDFF; }
+
 ```
+
+Set the Restart button's `objectName` to `restartAction` to use this outlined accent treatment; it fills with the theme accent on hover.
 
 Set the primary button's `objectName` to `primaryAction`. For closer platform-native behavior, pair QSS with an appropriate Qt style rather than relying on CSS alone. Use relative paths, add **⚙ Settings** with an extensible empty `SettingsDialog`, and implement **↺ Restart** with `os.execv(sys.executable, [sys.executable] + sys.argv)`.
