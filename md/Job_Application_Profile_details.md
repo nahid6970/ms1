@@ -55,10 +55,14 @@ Use this file as my source of truth when helping complete job application forms.
    - Year: 2016
    - Roll: 510014
    - GPA: 5.00 / 5.00
+   - Result publication date: 18 August 2016
+   - Source: https://www.dhakatribune.com/bangladesh/education/3414/74.70%25-students-pass-hsc
 4. SSC in Commerce (Bangla Version), Provati Uchya Bidyanikaton, Dhaka Board
    - Year: 2014
    - Roll: 402206
    - GPA: 5.00 / 5.00
+   - Result publication date: 17 May 2014
+   - Source: https://www.dhakatribune.com/bangladesh/bangladesh-others/64221/ssc-results-on-may-17
 
 ## Employment history
 - Status shown on profile: Fresher *(Note: on some sites, checking the Experience "If applicable" checkmark is required before filling experience details)*
@@ -91,4 +95,3 @@ Use this file as my source of truth when helping complete job application forms.
 
 ## Not listed / ask me
 Ask me rather than guessing if an application requests details not listed here, such as current salary, expected salary, notice period, work authorization, certificates, portfolio, or updated experience.
-
