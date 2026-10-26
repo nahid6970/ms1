@@ -1,6 +1,7 @@
 let videoFormats = [];
 let audioFormats = [];
 let combinedFormats = [];
+let isPlaylistUrl = false;
 
 function isFacebookUrl(url) {
   return /^(https?:\/\/)?(www\.|m\.|web\.)?facebook\.com\/|^(https?:\/\/)?fb\.(watch|com)\//i.test(url);
@@ -18,6 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const currentUrl = tab.url;
   document.getElementById('url').value = currentUrl;
+  try {
+    const parsedUrl = new URL(currentUrl);
+    isPlaylistUrl = /youtube\.com$/.test(parsedUrl.hostname) && parsedUrl.searchParams.has('list');
+  } catch (_) {}
 
   // Site-specific status hints
   if (isFacebookGroupUrl(currentUrl)) {
@@ -38,20 +43,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     setStatus('FACEBOOK VIDEO DETECTED — AUTH RECOMMENDED IN SETTINGS');
     document.getElementById('fbAuthHint').style.display = 'block';
   } else if (isYouTubeUrl(currentUrl)) {
-    // Check if it's a playlist URL
-    if (currentUrl.includes('list=')) {
-      if (!currentUrl.includes('v=')) {
-        setStatus('PLAYLISTS ARE IGNORED. Only individual videos are supported.');
-        document.getElementById('fetchFormats').disabled = true;
-      } else {
-        setStatus('READY (Playlist detected - only this video will be downloaded)');
-      }
+    if (isPlaylistUrl) {
+      document.getElementById('playlistOptions').style.display = 'block';
+      document.getElementById('fetchFormats').style.display = 'none';
+      document.getElementById('titleSection').style.display = 'none';
+      document.getElementById('videoFormatSection').style.display = 'none';
+      document.getElementById('audioSection').style.display = 'none';
+      document.getElementById('subtitleOptions').style.display = 'none';
+      document.getElementById('download').disabled = false;
+      document.getElementById('downloadText').textContent = '[ DOWNLOAD PLAYLIST ]';
+      setStatus('PLAYLIST DETECTED — READY TO DOWNLOAD');
     }
   }
   
   // Restore saved state for this URL
   chrome.storage.local.get(['videoFormats', 'audioFormats', 'combinedFormats', 'selectedVideo', 'selectedAudio', 'savedTitle', 'lastUrl'], (data) => {
-    if (data.lastUrl === currentUrl && data.videoFormats && data.audioFormats) {
+    if (!isPlaylistUrl && data.lastUrl === currentUrl && data.videoFormats && data.audioFormats) {
       videoFormats = data.videoFormats;
       audioFormats = data.audioFormats;
       combinedFormats = data.combinedFormats || [];
@@ -77,10 +84,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   chrome.storage.sync.get({
     downloadSubs: false,
-    subLang: 'en'
+    subLang: 'en',
+    numberPlaylistItems: true,
+    playlistQuality: 'best'
   }, (settings) => {
     document.getElementById('downloadSubs').checked = settings.downloadSubs;
     document.getElementById('subLang').value = settings.subLang;
+    document.getElementById('numberPlaylistItems').checked = settings.numberPlaylistItems;
+    document.getElementById('playlistQuality').value = settings.playlistQuality;
     toggleSubLangSection();
   });
 });
@@ -137,6 +148,12 @@ function updateAudioSelectVisibility() {
 }
 
 document.getElementById('downloadSubs').addEventListener('change', toggleSubLangSection);
+document.getElementById('numberPlaylistItems').addEventListener('change', () => {
+  chrome.storage.sync.set({ numberPlaylistItems: document.getElementById('numberPlaylistItems').checked });
+});
+document.getElementById('playlistQuality').addEventListener('change', () => {
+  chrome.storage.sync.set({ playlistQuality: document.getElementById('playlistQuality').value });
+});
 
 function toggleSubLangSection() {
   const checked = document.getElementById('downloadSubs').checked;
@@ -210,11 +227,11 @@ document.getElementById('download').addEventListener('click', async () => {
   const selectedOption = videoSelect.options[videoSelect.selectedIndex];
   const isCombined = selectedOption && selectedOption.dataset.combined === 'true';
 
-  const videoFormat = videoSelect.value;
+  const videoFormat = isPlaylistUrl ? 'best' : videoSelect.value;
   // If combined format selected, pass it as both video and audio so format string = "id+best/best"
   // native_host.py will handle it with the /best fallback
-  const audioFormat = isCombined ? 'best' : document.getElementById('audioFormat').value;
-  const downloadSubs = document.getElementById('downloadSubs').checked;
+  const audioFormat = isPlaylistUrl || isCombined ? 'best' : document.getElementById('audioFormat').value;
+  const downloadSubs = isPlaylistUrl ? false : document.getElementById('downloadSubs').checked;
   const subLang = document.getElementById('subLang').value;
   
   chrome.storage.sync.set({ downloadSubs, subLang });
@@ -241,7 +258,10 @@ document.getElementById('download').addEventListener('click', async () => {
       downloadSubs,
       subLang,
       saveDir: settings.saveDir,
-      customTitle: document.getElementById('videoTitle').value.trim()
+      customTitle: isPlaylistUrl ? '' : document.getElementById('videoTitle').value.trim(),
+      isPlaylist: isPlaylistUrl,
+      numberPlaylistItems: isPlaylistUrl && document.getElementById('numberPlaylistItems').checked,
+      playlistQuality: isPlaylistUrl ? document.getElementById('playlistQuality').value : 'best'
     }
   }, (response) => {
     downloadBtn.disabled = false;
@@ -251,12 +271,12 @@ document.getElementById('download').addEventListener('click', async () => {
       document.getElementById('downloadProgress').style.width = '100%';
       setStatus('DOWNLOAD COMPLETE!');
       setTimeout(() => {
-        document.getElementById('downloadText').textContent = '[ DOWNLOAD VIDEO ]';
+        document.getElementById('downloadText').textContent = isPlaylistUrl ? '[ DOWNLOAD PLAYLIST ]' : '[ DOWNLOAD VIDEO ]';
         document.getElementById('downloadProgress').style.width = '0%';
         setStatus('READY');
       }, 3000);
     } else {
-      document.getElementById('downloadText').textContent = '[ DOWNLOAD VIDEO ]';
+      document.getElementById('downloadText').textContent = isPlaylistUrl ? '[ DOWNLOAD PLAYLIST ]' : '[ DOWNLOAD VIDEO ]';
       document.getElementById('downloadProgress').style.width = '0%';
       setStatus(`ERROR: ${response.error}`);
     }

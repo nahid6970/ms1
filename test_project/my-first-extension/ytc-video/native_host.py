@@ -251,17 +251,31 @@ def download_video(message):
         sub_lang = message.get('subLang', 'en')
         save_dir = message['saveDir']
         custom_title = message.get('customTitle', '').strip()
+        is_playlist = message.get('isPlaylist', False)
+        number_playlist_items = message.get('numberPlaylistItems', False)
+        playlist_quality = str(message.get('playlistQuality', 'best'))
 
         # Build output template — use custom title if provided, otherwise yt-dlp's %(title)s
-        if custom_title:
+        if is_playlist and number_playlist_items:
+            output_template = f'{save_dir}/%(playlist_index)02d - %(title)s.%(ext)s'
+        elif custom_title:
             # Sanitize: remove characters not allowed in filenames
             safe_title = re.sub(r'[\\/*?:"<>|]', '', custom_title).strip()
             output_template = f'{save_dir}/{safe_title}.%(ext)s'
         else:
             output_template = f'{save_dir}/%(title)s.%(ext)s'
         
+        # Playlist quality uses a height cap that works across videos with
+        # different format IDs and falls back to a combined format if needed.
+        if is_playlist and playlist_quality != 'best':
+            if not playlist_quality.isdigit():
+                raise ValueError('Unsupported playlist quality')
+            height = int(playlist_quality)
+            if height not in (360, 480, 720, 1080, 1440, 2160):
+                raise ValueError('Unsupported playlist quality')
+            format_str = f'bestvideo[height<={height}]+bestaudio/best[height<={height}]'
         # Build format string
-        if video_format == 'best' and audio_format == 'best':
+        elif video_format == 'best' and audio_format == 'best':
             format_str = 'bestvideo+bestaudio/best'
         elif video_format == 'best':
             format_str = f'bestvideo+{audio_format}'
@@ -274,13 +288,12 @@ def download_video(message):
         if is_facebook_url(url):
             format_str = f'{format_str}/best'
         
-        command = [
-            'yt-dlp',
-            '--no-playlist',
-            '-f', format_str,
-            '-o', output_template,
-            '--newline'
-        ]
+        command = ['yt-dlp']
+        if is_playlist:
+            command.append('--yes-playlist')
+        else:
+            command.append('--no-playlist')
+        command.extend(['-f', format_str, '-o', output_template, '--newline'])
         
         # Add extractor-args only for YouTube URLs
         command.extend(build_extractor_args(url))

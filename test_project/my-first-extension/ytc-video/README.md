@@ -6,6 +6,7 @@ site supported by yt-dlp — directly from your browser.
 ## Features
 
 - Download videos in any quality/format
+- Download YouTube playlists with selectable maximum resolution and optional playlist-order filename prefixes
 - Separate video + audio format selection
 - Combined [A+V] format support (common on Facebook)
 - Optional subtitle download

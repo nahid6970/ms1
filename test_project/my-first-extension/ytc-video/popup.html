@@ -22,6 +22,24 @@
 
     <button id="fetchFormats" class="action-btn">[ FETCH FORMATS ]</button>
 
+    <div class="section" id="playlistOptions" style="display: none;">
+      <label class="section-title" for="playlistQuality">VIDEO QUALITY:</label>
+      <select id="playlistQuality" class="select">
+        <option value="best">Best available</option>
+        <option value="2160">Up to 2160p (4K)</option>
+        <option value="1440">Up to 1440p</option>
+        <option value="1080">Up to 1080p</option>
+        <option value="720">Up to 720p</option>
+        <option value="480">Up to 480p</option>
+        <option value="360">Up to 360p</option>
+      </select>
+      <label class="checkbox-label" for="numberPlaylistItems">
+        <input type="checkbox" id="numberPlaylistItems" checked>
+        PREFIX FILENAMES WITH PLAYLIST SERIAL
+      </label>
+      <p class="help-text">Files will start with the video's playlist position, such as 01 - Title.</p>
+    </div>
+
     <!-- Title field: shown after formats are fetched, editable -->
     <div class="section" id="titleSection" style="display: none;">
       <label class="section-title">TITLE / FILENAME:</label>
@@ -29,7 +47,7 @@
       <p class="help-text">Edit to rename the output file</p>
     </div>
 
-    <div class="section">
+    <div class="section" id="videoFormatSection">
       <label class="section-title">VIDEO FORMAT:</label>
       <select id="videoFormat" class="select" disabled>
         <option value="">Fetch formats first...</option>
@@ -43,7 +61,7 @@
       </select>
     </div>
 
-    <div class="section">
+    <div class="section" id="subtitleOptions">
       <label class="checkbox-label">
         <input type="checkbox" id="downloadSubs">
         DOWNLOAD SUBTITLES
