@@ -41,7 +41,6 @@ menu_items=(
     "About                       : about_device                            :$BLUE"
     "SSH for Android              : start_ssh_server                        :$GREEN"
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
-    "T3 for Android [Ubuntu]      : start_ubuntu_t3_server                  :$GREEN"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Pkg Search & Install        : pkg_search_install                      :$CYAN"
@@ -610,41 +609,6 @@ get_ssh_device_ips() {
             *.*) printf '%s\n' "$device_ip" ;;
         esac
     done
-}
-
-# Start T3 Code inside Ubuntu bound to the phone's reachable Wi-Fi address.
-start_ubuntu_t3_server() {
-    clear
-    if ! command -v proot-distro >/dev/null 2>&1; then
-        echo -e "${RED}proot-distro is not installed.${NC}"
-        return 1
-    fi
-    if ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' && \
-       [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; then
-        echo -e "${RED}Ubuntu is not installed.${NC}"
-        return 1
-    fi
-
-    local device_ip
-    device_ip="$(get_ssh_device_ips | head -n 1)"
-    if [[ -z "$device_ip" ]]; then
-        echo -e "${RED}Could not detect the phone's IP address. Connect to Wi-Fi and try again.${NC}"
-        return 1
-    fi
-
-    echo -e "${GREEN}Starting T3 Code in Ubuntu on ${CYAN}${device_ip}${GREEN}.${NC}"
-    echo -e "When the server is ready, open another Ubuntu shell and run ${CYAN}t3 pair${NC}."
-    echo "In T3 Android, scan the QR code or paste the pairing URL into Settings > Environments."
-    echo "Press Ctrl+C here to stop the server."
-    echo
-
-    termux-wake-lock 2>/dev/null || true
-    trap 'termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
-    proot-distro login ubuntu -- t3 serve --host "$device_ip"
-    local status=$?
-    termux-wake-unlock 2>/dev/null || true
-    trap - INT TERM
-    return "$status"
 }
 
 show_ssh_connection_info() {

@@ -32,9 +32,10 @@ show_menu() {
     echo -e "  ${CYAN}4)${NC} Configure Ubuntu environment variables"
     echo -e "  ${GREEN}5)${NC} Simplify Ubuntu terminal startup"
     echo -e "  ${MAGENTA}6)${NC} Configure Pi Gemini proxy"
+    echo -e "  ${GREEN}7)${NC} Start T3 server for Android app"
     echo -e "  ${YELLOW}q)${NC} Quit"
     echo
-    read -r -p 'Enter choice [1/2/3/4/5/6/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/6/7/q]: ' choice
 
     case "$choice" in
         1) install_ubuntu ;;
@@ -43,6 +44,7 @@ show_menu() {
         4) configure_ubuntu_environment ;;
         5) simplify_ubuntu_terminal ;;
         6) configure_pi_gemini_proxy ;;
+        7) start_t3_android_server ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}" ;;
     esac
@@ -163,6 +165,71 @@ run_in_ubuntu() {
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
         return 1
     fi
+}
+
+get_t3_host_ip() {
+    local host_ip="" python_cmd
+    if command -v getprop >/dev/null 2>&1; then
+        host_ip="$(getprop dhcp.wlan0.ipaddress 2>/dev/null | tr -d '\r')"
+    fi
+    if [[ -z "$host_ip" ]]; then
+        for python_cmd in python3 python; do
+            if command -v "$python_cmd" >/dev/null 2>&1; then
+                host_ip="$($python_cmd -c 'import socket; s=socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.connect(("192.0.2.1", 1)); print(s.getsockname()[0]); s.close()' 2>/dev/null)"
+                [[ -n "$host_ip" ]] && break
+            fi
+        done
+    fi
+    if [[ -z "$host_ip" ]] && command -v hostname >/dev/null 2>&1; then
+        host_ip="$(hostname -I 2>/dev/null | tr ' ' '\n' | awk '/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/ && $0 !~ /^127\./ {print; exit}')"
+    fi
+    [[ "$host_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || return 1
+    printf '%s\n' "$host_ip"
+}
+
+start_t3_android_server() {
+    clear
+    local host_ip status
+    host_ip="$(get_t3_host_ip)" || {
+        echo -e "${RED}Could not detect the phone's Wi-Fi IP. Connect to Wi-Fi and try again.${NC}"
+        return 1
+    }
+
+    if inside_ubuntu; then
+        if ! command -v t3 >/dev/null 2>&1; then
+            echo -e "${RED}T3 CLI is not on PATH in Ubuntu. Open a fresh Ubuntu shell or fix its PATH first.${NC}"
+            return 1
+        fi
+    elif ! command -v proot-distro >/dev/null 2>&1 || {
+        ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
+        [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]
+    }; then
+        echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}.${NC}"
+    echo -e "When the server is ready, open another Ubuntu shell and run ${CYAN}t3 pair${NC}."
+    echo "In T3 Android, scan the QR code or paste the pairing URL into Settings > Environments."
+    echo "Press Ctrl+C here to stop the server."
+    echo
+
+    if ! inside_ubuntu && command -v termux-wake-lock >/dev/null 2>&1; then
+        termux-wake-lock 2>/dev/null || true
+        trap 'termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
+    fi
+    if inside_ubuntu; then
+        t3 serve --host "$host_ip"
+        status=$?
+    else
+        run_in_ubuntu "t3 serve --host '$host_ip'"
+        status=$?
+    fi
+    if command -v termux-wake-unlock >/dev/null 2>&1; then
+        termux-wake-unlock 2>/dev/null || true
+    fi
+    trap - INT TERM
+    return "$status"
 }
 
 ubuntu_home_dir() {
