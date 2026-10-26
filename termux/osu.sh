@@ -393,9 +393,10 @@ install_ai_agents() {
     echo -e "  ${BLUE}3)${NC} Install T3 Code"
     echo -e "  ${MAGENTA}4)${NC} Install Pi AI coding agent"
     echo -e "  ${YELLOW}5)${NC} Install OpenCode"
+    echo -e "  ${GREEN}6)${NC} Install Antigravity CLI (agy)"
     echo -e "  ${YELLOW}q)${NC} Back"
     echo
-    read -r -p 'Enter choice [1/2/3/4/5/q]: ' choice
+    read -r -p 'Enter choice [1/2/3/4/5/6/q]: ' choice
 
     case "$choice" in
         1)
@@ -417,6 +418,10 @@ install_ai_agents() {
         5)
             echo -e "${CYAN}Installing OpenCode in Ubuntu...${NC}"
             run_in_ubuntu 'curl -fsSL https://opencode.ai/install | bash'
+            ;;
+        6)
+            echo -e "${CYAN}Installing Antigravity CLI (agy) in Ubuntu...${NC}"
+            run_in_ubuntu 'curl -fsSL https://antigravity.google/cli/install.sh | bash'
             ;;
         q|Q) return 0 ;;
         *) echo -e "${RED}Invalid choice.${NC}"; return 1 ;;
