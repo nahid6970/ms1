@@ -43,10 +43,12 @@ Use this file as my source of truth when helping complete job application forms.
 ## Education
 1. MBA in Finance, University of Dhaka, Faculty of Business Studies *(Note: on some sites, requires ticking the Masters "If applicable" checkmark first to enable fields)*
    - Year: 2021
+   - Result publication date: 23 October 2023
    - CGPA: 3.23 / 4.00
    - Duration: 1 year
 2. BBA in Finance, University of Dhaka, Faculty of Business Studies
    - Year: 2020
+   - Result publication date: 13 June 2022
    - CGPA: 3.30 / 4.00
    - Duration: 4 years
 3. HSC in Commerce (Bangla Version), Notre Dame College, Dhaka Board
@@ -89,3 +91,4 @@ Use this file as my source of truth when helping complete job application forms.
 
 ## Not listed / ask me
 Ask me rather than guessing if an application requests details not listed here, such as current salary, expected salary, notice period, work authorization, certificates, portfolio, or updated experience.
+
