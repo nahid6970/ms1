@@ -3,7 +3,7 @@ Hello everyone. Today, I’m going to walk you through three Odoo modules: **Sub
 So lets start with ᴃᴃSubscriptionᴃᴃ
 ​
 #1.5#Subscriptions#/#
-##1. What Subscriptions is for##
+##1. What is Subscriptions##
 A subscription is an arrangement where a customer pays on a recurring basis for a product or service. The customer might pay monthly, quarterly, or yearly, depending on the plan.
 ​
 For our furniture business, a subscription could be a monthly furniture-care service. A customer pays regularly, and in return we provide scheduled maintenance, replacement supplies, or another ongoing service.
