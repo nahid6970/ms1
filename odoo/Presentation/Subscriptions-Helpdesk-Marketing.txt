@@ -54,6 +54,20 @@ When the customer accepts, I confirm the quotation. From there, the subscription
 
 So the basic flow is: set up a subscription product, connect it to a recurring plan, prepare a quotation for the customer, and confirm it when the customer accepts.
 
+##Live workflow: sell the monthly Furniture Care Plan##
+
+ᴃᴃSubscriptions ➔ Products ➔ Products ➔ Newᴃᴃ
+I’m going to build this from the product side first. I’ll enter “Furniture Care Plan,” set it as a service, enter the sales price, and make sure the subscription option is enabled. I’ll save the product. The important check here is that I can distinguish this recurring service from a one-time furniture sale.
+
+Next, I’ll open the recurring plans menu and check that a monthly plan is available. I’ll open it and review its interval and billing details. For this demonstration, I’ll use the monthly plan. That determines the recurring schedule; it does not change what the product itself represents.
+
+ᴃᴃSubscriptions ➔ Dashboard ➔ Newᴃᴃ
+Now I’ll create the customer quotation. I’ll choose Bailey Builds as the customer, add Furniture Care Plan, and select the monthly recurring plan. I’ll review the quantity, price, and quotation details, then save. Before I confirm, I’ll pause here and check that the customer and plan are correct.
+
+When I click Confirm, the quotation becomes a sales order and starts the subscription workflow. I’ll point out the subscription status and the customer’s recurring plan on the record. Then I’ll create an invoice from the sales order, review the invoice, and confirm it. This shows the link between the recurring sale and invoicing.
+
+As I demonstrate, I’ll say what changed after each click: the product is available for subscription sales, the quotation is confirmed, and an invoice is created. That makes the workflow easier to follow than just looking at the finished record.
+
 ##3. Manage changes: renew, close, and upsell##
 Subscriptions are ongoing, so we also need to handle what happens after the initial sale.
 
@@ -66,6 +80,8 @@ We can also upsell. Upselling means offering a more premium version of the same 
 That is different from cross-selling. Cross-selling means offering a separate complementary product. For example, the customer might also be interested in a home design consultation.
 
 In Odoo, the subscription can be updated through a quotation for the change. As with renewals, the subscription needs to be in the appropriate invoiced state for the upsell workflow. We should check its status, explain the change, and make sure the revised offer is correct before confirming it.
+
+For a short renewal demo, I’ll open an invoiced subscription, click Renew, and review the new quotation Odoo creates for the same customer. I’ll check the product and recurring plan, then confirm the new quotation to show how the next subscription period is recorded. I’ll describe closing as the other outcome: when a customer ends the service, we close the subscription and verify that its status reflects that change.
 
 The main idea is that customer needs can change over time. We can use the subscription record to manage that relationship instead of treating every change as an unrelated sale.
 
@@ -107,6 +123,15 @@ For the furniture example, imagine a customer writes to say that a chair arrived
 
 The channels help customers contact us in the way that works for them, while Helpdesk gives our team one place to manage the resulting work.
 
+##Live workflow: receive and assign a support ticket##
+
+ᴃᴃHelpdesk ➔ Tickets ➔ Newᴃᴃ
+I’ll create a ticket for the damaged chair. I’ll enter a clear title, select the customer, describe the problem, choose the support team, and assign an owner. I’ll save the ticket and point out the fields that help the next person understand what the customer needs.
+
+Next, I’ll open the team’s Kanban pipeline. I’ll show the New column and move the ticket to In Progress once someone starts working on it. If we are waiting for a photo or more information from the customer, I’ll move it to a waiting stage. Once the issue is resolved, I’ll move it to the team’s solved or closed stage. I’ll explain that stage names depend on the company’s own process.
+
+If I have a demo database ready, I’ll also show one configured intake channel, such as the website contact form or email alias. I’ll explain that incoming requests from these channels can create tickets for the team, so employees can manage them in the same pipeline. I won’t spend time setting up every channel during this presentation.
+
 ##3. Stages and Service Level Agreements##
 Tickets move through stages as the team works on them. For example, we might use stages such as New, In Progress, Waiting for Customer, and Solved. The exact names should match the company’s workflow.
 
@@ -118,6 +143,8 @@ Stages describe the work process. An SLA, or Service Level Agreement, describes 
 For example, a company might set a faster target for urgent requests than for general questions. The SLA policy can be associated with the relevant team and tickets. The working-hours calendar matters because service time should be measured against the hours the team is expected to work.
 
 ᴃᴃHelpdesk ➔ Configuration ➔ SLA Policiesᴃᴃ
+For the demo, I’ll open an existing SLA policy or create a simple one. I’ll choose the Helpdesk team, define which tickets the policy applies to, select the target stage and time limit, then save it. I’ll point out the working-hours calendar used by the team and show how the SLA appears on a matching ticket. The exact conditions depend on the business, so I’ll use a simple example rather than configure a complicated policy live.
+
 When we configure an SLA, we need to be clear about the target, which tickets it applies to, and the working hours we use. A target is only useful if the team understands it and the policy reflects what the business can actually deliver.
 
 A ticket being in a later stage does not automatically mean the customer is satisfied. The stage tells us where the work is. The SLA tells us whether the service target is being met. Both views help us manage support, but they answer different questions.
@@ -163,6 +190,18 @@ For our example, the goal is to introduce the Furniture Care Plan to existing cu
 
 If we are using a campaign, we can organize related emails together and plan their timing. We should avoid sending repeated messages without a clear reason. A good campaign has a purpose and a sensible pace.
 
+##Live workflow: prepare an email for the right audience##
+
+ᴃᴃEmail Marketing ➔ Mailing Lists ➔ Mailing Lists ➔ Newᴃᴃ
+I’ll create or open a mailing list for existing furniture customers. I’ll review the contacts on the list and explain that this audience is selected because the offer is relevant to them. I’ll also point out that a customer’s opt-out preference must be respected.
+
+ᴃᴃEmail Marketing ➔ Mailings ➔ Newᴃᴃ
+Now I’ll create a mailing called “Furniture Care Plan.” I’ll enter a clear subject, select the mailing list, and build the email using the available blocks or a template. I’ll keep the message focused: what the plan includes, how often it renews, and one clear action for the reader. Before sending, I’ll preview the email, check its links, and verify the recipients.
+
+If I’m showing a campaign instead of a single mailing, I’ll first enable the mailing campaigns feature in settings if it is not already enabled. Then I’ll create the campaign and add the related mailings. I’ll explain the difference on screen: the campaign organizes a sequence, while each mailing is an individual email.
+
+I’ll stop before sending to a live audience unless the database is set up for a real demonstration. The purpose of this walkthrough is to show the preparation and review steps, including checking the audience and message before launch.
+
 ##3. A/B testing and learning from results##
 Sometimes we are unsure which subject line or call to action will work better. A/B testing lets us compare versions of an email with a small portion of the audience.
 
@@ -183,6 +222,8 @@ When setting up an automation, we first define the target audience or records. T
 Before launching the campaign, we should test it on a record and confirm that the right audience, content, and activities are selected. The training material demonstrates using a test record before running the campaign. This gives us a chance to catch a configuration mistake before real customers are contacted.
 
 Automation should make a good process easier to run. It should not mean that we send messages without considering timing, relevance, or customer preferences. We still need to review the campaign and make sure it is doing what we intended.
+
+For the live demo, I’ll open an existing test campaign rather than build a complex automation from scratch. I’ll show the target audience, one email activity, and the condition that controls the next step. Then I’ll use the test option on a sample record and confirm that the expected activity appears. Only after reviewing the test result would I consider launching it.
 
 ##5. Marketing summary##
 To recap Marketing: we organize contacts into relevant mailing lists, create clear email content, use campaigns when we have a sequence of messages, and test variations when we want to compare approaches. Marketing automation can handle repeatable follow-up when we define the audience and conditions carefully.
