@@ -37,9 +37,9 @@ YouTube page (F9 pressed)
 
 ## Adding a New Python GUI Tool
 
-1. **Create the tool** in its own folder under `C:\@delta\ms1\tools\`
+1. **Create the tool** in its own folder. Tools can live under `C:\@delta\ms1\tools\` or inside the extension directory itself (e.g. `script_loader/reveal_explorer/`)
 2. Accept a `--url` or similar CLI arg via `argparse` so the extension can pass data to it
-3. **Create a `host.py`** (copy from `yt_like_dislike/host.py`, change the `app.py` path)
+3. **Create a `host.py`** (copy from `yt_like_dislike/host.py` or `reveal_explorer/host.py`, change the app path)
 4. **Create a native messaging manifest** (copy `com.delta.yt_analyzer.json`, change `name` and `path`)
 5. **Run `install_host.py`** with the extension ID to register the host in the Windows registry
 6. **Create a `user_scripts/your_tool.js`** that sends `chrome.runtime.sendMessage({ type: 'LAUNCH_YOUR_TOOL', ... })`
@@ -50,6 +50,8 @@ YouTube page (F9 pressed)
      return true;
    }
    ```
+
+For browser-level hotkeys (when Chrome intercepts the key before content scripts), use the `commands` API in `manifest.json` + `chrome.commands.onCommand` in `background.js`. See the extension's `DEV_GUIDE.md` → "Using Chrome commands API" section for details.
 
 ---
 

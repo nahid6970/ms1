@@ -18,8 +18,15 @@ script_loader/
 ├── popup.js                # Popup logic: script list, toggles, settings panels
 ├── page_bridge.js          # Content script injected on every page (for page↔extension comms)
 ├── user_scripts/           # Drop .js files here — they auto-appear in the popup
-│   ├── yt_analyzer.js      # Example: F9 hotkey → launches Python GUI
+│   ├── yt_analyzer.js      # F9 hotkey → launches Python GUI
+│   ├── reveal_in_explorer.js  # Ctrl+Shift+F on file:// pages → opens File Explorer
 │   └── ...
+├── reveal_explorer/        # Native messaging host for Reveal In Explorer
+│   ├── host.py             # Reads file:/// URL, runs explorer.exe /select
+│   ├── com.delta.reveal_explorer.json  # Native messaging manifest
+│   ├── install_host.py     # One-time Windows registry installer
+│   ├── f1_relay.py         # OS-level F1 → Ctrl+Shift+F relay (optional)
+│   └── requirements.txt    # keyboard lib for f1_relay.py
 └── assets/icons/
 ```
 
@@ -117,6 +124,60 @@ document.addEventListener('keydown', (e) => {
 ```
 
 **Step 7** — Reload extension, toggle ON in popup, press your hotkey.
+
+---
+
+## Using Chrome `commands` API (Browser-Level Hotkeys)
+
+Some keys like F1 are intercepted by Chrome before content scripts can `preventDefault()`. For hotkeys that must work even when Chrome would normally eat them, register a `commands` entry in `manifest.json`:
+
+```json
+"commands": {
+  "your-command-name": {
+    "suggested_key": { "default": "Ctrl+Shift+F" },
+    "description": "Your description"
+  }
+}
+```
+
+Then listen in `background.js`:
+
+```js
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== 'your-command-name') return;
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const url = tabs[0]?.url || '';
+    // do something with the active tab URL
+  });
+});
+```
+
+**Limitations:**
+- F1 cannot be used — Chrome rejects it as reserved.
+- Alt+E and similar single-modifier combos may conflict with Chrome menu shortcuts.
+- Ctrl+Shift+<letter> combos are safe and recommended.
+
+### Reveal In Explorer (`reveal_in_explorer.js`)
+
+Press **Ctrl+Shift+F** on a `file:///` page to open File Explorer with the file selected.
+
+**Flow:**
+```
+file:// page (Ctrl+Shift+F pressed)
+  → chrome.commands.onCommand fires in background.js
+  → background.js calls sendNativeMessage('com.delta.reveal_explorer', { url })
+  → Chrome spawns reveal_explorer/host.py
+  → host.py converts file:/// URL → Windows path, runs explorer.exe /select,"<path>"
+```
+
+**Setup:**
+1. Run `python reveal_explorer/install_host.py <EXTENSION_ID>` (once)
+2. Reload extension, toggle "Reveal In Explorer" ON
+3. Enable "Allow access to file URLs" in chrome://extensions → Details
+
+**F1 Relay (optional):** `reveal_explorer/f1_relay.py` intercepts F1 at the OS level and sends Ctrl+Shift+F instead when Chrome is focused. Requires `pip install keyboard`. Run with `pythonw reveal_explorer/f1_relay.py`.
+
+**File access:** The manifest includes `file:///*` in `content_scripts.matches` so scripts inject on local file pages. You must also enable "Allow access to file URLs" in the extension's chrome://extensions details page.
 
 ---
 
