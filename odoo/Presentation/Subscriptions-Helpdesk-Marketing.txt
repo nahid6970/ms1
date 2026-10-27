@@ -16,43 +16,43 @@ You can see that the subscription is connected to a sales order. So we can follo
 ​
 ##2. Configure the recurring plan and product##
 Before we create the Cloud Storage product, let's set up the plans that define how often customers are billed and what they can manage themselves.
-
+​
 ᴃᴃSubscriptions ➔ Configuration ➔ Recurring Plans ➔ Newᴃᴃ
 Let's create a plan called **Monthly**. The form has a few settings that control its billing schedule and the choices available to customers in the portal.
-
+​
 **Billing Period** is set to **1 Month**. This means the subscription is billed once each month. If we wanted quarterly billing, we could set the period to three months.
-
+​
 **Align to Period Start** is unchecked here. That means the customer’s billing cycle follows the subscription start date instead of aligning everyone to the first day of the calendar month. If we enable it, subscriptions are aligned to the start of the next billing period, and the first invoice can be adjusted for the partial period.
-
+​
 **Automatic Closing** is set to **15 Days**. If a recurring payment remains unpaid, Odoo waits this grace period and then closes the subscription automatically. This gives the customer time to resolve a payment issue before the plan is closed.
-
+​
 **Company** says **Visible to all**. In a database with multiple companies, that means this recurring plan can be used across all of them. We could select a specific company if the plan should only be available to one company.
-
+​
 **Invoice Email Template** is set to **Invoice: Sending**. This is the email template Odoo uses for subscription invoice communications, including details such as the customer and invoice information.
-
+​
 Now let's look at the **Self-Service** options. These decide which subscription changes customers can make themselves from the portal.
-
+​
 **Closable** is enabled and set to **At date**. This lets a customer close their subscription through the portal and choose when the closure takes effect.
-
+​
 **Pausable** is enabled, so a customer can pause the subscription for a while instead of closing it completely.
-
+​
 **Add Products** is unchecked. If we enabled it, customers could add products or change quantities on their recurring order, which can generate an upsell quotation.
-
+​
 **Renew** is enabled, so customers can create a renewal quotation from the portal when they want to continue.
-
+​
 Under **Optional Plans**, we see **Yearly**. This gives customers on the monthly plan the option to switch to the yearly plan. Odoo prepares a new or renewal quotation for that change.
-
+​
 For our demonstration, we’ll keep these settings as shown. The main idea is that the recurring plan controls the billing interval and the self-service choices available to the customer.
-
+​
 ᴃᴃSubscriptions ➔ Products ➔ Products ➔ Newᴃᴃ
 Now let's create our product, **Cloud Storage**. It gives the customer ongoing access to secure online storage, billed monthly.
-
+​
 On the product form, enter the name and set **Product Type** to **Service**. When we create the product from the Subscriptions app, the subscription option is usually enabled by default; let's make sure it stays enabled. We can use the product description to explain the plan, for example, 500 GB of storage for a monthly fee.
-
+​
 Open the **Recurring Prices** tab and add a price rule for the **Monthly** plan. Enter the recurring price for the service. If we want customers to switch to **Yearly**, we can also add a yearly price rule here. Then save the product.
-
+​
 We don't need to go through every general product field. Let's focus on the service name, the storage amount included, and the recurring prices that match the plans we just configured.
-
+​
 ##3. Create and confirm the customer quotation##
 ᴃᴃSubscriptions ➔ Dashboard ➔ Newᴃᴃ
 Now, let's create a quotation for Bailey Builds. On the quotation, select the customer and add **__Cloud Storage__** on the order line. Then choose the **__monthly recurring__** plan and **__review the quantity and recurring price__**.
@@ -85,92 +85,70 @@ Now let’s move to Helpdesk. A customer may need support if they cannot access 
 #1.5#Helpdesk#/#
 ​
 ##1. Helpdesk dashboard and teams##
-Helpdesk is where the team organizes customer requests as tickets. A ticket keeps the issue, customer, owner, and progress together in one record.
+Helpdesk is where customers submit their issues as tickets. We, as consultants, can review each ticket, assign it to the right person, and work toward solving the issue. The ticket keeps the customer’s request, assigned owner, and progress together in one place.
 ​
 ᴃᴃHelpdesk ➔ Dashboardᴃᴃ
 Here we can see the Helpdesk teams. Let's open the team that handles customer support.
 ​
-On the team page, let's click **Tickets** to open its pipeline. Then let's open the team settings and look at the team members. These settings tell us who can work on tickets for this team.
-​
-The exact teams depend on the company. For our example, a Cloud Support team could handle account access and syncing problems, while a General Support team could handle questions about plans and billing.
+lets open team settings and look at the team members. These settings tell us who can work on tickets for this team. ¿¿Assigned Team¿¿
 ​
 ##2. Create and assign a ticket##
 ᴃᴃHelpdesk ➔ Team ➔ Tickets ➔ Newᴃᴃ
-Let's create a ticket for a customer who cannot upload files to Cloud Storage. Enter a short title, select the customer, and describe the issue—for example, the customer receives an error when uploading a file.
+Let's create a ticket for a customer who cannot upload files to Cloud Storage. On the new ticket form, enter a short title and select the customer. Then add a description of the issue —> for example, the customer gets an error when uploading a file.
 ​
-Notice the team and assigned person fields. They show who is responsible for the ticket. Let's select the Cloud Support team and assign an employee, then save the ticket.
+Notice the **__Helpdesk Team__** and **Assigned To** fields. They show which team handles the issue and who is responsible for the next step. Let's select the Cloud Support team and assign an employee.
 ​
-Now we can see the saved ticket card in the pipeline. The team can see the issue and who is responsible for following up. If the customer contacts us through a configured email alias or website contact form, Odoo can also create a ticket from that channel. Let's look at the channel configuration only if it is already available in the demo database.
+We can also set the **Priority** using the stars. Zero stars is Low, one is Medium, two is High, and three is Urgent. Tickets start at zero stars by default. Since this example affects one customer, let's choose Medium. If many customers could not access their files, we would mark it Urgent.
+​
+Now let's save the ticket and open it. Now we can see the saved ticket card in the pipeline. The team can see the issue and who is responsible for following up. If the customer contacts us through a configured email alias or website contact form, Odoo can also create a ticket from that channel. Let's look at the channel configuration only if it is already available in the demo database.
+​
+¿¿Email-Alias + website [CustomerRating]¿¿
 ​
 ##3. Move the ticket through stages##
-On this Kanban screen, each column is a stage and each card is a ticket. The stages describe the team’s process.
 ​
-Let's move our ticket from **New** to **In Progress** to show that someone has started working on it. If we need more information from the customer, let's move it to a waiting stage. When the issue is resolved, let's move it to the solved or closed stage used by this team.
-​
-As the card moves, notice that the stage gives us a quick visual indicator. It helps the team see what needs attention without opening every ticket.
-​
-##4. Show the SLA on the team and ticket##
+##4. SLA on the team and ticket##
 An SLA, or Service Level Agreement, is the target time for handling a ticket. It helps the company set a service expectation and helps the team see which requests need attention.
 ​
-ᴃᴃHelpdesk ➔ Team Settingsᴃᴃ
-Let's open the team settings and point out the SLA option and the working-hours setting. The working hours matter because the target should reflect when the team is expected to work.
+ᴃᴃHelpdesk ➔ Team Settings -> VIP-Teamᴃᴃ
+Let's open the team settings -> SLA option and the working-hours setting. The working hours matter because the target should reflect when the team is expected to work.
 ​
 ᴃᴃHelpdesk ➔ Configuration ➔ SLA Policiesᴃᴃ
-Let's open a simple SLA policy. Notice the team, the conditions that determine which tickets qualify, the target stage, and the time limit. The exact labels may vary slightly in our database, so we'll focus on the fields visible on screen.
+Let's open a simple SLA policy. Notice the team, the conditions that determine which tickets qualify, the target stage, and the time limit.
+-> Create a ticket on VIP team and see the effect
 ​
-Now, let's return to a matching ticket and show the SLA information on the ticket. The ticket stage tells us where the work is; the SLA tells us whether we are meeting the time target. Those are related, but they answer different questions.
-​
-##5. Resolve a ticket and review customer feedback##
-After a ticket is resolved, customer ratings can show how the support experience felt to the customer.
-​
-ᴃᴃHelpdesk ➔ Team Settings ➔ Customer Ratingsᴃᴃ
-Let's open the team settings and find Customer Ratings. If there are responses, we can open the rating view and look at a rating and comment. This gives us direct feedback to review after closing the ticket.
-​
-Now let's finish by resolving the Cloud Storage access ticket and reviewing the customer feedback workflow.
-​
-ᴃᴃHelpdesk ➔ Open the Cloud Storage access ticketᴃᴃ
-On the ticket, let's review the customer’s message and any troubleshooting notes. We can add a response, assign the next action, and move the ticket to **Solved** once the customer can upload files again.
-​
-After resolving the ticket, let's check whether a customer rating or comment is available. That lets the team see how the support experience went and whether the issue was fully resolved.
-​
-##6. Helpdesk transition##
-We’ve followed one support ticket from creation to assignment, moved it through the pipeline, checked its SLA, and reviewed customer feedback.
-​
-Now, let's move to Marketing. We have a monthly Cloud Storage plan and a support process; Marketing helps us introduce the service and explain its benefits to the right audience.
-​
+
 #1.5#Marketing#/#
-​
 ##1. Email Marketing dashboard##
-Marketing helps us communicate with customers and potential customers. We'll focus on email mailings, campaigns, A/B testing, and a short automation example.
+Marketing helps us communicate with customers and potential customers. We'll focus on email mailings, campaigns & A/B testing.
 ​
 ᴃᴃEmail Marketing ➔ Dashboardᴃᴃ
 Here we are on the email marketing dashboard. We can see the mailings and basic information in the list, such as the subject and status.
 ​
-A **mailing** is one standalone email. A **campaign** groups related mailings into a broader sequence. For example, the first email can introduce Cloud Storage, and a later email can explain plan options or remind interested customers to sign up. Each email is a mailing; together they can be part of one campaign.
+First we need to enable campaign from config -> setting
+A **mailing** is one standalone email. A **campaign** is a group related mailings where we can create an event and send multple mails to selected customers and at different times. For example, the first email can introduce Cloud Storage, and a later email can explain plan options or remind interested customers to sign up. Each email is a mailing; together they can be part of one campaign.
 ​
 ##2. Choose the audience##
 ᴃᴃEmail Marketing ➔ Mailing Lists ➔ Mailing Listsᴃᴃ
-Let's open the mailing lists and select a list of small businesses or customers interested in secure file storage. This is a relevant audience for Cloud Storage.
-​
-We want to send a useful message to the right people. Also, remember that if a contact has opted out, we must respect that preference.
+Here we can see 2 mailing list. First one has 1 contact saved and the Newsletter has 2 contact saved. we can go into one of them add more contacts if we want to.
 ​
 ##3. Prepare an email mailing##
+¿¿Campaign¿¿
 ᴃᴃEmail Marketing ➔ Mailings ➔ Newᴃᴃ
-Now, let’s create a mailing called “Cloud Storage.” First, let's enter the subject. Then, let's select the mailing list as the recipients and open the email editor.
+Now, let’s create a ᴃᴃCampaignᴃᴃ named **__Happy Friday__**. Send mailing -> Subject -> mailing list -> Mail body ->
 ​
-On the editor screen, we can choose a building block or template. Let's add a heading, a short description of the plan, and one clear button or call to action. We’ll keep the message focused so customers quickly understand the offer.
-​
-Before sending, let's preview the email and check its layout, subject, recipients, and links. If available, let's send a test email to myself. We'll stop before sending to the full list unless this is an approved live campaign.
-​
-For the campaign walkthrough, let's open the campaign feature and look at where related mailings are grouped. If the feature is not enabled, let's check its setting first. Then we can compare the campaign with an individual mailing on screen.
+On the editor screen, we can choose a building block or template. 
+ ---------->
 ​
 ##4. Compare versions with A/B testing##
-If we are not sure which subject line or call to action works better, we can test two versions of the mailing.
-​
+If we are not sure which subject line or Template our customer is going to like then we can create multiple emailbody and send them to few of our customers to test them which one is the mostly liked by our customers.
 ᴃᴃEmail Marketing ➔ Open a mailing ➔ A/B Testingᴃᴃ
 Let's open the test setup and show the two versions. For example, one version can focus on secure backups, and the other on accessing files from anywhere. Then notice the test audience portion and the measure we want to compare, such as opens or clicks.
 ​
-Odoo sends the versions to a portion of the recipients, compares the selected result, and can send the stronger version to the remaining audience. The key point is that the result depends on the measure we chose. More opens may not automatically mean more sales.
+In the **Winner Selection** dropdown, we choose what Odoo should use to decide which version performed better. **Highest Open Rate** selects the version that more recipients opened. **Highest Click Rate** selects the version that led to more clicks on links in the email. Depending on the options shown in this database, we may also see measures such as replies or quotations.
+
+Let's choose the measure that matches our goal. If we want to know which subject line attracts attention, we can use open rate. If we want customers to visit the Cloud Storage page, click rate is more useful. The test result can be affected by the size of the test audience and the time allowed for recipients to respond, so we should give the test enough time before selecting a winner.
+
+Once the test is complete, Odoo identifies the winning version according to the selected measure. **Final Winner** is the version Odoo then sends to the remaining recipients, if we have enabled that option. The key point is that the winner depends on the measure we chose: more opens may not automatically mean more clicks or sales.
 ​
 ##5. Show a marketing automation campaign##
 Marketing automation can trigger activities based on a defined audience and conditions. Let's use an existing test campaign so we can focus on the workflow rather than building every setting from scratch.
