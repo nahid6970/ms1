@@ -1029,5 +1029,18 @@
     "hide_terminal": false,
     "script_enabled": false,
     "added_at": 1792934220.167357
+  },
+  {
+    "name": "myRSS",
+    "type": "App",
+    "paths": [
+      "pythonw"
+    ],
+    "Command": "C:\\@delta\\myRSS\\main.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\myRSS\\main.py\" -WindowStyle Hidden",
+    "ExecutableType": "other",
+    "run_as_admin": false,
+    "hide_terminal": false,
+    "script_enabled": false
   }
 ]
