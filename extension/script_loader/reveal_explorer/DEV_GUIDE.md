@@ -16,8 +16,9 @@ script_loader/
 │   └── reveal_in_explorer.js             # Content script fallback (Ctrl+Shift+F keydown)
 └── reveal_explorer/                       # Native messaging host + utilities
     ├── host.py                            # Reads file:/// URL → runs explorer.exe /select
+    ├── run_host.bat                       # Generated Windows launcher for host.py
     ├── com.delta.reveal_explorer.json     # Native messaging manifest
-    ├── install_host.py                    # One-time Windows registry installer
+    ├── install_host.py                    # Windows registry installer called by run.py
     ├── f1_relay.py                        # OS-level F1 → Ctrl+Shift+F relay (optional)
     ├── requirements.txt                   # keyboard lib for f1_relay.py
     └── DEV_GUIDE.md                       # This file
@@ -31,7 +32,8 @@ script_loader/
 file:// page (Ctrl+Shift+F pressed)
   → chrome.commands.onCommand fires in background.js (browser-level intercept)
   → background.js calls chrome.runtime.sendNativeMessage('com.delta.reveal_explorer', { url })
-  → Chrome spawns reveal_explorer/host.py via the registered native messaging host
+  → Chrome starts reveal_explorer/run_host.bat via the registered native messaging host
+  → run_host.bat launches host.py with the Python interpreter used by run.py
   → host.py converts file:///C:/path/file.pdf → C:\path\file.pdf
   → host.py runs: explorer.exe /select,"C:\path\file.pdf"
   → File Explorer opens with the file highlighted
@@ -60,19 +62,21 @@ pythonw reveal_explorer/f1_relay.py
 
 ## Setup
 
-1. **Register the native messaging host** (run once):
+1. **Load this project folder** as an unpacked extension in `chrome://extensions`.
+
+2. **Register the native messaging host** and open Chrome's extensions page:
    ```
-   python reveal_explorer/install_host.py <EXTENSION_ID>
+   python run.py
    ```
-   Find your extension ID at `chrome://extensions`.
+   `run.py` finds the extension ID Chrome assigned to this exact project folder in its profiles, then registers the host for that ID.
 
-2. **Reload the extension** in `chrome://extensions`.
+3. **Reload the extension** in `chrome://extensions`.
 
-3. **Enable "Allow access to file URLs"** — chrome://extensions → Details → toggle ON.
+4. **Enable "Allow access to file URLs"** — chrome://extensions → Details → toggle ON.
 
-4. **Toggle "Reveal In Explorer" ON** in the popup.
+5. **Check the shortcut** — open `chrome://extensions/shortcuts` and ensure **Ctrl+Shift+F** is assigned to Reveal In Explorer.
 
-5. **Test** — open a `file:///` URL, press Ctrl+Shift+F.
+6. **Test** — open a `file:///` URL and press Ctrl+Shift+F. If you move the project folder, load the new folder and run `python run.py` again.
 
 ---
 

@@ -13,6 +13,7 @@ local Python GUI apps via Chrome's Native Messaging API.
 ```
 script_loader/
 ├── manifest.json           # Extension config, permissions, background worker
+├── run.py                  # Finds this folder's Chrome extension ID and registers its host
 ├── background.js           # Service worker: tab injection, native messaging, message routing
 ├── popup.html              # Popup UI styles
 ├── popup.js                # Popup logic: script list, toggles, settings panels
@@ -23,8 +24,9 @@ script_loader/
 │   └── ...
 ├── reveal_explorer/        # Native messaging host for Reveal In Explorer
 │   ├── host.py             # Reads file:/// URL, runs explorer.exe /select
+│   ├── run_host.bat        # Generated launcher used by Chrome on Windows
 │   ├── com.delta.reveal_explorer.json  # Native messaging manifest
-│   ├── install_host.py     # One-time Windows registry installer
+│   ├── install_host.py     # Windows registry installer called by run.py
 │   ├── f1_relay.py         # OS-level F1 → Ctrl+Shift+F relay (optional)
 │   └── requirements.txt    # keyboard lib for f1_relay.py
 └── assets/icons/
@@ -79,15 +81,22 @@ Change the path to point to your app:
 app_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'your_app.py')
 ```
 
-**Step 3 — Create a native messaging manifest** `com.delta.your_tool.json`:
+**Step 3 — Create a native messaging manifest** `com.delta.your_tool.json`.
+On Windows, point `path` to an executable launcher (for example, a `.bat` file that invokes Python), not directly to the `.py` source file:
 ```json
 {
   "name": "com.delta.your_tool",
   "description": "Your tool description",
-  "path": "C:\\path\\to\\host.py",
+  "path": "C:\\path\\to\\host.bat",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://YOUR_EXTENSION_ID/"]
 }
+```
+
+The launcher should invoke the intended Python interpreter and the host script, while keeping stdout free of anything except the native messaging protocol:
+```bat
+@echo off
+"C:\\path\\to\\python.exe" "C:\\path\\to\\host.py" %*
 ```
 
 **Step 4 — Register it in Windows registry** (run once):
@@ -166,14 +175,16 @@ Press **Ctrl+Shift+F** on a `file:///` page to open File Explorer with the file 
 file:// page (Ctrl+Shift+F pressed)
   → chrome.commands.onCommand fires in background.js
   → background.js calls sendNativeMessage('com.delta.reveal_explorer', { url })
-  → Chrome spawns reveal_explorer/host.py
+  → Chrome starts reveal_explorer/run_host.bat, which launches host.py
   → host.py converts file:/// URL → Windows path, runs explorer.exe /select,"<path>"
 ```
 
 **Setup:**
-1. Run `python reveal_explorer/install_host.py <EXTENSION_ID>` (once)
-2. Reload extension, toggle "Reveal In Explorer" ON
-3. Enable "Allow access to file URLs" in chrome://extensions → Details
+1. Load this project folder as an unpacked extension at `chrome://extensions`.
+2. Run `python run.py`. It finds the ID Chrome assigned to this folder and registers the native host.
+3. Reload the extension and enable "Allow access to file URLs" in its Details page.
+4. Check or assign **Ctrl+Shift+F** at `chrome://extensions/shortcuts`.
+5. If you move the project folder, load the new folder and run `python run.py` again.
 
 **F1 Relay (optional):** `reveal_explorer/f1_relay.py` intercepts F1 at the OS level and sends Ctrl+Shift+F instead when Chrome is focused. Requires `pip install keyboard`. Run with `pythonw reveal_explorer/f1_relay.py`.
 
