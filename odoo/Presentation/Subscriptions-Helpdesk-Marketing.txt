@@ -14,16 +14,45 @@ Let's open a subscription. Here, we can see the customer, product, recurring pla
 ​
 You can see that the subscription is connected to a sales order. So we can follow the customer’s recurring service through familiar Odoo sales information.
 ​
-##2. Check the recurring plan and product##
-Before we create a subscription for a customer, let's check the plan and product we are going to use.
-​
+##2. Configure the recurring plan and product##
+Before we create the Cloud Storage product, let's set up the plans that define how often customers are billed and what they can manage themselves.
+
+ᴃᴃSubscriptions ➔ Configuration ➔ Recurring Plans ➔ Newᴃᴃ
+Let's create a plan called **Monthly**. The form has a few settings that control its billing schedule and the choices available to customers in the portal.
+
+**Billing Period** is set to **1 Month**. This means the subscription is billed once each month. If we wanted quarterly billing, we could set the period to three months.
+
+**Align to Period Start** is unchecked here. That means the customer’s billing cycle follows the subscription start date instead of aligning everyone to the first day of the calendar month. If we enable it, subscriptions are aligned to the start of the next billing period, and the first invoice can be adjusted for the partial period.
+
+**Automatic Closing** is set to **15 Days**. If a recurring payment remains unpaid, Odoo waits this grace period and then closes the subscription automatically. This gives the customer time to resolve a payment issue before the plan is closed.
+
+**Company** says **Visible to all**. In a database with multiple companies, that means this recurring plan can be used across all of them. We could select a specific company if the plan should only be available to one company.
+
+**Invoice Email Template** is set to **Invoice: Sending**. This is the email template Odoo uses for subscription invoice communications, including details such as the customer and invoice information.
+
+Now let's look at the **Self-Service** options. These decide which subscription changes customers can make themselves from the portal.
+
+**Closable** is enabled and set to **At date**. This lets a customer close their subscription through the portal and choose when the closure takes effect.
+
+**Pausable** is enabled, so a customer can pause the subscription for a while instead of closing it completely.
+
+**Add Products** is unchecked. If we enabled it, customers could add products or change quantities on their recurring order, which can generate an upsell quotation.
+
+**Renew** is enabled, so customers can create a renewal quotation from the portal when they want to continue.
+
+Under **Optional Plans**, we see **Yearly**. This gives customers on the monthly plan the option to switch to the yearly plan. Odoo prepares a new or renewal quotation for that change.
+
+For our demonstration, we’ll keep these settings as shown. The main idea is that the recurring plan controls the billing interval and the self-service choices available to the customer.
+
 ᴃᴃSubscriptions ➔ Products ➔ Products ➔ Newᴃᴃ
-Let's create our product, **Cloud Storage**. It gives the customer ongoing access to secure online storage, billed monthly.
-​
-On the product form, enter the name and set **Product Type** to **Service**. Make sure the product is enabled for subscriptions if that option is we can sell the product to our customers on a recurring basis.
-​
-Now open the **Recurring Prices** tab. Let's add the **__monthly & yearly__** plan and enter the recurring price. This is where we define how often the subscription repeats and what the customer pays. For a service subscription.
-​
+Now let's create our product, **Cloud Storage**. It gives the customer ongoing access to secure online storage, billed monthly.
+
+On the product form, enter the name and set **Product Type** to **Service**. When we create the product from the Subscriptions app, the subscription option is usually enabled by default; let's make sure it stays enabled. We can use the product description to explain the plan, for example, 500 GB of storage for a monthly fee.
+
+Open the **Recurring Prices** tab and add a price rule for the **Monthly** plan. Enter the recurring price for the service. If we want customers to switch to **Yearly**, we can also add a yearly price rule here. Then save the product.
+
+We don't need to go through every general product field. Let's focus on the service name, the storage amount included, and the recurring prices that match the plans we just configured.
+
 ##3. Create and confirm the customer quotation##
 ᴃᴃSubscriptions ➔ Dashboard ➔ Newᴃᴃ
 Now, let's create a quotation for Bailey Builds. On the quotation, select the customer and add **__Cloud Storage__** on the order line. Then choose the **__monthly recurring__** plan and **__review the quantity and recurring price__**.
@@ -32,7 +61,7 @@ Let's open **Other Info** and check the subscription start date. Then review the
 ​
 At this point, this is still a quotation. We can review it with the customer and make changes before confirming it. Once the customer accepts, let's click **Confirm**.
 ​
-Now we can see that the quotation has become a confirmed sales order and the subscription is active. Here **__MRR__** shows what is our montly recurrung revenue from this subscription
+Now we can see that the quotation has become a confirmed sales order and the subscription is active. **MRR** means Monthly Recurring Revenue; it shows the monthly recurring revenue from this subscription.
 ​
 ##4. Renew or change a subscription##
 Now, let’s look at what happens when a customer wants to continue or change their Cloud Storage plan.
@@ -45,10 +74,11 @@ If the customer needs more space, we can use an ᴃᴃupsellᴃᴃ quotation to 
 ​
 If the customer no longer wants Cloud Storage, we close the subscription and check that the status reflects that. The important thing on this screen is the current state of the subscription and the action we take next: renew, change, or close.
 ​
-ᴃᴃChange Plan from montly to yearlyᴃᴃ
+ᴃᴃChange Plan from Monthly to Yearlyᴃᴃ
+Because **Yearly** appears under **Optional Plans**, let's open the customer preview and show the plan-switch option. When the customer chooses Yearly, Odoo prepares a quotation for the change. We can review the new billing period and price before confirming it.
 ​
-##6. Subscription transition##
-That was the subscription workflow: we set up a service product and monthly price, created a customer quotation, confirmed it, and followed it into invoicing. We also saw where to renew or upgrade the plan.
+##5. Subscription transition##
+That was the subscription workflow: we set up a service product and monthly price, created a customer quotation, confirmed it, and followed it into invoicing. We also saw where to renew the subscription or switch from the Monthly plan to the Yearly plan.
 ​
 Now let’s move to Helpdesk. A customer may need support if they cannot access their files or upload new ones. Let's see how Odoo turns that request into a ticket the team can track.
 ​
