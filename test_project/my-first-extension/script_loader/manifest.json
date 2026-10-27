@@ -17,7 +17,8 @@
     {
       "matches": [
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "file:///*"
       ],
       "js": [
         "page_bridge.js"
@@ -40,5 +41,13 @@
       "128": "assets/icons/img-128x128.png",
       "48": "assets/icons/img-48x48.png",
       "16": "assets/icons/img-16x16.png"
+   },
+   "commands": {
+      "reveal-in-explorer": {
+         "suggested_key": {
+            "default": "Ctrl+Shift+F"
+         },
+         "description": "Reveal current local file in File Explorer"
+      }
    }
 }

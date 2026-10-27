@@ -126,7 +126,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     });
   }
 
-  if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
+  if (changeInfo.status === 'complete' && tab.url && (tab.url.startsWith('http') || tab.url.startsWith('file:'))) {
     // Get enabled scripts from storage
     chrome.storage.local.get(['enabledScripts'], (result) => {
       const enabledScripts = result.enabledScripts || {};
@@ -167,6 +167,30 @@ chrome.tabs.onCreated.addListener((tab) => {
   handleNewTabRedirect(tab);
 });
 
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== 'reveal-in-explorer') return;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs[0];
+    const url = tab?.url || '';
+    if (!url.startsWith('file:///')) {
+      console.log('[Reveal In Explorer] Not a file:// page, ignoring:', url);
+      return;
+    }
+
+    chrome.runtime.sendNativeMessage(
+      'com.delta.reveal_explorer',
+      { url },
+      (response) => {
+        const err = chrome.runtime.lastError;
+        if (err || (response && !response.ok)) {
+          console.error('[Reveal In Explorer] Failed:', err?.message || response?.error);
+        }
+      }
+    );
+  });
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === 'LAUNCH_YT_ANALYZER') {
     chrome.runtime.sendNativeMessage(
@@ -175,6 +199,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       (response) => {
         const err = chrome.runtime.lastError;
         sendResponse({ ok: !err, error: err?.message });
+      }
+    );
+    return true; // async
+  }
+
+  if (message?.type === 'REVEAL_IN_EXPLORER') {
+    chrome.runtime.sendNativeMessage(
+      'com.delta.reveal_explorer',
+      { url: message.url },
+      (response) => {
+        const err = chrome.runtime.lastError;
+        sendResponse({ ok: !err, error: err?.message || response?.error });
       }
     );
     return true; // async

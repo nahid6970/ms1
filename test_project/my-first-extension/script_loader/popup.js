@@ -94,7 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'ai_studio_quick_delete': 'AI Studio Quick Tools - Delete, copy code blocks & bookmark turns in Google AI Studio',
       'youtube_swap_sections': 'YouTube Swap Sections - Swaps comments & video sidebar (Shortcut: Shift+F)',
       'element_hider': 'Element Hider - Hide any page element by port; click 👁 to pick elements visually',
-      'force_visible_cursor': 'Force Visible Cursor - Restore the normal cursor when a page hides it'
+      'force_visible_cursor': 'Force Visible Cursor - Restore the normal cursor when a page hides it',
+      'reveal_in_explorer': 'Reveal In Explorer - Press Ctrl+Shift+F on a local file page to open it selected in File Explorer'
     };
     
     const baseDescription = descriptions[scriptName.replace(/\s+/g, '_').toLowerCase()];

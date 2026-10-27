@@ -1,0 +1,9 @@
+{
+  "name": "com.delta.reveal_explorer",
+  "description": "Reveal In Explorer native messaging host",
+  "path": "C:\\@delta\\ms1\\tools\\reveal_explorer\\host.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://ibcoohneopabolfjjmnjfhbeffgaenac/"
+  ]
+}
