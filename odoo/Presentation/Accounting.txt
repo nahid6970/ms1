@@ -1,0 +1,173 @@
+ᴃᴃAccounting Modulesᴃᴃ
+​
+??**Fiscal Localization**??
+ᴃᴃConfig -> Setting -> Fiscal Localizationᴃᴃ
+Hello everyone. Today, I will walk you guys through Accounting module in odoo
+- Lets start with @@**__Fiscal Localization__**@@
+- So initially when we setup odoo our first job is to make sure we configure the **Fiscal Localization Package** Properly by selecting the proper country like picking Canada or the United States.
+​
+++Fiscal Localization must be selected BEFORE posting any invoice or bill. Bcoz Once we do any transaction with this, Odoo permanently locks this package to protect financial data integrity.++
+​
+By selecting the country localization package, Odoo helps to setup:
+- **Tax Rules**
+- Pre-built **Fiscal Positions**
+- And a complete, country-compliant **Chart of Accounts**
+​
+??**Chart of Accounts**??
+ᴃᴃConfig -> Chart of Accountᴃᴃ
+​
+"Now, let’s look at our **Chart of Accounts**. So This is our main general ledger where every financial transaction is recorded:
+- ᴃᴃ**1. Unique Code & Prefixes:**ᴃᴃ
+-- Here Every account must have a unique code.
+-- We generally use numbering **prefixes** to organize accounts here:
+--- Codes starting with **1** represent **Assets**.
+--- Codes starting with **2** represent **Liabilities and Accounts Payable**.
+--- Codes starting with **4** represent **Income**.
+--- Codes starting with **5** represent **Cost of Goods sold & Expenses** & so on.
+- **ᴃᴃ2. Account Types: Go Inside an Accountᴃᴃ**
+-- Every account has a strict **Account Type** that we can choose from. This helps us create our Balance Sheet and Profit & Loss reports automatically.
+-- **__Allow Reconciliation__:** When this is checked, Odoo allows us to match the open debit and credit items and clear them.
+--- We generally use them for Receivable, Payable, and Transit accounts.
+-- **__Group field__** is used for financial statement structuring and organizing the report.
+-- **Multi-Company Mapping:** This Allows us to map one account for multiple companies 
+--- so for multiple companies we dont have to open the same account 
+--- we just need to make sure the code is unique.
+​
+??**Dashboard**??
+ᴃᴃAccount Module -> Dashboardᴃᴃ
+Ok lets Return to our main **__Dashboard__**. Here every card you see here represents a **Journal**.
+- **1. Sales Journal:** Records all **Customer Invoices** and **Credit Notes**.
+- **2. Purchase Journal:** Records all **Vendor Bills** and supplier **Refunds**.
+- **3. Bank Journal:** Tracks Bank Related journals.
+- **4. Cash Journal:** Records journals related to sales and purchase where we get cash for sales or to pay in cash for purchase.
+- **ᴃᴃ5. Miscellaneous Journal:ᴃᴃ** is used for general adjustments—such as **Opening Balances**, **Payroll entries**, and automated **Asset Depreciation** etc.
+​
+??**Temporary & Holding Accounts**??
+ᴃᴃChart of Accounts ➔ Filter by Account Type (Liquidity Transfer & Outstanding Accounts)ᴃᴃ
+To keep our bank and company transactions accurate, Odoo uses **Temporary Accounts**.
+¿¿A Temporary Account acts as a bridge to hold money in transit. Once the transaction is fully processed and reconciled, its balance always clears back to zero¿¿
+- **Liquidity Transfer Account: ᴃᴃSKIPᴃᴃ**
+-- Used for internal transfers between two company bank accounts.
+-- When Bank A sends money, Bank A is Credited and Liquidity Transfer is Debited.
+-- When Bank B receives money, Bank B is Debited and Liquidity Transfer is Credited.
+-- Both bank statements reconcile independently, and the transit account zeroes out.
+- **Outstanding Receipts & Payments**:
+-- These accounts simply hold the money while we wait for transactions to actually clear in our bank.
+-- When we record a customer payment, Odoo marks the invoice as In Payment, and the money waits in Outstanding Receipts.
+-- Later, when our bank statement comes in and we match it, the funds move into our Real Bank Account, and the invoice officially becomes Paid.
+-- For this to work we have to go to our journal and bank
+--- For **__Incoming payments__** we need to set **__outstanding receipts__**
+--- For **__Outgoing payments__** we need to set this to **__outstanding payments__**
+​
+- **Bank Suspense Account: ᴃᴃSKIPᴃᴃ**
+-- Acts as the temporary parking room for imported bank transactions until our accountant matches them to an invoice or expense account."
+​
+**??Taxes??**
+ᴃᴃConfig -> Taxes -> 13% HSTᴃᴃ
+Lets talk about **Taxes and Fiscal Positions** in Odoo.
+- Lets go to config -> **__Fiscal Position__** -> Here we can see all the provinces of canada if we want to we can add new or edit existing ones or remove them
+- Lets go to config -> **__Taxes__** -> Here we can set different types of taxes like sales or purchase tax for different provinces
+--- ᴃᴃ13% HSTᴃᴃ
+---- **__Tax Name__**: Here we can give a name to this
+---- **__Active__**: We can make it active/inactive
+---- **__Tax Type__**: We can choose purchase tax or sales tax or none from here
+----- **Sales Tax:** Recorded as a **Tax Liability**
+----- **Purchase Tax:** Recorded as a **Tax Asset**
+---- **__Tax scope__**: It tells us whether to apply it for good or services.
+---- **__Amount__**: Here amount is the main part where we set how much tax to impose on sales or purchase.
+---- **__Base__**: this shows baseline net amount of the sale or purchase before we apply any taxes to the product.
+---- **__100 of tax__**: This row tells Odoo "Take 100% of that $13.00 and route it straight into Account 118300 HST rec
+---- **__Fiscal Position__**: Here we can add more provinces if we want to.
+---- **__Replaces__** ᴃᴃSKIPᴃᴃ: For exampe, When we configure a tax in Odoo (like the 13% HST) and assign it to a specific Fiscal Position (Ontario), what the Replaces field does is: "Whenever a product's default tax is listed here, it kicks it out and uses this 13% HST instead
+​
+-- We can also select **__group of taxes__** here by doing that we can add multipe taxes type for the same tax record like 5% GST, 12% PST ETC
+--- its useful for regions like British Columbia, where customers pay two separate taxes simultaneously (GST 5% + PST 7%)
+​
+ᴃᴃconfig -> setting -> Default Taxesᴃᴃ
+So when we create new products this are the taxes automatically set to the products sales tax & purchase tax by default.
+-- Create a new product with defaults ¿¿WORKFLOW¿¿
+​
+Since the default taxes is set to British Colombia what happens when a customer buys a product from ontario. we can set it in a way so when a customer buys a product from us where the tax is set to british colombia taxes but the customer is from ontaria the tax will be based on ontario.
+ᴃᴃGo to sales -> New Quotation -> Create a new customerᴃᴃ **__ARBAS__**
+- ᴃᴃCustomer location internal link ᴃᴃ
+-- address country = canada, city = ontorai
+-- sales & purchase tab -> Fiscal Position to ontorio
+As u can see for British colombia the tax shoulb be 12% GST+PST BUT it shows 13% HST which is based on ontario tax
+​
+**??Asset Models??**
+ᴃᴃConfiguration -> Asset Modelsᴃᴃ
+Now lets see how **__Asset Models, Asset and depreciation works__**
+Usually, our finance teams spend a lot of time tracking equipment in Excel and calculating monthly depreciation by hand. In Odoo, we automate this entire process using **Asset Models**.
+​
+The Asset Model generally acts like a template:
+​
+- **__Depreciation Method__**: Here we define the method on how to calculate depreciation. we can choose:
+-- **Straight Line**
+-- **Declining**
+-- **Declining then Straight Line**
+Straight line means the depreciation of the asset will be equal on each year. for declining method for some initial years the depreciation is higher as the asset value decreases so the depreciation also decreases. and for Declining then Straight Line method first few years it follows declining method after that it switches to Straight Line for all remaining periods
+- **__Duration__**: it shows the number of depreciations to depreciate our asset
+- **__Computation__**: 
+-- **No Prorata**: Here it means that even if we purchase the asset in the middle of a year it will still consider the full 12 month of that year
+-- **Constant Periods**: Here it treats every single month as same in length. For example we have some month like  February with 28 days but here it will consider each month with same length.
+-- **Based on days per period**: Here odoo breaks the depreciation down into a daily rate. It considers each days of the month.
+- On the right side, under **Accounting**, we link our balance sheet accounts like: 
+--- **Fixed Asset Account**
+--- **Depreciation Account**,
+--- and our monthly **Expense Account**.
+--- For journals we generally use **misc operation**
+​
+Also when we purchase an asset it will not automatically be considered an asset. for that we have to
+-- go to our **@@__Fixed Asset Account__@@**
+-- go to **__Automation__** TAB
+-- We have to choose between **@@__create in draft__@@** or **@@__create and validate__@@**
+​
+ᴃᴃAssetᴃᴃ
+ᴃᴃAccounting -> Assets -> Click 'New' or Open an Assetᴃᴃ
+​
+"Now, let’s look at the **Asset** form itself. 
+​
+##1. Asset Values & Grouping##
+- **__Original Value__**: IT is the total purchase price of the asset before any depreciation.
+- **__Acquisition Date__**: The exact date our company bought and acquired the asset.
+- **__Asset Model__**: The template we selected earlier, which automatically fills in our depreciation rules and accounts.
+- **__Asset Group__**: This allows us to categorize assets —> for example, grouping all computers under **IT Hardware** or heavy equipment under **Factory Machinery** for cleaner financial reporting.
+​
+##2. Current Values & Salvage Value##
+Looking at the top right section under **Current Values**:
+- **__Not Depreciable Value__**: This is the residual Value that will **never** be depreciated.
+- **__Book Value__**: This shows sum of depreciable value, Salvage value and book value of all value increase items.
+​
+##3. Prorata Date & Value at Import (Migration)##
+- **__Prorata Date__**: This is the starting date from which depreciation begins counting.
+​
+- **__Value at Import (Depreciated Amount)__**: 
+¿¿This is extremely useful when migrating from our old accounting software into Odoo.¿¿
+If we buy an asset that was already partially depreciated we can insert the amount here.
+​
+ᴃᴃBillᴃᴃ
+ᴃᴃBills -> Click 'New' -> Add line with Account 124107 -> Confirmᴃᴃ
+​
+"Now let’s see the full automation in action:
+​
+1. ------>
+2. In the line item, we select our fixed asset account—**124107 Machinery and Equipment**.
+3. Now when we confirm we can see an asset smart button we can click it and configure the asset settings from there.
+​
+ᴃᴃAction: Open the created Asset -> Point to 'Bills' tab and 'Compute Depreciation' buttonᴃᴃ
+If we open the new asset:
+- Under the **Bills** tab at the top, we can always see and click the original vendor bill that created this asset.
+- Clicking **Compute Depreciation** generates the full depreciation schedule in the table below for all 5 years.
+- When we click **Confirm**, the asset status moves from **Draft** to **Running**.
+​
+ᴃᴃAction: Point mouse to the 'Posted Entries' Smart Button at the top rightᴃᴃ
+Each year, Odoo automatically posts the depreciation journal entries. we can click the **Posted Entries** smart button at the top right to see every single journal entry that has been posted to our general ledger.
+​
+**??Bank Reconciliation??**
+We can do Bank reconciliation in 3 ways
+Odoo supports 3 methods to bring bank statements in:
+- **1. Online Bank Synchronization:**
+- **2. Statement File Import:**
+- **3. Manual Entry:** Quick on-screen entry for adjustments or offline cash deposits."
+For now i am going to show u how the 3rd one works ¿¿WORKFLOW¿¿
+​

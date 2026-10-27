@@ -1,0 +1,181 @@
+#1.5#MRP#/#
+In manufacturing module or in short MRP we can manufacture the products that we need so we can sell it to our customers instead of purchasing it from our vender. we need to make sure we have proper amount of components for that. So in order to Manufacturing module to work properly for a product we need to create a **__BoM__** or  **__Bill of Materials__** for that product.
+​
+??**1. Bill of Materials (BOM)**??
+ᴃᴃProducts ➔ Bill of Materials ➔ Click 'New'ᴃᴃ
+-- **__Product__**: **Executive Wooden Desk**.
+-- Under **BOM Type**, select **Manufacture this product**.
+-- Under **Components** tab, add:
+--- Table Top   ᴃᴃ1ᴃᴃ
+--- Desk Leg    ᴃᴃ1ᴃᴃ
+--- Screws Pack ᴃᴃ1ᴃᴃ 
+- **Manufacturing VS Kit (Phantom BOM):**
+-- Manufacturing means the products components will be assembled into a new product, and for Kit its not going to be assembled rather it will be packaged with individual items in the box and will be sent to the customer so they can assemble it themselve.
+​
+??**2. Work Centers**??
+ᴃᴃCreate a Workcenterᴃᴃ
+- **Work Center Parameters:**
+-- **Working Hours:** Set working schedule (e.g., Standard 40 hours/week).
+-- **Cost per Hour:** Enter hourly operational expense of the workstation.
+-- **Time Efficiency %:**
+--- 100% = standard run time.
+--- 200% = machine is twice as fast (cuts duration in half).
+--- 50% = machine takes twice as long.
+-- **Product Capacity:** Under **Product Capacities** tab, define capacity per cycle (e.g., 5 units at a time) and product-specific setup/cleanup times.
+- **Alternative Work Centers (Bottleneck Prevention):**
+-- Lets Open **WorkStation 1** ➔ in the **Alternative Work Centers** field, add **WorkStation 2**.
+-- Open **WorkStation 2** ➔ add **WorkStation 1** as alternative.
+-- If Station 1 is busy or overloaded, we can redirect scheduled work orders to Station 2 without production stopping.
+​
+??**3. Operations & Work Order Dependencies**??
+- BoM form ➔ Open **Miscellaneous** tab ➔ Check **++Operation Dependencies++**.
+- **Operations** tab -> Gear -> the **Blocked By** column.
+- Open Operation 2 **__(e.g., Staining/Painting)__** and in the **Blocked By** field, select Operation 1 **__(Assembly)__**.
+- Open **__Operation 3 (Drying)__** and set it as blocked by Operation 2.
+- Explain: Downstream operations remain locked until prerequisite operations are completed on the shop floor.
+​
+??**4. Creating & Confirming MOs**??
+ᴃᴃManufacturing ➔ Operations ➔ Manufacturing Orders ➔ Click 'New'ᴃᴃ
+- Select the finished product. Show that the BOM, Components, and Work Orders populate automatically.
+- Click **Confirm**.
+- Point out the **Component Status**:
+-- **Green (Available):** All parts are in stock.
+-- **Red (Not Available):** Components are missing.
+-- **Orange (Waiting Another Operation):** Components need to be transferred to the production location first.
+- Explain automatic component reservation.
+​
+??**5. Sales -> MO (MTO vs. Reordering Rules)**??
+- ++Inventory Settings ➔ Enable **Multi-Step Routes**.++
+- ++Product ➔ Inventory Tab++
+​
+- **MTO (Make-to-Order): For ᴃᴃMainᴃᴃ**
+-- On the product's Inventory tab, check both **++__Replenish on Order (MTO)__++** and **++__Manufacture__++**.
+-- Create and confirm a customer **++Sales Order++** for this product.
+-- Show the **++__Manufacturing smart button__++** appearing directly on the Sales Order.
+- **Reordering Rules (Min/Max): For ᴃᴃComponentsᴃᴃ**
+-- Open product's **Reordering Rules** smart button.
+-- Set Min Quantity = 0 and Max Quantity = 0 (or safety stock numbers).
+-- MTO produces only when demand arrives, whereas Reordering Rules maintain buffer inventory to prevent stockouts.
+​
+Also Show **??BUY Route??** that creates ??**Purchase Order**??
+- Buy route/Reordering for each component
+-- Reordering rules requires Vendor and to the main product
+- MTO+Manufacturing For main Product
+​
+
+??**6. Multi-Step Manufacturing Logistics (1, 2, and 3-Step)**??
+ᴃᴃInventory ➔ Configuration ➔ Warehouses ➔ Open Main Warehouseᴃᴃ
+- Locate the **Manufacture** options under the warehouse form:
+-- **__1-Step (Manufacture)__:** Standard direct production in one step.
+-- **__2-Step (Pick components then manufacture)__:**
+--- When an MO is confirmed, its status shows **Waiting Another Operation** (orange).
+--- Click the **Transfers** smart button to show the picking transfer from **WH/Stock** to **Pre-Production**.
+--- Validate the transfer ➔ return to MO ➔ status turns green to **Ready**.
+-- **__3-Step (Pick components, manufacture, then store finished products)__:**
+--- Same as 2-Step, but after clicking **Produce All**, a second transfer appears to move finished products from **Post-Production** into **WH/Stock** storage.
+​
+??**7. Order Flexibility: Split, Merge & Backorders**??
+ᴃᴃManufacturing ➔ Operations ➔ Manufacturing Ordersᴃᴃ
+​
+- **__Splitting an MO__:**
+-- Open a confirmed MO for 12 units.
+-- Click the **Gear icon** (or Actions) at the top ➔ Select **Split**.
+-- Split into 3 orders with custom quantities (e.g., 4, 2, and 6) and assign different dates or workers. Click **Split**.
+-- Show the **Backorder** smart button displaying the split orders with 001, 002 tags.
+- **__Merging MOs__:**
+-- Go to the MO list view. Select two MOs for the exact same product.
+-- Click **Actions ➔ Merge**. Show that they combine into a single MO with the earliest scheduled start date.
+- **Manufacturing Backorders:**
+-- On an MO of 5 units, register only 4 units produced.
+-- Click **Produce All** / Mark as Done.
+-- Odoo prompts a Backorder window ➔ Click **Create Backorder**.
+-- Show that 4 units are completed, and a new child backorder MO is created for the remaining 1 unit.
+​
+??**8. Scrap Orders from MO**??
+ᴃᴃInside an active Manufacturing Order ➔ Click 'Scrap' buttonᴃᴃ
+- ++Confirmed MO++
+- ++Component -> Buy route + vendor++
+​
+- Click the **Scrap** button at the top of the MO.
+- Select a defective component (e.g., damaged wooden board) and set quantity to 1.
+- Check the box **Replenish Scrapped Quantities**.
+- Click **Scrap Products**.
+- Show the results:
+-- The MO component status updates to reflect the missing unit.
+-- A **Scraps** smart button appears showing the damaged scrap record.
+-- A **Purchases** or **Transfers** smart button appears automatically to replenish the replacement part.
+​
+??**9. Shop Floor Module (Tablet Interface)**??
+ᴃᴃDashboard ➔ Open 'Shop Floor' Appᴃᴃ
+- Click **Add Operator** ➔ Log in using employee profile or PIN.
+- Filter by specific Work Center tab (e.g., Assembly Station).
+- Click on an active work order card to start the timer (tracks actual duration vs expected duration).
+- Click the **Information (i) icon** on an operation step to display attached PDF worksheets and assembly diagrams.
+- Mark steps as done and tap **Close Production**.
+​
+??**Unbuild**?? -> Reverts the Products
+-- Main Products is removed from inventory
+-- Components are added back to our inventory
+​
+??**10. Lots & Serial Number Tracking**??
+- ++Inventory Settings ➔ Check **Lots & Serial Numbers** ➔ Save.++
+- ++Set **Track Inventory** to **By Unique Serial Number** or **By Lots**.++
+​
+- Create an MO for a product tracked by serial numbers (e.g., 10 units of an office chair).
+- Confirm the MO. Click **Generate Serials** or click **Produce All** to generate serial numbers automatically.
+- Once completed, click the **Traceability** smart button at the top of the MO.
+- Show the complete product journey: Exactly which component lot numbers were consumed to build each finished serial number.
+​
+??**11. Multi-Level BOMs (Sub-Assemblies)**??
+ᴃᴃManufacturing ➔ Products ➔ Bill of Materialsᴃᴃ
+- ++Finished product BOM has a manufactured component as one of its raw materials.++
+- ++The sub-assembly component has its own BOM + Routes set to ᴃᴃReplenish on Order (MTO)ᴃᴃ and Manufacture.++
+​
+- Open the BOM for the final product (e.g., Wheelie Table) and show the component (e.g., Wheelie Leg).
+- Use the internal link to show that the Wheelie Leg has its own BOM (Wheel + Leg).
+- Create a new MO for the final product and click **Confirm**.
+- Point out the **Child MO** smart button that appears automatically.
+- Explain: Odoo schedules the Child MO first so parts are assembled before the main table assembly begins.
+​
+??**12. By-Products & Cost Sharing**??
+ᴃᴃManufacturing ➔ Configuration ➔ Settings ➔ Check 'By-Products'ᴃᴃ
+- Open a BOM (e.g., Chair or Cutting operation).
+- Go to the **By-Products** tab.
+- Add a secondary product (e.g., Wood Chips / Scraps / Foam Trimmings), set quantity, and assign a **Cost Share %** (e.g., 5%).
+- Create and complete an MO for this product.
+- Open the MO **Overview / Cost Analysis** smart button to show that 95% of total production cost is assigned to the main product, while 5% is allocated to the by-product inventory value.
+​
+??**13. Real-Time Production Cost Analysis**??
+ᴃᴃInside completed MO ➔ Click 'Overview' Smart Buttonᴃᴃ
+- ++Work Center has **__Cost per Hour__** configured.++
+- ++Employee profile has __**Cost per Hour / Wage** set__.++
+- ++Product Category has Costing Method set to __**Average Cost (AVCO)** or **FIFO**__.++
+​
+- Open the **Overview** smart button on a finished MO.
+- Show the live unit cost breakdown:
+-- **Components Cost:** Calculated from actual purchase price / inventory valuation.
+-- **Work Center Cost:** Calculated from machine runtime multiplied by hourly rate.
+-- **Employee Labor Cost:** Calculated from actual tracked worker time multiplied by employee hourly wage.
+- Show the final calculated **Unit Production Cost**.
+​
+??**14. Allocation Reports (VIP Prioritization)**??
+- ++Configuration ➔ Settings ➔ Allocation Report++
+- ++Existing unfulfilled customer Sales Orders for the product.++
+- Create and confirm an MO for products that have pending backlogged customer orders.
+- Click the **Allocation** smart button (Reception Report).
+- Show the list of open customer Sales Orders.
+- Click **Assign** next to a VIP customer’s order.
+- Explain: This locks the newly produced units directly to that VIP customer’s delivery order so other orders cannot take them.
+​
+??**15. Equipment Maintenance & OEE**??
+- ++Maintenance App installed.++
+- ++Equipment created and assigned to a Work Center.++
+- **Work Center OEE:**
+-- On the Manufacturing overview card, point out the **OEE %** (Overall Equipment Effectiveness).
+-- Explain the 3 states: **Fully Productive Time**, **Reduced Speed**, and **Loss Reasons / Downtime**.
+- **Preventative Maintenance:**
+-- Open **Maintenance ➔ Maintenance Requests ➔ New**.
+-- Select the equipment (e.g., Table Saw), set Maintenance Type to **Preventative**.
+-- Check **Recurrent**, set repeat interval (e.g., every 2 weeks).
+-- Show how recurring requests schedule automatically on the maintenance calendar to prevent line breakdowns.
+​

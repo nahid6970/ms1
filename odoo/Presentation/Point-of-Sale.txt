@@ -1,0 +1,89 @@
+#1.5#PoS#/#
+ᴃᴃPoS Dashboardᴃᴃ
+Hello everyone. So Today we will be looking at **Odoo Point of Sale**.
+​
+Most of us already know what POS is ->
+- we see it every day at Retail Shops and many other big markets.
+- In Simple Term, POS is a software in the retail market counter where a customer grabs an item, pays immediately, and gets their receipt, & our accounting is updated at the end of the day.
+​
+Here as u can see 1 retail shop and 1 restaurant. we can add as many shops or resturent as we want and we can easily manage them with the help of odoo point of sale easily.
+​
+ᴃᴃSettings ➔ Retail Shop / Restaurantᴃᴃ
+Here we can create new point of sale from here with this button
+​
+Here as u can see there is a checkbox option named is a bar/restaurant. so this checkbox defines if this point of sale is a retail shop or a restaurant. if its unchecked it will work like normal shop but if we check it then it will work like how restaurant or bar normally works. So u may ask, what additional Features it will add?
+-- it will add kitchen module for the restaurant to work normally
+-- it will also add Floor Plan so our customers can eat food. & there are other features as well
+-- Here if its enabled we can see that there are some additional settings like **__dine in, takeout, delivery__**
+-- We can add more options by clicking **__config presets__**
+-- Here We can add additional **__Floors__** if we want to.
+-- We can Also set **__payment method__** here and we will only see the payment options that we enabled here. if we remove one we wont see them in our point of sale
+-- For **__Product & PoS Category__** For example we have thousands of products and we categorized them in 10-15 categories in our ᴃᴃPoS categoryᴃᴃ, we can create new category here and we can set PoS Category in the products ᴃᴃProduct -> Burger -> PoS TABᴃᴃ So we can set PoS category here. Also we can choose a color for it like click it and then select a color & For **__Color Field__** We can set a color for the product which will show as a color bar below the product images
+​
+##Multi-Shop Settings & Cashier PINs##
+??**Employee PINs**??:
+- Ok initially we need to setup a password so only specific persons can access this terminal bcz without PIN anyone can access it ᴃᴃopen/close Registerᴃᴃ SEE. ᴃᴃDuplicateᴃᴃ ᴃᴃConfig -> Setting -> PoS Interafceᴃᴃ Lets enable **__Log in with employees__**. Now Lets go to ᴃᴃEMPLOYEE Module -> Setting TAB -> Set a pinᴃᴃ ¿¿WORKFLOW¿¿ For now lets just disalbe it
+​
+#1.5#Register Management & Cash Control#/#
+##1. Opening the Register & Cash Float Breakdown##
+ᴃᴃOpen Register ➔ Retail Shop ➔ Opening Cash popupᴃᴃ
+This is our opening Register Controls
+When opening the register in Odoo:
+- We can simply enter the total cash amount, or click the **Coins or Bills** Icon.
+- So here we can input note or coin counts like how much we have of what bill or coin. For example i have say
+-- $200 bills ➔ 2
+-- $50 bills  ➔ 4
+-- $20 bills  ➔ 10
+-- $5 bills   ➔ 20
+-- $1 bills   ➔ 100
+- We can also add an **__Opening Note__** which will show at our chatter now lets click **__Open Register__**.
+​
+##Retail Products Workflow##
+ᴃᴃInside Retail Session ➔ Product Catalog Screenᴃᴃ
+This is our retail shop window
+-- This is our retail shop **__Category__**
+-- This are our **__Products__** based on selected **__Category__**
+-- Ok Lets **__select__** some products now
+-- Also when we hold our mouse on a product we can see some additional info like **__inventory__**, **__Product Price__** and Total **__Order Price__**, Also we can see the from which **__vendors__** we are getting the products as **__replenishment__**
+​
+- **Quantity & Price Adjustments:**
+-- With this numbering values we can change **__quantity__**, **__% Discount__** and **__Product Price__**
+-- With clear button we can clear everything easily or we can just press 3dot and **__cancel order__**
+-- With Customer button we can attach a customer with this order
+-- & with the **__Note button__** we can add some note below products so when we print this slip it will show those info. We can also do this with 3dot **__Customer Note__**
+--- ¿¿WorkFLOW¿¿ lets change some **__quantity__**, **__% Discount__** & **__Price__**
+--- ok lets click payment Pick ᴃᴃCashᴃᴃ For now & Pick a Customer
+---- Now lets **__close this register__** and see the journals that were created for this session ->
+---- Order -> Session -> Journal Entry
+¿¿Journal Entries¿¿
+---- **__Sales__** Represents our **__income__** as credit
+---- **__Stock Valuation__** credit since our inventory valuation is reduced by this amount.
+---- & **__Purchase__** is debit against our Inventory Valuation.
+---- **__Customer Account__** is debit, So initially in PoS it creates this Customer Account for journal and after that it creates **__cash journal__** -> We can see that in our Journal items smart button
+---- ¡¡SKIP¡¡ & Also u can see something like ᴃᴃInvoiceᴃᴃ what it does when we enable it is we can see a invoice in our accounting for this session.
+​
+##Pricelists, Promos & Cash In / Cash Out##
+ᴃᴃTop-right menu ➔ 'Cash In / Cash Out' & Numpad action buttonsᴃᴃ
+While working inside the register, daily store events happen:
+- **Pricelists:** If a VIP customer walks in, Odoo applies their customer pricelist, or the cashier can click **Pricelist** to switch rates manually.
+- **Promo Codes:** Cashiers can tap **Action ➔ Enter Code** to apply discount coupons or loyalty vouchers.
+- **Cash In / Cash Out:** If the manager takes $50 from the drawer to buy store cleaning supplies:
+-- We tap the top-right menu ➔ **Cash In / Cash Out**.
+-- Select **Cash Out**, enter $50, and type the reason: *'Store cleaning supplies'*.
+-- Odoo logs an immediate timestamped audit note so no cash ever goes missing.
+​
+#1.5#??**Restaurant Operations**??#/#
+??**Floor Plans & Table Management**??
+ᴃᴃOpen Register ➔ Restaurant ➔ Interactive Floor Planᴃᴃ
+Now, let’s go to our **__Restaurant__**.
+- This is .. So this is our Restaurant Table where generally customers comes and sit here we can click any table to select order for customers of that table lets select ᴃᴃtable 2ᴃᴃ.
+-- So before adding any product we can also divide them into different **__Course__** -> Add some Pasta
+-- **__Course 2__** -> Spicy Tuna
+-- Click on the 1st Course and Click Send Food to send it to Our Kitchen.
+-- PoS Dashboard ᴃᴃOrder -> Preparation Display ᴃᴃ ¿¿WorkFlow¿¿
+-- Bill means we can print the bill
+-- ᴃᴃTransfer / Mergeᴃᴃ helps us Combine order from 2 different tables into one ¿¿WORKFLOW¿¿
+-- Transfer Course Means sending some Food items From One course to another Course ¿¿WORKFLOW¿¿
+-- ᴃᴃSplit Billsᴃᴃ means when multiple people sit in the same table but they dont want to pay together but they want to pay individually then we can separate their bills based on what food they ordered
+-- ᴃᴃENTER CODEᴃᴃ Can be used in order to provide discount i have already setup a discount offer so lets use it
+​
