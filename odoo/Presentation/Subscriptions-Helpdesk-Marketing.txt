@@ -1,13 +1,13 @@
 #1.5#Subscriptions, Helpdesk & Marketing#/#
 
-Hello everyone. Today, Today, let’s look at three Odoo modules: **Subscriptions**, **Helpdesk**, and **Marketing**.
+Hello everyone. Today, let’s look at three Odoo modules: **Subscriptions**, **Helpdesk**, and **Marketing**.
 
-So lets start with ᴃᴃSubscriptionᴃᴃ
+So, let’s start with ᴃᴃSubscriptionsᴃᴃ
 
 #1.5#Subscriptions#/#
 
 ##1. Subscription dashboard##
-A subscription is a product or service that a customer pays for on a recurring schedule, like monthly or yearly. Let's see how we set up that schedule, sell it, and manage it after the sale.
+A subscription can also provide ongoing access to a digital service. For this example, we’ll sell **Cloud Storage**: a monthly plan that gives a customer a set amount of secure online storage. Let’s set up the service, sell it, and follow the subscription.
 
 ᴃᴃSubscriptions ➔ Dashboardᴃᴃ
 So here we are on the Subscriptions dashboard. Let's start with the records and statuses shown here. This gives us a quick view of the subscriptions the company is managing.
@@ -19,38 +19,39 @@ You can see that the subscription is connected to a sales order. So we can follo
 ##2. Check the recurring plan and product##
 Before we create a subscription for a customer, let's check the plan and product we are going to use.
 
-ᴃᴃSubscriptions ➔ Configuration ➔ Recurring Plansᴃᴃ
-Let's open the monthly plan. Notice the plan name and recurrence interval. This shows how often the customer will be billed. For today’s example, we’re using a monthly Furniture Care Plan.
+ᴃᴃSubscriptions ➔ Products ➔ Products ➔ Newᴃᴃ
+Let's create our product, **Cloud Storage**. It gives the customer ongoing access to secure online storage, billed monthly.
 
-ᴃᴃSubscriptions ➔ Products ➔ Productsᴃᴃ
-Now, let's open the Furniture Care Plan product. Here we can see its name and sales price. Notice the subscription option or recurring details on the form. The product tells us what the customer is buying; the recurring plan tells us how often the order repeats.
+On the product form, enter the name and set **Product Type** to **Service**. Make sure the product is enabled for subscriptions if that option is shown. We can use the product description to explain the plan, for example, 500 GB of storage for a monthly fee.
 
-We don't need to spend time on every general product field. We'll focus on the fields that affect this workflow: the product, the price, and the recurring plan.
+Now open the **Recurring Prices** tab. Let's add the monthly plan and enter the recurring price. This is where we define how often the subscription repeats and what the customer pays. For a service subscription, we can use the fixed-price or prepaid invoicing setup recommended in the training material. We'll save the product once these details are set.
+
+We don't need to go through every general product field. Let's focus on the service name, the storage amount included, and the monthly recurring price.
 
 ##3. Create and confirm the customer quotation##
 ᴃᴃSubscriptions ➔ Dashboard ➔ Newᴃᴃ
-Now, let's create a quotation for Bailey Builds. On the quotation, let's select the customer first. Then, let's add the Furniture Care Plan on the order line.
+Now, let's create a quotation for Bailey Builds. On the quotation, select the customer and add Cloud Storage on the order line. Then choose the monthly recurring plan and review the quantity and recurring price.
 
-On the order line, we can review the product, quantity, and price. Let's select the monthly recurring plan and check the quotation before confirming anything.
+Let's open **Other Info** and check the subscription start date. Then review the order line and confirm the recurring price and billing interval. The quotation should clearly show what storage service the customer is subscribing to and the monthly charge.
 
 At this point, this is still a quotation. We can review it with the customer and make changes before confirming it. Once the customer accepts, let's click **Confirm**.
 
-Now we can see that the quotation has become a confirmed sales order and the subscription is active. Let's pause here and look at the status and the recurring plan on the record.
+Now we can see that the quotation has become a confirmed sales order and the subscription is active. Let's pause here and look at the status and recurring plan.
 
-Next, let's click **Create Invoice**. Let's review the invoice that Odoo prepares, then confirm it. This shows the next step after the sale: the customer’s recurring service is connected to the invoicing workflow.
+Next, let's click **Create Invoice**. Review the invoice Odoo prepares and confirm it. This shows the customer’s recurring Cloud Storage service connected to the invoicing workflow. The customer’s access is then provided according to the company’s service process.
 
-So on screen, we just followed the process from product, to quotation, to confirmed subscription, to invoice.
+So on screen, we followed the process from service product setup to quotation, confirmed subscription, and invoice.
 
 ##4. Renew or change a subscription##
-Now, let's look at what happens when a customer wants to continue or change the service.
+Now, let’s look at what happens when a customer wants to continue or change their Cloud Storage plan.
 
 Let's open an invoiced subscription. In this example, the order has already been invoiced, which is needed for the renewal workflow shown in the training material. Let's click **Renew** and review the new quotation Odoo creates for the same customer and product.
 
 Before confirming the renewal, let's check the recurring plan and order lines again. Then let's confirm the new quotation and look at how the next period is recorded.
 
-If the customer wants a higher level of service, we can use an upsell quotation to offer a more premium version. For example, we could move from the basic furniture-care plan to a plan with more frequent visits. The key point is that this is an upsell because it improves the same service. A separate home design consultation would be a cross-sell because it is a different, complementary service.
+If the customer needs more space, we can use an upsell quotation to move them from a 500 GB plan to a 2 TB plan. That is an upsell because it expands the same service. A separate team collaboration tool could be a complementary cross-sell.
 
-If the customer no longer wants the service, we close the subscription and check that the status reflects that. The important thing on this screen is the current state of the subscription and the action we take next: renew, change, or close.
+If the customer no longer wants Cloud Storage, we close the subscription and check that the status reflects that. The important thing on this screen is the current state of the subscription and the action we take next: renew, change, or close.
 
 ##5. Optional: self-service and automation##
 If there is time, let's briefly open the recurring plan settings and show the self-service options available in this database. The key point is which changes the customer can make through the portal, and why we should enable only the options that match our company policy.
@@ -58,9 +59,9 @@ If there is time, let's briefly open the recurring plan settings and show the se
 We can also look at an existing automation rule. Notice its trigger and action—for example, a rule that creates a follow-up activity for a subscription with a low satisfaction rating. The main point is to see what event starts the automation and who is expected to follow up.
 
 ##6. Subscription transition##
-That was the subscription workflow: we checked the recurring plan and product, created a customer quotation, confirmed it, and followed it into invoicing. We also saw where to renew or change the subscription.
+That was the subscription workflow: we set up a service product and monthly price, created a customer quotation, confirmed it, and followed it into invoicing. We also saw where to renew or upgrade the plan.
 
-Now let’s move to Helpdesk. After a customer buys a product or service, they may need support. Let's see how Odoo turns that request into a ticket the team can track.
+Now let’s move to Helpdesk. A customer may need support if they cannot access their files or upload new ones. Let's see how Odoo turns that request into a ticket the team can track.
 
 #1.5#Helpdesk#/#
 
@@ -72,13 +73,13 @@ Here we can see the Helpdesk teams. Let's open the team that handles customer su
 
 On the team page, let's click **Tickets** to open its pipeline. Then let's open the team settings and look at the team members. These settings tell us who can work on tickets for this team.
 
-The exact teams depend on the company. For our example, a Warranty team could handle damaged products, while a General Support team could handle questions about services.
+The exact teams depend on the company. For our example, a Cloud Support team could handle account access and syncing problems, while a General Support team could handle questions about plans and billing.
 
 ##2. Create and assign a ticket##
 ᴃᴃHelpdesk ➔ Team ➔ Tickets ➔ Newᴃᴃ
-Let’s create a ticket for a customer whose chair arrived with a damaged leg. Let's enter a short title that explains the issue. Then, let's select the customer and write a brief description of what happened.
+Let's create a ticket for a customer who cannot upload files to Cloud Storage. Enter a short title, select the customer, and describe the issue—for example, the customer receives an error when uploading a file.
 
-Notice the team and assigned person fields. They show who is responsible for the ticket. Let's select the Warranty team and assign an employee, then save the ticket.
+Notice the team and assigned person fields. They show who is responsible for the ticket. Let's select the Cloud Support team and assign an employee, then save the ticket.
 
 Now we can see the saved ticket card in the pipeline. The team can see the issue and who is responsible for following up. If the customer contacts us through a configured email alias or website contact form, Odoo can also create a ticket from that channel. Let's look at the channel configuration only if it is already available in the demo database.
 
@@ -100,23 +101,23 @@ Let's open a simple SLA policy. Notice the team, the conditions that determine w
 
 Now, let's return to a matching ticket and show the SLA information on the ticket. The ticket stage tells us where the work is; the SLA tells us whether we are meeting the time target. Those are related, but they answer different questions.
 
-##5. Customer ratings and after-sales actions##
+##5. Resolve a ticket and review customer feedback##
 After a ticket is resolved, customer ratings can show how the support experience felt to the customer.
 
 ᴃᴃHelpdesk ➔ Team Settings ➔ Customer Ratingsᴃᴃ
 Let's open the team settings and find Customer Ratings. If there are responses, we can open the rating view and look at a rating and comment. This gives us direct feedback to review after closing the ticket.
 
-Now let’s use our damaged-chair ticket to show an after-sales action.
+Now let's finish by resolving the Cloud Storage access ticket and reviewing the customer feedback workflow.
 
-ᴃᴃHelpdesk ➔ Open the damaged-chair ticketᴃᴃ
-On the ticket, we can see the after-sales buttons available to this team. For our example, let's choose the action that matches the customer’s situation: a **Return** if the product needs to come back, or a **Refund** if money needs to be credited back.
+ᴃᴃHelpdesk ➔ Open the Cloud Storage access ticketᴃᴃ
+On the ticket, let's review the customer’s message and any troubleshooting notes. We can add a response, assign the next action, and move the ticket to **Solved** once the customer can upload files again.
 
-Let's open the return or refund form and review the customer and order information before confirming anything. This is where Helpdesk connects the customer issue with the related sales or inventory workflow. The key point is that the right action depends on the company’s policy and the details of the order.
+After resolving the ticket, let's check whether a customer rating or comment is available. That lets the team see how the support experience went and whether the issue was fully resolved.
 
 ##6. Helpdesk transition##
-We’ve followed one support ticket from creation to assignment, moved it through the pipeline, checked its SLA, and looked at feedback and after-sales actions.
+We’ve followed one support ticket from creation to assignment, moved it through the pipeline, checked its SLA, and reviewed customer feedback.
 
-Now, let's move to Marketing. We have a subscription service and a support process; Marketing helps us communicate those offers and updates to the right audience.
+Now, let's move to Marketing. We have a monthly Cloud Storage plan and a support process; Marketing helps us introduce the service and explain its benefits to the right audience.
 
 #1.5#Marketing#/#
 
@@ -126,17 +127,17 @@ Marketing helps us communicate with customers and potential customers. We'll foc
 ᴃᴃEmail Marketing ➔ Dashboardᴃᴃ
 Here we are on the email marketing dashboard. We can see the mailings and basic information in the list, such as the subject and status.
 
-A **mailing** is one standalone email. A **campaign** groups related mailings into a broader sequence. For example, the first email can introduce the Furniture Care Plan, and a later email can provide a reminder. Each email is a mailing; together they can be part of one campaign.
+A **mailing** is one standalone email. A **campaign** groups related mailings into a broader sequence. For example, the first email can introduce Cloud Storage, and a later email can explain plan options or remind interested customers to sign up. Each email is a mailing; together they can be part of one campaign.
 
 ##2. Choose the audience##
 ᴃᴃEmail Marketing ➔ Mailing Lists ➔ Mailing Listsᴃᴃ
-Let's open the mailing lists and select the list for existing furniture customers. This list contains the contacts for our existing furniture customers, which makes it a relevant audience for this offer.
+Let's open the mailing lists and select a list of small businesses or customers interested in secure file storage. This is a relevant audience for Cloud Storage.
 
-We want to send a useful message to the right people. And remember that if a contact has opted out, we must respect that preference.
+We want to send a useful message to the right people. Also, remember that if a contact has opted out, we must respect that preference.
 
 ##3. Prepare an email mailing##
 ᴃᴃEmail Marketing ➔ Mailings ➔ Newᴃᴃ
-Now, let's create a mailing called “Furniture Care Plan.” First, let's enter the subject. Then, let's select the mailing list as the recipients and open the email editor.
+Now, let’s create a mailing called “Cloud Storage.” First, let's enter the subject. Then, let's select the mailing list as the recipients and open the email editor.
 
 On the editor screen, we can choose a building block or template. Let's add a heading, a short description of the plan, and one clear button or call to action. We’ll keep the message focused so customers quickly understand the offer.
 
@@ -148,7 +149,7 @@ For the campaign walkthrough, let's open the campaign feature and look at where 
 If we are not sure which subject line or call to action works better, we can test two versions of the mailing.
 
 ᴃᴃEmail Marketing ➔ Open a mailing ➔ A/B Testingᴃᴃ
-Let's open the test setup and show the two versions. For example, one version can focus on convenience and the other on the service benefit. Then notice the test audience portion and the measure we want to compare, such as opens or clicks.
+Let's open the test setup and show the two versions. For example, one version can focus on secure backups, and the other on accessing files from anywhere. Then notice the test audience portion and the measure we want to compare, such as opens or clicks.
 
 Odoo sends the versions to a portion of the recipients, compares the selected result, and can send the stronger version to the remaining audience. The key point is that the result depends on the measure we chose. More opens may not automatically mean more sales.
 
@@ -165,7 +166,7 @@ The key point is that testing lets us catch mistakes before launching a campaign
 ##6. Closing##
 Let’s connect what we saw on screen.
 
-In Subscriptions, we set up a recurring product and followed it through quotation, confirmation, invoicing, and renewal. In Helpdesk, we created a ticket, assigned it to a team member, moved it through stages, checked its SLA, and reviewed after-sales actions. In Marketing, we selected an audience, prepared an email, compared versions, and tested an automation workflow.
+In Subscriptions, we set up Cloud Storage as a recurring service and followed it through quotation, confirmation, invoicing, and renewal. In Helpdesk, we created an access-support ticket, assigned it to a team member, moved it through stages, checked its SLA, and reviewed customer feedback. In Marketing, we selected an audience, prepared an email, compared versions, and tested an automation workflow.
 
 These modules support different steps in the customer relationship, and Odoo lets us connect the related information and processes.
 
@@ -173,6 +174,6 @@ That’s all for my presentation. Thank you for listening. I’m happy to take y
 
 ##Presenter notes##
 -- Designed for around 30–45 minutes, depending on how many live actions and examples you show.
--- Keep a demo database ready with a subscription product and invoiced subscription, a Helpdesk team with an SLA and customer ratings enabled, a sample damaged-product ticket, a mailing list and mailing, and a test marketing automation campaign.
+-- Keep a demo database ready with Cloud Storage configured as a Service with a monthly recurring price, an invoiced subscription, a Helpdesk team with an SLA and customer ratings enabled, and a sample file-upload support ticket, a mailing list and mailing, and a test marketing automation campaign.
 -- If a field or button is not available in the database, skip that demonstration and explain the workflow from the record that is available.
 -- Menu labels can vary slightly by Odoo version and installed apps. Follow the equivalent menu shown in your database.
