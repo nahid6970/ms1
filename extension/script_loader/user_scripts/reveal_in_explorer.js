@@ -1,4 +1,4 @@
-// Reveal In Explorer — Ctrl+Shift+E hotkey on file:// pages.
+// Reveal In Explorer — Ctrl+Shift+F hotkey on file:// pages.
 // Primary handler is chrome.commands.onCommand in background.js (intercepts
 // at browser level). This content script is a fallback for when the commands
 // API isn't available or the script is injected dynamically.
