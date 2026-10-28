@@ -152,15 +152,14 @@
     "name": "mypygui",
     "type": "Command",
     "paths": [
-      "python.exe"
+      "pythonw.exe"
     ],
     "Command": "C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py\"",
-    "ExecutableType": "ahk_v2",
+    "ExecutableType": "other",
     "run_as_admin": false,
-    "hide_terminal": true,
-    "script_enabled": false,
-    "added_at": 1784124737.4222775
+    "hide_terminal": false,
+    "script_enabled": false
   },
   {
     "Command": "",
@@ -1041,6 +1040,21 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1793116318.5608406
+  },
+  {
+    "name": "T3Code",
+    "type": "App",
+    "paths": [
+      "t3"
+    ],
+    "Command": "",
+    "ps1_command": "Start-Process -FilePath \"t3\"",
+    "ExecutableType": "ahk_v2",
+    "run_as_admin": false,
+    "hide_terminal": true,
+    "script_enabled": false,
+    "added_at": 1793203377.7672734
   }
 ]
