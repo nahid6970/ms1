@@ -51,10 +51,14 @@
 - Target path input with file browse dialog
 - Supports optional command line arguments
 - "Hide Terminal Window" toggle (boolean, `hide_terminal`)
+- "Run as administrator" toggle (boolean, `run_as_admin`); prompts for elevation each time the launcher runs
 - Generates `Run()` statements:
   - `.py`/`.pyw` files execute via `pythonw.exe` (hidden) or `python.exe` (shown)
   - `.ps1` files execute via `powershell.exe -WindowStyle Hidden` (hidden) or `powershell.exe -NoExit` (shown)
   - Other executables/files run directly, using `"Hide"` window option if hidden
+- Elevated launchers use AutoHotkey's `*RunAs` option and retain the configured working directory/window visibility.
+
+Script shortcuts also support `run_as_admin`: the action is written to a temporary standalone AHK v2 file and launched with `*RunAs`. Since it runs in a separate process, it cannot access functions or variables defined only in the parent generated script.
 
 **Usage:**
 

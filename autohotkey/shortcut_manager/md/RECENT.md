@@ -2,6 +2,13 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-10-29 - Per-shortcut administrator launch toggle
+
+- Added a "Run as administrator" checkbox to script and launcher shortcut dialogs.
+- Launcher shortcuts use AutoHotkey's `*RunAs` launch option; script actions run in a temporary standalone AHK file elevated per invocation.
+- Existing shortcuts default to not elevated, and the setting is persisted as `run_as_admin`.
+- Encoded elevated script action bodies as UTF-8 hex so nested quotes and apostrophes cannot break AHK parsing.
+
 ## 2026-09-29 - Apply exclusion rules across shortcut types
 
 - Exclusion guards cover matching hotkeys in script, launcher, context, text, background-script, and key-remap shortcuts.

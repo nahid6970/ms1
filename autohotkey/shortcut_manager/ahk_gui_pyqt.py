@@ -1051,6 +1051,23 @@ class AddEditShortcutDialog(QDialog):
         form_layout.addWidget(self.enabled_checkbox)
         form_layout.addWidget(self.favourite_checkbox)
 
+        if self.shortcut_type in ["script", "launcher"]:
+            self.run_as_admin_checkbox = QCheckBox("Run as administrator")
+            self.run_as_admin_checkbox.setChecked(False)
+            self.run_as_admin_checkbox.setToolTip(
+                "Prompts for elevation each time this shortcut runs. Script shortcut actions run in a separate AHK process."
+            )
+            self.run_as_admin_checkbox.setStyleSheet(f"""
+                QCheckBox {{
+                    font-family: 'Consolas', 'Segoe UI', sans-serif;
+                    font-size: 11pt;
+                    color: {CP_TEXT};
+                    spacing: 8px;
+                    margin-top: 5px;
+                }}
+            """)
+            form_layout.addWidget(self.run_as_admin_checkbox)
+
         if self.shortcut_type == "launcher":
             self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
             self.hide_terminal_checkbox.setChecked(True)
@@ -1561,6 +1578,7 @@ SendText("Hello World")"""
         if self.shortcut_type == "script":
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
             self.action_edit.setPlainText(self.shortcut_data.get("action", ""))
+            self.run_as_admin_checkbox.setChecked(self.shortcut_data.get("run_as_admin", False))
         elif self.shortcut_type == "context":
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
             self.window_title_edit.setText(self.shortcut_data.get("window_title", ""))
@@ -1605,6 +1623,7 @@ SendText("Hello World")"""
             self.hotkey_edit.setText(self.shortcut_data.get("hotkey", ""))
             self.file_path_edit.setText(self.shortcut_data.get("target_path", ""))
             self.hide_terminal_checkbox.setChecked(self.shortcut_data.get("hide_terminal", True))
+            self.run_as_admin_checkbox.setChecked(self.shortcut_data.get("run_as_admin", False))
         elif self.shortcut_type == "remap":
             self.origin_key_edit.setText(self.shortcut_data.get("origin_key", ""))
             self.destination_key_edit.setText(self.shortcut_data.get("destination_key", ""))
@@ -1972,6 +1991,7 @@ SendText("Hello World")"""
                 "description": description,
                 "hotkey": hotkey,
                 "action": action,
+                "run_as_admin": self.run_as_admin_checkbox.isChecked(),
                 "enabled": enabled
             }
         elif self.shortcut_type == "context":
@@ -2078,6 +2098,7 @@ SendText("Hello World")"""
                 "hotkey": hotkey,
                 "target_path": target_path,
                 "hide_terminal": self.hide_terminal_checkbox.isChecked(),
+                "run_as_admin": self.run_as_admin_checkbox.isChecked(),
                 "enabled": enabled
             }
         elif self.shortcut_type == "remap":
@@ -5200,6 +5221,29 @@ class AHKShortcutEditor(QMainWindow):
 
                     safe_hotkey = escape_hotkey(hotkey)
 
+                    if shortcut.get('run_as_admin', False):
+                        # Run the action in a temporary standalone AHK file so Windows can
+                        # prompt to elevate only this shortcut invocation.
+                        if not any("RunElevatedAction(actionHex)" in line for line in output_lines):
+                            output_lines.extend([
+                                "RunElevatedAction(actionHex) {",
+                                '    actionBuffer := Buffer(StrLen(actionHex) // 2 + 1, 0)',
+                                '    Loop StrLen(actionHex) // 2',
+                                '        NumPut("UChar", Integer("0x" SubStr(actionHex, A_Index * 2 - 1, 2)), actionBuffer, A_Index - 1)',
+                                '    actionText := StrGet(actionBuffer, "UTF-8")',
+                                '    tempFile := A_Temp "\\ShortcutManager_" A_TickCount ".ahk"',
+                                '    FileAppend("#Requires AutoHotkey v2.0`n" actionText, tempFile, "UTF-8-RAW")',
+                                '    Run("*RunAs " A_AhkPath " `"" tempFile "`"")',
+                                "}",
+                                "",
+                            ])
+                        action_hex = action.encode("utf-8").hex().upper()
+                        output_lines.append(f'{safe_hotkey}::RunElevatedAction("{action_hex}")')
+                        if guarded:
+                            output_lines.append("#HotIf")
+                        output_lines.append("")
+                        continue
+
                     if '\n' in action:
                         output_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
@@ -5347,6 +5391,8 @@ class AHKShortcutEditor(QMainWindow):
 
                     # Escape and format AHK parameters
                     safe_cmd_str = cmd_str.replace("'", "''")
+                    if shortcut.get('run_as_admin', False):
+                        safe_cmd_str = ("*RunAs " + cmd_str).replace("'", "''")
                     safe_working_dir = working_dir.replace("'", "''") if working_dir else ""
                     
                     # If it is Python and hide_terminal is True, we run the script with pythonw.exe

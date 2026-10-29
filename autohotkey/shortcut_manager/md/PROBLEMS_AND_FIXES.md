@@ -1,5 +1,13 @@
 # Problems & Fixes Log
 
+## 2026-10-29 - Elevated script action strings broke on embedded quotes
+
+**Problem:** Generated elevated script shortcuts could fail to parse when an action contained apostrophes or nested quoted AHK code.
+
+**Root Cause:** The action body was embedded in a single-quoted AHK string, which is fragile for arbitrary code.
+
+**Solution:** Encode the action as UTF-8 hexadecimal in the hotkey call, then decode it in `RunElevatedAction()`. This avoids AHK string-literal escaping for arbitrary embedded code.
+
 ## 2026-09-29 - Exclusion rules did not cover every shortcut type
 
 **Problem:** Key remaps and hotkeys inside background scripts could bypass exclusion rules. Text and file triggers also needed guards when a blank rule excludes all shortcuts.
