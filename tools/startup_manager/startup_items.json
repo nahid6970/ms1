@@ -156,11 +156,10 @@
     ],
     "Command": "C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py",
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py\"",
-    "ExecutableType": "other",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1793220474.70991
+    "hide_terminal": true,
+    "script_enabled": false
   },
   {
     "Command": "",
@@ -1038,7 +1037,7 @@
     ],
     "Command": "C:\\@delta\\myRSS\\main.py",
     "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\myRSS\\main.py\" -WindowStyle Hidden",
-    "ExecutableType": "other",
+    "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
     "script_enabled": false
