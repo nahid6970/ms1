@@ -159,7 +159,8 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1793220474.70991
   },
   {
     "Command": "",
@@ -1040,8 +1041,7 @@
     "ExecutableType": "other",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1793116318.5608406
+    "script_enabled": false
   },
   {
     "name": "T3Code",

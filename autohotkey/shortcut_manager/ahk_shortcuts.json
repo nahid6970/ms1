@@ -290,6 +290,15 @@
             "hotkey": "#3",
             "name": "Komorebi W3",
             "favourite": false
+        },
+        {
+            "name": "Minimize Apps",
+            "category": "General",
+            "description": "",
+            "hotkey": "#d",
+            "action": "MinimizeActiveWindow() {\n    hwnd := WinExist(\"A\")\n    if !hwnd\n        return\n\n    ; Method 1: Standard system command (best for most apps + many games)\n    PostMessage(0x0112, 0xF020, 0, , hwnd)   ; WM_SYSCOMMAND + SC_MINIMIZE\n\n    ; Method 2: Direct ShowWindow call (helps stubborn windows)\n    DllCall(\"ShowWindow\", \"Ptr\", hwnd, \"Int\", 6)  ; SW_MINIMIZE = 6\n\n    ; Method 3: Fallback to WinMinimize\n    try WinMinimize(\"ahk_id \" hwnd)\n}",
+            "enabled": true,
+            "favourite": true
         }
     ],
     "launcher_shortcuts": [
@@ -372,7 +381,7 @@
             "hotkey": "#f",
             "target_path": "C:\\@delta\\ms1\\testing\\screenshot\\folder_launcher\\launcher.py",
             "hide_terminal": true,
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "gallery view",
