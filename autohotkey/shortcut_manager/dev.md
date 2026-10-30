@@ -53,7 +53,6 @@ Shortcut data is stored in `ahk_shortcuts.json` as arrays:
 - `text_shortcuts`
 - `file_shortcuts`
 - `startup_scripts`
-- Launcher and script shortcut entries may include `run_as_admin` (defaults to `false` for older data).
 
 App settings stored in the same JSON:
 

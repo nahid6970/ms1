@@ -1051,17 +1051,20 @@ class AddEditShortcutDialog(QDialog):
         form_layout.addWidget(self.enabled_checkbox)
         form_layout.addWidget(self.favourite_checkbox)
 
-        if self.shortcut_type in ["script", "launcher"]:
-            self.run_as_admin_checkbox = QCheckBox("Run as administrator")
+        if self.shortcut_type in ("script", "launcher"):
+            self.run_as_admin_checkbox = QCheckBox("🛡 Run as Admin (UAC elevation)")
             self.run_as_admin_checkbox.setChecked(False)
             self.run_as_admin_checkbox.setToolTip(
-                "Prompts for elevation each time this shortcut runs. Script shortcut actions run in a separate AHK process."
+                "When enabled, the action/launcher is executed with administrator "
+                "privileges via ShellExecute(\"runas\", ...).\n\n"
+                "Script Shortcuts: the entire action block is relaunched elevated.\n"
+                "Launcher Shortcuts: the target is launched elevated instead of using Run()."
             )
             self.run_as_admin_checkbox.setStyleSheet(f"""
                 QCheckBox {{
                     font-family: 'Consolas', 'Segoe UI', sans-serif;
                     font-size: 11pt;
-                    color: {CP_TEXT};
+                    color: {CP_ORANGE};
                     spacing: 8px;
                     margin-top: 5px;
                 }}
@@ -3887,6 +3890,13 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "text" and shortcut.get('source_file', '').strip():
             file_icon = (f'<img src="icon://file" width="{ns}" height="{ns}" '
                          f'align="middle" title="Auto-loaded from file"> ')
+        # Admin indicator badge for script/launcher shortcuts with run_as_admin
+        admin_badge = ''
+        if shortcut_type in ("script", "launcher") and shortcut.get('run_as_admin', False):
+            admin_badge = (f'<span style="background-color: {CP_ORANGE}; color: black; '
+                           f'font-size: 0.7em; font-weight: bold; padding: 1px 4px; '
+                           f'border-radius: 2px; margin-left: 4px;" '
+                           f'title="Run as Administrator (UAC elevation)">🛡 ADMIN</span>')
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
@@ -3925,7 +3935,7 @@ class AHKShortcutEditor(QMainWindow):
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="{left_valign}" style="white-space: nowrap;">{key_html}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="{left_valign}" align="center">󰌌</td>
-                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{desc_html}{rules_html}</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{admin_badge}{desc_html}{rules_html}</td>
                                 </tr>
                             </table>
                         </a>
@@ -4136,6 +4146,22 @@ class AHKShortcutEditor(QMainWindow):
 
             # Add helper function for fast pasting
             output_lines.extend([
+                "RunElevated(code) {",
+                "    ; Write the code to a temporary .ahk file and launch it elevated",
+                "    tmpFile := A_Temp . \"\\ahk_elevated_\" . A_NowUTC . \".ahk\"",
+                "    tmpFile := StrReplace(tmpFile, \":\", \"\")",
+                "    FileDelete(tmpFile)  ; remove if exists from a previous run",
+                "    FileAppend(\"#Requires AutoHotkey v2.0`n\" . code, tmpFile, \"UTF-8\")",
+                "    try {",
+                "        ShellExecute(\"runas\", A_AhkPath, '\"' . tmpFile . '\"', A_Temp)",
+                "    } catch {",
+                "        ; Fallback: try normal Run with RunAs verb",
+                "        Run('\"' . A_AhkPath . '\" \"' . tmpFile . '\"', A_Temp)",
+                "    }",
+                "    ; Clean up the temp file after a short delay (let the elevated process read it first)",
+                "    SetTimer(() => (FileDelete(tmpFile), 0), -5000)",
+                "}",
+                "",
                 "Paste(text) {",
                 "    Old := A_Clipboard",
                 "    A_Clipboard := \"\"  ; Clear clipboard first",
@@ -5213,6 +5239,7 @@ class AHKShortcutEditor(QMainWindow):
 
                     action = shortcut.get('action', '')
                     hotkey = shortcut.get('hotkey', '')
+                    run_as_admin = shortcut.get('run_as_admin', False)
                     action = action.replace(',,,', ',,')
 
                     guarded = needs_exclusion_guard(hotkey)
@@ -5221,30 +5248,15 @@ class AHKShortcutEditor(QMainWindow):
 
                     safe_hotkey = escape_hotkey(hotkey)
 
-                    if shortcut.get('run_as_admin', False):
-                        # Run the action in a temporary standalone AHK file so Windows can
-                        # prompt to elevate only this shortcut invocation.
-                        if not any("RunElevatedAction(actionHex)" in line for line in output_lines):
-                            output_lines.extend([
-                                "RunElevatedAction(actionHex) {",
-                                '    actionBuffer := Buffer(StrLen(actionHex) // 2 + 1, 0)',
-                                '    Loop StrLen(actionHex) // 2',
-                                '        NumPut("UChar", Integer("0x" SubStr(actionHex, A_Index * 2 - 1, 2)), actionBuffer, A_Index - 1)',
-                                '    actionText := StrGet(actionBuffer, "UTF-8")',
-                                '    tempFile := A_Temp "\\ShortcutManager_" A_TickCount ".ahk"',
-                                '    FileAppend("#Requires AutoHotkey v2.0`n" actionText, tempFile, "UTF-8-RAW")',
-                                '    Run("*RunAs " A_AhkPath " `"" tempFile "`"")',
-                                "}",
-                                "",
-                            ])
-                        action_hex = action.encode("utf-8").hex().upper()
-                        output_lines.append(f'{safe_hotkey}::RunElevatedAction("{action_hex}")')
-                        if guarded:
-                            output_lines.append("#HotIf")
-                        output_lines.append("")
-                        continue
-
-                    if '\n' in action:
+                    if run_as_admin:
+                        # Admin-elevated: wrap the action in RunElevated()
+                        # Escape the action for AHK double-quoted string: backticks doubled, 
+                        # double-quotes escaped, newlines -> `n, tabs -> `t
+                        safe_action = action.replace("`", "``").replace('"', '`"')
+                        safe_action = safe_action.replace('\n', '`n').replace('\t', '`t')
+                        safe_action = safe_action.replace('\r', '')
+                        output_lines.append(f"{safe_hotkey}::RunElevated(\"{safe_action}\")")
+                    elif '\n' in action:
                         output_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
                         match = re.search(r"^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{", action, re.MULTILINE)
@@ -5323,6 +5335,7 @@ class AHKShortcutEditor(QMainWindow):
                     target_path = shortcut.get('target_path', '')
                     hotkey = shortcut.get('hotkey', '')
                     hide_terminal = shortcut.get('hide_terminal', True)
+                    run_as_admin = shortcut.get('run_as_admin', False)
 
                     # Extract executable/script and its arguments
                     exe_path, args_part = parse_windows_command_line(target_path)
@@ -5391,8 +5404,6 @@ class AHKShortcutEditor(QMainWindow):
 
                     # Escape and format AHK parameters
                     safe_cmd_str = cmd_str.replace("'", "''")
-                    if shortcut.get('run_as_admin', False):
-                        safe_cmd_str = ("*RunAs " + cmd_str).replace("'", "''")
                     safe_working_dir = working_dir.replace("'", "''") if working_dir else ""
                     
                     # If it is Python and hide_terminal is True, we run the script with pythonw.exe
@@ -5413,6 +5424,38 @@ class AHKShortcutEditor(QMainWindow):
                             action = f"Run('{safe_cmd_str}', , {hide_opt})"
                         else:
                             action = f"Run('{safe_cmd_str}')"
+
+                    # Override with elevated launch via ShellExecute("runas", ...)
+                    if run_as_admin:
+                        # ShellExecute(verb, file, [params, workingdir, show])
+                        # Split cmd_str back to exe + args for ShellExecute
+                        shell_exe = exe_path
+                        shell_args = args_part
+                        if is_python:
+                            # For Python, the command is "py_exe script_path extra_args"
+                            # ShellExecute needs exe as the interpreter, params as the rest
+                            shell_exe = py_exe
+                            shell_args = f'"{script_path}"'
+                            if args_part:
+                                shell_args += f' {args_part}'
+                        elif exe_path.lower().endswith('.ps1'):
+                            # For PS1, exe is powershell.exe, params are the options + file + args
+                            shell_exe = "powershell.exe"
+                            shell_args = f'{ps_options} "{exe_path}"'
+                            if args_part:
+                                shell_args += f' {args_part}'
+                        # Escape single quotes for AHK string literals
+                        safe_shell_exe = shell_exe.replace("'", "''")
+                        safe_shell_args = shell_args.replace("'", "''") if shell_args else ""
+                        safe_shell_wdir = working_dir.replace("'", "''") if working_dir else ""
+                        if safe_shell_args and safe_shell_wdir:
+                            action = f"ShellExecute('runas', '{safe_shell_exe}', '{safe_shell_args}', '{safe_shell_wdir}')"
+                        elif safe_shell_args:
+                            action = f"ShellExecute('runas', '{safe_shell_exe}', '{safe_shell_args}')"
+                        elif safe_shell_wdir:
+                            action = f"ShellExecute('runas', '{safe_shell_exe}', , '{safe_shell_wdir}')"
+                        else:
+                            action = f"ShellExecute('runas', '{safe_shell_exe}')"
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:

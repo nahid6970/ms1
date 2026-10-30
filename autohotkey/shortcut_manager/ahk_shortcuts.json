@@ -81,9 +81,7 @@
             "description": "",
             "enabled": true,
             "hotkey": "#x",
-            "name": "Script Manager",
-            "run_as_admin": false,
-            "favourite": false
+            "name": "Script Manager"
         },
         {
             "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\flask\\4999_startup\\startup.py\"', , \"Hide\")",
