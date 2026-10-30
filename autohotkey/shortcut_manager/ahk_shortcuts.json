@@ -81,7 +81,9 @@
             "description": "",
             "enabled": true,
             "hotkey": "#x",
-            "name": "Script Manager"
+            "name": "Script Manager",
+            "run_as_admin": true,
+            "favourite": false
         },
         {
             "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\flask\\4999_startup\\startup.py\"', , \"Hide\")",
@@ -400,6 +402,17 @@
             "target_path": "C:\\@delta\\ms1\\tools\\mouse\\fix_cursor.py",
             "hide_terminal": true,
             "enabled": true
+        },
+        {
+            "name": "locksmith",
+            "category": "General",
+            "description": "",
+            "hotkey": "^l",
+            "target_path": "C:\\@delta\\ms1\\tools\\locksmith.py",
+            "hide_terminal": true,
+            "run_as_admin": true,
+            "enabled": true,
+            "favourite": false
         }
     ],
     "text_shortcuts": [

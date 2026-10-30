@@ -4146,17 +4146,6 @@ class AHKShortcutEditor(QMainWindow):
 
             # Add helper function for fast pasting
             output_lines.extend([
-                "RunElevated(code) {",
-                "    ; Write the action code to a temp .ahk file and re-launch it elevated",
-                "    tmpFile := A_Temp . \"\\ahk_elv_\" . A_NowUTC . \".ahk\"",
-                "    FileDelete(tmpFile)",
-                "    FileAppend(\"#Requires AutoHotkey v2.0`n\" . code, tmpFile, \"UTF-8\")",
-                "    ; Run(..., \"RunAs\") triggers UAC elevation in AHK v2",
-                "    Run('\"' . A_AhkPath . '\" \"' . tmpFile . '\"', A_Temp, \"RunAs\")",
-                "    ; Clean up after a delay so the elevated process has time to read the file",
-                "    SetTimer(() => FileDelete(tmpFile), -5000)",
-                "}",
-                "",
                 "Paste(text) {",
                 "    Old := A_Clipboard",
                 "    A_Clipboard := \"\"  ; Clear clipboard first",
@@ -5244,13 +5233,27 @@ class AHKShortcutEditor(QMainWindow):
                     safe_hotkey = escape_hotkey(hotkey)
 
                     if run_as_admin:
-                        # Admin-elevated: wrap the action in RunElevated()
-                        # Escape the action for AHK double-quoted string: backticks doubled, 
-                        # double-quotes escaped, newlines -> `n, tabs -> `t
-                        safe_action = action.replace("`", "``").replace('"', '`"')
-                        safe_action = safe_action.replace('\n', '`n').replace('\t', '`t')
-                        safe_action = safe_action.replace('\r', '')
-                        output_lines.append(f"{safe_hotkey}::RunElevated(\"{safe_action}\")")
+                        # Admin-elevated: write the action to a companion .ahk file at
+                        # generate-time (Python-side), then the hotkey simply runs it elevated.
+                        # This avoids all AHK string-escaping issues entirely.
+                        safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
+                        # Place the companion file next to the generated script
+                        output_dir = SCRIPT_DIR
+                        companion_filename = f"ahk_elv_{safe_name}.ahk"
+                        companion_path = os.path.join(output_dir, companion_filename)
+                        # Write the companion file now (Python-side — no AHK string encoding needed)
+                        companion_content = "#Requires AutoHotkey v2.0\n" + action + "\n"
+                        try:
+                            with open(companion_path, 'w', encoding='utf-8') as cf:
+                                cf.write(companion_content)
+                        except Exception as write_err:
+                            output_lines.append(f"; WARNING: Could not write admin companion file: {write_err}")
+                        # The hotkey just launches the companion file elevated.
+                        # In AHK v2 double-quoted strings: only backtick and " need escaping.
+                        # Backslashes are literal — no escaping needed for Windows paths.
+                        cp_ahk = companion_path.replace('`', '``').replace('"', '`"')
+                        # Generated AHK: hotkey::Run(A_AhkPath . " `"path`"", , "RunAs")
+                        output_lines.append(f'{safe_hotkey}::Run(A_AhkPath . " `"{cp_ahk}`"", , "RunAs")')
                     elif '\n' in action:
                         output_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
