@@ -8,6 +8,11 @@ Persistent
 #Include C:\@delta\ms1\scripts\Autohtokey\version2\tray.ahk
 #Include C:\@delta\ms1\scripts\Autohtokey\math.ahk
 #Include "C:\@delta\ms1\autohotkey\shortcut_manager\generated_shortcuts.ahk"
+; Admin shortcuts run in a separate elevated instance (auto-started below if the file exists)
+if FileExist("C:\@delta\ms1\autohotkey\shortcut_manager\generated_shortcuts_admin.ahk") {
+    if !A_IsAdmin
+        Run '*RunAs ' . A_AhkPath . ' "C:\@delta\ms1\autohotkey\shortcut_manager\generated_shortcuts_admin.ahk"'
+}
 ; #Include "C:\@delta\ms1\scripts\Autohtokey\recordKey.ahk"
  
 
