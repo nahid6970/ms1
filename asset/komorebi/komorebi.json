@@ -439,6 +439,11 @@
             "kind": "Exe",
             "id": "studio64.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Beta).exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
@@ -596,6 +601,11 @@
             "kind": "Title",
             "id": "T3 Code (Nightly)",
             "matching_strategy": "Contains"
+        },
+        {
+            "kind": "Exe",
+            "id": "T3 Code (Beta).exe",
+            "matching_strategy": "Equals"
         }
     ],
     "gui_settings": {

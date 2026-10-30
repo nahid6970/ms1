@@ -1172,7 +1172,7 @@
             "category": "General",
             "description": "",
             "window_title": "",
-            "process_name": "T3 Code (Nightly).exe",
+            "process_name": "T3 Code (Nightly).exe, T3 Code (Beta).exe",
             "window_class": "",
             "window_title_enabled": false,
             "process_name_enabled": true,

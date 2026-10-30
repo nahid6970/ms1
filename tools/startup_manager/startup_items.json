@@ -158,7 +158,7 @@
     "ps1_command": "Start-Process -FilePath \"pythonw.exe\" -ArgumentList \"C:\\@delta\\ms1\\testing\\mypygui\\mypygui_qt.py\"",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
-    "hide_terminal": true,
+    "hide_terminal": false,
     "script_enabled": false
   },
   {
@@ -1040,7 +1040,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1793368865.056352
   },
   {
     "name": "T3Code",
