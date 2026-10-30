@@ -3890,13 +3890,10 @@ class AHKShortcutEditor(QMainWindow):
         if shortcut_type == "text" and shortcut.get('source_file', '').strip():
             file_icon = (f'<img src="icon://file" width="{ns}" height="{ns}" '
                          f'align="middle" title="Auto-loaded from file"> ')
-        # Admin indicator badge for script/launcher shortcuts with run_as_admin
+        # Admin indicator for script/launcher shortcuts with run_as_admin
         admin_badge = ''
         if shortcut_type in ("script", "launcher") and shortcut.get('run_as_admin', False):
-            admin_badge = (f'<span style="background-color: {CP_ORANGE}; color: black; '
-                           f'font-size: 0.7em; font-weight: bold; padding: 1px 4px; '
-                           f'border-radius: 2px; margin-left: 4px;" '
-                           f'title="Run as Administrator (UAC elevation)">🛡 ADMIN</span>')
+            admin_badge = '🛡 '
         description = shortcut.get('description', '')
         desc_html = f' <span class="shortcut-desc">({description[:25]}...)</span>' if len(description) > 25 else f' <span class="shortcut-desc">({description})</span>' if description else ''
 
@@ -3935,7 +3932,7 @@ class AHKShortcutEditor(QMainWindow):
                                 <tr {text_style}>
                                     <td width="{key_width}" class="shortcut-key" valign="{left_valign}" style="white-space: nowrap;">{key_html}</td>
                                     <td width="{icon_width}" class="shortcut-separator" valign="{left_valign}" align="center">󰌌</td>
-                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{name}{admin_badge}{desc_html}{rules_html}</td>
+                                    <td style="padding-left: 15px;" class="shortcut-name" valign="middle">{fav_icon}{file_icon}{admin_badge}{name}{desc_html}{rules_html}</td>
                                 </tr>
                             </table>
                         </a>

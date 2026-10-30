@@ -2,6 +2,30 @@
 
 All sessions are recorded here. Do not archive old entries.
 
+## 2026-10-30 - Run as Admin Toggle for Script & Launcher Shortcuts
+
+### What was added
+
+A **🛡 Run as Admin (UAC elevation)** checkbox in the Add/Edit dialog for **Script Shortcuts** and **Launcher Shortcuts**.
+
+### Behavior
+
+- **Script Shortcuts:** At Generate AHK time, Python writes a companion `.ahk` file (`ahk_elv_<Name>.ahk`) alongside `generated_shortcuts.ahk` containing `#Requires AutoHotkey v2.0` plus the action code verbatim. The hotkey calls `Run("*RunAs " . A_AhkPath . " \`"path\`"")` to launch that file elevated via UAC.
+- **Launcher Shortcuts:** The generated `Run(...)` call is replaced with `Run("*RunAs <target>", workdir)` — the `*RunAs` prefix in the target string triggers the Windows Shell `runas` verb (UAC prompt).
+
+### Why `*RunAs` prefix, not `"RunAs"` option
+
+`"RunAs"` as the Options parameter of `Run()` is a display mode (like `"Hide"`), not an elevation verb. The correct AHK v2 elevation mechanism is to prefix the target string with `*RunAs `.
+
+### UI
+
+- Checkbox appears in orange below the Favourite checkbox in the dialog.
+- A 🛡 icon is shown before the shortcut name in the list for any admin-enabled shortcut.
+
+### Files changed
+
+- `ahk_gui_pyqt.py` — dialog UI, populate/save fields, AHK generation, HTML display
+
 ## 2026-09-29 - Apply exclusion rules across shortcut types
 
 - Exclusion guards cover matching hotkeys in script, launcher, context, text, background-script, and key-remap shortcuts.

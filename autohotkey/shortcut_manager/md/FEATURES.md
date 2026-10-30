@@ -1,5 +1,26 @@
 # Feature Specifications
 
+## Run as Admin (UAC Elevation)
+
+**Status:** Complete
+
+**Description:** Per-shortcut toggle that causes the action to run with administrator privileges via UAC elevation.
+
+**Applies to:** Script Shortcuts, Launcher Shortcuts
+
+**Implementation:**
+
+- Checkbox `🛡 Run as Admin (UAC elevation)` in the Add/Edit dialog (orange, below Favourite).
+- Stored as `"run_as_admin": true/false` in `ahk_shortcuts.json`.
+- **Script Shortcuts:** Python writes a companion file `ahk_elv_<Name>.ahk` at generate time. The hotkey line becomes `Run("*RunAs " . A_AhkPath . " \`"path\`"")`. This sidesteps all AHK string-escaping issues with arbitrary action code.
+- **Launcher Shortcuts:** Target is prefixed with `*RunAs` in the `Run()` call: `Run("*RunAs <target>", workdir)`.
+- The `*RunAs` prefix (not the Options param) is the correct AHK v2 mechanism to trigger the Windows Shell `runas` verb.
+- A 🛡 icon is shown before the shortcut name in the list view.
+
+**Files Involved:**
+
+- `ahk_gui_pyqt.py`
+
 ## Visual Shortcut Builder
 
 **Status:** Complete
