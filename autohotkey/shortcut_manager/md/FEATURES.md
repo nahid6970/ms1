@@ -4,22 +4,31 @@
 
 **Status:** Complete
 
-**Description:** Per-shortcut toggle that causes the action to run with administrator privileges via UAC elevation.
+**Description:** Per-shortcut toggle that causes the action to run with administrator privileges. Uses a separate persistent elevated AHK instance instead of per-keypress UAC prompts.
 
 **Applies to:** Script Shortcuts, Launcher Shortcuts
 
-**Implementation:**
+**How it works:**
 
-- Checkbox `🛡 Run as Admin (UAC elevation)` in the Add/Edit dialog (orange, below Favourite).
+- Shortcuts marked `run_as_admin: true` are collected into `generated_shortcuts_admin.ahk` instead of the main `generated_shortcuts.ahk`.
+- `generated_shortcuts_admin.ahk` self-elevates once on startup (`if !A_IsAdmin { Run '*RunAs ...' ; ExitApp }`), then stays resident as an elevated AHK process.
+- `ahk_v2.ahk` (main script) auto-launches this admin instance on reload via `Run '*RunAs ...'`.
+- **One UAC prompt per session** — not per keypress. Shortcuts receive the active window context correctly because the process is already elevated and resident.
+- If no admin shortcuts exist, `generated_shortcuts_admin.ahk` is deleted on Generate AHK to avoid stale hotkeys.
+- Old `ahk_elv_*.ahk` companion files from the previous approach are cleaned up on every generate.
+
+**UI:**
+
+- Checkbox `🛡 Run as Admin (UAC elevation)` in Add/Edit dialog (orange, below Favourite).
 - Stored as `"run_as_admin": true/false` in `ahk_shortcuts.json`.
-- **Script Shortcuts:** Python writes a companion file `ahk_elv_<Name>.ahk` at generate time. The hotkey line becomes `Run("*RunAs " . A_AhkPath . " \`"path\`"")`. This sidesteps all AHK string-escaping issues with arbitrary action code.
-- **Launcher Shortcuts:** Target is prefixed with `*RunAs` in the `Run()` call: `Run("*RunAs <target>", workdir)`.
-- The `*RunAs` prefix (not the Options param) is the correct AHK v2 mechanism to trigger the Windows Shell `runas` verb.
-- A 🛡 icon is shown before the shortcut name in the list view.
+- 🛡 icon shown before the shortcut name in the list for any admin-flagged shortcut.
+- Status bar shows both filenames + count when admin shortcuts exist.
 
 **Files Involved:**
 
 - `ahk_gui_pyqt.py`
+- `generated_shortcuts_admin.ahk` (generated output)
+- `C:\@delta\ms1\ahk_v2.ahk` (auto-launches the admin instance)
 
 ## Visual Shortcut Builder
 

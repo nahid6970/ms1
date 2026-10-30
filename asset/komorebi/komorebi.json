@@ -434,6 +434,11 @@
             "kind": "Title",
             "id": "ArtCraft Launcher",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "studio64.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [

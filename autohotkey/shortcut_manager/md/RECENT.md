@@ -2,29 +2,54 @@
 
 All sessions are recorded here. Do not archive old entries.
 
-## 2026-10-30 - Run as Admin Toggle for Script & Launcher Shortcuts
+# Recent Development Log
 
-### What was added
+All sessions are recorded here. Do not archive old entries.
 
-A **🛡 Run as Admin (UAC elevation)** checkbox in the Add/Edit dialog for **Script Shortcuts** and **Launcher Shortcuts**.
+## 2026-10-30 - Run as Admin: Separate Elevated AHK Instance (revised approach)
 
-### Behavior
+### Problem with the original per-shortcut approach
 
-- **Script Shortcuts:** At Generate AHK time, Python writes a companion `.ahk` file (`ahk_elv_<Name>.ahk`) alongside `generated_shortcuts.ahk` containing `#Requires AutoHotkey v2.0` plus the action code verbatim. The hotkey calls `Run("*RunAs " . A_AhkPath . " \`"path\`"")` to launch that file elevated via UAC.
-- **Launcher Shortcuts:** The generated `Run(...)` call is replaced with `Run("*RunAs <target>", workdir)` — the `*RunAs` prefix in the target string triggers the Windows Shell `runas` verb (UAC prompt).
+The first implementation launched an elevated companion `.ahk` file per hotkey press (`*RunAs` on each trigger). This caused:
+- Focus loss — the UAC prompt steals focus so `WinExist("A")` in the elevated process returns the wrong window.
+- Timing issues — the elevated process starts too late for window-manipulation shortcuts like `#d` (minimize) or `!q` (kill foreground).
 
-### Why `*RunAs` prefix, not `"RunAs"` option
+### New architecture
 
-`"RunAs"` as the Options parameter of `Run()` is a display mode (like `"Hide"`), not an elevation verb. The correct AHK v2 elevation mechanism is to prefix the target string with `*RunAs `.
+Admin-flagged shortcuts are collected into a **separate `generated_shortcuts_admin.ahk`** file. This file:
+1. Self-elevates once on startup (`if !A_IsAdmin { Run '*RunAs ...' ; ExitApp }`)
+2. Runs as a persistent elevated AHK instance alongside `generated_shortcuts.ahk`
+3. Has the UAC prompt only once — not per keypress
+
+### How `ahk_v2.ahk` starts it
+
+Added to `C:\@delta\ms1\ahk_v2.ahk` right after the `#Include` for `generated_shortcuts.ahk`:
+```ahk
+if FileExist("C:\@delta\ms1\autohotkey\shortcut_manager\generated_shortcuts_admin.ahk") {
+    if !A_IsAdmin
+        Run '*RunAs ' . A_AhkPath . ' "C:\@delta\ms1\autohotkey\shortcut_manager\generated_shortcuts_admin.ahk"'
+}
+```
+
+Reloading the main script auto-launches the admin instance.
+
+### Generation changes
+
+- Script shortcuts with `run_as_admin` → go into `admin_lines`, emitted inline (no companion files)
+- Launcher shortcuts with `run_as_admin` → go into `admin_lines` with normal `Run()` (no `*RunAs` prefix — already elevated)
+- If no admin shortcuts exist: `generated_shortcuts_admin.ahk` is deleted to avoid stale hotkeys
+- Old `ahk_elv_*.ahk` companion files are cleaned up on every generate
 
 ### UI
 
-- Checkbox appears in orange below the Favourite checkbox in the dialog.
-- A 🛡 icon is shown before the shortcut name in the list for any admin-enabled shortcut.
+- 🛡 icon shown before the shortcut name in the list (no pill/badge, just the icon)
+- Status bar shows both filenames and count when admin shortcuts exist
 
 ### Files changed
 
-- `ahk_gui_pyqt.py` — dialog UI, populate/save fields, AHK generation, HTML display
+- `ahk_gui_pyqt.py` — generation logic, UI
+- `C:\@delta\ms1\ahk_v2.ahk` — added auto-launch of admin instance
+
 
 ## 2026-09-29 - Apply exclusion rules across shortcut types
 
