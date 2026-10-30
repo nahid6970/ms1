@@ -410,9 +410,9 @@
             "hotkey": "^l",
             "target_path": "C:\\@delta\\ms1\\tools\\locksmith.py",
             "hide_terminal": true,
-            "run_as_admin": true,
+            "run_as_admin": false,
             "enabled": true,
-            "favourite": false
+            "favourite": true
         }
     ],
     "text_shortcuts": [

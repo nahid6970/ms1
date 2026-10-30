@@ -5249,11 +5249,12 @@ class AHKShortcutEditor(QMainWindow):
                         except Exception as write_err:
                             output_lines.append(f"; WARNING: Could not write admin companion file: {write_err}")
                         # The hotkey just launches the companion file elevated.
-                        # In AHK v2 double-quoted strings: only backtick and " need escaping.
-                        # Backslashes are literal — no escaping needed for Windows paths.
+                        # AHK v2 elevation: prefix the target with "*RunAs " (not the Options param).
+                        # Backslashes are literal in AHK v2 double-quoted strings.
+                        # Only backtick and double-quote need escaping inside a double-quoted string.
                         cp_ahk = companion_path.replace('`', '``').replace('"', '`"')
-                        # Generated AHK: hotkey::Run(A_AhkPath . " `"path`"", , "RunAs")
-                        output_lines.append(f'{safe_hotkey}::Run(A_AhkPath . " `"{cp_ahk}`"", , "RunAs")')
+                        # Generated: hotkey::Run("*RunAs " . A_AhkPath . " `"path`"")
+                        output_lines.append(f'{safe_hotkey}::Run("*RunAs " . A_AhkPath . " `"{cp_ahk}`"")')
                     elif '\n' in action:
                         output_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
@@ -5425,9 +5426,8 @@ class AHKShortcutEditor(QMainWindow):
 
                     # Override with elevated launch using Run(..., "RunAs") for UAC elevation
                     if run_as_admin:
-                        # Build the full command string the same as the normal path,
-                        # but pass "RunAs" as the options parameter to Run().
-                        # For Python scripts we need the full "pythonw.exe script.py" command.
+                        # Build the full command string for elevated launch.
+                        # AHK v2 elevation: prefix target with "*RunAs " — NOT an Options param.
                         if is_python:
                             elv_cmd = f'{py_exe} "{script_path}"'
                             if args_part:
@@ -5440,12 +5440,13 @@ class AHKShortcutEditor(QMainWindow):
                             elv_cmd = f'"{exe_path}"'
                             if args_part:
                                 elv_cmd += f' {args_part}'
-                        safe_elv_cmd = elv_cmd.replace("'", "''")
-                        safe_elv_wdir = working_dir.replace("'", "''") if working_dir else ""
+                        # Escape for AHK double-quoted string (backtick -> ``, " -> `")
+                        safe_elv_cmd = elv_cmd.replace('`', '``').replace('"', '`"')
+                        safe_elv_wdir = working_dir.replace('`', '``').replace('"', '`"') if working_dir else ""
                         if safe_elv_wdir:
-                            action = f"Run('{safe_elv_cmd}', '{safe_elv_wdir}', 'RunAs')"
+                            action = f'Run("*RunAs {safe_elv_cmd}", "{safe_elv_wdir}")'
                         else:
-                            action = f"Run('{safe_elv_cmd}', , 'RunAs')"
+                            action = f'Run("*RunAs {safe_elv_cmd}")'
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:
