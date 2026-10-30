@@ -51,7 +51,8 @@
             "enabled": true,
             "hotkey": "!q",
             "name": "Kill Foreground Process",
-            "favourite": true
+            "favourite": true,
+            "run_as_admin": false
         },
         {
             "action": "CopyPath_File()\nCopyPath_File() {\n    ClipboardBackup := ClipboardAll()\n    A_Clipboard := \"\" \n    Send(\"^c\")\n    Errorlevel := !ClipWait(1)\n    if ErrorLevel\n    {\n    MsgBox(\"No valid file path found.\")\n    }\n    else\n    {\n    ClipBoardContent := A_Clipboard\n    ; V1toV2: StrReplace() is not case sensitive\n    ; check for StringCaseSense in v1 source script\n    ; and change the CaseSense param in StrReplace() if necessary\n    ClipBoardContent := StrReplace(ClipBoardContent, \"`n\", \"`t\")\n    A_Clipboard := ClipboardBackup\n    A_Clipboard := ClipBoardContent\n    TrayTip(\"Copy as Path\", \"Copied `\"\" ClipBoardContent \"`\" to clipboard.\")\n    }}",
@@ -301,7 +302,7 @@
             "action": "MinimizeActiveWindow() {\n    hwnd := WinExist(\"A\")\n    if !hwnd\n        return\n\n    ; Method 1: Standard system command (best for most apps + many games)\n    PostMessage(0x0112, 0xF020, 0, , hwnd)   ; WM_SYSCOMMAND + SC_MINIMIZE\n\n    ; Method 2: Direct ShowWindow call (helps stubborn windows)\n    DllCall(\"ShowWindow\", \"Ptr\", hwnd, \"Int\", 6)  ; SW_MINIMIZE = 6\n\n    ; Method 3: Fallback to WinMinimize\n    try WinMinimize(\"ahk_id \" hwnd)\n}",
             "enabled": true,
             "favourite": true,
-            "run_as_admin": true
+            "run_as_admin": false
         }
     ],
     "launcher_shortcuts": [

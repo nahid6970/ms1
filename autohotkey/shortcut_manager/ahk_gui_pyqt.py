@@ -5210,66 +5210,46 @@ class AHKShortcutEditor(QMainWindow):
                     output_lines.append("")
 
             # Add script shortcuts
+            admin_lines = []  # collects lines for the separate elevated admin script
             enabled_scripts = [s for s in self.script_shortcuts if s.get('enabled', True)]
             if enabled_scripts:
                 output_lines.append(";! === SCRIPT SHORTCUTS ===")
                 for shortcut in enabled_scripts:
-                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
-                    if shortcut.get('description'):
-                        output_lines.append(f";! {shortcut.get('description')}")
-
                     action = shortcut.get('action', '')
                     hotkey = shortcut.get('hotkey', '')
                     run_as_admin = shortcut.get('run_as_admin', False)
                     action = action.replace(',,,', ',,')
+                    safe_hotkey = escape_hotkey(hotkey)
+
+                    # Admin shortcuts go to the separate elevated script, not the main one
+                    target_lines = admin_lines if run_as_admin else output_lines
+
+                    target_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    if shortcut.get('description'):
+                        target_lines.append(f";! {shortcut.get('description')}")
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:
-                        output_lines.append("#HotIf !IsShortcutExcluded()")
+                        target_lines.append("#HotIf !IsShortcutExcluded()")
 
-                    safe_hotkey = escape_hotkey(hotkey)
-
-                    if run_as_admin:
-                        # Admin-elevated: write the action to a companion .ahk file at
-                        # generate-time (Python-side), then the hotkey simply runs it elevated.
-                        # This avoids all AHK string-escaping issues entirely.
-                        safe_name = re.sub(r'[^a-zA-Z0-9]', '', shortcut.get('name', 'Script'))
-                        # Place the companion file next to the generated script
-                        output_dir = SCRIPT_DIR
-                        companion_filename = f"ahk_elv_{safe_name}.ahk"
-                        companion_path = os.path.join(output_dir, companion_filename)
-                        # Write the companion file now (Python-side — no AHK string encoding needed)
-                        companion_content = "#Requires AutoHotkey v2.0\n" + action + "\n"
-                        try:
-                            with open(companion_path, 'w', encoding='utf-8') as cf:
-                                cf.write(companion_content)
-                        except Exception as write_err:
-                            output_lines.append(f"; WARNING: Could not write admin companion file: {write_err}")
-                        # The hotkey just launches the companion file elevated.
-                        # AHK v2 elevation: prefix the target with "*RunAs " (not the Options param).
-                        # Backslashes are literal in AHK v2 double-quoted strings.
-                        # Only backtick and double-quote need escaping inside a double-quoted string.
-                        cp_ahk = companion_path.replace('`', '``').replace('"', '`"')
-                        # Generated: hotkey::Run("*RunAs " . A_AhkPath . " `"path`"")
-                        output_lines.append(f'{safe_hotkey}::Run("*RunAs " . A_AhkPath . " `"{cp_ahk}`"")')
-                    elif '\n' in action:
-                        output_lines.append(f"{safe_hotkey}:: {{")
+                    if '\n' in action:
+                        target_lines.append(f"{safe_hotkey}:: {{")
                         lines = [l.strip() for l in action.split('\n') if l.strip()]
                         match = re.search(r"^\s*([a-zA-Z0-9_]+)\s*\([^)]*\)\s*\{", action, re.MULTILINE)
                         if match and len(lines) > 0:
                             func_name = match.group(1)
                             if lines[0].startswith(f"{func_name}(") and not any(l.strip() == f"{func_name}()" for l in lines):
-                                output_lines.append(f"    {func_name}()")
+                                target_lines.append(f"    {func_name}()")
                         for line in action.split('\n'):
                             if line.strip():
-                                output_lines.append(f"    {line}")
-                        output_lines.append("}")
+                                target_lines.append(f"    {line}")
+                        target_lines.append("}")
                     else:
-                        output_lines.append(f"{safe_hotkey}::{action}")
+                        target_lines.append(f"{safe_hotkey}::{action}")
 
                     if guarded:
-                        output_lines.append("#HotIf")
-                    output_lines.append("")
+                        target_lines.append("#HotIf")
+                    target_lines.append("")
                 output_lines.append("")
 
             # Helper to parse Windows command line arguments robustly
@@ -5324,9 +5304,17 @@ class AHKShortcutEditor(QMainWindow):
             if enabled_launchers:
                 output_lines.append(";! === LAUNCHER SHORTCUTS ===")
                 for shortcut in enabled_launchers:
-                    output_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
+                    target_path = shortcut.get('target_path', '')
+                    hotkey = shortcut.get('hotkey', '')
+                    hide_terminal = shortcut.get('hide_terminal', True)
+                    run_as_admin = shortcut.get('run_as_admin', False)
+
+                    # Admin launchers go to the separate elevated script
+                    target_lines = admin_lines if run_as_admin else output_lines
+
+                    target_lines.append(f";! {shortcut.get('name', 'Unnamed')}")
                     if shortcut.get('description'):
-                        output_lines.append(f";! {shortcut.get('description')}")
+                        target_lines.append(f";! {shortcut.get('description')}")
 
                     target_path = shortcut.get('target_path', '')
                     hotkey = shortcut.get('hotkey', '')
@@ -5421,40 +5409,20 @@ class AHKShortcutEditor(QMainWindow):
                         else:
                             action = f"Run('{safe_cmd_str}')"
 
-                    # Override with elevated launch using Run(..., "RunAs") for UAC elevation
-                    if run_as_admin:
-                        # Build the full command string for elevated launch.
-                        # AHK v2 elevation: prefix target with "*RunAs " — NOT an Options param.
-                        if is_python:
-                            elv_cmd = f'{py_exe} "{script_path}"'
-                            if args_part:
-                                elv_cmd += f' {args_part}'
-                        elif exe_path.lower().endswith('.ps1'):
-                            elv_cmd = f'powershell.exe {ps_options} "{exe_path}"'
-                            if args_part:
-                                elv_cmd += f' {args_part}'
-                        else:
-                            elv_cmd = f'"{exe_path}"'
-                            if args_part:
-                                elv_cmd += f' {args_part}'
-                        # Escape for AHK double-quoted string (backtick -> ``, " -> `")
-                        safe_elv_cmd = elv_cmd.replace('`', '``').replace('"', '`"')
-                        safe_elv_wdir = working_dir.replace('`', '``').replace('"', '`"') if working_dir else ""
-                        if safe_elv_wdir:
-                            action = f'Run("*RunAs {safe_elv_cmd}", "{safe_elv_wdir}")'
-                        else:
-                            action = f'Run("*RunAs {safe_elv_cmd}")'
+                    # Admin launchers: use normal Run() — the admin script is already elevated
+                    # (no *RunAs prefix needed; the process inherits elevation from the admin script)
+                    # Non-admin launchers: action is already built correctly above.
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:
-                        output_lines.append("#HotIf !IsShortcutExcluded()")
+                        target_lines.append("#HotIf !IsShortcutExcluded()")
 
                     safe_hotkey = escape_hotkey(hotkey)
-                    output_lines.append(f"{safe_hotkey}::{action}")
+                    target_lines.append(f"{safe_hotkey}::{action}")
 
                     if guarded:
-                        output_lines.append("#HotIf")
-                    output_lines.append("")
+                        target_lines.append("#HotIf")
+                    target_lines.append("")
                 output_lines.append("")
 
             # Add context shortcuts with #HotIf directives
@@ -5891,11 +5859,57 @@ class AHKShortcutEditor(QMainWindow):
                 output_lines.append("")
 
             output_dir = SCRIPT_DIR
+
+            # ── Write main generated_shortcuts.ahk ──────────────────────
             output_file = os.path.join(output_dir, "generated_shortcuts.ahk")
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write('\n'.join(output_lines))
 
-            self.statusBar().showMessage(f"🚀 Success: AHK script generated as '{output_file}'", 3000)
+            # ── Write generated_shortcuts_admin.ahk (if any admin shortcuts exist) ──
+            admin_file = os.path.join(output_dir, "generated_shortcuts_admin.ahk")
+            if admin_lines:
+                admin_header = [
+                    "#Requires AutoHotkey v2.0",
+                    "#SingleInstance",
+                    "Persistent",
+                    "",
+                    "; Auto-elevate: re-launch this script as administrator if not already elevated.",
+                    "if !A_IsAdmin {",
+                    "    Run '*RunAs ' . A_AhkPath . ' \"' . A_ScriptFullPath . '\"'",
+                    "    ExitApp",
+                    "}",
+                    "",
+                    ";! === ADMIN SHORTCUTS (elevated) ===",
+                    "",
+                ]
+                admin_content = '\n'.join(admin_header + admin_lines)
+                with open(admin_file, 'w', encoding='utf-8') as f:
+                    f.write(admin_content)
+            else:
+                # No admin shortcuts — remove the file if it exists to avoid stale hotkeys
+                if os.path.exists(admin_file):
+                    try:
+                        os.remove(admin_file)
+                    except Exception:
+                        pass
+
+            # ── Clean up any leftover ahk_elv_*.ahk companion files ────
+            import glob
+            for old_companion in glob.glob(os.path.join(output_dir, "ahk_elv_*.ahk")):
+                try:
+                    os.remove(old_companion)
+                except Exception:
+                    pass
+
+            # ── Status bar message ──────────────────────────────────────
+            if admin_lines:
+                n_admin = sum(1 for s in self.script_shortcuts + self.launcher_shortcuts
+                              if s.get('run_as_admin') and s.get('enabled', True))
+                self.statusBar().showMessage(
+                    f"🚀 Generated '{os.path.basename(output_file)}' + "
+                    f"'{os.path.basename(admin_file)}' ({n_admin} admin shortcut{'s' if n_admin != 1 else ''})", 5000)
+            else:
+                self.statusBar().showMessage(f"🚀 Success: AHK script generated as '{output_file}'", 3000)
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to generate AHK script: {e}")
