@@ -1056,9 +1056,9 @@ class AddEditShortcutDialog(QDialog):
             self.run_as_admin_checkbox.setChecked(False)
             self.run_as_admin_checkbox.setToolTip(
                 "When enabled, the action/launcher is executed with administrator "
-                "privileges via ShellExecute(\"runas\", ...).\n\n"
-                "Script Shortcuts: the entire action block is relaunched elevated.\n"
-                "Launcher Shortcuts: the target is launched elevated instead of using Run()."
+                "privileges via Run(..., \"RunAs\").\n\n"
+                "Script Shortcuts: the entire action block is relaunched elevated via a temp .ahk file.\n"
+                "Launcher Shortcuts: the target is launched elevated using Run(..., \"RunAs\")."
             )
             self.run_as_admin_checkbox.setStyleSheet(f"""
                 QCheckBox {{
@@ -4147,19 +4147,14 @@ class AHKShortcutEditor(QMainWindow):
             # Add helper function for fast pasting
             output_lines.extend([
                 "RunElevated(code) {",
-                "    ; Write the code to a temporary .ahk file and launch it elevated",
-                "    tmpFile := A_Temp . \"\\ahk_elevated_\" . A_NowUTC . \".ahk\"",
-                "    tmpFile := StrReplace(tmpFile, \":\", \"\")",
-                "    FileDelete(tmpFile)  ; remove if exists from a previous run",
+                "    ; Write the action code to a temp .ahk file and re-launch it elevated",
+                "    tmpFile := A_Temp . \"\\ahk_elv_\" . A_NowUTC . \".ahk\"",
+                "    FileDelete(tmpFile)",
                 "    FileAppend(\"#Requires AutoHotkey v2.0`n\" . code, tmpFile, \"UTF-8\")",
-                "    try {",
-                "        ShellExecute(\"runas\", A_AhkPath, '\"' . tmpFile . '\"', A_Temp)",
-                "    } catch {",
-                "        ; Fallback: try normal Run with RunAs verb",
-                "        Run('\"' . A_AhkPath . '\" \"' . tmpFile . '\"', A_Temp)",
-                "    }",
-                "    ; Clean up the temp file after a short delay (let the elevated process read it first)",
-                "    SetTimer(() => (FileDelete(tmpFile), 0), -5000)",
+                "    ; Run(..., \"RunAs\") triggers UAC elevation in AHK v2",
+                "    Run('\"' . A_AhkPath . '\" \"' . tmpFile . '\"', A_Temp, \"RunAs\")",
+                "    ; Clean up after a delay so the elevated process has time to read the file",
+                "    SetTimer(() => FileDelete(tmpFile), -5000)",
                 "}",
                 "",
                 "Paste(text) {",
@@ -5425,37 +5420,29 @@ class AHKShortcutEditor(QMainWindow):
                         else:
                             action = f"Run('{safe_cmd_str}')"
 
-                    # Override with elevated launch via ShellExecute("runas", ...)
+                    # Override with elevated launch using Run(..., "RunAs") for UAC elevation
                     if run_as_admin:
-                        # ShellExecute(verb, file, [params, workingdir, show])
-                        # Split cmd_str back to exe + args for ShellExecute
-                        shell_exe = exe_path
-                        shell_args = args_part
+                        # Build the full command string the same as the normal path,
+                        # but pass "RunAs" as the options parameter to Run().
+                        # For Python scripts we need the full "pythonw.exe script.py" command.
                         if is_python:
-                            # For Python, the command is "py_exe script_path extra_args"
-                            # ShellExecute needs exe as the interpreter, params as the rest
-                            shell_exe = py_exe
-                            shell_args = f'"{script_path}"'
+                            elv_cmd = f'{py_exe} "{script_path}"'
                             if args_part:
-                                shell_args += f' {args_part}'
+                                elv_cmd += f' {args_part}'
                         elif exe_path.lower().endswith('.ps1'):
-                            # For PS1, exe is powershell.exe, params are the options + file + args
-                            shell_exe = "powershell.exe"
-                            shell_args = f'{ps_options} "{exe_path}"'
+                            elv_cmd = f'powershell.exe {ps_options} "{exe_path}"'
                             if args_part:
-                                shell_args += f' {args_part}'
-                        # Escape single quotes for AHK string literals
-                        safe_shell_exe = shell_exe.replace("'", "''")
-                        safe_shell_args = shell_args.replace("'", "''") if shell_args else ""
-                        safe_shell_wdir = working_dir.replace("'", "''") if working_dir else ""
-                        if safe_shell_args and safe_shell_wdir:
-                            action = f"ShellExecute('runas', '{safe_shell_exe}', '{safe_shell_args}', '{safe_shell_wdir}')"
-                        elif safe_shell_args:
-                            action = f"ShellExecute('runas', '{safe_shell_exe}', '{safe_shell_args}')"
-                        elif safe_shell_wdir:
-                            action = f"ShellExecute('runas', '{safe_shell_exe}', , '{safe_shell_wdir}')"
+                                elv_cmd += f' {args_part}'
                         else:
-                            action = f"ShellExecute('runas', '{safe_shell_exe}')"
+                            elv_cmd = f'"{exe_path}"'
+                            if args_part:
+                                elv_cmd += f' {args_part}'
+                        safe_elv_cmd = elv_cmd.replace("'", "''")
+                        safe_elv_wdir = working_dir.replace("'", "''") if working_dir else ""
+                        if safe_elv_wdir:
+                            action = f"Run('{safe_elv_cmd}', '{safe_elv_wdir}', 'RunAs')"
+                        else:
+                            action = f"Run('{safe_elv_cmd}', , 'RunAs')"
 
                     guarded = needs_exclusion_guard(hotkey)
                     if guarded:
