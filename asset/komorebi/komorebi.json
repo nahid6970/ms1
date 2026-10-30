@@ -429,6 +429,11 @@
             "kind": "Title",
             "id": "T3 Code (Nightly)",
             "matching_strategy": "Contains"
+        },
+        {
+            "kind": "Title",
+            "id": "ArtCraft Launcher",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
