@@ -82,8 +82,8 @@
             "enabled": true,
             "hotkey": "#x",
             "name": "Script Manager",
-            "run_as_admin": true,
-            "favourite": false
+            "run_as_admin": false,
+            "favourite": true
         },
         {
             "action": "Run('pythonw.exe \"C:\\@delta\\ms1\\flask\\4999_startup\\startup.py\"', , \"Hide\")",
@@ -300,7 +300,8 @@
             "hotkey": "#d",
             "action": "MinimizeActiveWindow() {\n    hwnd := WinExist(\"A\")\n    if !hwnd\n        return\n\n    ; Method 1: Standard system command (best for most apps + many games)\n    PostMessage(0x0112, 0xF020, 0, , hwnd)   ; WM_SYSCOMMAND + SC_MINIMIZE\n\n    ; Method 2: Direct ShowWindow call (helps stubborn windows)\n    DllCall(\"ShowWindow\", \"Ptr\", hwnd, \"Int\", 6)  ; SW_MINIMIZE = 6\n\n    ; Method 3: Fallback to WinMinimize\n    try WinMinimize(\"ahk_id \" hwnd)\n}",
             "enabled": true,
-            "favourite": true
+            "favourite": true,
+            "run_as_admin": true
         }
     ],
     "launcher_shortcuts": [
