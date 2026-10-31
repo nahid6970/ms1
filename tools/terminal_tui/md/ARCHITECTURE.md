@@ -236,7 +236,7 @@ function prompt { ... }
 
 ### Sessions
 - `POST /api/session/<project>` - Start/connect terminal session
-- `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, and Kiro CLI conversations whose saved working directory is inside the requested workspace
+- `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, and Kiro CLI conversations in the workspace, including rough readable-text token estimates
 - `GET /api/agent/session-context?project=<workspace>&agent=<agent>&sessionId=<id>&sessionPath=<path>` - Build editable context from a saved native session after validating its workspace and agent storage path
 - `POST /api/agent/handoffs` - Link the source session ID and native transcript path in a short prompt, then create a linked native session in the target agent
 - `DELETE /api/agent/session` - Permanently remove one validated native session file (and Kiro's transcript companion), then update linked conversation state

@@ -6007,6 +6007,14 @@
             return `<svg aria-hidden="true" height="${dimension}" style="flex:none;line-height:1;vertical-align:middle;" viewBox="0 0 24 24" width="${dimension}" xmlns="http://www.w3.org/2000/svg"><path d="M19.503 0H4.496A4.496 4.496 0 000 4.496v15.007A4.496 4.496 0 004.496 24h15.007A4.496 4.496 0 0024 19.503V4.496A4.496 4.496 0 0019.503 0z" fill="#fff"></path><path d="M9.064 3.344a4.578 4.578 0 012.285-.312c1 .115 1.891.54 2.673 1.275.01.01.024.017.037.021a.09.09 0 00.043 0 4.55 4.55 0 013.046.275l.047.022.116.057a4.581 4.581 0 012.188 2.399c.209.51.313 1.041.315 1.595a4.24 4.24 0 01-.134 1.223.123.123 0 00.03.115c.594.607.988 1.33 1.183 2.17.289 1.425-.007 2.71-.887 3.854l-.136.166a4.548 4.548 0 01-2.201 1.388.123.123 0 00-.081.076c-.191.551-.383 1.023-.74 1.494-.9 1.187-2.222 1.846-3.711 1.838-1.187-.006-2.239-.44-3.157-1.302a.107.107 0 00-.105-.024c-.388.125-.78.143-.424.138a4.441 4.441 0 01-1.945-.466 4.544 4.544 0 01-1.61-1.335c-.152-.202-.303-.392-.414-.617a5.81 5.81 0 01-.37-.961 4.582 4.582 0 01-.014-2.298.124.124 0 00.006-.056.085.085 0 00-.027-.048 4.467 4.467 0 01-1.034-1.651 3.896 3.896 0 01-.251-1.192 5.189 5.189 0 01.141-1.6c.337-1.112.982-1.985 1.933-2.618.212-.141.413-.251.601-.33.215-.089.43-.164.646-.227a.098.098 0 00.065-.066 4.51 4.51 0 01.829-1.615 4.535 4.535 0 011.837-1.388zm3.482 10.565a.637.637 0 000 1.272h3.636a.637.637 0 100-1.272h-3.636zM8.462 9.23a.637.637 0 00-1.106.631l1.272 2.224-1.266 2.136a.636.636 0 101.095.649l1.454-2.455a.636.636 0 00.005-.64L8.462 9.23z" fill="url(#${gradientId})"></path><defs><linearGradient gradientUnits="userSpaceOnUse" id="${gradientId}" x1="12" x2="12" y1="3" y2="21"><stop stop-color="#B1A7FF"></stop><stop offset=".5" stop-color="#7A9DFF"></stop><stop offset="1" stop-color="#3941FF"></stop></linearGradient></defs></svg>`;
         }
 
+        function formatAgentTokenEstimate(value) {
+            const count = Math.max(0, Number(value) || 0);
+            if (count >= 1000000) return `~${(count / 1000000).toFixed(1)}m`;
+            if (count >= 10000) return `~${Math.round(count / 1000)}k`;
+            if (count >= 1000) return `~${(count / 1000).toFixed(1)}k`;
+            return `~${count}`;
+        }
+
         function filterAgentSessions() {
             const list = document.getElementById('agent-session-list');
             const query = (document.getElementById('agent-session-search')?.value || '').trim().toLowerCase();
@@ -6026,6 +6034,7 @@
                 const activeAgentName = activeAgent === 'pi' ? 'Pi' : activeAgent === 'kiro' ? 'Kiro' : 'Codex';
                 const sessionTitle = String(session.title || 'Untitled chat');
                 const sessionPath = String(session.cwd || 'Folder unavailable');
+                const tokenEstimate = formatAgentTokenEstimate(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
                 const agentTrail = Array.isArray(session.agentTrail) ? session.agentTrail : [];
                 const trailMarkup = session.conversationId && session.isCurrentActiveSession && agentTrail.length
@@ -6037,7 +6046,7 @@
                         <span style="min-width:0;flex:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;">
                             <span style="font-size:.8rem;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(sessionTitle)}</span>
                             <span style="font-size:.67rem;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(sessionPath)}</span>
-                            <span class="agent-session-meta" data-testid="agent-session-meta" style="font-size:.64rem;color:#696969;display:flex;align-items:center;gap:8px;min-width:0;"><span style="flex:none;">${escapeHtml(date)}</span>${trailMarkup}<span style="flex:none;margin-left:auto;">${escapeHtml(session.sessionId)}</span></span>
+                            <span class="agent-session-meta" data-testid="agent-session-meta" style="font-size:.64rem;color:#696969;display:flex;align-items:center;gap:8px;min-width:0;"><span style="flex:none;">${escapeHtml(date)}</span>${trailMarkup}<span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" title="Approximate tokens from readable user and assistant text; excludes tool metadata." style="flex:none;color:#9292a0;">${escapeHtml(tokenEstimate)}</span><span style="flex:none;margin-left:auto;">${escapeHtml(session.sessionId)}</span></span>
                         </span>
                     </button>
                     <button type="button" id="agent-session-handoff-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>

@@ -1547,14 +1547,6 @@
         {
           "agent": "pi",
           "sessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e"
-        },
-        {
-          "agent": "codex",
-          "sessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb"
-        },
-        {
-          "agent": "kiro",
-          "sessionId": "c01d0156-1c70-4a6d-a7a0-21a566264b82"
         }
       ],
       "handoffs": [
@@ -1581,8 +1573,8 @@
         }
       ],
       "activeHandoffId": "6b7b011c-bde6-471d-8a1c-b6dcf0e04864",
-      "activeAgent": "kiro",
-      "activeSessionId": "c01d0156-1c70-4a6d-a7a0-21a566264b82",
+      "activeAgent": "pi",
+      "activeSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
       "status": "active",
       "updatedAt": 1793460205.804405
     },

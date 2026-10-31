@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-10-31] - Show Session Token Estimates
+
+- Added an approximate token count between the agent-history trail and session ID in each saved-session row.
+- The estimate uses readable user/assistant message text at roughly four characters per token; the tooltip clarifies that tool metadata is excluded.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Add Cross-Agent Conversation Handoffs
 
 - Added a **Switch** action on each saved Codex, Pi, and Kiro CLI session. Any agent can hand off to either of the other two.

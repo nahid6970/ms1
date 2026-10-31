@@ -1592,6 +1592,34 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
     }
 
 
+def _estimate_agent_session_tokens(agent, session_path):
+    """Estimate readable conversation tokens at roughly four characters per token."""
+    transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
+    readable_characters = 0
+    try:
+        with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
+            for line in transcript_file:
+                if len(line) > 2_000_000:
+                    continue
+                try:
+                    record = json.loads(line)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                role, text = _agent_message_from_record(agent, record)
+                if not role or not text:
+                    continue
+                text = re.sub(r'<!--\s*TUI-HANDOFF:[0-9a-f-]{32,36}\s*-->', '', text)
+                normalized = ' '.join(text.split()).casefold()
+                if (normalized.startswith('# agents.md instructions') or
+                        normalized.startswith('## environment context') or
+                        ('<instructions>' in normalized and 'agents.md' in normalized)):
+                    continue
+                readable_characters += len(text)
+    except OSError:
+        return 0
+    return (readable_characters + 3) // 4
+
+
 @app.route('/api/agent/sessions', methods=['GET'])
 @app.route('/api/codex/sessions', methods=['GET'])
 def api_agent_sessions():
@@ -1658,6 +1686,7 @@ def api_agent_sessions():
                         'cwd': cwd,
                         'lastModified': modified_at,
                         'sessionPath': os.path.abspath(session_path),
+                        'tokenEstimate': _estimate_agent_session_tokens(agent, session_path),
                         'handoffToken': transcript['handoffToken'],
                     })
                 except (OSError, ValueError, TypeError, AttributeError):
