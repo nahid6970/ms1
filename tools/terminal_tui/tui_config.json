@@ -1536,5 +1536,41 @@
   },
   "git_exclude_patterns": [
     "gg.json"
+  ],
+  "agent_handoff_conversations": [
+    {
+      "id": "3a135d71-1333-4aec-924f-70dd58f854f4",
+      "project": "Terminal TUI",
+      "originAgent": "pi",
+      "originSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
+      "sessions": [
+        {
+          "agent": "pi",
+          "sessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e"
+        },
+        {
+          "agent": "codex",
+          "sessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "e9a5ecae-a4cd-4d74-a06f-38d45053c1b5",
+          "token": "e29d4dfcdb6a4b4d9a528147c2f5fe7b",
+          "sourceAgent": "pi",
+          "sourceSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
+          "targetAgent": "codex",
+          "targetSessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb",
+          "transcriptBundle": "C:\\Users\\nahid\\AppData\\Local\\TerminalTui\\AgentHandoffBundles\\a03a1153337dabbc\\e9a5ecae-a4cd-4d74-a06f-38d45053c1b5.md",
+          "status": "active",
+          "createdAt": 1793459307.629635
+        }
+      ],
+      "activeHandoffId": "e9a5ecae-a4cd-4d74-a06f-38d45053c1b5",
+      "activeAgent": "codex",
+      "activeSessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb",
+      "status": "active",
+      "updatedAt": 1793459307.629635
+    }
   ]
 }

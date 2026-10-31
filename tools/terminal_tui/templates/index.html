@@ -3886,8 +3886,9 @@
                 </select>
                 <span style="margin-left:auto;font-size:.67rem;color:#777;">Original session stays saved</span>
             </div>
-            <div id="agent-handoff-import-note" data-testid="agent-handoff-import-note" style="padding:4px 16px 8px;color:#999;font-size:.7rem;">Review the handoff note. A full readable transcript and the original event log will be exported locally, and the new agent will be asked to read them before continuing.</div>
-            <textarea id="agent-handoff-context" maxlength="18000" spellcheck="false" placeholder="Loading recent conversation context…" style="width:calc(100% - 32px);margin:0 16px 12px;box-sizing:border-box;min-height:240px;flex:1;resize:vertical;padding:11px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#e5e7eb;outline:none;font-family:'Fira Code',Consolas,monospace;font-size:.72rem;line-height:1.55;"></textarea>
+            <div id="agent-handoff-import-note" data-testid="agent-handoff-import-note" style="padding:4px 16px 8px;color:#999;font-size:.7rem;">The new agent receives this session ID and its original transcript path, reads that file directly, and starts a fresh native session.</div>
+            <label for="agent-handoff-context" style="padding:2px 16px 6px;color:#999;font-size:.69rem;">Optional note for the new agent</label>
+            <textarea id="agent-handoff-context" maxlength="18000" spellcheck="false" placeholder="Add a brief instruction if needed…" style="width:calc(100% - 32px);margin:0 16px 12px;box-sizing:border-box;min-height:100px;max-height:180px;flex:none;resize:vertical;padding:11px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#e5e7eb;outline:none;font-family:'Fira Code',Consolas,monospace;font-size:.72rem;line-height:1.55;"></textarea>
             <div id="agent-handoff-error" role="status" style="display:none;padding:0 16px 10px;color:#fca5a5;font-size:.7rem;"></div>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
                 <button id="agent-handoff-cancel" onclick="closeAgentHandoffModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
@@ -6096,7 +6097,7 @@
             [...target.options].forEach(option => { option.disabled = option.value === sourceSession.agent; });
             target.value = ['codex', 'pi', 'kiro'].find(name => name !== sourceSession.agent) || 'codex';
             context.value = '';
-            context.placeholder = 'Loading recent conversation context…';
+            context.placeholder = 'Add a brief instruction if needed…';
             error.style.display = 'none';
             start.disabled = true;
             start.style.opacity = '.55';
@@ -6135,7 +6136,7 @@
             const handoffText = document.getElementById('agent-handoff-context').value.trim();
             const error = document.getElementById('agent-handoff-error');
             const start = document.getElementById('agent-handoff-start');
-            if (!source || !activeProject || !handoffText) return;
+            if (!source || !activeProject) return;
             start.disabled = true;
             start.textContent = 'Starting…';
             error.style.display = 'none';

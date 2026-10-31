@@ -19,11 +19,10 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
-## [2026-10-31] - Bundle Full Sessions for Agent Handoffs
+## [2026-10-31] - Pass Native Session Paths to Handoff Agents
 
-- Each switch now exports every readable user/assistant message and copies the source agent's original JSONL event log into a persistent local app-data bundle.
-- The target agent's first prompt points to both files and asks it to read the full transcript before continuing.
-- Subsequent switches include the earlier transcript bundle, preserving context through multi-agent chains without converting private native session formats.
+- Each switch now sends a compact prompt with the source agent, session ID, and original transcript path; the target reads that file directly.
+- The target starts a fresh native session and is told to follow prior handoff paths when present, preserving the agent chain without copying or converting session files.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 
