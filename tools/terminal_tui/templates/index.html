@@ -2040,7 +2040,7 @@
                         </svg>
                     </button>
 
-                    <button class="action-btn" id="codex-resume-toggle" onclick="openCodexSessionPicker()" title="Browse and continue a saved Codex chat" aria-label="Browse saved Codex chats" style="height: 34px; min-width: 34px; padding: 0 7px; display: flex; align-items: center; justify-content: center; gap: 5px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.68rem; font-weight: 600;">↻ Codex</button>
+                    <button class="action-btn" id="codex-resume-toggle" onclick="openCodexSessionPicker()" title="Browse and continue a saved agent chat" aria-label="Browse saved agent chats" style="height: 34px; min-width: 34px; padding: 0 7px; display: flex; align-items: center; justify-content: center; gap: 5px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.68rem; font-weight: 600;">↻ AGENT</button>
 
                     <button class="action-btn" id="scratchpad-toggle-btn" onclick="toggleScratchpad(event)" title="Workspace Notes & Scratchpad" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); position: relative; transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -5943,16 +5943,18 @@
             const input = document.getElementById('codex-session-search');
             const list = document.getElementById('codex-session-list');
             const count = document.getElementById('codex-session-picker-count');
+            const title = document.getElementById('codex-session-picker-title');
             modal.classList.add('show');
             input.value = '';
+            title.textContent = `Continue a chat in ${activeProject}`;
             count.textContent = 'Loading saved sessions…';
             list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading Codex sessions…</div>';
             try {
-                const response = await fetch('/api/codex/sessions');
+                const response = await fetch(`/api/codex/sessions?project=${encodeURIComponent(activeProject)}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not load Codex sessions.');
                 codexSavedSessions = data.sessions || [];
-                count.textContent = `${codexSavedSessions.length} saved ${codexSavedSessions.length === 1 ? 'chat' : 'chats'}`;
+                count.textContent = `${codexSavedSessions.length} ${codexSavedSessions.length === 1 ? 'chat' : 'chats'} in this workspace`;
                 filterCodexSessions();
                 input.focus();
             } catch (error) {
@@ -5972,7 +5974,7 @@
                 `${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
             );
             if (!matches.length) {
-                list.innerHTML = `<div style="padding:26px 12px;text-align:center;color:#888;font-size:.8rem;">${codexSavedSessions.length ? 'No matching chats.' : 'No saved Codex chats were found for this profile.'}</div>`;
+                list.innerHTML = `<div style="padding:26px 12px;text-align:center;color:#888;font-size:.8rem;">${codexSavedSessions.length ? 'No matching chats.' : 'No saved Codex chats were found in this workspace.'}</div>`;
                 return;
             }
             list.innerHTML = matches.map(session => {

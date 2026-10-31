@@ -5,9 +5,10 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-10-31] - Add Quick Codex Chat Resume
 
-- Added a workspace toolbar button that opens a searchable list of saved Codex chats, including first prompt, workspace path, modified time, and session ID.
+- Added a workspace toolbar AGENT button that opens a searchable list of saved Codex chats scoped to the active workspace, including first user prompt, workspace path, modified time, and session ID.
 - Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab, using the session's saved folder when available.
-- Added `GET /api/codex/sessions` to read current and archived session metadata from the active Codex profile.
+- Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
+- Added `GET /api/codex/sessions?project=<workspace>` to read current and archived session metadata from the active Codex profile, filtered to the workspace folder and its descendants.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 

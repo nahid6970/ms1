@@ -68,8 +68,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume Codex Chat
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's Codex button opens a searchable list of saved Codex chats, including each chat's first prompt, folder, modified time, and session ID. Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab.
-**Usage:** Open a workspace and click `↻ Codex`; search or browse the saved chats, then select one to resume it.
+**Description:** The workspace toolbar's AGENT button opens a searchable list of saved Codex chats for the active workspace, including each chat's first user prompt, folder, modified time, and session ID. Injected `AGENTS.md` instructions are skipped when choosing the title. Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab.
+**Usage:** Open a workspace and click `↻ AGENT`; search or browse that workspace's saved chats, then select one to resume it.
 **Files Involved:** `app.py` (`GET /api/codex/sessions`), `templates/index.html` (session picker modal and `resumeCodexSession()`)
 
 ## Workspace Management

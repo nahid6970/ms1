@@ -1454,7 +1454,14 @@ def api_session_pane_stop(project, pane_id):
 
 @app.route('/api/codex/sessions', methods=['GET'])
 def api_codex_sessions():
-    """List saved Codex conversations for the profile running this server."""
+    """List saved Codex conversations that belong to the requested workspace."""
+    project_name = (request.args.get('project') or '').strip()
+    projects = scan_projects()
+    project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     codex_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
     session_dirs = [os.path.join(codex_home, 'sessions'), os.path.join(codex_home, 'archived_sessions')]
@@ -1478,6 +1485,15 @@ def api_codex_sessions():
                         session_id = str(metadata.get('session_id') or metadata.get('id') or '')
                         if not re.fullmatch(r'[0-9a-fA-F-]{36}', session_id) or session_id in seen_ids:
                             continue
+                        cwd = str(metadata.get('cwd') or '')
+                        if not cwd:
+                            continue
+                        session_cwd = os.path.normcase(os.path.realpath(os.path.abspath(cwd)))
+                        try:
+                            if os.path.commonpath([project_path, session_cwd]) != project_path:
+                                continue
+                        except ValueError:
+                            continue
 
                         title = ''
                         for line in session_file:
@@ -1492,19 +1508,27 @@ def api_codex_sessions():
                                 continue
                             content = event_payload.get('content') or []
                             if isinstance(content, str):
-                                title = content
+                                candidate_title = content
                             elif isinstance(content, list):
-                                title = ' '.join(
+                                candidate_title = ' '.join(
                                     str(part.get('text') or '')
                                     for part in content
                                     if isinstance(part, dict) and part.get('type') in {'input_text', 'text'}
                                 )
-                            title = ' '.join(title.split())[:180]
+                            else:
+                                candidate_title = ''
+                            candidate_title = ' '.join(candidate_title.split())
+                            candidate_lower = candidate_title.casefold()
+                            if (not candidate_title or
+                                    candidate_lower.startswith('# agents.md instructions') or
+                                    candidate_lower.startswith('## environment context') or
+                                    ('<instructions>' in candidate_lower and 'agents.md' in candidate_lower)):
+                                continue
+                            title = candidate_title[:180]
                             if title:
                                 break
 
                     seen_ids.add(session_id)
-                    cwd = str(metadata.get('cwd') or '')
                     sessions.append({
                         'sessionId': session_id,
                         'title': title or 'Untitled chat',
