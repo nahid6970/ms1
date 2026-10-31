@@ -495,4 +495,9 @@ install_ai_agents() {
     esac
 }
 
+if [[ "${1:-}" == "--start-t3" ]]; then
+    start_t3_android_server "${@:2}"
+    exit $?
+fi
+
 show_menu
