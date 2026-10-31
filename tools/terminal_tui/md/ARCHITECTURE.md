@@ -61,7 +61,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
-- **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex and Pi sessions scoped to the active workspace. Rows show the matching SVG icon beside session details; choosing one runs that agent CLI in a new terminal tab.
+- **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex, Pi, and Kiro CLI sessions scoped to the active workspace. Rows show the matching agent icon beside session details; choosing one runs that agent CLI in a new terminal tab.
 - **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
 - **Ctrl+F**: Open terminal output search when a terminal pane is focused.
 - **Arrow Up/Down + Enter**: Navigate and select items in the F1 palette.
@@ -236,7 +236,7 @@ function prompt { ... }
 
 ### Sessions
 - `POST /api/session/<project>` - Start/connect terminal session
-- `GET /api/agent/sessions?project=<workspace>` - List saved Codex and Pi conversations whose saved working directory is inside the requested workspace
+- `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, and Kiro CLI conversations whose saved working directory is inside the requested workspace
 - `POST /api/session/<project>/stop` - Kill terminal session
 - `GET /api/session/<project>/stats` - CPU/memory/git stats
 - `POST /api/sessions/reset` - Kill all sessions + reset layouts

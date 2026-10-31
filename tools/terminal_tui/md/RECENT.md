@@ -5,9 +5,9 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-10-31] - Add Unified AI Agent Session Resume
 
-- Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex and Pi sessions scoped to the active workspace.
-- Added the Codex and Pi SVG icons to the left of each session's title, workspace path, modified time, and session ID.
-- Selecting a session opens Codex with `codex resume <SESSION_ID>` or Pi with `pi --session <SESSION_PATH>` in a new terminal tab.
+- Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex, Pi, and Kiro CLI sessions scoped to the active workspace.
+- Added each agent icon to the left of the session title, workspace path, modified time, and session ID.
+- Selecting a session opens Codex with `codex resume <SESSION_ID>`, Pi with `pi --session <SESSION_PATH>`, or Kiro with `kiro-cli chat --resume-id <SESSION_ID>` in a new terminal tab.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
 - Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
 

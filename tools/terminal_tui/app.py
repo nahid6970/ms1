@@ -1492,6 +1492,60 @@ def api_agent_sessions():
     else:
         pi_roots = [os.path.join(pi_agent_home, 'sessions')]
     session_roots.extend(('pi', path) for path in pi_roots)
+    session_roots.append(('kiro', os.path.join(profile_home, '.kiro', 'sessions', 'cli')))
+
+    def clean_session_title(value):
+        value = ' '.join(str(value or '').split())
+        lowered = value.casefold()
+        if (not value or lowered.startswith('# agents.md instructions') or
+                lowered.startswith('## environment context') or
+                ('<instructions>' in lowered and 'agents.md' in lowered)):
+            return ''
+        return value[:180]
+
+    def find_session_title(agent, transcript_file):
+        for line in transcript_file:
+            if len(line) > 2_000_000:
+                continue
+            try:
+                record = json.loads(line)
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+            if agent == 'kiro':
+                if record.get('kind') != 'Prompt':
+                    continue
+                content = (record.get('data') or {}).get('content') or []
+                candidate = ' '.join(
+                    str(part.get('data') or '')
+                    for part in content
+                    if isinstance(part, dict) and part.get('kind') == 'text'
+                ) if isinstance(content, list) else str(content)
+            else:
+                if agent == 'codex':
+                    message = record.get('payload') or {}
+                    is_user_message = message.get('role') == 'user'
+                else:
+                    message = record.get('message') or {}
+                    is_user_message = message.get('role') == 'user' and record.get('type') == 'message'
+                if not is_user_message:
+                    continue
+                content = message.get('content') or []
+                if isinstance(content, str):
+                    candidate = content
+                elif isinstance(content, list):
+                    candidate = ' '.join(
+                        str(part.get('text') or '')
+                        for part in content
+                        if isinstance(part, dict) and part.get('type') in {'input_text', 'text'}
+                    )
+                else:
+                    candidate = ''
+
+            candidate = clean_session_title(candidate)
+            if candidate:
+                return candidate
+        return ''
 
     sessions = []
     seen_ids = set()
@@ -1501,17 +1555,23 @@ def api_agent_sessions():
             continue
         for root, _dirs, filenames in os.walk(session_dir):
             for filename in filenames:
-                if not filename.lower().endswith('.jsonl'):
+                if agent == 'kiro':
+                    if not filename.lower().endswith('.json'):
+                        continue
+                elif not filename.lower().endswith('.jsonl'):
                     continue
                 session_path = os.path.join(root, filename)
                 try:
                     modified_at = os.path.getmtime(session_path)
                     with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-                        first_line = session_file.readline()
-                        first_record = json.loads(first_line)
-                        metadata = first_record.get('payload') or {}
-                        if agent == 'pi':
-                            metadata = first_record
+                        if agent == 'kiro':
+                            metadata = json.load(session_file)
+                        else:
+                            first_record = json.loads(session_file.readline())
+                            metadata = first_record.get('payload') or {}
+                            if agent == 'pi':
+                                metadata = first_record
+
                         session_id = str(metadata.get('session_id') or metadata.get('id') or '')
                         if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id) or (agent, session_id) in seen_ids:
                             continue
@@ -1525,42 +1585,18 @@ def api_agent_sessions():
                         except ValueError:
                             continue
 
-                        title = ''
-                        for line in session_file:
-                            if len(line) > 2_000_000:
-                                continue
-                            try:
-                                record = json.loads(line)
-                            except (json.JSONDecodeError, TypeError):
-                                continue
-                            if agent == 'codex':
-                                event_payload = record.get('payload') or {}
-                            else:
-                                event_payload = record.get('message') or {}
-                            if (event_payload.get('role') != 'user' or
-                                    (agent == 'pi' and record.get('type') != 'message')):
-                                continue
-                            content = event_payload.get('content') or []
-                            if isinstance(content, str):
-                                candidate_title = content
-                            elif isinstance(content, list):
-                                candidate_title = ' '.join(
-                                    str(part.get('text') or '')
-                                    for part in content
-                                    if isinstance(part, dict) and part.get('type') in {'input_text', 'text'}
-                                )
-                            else:
-                                candidate_title = ''
-                            candidate_title = ' '.join(candidate_title.split())
-                            candidate_lower = candidate_title.casefold()
-                            if (not candidate_title or
-                                    candidate_lower.startswith('# agents.md instructions') or
-                                    candidate_lower.startswith('## environment context') or
-                                    ('<instructions>' in candidate_lower and 'agents.md' in candidate_lower)):
-                                continue
-                            title = candidate_title[:180]
-                            if title:
-                                break
+                        if agent == 'kiro':
+                            title = clean_session_title(metadata.get('title'))
+                            if not title:
+                                transcript_path = os.path.splitext(session_path)[0] + '.jsonl'
+                                if not os.path.isfile(transcript_path):
+                                    continue
+                                with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
+                                    title = find_session_title(agent, transcript_file)
+                        else:
+                            title = find_session_title(agent, session_file)
+                    if agent == 'kiro' and not title:
+                        continue
 
                     seen_ids.add((agent, session_id))
                     sessions.append({
