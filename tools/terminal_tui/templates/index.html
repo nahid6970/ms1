@@ -2040,6 +2040,14 @@
                         </svg>
                     </button>
 
+                    <div id="codex-resume-actions" style="position: relative;">
+                        <button class="action-btn" id="codex-resume-toggle" onclick="toggleCodexResumeMenu(event)" title="Continue a saved Codex chat" aria-label="Continue a saved Codex chat" aria-expanded="false" style="height: 34px; min-width: 34px; padding: 0 7px; display: flex; align-items: center; justify-content: center; gap: 5px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.68rem; font-weight: 600;">↻ Codex</button>
+                        <div id="codex-resume-menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 200; min-width: 190px; padding: 5px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+                            <button id="codex-resume-picker" onclick="resumeCodexChat(false)" style="display:block;width:100%;padding:8px 10px;border:0;border-radius:5px;background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;font-size:.78rem;">Choose a saved chat…</button>
+                            <button id="codex-resume-latest" onclick="resumeCodexChat(true)" style="display:block;width:100%;padding:8px 10px;border:0;border-radius:5px;background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;font-size:.78rem;">Continue latest chat</button>
+                        </div>
+                    </div>
+
                     <button class="action-btn" id="scratchpad-toggle-btn" onclick="toggleScratchpad(event)" title="Workspace Notes & Scratchpad" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); position: relative; transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -5911,6 +5919,27 @@
             Object.keys(existing).forEach(key => {
                 if (!seen.has(key)) existing[key].remove();
             });
+        }
+
+        function toggleCodexResumeMenu(event) {
+            event?.stopPropagation();
+            const menu = document.getElementById('codex-resume-menu');
+            const button = document.getElementById('codex-resume-toggle');
+            const open = menu && menu.style.display !== 'none';
+            if (menu) menu.style.display = open ? 'none' : 'block';
+            if (button) button.setAttribute('aria-expanded', String(!open));
+        }
+
+        function resumeCodexChat(latest = false) {
+            const menu = document.getElementById('codex-resume-menu');
+            const button = document.getElementById('codex-resume-toggle');
+            if (menu) menu.style.display = 'none';
+            if (button) button.setAttribute('aria-expanded', 'false');
+            if (!activeProject) {
+                alert('Open a workspace first to resume a Codex chat.');
+                return;
+            }
+            splitTerminal('tabs', latest ? 'codex resume --last' : 'codex resume');
         }
 
         function splitTerminal(direction, initialCommand = null) {

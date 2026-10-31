@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-10-31] - Add Quick Codex Chat Resume
+
+- Added a workspace toolbar menu to open Codex's saved-chat picker or resume the latest saved chat in a new terminal tab.
+- Reuses the Codex CLI session store and active PowerShell profile.
+- Documented the workflow in FEATURES.md and ARCHITECTURE.md.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-10-25] - Add Synchronized Workspace Filters
 
 - Added a three-state project filter (All, GitHub, Rclone) to the sidebar and workspace dropdown.

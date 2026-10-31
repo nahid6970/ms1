@@ -66,6 +66,12 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Description:** F1 opens a centered command-palette-style window for selecting workspaces, searching saved commands, and creating a new workspace.
 **Implementation:** `templates/index.html` — dark rounded palette layout, search/back row, Projects and Commands views, existing Add Workspace modal integration, Arrow-key/Enter navigation, and Ctrl/Cmd+1–9 project shortcuts.
 
+## Resume Codex Chat
+**Status:** ✅ Complete
+**Description:** The workspace toolbar's Codex button launches the Codex saved-chat picker (`codex resume`) or continues the latest saved chat (`codex resume --last`) in a new terminal tab. Codex uses the account and conversation history available to the active PowerShell profile.
+**Usage:** Open a workspace, click `↻ Codex`, then choose a saved chat or continue the latest one.
+**Files Involved:** `templates/index.html` (toolbar action and `resumeCodexChat()`)
+
 ## Workspace Management
 **Status:** ✅ Complete
 **Description:** Multi-workspace terminal sessions. Each workspace = project folder + persistent PowerShell session with custom profile.

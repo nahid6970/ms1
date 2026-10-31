@@ -61,6 +61,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
+- **Codex toolbar action**: Opens the Codex CLI saved-chat picker or resumes its latest chat in a new terminal tab.
 - **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
 - **Ctrl+F**: Open terminal output search when a terminal pane is focused.
 - **Arrow Up/Down + Enter**: Navigate and select items in the F1 palette.
