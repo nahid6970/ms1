@@ -172,6 +172,15 @@ if [[ "$IS_TERMUX" == true ]]; then
         bash "$osu_script" --start-t3 "$@"
     }
 
+    # Create a fresh mobile pairing link from another Termux tab while T3 serves.
+    t3pair() {
+        if ! command -v proot-distro >/dev/null 2>&1; then
+            echo "proot-distro is not installed."
+            return 1
+        fi
+        proot-distro login ubuntu -- t3 pair "$@"
+    }
+
     termux-wake-lock 2>/dev/null || true
     if [[ -f /data/data/com.termux/files/usr/etc/bash_completion ]]; then
         . /data/data/com.termux/files/usr/etc/bash_completion

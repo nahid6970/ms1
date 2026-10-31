@@ -208,7 +208,7 @@ get_t3_host_ip() {
 }
 
 start_t3_android_server() {
-    local host_ip status server_script
+    local host_ip status
     host_ip="$(get_t3_host_ip)" || {
         echo -e "${RED}Could not detect the phone's Wi-Fi IP. Connect to Wi-Fi and try again.${NC}"
         return 1
@@ -230,52 +230,18 @@ start_t3_android_server() {
     fi
 
     echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}...${NC}"
-    echo "The pairing link and QR code will appear below. Paste the link into T3 Android > Settings > Environments."
+    echo "Keep this server running. In another Termux tab, run: t3pair"
+    echo "Then paste its pairing link into T3 Android > Settings > Environments."
 
     if ! inside_ubuntu && command -v termux-wake-lock >/dev/null 2>&1; then
         termux-wake-lock 2>/dev/null || true
         trap 'termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
     fi
-
-    server_script=$(cat <<'T3_SERVER_SCRIPT'
-host_ip="$1"
-mkdir -p "$HOME/.t3"
-log_file="$HOME/.t3/serve-android.log"
-t3 serve --host "$host_ip" >"$log_file" 2>&1 &
-server_pid=$!
-trap 'kill "$server_pid" 2>/dev/null || true; exit 130' INT TERM
-
-for ((attempt = 0; attempt < 15; attempt++)); do
-    [[ -s "$HOME/.t3/userdata/server-runtime.json" ]] && break
-    kill -0 "$server_pid" 2>/dev/null || break
-    sleep 1
-done
-
-if ! kill -0 "$server_pid" 2>/dev/null; then
-    echo "T3 server exited before it became ready. Server output:"
-    cat "$log_file"
-    exit 1
-fi
-
-t3 pair
-pair_status=$?
-if (( pair_status != 0 )); then
-    echo "Could not create the pairing link. T3 server output:"
-    cat "$log_file"
-    kill "$server_pid" 2>/dev/null || true
-    exit "$pair_status"
-fi
-
-echo
-echo "T3 server is running. Press Ctrl+C to stop it."
-wait "$server_pid"
-T3_SERVER_SCRIPT
-    )
     if inside_ubuntu; then
-        bash -c "$server_script" bash "$host_ip"
+        t3 serve --host "$host_ip"
         status=$?
     else
-        proot-distro login ubuntu -- bash -c "$server_script" bash "$host_ip"
+        proot-distro login ubuntu -- t3 serve --host "$host_ip"
         status=$?
     fi
 
