@@ -1,282 +1,178 @@
 {
-    "Layout_2026-05-24_19-07-16": {
+    "Layout_2026-10-31_12-40-43": {
         "icons": {
             "nahid": {
-                "x": 1840,
-                "y": 802
+                "x": 14,
+                "y": 41
             },
             "This PC": {
-                "x": 16,
-                "y": 102
-            },
-            "Recycle Bin": {
-                "x": 16,
-                "y": 202
+                "x": 14,
+                "y": 139
             },
             "Control Panel": {
-                "x": 16,
-                "y": 302
+                "x": 14,
+                "y": 237
             },
-            "DesktopOK": {
-                "x": 16,
-                "y": 402
+            "Recycle Bin": {
+                "x": 14,
+                "y": 335
             },
             "Google Chrome": {
-                "x": 16,
-                "y": 502
+                "x": 14,
+                "y": 433
             },
-            "PotPlayer 64 bit": {
-                "x": 16,
-                "y": 602
-            },
-            "Sonarr": {
-                "x": 16,
-                "y": 702
-            },
-            "Prowlarr": {
-                "x": 16,
-                "y": 802
-            },
-            "Cleanuparr": {
-                "x": 16,
-                "y": 902
+            "OBS Studio": {
+                "x": 14,
+                "y": 531
             },
             "UniGetUI": {
-                "x": 92,
-                "y": 2
-            },
-            "Zoom Workplace": {
-                "x": 92,
-                "y": 102
-            },
-            "Sniffnet": {
-                "x": 92,
-                "y": 202
-            },
-            "Thunderbird": {
-                "x": 92,
-                "y": 302
-            },
-            "QuickLook": {
-                "x": 92,
-                "y": 402
-            },
-            "Free Download Manager": {
-                "x": 92,
-                "y": 502
-            },
-            "Xodo PDF Reader": {
-                "x": 92,
-                "y": 602
-            },
-            "BCUninstaller": {
-                "x": 92,
-                "y": 702
-            },
-            "Google": {
-                "x": 92,
-                "y": 802
-            },
-            "Helium": {
-                "x": 92,
-                "y": 902
-            },
-            "KDE Connect": {
-                "x": 168,
-                "y": 2
-            },
-            "NotebookLM": {
-                "x": 168,
-                "y": 102
-            },
-            "XLaunch": {
-                "x": 168,
-                "y": 202
-            },
-            "nexusfont": {
-                "x": 168,
-                "y": 302
+                "x": 14,
+                "y": 629
             },
             "Google AI Studio": {
-                "x": 168,
-                "y": 402
+                "x": 14,
+                "y": 727
             },
-            "Nahid - Chrome": {
-                "x": 168,
-                "y": 502
+            "GitHub Desktop": {
+                "x": 14,
+                "y": 825
             },
-            "JDownloader 2": {
-                "x": 168,
-                "y": 602
+            "Workspaces": {
+                "x": 14,
+                "y": 923
+            },
+            "Sonarr": {
+                "x": 90,
+                "y": 41
+            },
+            "Radarr": {
+                "x": 90,
+                "y": 139
+            },
+            "Prowlarr": {
+                "x": 90,
+                "y": 237
             },
             "Excel-like Data Table": {
-                "x": 168,
-                "y": 702
+                "x": 90,
+                "y": 335
             },
-            "Analytical": {
-                "x": 244,
-                "y": 2
+            "Google": {
+                "x": 90,
+                "y": 433
             },
-            "SyncFolders": {
-                "x": 244,
-                "y": 302
+            "Antigravity": {
+                "x": 90,
+                "y": 531
             },
-            "youtube-cookie.txt": {
-                "x": 244,
-                "y": 402
+            "T3 Code (Beta)": {
+                "x": 90,
+                "y": 629
             },
-            "art.7z": {
-                "x": 244,
-                "y": 502
+            "Orca": {
+                "x": 90,
+                "y": 727
             },
-            "Excel-like Data Table.pdf": {
-                "x": 244,
-                "y": 602
+            "BCUninstaller": {
+                "x": 90,
+                "y": 825
             },
-            "asdasdasdasd.txt": {
-                "x": 244,
-                "y": 702
+            "My TV Shows": {
+                "x": 90,
+                "y": 923
             },
-            "scientific_calculator": {
-                "x": 244,
-                "y": 802
+            "ArtCraft Launcher": {
+                "x": 166,
+                "y": 41
             },
-            "Taxes Zone-Noakhali - TAXNOA _ Powered By Teletalk.pdf": {
-                "x": 244,
-                "y": 902
+            "PdfCraft": {
+                "x": 166,
+                "y": 139
             },
-            "Islamic Foundation - IFB _ Powered By Teletalk.pdf": {
-                "x": 320,
-                "y": 102
+            "LDPlayer 9": {
+                "x": 166,
+                "y": 237
             },
-            "Gallery": {
-                "x": 320,
-                "y": 202
+            "LDMultiPlayer": {
+                "x": 166,
+                "y": 335
             },
-            "Gas Transmission Company Limited (GTCL) - GTCL _ Powered By Teletalk.pdf": {
-                "x": 320,
-                "y": 302
+            "Far Cry 4": {
+                "x": 166,
+                "y": 433
             },
-            "DOSBox 0.74-3": {
-                "x": 320,
-                "y": 402
+            "Far Cry": {
+                "x": 166,
+                "y": 531
             },
-            "\u09eb\u09e6\u09a4\u09ae \u09ac\u09bf\u09b8\u09bf\u098f\u09b8 \u09b8\u09be\u09ae\u09cd\u09aa\u09cd\u09b0\u09a4\u09bf\u0995 \u0993 \u099a\u09b2\u09ae\u09be\u09a8 \u0998\u099f\u09a8\u09be  \u09aa\u09cd\u09b0\u09ac\u09be\u09b9 by Zahidul Islam BCS Intelligence.pdf": {
-                "x": 928,
-                "y": 102
+            "Roblox Studio": {
+                "x": 166,
+                "y": 629
             },
-            "Vocab.txt": {
-                "x": 928,
-                "y": 302
-            },
-            "new 1.txt": {
-                "x": 928,
-                "y": 402
-            },
-            "481133401_1792295234890919_906037966534795884_n.jpg": {
-                "x": 1004,
-                "y": 2
-            },
-            "Map_of_Bangladesh-en.svg": {
-                "x": 1004,
-                "y": 102
-            },
-            "surakafirun.png": {
-                "x": 1004,
-                "y": 202
-            },
-            "@delta.xlsx": {
-                "x": 1080,
-                "y": 2
-            },
-            "xHTML.html": {
-                "x": 1080,
-                "y": 502
-            },
-            "New folder": {
-                "x": 1232,
-                "y": 402
-            },
-            "FB_Group_IMG": {
-                "x": 1232,
-                "y": 902
-            },
-            "math kiro": {
-                "x": 1308,
-                "y": 902
-            },
-            "image_403.png": {
-                "x": 1384,
-                "y": 602
-            },
-            "TEST": {
-                "x": 1384,
-                "y": 902
-            },
-            "song": {
-                "x": 1460,
-                "y": 902
-            },
-            "image_336.png": {
-                "x": 1536,
-                "y": 502
+            "Roblox Player": {
+                "x": 166,
+                "y": 727
             },
             "ShareFolder": {
-                "x": 1536,
-                "y": 902
+                "x": 1534,
+                "y": 923
             },
-            "admitcard": {
-                "x": 1612,
-                "y": 902
+            "SyncFolders": {
+                "x": 1610,
+                "y": 923
             },
-            "msBackups": {
-                "x": 1688,
-                "y": 902
+            "odoo documentation": {
+                "x": 1686,
+                "y": 825
+            },
+            "ldplayer": {
+                "x": 1686,
+                "y": 923
+            },
+            "Job_Application_Profile.md": {
+                "x": 1762,
+                "y": 825
+            },
+            "db": {
+                "x": 1762,
+                "y": 923
+            },
+            "clipboard_20261011_143611_790663.png": {
+                "x": 1838,
+                "y": 629
+            },
+            "ffff.txt": {
+                "x": 1838,
+                "y": 727
             },
             "playlist.dpl": {
-                "x": 1764,
-                "y": 802
+                "x": 1838,
+                "y": 825
             },
             "ms1": {
-                "x": 1764,
-                "y": 902
-            },
-            "myShare": {
-                "x": 1840,
-                "y": 502
-            },
-            "Root": {
-                "x": 1840,
-                "y": 602
-            },
-            "youtube_cookies.txt": {
-                "x": 1840,
-                "y": 702
-            },
-            "@JOB": {
-                "x": 1840,
-                "y": 902
+                "x": 1838,
+                "y": 923
             }
         },
         "windows": [
             {
-                "title": "python",
-                "class": "Qt6110QWindowToolSaveBits",
-                "x": 60,
-                "y": 990,
-                "w": 1800,
-                "h": 39
-            },
-            {
                 "title": "CYBER_DESKTOP_OK v1.0",
-                "class": "Qt6110QWindowIcon",
+                "class": "Qt6112QWindowIcon",
                 "x": 702,
-                "y": 185,
+                "y": 205,
                 "w": 516,
                 "h": 639
             },
             {
-                "title": "snipping tool video resolution - Google Search - Google Chrome",
+                "title": "pythonw",
+                "class": "Qt6112QWindowToolSaveBits",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 39
+            },
+            {
+                "title": "qBittorrent theme smoketest - Google Chrome",
                 "class": "Chrome_WidgetWin_1",
                 "x": -32000,
                 "y": -32000,
@@ -284,15 +180,15 @@
                 "h": 28
             },
             {
-                "title": "Snipping Tool",
-                "class": "XamlWindow",
+                "title": "Workspaces",
+                "class": "Chrome_WidgetWin_1",
                 "x": -32000,
                 "y": -32000,
                 "w": 160,
                 "h": 28
             },
             {
-                "title": "snap_recording - File Explorer",
+                "title": "FarCry4_Saves_Backup - File Explorer",
                 "class": "CabinetWClass",
                 "x": -32000,
                 "y": -32000,
@@ -300,18 +196,26 @@
                 "h": 28
             },
             {
-                "title": "Zoom Workplace",
-                "class": "ZPPTMainFrmWndClassEx",
+                "title": "Excel-like Data Table",
+                "class": "Chrome_WidgetWin_1",
                 "x": -32000,
                 "y": -32000,
                 "w": 160,
                 "h": 28
             },
             {
-                "title": "Jackett",
-                "class": "WindowsForms10.Window.8.app.0.784086_r3_ad1",
-                "x": 0,
-                "y": 1004,
+                "title": "T3 Code (Beta)",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "@delta - File Explorer",
+                "class": "CabinetWClass",
+                "x": -32000,
+                "y": -32000,
                 "w": 160,
                 "h": 28
             },
