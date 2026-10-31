@@ -1580,6 +1580,10 @@
       "kiro:b537d889-c706-45d0-8fd6-6a56d3e449c3": "Fixing Bangla text rendering and scrolling issues in xterm",
       "kiro:309ef9a4-70eb-4bf7-9b6c-422b41514293": "Add Rclone Integration Panel to Workspace",
       "codex:01a13882-7098-7493-a196-25ca02bfd668": "Reposition Rank Badge and Update Docs"
+    },
+    "Screenshot Region": {
+      "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",
+      "codex:01a192d0-e38d-7172-90fb-5e1c35795b7a": "Add Snipping Tool Option to Screenshot Script"
     }
   }
 }

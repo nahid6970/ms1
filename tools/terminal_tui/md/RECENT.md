@@ -5,7 +5,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-10-31] - Show Session Token Estimates
 
-- Added an approximate token count between the agent-history trail and session ID in each saved-session row.
+- Added an approximate token badge next to each session ID below the row action buttons.
 - The estimate uses readable user/assistant message text at roughly four characters per token; the tooltip clarifies that tool metadata is excluded.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
