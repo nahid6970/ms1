@@ -1567,5 +1567,19 @@
       "status": "active",
       "updatedAt": 1793461283.2775137
     }
-  ]
+  ],
+  "agent_session_title_overrides": {
+    "Terminal TUI": {
+      "kiro:a1a44d96-93e6-4631-ab8e-a98880a10258": "Fixing AI Model Batch Tester Dropdown Logic",
+      "kiro:2b824e6f-daad-4e09-b9a5-ecfab1e5cf88": "Fix AI Suggest Route and Add Model Selector",
+      "kiro:d6f38f92-4461-4c44-a150-ba05a734d5df": "Fixing Rclone AI Ignore List Errors",
+      "kiro:1b709786-0ef2-49b0-99ac-92cc526d764f": "Implement Workspace Focus History and Navigation",
+      "kiro:1c749645-eeaf-4f8a-9fb8-ef8ed56b9ed3": "Fixing Windows terminal environment PATH inheritance",
+      "kiro:8a2a479a-64a4-4b26-af47-a889a96baf0e": "Fix Terminal Missing System Path Variables",
+      "codex:01a170e9-0aba-7192-9b36-4fa961257833": "Style and Center Rclone Icon Controls",
+      "kiro:b537d889-c706-45d0-8fd6-6a56d3e449c3": "Fixing Bangla text rendering and scrolling issues in xterm",
+      "kiro:309ef9a4-70eb-4bf7-9b6c-422b41514293": "Add Rclone Integration Panel to Workspace",
+      "codex:01a13882-7098-7493-a196-25ca02bfd668": "Reposition Rank Badge and Update Docs"
+    }
+  }
 }

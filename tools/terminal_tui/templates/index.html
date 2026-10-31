@@ -3867,6 +3867,29 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="agent-session-title-modal" role="dialog" aria-modal="true" aria-labelledby="agent-session-title-heading" onclick="if(event.target===this)closeAgentSessionTitleModal()" style="z-index:1240;">
+        <div class="modal-content" style="width:500px;max-width:92vw;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:12px;">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+                <div id="agent-session-title-heading" style="font-size:.92rem;font-weight:650;color:#f3f4f6;">Rename conversation</div>
+                <div id="agent-session-title-description" style="font-size:.68rem;color:#999;margin-top:4px;">This changes the title shown in the session list.</div>
+            </div>
+            <div style="padding:14px 16px 8px;">
+                <input id="agent-session-title-input" type="text" maxlength="160" autocomplete="off" placeholder="Conversation title" onkeydown="if(event.key==='Enter'){event.preventDefault();saveAgentConversationTitle()}" style="width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #3b3b3b;border-radius:7px;background:#111;color:#f3f4f6;outline:none;font-size:.82rem;">
+            </div>
+            <div style="display:flex;align-items:center;gap:7px;padding:2px 16px 12px;">
+                <select id="agent-session-title-model-select" aria-label="Gemini model for title generation" title="Gemini model" style="height:28px;max-width:210px;padding:3px 7px;border:1px solid rgba(168,85,247,.35);border-radius:6px;background:#111;color:#ddd;font-size:.7rem;outline:none;"></select>
+                <button type="button" id="agent-session-title-ai-suggest-btn" data-testid="agent-session-title-ai-suggest" onclick="suggestAgentConversationTitle()" title="Generate a title with Gemini" aria-label="Generate title with Gemini" style="height:28px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;border:1px solid rgba(168,85,247,.4);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;cursor:pointer;font-size:.72rem;font-weight:600;">
+                    <span id="agent-session-title-ai-suggest-icon" aria-hidden="true">✨</span><span>Suggest title</span>
+                </button>
+                <span id="agent-session-title-status" role="status" style="min-width:0;margin-left:auto;color:#999;font-size:.68rem;text-align:right;"></span>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
+                <button type="button" id="agent-session-title-cancel" onclick="closeAgentSessionTitleModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
+                <button type="button" id="agent-session-title-save" onclick="saveAgentConversationTitle()" style="padding:7px 13px;border:1px solid #7c3aed;border-radius:7px;background:#6d28d9;color:#fff;cursor:pointer;font-size:.73rem;">Save title</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="agent-handoff-modal" role="dialog" aria-modal="true" aria-labelledby="agent-handoff-title" onclick="if(event.target===this)closeAgentHandoffModal()" style="z-index:1220;">
         <div class="modal-content" style="width:760px;max-width:94vw;max-height:88vh;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:14px;">
             <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
@@ -6131,34 +6154,142 @@
             splitTerminal('tabs', `${locationCommand}${agentCommand}`);
         }
 
-        async function renameAgentConversation(agent, sessionId) {
+        let agentTitleRenameSource = null;
+
+        function populateAgentSessionTitleModelDropdown() {
+            const select = document.getElementById('agent-session-title-model-select');
+            if (!select) return;
+            const fallback = [
+                { val: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                { val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+                { val: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+            ];
+            const available = (typeof DYNAMIC_AI_MODELS !== 'undefined' && DYNAMIC_AI_MODELS.gemini?.length)
+                ? DYNAMIC_AI_MODELS.gemini : fallback;
+            const hidden = typeof getHiddenModels === 'function' ? (getHiddenModels().gemini || []) : [];
+            const models = available.filter(model => !hidden.includes(model.val));
+            const preferred = localStorage.getItem('agent-session-title-model') ||
+                localStorage.getItem('git-ai-commit-model') || localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+            select.innerHTML = '';
+            (models.length ? models : fallback).forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.val;
+                option.textContent = model.label || model.val;
+                select.appendChild(option);
+            });
+            if ([...select.options].some(option => option.value === preferred)) select.value = preferred;
+            select.onchange = () => localStorage.setItem('agent-session-title-model', select.value);
+        }
+
+        function renameAgentConversation(agent, sessionId) {
             const session = agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId);
             if (!session || !activeProject) return;
-            const title = prompt('Rename conversation', session.title || '');
-            if (title === null) return;
-            const cleanedTitle = title.trim();
-            if (!cleanedTitle) {
-                alert('Conversation title cannot be empty.');
+            agentTitleRenameSource = { ...session, project: activeProject };
+            document.getElementById('agent-session-title-input').value = session.title || '';
+            document.getElementById('agent-session-title-status').textContent = '';
+            populateAgentSessionTitleModelDropdown();
+            document.getElementById('agent-session-title-modal').classList.add('show');
+            const input = document.getElementById('agent-session-title-input');
+            input.focus();
+            input.select();
+        }
+
+        function closeAgentSessionTitleModal() {
+            document.getElementById('agent-session-title-modal')?.classList.remove('show');
+            agentTitleRenameSource = null;
+        }
+
+        async function suggestAgentConversationTitle() {
+            const source = agentTitleRenameSource;
+            const button = document.getElementById('agent-session-title-ai-suggest-btn');
+            const icon = document.getElementById('agent-session-title-ai-suggest-icon');
+            const status = document.getElementById('agent-session-title-status');
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            if (!source) return;
+            if (!apiKey) {
+                status.style.color = '#fca5a5';
+                status.textContent = 'Add a Gemini API key in AI Copilot settings.';
                 return;
             }
+            button.disabled = true;
+            icon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+            status.style.color = '#aaa';
+            status.textContent = 'Generating…';
+            try {
+                const response = await fetch('/api/agent/session-title/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: source.project,
+                        agent: source.agent,
+                        sessionId: source.sessionId,
+                        sessionPath: source.sessionPath || '',
+                        api_key: apiKey,
+                        model: document.getElementById('agent-session-title-model-select').value || 'gemini-2.5-flash',
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not generate a title.');
+                if (agentTitleRenameSource !== source) return;
+                document.getElementById('agent-session-title-input').value = data.suggestion || '';
+                status.style.color = '#86efac';
+                status.textContent = `Suggested with ${data.model || 'Gemini'}`;
+            } catch (error) {
+                status.style.color = '#fca5a5';
+                status.textContent = String(error.message || error);
+            } finally {
+                button.disabled = false;
+                icon.textContent = '✨';
+            }
+        }
+
+        async function saveAgentConversationTitle() {
+            const source = agentTitleRenameSource;
+            const saveButton = document.getElementById('agent-session-title-save');
+            const status = document.getElementById('agent-session-title-status');
+            const title = document.getElementById('agent-session-title-input').value.trim();
+            if (!source) return;
+            if (!title) {
+                status.style.color = '#fca5a5';
+                status.textContent = 'Enter a conversation title.';
+                return;
+            }
+            if (activeProject !== source.project) {
+                status.style.color = '#fca5a5';
+                status.textContent = 'The active workspace changed. Reopen this dialog.';
+                return;
+            }
+            saveButton.disabled = true;
+            status.style.color = '#aaa';
+            status.textContent = 'Saving…';
             try {
                 const response = await fetch('/api/agent/session-title', {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        project: activeProject,
-                        agent,
-                        sessionId,
-                        sessionPath: session.sessionPath || '',
-                        title: cleanedTitle,
+                        project: source.project,
+                        agent: source.agent,
+                        sessionId: source.sessionId,
+                        sessionPath: source.sessionPath || '',
+                        title,
                     }),
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not rename this conversation.');
-                session.title = data.title;
+                closeAgentSessionTitleModal();
+                const refresh = await fetch(`/api/agent/sessions?project=${encodeURIComponent(source.project)}`);
+                const refreshedData = await refresh.json();
+                if (refresh.ok) agentSavedSessions = refreshedData.sessions || [];
+                else {
+                    const localSession = agentSavedSessions.find(item => item.agent === source.agent && item.sessionId === source.sessionId);
+                    if (localSession) localSession.title = data.title;
+                }
                 filterAgentSessions();
             } catch (error) {
-                alert(String(error.message || error));
+                status.style.color = '#fca5a5';
+                status.textContent = String(error.message || error);
+            } finally {
+                saveButton.disabled = false;
             }
         }
 

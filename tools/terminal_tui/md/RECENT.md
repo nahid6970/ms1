@@ -55,6 +55,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Added icon-only Codex, Kiro CLI, and Pi launch buttons in the saved-session picker header before its close button; each starts a fresh session in a new tab rooted at the active workspace.
 - Added a rename icon before the switch control in each saved-session row. Linked agent sessions share the renamed conversation title; standalone session titles are stored as workspace-scoped display overrides.
 - Improved session timestamps with a brighter, larger date-and-time chip, clock icon, and full local date on hover.
+- Added an editable Gemini title suggestion flow to the session rename dialog, with model selection and a new validated title-generation endpoint.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
 - Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
 
