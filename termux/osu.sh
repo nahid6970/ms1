@@ -188,8 +188,7 @@ get_t3_host_ip() {
 }
 
 start_t3_android_server() {
-    clear
-    local host_ip status
+    local host_ip status pair_status server_pid server_log
     host_ip="$(get_t3_host_ip)" || {
         echo -e "${RED}Could not detect the phone's Wi-Fi IP. Connect to Wi-Fi and try again.${NC}"
         return 1
@@ -208,23 +207,55 @@ start_t3_android_server() {
         return 1
     fi
 
-    echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}.${NC}"
-    echo -e "When the server is ready, open another Ubuntu shell and run ${CYAN}t3 pair${NC}."
-    echo "In T3 Android, scan the QR code or paste the pairing URL into Settings > Environments."
-    echo "Press Ctrl+C here to stop the server."
-    echo
+    if inside_ubuntu; then
+        server_log="$HOME/.t3/serve-android.log"
+    else
+        server_log="$HOME/.local/state/ms1/t3-ubuntu-serve.log"
+        if ! run_in_ubuntu 'command -v t3 >/dev/null 2>&1'; then
+            echo -e "${RED}T3 CLI is not on PATH in Ubuntu. Open a fresh Ubuntu shell or fix its PATH first.${NC}"
+            return 1
+        fi
+        mkdir -p "$(dirname "$server_log")" || return 1
+    fi
+
+    mkdir -p "$(dirname "$server_log")" || return 1
+    echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}...${NC}"
+    echo "The pairing link/QR code will appear below. Paste the link into T3 Android > Settings > Environments."
 
     if ! inside_ubuntu && command -v termux-wake-lock >/dev/null 2>&1; then
         termux-wake-lock 2>/dev/null || true
-        trap 'termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
     fi
     if inside_ubuntu; then
-        t3 serve --host "$host_ip"
-        status=$?
+        t3 serve --host "$host_ip" >"$server_log" 2>&1 &
+        server_pid=$!
     else
-        run_in_ubuntu "t3 serve --host '$host_ip'"
-        status=$?
+        proot-distro login ubuntu -- t3 serve --host "$host_ip" >"$server_log" 2>&1 </dev/null &
+        server_pid=$!
     fi
+
+    trap 'kill "$server_pid" 2>/dev/null || true; command -v termux-wake-unlock >/dev/null 2>&1 && termux-wake-unlock 2>/dev/null || true; trap - INT TERM' INT TERM
+    sleep 3
+    if inside_ubuntu; then
+        t3 pair
+        pair_status=$?
+    else
+        proot-distro login ubuntu -- t3 pair
+        pair_status=$?
+    fi
+    if (( pair_status != 0 )); then
+        echo -e "${RED}Could not create the pairing link. T3 server output:${NC}"
+        cat "$server_log"
+        kill "$server_pid" 2>/dev/null || true
+        command -v termux-wake-unlock >/dev/null 2>&1 && termux-wake-unlock 2>/dev/null || true
+        trap - INT TERM
+        return "$pair_status"
+    fi
+
+    echo
+    echo -e "${GREEN}T3 server is running at the address shown in the pairing link.${NC}"
+    echo "Press Ctrl+C to stop it."
+    wait "$server_pid"
+    status=$?
     if command -v termux-wake-unlock >/dev/null 2>&1; then
         termux-wake-unlock 2>/dev/null || true
     fi
