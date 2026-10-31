@@ -20,6 +20,27 @@ inside_ubuntu() {
     [[ -r /etc/os-release ]] && grep -qi '^ID=ubuntu$' /etc/os-release
 }
 
+ubuntu_rootfs_dir() {
+    local rootfs
+    for rootfs in \
+        "${PREFIX:-}/var/lib/proot-distro/installed-rootfs/ubuntu" \
+        "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu"; do
+        [[ -n "$rootfs" && -r "$rootfs/etc/os-release" ]] || continue
+        if grep -qi '^ID=ubuntu$' "$rootfs/etc/os-release"; then
+            printf '%s\n' "$rootfs"
+            return 0
+        fi
+    done
+    return 1
+}
+
+ubuntu_is_installed() {
+    inside_ubuntu && return 0
+    command -v proot-distro >/dev/null 2>&1 || return 1
+    ubuntu_rootfs_dir >/dev/null 2>&1 && return 0
+    proot-distro login ubuntu -- /bin/true >/dev/null 2>&1
+}
+
 show_menu() {
     clear
     echo -e "${MAGENTA}╔══════════════════════════════════════╗${NC}"
@@ -66,8 +87,7 @@ install_ubuntu() {
         }
     fi
 
-    if proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' || \
-       [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; then
+    if ubuntu_is_installed; then
         echo -e "${GREEN}Ubuntu is already installed.${NC}"
     else
         echo -e "${CYAN}Downloading and installing Ubuntu...${NC}"
@@ -94,10 +114,7 @@ setup_ubuntu_environment() {
     local is_ubuntu=false
     if inside_ubuntu; then
         is_ubuntu=true
-    elif ! command -v proot-distro >/dev/null 2>&1 || {
-        ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
-        [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]
-    }; then
+    elif ! ubuntu_is_installed; then
         echo -e "${RED}Ubuntu is not installed yet. Run option 1 first.${NC}"
         return 1
     fi
@@ -106,7 +123,12 @@ setup_ubuntu_environment() {
     if [[ "$is_ubuntu" == true ]]; then
         ubuntu_home="$HOME"
     else
-        ubuntu_home="$HOME/.local/share/proot-distro/installed-rootfs/ubuntu/root"
+        local rootfs
+        rootfs=$(ubuntu_rootfs_dir) || {
+            echo -e "${RED}Could not locate Ubuntu's installed root filesystem.${NC}"
+            return 1
+        }
+        ubuntu_home="$rootfs/root"
     fi
 
     mkdir -p "$ubuntu_home/projects" "$ubuntu_home/scripts" \
@@ -157,9 +179,7 @@ run_in_ubuntu() {
     local command_string="$1"
     if inside_ubuntu; then
         bash -lc "$command_string"
-    elif command -v proot-distro >/dev/null 2>&1 && \
-         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
-           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
+    elif ubuntu_is_installed; then
         proot-distro login ubuntu -- bash -lc "$command_string"
     else
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
@@ -199,10 +219,7 @@ start_t3_android_server() {
             echo -e "${RED}T3 CLI is not on PATH in Ubuntu. Open a fresh Ubuntu shell or fix its PATH first.${NC}"
             return 1
         fi
-    elif ! command -v proot-distro >/dev/null 2>&1 || {
-        ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
-        [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]
-    }; then
+    elif ! ubuntu_is_installed; then
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
         return 1
     fi
@@ -266,10 +283,13 @@ start_t3_android_server() {
 ubuntu_home_dir() {
     if inside_ubuntu; then
         printf '%s\n' "$HOME"
-    elif command -v proot-distro >/dev/null 2>&1 && \
-         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
-           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
-        printf '%s\n' "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu/root"
+    elif ubuntu_is_installed; then
+        local rootfs
+        rootfs=$(ubuntu_rootfs_dir) || {
+            echo -e "${RED}Could not locate Ubuntu's installed root filesystem.${NC}" >&2
+            return 1
+        }
+        printf '%s\n' "$rootfs/root"
     else
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}" >&2
         return 1
