@@ -68,7 +68,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume AI Agent Sessions
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, and Kiro CLI sessions for the active workspace. Each row shows that agent's icon to the left of the first user prompt, folder, modified time, and session ID. Injected `AGENTS.md` instructions are skipped when choosing the title. Selecting a row resumes the session with its own CLI in a new terminal tab.
+**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, and Kiro CLI sessions for the active workspace. Each row shows that agent's icon to the left of the first user prompt, folder, modified time, and session ID. Injected `AGENTS.md` instructions are skipped when choosing the title. Selecting a row resumes the session with its own CLI in a new terminal tab using that agent's automatic tool-approval option (`codex --yolo`, `pi --approve`, or `kiro-cli chat --trust-all-tools`). New cross-agent handoffs use the same options.
 **Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse the sessions, then select one to resume it.
 **Files Involved:** `app.py` (`GET /api/agent/sessions`), `templates/index.html` (session picker modal and `resumeAgentSession()`)
 

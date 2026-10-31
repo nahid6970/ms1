@@ -6073,13 +6073,13 @@
             let command;
             if (session.agent === 'pi') {
                 const safeSessionPath = String(session.sessionPath || '').replace(/'/g, "''");
-                command = `pi --session '${safeSessionPath}'`;
+                command = `pi --approve --session '${safeSessionPath}'`;
             } else if (session.agent === 'kiro') {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
-                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --resume-id ${session.sessionId}`;
+                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --trust-all-tools --resume-id ${session.sessionId}`;
             } else {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
-                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex resume ${session.sessionId}`;
+                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
             }
             splitTerminal('tabs', command);
         }
@@ -6207,9 +6207,9 @@
                 const safePath = String(data.cwd || '').replace(/'/g, "''");
                 const command = `$__agentHandoff = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encodedPrompt}')); ` +
                     `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}` +
-                    (targetAgent === 'pi' ? 'pi -- $__agentHandoff' :
-                        targetAgent === 'kiro' ? 'kiro-cli chat $__agentHandoff' :
-                            'codex $__agentHandoff');
+                    (targetAgent === 'pi' ? 'pi --approve -- $__agentHandoff' :
+                        targetAgent === 'kiro' ? 'kiro-cli chat --trust-all-tools $__agentHandoff' :
+                            'codex --yolo $__agentHandoff');
                 closeAgentHandoffModal();
                 closeAgentSessionPicker();
                 splitTerminal('tabs', command);
