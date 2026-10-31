@@ -293,3 +293,14 @@ Always state one clear outcome at the end of the response. Do not say “restart
   - Eye toggle (hide/show globally) per card
   - Speed select override per card
   - Syncs copilot dropdown speed tags after batch completes
+
+---
+
+## Unified Agent Sessions and Handoff
+**Status:** ✅ Complete
+**Description:** Browse Codex, Pi, and Kiro CLI sessions for the active workspace, resume native sessions, and continue a conversation in any other supported agent.
+**Implementation:** Session picker merges each agent's local session store and sorts by modification time. A handoff creates a new native session in the selected target agent with editable context assembled from the source transcript. The original session remains intact; linked sessions show the conversation's chronological agent icon trail beside the timestamp and session ID.
+**Files Involved:** `app.py` (routes: `/api/agent/sessions`, `/api/agent/session-context`, `/api/agent/handoffs`), `templates/index.html` (agent session picker and handoff dialog)
+**Usage:** Click **AGENT** beside the workspace selector, choose **Switch** on any session, edit the supplied context, select a different agent, then start the handoff.
+**Supported directions:** Codex ↔ Pi, Codex ↔ Kiro CLI, Pi ↔ Kiro CLI.
+**Notes:** Handoffs create a fresh target-agent session, not a conversion of the source agent's private transcript format. Each newly created native session is linked back to the original conversation when it appears in the session store.

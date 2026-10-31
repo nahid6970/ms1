@@ -87,6 +87,7 @@ import re
 import threading
 import subprocess
 import time
+import uuid
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
 from winpty import PTY
@@ -1452,27 +1453,17 @@ def api_session_pane_stop(project, pane_id):
         threading.Thread(target=session.kill, daemon=True).start()
     return jsonify({"success": True, "paneId": pane_id})
 
-@app.route('/api/agent/sessions', methods=['GET'])
-@app.route('/api/codex/sessions', methods=['GET'])
-def api_agent_sessions():
-    """List saved Codex and Pi conversations for the requested workspace."""
-    project_name = (request.args.get('project') or '').strip()
-    projects = scan_projects()
-    project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
-    if not project:
-        return jsonify({'error': 'Workspace not found.'}), 404
-    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
-
-    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+def _agent_session_roots(profile_home, project_path):
+    """Return the native session roots used by each supported local agent."""
     codex_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
-    session_roots = [
+    roots = [
         ('codex', os.path.join(codex_home, 'sessions')),
         ('codex', os.path.join(codex_home, 'archived_sessions')),
     ]
 
     pi_agent_home = os.path.join(profile_home, '.pi', 'agent')
     pi_env_session_dir = os.environ.get('PI_CODING_AGENT_SESSION_DIR')
-    pi_settings_paths = [os.path.join(pi_agent_home, 'settings.json'), os.path.join(project['path'], '.pi', 'settings.json')]
+    pi_settings_paths = [os.path.join(pi_agent_home, 'settings.json'), os.path.join(project_path, '.pi', 'settings.json')]
     pi_configured_roots = []
     for settings_path in pi_settings_paths:
         try:
@@ -1491,61 +1482,128 @@ def api_agent_sessions():
         pi_roots = pi_configured_roots
     else:
         pi_roots = [os.path.join(pi_agent_home, 'sessions')]
-    session_roots.extend(('pi', path) for path in pi_roots)
-    session_roots.append(('kiro', os.path.join(profile_home, '.kiro', 'sessions', 'cli')))
+    roots.extend(('pi', path) for path in pi_roots)
+    roots.append(('kiro', os.path.join(profile_home, '.kiro', 'sessions', 'cli')))
+    return roots
 
-    def clean_session_title(value):
-        value = ' '.join(str(value or '').split())
-        lowered = value.casefold()
-        if (not value or lowered.startswith('# agents.md instructions') or
-                lowered.startswith('## environment context') or
-                ('<instructions>' in lowered and 'agents.md' in lowered)):
-            return ''
-        return value[:180]
 
-    def find_session_title(agent, transcript_file):
-        for line in transcript_file:
-            if len(line) > 2_000_000:
-                continue
-            try:
-                record = json.loads(line)
-            except (json.JSONDecodeError, TypeError):
-                continue
+def _path_is_within(path, root):
+    try:
+        normalized_path = os.path.normcase(os.path.realpath(os.path.abspath(path)))
+        normalized_root = os.path.normcase(os.path.realpath(os.path.abspath(root)))
+        return os.path.commonpath([normalized_root, normalized_path]) == normalized_root
+    except (OSError, ValueError):
+        return False
 
-            if agent == 'kiro':
-                if record.get('kind') != 'Prompt':
+
+def _agent_message_from_record(agent, record):
+    """Return a plain user/assistant text message from a native transcript row."""
+    if agent == 'kiro':
+        role = {'Prompt': 'user', 'AssistantMessage': 'assistant'}.get(record.get('kind'))
+        content = (record.get('data') or {}).get('content') or []
+        if isinstance(content, list):
+            text = ' '.join(
+                str(part.get('data') or '')
+                for part in content
+                if isinstance(part, dict) and part.get('kind') == 'text'
+            )
+        else:
+            text = str(content)
+    else:
+        if agent == 'codex':
+            message = record.get('payload') or {}
+            role = message.get('role')
+        else:
+            message = record.get('message') or {}
+            role = message.get('role') if record.get('type') == 'message' else None
+        if role not in {'user', 'assistant'}:
+            return None, ''
+        content = message.get('content') or []
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            accepted_types = {'input_text', 'output_text', 'text'}
+            text = ' '.join(
+                str(part.get('text') or '')
+                for part in content
+                if isinstance(part, dict) and part.get('type') in accepted_types
+            )
+        else:
+            text = ''
+
+    if role not in {'user', 'assistant'}:
+        return None, ''
+    return role, text
+
+
+def _extract_agent_transcript(agent, session_path, include_history=False):
+    transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
+    title = ''
+    original_prompt = ''
+    handoff_token = ''
+    messages = []
+    try:
+        with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
+            for line in transcript_file:
+                if len(line) > 2_000_000:
                     continue
-                content = (record.get('data') or {}).get('content') or []
-                candidate = ' '.join(
-                    str(part.get('data') or '')
-                    for part in content
-                    if isinstance(part, dict) and part.get('kind') == 'text'
-                ) if isinstance(content, list) else str(content)
-            else:
-                if agent == 'codex':
-                    message = record.get('payload') or {}
-                    is_user_message = message.get('role') == 'user'
-                else:
-                    message = record.get('message') or {}
-                    is_user_message = message.get('role') == 'user' and record.get('type') == 'message'
-                if not is_user_message:
+                try:
+                    record = json.loads(line)
+                except (json.JSONDecodeError, TypeError):
                     continue
-                content = message.get('content') or []
-                if isinstance(content, str):
-                    candidate = content
-                elif isinstance(content, list):
-                    candidate = ' '.join(
-                        str(part.get('text') or '')
-                        for part in content
-                        if isinstance(part, dict) and part.get('type') in {'input_text', 'text'}
-                    )
-                else:
-                    candidate = ''
+                role, text = _agent_message_from_record(agent, record)
+                if not role or not text:
+                    continue
+                marker = re.search(r'<!--\s*TUI-HANDOFF:([0-9a-f-]{32,36})\s*-->', text, re.IGNORECASE)
+                if marker and not handoff_token:
+                    handoff_token = marker.group(1).lower()
+                text = re.sub(r'<!--\s*TUI-HANDOFF:[0-9a-f-]{32,36}\s*-->', '', text, flags=re.IGNORECASE)
+                text = ' '.join(text.split())
+                lowered = text.casefold()
+                is_bootstrap_context = (
+                    lowered.startswith('# agents.md instructions') or
+                    lowered.startswith('## environment context') or
+                    ('<instructions>' in lowered and 'agents.md' in lowered)
+                )
+                if role == 'user' and not original_prompt and not is_bootstrap_context:
+                    original_prompt = text[:12000]
+                if not title and role == 'user':
+                    candidate = text
+                    if (candidate and not lowered.startswith('# agents.md instructions') and
+                            not lowered.startswith('## environment context') and
+                            not ('<instructions>' in lowered and 'agents.md' in lowered)):
+                        title = candidate[:180]
+                if include_history and text and not is_bootstrap_context:
+                    messages.append({'role': role, 'text': text[-2400:]})
+                    if len(messages) > 12:
+                        messages.pop(0)
+                if title and handoff_token and not include_history:
+                    break
+                if title and not include_history:
+                    break
+    except OSError:
+        pass
+    return {
+        'title': title,
+        'originalPrompt': original_prompt,
+        'handoffToken': handoff_token,
+        'messages': messages,
+    }
 
-            candidate = clean_session_title(candidate)
-            if candidate:
-                return candidate
-        return ''
+
+@app.route('/api/agent/sessions', methods=['GET'])
+@app.route('/api/codex/sessions', methods=['GET'])
+def api_agent_sessions():
+    """List saved Codex, Pi, and Kiro conversations for the requested workspace."""
+    project_name = (request.args.get('project') or '').strip()
+    projects = scan_projects()
+    project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    session_roots = _agent_session_roots(profile_home, project['path'])
 
     sessions = []
     seen_ids = set()
@@ -1585,16 +1643,9 @@ def api_agent_sessions():
                         except ValueError:
                             continue
 
-                        if agent == 'kiro':
-                            title = clean_session_title(metadata.get('title'))
-                            if not title:
-                                transcript_path = os.path.splitext(session_path)[0] + '.jsonl'
-                                if not os.path.isfile(transcript_path):
-                                    continue
-                                with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
-                                    title = find_session_title(agent, transcript_file)
-                        else:
-                            title = find_session_title(agent, session_file)
+                        transcript = _extract_agent_transcript(agent, session_path)
+                        title = str(metadata.get('title') or '').strip() if agent == 'kiro' else ''
+                        title = title or transcript['title']
                     if agent == 'kiro' and not title:
                         continue
 
@@ -1606,12 +1657,172 @@ def api_agent_sessions():
                         'cwd': cwd,
                         'lastModified': modified_at,
                         'sessionPath': os.path.abspath(session_path),
+                        'handoffToken': transcript['handoffToken'],
                     })
                 except (OSError, ValueError, TypeError, AttributeError):
                     continue
 
     sessions.sort(key=lambda item: item['lastModified'], reverse=True)
+    conversations = get_config_val('agent_handoff_conversations', list)
+    registry_changed = False
+    for session in sessions:
+        token = session.get('handoffToken')
+        if token:
+            for conversation in conversations:
+                if conversation.get('project') != project['name']:
+                    continue
+                for handoff in conversation.get('handoffs', []):
+                    if (handoff.get('token') != token or handoff.get('targetAgent') != session['agent'] or
+                            handoff.get('targetSessionId')):
+                        continue
+                    handoff['targetSessionId'] = session['sessionId']
+                    handoff['status'] = 'active'
+                    member = {'agent': session['agent'], 'sessionId': session['sessionId']}
+                    if member not in conversation.get('sessions', []):
+                        conversation.setdefault('sessions', []).append(member)
+                    if conversation.get('activeHandoffId') == handoff.get('id'):
+                        conversation['activeAgent'] = session['agent']
+                        conversation['activeSessionId'] = session['sessionId']
+                        conversation['status'] = 'active'
+                    registry_changed = True
+        for conversation in conversations:
+            member_keys = {
+                (member.get('agent'), member.get('sessionId'))
+                for member in conversation.get('sessions', [])
+                if isinstance(member, dict)
+            }
+            if conversation.get('project') != project['name'] or (session['agent'], session['sessionId']) not in member_keys:
+                continue
+            session['originAgent'] = conversation.get('originAgent', session['agent'])
+            session['activeAgent'] = conversation.get('activeAgent', session['agent'])
+            agent_trail = [session['originAgent']]
+            for handoff in conversation.get('handoffs', []):
+                target_agent = handoff.get('targetAgent')
+                if target_agent in {'codex', 'pi', 'kiro'} and target_agent != agent_trail[-1]:
+                    agent_trail.append(target_agent)
+            session['agentTrail'] = agent_trail
+            session['activeSessionId'] = conversation.get('activeSessionId')
+            session['conversationId'] = conversation.get('id')
+            session['handoffStatus'] = conversation.get('status', 'active')
+            session['isCurrentActiveSession'] = bool(
+                conversation.get('activeAgent') == session['agent'] and
+                conversation.get('activeSessionId') == session['sessionId']
+            )
+            break
+        session.pop('handoffToken', None)
+    if registry_changed:
+        set_config_val('agent_handoff_conversations', conversations)
     return jsonify({'sessions': sessions})
+
+@app.route('/api/agent/session-context', methods=['GET'])
+def api_agent_session_context():
+    project_name = (request.args.get('project') or '').strip()
+    agent = (request.args.get('agent') or '').strip().lower()
+    session_id = (request.args.get('sessionId') or '').strip()
+    session_path = os.path.abspath(os.path.expanduser(request.args.get('sessionPath') or ''))
+    if agent not in {'codex', 'pi', 'kiro'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+        return jsonify({'error': 'Invalid source session.'}), 400
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
+    if not any(_path_is_within(session_path, root) for root in allowed_roots):
+        return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
+    try:
+        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
+            if agent == 'codex':
+                metadata = metadata.get('payload') or {}
+        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+        cwd = str(metadata.get('cwd') or '')
+        if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
+            return jsonify({'error': 'Session does not belong to the active workspace.'}), 404
+        transcript = _extract_agent_transcript(agent, session_path, include_history=True)
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the saved session.'}), 404
+
+    history = transcript['messages'][-10:]
+    formatted_history = '\n\n'.join(
+        f"**{'User' if item['role'] == 'user' else 'Agent'}:**\n{item['text']}"
+        for item in history
+    )
+    handoff_text = (
+        f"Continue work from a saved {agent.upper()} session. This will continue in a new native session managed by another agent.\n\n"
+        f"### Original request\n{transcript['originalPrompt'] or transcript['title'] or 'Not available in the saved transcript.'}\n\n"
+        f"### Recent conversation\n{formatted_history or 'No readable user/assistant text was found.'}\n\n"
+        "### Handoff instructions\n"
+        "Treat this as context from another agent, not as proof that its actions completed. Inspect the current workspace and files before making changes. Preserve the user's goal, decisions, and constraints, then continue from the current state. State any important uncertainty before acting."
+    )
+    return jsonify({
+        'sourceAgent': agent,
+        'sourceSessionId': session_id,
+        'sourceTitle': transcript['title'] or metadata.get('title') or 'Untitled chat',
+        'cwd': cwd,
+        'handoffText': handoff_text[:18000],
+    })
+
+@app.route('/api/agent/handoffs', methods=['POST'])
+def api_agent_handoff_create():
+    data = request.get_json(silent=True) or {}
+    project_name = str(data.get('project') or '').strip()
+    source_agent = str(data.get('sourceAgent') or '').strip().lower()
+    target_agent = str(data.get('targetAgent') or '').strip().lower()
+    session_id = str(data.get('sourceSessionId') or '').strip()
+    handoff_text = str(data.get('handoffText') or '').strip()
+    projects = scan_projects()
+    project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    if (source_agent not in {'codex', 'pi', 'kiro'} or target_agent not in {'codex', 'pi', 'kiro'} or
+            source_agent == target_agent or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id)):
+        return jsonify({'error': 'Choose a different supported target agent.'}), 400
+    if not handoff_text or len(handoff_text) > 18000:
+        return jsonify({'error': 'Handoff context must be between 1 and 18,000 characters.'}), 400
+
+    conversations = get_config_val('agent_handoff_conversations', list)
+    conversation = next((item for item in conversations if
+        item.get('project') == project['name'] and any(
+            member.get('agent') == source_agent and member.get('sessionId') == session_id
+            for member in item.get('sessions', []) if isinstance(member, dict)
+        )), None)
+    if not conversation:
+        conversation = {
+            'id': str(uuid.uuid4()),
+            'project': project['name'],
+            'originAgent': source_agent,
+            'originSessionId': session_id,
+            'sessions': [{'agent': source_agent, 'sessionId': session_id}],
+            'handoffs': [],
+        }
+        conversations.append(conversation)
+
+    handoff_id = str(uuid.uuid4())
+    token = uuid.uuid4().hex
+    conversation['activeHandoffId'] = handoff_id
+    conversation['activeAgent'] = target_agent
+    conversation['activeSessionId'] = None
+    conversation['status'] = 'pending'
+    conversation['updatedAt'] = time.time()
+    conversation.setdefault('handoffs', []).append({
+        'id': handoff_id,
+        'token': token,
+        'sourceAgent': source_agent,
+        'sourceSessionId': session_id,
+        'targetAgent': target_agent,
+        'targetSessionId': None,
+        'status': 'pending',
+        'createdAt': time.time(),
+    })
+    set_config_val('agent_handoff_conversations', conversations)
+    handoff_prompt = f"{handoff_text}\n\n<!--TUI-HANDOFF:{token}-->"
+    return jsonify({
+        'handoffId': handoff_id,
+        'targetAgent': target_agent,
+        'cwd': project['path'],
+        'prompt': handoff_prompt,
+    })
 
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):

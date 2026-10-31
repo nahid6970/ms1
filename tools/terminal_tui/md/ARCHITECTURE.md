@@ -237,6 +237,8 @@ function prompt { ... }
 ### Sessions
 - `POST /api/session/<project>` - Start/connect terminal session
 - `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, and Kiro CLI conversations whose saved working directory is inside the requested workspace
+- `GET /api/agent/session-context?project=<workspace>&agent=<agent>&sessionId=<id>&sessionPath=<path>` - Build editable context from a saved native session after validating its workspace and agent storage path
+- `POST /api/agent/handoffs` - Create a linked conversation handoff to another supported agent; the target starts a new native session
 - `POST /api/session/<project>/stop` - Kill terminal session
 - `GET /api/session/<project>/stats` - CPU/memory/git stats
 - `POST /api/sessions/reset` - Kill all sessions + reset layouts

@@ -3,6 +3,22 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-10-31] - Add Cross-Agent Conversation Handoffs
+
+- Added a **Switch** action on each saved Codex, Pi, and Kiro CLI session. Any agent can hand off to either of the other two.
+- Handoff context is assembled from the saved transcript, editable before launch, and starts a fresh native target-agent session in a new terminal tab.
+- Linked conversations retain their origin and active agent labels; reopening any linked row resumes the latest active native session.
+- Added project and storage-path validation to context loading and persisted handoff lineage in the local app config.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`, `.gitignore`
+
+## [2026-10-31] - Show Agent Switch History as Icons
+
+- Replaced the text lineage label with a compact chronological trail of agent icons, such as Codex → Kiro → Pi.
+- Moved the trail onto the existing timestamp/session-ID row and kept the newest icons visible when the trail needs horizontal scrolling.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Add Unified AI Agent Session Resume
 
 - Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex, Pi, and Kiro CLI sessions scoped to the active workspace.
