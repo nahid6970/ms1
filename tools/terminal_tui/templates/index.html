@@ -6121,6 +6121,14 @@
             return `~${count}`;
         }
 
+        function getAgentTokenBadgeColors(value) {
+            const count = Math.max(0, Number(value) || 0);
+            if (count >= 50000) return { text: '#fecdd3', border: 'rgba(251,113,133,.34)', background: 'rgba(225,29,72,.13)', icon: '#fb7185' };
+            if (count >= 10000) return { text: '#fde68a', border: 'rgba(251,191,36,.34)', background: 'rgba(217,119,6,.13)', icon: '#fbbf24' };
+            if (count >= 1000) return { text: '#ddd6fe', border: 'rgba(167,139,250,.34)', background: 'rgba(124,58,237,.13)', icon: '#a78bfa' };
+            return { text: '#bfdbfe', border: 'rgba(96,165,250,.28)', background: 'rgba(59,130,246,.11)', icon: '#60a5fa' };
+        }
+
         function filterAgentSessions() {
             const list = document.getElementById('agent-session-list');
             const query = (document.getElementById('agent-session-search')?.value || '').trim().toLowerCase();
@@ -6145,6 +6153,8 @@
                 const sessionTitle = String(session.title || 'Untitled chat');
                 const sessionPath = String(session.cwd || 'Folder unavailable');
                 const tokenEstimate = formatAgentTokenEstimate(session.tokenEstimate);
+                const tokenEstimateDisplay = tokenEstimate.replace(/^~/, '');
+                const tokenBadgeColors = getAgentTokenBadgeColors(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
                 const agentTrail = Array.isArray(session.agentTrail) ? session.agentTrail : [];
                 const trailMarkup = session.conversationId && session.isCurrentActiveSession && agentTrail.length > 1
@@ -6166,7 +6176,7 @@
                     <button type="button" id="agent-session-delete-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
                         </span>
                         <span style="display:flex;align-items:center;justify-content:flex-end;gap:7px;max-width:100%;">
-                            <span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" title="Approximate tokens from readable user and assistant text; excludes tool metadata." aria-label="Approximately ${escapeHtml(tokenEstimate)} tokens" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(96,165,250,.28);border-radius:6px;background:rgba(59,130,246,.11);color:#bfdbfe;font-size:.63rem;font-weight:650;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:#60a5fa;flex:none;"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"></path><path d="m3 12 9 4.5 9-4.5"></path><path d="m3 16.5 9 4.5 9-4.5"></path></svg>${escapeHtml(tokenEstimate)} tokens</span>
+                            <span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" title="Approximate tokens from readable user and assistant text; excludes tool metadata." aria-label="Approximately ${escapeHtml(tokenEstimateDisplay)} tokens" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid ${tokenBadgeColors.border};border-radius:6px;background:${tokenBadgeColors.background};color:${tokenBadgeColors.text};font-size:.63rem;font-weight:650;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:${tokenBadgeColors.icon};flex:none;"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"></path><path d="m3 12 9 4.5 9-4.5"></path><path d="m3 16.5 9 4.5 9-4.5"></path></svg>${escapeHtml(tokenEstimateDisplay)}</span>
                             <span class="agent-session-id" data-testid="agent-session-id" title="${escapeHtml(session.sessionId)}" aria-label="Session ID ${escapeHtml(session.sessionId)}" style="display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;color:#a1a1aa;font: .58rem/1.2 'Fira Code',Consolas,monospace;">${escapeHtml(session.sessionId)}</span>
                         </span>
                     </span>

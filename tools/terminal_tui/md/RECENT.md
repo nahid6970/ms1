@@ -59,6 +59,8 @@ Read this file only when relevant to the current task. When reading, reference t
 - Aligned the AGENT button with adjacent toolbar controls by matching their corner radius and removing the hover lift; mobile sizing now matches the compact header buttons.
 - Changed the toolbar label to centered uppercase “AGENTS” with a consistent text line box.
 - Changed the AGENTS button corners to square.
+- Simplified the session token badge to show only the compact count without a tilde or “tokens” suffix.
+- Added size-based token badge colors: blue under 1k, violet from 1k, amber from 10k, and rose from 50k.
 - Added an editable Gemini title suggestion flow to the session rename dialog, with model selection and a new validated title-generation endpoint.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
 - Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
