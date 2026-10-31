@@ -19,6 +19,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
+## [2026-10-31] - Bundle Full Sessions for Agent Handoffs
+
+- Each switch now exports every readable user/assistant message and copies the source agent's original JSONL event log into a persistent local app-data bundle.
+- The target agent's first prompt points to both files and asks it to read the full transcript before continuing.
+- Subsequent switches include the earlier transcript bundle, preserving context through multi-agent chains without converting private native session formats.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Add Unified AI Agent Session Resume
 
 - Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex, Pi, and Kiro CLI sessions scoped to the active workspace.

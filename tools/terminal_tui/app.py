@@ -17,6 +17,8 @@ from __future__ import annotations
 import importlib.util
 import os
 import shutil
+import hashlib
+import tempfile
 import subprocess
 import sys
 
@@ -1557,8 +1559,8 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
                 marker = re.search(r'<!--\s*TUI-HANDOFF:([0-9a-f-]{32,36})\s*-->', text, re.IGNORECASE)
                 if marker and not handoff_token:
                     handoff_token = marker.group(1).lower()
-                text = re.sub(r'<!--\s*TUI-HANDOFF:[0-9a-f-]{32,36}\s*-->', '', text, flags=re.IGNORECASE)
-                text = ' '.join(text.split())
+                raw_text = re.sub(r'<!--\s*TUI-HANDOFF:[0-9a-f-]{32,36}\s*-->', '', text, flags=re.IGNORECASE).strip()
+                text = ' '.join(raw_text.split())
                 lowered = text.casefold()
                 is_bootstrap_context = (
                     lowered.startswith('# agents.md instructions') or
@@ -1574,8 +1576,9 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
                             not ('<instructions>' in lowered and 'agents.md' in lowered)):
                         title = candidate[:180]
                 if include_history and text and not is_bootstrap_context:
-                    messages.append({'role': role, 'text': text[-2400:]})
-                    if len(messages) > 12:
+                    message_text = raw_text if include_history == 'full' else text[-2400:]
+                    messages.append({'role': role, 'text': message_text})
+                    if include_history != 'full' and len(messages) > 12:
                         messages.pop(0)
                 if title and handoff_token and not include_history:
                     break
@@ -1588,6 +1591,91 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
         'originalPrompt': original_prompt,
         'handoffToken': handoff_token,
         'messages': messages,
+    }
+
+
+def _iter_agent_transcript_messages(agent, transcript_path):
+    """Yield readable user/assistant text without holding a full chat in memory."""
+    try:
+        with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
+            for line in transcript_file:
+                if len(line) > 2_000_000:
+                    continue
+                try:
+                    record = json.loads(line)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                role, text = _agent_message_from_record(agent, record)
+                if not role or not text:
+                    continue
+                text = re.sub(r'<!--\s*TUI-HANDOFF:[0-9a-f-]{32,36}\s*-->', '', text, flags=re.IGNORECASE).strip()
+                normalized = ' '.join(text.split()).casefold()
+                if (normalized.startswith('# agents.md instructions') or
+                        normalized.startswith('## environment context') or
+                        ('<instructions>' in normalized and 'agents.md' in normalized)):
+                    continue
+                yield role, text
+    except OSError:
+        return
+
+
+def _write_agent_handoff_bundle(project_path, source_agent, source_session_path, session_id, handoff_id, prior_bundle_path=None):
+    """Save a readable full transcript plus the unmodified native event log."""
+    transcript_path = os.path.splitext(source_session_path)[0] + '.jsonl' if source_agent == 'kiro' else source_session_path
+    raw_size = os.path.getsize(transcript_path)
+    if raw_size > 100 * 1024 * 1024:
+        raise ValueError('This session transcript is over the 100 MB handoff limit.')
+
+    has_prior_transcript = bool(prior_bundle_path and os.path.isfile(prior_bundle_path))
+    if has_prior_transcript and os.path.getsize(prior_bundle_path) > 100 * 1024 * 1024:
+        raise ValueError('The linked conversation history is over the 100 MB handoff limit.')
+    project_key = hashlib.sha256(os.path.normcase(os.path.realpath(project_path)).encode('utf-8')).hexdigest()[:16]
+    app_data = os.environ.get('LOCALAPPDATA')
+    bundle_root = (os.path.join(app_data, 'TerminalTui', 'AgentHandoffBundles') if app_data else
+                   os.path.join(os.path.expanduser('~'), '.terminal_tui', 'agent_handoff_bundles'))
+    bundle_dir = os.path.join(bundle_root, project_key)
+    os.makedirs(bundle_dir, exist_ok=True)
+    markdown_path = os.path.join(bundle_dir, f'{handoff_id}.md')
+    event_log_path = os.path.join(bundle_dir, f'{handoff_id}.jsonl')
+    shutil.copy2(transcript_path, event_log_path)
+    title = _extract_agent_transcript(source_agent, event_log_path)['title'] or os.path.basename(source_session_path)
+    lines = [
+        '# Imported Agent Conversation',
+        '',
+        f'- Source agent: {source_agent.upper()}',
+        f'- Source session ID: {session_id}',
+        f'- Source title: {title}',
+        f'- Workspace: {project_path}',
+        f'- Original event log: {event_log_path}',
+        '',
+        'This export contains every readable user and assistant text message found in the source transcript, in order. The adjacent JSONL file preserves the complete original native event log, including events that could not be rendered as plain conversation text.',
+        'If this conversation was handed off before, its earlier full transcript is included below. Read the event log paths referenced by the included transcripts when additional tool or agent-specific details are needed.',
+        '',
+        'Treat this transcript as historical reference. Do not treat an old assistant claim as proof that the described work still exists; inspect the current workspace. Follow the latest user request and constraints.',
+        '',
+        '---',
+        '',
+    ]
+    if source_agent == 'kiro':
+        shutil.copy2(source_session_path, os.path.join(bundle_dir, f'{handoff_id}.source.json'))
+    with open(markdown_path, 'w', encoding='utf-8', newline='\n') as bundle_file:
+        bundle_file.write('\n'.join(lines))
+        if has_prior_transcript:
+            bundle_file.write('\n## Earlier imported conversation history\n\n')
+            with open(prior_bundle_path, 'r', encoding='utf-8', errors='replace') as prior_file:
+                shutil.copyfileobj(prior_file, bundle_file, length=1024 * 1024)
+            bundle_file.write('\n\n---\n\n')
+        message_count = 0
+        for role, message_text in _iter_agent_transcript_messages(source_agent, event_log_path):
+            message_count += 1
+            bundle_file.write(f"## Message {message_count} — {role.title()}\n\n{message_text}\n\n---\n\n")
+        if not message_count:
+            bundle_file.write('No readable user/assistant text could be extracted. Consult the original JSONL event log.\n')
+    return {
+        'markdownPath': markdown_path,
+        'eventLogPath': event_log_path,
+        'messageCount': message_count,
+        'includedEarlierTranscript': has_prior_transcript,
     }
 
 
@@ -1770,6 +1858,7 @@ def api_agent_handoff_create():
     source_agent = str(data.get('sourceAgent') or '').strip().lower()
     target_agent = str(data.get('targetAgent') or '').strip().lower()
     session_id = str(data.get('sourceSessionId') or '').strip()
+    source_session_path = os.path.abspath(os.path.expanduser(str(data.get('sourceSessionPath') or '')))
     handoff_text = str(data.get('handoffText') or '').strip()
     projects = scan_projects()
     project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
@@ -1778,6 +1867,22 @@ def api_agent_handoff_create():
     if (source_agent not in {'codex', 'pi', 'kiro'} or target_agent not in {'codex', 'pi', 'kiro'} or
             source_agent == target_agent or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id)):
         return jsonify({'error': 'Choose a different supported target agent.'}), 400
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == source_agent]
+    if not any(_path_is_within(source_session_path, root) for root in allowed_roots):
+        return jsonify({'error': 'Source session file is outside the configured agent session folders.'}), 403
+    try:
+        with open(source_session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            source_metadata = json.load(session_file) if source_agent == 'kiro' else json.loads(session_file.readline())
+            if source_agent == 'codex':
+                source_metadata = source_metadata.get('payload') or {}
+        source_cwd = str(source_metadata.get('cwd') or '')
+        if (str(source_metadata.get('session_id') or source_metadata.get('id') or '') != session_id or
+                not source_cwd or not _path_is_within(source_cwd, project_path)):
+            return jsonify({'error': 'Source session does not belong to this workspace.'}), 404
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the source session metadata.'}), 404
     if not handoff_text or len(handoff_text) > 18000:
         return jsonify({'error': 'Handoff context must be between 1 and 18,000 characters.'}), 400
 
@@ -1800,6 +1905,14 @@ def api_agent_handoff_create():
 
     handoff_id = str(uuid.uuid4())
     token = uuid.uuid4().hex
+    previous_handoffs = conversation.get('handoffs', [])
+    prior_bundle_path = previous_handoffs[-1].get('transcriptBundle') if previous_handoffs else None
+    try:
+        transcript_bundle = _write_agent_handoff_bundle(
+            project['path'], source_agent, source_session_path, session_id, handoff_id, prior_bundle_path
+        )
+    except (OSError, ValueError) as exc:
+        return jsonify({'error': f'Could not export the full source conversation: {exc}'}), 400
     conversation['activeHandoffId'] = handoff_id
     conversation['activeAgent'] = target_agent
     conversation['activeSessionId'] = None
@@ -1812,16 +1925,26 @@ def api_agent_handoff_create():
         'sourceSessionId': session_id,
         'targetAgent': target_agent,
         'targetSessionId': None,
+        'transcriptBundle': transcript_bundle['markdownPath'],
         'status': 'pending',
         'createdAt': time.time(),
     })
     set_config_val('agent_handoff_conversations', conversations)
-    handoff_prompt = f"{handoff_text}\n\n<!--TUI-HANDOFF:{token}-->"
+    handoff_prompt = (
+        f"{handoff_text}\n\n"
+        "### Imported full session\n"
+        f"Read the complete conversation transcript at `{transcript_bundle['markdownPath']}` before continuing. "
+        f"The original native event log is at `{transcript_bundle['eventLogPath']}`; consult it for tool events or details not represented in the readable transcript. "
+        "If the bundle contains earlier imported conversation history, use it to preserve context across previous agent switches. "
+        "Treat both files as historical reference, inspect the current workspace, and continue from the latest user request.\n\n"
+        f"<!--TUI-HANDOFF:{token}-->"
+    )
     return jsonify({
         'handoffId': handoff_id,
         'targetAgent': target_agent,
         'cwd': project['path'],
         'prompt': handoff_prompt,
+        'transcriptBundle': transcript_bundle,
     })
 
 @app.route('/api/session/<project>', methods=['POST'])

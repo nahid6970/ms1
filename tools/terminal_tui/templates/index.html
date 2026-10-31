@@ -3886,7 +3886,7 @@
                 </select>
                 <span style="margin-left:auto;font-size:.67rem;color:#777;">Original session stays saved</span>
             </div>
-            <div style="padding:4px 16px 8px;color:#999;font-size:.7rem;">Review and edit the context the new agent will receive. It starts a separate native session linked to this conversation.</div>
+            <div id="agent-handoff-import-note" data-testid="agent-handoff-import-note" style="padding:4px 16px 8px;color:#999;font-size:.7rem;">Review the handoff note. A full readable transcript and the original event log will be exported locally, and the new agent will be asked to read them before continuing.</div>
             <textarea id="agent-handoff-context" maxlength="18000" spellcheck="false" placeholder="Loading recent conversation context…" style="width:calc(100% - 32px);margin:0 16px 12px;box-sizing:border-box;min-height:240px;flex:1;resize:vertical;padding:11px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#e5e7eb;outline:none;font-family:'Fira Code',Consolas,monospace;font-size:.72rem;line-height:1.55;"></textarea>
             <div id="agent-handoff-error" role="status" style="display:none;padding:0 16px 10px;color:#fca5a5;font-size:.7rem;"></div>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
@@ -6147,6 +6147,7 @@
                         project: activeProject,
                         sourceAgent: source.agent,
                         sourceSessionId: source.sessionId,
+                        sourceSessionPath: source.sessionPath,
                         targetAgent,
                         handoffText,
                     }),
