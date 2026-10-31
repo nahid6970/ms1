@@ -1037,11 +1037,9 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Added a Restore from Git action to the missing-folder dialog and documented the new endpoint and behavior.
 - Prevent overlapping stats polls and stale workspace restores from overwriting the active workspace.
 
-## [2026-11-01] - Gray Token Badge for Sessions Under 500 Tokens
+## [2026-11-01] - Single-Line Layout for Rename Modal & Gray Token Badges
 
-- Added a `'tiny'` token range for sessions with fewer than 500 estimated tokens.
-- Tokens under 500 now render with a muted gray palette (`#94a3b8` text, soft gray border and background) instead of the default blue.
-- The 500–999 range (`'small'`) retains the existing blue.
-- Only the CSS and the `getAgentTokenBadgeRange()` JS function were changed; no backend changes.
+- Ensured the conversation rename modal control row stays on a single line (`flex-wrap: nowrap` and `flex: none` on controls).
+- Added a `'tiny'` token range for sessions with fewer than 500 estimated tokens rendered in a muted gray palette (`#94a3b8`).
 
 **Files Modified:** `templates/index.html`, `md/RECENT.md`

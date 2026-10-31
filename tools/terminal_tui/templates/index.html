@@ -3965,12 +3965,12 @@
             <div style="padding:14px 16px 8px;">
                 <input id="agent-session-title-input" type="text" maxlength="160" autocomplete="off" placeholder="Conversation title" onkeydown="if(event.key==='Enter'){event.preventDefault();saveAgentConversationTitle()}" style="width:100%;box-sizing:border-box;padding:10px 11px;border:1px solid #3b3b3b;border-radius:7px;background:#111;color:#f3f4f6;outline:none;font-size:.82rem;">
             </div>
-            <div style="display:flex;align-items:center;gap:7px;padding:2px 16px 12px;">
-                <select id="agent-session-title-model-select" aria-label="Gemini model for title generation" title="Gemini model" style="height:28px;max-width:210px;padding:3px 7px;border:1px solid rgba(168,85,247,.35);border-radius:6px;background:#111;color:#ddd;font-size:.7rem;outline:none;"></select>
-                <button type="button" id="agent-session-title-ai-suggest-btn" data-testid="agent-session-title-ai-suggest" onclick="suggestAgentConversationTitle()" title="Generate a title with Gemini" aria-label="Generate title with Gemini" style="height:28px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;border:1px solid rgba(168,85,247,.4);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;cursor:pointer;font-size:.72rem;font-weight:600;">
-                    <span id="agent-session-title-ai-suggest-icon" aria-hidden="true">✨</span><span>Suggest title</span>
+            <div style="display:flex;align-items:center;gap:7px;padding:2px 16px 12px;flex-wrap:nowrap;">
+                <select id="agent-session-title-model-select" aria-label="Gemini model for title generation" title="Gemini model" style="height:28px;flex:none;max-width:190px;padding:3px 7px;border:1px solid rgba(168,85,247,.35);border-radius:6px;background:#111;color:#ddd;font-size:.7rem;outline:none;"></select>
+                <button type="button" id="agent-session-title-ai-suggest-btn" data-testid="agent-session-title-ai-suggest" onclick="suggestAgentConversationTitle()" title="Generate a title with Gemini" aria-label="Generate title with Gemini" style="height:28px;flex:none;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 9px;border:1px solid rgba(168,85,247,.4);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;cursor:pointer;font-size:.72rem;font-weight:600;">
+                    <span id="agent-session-title-ai-suggest-icon" aria-hidden="true">✨</span><span style="white-space:nowrap;">Suggest title</span>
                 </button>
-                <span id="agent-session-title-status" role="status" style="min-width:0;margin-left:auto;color:#999;font-size:.68rem;text-align:right;"></span>
+                <span id="agent-session-title-status" role="status" style="min-width:0;margin-left:auto;color:#999;font-size:.68rem;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
             </div>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
                 <button type="button" id="agent-session-title-cancel" onclick="closeAgentSessionTitleModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
