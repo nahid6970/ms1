@@ -8,6 +8,9 @@ if !A_IsAdmin {
     ExitApp
 }
 
+; Red tray icon to distinguish the elevated admin instance
+TraySetIcon("C:\@delta\ms1\autohotkey\shortcut_manager\ahk_admin.ico")
+
 ;! === ADMIN SHORTCUTS (elevated) ===
 
 ;! Minimize Apps

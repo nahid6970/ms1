@@ -5868,6 +5868,7 @@ class AHKShortcutEditor(QMainWindow):
             # ── Write generated_shortcuts_admin.ahk (if any admin shortcuts exist) ──
             admin_file = os.path.join(output_dir, "generated_shortcuts_admin.ahk")
             if admin_lines:
+                admin_ico = os.path.join(SCRIPT_DIR, "ahk_admin.ico").replace('`', '``').replace('"', '`"')
                 admin_header = [
                     "#Requires AutoHotkey v2.0",
                     "#SingleInstance",
@@ -5878,6 +5879,9 @@ class AHKShortcutEditor(QMainWindow):
                     "    Run '*RunAs ' . A_AhkPath . ' \"' . A_ScriptFullPath . '\"'",
                     "    ExitApp",
                     "}",
+                    "",
+                    f"; Red tray icon to distinguish the elevated admin instance",
+                    f'TraySetIcon("{admin_ico}")',
                     "",
                     ";! === ADMIN SHORTCUTS (elevated) ===",
                     "",
