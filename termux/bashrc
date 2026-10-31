@@ -128,15 +128,6 @@ gg() {
 }
 
 ggproxy() {
-    if [[ "$IS_TERMUX" == true ]]; then
-        if ! command -v proot-distro >/dev/null 2>&1; then
-            echo "proot-distro is not installed."
-            return 1
-        fi
-        proot-distro login ubuntu -- bash -lic 'ggproxy "$@"' bash "$@"
-        return $?
-    fi
-
     local gemini_cli python_cmd
     gemini_cli=$(_gemini_cli_script) || return 1
     if command -v python >/dev/null 2>&1; then
@@ -161,25 +152,6 @@ if [[ "$IS_TERMUX" == true ]]; then
     alias rm='rm -f -r'
     alias ro='rclone cat g00:/Remote_Control/output.txt'
     alias update='pkg update && pkg upgrade -y'
-
-    # Start Ubuntu's T3 server for the Android companion app via osu option 7.
-    t3() {
-        local osu_script="$HOME/ms1/termux/osu.sh"
-        if [[ ! -f "$osu_script" ]]; then
-            echo "Could not find $osu_script."
-            return 1
-        fi
-        bash "$osu_script" --start-t3 "$@"
-    }
-
-    # Create a fresh mobile pairing link from another Termux tab while T3 serves.
-    t3pair() {
-        if ! command -v proot-distro >/dev/null 2>&1; then
-            echo "proot-distro is not installed."
-            return 1
-        fi
-        proot-distro login ubuntu -- t3 pair "$@"
-    }
 
     termux-wake-lock 2>/dev/null || true
     if [[ -f /data/data/com.termux/files/usr/etc/bash_completion ]]; then

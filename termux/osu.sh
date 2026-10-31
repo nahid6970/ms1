@@ -20,27 +20,6 @@ inside_ubuntu() {
     [[ -r /etc/os-release ]] && grep -qi '^ID=ubuntu$' /etc/os-release
 }
 
-ubuntu_rootfs_dir() {
-    local rootfs
-    for rootfs in \
-        "${PREFIX:-}/var/lib/proot-distro/installed-rootfs/ubuntu" \
-        "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu"; do
-        [[ -n "$rootfs" && -r "$rootfs/etc/os-release" ]] || continue
-        if grep -qi '^ID=ubuntu$' "$rootfs/etc/os-release"; then
-            printf '%s\n' "$rootfs"
-            return 0
-        fi
-    done
-    return 1
-}
-
-ubuntu_is_installed() {
-    inside_ubuntu && return 0
-    command -v proot-distro >/dev/null 2>&1 || return 1
-    ubuntu_rootfs_dir >/dev/null 2>&1 && return 0
-    proot-distro login ubuntu -- /bin/true >/dev/null 2>&1
-}
-
 show_menu() {
     clear
     echo -e "${MAGENTA}╔══════════════════════════════════════╗${NC}"
@@ -87,7 +66,8 @@ install_ubuntu() {
         }
     fi
 
-    if ubuntu_is_installed; then
+    if proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' || \
+       [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; then
         echo -e "${GREEN}Ubuntu is already installed.${NC}"
     else
         echo -e "${CYAN}Downloading and installing Ubuntu...${NC}"
@@ -114,7 +94,10 @@ setup_ubuntu_environment() {
     local is_ubuntu=false
     if inside_ubuntu; then
         is_ubuntu=true
-    elif ! ubuntu_is_installed; then
+    elif ! command -v proot-distro >/dev/null 2>&1 || {
+        ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
+        [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]
+    }; then
         echo -e "${RED}Ubuntu is not installed yet. Run option 1 first.${NC}"
         return 1
     fi
@@ -123,12 +106,7 @@ setup_ubuntu_environment() {
     if [[ "$is_ubuntu" == true ]]; then
         ubuntu_home="$HOME"
     else
-        local rootfs
-        rootfs=$(ubuntu_rootfs_dir) || {
-            echo -e "${RED}Could not locate Ubuntu's installed root filesystem.${NC}"
-            return 1
-        }
-        ubuntu_home="$rootfs/root"
+        ubuntu_home="$HOME/.local/share/proot-distro/installed-rootfs/ubuntu/root"
     fi
 
     mkdir -p "$ubuntu_home/projects" "$ubuntu_home/scripts" \
@@ -179,7 +157,9 @@ run_in_ubuntu() {
     local command_string="$1"
     if inside_ubuntu; then
         bash -lc "$command_string"
-    elif ubuntu_is_installed; then
+    elif command -v proot-distro >/dev/null 2>&1 && \
+         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
+           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
         proot-distro login ubuntu -- bash -lc "$command_string"
     else
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
@@ -208,6 +188,7 @@ get_t3_host_ip() {
 }
 
 start_t3_android_server() {
+    clear
     local host_ip status
     host_ip="$(get_t3_host_ip)" || {
         echo -e "${RED}Could not detect the phone's Wi-Fi IP. Connect to Wi-Fi and try again.${NC}"
@@ -219,19 +200,19 @@ start_t3_android_server() {
             echo -e "${RED}T3 CLI is not on PATH in Ubuntu. Open a fresh Ubuntu shell or fix its PATH first.${NC}"
             return 1
         fi
-    elif ! ubuntu_is_installed; then
+    elif ! command -v proot-distro >/dev/null 2>&1 || {
+        ! proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' &&
+        [[ ! -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]
+    }; then
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}"
         return 1
     fi
 
-    if ! inside_ubuntu && ! run_in_ubuntu 'command -v t3 >/dev/null 2>&1'; then
-        echo -e "${RED}T3 CLI is not on PATH in Ubuntu. Open a fresh Ubuntu shell or fix its PATH first.${NC}"
-        return 1
-    fi
-
-    echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}...${NC}"
-    echo "Keep this server running. In another Termux tab, run: t3pair"
-    echo "Then paste its pairing link into T3 Android > Settings > Environments."
+    echo -e "${GREEN}Starting T3 in Ubuntu on ${CYAN}${host_ip}${GREEN}.${NC}"
+    echo -e "When the server is ready, open another Ubuntu shell and run ${CYAN}t3 pair${NC}."
+    echo "In T3 Android, scan the QR code or paste the pairing URL into Settings > Environments."
+    echo "Press Ctrl+C here to stop the server."
+    echo
 
     if ! inside_ubuntu && command -v termux-wake-lock >/dev/null 2>&1; then
         termux-wake-lock 2>/dev/null || true
@@ -241,10 +222,9 @@ start_t3_android_server() {
         t3 serve --host "$host_ip"
         status=$?
     else
-        proot-distro login ubuntu -- t3 serve --host "$host_ip"
+        run_in_ubuntu "t3 serve --host '$host_ip'"
         status=$?
     fi
-
     if command -v termux-wake-unlock >/dev/null 2>&1; then
         termux-wake-unlock 2>/dev/null || true
     fi
@@ -255,13 +235,10 @@ start_t3_android_server() {
 ubuntu_home_dir() {
     if inside_ubuntu; then
         printf '%s\n' "$HOME"
-    elif ubuntu_is_installed; then
-        local rootfs
-        rootfs=$(ubuntu_rootfs_dir) || {
-            echo -e "${RED}Could not locate Ubuntu's installed root filesystem.${NC}" >&2
-            return 1
-        }
-        printf '%s\n' "$rootfs/root"
+    elif command -v proot-distro >/dev/null 2>&1 && \
+         { proot-distro list 2>/dev/null | grep -qi 'ubuntu.*installed' ||
+           [[ -d "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu" ]]; }; then
+        printf '%s\n' "$HOME/.local/share/proot-distro/installed-rootfs/ubuntu/root"
     else
         echo -e "${RED}Ubuntu is not installed. Install it with option 1 first.${NC}" >&2
         return 1
@@ -517,10 +494,5 @@ install_ai_agents() {
         *) echo -e "${RED}Invalid choice.${NC}"; return 1 ;;
     esac
 }
-
-if [[ "${1:-}" == "--start-t3" ]]; then
-    start_t3_android_server "${@:2}"
-    exit $?
-fi
 
 show_menu
