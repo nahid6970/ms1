@@ -1715,6 +1715,83 @@ def api_agent_sessions():
         set_config_val('agent_handoff_conversations', conversations)
     return jsonify({'sessions': sessions})
 
+@app.route('/api/agent/session', methods=['DELETE'])
+def api_agent_session_delete():
+    data = request.get_json(silent=True) or {}
+    project_name = str(data.get('project') or '').strip()
+    agent = str(data.get('agent') or '').strip().lower()
+    session_id = str(data.get('sessionId') or '').strip()
+    session_path = os.path.abspath(os.path.expanduser(str(data.get('sessionPath') or '')))
+    if agent not in {'codex', 'pi', 'kiro'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+        return jsonify({'error': 'Invalid agent session.'}), 400
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
+    expected_extension = '.json' if agent == 'kiro' else '.jsonl'
+    if (not session_path.lower().endswith(expected_extension) or
+            not any(_path_is_within(session_path, root) for root in allowed_roots)):
+        return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
+    try:
+        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
+            if agent == 'codex':
+                metadata = metadata.get('payload') or {}
+        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+        cwd = str(metadata.get('cwd') or '')
+        if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
+            return jsonify({'error': 'Session does not belong to this workspace.'}), 404
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the saved session.'}), 404
+
+    files_to_delete = [session_path]
+    if agent == 'kiro':
+        companion_path = os.path.splitext(session_path)[0] + '.jsonl'
+        if os.path.isfile(companion_path) and any(_path_is_within(companion_path, root) for root in allowed_roots):
+            files_to_delete.insert(0, companion_path)
+    try:
+        for path in files_to_delete:
+            os.remove(path)
+    except OSError as exc:
+        return jsonify({'error': f'Could not delete the session file: {exc}'}), 409
+
+    conversations = get_config_val('agent_handoff_conversations', list)
+    updated_conversations = []
+    registry_changed = False
+    deleted_key = (agent, session_id)
+    for conversation in conversations:
+        if conversation.get('project') == project['name']:
+            members = [member for member in conversation.get('sessions', []) if isinstance(member, dict)]
+            remaining = [member for member in members if (member.get('agent'), member.get('sessionId')) != deleted_key]
+            if len(remaining) != len(members):
+                conversation['sessions'] = remaining
+                registry_changed = True
+                if (conversation.get('activeAgent'), conversation.get('activeSessionId')) == deleted_key:
+                    remaining_keys = {(member.get('agent'), member.get('sessionId')) for member in remaining}
+                    fallback = next((
+                        (handoff.get('targetAgent'), handoff.get('targetSessionId'))
+                        for handoff in reversed(conversation.get('handoffs', []))
+                        if (handoff.get('targetAgent'), handoff.get('targetSessionId')) in remaining_keys
+                    ), None)
+                    if fallback is None:
+                        origin_key = (conversation.get('originAgent'), conversation.get('originSessionId'))
+                        fallback = origin_key if origin_key in remaining_keys else (
+                            (remaining[-1].get('agent'), remaining[-1].get('sessionId')) if remaining else None
+                        )
+                    if fallback:
+                        conversation['activeAgent'], conversation['activeSessionId'] = fallback
+                        conversation['status'] = 'active'
+                    else:
+                        conversation['activeSessionId'] = None
+                if not remaining and conversation.get('status') != 'pending':
+                    continue
+        updated_conversations.append(conversation)
+    if registry_changed:
+        set_config_val('agent_handoff_conversations', updated_conversations)
+    return jsonify({'success': True, 'agent': agent, 'sessionId': session_id, 'deletedFiles': len(files_to_delete)})
+
 @app.route('/api/agent/session-context', methods=['GET'])
 def api_agent_session_context():
     project_name = (request.args.get('project') or '').strip()

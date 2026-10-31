@@ -26,6 +26,13 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 
+## [2026-10-31] - Add Session Delete Action
+
+- Replaced the Switch text with an accessible icon-only control and added a neighboring trash icon for saved sessions.
+- Added a confirmed delete endpoint that validates the session path, agent, and workspace before removing it; deleting one item leaves other agent sessions in the linked conversation intact.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Add Unified AI Agent Session Resume
 
 - Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex, Pi, and Kiro CLI sessions scoped to the active workspace.
