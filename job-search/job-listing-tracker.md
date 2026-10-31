@@ -5,17 +5,19 @@
 **Last updated:** 31 October 2026  
 **Tracked source:** [BD Govt Job — Bank Jobs](https://bdgovtjob.net/category/bank-jobs/)
 
+**Baseline checkpoint:** The newest listings on this category page were reviewed through **Bank Asia / Sr. Analyst–Analyst, Structured Finance (posted 28 Oct 2026)** on 31 Oct 2026. The five rows below establish the initial seen set. On the next scan, search newer entries and continue backward until reaching this known set; do not stop after five results.
+
 ## Instructions for future checks
 
 When Nahid asks whether there are new listings on a site/category:
 
 1. Read this tracker and `recent.md` first for his profile, eligibility rules, and previously reviewed listings.
-2. Open the source page and inspect its newest entries (default: the latest five, unless he requests another number). Verify the actual notice/career page where possible because aggregator dates, job titles, and deadlines can be inaccurate.
+2. Open the source page and scan incrementally: start with the newest entry and move backward through the page and pagination until reaching listings already recorded in this tracker. The goal is to find **all posts since the last checkpoint**, not an arbitrary number such as five. If the source page does not expose older results or a clear overlap/checkpoint, say what range was actually checked and do not claim the scan is exhaustive. Verify the actual notice/career page where possible because aggregator dates, job titles, and deadlines can be inaccurate.
 3. Compare each listing using **employer + exact post/title + source/job ID or circular date + deadline**. Employer name alone is not a unique identifier: the same employer can publish a genuinely new post or circular. A changed deadline, repost, or updated page for the same post should be recorded as an update to the existing entry, not a new vacancy.
 4. Report only genuinely new listings as **NEW**. Mention previously seen listings separately as **ALREADY TRACKED** (or **UPDATED** if the same post changed). If a new post is from an employer already seen, explicitly say **new post from a previously seen employer**.
 5. For every new listing, check the full circular for strict eligibility conditions: degree/subject, CGPA/division, age and its cutoff date, experience, licensing, skills, residency/district, required documents, number of posts, application dates, and how to apply. Mark unknown conditions clearly; do not assume eligibility.
 6. Match against Nahid's profile and show a compact table with ✅ / ❌ / ⚠️ eligibility, strict conditions, deadline, and location/commute. Apply Nahid's Dhaka/Narayanganj commute warning rule from `recent.md`. Put application links separately after the table, only for eligible or uncertain roles.
-7. After presenting the new jobs, add each reviewed listing to the table below. Keep expired entries: they help distinguish old notices from new ones. Update status/deadline when a known listing changes rather than silently replacing its history.
+7. After presenting the new jobs, add each new listing to the table below and move the baseline checkpoint to the oldest already-known listing reached during this scan (or record the exact scan date and last-seen post if the source has no stable order). Keep expired entries: they help distinguish old notices from new ones. Update status/deadline when a known listing changes rather than silently replacing its history.
 
 ## Previously reviewed on the Bank Jobs page
 
