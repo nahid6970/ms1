@@ -10,6 +10,12 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
+## [2026-10-31] - Rebuild Agent Trails After Session Deletion
+
+- Agent history trails now include only surviving native sessions, so deleting a switched session falls back to the remaining earlier agents.
+
+**Files Modified:** `app.py`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Add Cross-Agent Conversation Handoffs
 
 - Added a **Switch** action on each saved Codex, Pi, and Kiro CLI session. Any agent can hand off to either of the other two.

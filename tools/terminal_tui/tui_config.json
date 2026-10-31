@@ -1539,77 +1539,33 @@
   ],
   "agent_handoff_conversations": [
     {
-      "id": "3a135d71-1333-4aec-924f-70dd58f854f4",
+      "id": "2feda58d-e78f-4928-8913-222e7a1c8cf6",
       "project": "Terminal TUI",
-      "originAgent": "pi",
-      "originSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
+      "originAgent": "codex",
+      "originSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
       "sessions": [
-        {
-          "agent": "pi",
-          "sessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e"
-        }
-      ],
-      "handoffs": [
-        {
-          "id": "e9a5ecae-a4cd-4d74-a06f-38d45053c1b5",
-          "token": "e29d4dfcdb6a4b4d9a528147c2f5fe7b",
-          "sourceAgent": "pi",
-          "sourceSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
-          "targetAgent": "codex",
-          "targetSessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb",
-          "transcriptBundle": "C:\\Users\\nahid\\AppData\\Local\\TerminalTui\\AgentHandoffBundles\\a03a1153337dabbc\\e9a5ecae-a4cd-4d74-a06f-38d45053c1b5.md",
-          "status": "active",
-          "createdAt": 1793459307.629635
-        },
-        {
-          "id": "6b7b011c-bde6-471d-8a1c-b6dcf0e04864",
-          "token": "600d06ef01894d91bdb83cb0fc5b7b8f",
-          "sourceAgent": "codex",
-          "sourceSessionId": "01a19281-65ed-7a62-8d57-ecb2d66ae4eb",
-          "targetAgent": "kiro",
-          "targetSessionId": "c01d0156-1c70-4a6d-a7a0-21a566264b82",
-          "status": "active",
-          "createdAt": 1793460205.804405
-        }
-      ],
-      "activeHandoffId": "6b7b011c-bde6-471d-8a1c-b6dcf0e04864",
-      "activeAgent": "pi",
-      "activeSessionId": "01a12ed5-0b9c-730c-94cd-12bb78c4144e",
-      "status": "active",
-      "updatedAt": 1793460205.804405
-    },
-    {
-      "id": "3d4caeb3-78c5-4255-a7ae-deb587f075f2",
-      "project": "Terminal TUI",
-      "originAgent": "kiro",
-      "originSessionId": "d63785b9-031b-4848-9a37-2f9a84b22ba6",
-      "sessions": [
-        {
-          "agent": "kiro",
-          "sessionId": "d63785b9-031b-4848-9a37-2f9a84b22ba6"
-        },
         {
           "agent": "codex",
-          "sessionId": "01a1928b-9f8c-7022-8fe5-3f6b51f07bb8"
+          "sessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279"
         }
       ],
       "handoffs": [
         {
-          "id": "3d46ddaa-52d6-45ad-8244-310e6703fa39",
-          "token": "a5ad563d356c444daef1c2aab4e4642a",
-          "sourceAgent": "kiro",
-          "sourceSessionId": "d63785b9-031b-4848-9a37-2f9a84b22ba6",
-          "targetAgent": "codex",
-          "targetSessionId": "01a1928b-9f8c-7022-8fe5-3f6b51f07bb8",
+          "id": "f936feaa-1eff-4581-aec0-40eb1417bf2e",
+          "token": "981a7dfa48154759a440e8634dc79442",
+          "sourceAgent": "codex",
+          "sourceSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
+          "targetAgent": "pi",
+          "targetSessionId": "01a1929f-7cd5-70b4-8902-b3d718447d39",
           "status": "active",
-          "createdAt": 1793459981.109885
+          "createdAt": 1793461283.2775137
         }
       ],
-      "activeHandoffId": "3d46ddaa-52d6-45ad-8244-310e6703fa39",
+      "activeHandoffId": "f936feaa-1eff-4581-aec0-40eb1417bf2e",
       "activeAgent": "codex",
-      "activeSessionId": "01a1928b-9f8c-7022-8fe5-3f6b51f07bb8",
+      "activeSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
       "status": "active",
-      "updatedAt": 1793459981.109885
+      "updatedAt": 1793461283.2775137
     }
   ]
 }

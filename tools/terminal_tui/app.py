@@ -1725,10 +1725,17 @@ def api_agent_sessions():
                 continue
             session['originAgent'] = conversation.get('originAgent', session['agent'])
             session['activeAgent'] = conversation.get('activeAgent', session['agent'])
-            agent_trail = [session['originAgent']]
+            surviving_members = [
+                member for member in conversation.get('sessions', [])
+                if isinstance(member, dict) and (member.get('agent'), member.get('sessionId')) in member_keys
+            ]
+            first_member = surviving_members[0] if surviving_members else {'agent': session['agent']}
+            agent_trail = [first_member.get('agent', session['agent'])]
             for handoff in conversation.get('handoffs', []):
                 target_agent = handoff.get('targetAgent')
-                if target_agent in {'codex', 'pi', 'kiro'} and target_agent != agent_trail[-1]:
+                target_key = (target_agent, handoff.get('targetSessionId'))
+                if (target_agent in {'codex', 'pi', 'kiro'} and target_key in member_keys and
+                        target_agent != agent_trail[-1]):
                     agent_trail.append(target_agent)
             session['agentTrail'] = agent_trail
             session['activeSessionId'] = conversation.get('activeSessionId')
