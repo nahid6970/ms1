@@ -52,6 +52,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Added each agent icon to the left of the session title, workspace path, modified time, and session ID.
 - Selecting a session opens Codex with `codex --yolo resume <SESSION_ID>`, Pi with `pi --approve --session <SESSION_PATH>`, or Kiro with `kiro-cli chat --trust-all-tools --resume-id <SESSION_ID>` in a new terminal tab.
 - New cross-agent handoffs use the same agent-specific approval options: Codex `--yolo`, Pi `--approve`, and Kiro CLI `--trust-all-tools`.
+- Added icon-only Codex, Kiro CLI, and Pi launch buttons in the saved-session picker header before its close button; each starts a fresh session in a new tab rooted at the active workspace.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
 - Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
 

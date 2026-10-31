@@ -1078,8 +1078,6 @@
             border-color: rgba(248, 113, 113, 0.4);
         }
 
-
-
         .terminal-pane-add-btn {
             top: 36px;
         }
@@ -3858,6 +3856,7 @@
                     <div id="agent-session-picker-title" style="font-size:.96rem;font-weight:650;color:#f3f4f6;">Continue an AI agent session</div>
                     <div id="agent-session-picker-count" style="font-size:.68rem;color:#8b8b8b;margin-top:3px;">Loading saved sessions…</div>
                 </div>
+                <div id="agent-session-new-buttons" role="group" aria-label="Start a new AI agent session" style="display:flex;align-items:center;gap:5px;flex:none;"></div>
                 <button id="agent-session-picker-close" onclick="closeAgentSessionPicker()" aria-label="Close session picker" title="Close" style="width:28px;height:28px;border:0;background:transparent;color:#aaa;border-radius:6px;cursor:pointer;font-size:1.2rem;">×</button>
             </div>
             <div style="padding:10px 14px 8px;">
@@ -5295,7 +5294,10 @@
             const closeBtn = document.createElement('button');
             closeBtn.type = 'button';
             closeBtn.className = 'terminal-pane-close';
+            closeBtn.id = `terminal-pane-close-${paneId}`;
+            closeBtn.dataset.testid = 'terminal-pane-close';
             closeBtn.title = 'Close this terminal pane';
+            closeBtn.setAttribute('aria-label', closeBtn.title);
             closeBtn.innerText = '×';
             closeBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -5972,6 +5974,7 @@
             const list = document.getElementById('agent-session-list');
             const count = document.getElementById('agent-session-picker-count');
             const title = document.getElementById('agent-session-picker-title');
+            renderAgentSessionNewButtons();
             modal.classList.add('show');
             input.value = '';
             title.textContent = `Continue a chat in ${activeProject}`;
@@ -5993,6 +5996,29 @@
 
         function closeAgentSessionPicker() {
             document.getElementById('agent-session-picker-modal')?.classList.remove('show');
+        }
+
+        function renderAgentSessionNewButtons() {
+            const container = document.getElementById('agent-session-new-buttons');
+            if (!container || container.childElementCount) return;
+            const agentNames = { codex: 'Codex', kiro: 'Kiro CLI', pi: 'Pi' };
+            ['codex', 'kiro', 'pi'].forEach(agent => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.id = `agent-session-new-${agent}`;
+                button.dataset.testid = 'agent-session-new';
+                button.title = `Start a new ${agentNames[agent]} session`;
+                button.setAttribute('aria-label', button.title);
+                button.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #303030;border-radius:6px;background:#111;color:#ddd;cursor:pointer;';
+                button.innerHTML = agentSessionIconMarkup(agent, 15, `picker-new-${agent}`);
+                button.onmouseenter = () => { button.style.borderColor = '#7c3aed'; button.style.background = '#191323'; };
+                button.onmouseleave = () => { button.style.borderColor = '#303030'; button.style.background = '#111'; };
+                button.onclick = () => {
+                    closeAgentSessionPicker();
+                    startNewAgentSession(agent);
+                };
+                container.appendChild(button);
+            });
         }
 
         function agentSessionIconMarkup(agent, size, iconId) {
@@ -6082,6 +6108,21 @@
                 command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
             }
             splitTerminal('tabs', command);
+        }
+
+        function startNewAgentSession(agent) {
+            if (!activeProject) return;
+            const project = projects.find(item => item.name === activeProject);
+            const safePath = String(project?.path || '').replace(/'/g, "''");
+            const locationCommand = safePath
+                ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; `
+                : '';
+            const agentCommand = agent === 'pi' ? 'pi --approve'
+                : agent === 'kiro' ? 'kiro-cli chat --trust-all-tools'
+                    : agent === 'codex' ? 'codex --yolo'
+                        : null;
+            if (!agentCommand) return;
+            splitTerminal('tabs', `${locationCommand}${agentCommand}`);
         }
 
         async function deleteAgentSession(agent, sessionId) {
