@@ -2040,13 +2040,7 @@
                         </svg>
                     </button>
 
-                    <div id="codex-resume-actions" style="position: relative;">
-                        <button class="action-btn" id="codex-resume-toggle" onclick="toggleCodexResumeMenu(event)" title="Continue a saved Codex chat" aria-label="Continue a saved Codex chat" aria-expanded="false" style="height: 34px; min-width: 34px; padding: 0 7px; display: flex; align-items: center; justify-content: center; gap: 5px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.68rem; font-weight: 600;">↻ Codex</button>
-                        <div id="codex-resume-menu" style="display: none; position: absolute; top: calc(100% + 6px); right: 0; z-index: 200; min-width: 190px; padding: 5px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
-                            <button id="codex-resume-picker" onclick="resumeCodexChat(false)" style="display:block;width:100%;padding:8px 10px;border:0;border-radius:5px;background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;font-size:.78rem;">Choose a saved chat…</button>
-                            <button id="codex-resume-latest" onclick="resumeCodexChat(true)" style="display:block;width:100%;padding:8px 10px;border:0;border-radius:5px;background:transparent;color:var(--text-primary);text-align:left;cursor:pointer;font-size:.78rem;">Continue latest chat</button>
-                        </div>
-                    </div>
+                    <button class="action-btn" id="codex-resume-toggle" onclick="openCodexSessionPicker()" title="Browse and continue a saved Codex chat" aria-label="Browse saved Codex chats" style="height: 34px; min-width: 34px; padding: 0 7px; display: flex; align-items: center; justify-content: center; gap: 5px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.68rem; font-weight: 600;">↻ Codex</button>
 
                     <button class="action-btn" id="scratchpad-toggle-btn" onclick="toggleScratchpad(event)" title="Workspace Notes & Scratchpad" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); position: relative; transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3855,6 +3849,23 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
                 Paste Files
             </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="codex-session-picker-modal" role="dialog" aria-modal="true" aria-labelledby="codex-session-picker-title" onclick="if(event.target===this)closeCodexSessionPicker()" style="z-index:1200;">
+        <div class="modal-content" style="width:760px;max-width:94vw;height: min(680px, 84vh);padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:14px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+                <div style="min-width:0;flex:1;">
+                    <div id="codex-session-picker-title" style="font-size:.96rem;font-weight:650;color:#f3f4f6;">Continue a Codex chat</div>
+                    <div id="codex-session-picker-count" style="font-size:.68rem;color:#8b8b8b;margin-top:3px;">Loading saved sessions…</div>
+                </div>
+                <button id="codex-session-picker-close" onclick="closeCodexSessionPicker()" aria-label="Close session picker" title="Close" style="width:28px;height:28px;border:0;background:transparent;color:#aaa;border-radius:6px;cursor:pointer;font-size:1.2rem;">×</button>
+            </div>
+            <div style="padding:10px 14px 8px;">
+                <input id="codex-session-search" type="search" placeholder="Search chats, folders, or session IDs…" autocomplete="off" oninput="filterCodexSessions()" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#f3f4f6;outline:none;font-size:.82rem;">
+            </div>
+            <div id="codex-session-list" role="listbox" aria-label="Saved Codex sessions" style="flex:1;min-height:0;overflow-y:auto;padding:2px 10px 12px;display:flex;flex-direction:column;gap:4px;"></div>
+            <div style="padding:9px 15px;border-top:1px solid rgba(255,255,255,.08);color:#777;font-size:.67rem;">Select a chat to resume it in a new terminal tab.</div>
         </div>
     </div>
 
@@ -5921,25 +5932,71 @@
             });
         }
 
-        function toggleCodexResumeMenu(event) {
-            event?.stopPropagation();
-            const menu = document.getElementById('codex-resume-menu');
-            const button = document.getElementById('codex-resume-toggle');
-            const open = menu && menu.style.display !== 'none';
-            if (menu) menu.style.display = open ? 'none' : 'block';
-            if (button) button.setAttribute('aria-expanded', String(!open));
-        }
+        let codexSavedSessions = [];
 
-        function resumeCodexChat(latest = false) {
-            const menu = document.getElementById('codex-resume-menu');
-            const button = document.getElementById('codex-resume-toggle');
-            if (menu) menu.style.display = 'none';
-            if (button) button.setAttribute('aria-expanded', 'false');
+        async function openCodexSessionPicker() {
             if (!activeProject) {
-                alert('Open a workspace first to resume a Codex chat.');
+                alert('Open a workspace first to continue a Codex chat.');
                 return;
             }
-            splitTerminal('tabs', latest ? 'codex resume --last' : 'codex resume');
+            const modal = document.getElementById('codex-session-picker-modal');
+            const input = document.getElementById('codex-session-search');
+            const list = document.getElementById('codex-session-list');
+            const count = document.getElementById('codex-session-picker-count');
+            modal.classList.add('show');
+            input.value = '';
+            count.textContent = 'Loading saved sessions…';
+            list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading Codex sessions…</div>';
+            try {
+                const response = await fetch('/api/codex/sessions');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not load Codex sessions.');
+                codexSavedSessions = data.sessions || [];
+                count.textContent = `${codexSavedSessions.length} saved ${codexSavedSessions.length === 1 ? 'chat' : 'chats'}`;
+                filterCodexSessions();
+                input.focus();
+            } catch (error) {
+                count.textContent = 'Could not load saved sessions';
+                list.innerHTML = `<div style="padding:24px 12px;text-align:center;color:#fca5a5;font-size:.8rem;">${escapeHtml(String(error.message || error))}</div>`;
+            }
+        }
+
+        function closeCodexSessionPicker() {
+            document.getElementById('codex-session-picker-modal')?.classList.remove('show');
+        }
+
+        function filterCodexSessions() {
+            const list = document.getElementById('codex-session-list');
+            const query = (document.getElementById('codex-session-search')?.value || '').trim().toLowerCase();
+            const matches = codexSavedSessions.filter(session =>
+                `${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
+            );
+            if (!matches.length) {
+                list.innerHTML = `<div style="padding:26px 12px;text-align:center;color:#888;font-size:.8rem;">${codexSavedSessions.length ? 'No matching chats.' : 'No saved Codex chats were found for this profile.'}</div>`;
+                return;
+            }
+            list.innerHTML = matches.map(session => {
+                const date = session.lastModified ? new Date(session.lastModified * 1000).toLocaleString() : '';
+                return `<button type="button" id="codex-session-${escapeHtml(session.sessionId)}" class="codex-session-row" data-testid="codex-session-row" data-session-id="${escapeHtml(session.sessionId)}" role="option" aria-selected="false" style="width:100%;padding:11px 12px;display:flex;flex-direction:column;align-items:stretch;gap:5px;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;color:#eee;cursor:pointer;">
+                    <span style="font-size:.8rem;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(String(session.title || 'Untitled chat'))}</span>
+                    <span style="font-size:.67rem;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(String(session.cwd || 'Folder unavailable'))}</span>
+                    <span style="font-size:.64rem;color:#696969;display:flex;justify-content:space-between;gap:8px;"><span>${escapeHtml(date)}</span><span>${escapeHtml(session.sessionId)}</span></span>
+                </button>`;
+            }).join('');
+            list.querySelectorAll('.codex-session-row').forEach(row => {
+                row.addEventListener('mouseenter', () => { row.style.background = 'rgba(255,255,255,.07)'; row.style.borderColor = '#333'; });
+                row.addEventListener('mouseleave', () => { row.style.background = 'transparent'; row.style.borderColor = 'transparent'; });
+                row.addEventListener('click', () => resumeCodexSession(row.dataset.sessionId));
+            });
+        }
+
+        function resumeCodexSession(sessionId) {
+            const session = codexSavedSessions.find(item => item.sessionId === sessionId);
+            if (!session || !activeProject) return;
+            closeCodexSessionPicker();
+            const safePath = String(session.cwd || '').replace(/'/g, "''");
+            const command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex resume ${session.sessionId}`;
+            splitTerminal('tabs', command);
         }
 
         function splitTerminal(direction, initialCommand = null) {

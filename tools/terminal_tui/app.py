@@ -1452,6 +1452,71 @@ def api_session_pane_stop(project, pane_id):
         threading.Thread(target=session.kill, daemon=True).start()
     return jsonify({"success": True, "paneId": pane_id})
 
+@app.route('/api/codex/sessions', methods=['GET'])
+def api_codex_sessions():
+    """List saved Codex conversations for the profile running this server."""
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    codex_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
+    session_dirs = [os.path.join(codex_home, 'sessions'), os.path.join(codex_home, 'archived_sessions')]
+    sessions = []
+    seen_ids = set()
+
+    for session_dir in session_dirs:
+        if not os.path.isdir(session_dir):
+            continue
+        for root, _dirs, filenames in os.walk(session_dir):
+            for filename in filenames:
+                if not filename.lower().endswith('.jsonl'):
+                    continue
+                session_path = os.path.join(root, filename)
+                try:
+                    modified_at = os.path.getmtime(session_path)
+                    with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+                        first_line = session_file.readline()
+                        first_record = json.loads(first_line)
+                        metadata = first_record.get('payload') or {}
+                        session_id = str(metadata.get('session_id') or metadata.get('id') or '')
+                        if not re.fullmatch(r'[0-9a-fA-F-]{36}', session_id) or session_id in seen_ids:
+                            continue
+
+                        title = ''
+                        for line in session_file:
+                            if len(line) > 2_000_000:
+                                continue
+                            try:
+                                record = json.loads(line)
+                            except (json.JSONDecodeError, TypeError):
+                                continue
+                            event_payload = record.get('payload') or {}
+                            if event_payload.get('role') != 'user':
+                                continue
+                            content = event_payload.get('content') or []
+                            if isinstance(content, str):
+                                title = content
+                            elif isinstance(content, list):
+                                title = ' '.join(
+                                    str(part.get('text') or '')
+                                    for part in content
+                                    if isinstance(part, dict) and part.get('type') in {'input_text', 'text'}
+                                )
+                            title = ' '.join(title.split())[:180]
+                            if title:
+                                break
+
+                    seen_ids.add(session_id)
+                    cwd = str(metadata.get('cwd') or '')
+                    sessions.append({
+                        'sessionId': session_id,
+                        'title': title or 'Untitled chat',
+                        'cwd': cwd,
+                        'lastModified': modified_at,
+                    })
+                except (OSError, ValueError, TypeError, AttributeError):
+                    continue
+
+    sessions.sort(key=lambda item: item['lastModified'], reverse=True)
+    return jsonify({'sessions': sessions})
+
 @app.route('/api/session/<project>', methods=['POST'])
 def api_session(project):
     data = request.get_json(silent=True) or {}

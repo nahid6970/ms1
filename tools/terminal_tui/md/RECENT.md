@@ -5,11 +5,11 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-10-31] - Add Quick Codex Chat Resume
 
-- Added a workspace toolbar menu to open Codex's saved-chat picker or resume the latest saved chat in a new terminal tab.
-- Reuses the Codex CLI session store and active PowerShell profile.
-- Documented the workflow in FEATURES.md and ARCHITECTURE.md.
+- Added a workspace toolbar button that opens a searchable list of saved Codex chats, including first prompt, workspace path, modified time, and session ID.
+- Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab, using the session's saved folder when available.
+- Added `GET /api/codex/sessions` to read current and archived session metadata from the active Codex profile.
 
-**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 
 ## [2026-10-25] - Add Synchronized Workspace Filters
 

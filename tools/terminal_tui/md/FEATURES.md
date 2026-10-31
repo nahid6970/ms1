@@ -68,9 +68,9 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume Codex Chat
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's Codex button launches the Codex saved-chat picker (`codex resume`) or continues the latest saved chat (`codex resume --last`) in a new terminal tab. Codex uses the account and conversation history available to the active PowerShell profile.
-**Usage:** Open a workspace, click `↻ Codex`, then choose a saved chat or continue the latest one.
-**Files Involved:** `templates/index.html` (toolbar action and `resumeCodexChat()`)
+**Description:** The workspace toolbar's Codex button opens a searchable list of saved Codex chats, including each chat's first prompt, folder, modified time, and session ID. Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab.
+**Usage:** Open a workspace and click `↻ Codex`; search or browse the saved chats, then select one to resume it.
+**Files Involved:** `app.py` (`GET /api/codex/sessions`), `templates/index.html` (session picker modal and `resumeCodexSession()`)
 
 ## Workspace Management
 **Status:** ✅ Complete
