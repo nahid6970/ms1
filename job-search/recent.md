@@ -16,15 +16,18 @@ BBA and MBA in Finance; SSC and HSC in Commerce. Looking for fresher or no-exper
 ## 2. Presentation Rule (Permanent)
 When showing job options:
 1. Use a clean table with ✅ / ❌ / ⚠️ in an "Eligible?" column. NO links in the table.
-2. After the table, list apply links separately — only for ✅ and ⚠️ jobs.
+2. Include a "Location / commute" column. Check the actual duty station (not just the employer's headquarters) and estimate travel time from both Dhaka and Narayanganj.
+3. Treat jobs in Dhaka or Narayanganj, and commutes of about 30 minutes to 1 hour from either city, as within the preferred area. If a job is more than 1 hour from both, show a clear **⚠️ FAR FROM DHAKA/NARAYANGANJ** warning and state the estimated commute. If location or travel time cannot be confirmed, mark it **⚠️ Verify location** instead of guessing.
+4. Use map/route information and state the assumed starting point and travel mode when available. If the user gives an exact address or preferred mode later, use that instead. Mention that commute estimates can vary with traffic and route.
+5. After the table, list apply links separately — only for ✅ and ⚠️ jobs. For jobs with a far-location warning, keep the link only if the user is otherwise eligible, and repeat the warning next to the link.
 
 Example table format:
 
-| Bank / Org | Post | Experience | Eligible? | Deadline |
+| Bank / Org | Post | Experience | Eligible? | Location / commute | Deadline |
 |---|---|---|---|---|
-| Dutch-Bangla Bank | MTO | Fresher | ✅ Finance/MBA | Sept 13, 2026 |
-| Jamuna Bank | Chief HR Officer | 20 yrs exp | ❌ Senior post | Sept 16, 2026 |
-| Agrani Bank | Unknown post | TBC | ⚠️ Need to check | Sept 10, 2026 |
+| Dutch-Bangla Bank | MTO | Fresher | ✅ Finance/MBA | Dhaka; confirm duty station | Sept 13, 2026 |
+| Jamuna Bank | Chief HR Officer | 20 yrs exp | ❌ Senior post | Dhaka; confirm duty station | Sept 16, 2026 |
+| Agrani Bank | Unknown post | TBC | ⚠️ Need to check | ⚠️ Verify duty station and commute | Sept 10, 2026 |
 
 Example links section (after table):
 - **Dutch-Bangla Bank MTO** → [Apply](https://www.dutchbanglabank.com/career/career.html)
