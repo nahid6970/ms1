@@ -16,10 +16,11 @@ BBA and MBA in Finance; SSC and HSC in Commerce. Looking for fresher or no-exper
 ## 2. Presentation Rule (Permanent)
 When showing job options:
 1. Use a clean table with ✅ / ❌ / ⚠️ in an "Eligible?" column. NO links in the table.
-2. Include a "Location / commute" column. Check the actual duty station (not just the employer's headquarters) and estimate travel time from both Dhaka and Narayanganj.
-3. Treat jobs in Dhaka or Narayanganj, and commutes of about 30 minutes to 1 hour from either city, as within the preferred area. If a job is more than 1 hour from both, show a clear **⚠️ FAR FROM DHAKA/NARAYANGANJ** warning and state the estimated commute. If location or travel time cannot be confirmed, mark it **⚠️ Verify location** instead of guessing.
-4. Use map/route information and state the assumed starting point and travel mode when available. If the user gives an exact address or preferred mode later, use that instead. Mention that commute estimates can vary with traffic and route.
-5. After the table, list apply links separately — only for ✅ and ⚠️ jobs. For jobs with a far-location warning, keep the link only if the user is otherwise eligible, and repeat the warning next to the link.
+2. Before giving an eligibility recommendation, clearly flag every strict or disqualifying rule from the circular, including permanent-district/residency limits, age cutoff date, degree/CGPA/division requirements, experience, licenses, typing/shorthand speeds, required skills, and mandatory documents. Say plainly if an unknown profile detail is needed to determine eligibility. Do not recommend applying until all strict requirements are checked; if uncertain, mark ⚠️ and name the exact condition to verify.
+3. Include a "Location / commute" column. Check the actual duty station (not just the employer's headquarters) and estimate travel time from both Dhaka and Narayanganj.
+4. Treat jobs in Dhaka or Narayanganj, and commutes of about 30 minutes to 1 hour from either city, as within the preferred area. If a job is more than 1 hour from both, show a clear **⚠️ FAR FROM DHAKA/NARAYANGANJ** warning and state the estimated commute. If location or travel time cannot be confirmed, mark it **⚠️ Verify location** instead of guessing.
+5. Use map/route information and state the assumed starting point and travel mode when available. If the user gives an exact address or preferred mode later, use that instead. Mention that commute estimates can vary with traffic and route.
+6. After the table, list apply links separately — only for ✅ and ⚠️ jobs. For jobs with a far-location warning, keep the link only if the user is otherwise eligible, and repeat the warning next to the link.
 
 Example table format:
 
