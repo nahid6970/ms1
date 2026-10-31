@@ -1633,6 +1633,7 @@ def api_agent_sessions():
 
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     session_roots = _agent_session_roots(profile_home, project['path'])
+    title_overrides = get_config_val('agent_session_title_overrides', dict).get(project['name'], {})
 
     sessions = []
     seen_ids = set()
@@ -1674,7 +1675,7 @@ def api_agent_sessions():
 
                         transcript = _extract_agent_transcript(agent, session_path)
                         title = str(metadata.get('title') or '').strip() if agent == 'kiro' else ''
-                        title = title or transcript['title']
+                        title = title_overrides.get(f'{agent}:{session_id}') or title or transcript['title']
                     if agent == 'kiro' and not title:
                         continue
 
@@ -1738,6 +1739,8 @@ def api_agent_sessions():
                         target_agent != agent_trail[-1]):
                     agent_trail.append(target_agent)
             session['agentTrail'] = agent_trail
+            if conversation.get('title'):
+                session['title'] = conversation['title']
             session['activeSessionId'] = conversation.get('activeSessionId')
             session['conversationId'] = conversation.get('id')
             session['handoffStatus'] = conversation.get('status', 'active')
@@ -1750,6 +1753,56 @@ def api_agent_sessions():
     if registry_changed:
         set_config_val('agent_handoff_conversations', conversations)
     return jsonify({'sessions': sessions})
+
+@app.route('/api/agent/session-title', methods=['PATCH'])
+def api_agent_session_title():
+    data = request.get_json(silent=True) or {}
+    project_name = str(data.get('project') or '').strip()
+    agent = str(data.get('agent') or '').strip().lower()
+    session_id = str(data.get('sessionId') or '').strip()
+    session_path = os.path.abspath(os.path.expanduser(str(data.get('sessionPath') or '')))
+    title = str(data.get('title') or '').strip()
+    if agent not in {'codex', 'pi', 'kiro'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+        return jsonify({'error': 'Invalid agent session.'}), 400
+    if not title or len(title) > 160:
+        return jsonify({'error': 'Enter a title from 1 to 160 characters.'}), 400
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
+    expected_extension = '.json' if agent == 'kiro' else '.jsonl'
+    if (not session_path.lower().endswith(expected_extension) or
+            not any(_path_is_within(session_path, root) for root in allowed_roots)):
+        return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
+    try:
+        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
+            if agent == 'codex':
+                metadata = metadata.get('payload') or {}
+        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+        cwd = str(metadata.get('cwd') or '')
+        if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
+            return jsonify({'error': 'Session does not belong to this workspace.'}), 404
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the saved session.'}), 404
+
+    conversations = get_config_val('agent_handoff_conversations', list)
+    conversation = next((item for item in conversations if
+        item.get('project') == project['name'] and any(
+            member.get('agent') == agent and member.get('sessionId') == session_id
+            for member in item.get('sessions', []) if isinstance(member, dict)
+        )), None)
+    if conversation:
+        conversation['title'] = title
+        conversation['updatedAt'] = time.time()
+        set_config_val('agent_handoff_conversations', conversations)
+    else:
+        overrides = get_config_val('agent_session_title_overrides', dict)
+        overrides.setdefault(project['name'], {})[f'{agent}:{session_id}'] = title
+        set_config_val('agent_session_title_overrides', overrides)
+    return jsonify({'success': True, 'title': title, 'conversation': bool(conversation)})
 
 @app.route('/api/agent/session', methods=['DELETE'])
 def api_agent_session_delete():
