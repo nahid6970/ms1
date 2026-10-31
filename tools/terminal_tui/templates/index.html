@@ -1919,6 +1919,40 @@
             color: #000;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.38), 0 0 0 2px rgba(244,174,215,.2);
         }
+        .agent-session-token-estimate {
+            --token-foreground: #bfdbfe;
+            --token-border: rgba(96,165,250,.3);
+            --token-background: rgba(59,130,246,.1);
+            --token-accent: #60a5fa;
+            border-color: var(--token-border) !important;
+            background: var(--token-background) !important;
+            color: var(--token-foreground) !important;
+        }
+        .agent-session-token-estimate[data-token-range="tiny"] {
+            --token-foreground: #94a3b8;
+            --token-border: rgba(148,163,184,.22);
+            --token-background: rgba(148,163,184,.06);
+            --token-accent: #64748b;
+        }
+        .agent-session-token-estimate[data-token-range="medium"] {
+            --token-foreground: #ddd6fe;
+            --token-border: rgba(167,139,250,.32);
+            --token-background: rgba(124,58,237,.1);
+            --token-accent: #a78bfa;
+        }
+        .agent-session-token-estimate[data-token-range="large"] {
+            --token-foreground: #fde68a;
+            --token-border: rgba(251,191,36,.34);
+            --token-background: rgba(217,119,6,.11);
+            --token-accent: #fbbf24;
+        }
+        .agent-session-token-estimate[data-token-range="very-large"] {
+            --token-foreground: #fecdd3;
+            --token-border: rgba(251,113,133,.34);
+            --token-background: rgba(225,29,72,.11);
+            --token-accent: #fb7185;
+        }
+        .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -6121,12 +6155,13 @@
             return `~${count}`;
         }
 
-        function getAgentTokenBadgeColors(value) {
+        function getAgentTokenBadgeRange(value) {
             const count = Math.max(0, Number(value) || 0);
-            if (count >= 50000) return { text: '#fecdd3', border: 'rgba(251,113,133,.34)', background: 'rgba(225,29,72,.13)', icon: '#fb7185' };
-            if (count >= 10000) return { text: '#fde68a', border: 'rgba(251,191,36,.34)', background: 'rgba(217,119,6,.13)', icon: '#fbbf24' };
-            if (count >= 1000) return { text: '#ddd6fe', border: 'rgba(167,139,250,.34)', background: 'rgba(124,58,237,.13)', icon: '#a78bfa' };
-            return { text: '#bfdbfe', border: 'rgba(96,165,250,.28)', background: 'rgba(59,130,246,.11)', icon: '#60a5fa' };
+            if (count >= 50000) return 'very-large';
+            if (count >= 10000) return 'large';
+            if (count >= 1000) return 'medium';
+            if (count >= 500) return 'small';
+            return 'tiny';
         }
 
         function filterAgentSessions() {
@@ -6154,7 +6189,7 @@
                 const sessionPath = String(session.cwd || 'Folder unavailable');
                 const tokenEstimate = formatAgentTokenEstimate(session.tokenEstimate);
                 const tokenEstimateDisplay = tokenEstimate.replace(/^~/, '');
-                const tokenBadgeColors = getAgentTokenBadgeColors(session.tokenEstimate);
+                const tokenBadgeRange = getAgentTokenBadgeRange(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
                 const agentTrail = Array.isArray(session.agentTrail) ? session.agentTrail : [];
                 const trailMarkup = session.conversationId && session.isCurrentActiveSession && agentTrail.length > 1
@@ -6176,7 +6211,7 @@
                     <button type="button" id="agent-session-delete-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
                         </span>
                         <span style="display:flex;align-items:center;justify-content:flex-end;gap:7px;max-width:100%;">
-                            <span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" title="Approximate tokens from readable user and assistant text; excludes tool metadata." aria-label="Approximately ${escapeHtml(tokenEstimateDisplay)} tokens" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid ${tokenBadgeColors.border};border-radius:6px;background:${tokenBadgeColors.background};color:${tokenBadgeColors.text};font-size:.63rem;font-weight:650;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:${tokenBadgeColors.icon};flex:none;"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"></path><path d="m3 12 9 4.5 9-4.5"></path><path d="m3 16.5 9 4.5 9-4.5"></path></svg>${escapeHtml(tokenEstimateDisplay)}</span>
+                            <span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" data-token-range="${tokenBadgeRange}" title="Approximate tokens from readable user and assistant text; excludes tool metadata." aria-label="Approximately ${escapeHtml(tokenEstimateDisplay)} tokens" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(96,165,250,.3);border-radius:6px;font-size:.63rem;font-weight:650;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"></path><path d="m3 12 9 4.5 9-4.5"></path><path d="m3 16.5 9 4.5 9-4.5"></path></svg>${escapeHtml(tokenEstimateDisplay)}</span>
                             <span class="agent-session-id" data-testid="agent-session-id" title="${escapeHtml(session.sessionId)}" aria-label="Session ID ${escapeHtml(session.sessionId)}" style="display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;color:#a1a1aa;font: .58rem/1.2 'Fira Code',Consolas,monospace;">${escapeHtml(session.sessionId)}</span>
                         </span>
                     </span>

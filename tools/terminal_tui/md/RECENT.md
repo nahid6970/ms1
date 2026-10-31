@@ -61,6 +61,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Changed the AGENTS button corners to square.
 - Simplified the session token badge to show only the compact count without a tilde or “tokens” suffix.
 - Added size-based token badge colors: blue under 1k, violet from 1k, amber from 10k, and rose from 50k.
+- Centralized token badge range colors in CSS variables so each range keeps its text, background, border, and icon colors coordinated.
 - Added an editable Gemini title suggestion flow to the session rename dialog, with model selection and a new validated title-generation endpoint.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
 - Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
@@ -1035,3 +1036,12 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Added a workspace Git action that clones into a missing configured path or fetches the saved origin when the repository exists.
 - Added a Restore from Git action to the missing-folder dialog and documented the new endpoint and behavior.
 - Prevent overlapping stats polls and stale workspace restores from overwriting the active workspace.
+
+## [2026-11-01] - Gray Token Badge for Sessions Under 500 Tokens
+
+- Added a `'tiny'` token range for sessions with fewer than 500 estimated tokens.
+- Tokens under 500 now render with a muted gray palette (`#94a3b8` text, soft gray border and background) instead of the default blue.
+- The 500–999 range (`'small'`) retains the existing blue.
+- Only the CSS and the `getAgentTokenBadgeRange()` JS function were changed; no backend changes.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`

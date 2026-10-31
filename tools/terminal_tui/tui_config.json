@@ -1579,7 +1579,10 @@
       "codex:01a170e9-0aba-7192-9b36-4fa961257833": "Style and Center Rclone Icon Controls",
       "kiro:b537d889-c706-45d0-8fd6-6a56d3e449c3": "Fixing Bangla text rendering and scrolling issues in xterm",
       "kiro:309ef9a4-70eb-4bf7-9b6c-422b41514293": "Add Rclone Integration Panel to Workspace",
-      "codex:01a13882-7098-7493-a196-25ca02bfd668": "Reposition Rank Badge and Update Docs"
+      "codex:01a13882-7098-7493-a196-25ca02bfd668": "Reposition Rank Badge and Update Docs",
+      "codex:01a19211-b96a-7151-826a-af722ed57645": "Update token badge styling and colors",
+      "kiro:86acf3e0-048c-44ee-aab1-48fc92374bba": "Style low token counts with gray color",
+      "pi:01a193a3-8b42-732d-b41a-a2377822650e": "Update RECENT.md and verify token ranges"
     },
     "Screenshot Region": {
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",
