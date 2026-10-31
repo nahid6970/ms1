@@ -3,12 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
-## [2026-10-31] - Add Quick Codex Chat Resume
+## [2026-10-31] - Add Unified AI Agent Session Resume
 
-- Added a workspace toolbar AGENT button that opens a searchable list of saved Codex chats scoped to the active workspace, including first user prompt, workspace path, modified time, and session ID.
-- Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab, using the session's saved folder when available.
+- Added a workspace toolbar AGENT button that opens a searchable, newest-first list of Codex and Pi sessions scoped to the active workspace.
+- Added the Codex and Pi SVG icons to the left of each session's title, workspace path, modified time, and session ID.
+- Selecting a session opens Codex with `codex resume <SESSION_ID>` or Pi with `pi --session <SESSION_PATH>` in a new terminal tab.
 - Skipped injected `AGENTS.md` and environment context blocks when choosing chat titles.
-- Added `GET /api/codex/sessions?project=<workspace>` to read current and archived session metadata from the active Codex profile, filtered to the workspace folder and its descendants.
+- Added `GET /api/agent/sessions?project=<workspace>` to read Codex and Pi session metadata, filtered to the workspace folder and its descendants.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 

@@ -1452,9 +1452,10 @@ def api_session_pane_stop(project, pane_id):
         threading.Thread(target=session.kill, daemon=True).start()
     return jsonify({"success": True, "paneId": pane_id})
 
+@app.route('/api/agent/sessions', methods=['GET'])
 @app.route('/api/codex/sessions', methods=['GET'])
-def api_codex_sessions():
-    """List saved Codex conversations that belong to the requested workspace."""
+def api_agent_sessions():
+    """List saved Codex and Pi conversations for the requested workspace."""
     project_name = (request.args.get('project') or '').strip()
     projects = scan_projects()
     project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
@@ -1464,11 +1465,38 @@ def api_codex_sessions():
 
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     codex_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
-    session_dirs = [os.path.join(codex_home, 'sessions'), os.path.join(codex_home, 'archived_sessions')]
+    session_roots = [
+        ('codex', os.path.join(codex_home, 'sessions')),
+        ('codex', os.path.join(codex_home, 'archived_sessions')),
+    ]
+
+    pi_agent_home = os.path.join(profile_home, '.pi', 'agent')
+    pi_env_session_dir = os.environ.get('PI_CODING_AGENT_SESSION_DIR')
+    pi_settings_paths = [os.path.join(pi_agent_home, 'settings.json'), os.path.join(project['path'], '.pi', 'settings.json')]
+    pi_configured_roots = []
+    for settings_path in pi_settings_paths:
+        try:
+            with open(settings_path, 'r', encoding='utf-8') as settings_file:
+                configured_dir = (json.load(settings_file) or {}).get('sessionDir')
+            if configured_dir:
+                configured_dir = os.path.expandvars(os.path.expanduser(str(configured_dir)))
+                if not os.path.isabs(configured_dir):
+                    configured_dir = os.path.abspath(os.path.join(os.path.dirname(settings_path), configured_dir))
+                pi_configured_roots.append(configured_dir)
+        except (OSError, ValueError, TypeError, AttributeError):
+            continue
+    if pi_env_session_dir:
+        pi_roots = [os.path.abspath(os.path.expandvars(os.path.expanduser(pi_env_session_dir)))]
+    elif pi_configured_roots:
+        pi_roots = pi_configured_roots
+    else:
+        pi_roots = [os.path.join(pi_agent_home, 'sessions')]
+    session_roots.extend(('pi', path) for path in pi_roots)
+
     sessions = []
     seen_ids = set()
 
-    for session_dir in session_dirs:
+    for agent, session_dir in session_roots:
         if not os.path.isdir(session_dir):
             continue
         for root, _dirs, filenames in os.walk(session_dir):
@@ -1482,8 +1510,10 @@ def api_codex_sessions():
                         first_line = session_file.readline()
                         first_record = json.loads(first_line)
                         metadata = first_record.get('payload') or {}
+                        if agent == 'pi':
+                            metadata = first_record
                         session_id = str(metadata.get('session_id') or metadata.get('id') or '')
-                        if not re.fullmatch(r'[0-9a-fA-F-]{36}', session_id) or session_id in seen_ids:
+                        if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id) or (agent, session_id) in seen_ids:
                             continue
                         cwd = str(metadata.get('cwd') or '')
                         if not cwd:
@@ -1503,8 +1533,12 @@ def api_codex_sessions():
                                 record = json.loads(line)
                             except (json.JSONDecodeError, TypeError):
                                 continue
-                            event_payload = record.get('payload') or {}
-                            if event_payload.get('role') != 'user':
+                            if agent == 'codex':
+                                event_payload = record.get('payload') or {}
+                            else:
+                                event_payload = record.get('message') or {}
+                            if (event_payload.get('role') != 'user' or
+                                    (agent == 'pi' and record.get('type') != 'message')):
                                 continue
                             content = event_payload.get('content') or []
                             if isinstance(content, str):
@@ -1528,12 +1562,14 @@ def api_codex_sessions():
                             if title:
                                 break
 
-                    seen_ids.add(session_id)
+                    seen_ids.add((agent, session_id))
                     sessions.append({
+                        'agent': agent,
                         'sessionId': session_id,
                         'title': title or 'Untitled chat',
                         'cwd': cwd,
                         'lastModified': modified_at,
+                        'sessionPath': os.path.abspath(session_path),
                     })
                 except (OSError, ValueError, TypeError, AttributeError):
                     continue

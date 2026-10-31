@@ -66,11 +66,11 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Description:** F1 opens a centered command-palette-style window for selecting workspaces, searching saved commands, and creating a new workspace.
 **Implementation:** `templates/index.html` — dark rounded palette layout, search/back row, Projects and Commands views, existing Add Workspace modal integration, Arrow-key/Enter navigation, and Ctrl/Cmd+1–9 project shortcuts.
 
-## Resume Codex Chat
+## Resume AI Agent Sessions
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's AGENT button opens a searchable list of saved Codex chats for the active workspace, including each chat's first user prompt, folder, modified time, and session ID. Injected `AGENTS.md` instructions are skipped when choosing the title. Selecting a chat opens it with `codex resume <SESSION_ID>` in a new terminal tab.
-**Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse that workspace's saved chats, then select one to resume it.
-**Files Involved:** `app.py` (`GET /api/codex/sessions`), `templates/index.html` (session picker modal and `resumeCodexSession()`)
+**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex and Pi sessions for the active workspace. Each row shows that agent's icon to the left of the first user prompt, folder, modified time, and session ID. Injected `AGENTS.md` instructions are skipped when choosing the title. Selecting a row resumes the session with its own CLI in a new terminal tab.
+**Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse the sessions, then select one to resume it.
+**Files Involved:** `app.py` (`GET /api/agent/sessions`), `templates/index.html` (session picker modal and `resumeAgentSession()`)
 
 ## Workspace Management
 **Status:** ✅ Complete
