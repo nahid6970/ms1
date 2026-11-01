@@ -10,7 +10,8 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 * **[2026-10-12] Workspace Bar** (`templates/index.html`):
     * Slim `#workspace-bar` (34px, `#080c14`) sits between the toolbar and `#terminal-parent` inside `.terminal-container-wrapper`.
     * Shows only running workspaces (`p.is_active`) as chips with colored dot (uses `cardTheme.accentColor`). Active chip is highlighted in blue.
-    * Single-click on inactive chip → `selectProject()`. Double-click → `stopProjectSession(name, { silent: true })` (no confirm dialog).
+    * Single-click on inactive chip → `selectProject()` after the double-click window. Double-click → `stopProjectSession(name, { silent: true })` (no confirm dialog).
+    * Terminal pane tabs use the same click tracking to close the pane on double-click; single-click activates after the double-click window.
     * After killing a session, automatically focuses the last previously visited running workspace via `wsfocusHistory[]` stack, or falls back to homepage.
     * `updateWorkspaceBar()` is called from `restoreTerminalLayout` and `stopProjectSession`.
     * Togglable via Settings → Layout tab → "Show Workspace Bar" checkbox (`localStorage` key `show-workspace-bar`, default `true`).

@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Close Terminal Pane Tabs on Double-Click
+
+- Terminal pane tabs now close their pane on double-click, with shared click tracking so the tab-bar rerender after activation does not lose the second click.
+- Single-click activates the pane after a 550 ms double-click window; tabs expose stable `data-testid="terminal-tab"` and pane ID selectors.
+
+**Files Modified:** `templates/index.html`, `recent.md`, `md/RECENT.md`
+
 ## [2026-10-31] - Show Session Token Estimates
 
 - Added an approximate token badge next to each session ID below the row action buttons.
@@ -1046,6 +1053,14 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Restricted the mobile visualViewport resize fix to mobile widths (`<= 768px`) so desktop PC layouts never shift or shrink when resizing the window or switching viewports.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
+## [2026-11-01] - Make Workspace Tab Double-Click Reliable
+
+- Replaced the native `dblclick` dependency with shared click tracking, so selecting an inactive workspace cannot rebuild the tab element before a double-click is recognized.
+- Single-click switches after a 550 ms window; double-click silently stops the workspace session.
+- Added stable `data-testid="workspace-tab"` and project name attributes to workspace chips.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
 
 ## [2026-11-01] - Fix Terminal Pane Squished to 1/3 Width in Tabbed Layout
 
