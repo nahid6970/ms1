@@ -1958,7 +1958,7 @@
             gap: 5px;
             padding: 2px 6px;
             border: 1px solid rgba(16,185,129,.3);
-            border-radius: 5px;
+            border-radius: 2px;
             background: rgba(16,185,129,.07);
             color: #6ee7b7;
             font: inherit;
@@ -1972,6 +1972,7 @@
         #monitor-kiro-quota:disabled { opacity: .65; cursor: wait; }
         #monitor-kiro-quota { border-color: rgba(167,139,250,.35); background: rgba(139,92,246,.08); color: #c4b5fd; }
         #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
+        #monitor-quota-group { display: inline-flex; align-items: center; gap: 4px; }
         .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -2202,14 +2203,16 @@
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
-                    <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
-                        <span id="monitor-codex-icon" aria-hidden="true"></span>
-                        <span id="monitor-codex-quota-value">--</span>
-                    </button>
-                    <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
-                        <span id="monitor-kiro-icon" aria-hidden="true"></span>
-                        <span id="monitor-kiro-quota-value">--</span>
-                    </button>
+                    <div id="monitor-quota-group" role="group" aria-label="AI provider quotas" data-testid="quota-indicators">
+                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
+                            <span id="monitor-codex-icon" aria-hidden="true"></span>
+                            <span id="monitor-codex-quota-value">--</span>
+                        </button>
+                        <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
+                            <span id="monitor-kiro-icon" aria-hidden="true"></span>
+                            <span id="monitor-kiro-quota-value">--</span>
+                        </button>
+                    </div>
                     <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
                         <span style="color:#38bdf8;">⎇</span>
                         <span id="monitor-git-branch" style="color:#38bdf8;"></span>
