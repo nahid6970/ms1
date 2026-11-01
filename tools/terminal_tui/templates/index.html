@@ -3971,6 +3971,25 @@
                         </div>
                         <div id="settings-codex-account-list" data-testid="codex-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
                     </div>
+                    <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;">
+                            <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;">Kiro CLI Accounts</div>
+                            <button type="button" id="settings-kiro-account-info" data-testid="kiro-account-info" onclick="openKiroAccountHelp()" title="How to sign into another Kiro account" aria-label="Show instructions for adding a Kiro account" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:rgba(139,92,246,.14);border:1px solid rgba(167,139,250,.58);border-radius:50%;color:#c4b5fd;cursor:pointer;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+                            </button>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                            <label for="settings-kiro-usage-account" style="font-size:.76rem;color:var(--text-secondary);">Selected account</label>
+                            <select id="settings-kiro-usage-account" onchange="selectKiroUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
+                        </div>
+                        <div style="margin-top:5px;font-size:.68rem;color:var(--text-muted);">New terminals and Kiro usage checks use the selected profile. Existing terminal sessions keep their current profile.</div>
+                        <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:7px;margin-top:8px;">
+                            <input id="settings-kiro-account-name" type="text" maxlength="40" placeholder="Account name" aria-label="Kiro account name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                            <input id="settings-kiro-account-home" type="text" placeholder="Kiro profile folder, e.g. C:\Users\you\.kiro-work" aria-label="Kiro profile folder path" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                            <button type="button" id="settings-kiro-account-add" onclick="addKiroUsageAccount()" style="padding:4px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.76rem;cursor:pointer;">Add account</button>
+                        </div>
+                        <div id="settings-kiro-account-list" data-testid="kiro-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
+                    </div>
                 </div>
 
                 <!-- Tab 4: Voice Recording Settings -->
@@ -4124,6 +4143,29 @@ codex login</code></pre>
         </section>
     </div>
 
+    <div class="modal-overlay" id="kiro-account-help-modal" data-testid="kiro-account-help-modal" style="z-index:4100;" onclick="if(event.target===this)closeKiroAccountHelp()">
+        <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="kiro-account-help-title" style="width:520px;max-width:92vw;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;">
+                <div>
+                    <h2 id="kiro-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Add another Kiro account</h2>
+                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Sign in to a separate Kiro home, then add that folder here.</div>
+                </div>
+                <button type="button" id="kiro-account-help-close" onclick="closeKiroAccountHelp()" aria-label="Close instructions" style="width:28px;height:28px;flex:none;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:1.1rem;cursor:pointer;">×</button>
+            </div>
+            <ol style="margin:0;padding-left:22px;display:grid;gap:11px;color:var(--text-secondary);font-size:.78rem;line-height:1.5;">
+                <li>Open PowerShell. You do <strong style="color:var(--text-primary);">not</strong> need to log out of your usual Kiro account.</li>
+                <li>Set and create a separate profile folder, then start login:
+                    <pre id="kiro-account-login-command" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;padding:10px 12px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#c4b5fd;font:.76rem/1.7 Consolas,'Fira Code',monospace;"><code>$env:KIRO_HOME = 'C:\Users\you\.kiro-work'
+New-Item -ItemType Directory -Force $env:KIRO_HOME
+kiro-cli login</code></pre>
+                </li>
+                <li>Finish signing into the other account.</li>
+                <li>Back here, enter the same folder path, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
+            </ol>
+            <div style="margin-top:12px;padding:9px 10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.5;"><strong>Optional:</strong> <code>Remove-Item Env:KIRO_HOME</code> clears the override in that PowerShell window so later commands use the default profile. It does not sign out or delete either account.</div>
+        </section>
+    </div>
+
     <div class="modal-overlay" id="ai-usage-timing-help-modal" data-testid="ai-usage-timing-help-modal" style="z-index:4100;" onclick="if(event.target===this)closeAIUsageTimingHelp()">
         <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="ai-usage-timing-help-title" style="width:560px;max-width:92vw;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:13px;">
@@ -4271,6 +4313,29 @@ codex login</code></pre>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
                 <button type="button" id="codex-account-continue-cancel" onclick="closeCodexAccountContinueModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
                 <button type="button" id="codex-account-continue-start" onclick="startCodexAccountContinuation()" style="padding:7px 13px;border:1px solid #7c3aed;border-radius:7px;background:#6d28d9;color:#fff;cursor:pointer;font-size:.73rem;">Continue in new session</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="kiro-account-continue-modal" role="dialog" aria-modal="true" aria-labelledby="kiro-account-continue-title" onclick="if(event.target===this)closeKiroAccountContinueModal()" style="z-index:1250;">
+        <div class="modal-content" style="width:520px;max-width:92vw;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:12px;">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+                <div id="kiro-account-continue-title" style="font-size:.92rem;font-weight:650;color:#f3f4f6;">Continue with another Kiro account</div>
+                <div id="kiro-account-continue-source" style="font-size:.68rem;color:#999;margin-top:4px;"></div>
+            </div>
+            <div style="display:grid;gap:10px;padding:14px 16px 8px;">
+                <label for="kiro-account-continue-target" style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">Use account
+                    <select id="kiro-account-continue-target" style="width:100%;padding:8px 9px;border:1px solid #333;border-radius:7px;background:#141414;color:#f3f4f6;font-size:.76rem;"></select>
+                </label>
+                <label for="kiro-account-continue-note" style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">Optional note
+                    <textarea id="kiro-account-continue-note" maxlength="18000" spellcheck="false" placeholder="What should the new session focus on?" style="width:100%;box-sizing:border-box;min-height:75px;max-height:150px;resize:vertical;padding:9px 10px;border:1px solid #303030;border-radius:7px;background:#111;color:#e5e7eb;outline:none;font:.72rem/1.5 'Fira Code',Consolas,monospace;"></textarea>
+                </label>
+                <div style="color:#9ca3af;font-size:.69rem;line-height:1.5;">A new session will read the saved transcript as context. The original session remains available under its current account.</div>
+                <div id="kiro-account-continue-error" role="status" style="display:none;color:#fca5a5;font-size:.7rem;"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
+                <button type="button" id="kiro-account-continue-cancel" onclick="closeKiroAccountContinueModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
+                <button type="button" id="kiro-account-continue-start" onclick="startKiroAccountContinuation()" style="padding:7px 13px;border:1px solid #7c3aed;border-radius:7px;background:#6d28d9;color:#fff;cursor:pointer;font-size:.73rem;">Continue in new session</button>
             </div>
         </div>
     </div>
@@ -4992,6 +5057,7 @@ codex login</code></pre>
                 else if (id === 'ports-modal') closePortsMonitorModal();
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'codex-account-help-modal') closeCodexAccountHelp();
+                else if (id === 'kiro-account-help-modal') closeKiroAccountHelp();
                 else if (id === 'ai-usage-timing-help-modal') closeAIUsageTimingHelp();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
                 else if (id === 'ai-system-prompt-modal') closeAISystemPromptModal();
@@ -5710,8 +5776,9 @@ codex login</code></pre>
             updateTerminalTabs();
         }
 
-        function createTerminalPane(projectName, paneId, projectTheme = null, initialCommand = null, codexAccountId = undefined) {
+        function createTerminalPane(projectName, paneId, projectTheme = null, initialCommand = null, codexAccountId = undefined, kiroAccountId = undefined) {
             const paneCodexAccountId = codexAccountId === undefined ? getSelectedCodexUsageAccount() : codexAccountId;
+            const paneKiroAccountId = kiroAccountId === undefined ? getSelectedKiroUsageAccount() : kiroAccountId;
             const parent = document.getElementById('terminal-parent');
             const paneDiv = document.createElement('div');
             document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
@@ -5819,7 +5886,7 @@ codex login</code></pre>
             }
 
             const paneSocket = io('/pty');
-            const pane = { paneId, codexAccountId: paneCodexAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
+            const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;
             fitAddon = paneFitAddon;
@@ -5871,7 +5938,7 @@ codex login</code></pre>
 
             paneSocket.on('connect', () => {
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir, codexAccountId: paneCodexAccountId });
+                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId });
                 // Instantly fit and synchronize backend PTY size upon successful connection
                 setTimeout(() => {
                     try {
@@ -6401,6 +6468,8 @@ codex login</code></pre>
         let codexLimitsAutoRefreshIntervalId = null;
         let codexUsageAccounts = [];
         let codexDefaultHome = '';
+        let kiroUsageAccounts = [];
+        let kiroDefaultHome = '';
         let codexLimitsLoadInFlight = false;
         let codexLimitsRefreshQueued = false;
         let kiroUsageLoadInFlight = false;
@@ -6408,6 +6477,10 @@ codex login</code></pre>
 
         function getSelectedCodexUsageAccount() {
             return localStorage.getItem('codex-usage-account') || '';
+        }
+
+        function getSelectedKiroUsageAccount() {
+            return localStorage.getItem('kiro-usage-account') || '';
         }
 
         async function loadCodexUsageAccounts() {
@@ -6549,6 +6622,73 @@ codex login</code></pre>
                 if (getSelectedCodexUsageAccount() === accountId) localStorage.removeItem('codex-usage-account');
                 await loadCodexUsageAccounts();
                 loadCodexLimits(true);
+            } catch (error) {
+                alert(String(error.message || error));
+            }
+        }
+
+        async function loadKiroUsageAccounts() {
+            const response = await fetch('/api/kiro/accounts');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not load Kiro accounts.');
+            kiroUsageAccounts = Array.isArray(data.accounts) ? data.accounts : [];
+            kiroDefaultHome = String(data.defaultKiroHome || '');
+            const selected = getSelectedKiroUsageAccount();
+            const select = document.getElementById('settings-kiro-usage-account');
+            if (select) {
+                select.innerHTML = '<option value="">Default (current CLI login)</option>' + kiroUsageAccounts.map(account =>
+                    `<option value="${escapeHtml(account.id)}">${escapeHtml(account.name)}</option>`
+                ).join('');
+                select.value = kiroUsageAccounts.some(account => account.id === selected) ? selected : '';
+                if (selected && !select.value) localStorage.removeItem('kiro-usage-account');
+            }
+            const list = document.getElementById('settings-kiro-account-list');
+            if (list) list.innerHTML = kiroUsageAccounts.length ? kiroUsageAccounts.map(account =>
+                `<div data-testid="kiro-usage-account" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;font-size:.72rem;min-width:0;">
+                    <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(account.kiroHome)}"><strong>${escapeHtml(account.name)}</strong><span style="color:var(--text-muted);"> · ${escapeHtml(account.kiroHome)}</span></span>
+                    <button type="button" aria-label="Remove ${escapeHtml(account.name)}" onclick="removeKiroUsageAccount('${escapeHtml(account.id)}')" style="flex:none;padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;">Remove</button>
+                </div>`
+            ).join('') : '<div style="font-size:.68rem;color:var(--text-muted);">No additional Kiro profiles added.</div>';
+        }
+
+        function selectKiroUsageAccount(accountId) {
+            if (accountId) localStorage.setItem('kiro-usage-account', accountId);
+            else localStorage.removeItem('kiro-usage-account');
+            const select = document.getElementById('settings-kiro-usage-account');
+            if (select) select.value = accountId || '';
+            loadKiroUsage(true);
+            if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) openAgentSessionPicker();
+        }
+
+        async function addKiroUsageAccount() {
+            const nameInput = document.getElementById('settings-kiro-account-name');
+            const homeInput = document.getElementById('settings-kiro-account-home');
+            const name = nameInput?.value.trim();
+            const kiroHome = homeInput?.value.trim();
+            try {
+                const response = await fetch('/api/kiro/accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, kiroHome }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not add Kiro account.');
+                if (nameInput) nameInput.value = '';
+                if (homeInput) homeInput.value = '';
+                localStorage.setItem('kiro-usage-account', data.account.id);
+                await loadKiroUsageAccounts();
+                loadKiroUsage(true);
+            } catch (error) {
+                alert(String(error.message || error));
+            }
+        }
+
+        async function removeKiroUsageAccount(accountId) {
+            const account = kiroUsageAccounts.find(item => item.id === accountId);
+            if (!account) return;
+            try {
+                const response = await fetch('/api/kiro/accounts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not remove Kiro profile.');
+                if (getSelectedKiroUsageAccount() === accountId) localStorage.removeItem('kiro-usage-account');
+                await loadKiroUsageAccounts();
+                loadKiroUsage(true);
             } catch (error) {
                 alert(String(error.message || error));
             }
@@ -6707,15 +6847,17 @@ codex login</code></pre>
             const value = document.getElementById('monitor-kiro-quota-value');
             const icon = document.getElementById('monitor-kiro-icon');
             if (!button || !value) { kiroUsageLoadInFlight = false; return; }
+            const accountId = getSelectedKiroUsageAccount();
             button.style.display = 'inline-flex';
             button.disabled = true;
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('kiro', 13, 'monitor-kiro-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const cacheKey = 'ai-usage-cache:kiro:default';
+                const cacheKey = `ai-usage-cache:kiro:${accountId || 'default'}`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
+                    if (accountId) query.set('accountId', accountId);
                     if (forceRefresh) query.set('refresh', 'true');
                     query.set('cacheSeconds', String(getUsageServerCacheSeconds()));
                     const response = await fetch(`/api/kiro/usage?${query}`);
@@ -6734,8 +6876,9 @@ codex login</code></pre>
                 const credits = `${Number(data.remainingCredits).toFixed(2)} of ${Number(data.includedCredits).toFixed(2)} credits remaining`;
                 const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
-                button.title = `Kiro · ${plan}${credits}${reset} · Click to refresh`;
-                button.setAttribute('aria-label', `Kiro quota: ${value.textContent} remaining. Click to refresh.`);
+                const accountLabel = data.accountName && data.accountName !== 'Default' ? `${data.accountName} · ` : '';
+                button.title = `Kiro · ${accountLabel}${plan}${credits}${reset} · Click to refresh`;
+                button.setAttribute('aria-label', `Kiro ${accountLabel}quota: ${value.textContent} remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 button.title = `Could not read Kiro usage: ${String(error.message || error)}`;
@@ -6751,7 +6894,7 @@ codex login</code></pre>
         }
 
         loadCodexUsageAccounts().then(() => loadCodexLimits(false)).catch(() => loadCodexLimits(false));
-        loadKiroUsage(false);
+        loadKiroUsageAccounts().then(() => loadKiroUsage(false)).catch(() => loadKiroUsage(false));
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
@@ -6830,7 +6973,7 @@ codex login</code></pre>
             const list = document.getElementById('agent-session-list');
             const query = (document.getElementById('agent-session-search')?.value || '').trim().toLowerCase();
             const matches = agentSavedSessions.filter(session =>
-                `${session.agent} ${session.originAgent || ''} ${session.activeAgent || ''} ${session.codexAccountName || ''} ${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
+                `${session.agent} ${session.originAgent || ''} ${session.activeAgent || ''} ${session.codexAccountName || ''} ${session.kiroAccountName || ''} ${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
             );
             if (!matches.length) {
                 list.innerHTML = `<div style="padding:26px 12px;text-align:center;color:#888;font-size:.8rem;">${agentSavedSessions.length ? 'No matching sessions.' : 'No saved agent sessions were found in this workspace.'}</div>`;
@@ -6853,17 +6996,18 @@ codex login</code></pre>
                 const tokenEstimateDisplay = tokenEstimate.replace(/^~/, '');
                 const tokenBadgeRange = getAgentTokenBadgeRange(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
-                const sessionDomKey = `${session.agent}-${session.codexAccountId || 'default'}-${session.sessionId}`.replace(/[^A-Za-z0-9_-]/g, '-');
-                const codexAccountName = session.agent === 'codex' ? (session.codexAccountName || 'Default') : '';
-                const accountBadge = session.agent === 'codex'
-                    ? `<span class="agent-session-account" data-testid="agent-session-account" title="Codex profile: ${escapeHtml(codexAccountName)}" style="flex:none;display:inline-flex;align-items:center;padding:3px 7px;border:1px solid rgba(52,211,153,.24);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.65rem;font-weight:600;white-space:nowrap;">${escapeHtml(codexAccountName)}</span>`
+                const sessionProfileId = session.agent === 'codex' ? session.codexAccountId : session.agent === 'kiro' ? session.kiroAccountId : '';
+                const sessionDomKey = `${session.agent}-${sessionProfileId || 'default'}-${session.sessionId}`.replace(/[^A-Za-z0-9_-]/g, '-');
+                const profileName = session.agent === 'codex' ? (session.codexAccountName || 'Default') : session.agent === 'kiro' ? (session.kiroAccountName || 'Default') : '';
+                const accountBadge = ['codex', 'kiro'].includes(session.agent)
+                    ? `<span class="agent-session-account" data-testid="agent-session-account" title="${escapeHtml(agentName)} profile: ${escapeHtml(profileName)}" style="flex:none;display:inline-flex;align-items:center;padding:3px 7px;border:1px solid rgba(52,211,153,.24);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.65rem;font-weight:600;white-space:nowrap;">${escapeHtml(profileName)}</span>`
                     : '';
                 const agentTrail = Array.isArray(session.agentTrail) ? session.agentTrail : [];
                 const trailMarkup = session.conversationId && session.isCurrentActiveSession && agentTrail.length > 1
                     ? `<span id="agent-session-trail-${escapeHtml(session.sessionId)}" class="agent-session-lineage" data-testid="agent-session-lineage" title="${escapeHtml(agentTrail.map(name => name === 'pi' ? 'Pi' : name === 'kiro' ? 'Kiro' : 'Codex').join(' → '))}" aria-label="Conversation agent history: ${escapeHtml(agentTrail.join(' to '))}" style="display:flex;align-items:center;justify-content:center;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;">${agentTrail.map((name, index) => `${index ? '<span aria-hidden="true" style="font-size:16px;line-height:1;color:#ddd;font-weight:700;flex:none;">›</span>' : ''}${agentSessionIconMarkup(name, 13, `trail-${session.sessionId}-${index}`)}`).join('')}</span>`
                     : '<span aria-hidden="true" class="agent-session-trail-spacer" style="flex:1;min-width:0;"></span>';
                 return `<div id="agent-session-${escapeHtml(sessionDomKey)}" class="agent-session-row" data-testid="agent-session-row" data-agent="${escapeHtml(session.agent)}" data-session-id="${escapeHtml(session.sessionId)}" data-session-path="${escapeHtml(session.sessionPath || '')}" role="group" style="width:100%;padding:5px 7px;display:flex;flex-direction:row;align-items:center;gap:8px;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;color:#eee;">
-                    <button type="button" id="agent-session-open-${escapeHtml(sessionDomKey)}" class="agent-session-open" data-testid="agent-session-open" aria-label="${escapeHtml(`Open ${agentName} session: ${sessionTitle}; active agent ${activeAgentName}; ${codexAccountName ? `profile ${codexAccountName}; ` : ''}${sessionPath}; ${date}`)}" style="flex:1;min-width:0;padding:6px 5px;border:0;background:transparent;color:inherit;cursor:pointer;display:flex;flex-direction:row;align-items:center;gap:12px;text-align:left;">
+                    <button type="button" id="agent-session-open-${escapeHtml(sessionDomKey)}" class="agent-session-open" data-testid="agent-session-open" aria-label="${escapeHtml(`Open ${agentName} session: ${sessionTitle}; active agent ${activeAgentName}; ${profileName ? `profile ${profileName}; ` : ''}${sessionPath}; ${date}`)}" style="flex:1;min-width:0;padding:6px 5px;border:0;background:transparent;color:inherit;cursor:pointer;display:flex;flex-direction:row;align-items:center;gap:12px;text-align:left;">
                         ${agentIcon}
                         <span style="min-width:0;flex:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;">
                             <span style="font-size:.8rem;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(sessionTitle)}</span>
@@ -6875,7 +7019,7 @@ codex login</code></pre>
                         <span style="display:flex;align-items:center;gap:6px;">
                     <button type="button" id="agent-session-rename-${escapeHtml(sessionDomKey)}" class="agent-session-rename" data-testid="agent-session-rename" title="Rename this conversation" aria-label="Rename ${agentName} conversation: ${escapeHtml(sessionTitle)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(148,163,184,.25);border-radius:6px;background:rgba(51,65,85,.18);color:#cbd5e1;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
                     <button type="button" id="agent-session-handoff-${escapeHtml(sessionDomKey)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>
-                    ${session.agent === 'codex' ? `<button type="button" id="agent-session-continue-account-${escapeHtml(sessionDomKey)}" class="agent-session-continue-account" data-testid="agent-session-continue-account" title="Continue this conversation with another Codex account" aria-label="Continue Codex session on another account" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(52,211,153,.28);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10a4 4 0 0 1 0 8h-1"></path><path d="m13 11 3 4-3 4"></path><path d="M17 17H7a4 4 0 0 1 0-8h1"></path><path d="m11 13-3-4 3-4"></path></svg></button>` : ''}
+                    ${['codex', 'kiro'].includes(session.agent) ? `<button type="button" id="agent-session-continue-account-${escapeHtml(sessionDomKey)}" class="agent-session-continue-account" data-testid="agent-session-continue-account" title="Continue this conversation with another ${agentName} account" aria-label="Continue ${agentName} session on another account" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(52,211,153,.28);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10a4 4 0 0 1 0 8h-1"></path><path d="m13 11 3 4-3 4"></path><path d="M17 17H7a4 4 0 0 1 0-8h1"></path><path d="m11 13-3-4 3-4"></path></svg></button>` : ''}
                     <button type="button" id="agent-session-delete-${escapeHtml(sessionDomKey)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
                         </span>
                         <span style="display:flex;align-items:center;justify-content:flex-end;gap:7px;max-width:100%;">
@@ -6891,7 +7035,10 @@ codex login</code></pre>
                 row.querySelector('.agent-session-open').addEventListener('click', () => resumeAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
                 row.querySelector('.agent-session-rename').addEventListener('click', () => renameAgentConversation(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
                 row.querySelector('.agent-session-handoff').addEventListener('click', () => openAgentHandoffModal(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
-                row.querySelector('.agent-session-continue-account')?.addEventListener('click', () => openCodexAccountContinueModal(row.dataset.sessionPath));
+                row.querySelector('.agent-session-continue-account')?.addEventListener('click', () => {
+                    if (row.dataset.agent === 'kiro') openKiroAccountContinueModal(row.dataset.sessionPath);
+                    else openCodexAccountContinueModal(row.dataset.sessionPath);
+                });
                 row.querySelector('.agent-session-delete').addEventListener('click', () => deleteAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
             });
             list.querySelectorAll('.agent-session-lineage').forEach(trail => { trail.scrollLeft = trail.scrollWidth; });
@@ -6914,13 +7061,16 @@ codex login</code></pre>
                 command = `pi --approve --session '${safeSessionPath}'`;
             } else if (session.agent === 'kiro') {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
-                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --trust-all-tools --resume-id ${session.sessionId}`;
+                const safeKiroHome = String(session.kiroHome || '').replace(/'/g, "''");
+                command = `${safeKiroHome ? `$env:KIRO_HOME = '${safeKiroHome}'; ` : ''}${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --trust-all-tools --resume-id ${session.sessionId}`;
             } else {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
                 const safeCodexHome = String(session.codexHome || '').replace(/'/g, "''");
                 command = `${safeCodexHome ? `$env:CODEX_HOME = '${safeCodexHome}'; ` : ''}${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
             }
-            splitTerminal('tabs', command, session.agent === 'codex' ? (session.codexAccountId || '') : undefined);
+            splitTerminal('tabs', command,
+                session.agent === 'codex' ? (session.codexAccountId || '') : undefined,
+                session.agent === 'kiro' ? (session.kiroAccountId || '') : undefined);
         }
 
         function startNewAgentSession(agent) {
@@ -7186,6 +7336,76 @@ codex login</code></pre>
             }
         }
 
+        let kiroAccountContinueSource = null;
+
+        function openKiroAccountContinueModal(sessionPath) {
+            const source = agentSavedSessions.find(item => item.agent === 'kiro' && item.sessionPath === sessionPath);
+            if (!source || !activeProject) return;
+            kiroAccountContinueSource = source;
+            const select = document.getElementById('kiro-account-continue-target');
+            const error = document.getElementById('kiro-account-continue-error');
+            const start = document.getElementById('kiro-account-continue-start');
+            const normalizeHome = home => String(home || '').replace(/[\\/]+$/, '').replace(/\\/g, '/').toLowerCase();
+            const sourceHome = normalizeHome(source.kiroHome);
+            const profiles = [
+                { id: '', name: 'Default account', home: kiroDefaultHome },
+                ...kiroUsageAccounts.map(account => ({ id: account.id, name: account.name, home: account.kiroHome })),
+            ].filter(profile => profile.id !== (source.kiroAccountId || '') && normalizeHome(profile.home) !== sourceHome);
+            select.innerHTML = profiles.map(profile => `<option value="${escapeHtml(profile.id)}">${escapeHtml(profile.name)}</option>`).join('');
+            document.getElementById('kiro-account-continue-source').textContent = `${source.title || 'Untitled chat'} · currently using ${source.kiroAccountName || 'Default'}`;
+            document.getElementById('kiro-account-continue-note').value = '';
+            error.textContent = profiles.length ? '' : 'Add another Kiro profile in Settings → AI Usage & Accounts first.';
+            error.style.display = profiles.length ? 'none' : 'block';
+            start.disabled = profiles.length === 0;
+            start.style.opacity = profiles.length ? '1' : '.55';
+            document.getElementById('kiro-account-continue-modal').classList.add('show');
+        }
+
+        function closeKiroAccountContinueModal() {
+            document.getElementById('kiro-account-continue-modal')?.classList.remove('show');
+            kiroAccountContinueSource = null;
+        }
+
+        async function startKiroAccountContinuation() {
+            const source = kiroAccountContinueSource;
+            if (!source || !activeProject) return;
+            const start = document.getElementById('kiro-account-continue-start');
+            const error = document.getElementById('kiro-account-continue-error');
+            const targetAccountId = document.getElementById('kiro-account-continue-target').value;
+            start.disabled = true;
+            start.textContent = 'Starting…';
+            error.style.display = 'none';
+            try {
+                const response = await fetch('/api/agent/kiro/continue-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: activeProject,
+                        sourceSessionId: source.sessionId,
+                        sourceSessionPath: source.sessionPath,
+                        sourceKiroAccountId: source.kiroAccountId || '',
+                        targetKiroAccountId: targetAccountId,
+                        handoffNote: document.getElementById('kiro-account-continue-note').value.trim(),
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not continue with that Kiro account.');
+                const encodedPrompt = encodeAgentPrompt(data.prompt);
+                const safePath = String(data.cwd || '').replace(/'/g, "''");
+                const command = `$__kiroContinuePrompt = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encodedPrompt}')); ` +
+                    `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --trust-all-tools $__kiroContinuePrompt`;
+                closeKiroAccountContinueModal();
+                closeAgentSessionPicker();
+                splitTerminal('tabs', command, undefined, data.targetKiroAccountId || '');
+            } catch (continueError) {
+                error.textContent = String(continueError.message || continueError);
+                error.style.display = 'block';
+            } finally {
+                start.textContent = 'Continue in new session';
+                start.disabled = false;
+            }
+        }
+
         function closeAgentHandoffModal() {
             document.getElementById('agent-handoff-modal')?.classList.remove('show');
             agentHandoffSource = null;
@@ -7285,7 +7505,7 @@ codex login</code></pre>
             }
         }
 
-        function splitTerminal(direction, initialCommand = null, codexAccountId = undefined) {
+        function splitTerminal(direction, initialCommand = null, codexAccountId = undefined, kiroAccountId = undefined) {
             if (!activeProject) return;
             const parent = document.getElementById('terminal-parent');
             if (direction === 'stacked') {
@@ -7297,7 +7517,7 @@ codex login</code></pre>
             }
             const currentProjDetails = projects.find(p => p.name === activeProject) || {};
             const paneId = `pane-${Date.now()}-${splitPaneCounter++}`;
-            createTerminalPane(activeProject, paneId, currentProjDetails.theme, initialCommand, codexAccountId);
+            createTerminalPane(activeProject, paneId, currentProjDetails.theme, initialCommand, codexAccountId, kiroAccountId);
             
             updateTerminalTabs();
             
@@ -10703,6 +10923,16 @@ codex login</code></pre>
             document.getElementById('settings-codex-account-info')?.focus();
         }
 
+        function openKiroAccountHelp() {
+            document.getElementById('kiro-account-help-modal')?.classList.add('show');
+            document.getElementById('kiro-account-help-close')?.focus();
+        }
+
+        function closeKiroAccountHelp() {
+            document.getElementById('kiro-account-help-modal')?.classList.remove('show');
+            document.getElementById('settings-kiro-account-info')?.focus();
+        }
+
         function openAIUsageTimingHelp() {
             document.getElementById('ai-usage-timing-help-modal')?.classList.add('show');
             document.getElementById('ai-usage-timing-help-close')?.focus();
@@ -11091,7 +11321,7 @@ codex login</code></pre>
                         const response = await fetch(`/api/session/${projectName}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() })
+                            body: JSON.stringify({ paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount(), kiroAccountId: getSelectedKiroUsageAccount() })
                         });
                         if (restoreGeneration !== workspaceRestoreGeneration) return;
                         if (response.ok) {
@@ -11106,7 +11336,7 @@ codex login</code></pre>
                     const fallbackResponse = await fetch(`/api/session/${encodeURIComponent(projectName)}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() })
+                        body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount(), kiroAccountId: getSelectedKiroUsageAccount() })
                     });
                     if (restoreGeneration !== workspaceRestoreGeneration) return;
                     if (!fallbackResponse.ok) {
@@ -14046,10 +14276,16 @@ Always wrap your **entire response** in a single markdown code block.`;
             if (e.key === 'Escape') {
                 const aiUsageTimingHelp = document.getElementById('ai-usage-timing-help-modal');
                 if (aiUsageTimingHelp && aiUsageTimingHelp.classList.contains('show')) { closeAIUsageTimingHelp(); return; }
+                const kiroContinueModal = document.getElementById('kiro-account-continue-modal');
+                if (kiroContinueModal && kiroContinueModal.classList.contains('show')) { closeKiroAccountContinueModal(); return; }
+                const codexContinueModal = document.getElementById('codex-account-continue-modal');
+                if (codexContinueModal && codexContinueModal.classList.contains('show')) { closeCodexAccountContinueModal(); return; }
                 const codexAccountMenu = document.getElementById('codex-usage-account-menu');
                 if (codexAccountMenu && codexAccountMenu.getAttribute('aria-hidden') === 'false') { closeCodexUsageAccountMenu(); return; }
                 const codexAccountHelp = document.getElementById('codex-account-help-modal');
                 if (codexAccountHelp && codexAccountHelp.classList.contains('show')) { closeCodexAccountHelp(); return; }
+                const kiroAccountHelp = document.getElementById('kiro-account-help-modal');
+                if (kiroAccountHelp && kiroAccountHelp.classList.contains('show')) { closeKiroAccountHelp(); return; }
                 const gitIgnorePreview = document.getElementById('gitignore-ai-preview-modal');
                 if (gitIgnorePreview && gitIgnorePreview.classList.contains('show')) { closeGitIgnorePreview(); return; }
                 const rcloneDestinationPicker = document.getElementById('rclone-dst-picker-modal');

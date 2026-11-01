@@ -380,7 +380,7 @@ def restart_current_process(delay_seconds=1.0):
 
 
 class TerminalSession:
-    def __init__(self, name, path, use_real_dir_name=False, codex_home=None):
+    def __init__(self, name, path, use_real_dir_name=False, codex_home=None, kiro_home=None):
         self._kill_lock = threading.Lock()
         self._killed = False
         self.name = name
@@ -414,11 +414,15 @@ class TerminalSession:
         
         path_clean = path.replace("/", "\\")
 
-        # An explicitly selected Codex profile applies to this shell only.
+        # Explicitly selected AI profiles apply to this shell only.
         codex_home_setup = ""
         if codex_home:
             codex_home_ps = str(codex_home).replace("'", "''")
             codex_home_setup = f"$env:CODEX_HOME = '{codex_home_ps}'\n"
+        kiro_home_setup = ""
+        if kiro_home:
+            kiro_home_ps = str(kiro_home).replace("'", "''")
+            kiro_home_setup = f"$env:KIRO_HOME = '{kiro_home_ps}'\n"
         
         if bool(use_real_dir_name):
             prompt_display_name = os.path.basename(os.path.normpath(path))
@@ -431,6 +435,7 @@ class TerminalSession:
 # Global project root path
 $global:PROJECT_ROOT_PATH = "{path_clean}"
 {codex_home_setup}
+{kiro_home_setup}
 
 # Terminal color capability declarations so TUI apps (Codex, fzf, etc.) use full color
 $env:TERM = "xterm-256color"
@@ -1483,7 +1488,7 @@ def api_session_pane_stop(project, pane_id):
         threading.Thread(target=session.kill, daemon=True).start()
     return jsonify({"success": True, "paneId": pane_id})
 
-def _agent_session_roots(profile_home, project_path, codex_home=None):
+def _agent_session_roots(profile_home, project_path, codex_home=None, kiro_home=None):
     """Return the native session roots used by each supported local agent."""
     codex_homes = [os.path.abspath(codex_home)] if codex_home else [profile['home'] for profile in _codex_profile_entries(profile_home)]
     roots = []
@@ -1520,14 +1525,21 @@ def _agent_session_roots(profile_home, project_path, codex_home=None):
     else:
         pi_roots = [os.path.join(pi_agent_home, 'sessions')]
     roots.extend(('pi', path) for path in pi_roots)
-    roots.append(('kiro', os.path.join(profile_home, '.kiro', 'sessions', 'cli')))
+    kiro_homes = [os.path.abspath(kiro_home)] if kiro_home else [profile['home'] for profile in _kiro_profile_entries(profile_home)]
+    seen_kiro_homes = set()
+    for home in kiro_homes:
+        normalized_home = os.path.normcase(os.path.realpath(home))
+        if normalized_home in seen_kiro_homes:
+            continue
+        seen_kiro_homes.add(normalized_home)
+        roots.append(('kiro', os.path.join(home, 'sessions', 'cli')))
     return roots
 
 
 _CODEX_LIMITS_CACHE_LOCK = threading.Lock()
 _CODEX_LIMITS_CACHE = {}
 _KIRO_USAGE_CACHE_LOCK = threading.Lock()
-_KIRO_USAGE_CACHE = {'fetched_at': 0.0, 'data': None}
+_KIRO_USAGE_CACHE = {}
 
 
 def _codex_app_server_request(method, request_id, params=None, timeout=15, codex_home=None):
@@ -1680,6 +1692,70 @@ def _codex_profile_entries(profile_home):
     return profiles
 
 
+def _kiro_usage_accounts():
+    accounts = get_config_val('kiro_usage_accounts', list)
+    return [account for account in accounts if isinstance(account, dict)
+            and re.fullmatch(r'[a-f0-9]{32}', str(account.get('id') or ''))
+            and str(account.get('name') or '').strip()
+            and os.path.isdir(os.path.expandvars(os.path.expanduser(str(account.get('kiroHome') or ''))))]
+
+
+def _kiro_home_for_account_id(account_id):
+    account_id = str(account_id or '')
+    if not account_id:
+        return None
+    account = next((item for item in _kiro_usage_accounts() if item['id'] == account_id), None)
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(account['kiroHome']))) if account else None
+
+
+def _kiro_profile_entries(profile_home):
+    default_home = os.path.abspath(os.environ.get('KIRO_HOME') or os.path.join(profile_home, '.kiro'))
+    profiles = [{'id': '', 'name': 'Default', 'home': default_home}]
+    known_homes = {os.path.normcase(os.path.realpath(default_home))}
+    for account in _kiro_usage_accounts():
+        home = os.path.abspath(os.path.expandvars(os.path.expanduser(str(account['kiroHome']))))
+        normalized_home = os.path.normcase(os.path.realpath(home))
+        if normalized_home in known_homes:
+            continue
+        known_homes.add(normalized_home)
+        profiles.append({'id': account['id'], 'name': str(account['name']).strip(), 'home': home})
+    return profiles
+
+
+@app.route('/api/kiro/accounts', methods=['GET', 'POST', 'DELETE'])
+def api_kiro_accounts():
+    """Manage separate Kiro homes used for sign-ins and saved sessions."""
+    accounts = _kiro_usage_accounts()
+    if request.method == 'GET':
+        profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+        default_home = os.path.abspath(os.environ.get('KIRO_HOME') or os.path.join(profile_home, '.kiro'))
+        return jsonify({'accounts': accounts, 'defaultKiroHome': default_home})
+    if request.method == 'POST':
+        payload = request.get_json(silent=True) or {}
+        name = str(payload.get('name') or '').strip()[:40]
+        raw_home = str(payload.get('kiroHome') or '').strip()
+        if not name or not raw_home:
+            return jsonify({'error': 'Enter a name and an existing Kiro profile folder.'}), 400
+        kiro_home = os.path.abspath(os.path.expandvars(os.path.expanduser(raw_home)))
+        if not os.path.isdir(kiro_home):
+            return jsonify({'error': 'That Kiro profile folder does not exist. Create it and sign in with KIRO_HOME first.'}), 400
+        if any(os.path.normcase(os.path.realpath(account['kiroHome'])) == os.path.normcase(os.path.realpath(kiro_home)) for account in accounts):
+            return jsonify({'error': 'That Kiro profile folder is already added.'}), 409
+        account = {'id': uuid.uuid4().hex, 'name': name, 'kiroHome': kiro_home}
+        accounts.append(account)
+        set_config_val('kiro_usage_accounts', accounts)
+        return jsonify({'account': account}), 201
+    payload = request.get_json(silent=True) or {}
+    account_id = str(payload.get('id') or '')
+    kept_accounts = [account for account in accounts if account.get('id') != account_id]
+    if len(kept_accounts) == len(accounts):
+        return jsonify({'error': 'Kiro profile not found.'}), 404
+    set_config_val('kiro_usage_accounts', kept_accounts)
+    with _KIRO_USAGE_CACHE_LOCK:
+        _KIRO_USAGE_CACHE.pop(account_id, None)
+    return jsonify({'success': True, 'id': account_id})
+
+
 @app.route('/api/codex/accounts', methods=['GET', 'POST', 'DELETE'])
 def api_codex_accounts():
     """Manage configured Codex profiles used by quota, terminals, and session continuation."""
@@ -1747,7 +1823,7 @@ def api_codex_limits():
     return jsonify(data)
 
 
-def _read_kiro_usage():
+def _read_kiro_usage(kiro_home=None):
     """Read the current Kiro subscription usage through its documented CLI command."""
     kiro_executable = shutil.which('kiro-cli')
     if not kiro_executable:
@@ -1759,9 +1835,12 @@ def _read_kiro_usage():
     else:
         command = [kiro_executable, 'chat', '--no-interactive', '/usage']
     creationflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+    process_env = os.environ.copy()
+    if kiro_home:
+        process_env['KIRO_HOME'] = kiro_home
     result = subprocess.run(
         command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, encoding='utf-8', errors='replace', timeout=30, creationflags=creationflags,
+        text=True, encoding='utf-8', errors='replace', timeout=30, creationflags=creationflags, env=process_env,
     )
     if result.returncode != 0:
         raise RuntimeError('Kiro CLI could not read subscription usage. Check that Kiro CLI is signed in.')
@@ -1795,23 +1874,32 @@ def _read_kiro_usage():
 def api_kiro_usage():
     """Return subscription usage reported by the signed-in local Kiro CLI."""
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    account_id = str(request.args.get('accountId') or '')
+    account = next((item for item in _kiro_usage_accounts() if item['id'] == account_id), None) if account_id else None
+    if account_id and not account:
+        return jsonify({'available': False, 'error': 'Selected Kiro profile was not found.', 'fetchedAt': int(time.time())}), 404
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    default_home = os.path.abspath(os.environ.get('KIRO_HOME') or os.path.join(profile_home, '.kiro'))
+    kiro_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['kiroHome']))) if account else default_home
+    cache_key = account_id or '__default__'
     try:
         cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
     except (TypeError, ValueError):
         cache_seconds = 120
     now = time.monotonic()
     with _KIRO_USAGE_CACHE_LOCK:
-        cached = _KIRO_USAGE_CACHE['data']
-        if not force_refresh and cache_seconds and cached is not None and now - _KIRO_USAGE_CACHE['fetched_at'] < cache_seconds:
-            return jsonify(cached)
+        cached = _KIRO_USAGE_CACHE.get(cache_key)
+        if not force_refresh and cache_seconds and cached and cached.get('data') is not None and now - cached['fetched_at'] < cache_seconds:
+            return jsonify(cached['data'])
 
     try:
-        data = _read_kiro_usage()
+        data = _read_kiro_usage(kiro_home)
     except (OSError, RuntimeError, TimeoutError, ValueError, TypeError, subprocess.SubprocessError) as exc:
         data = {'available': False, 'error': str(exc), 'fetchedAt': int(time.time())}
+    data['accountName'] = account['name'] if account else 'Default'
 
     with _KIRO_USAGE_CACHE_LOCK:
-        _KIRO_USAGE_CACHE.update({'fetched_at': time.monotonic(), 'data': data})
+        _KIRO_USAGE_CACHE[cache_key] = {'fetched_at': time.monotonic(), 'data': data}
     return jsonify(data)
 
 
@@ -1964,21 +2052,27 @@ def api_agent_sessions():
     session_roots = []
     for profile in codex_profiles:
         session_roots.extend(
-            (agent, root, profile['id'], profile['name'], profile['home'])
+            (agent, root, profile['id'], profile['name'], profile['home'], '', '', '')
             for agent, root in _agent_session_roots(profile_home, project['path'], profile['home'])
             if agent == 'codex'
         )
     session_roots.extend(
-        (agent, root, '', '', '')
+        (agent, root, '', '', '', profile['id'], profile['name'], profile['home'])
+        for profile in _kiro_profile_entries(profile_home)
+        for agent, root in _agent_session_roots(profile_home, project['path'], kiro_home=profile['home'])
+        if agent == 'kiro'
+    )
+    session_roots.extend(
+        (agent, root, '', '', '', '', '', '')
         for agent, root in _agent_session_roots(profile_home, project['path'])
-        if agent != 'codex'
+        if agent == 'pi'
     )
     title_overrides = get_config_val('agent_session_title_overrides', dict).get(project['name'], {})
 
     sessions = []
     seen_ids = set()
 
-    for agent, session_dir, profile_id, profile_name, codex_home in session_roots:
+    for agent, session_dir, profile_id, profile_name, codex_home, kiro_account_id, kiro_account_name, kiro_home in session_roots:
         if not os.path.isdir(session_dir):
             continue
         for root, _dirs, filenames in os.walk(session_dir):
@@ -2031,6 +2125,9 @@ def api_agent_sessions():
                         'codexHome': codex_home if agent == 'codex' else None,
                         'codexAccountId': profile_id if agent == 'codex' else None,
                         'codexAccountName': profile_name if agent == 'codex' else None,
+                        'kiroHome': kiro_home if agent == 'kiro' else None,
+                        'kiroAccountId': kiro_account_id if agent == 'kiro' else None,
+                        'kiroAccountName': kiro_account_name if agent == 'kiro' else None,
                         'tokenEstimate': _estimate_agent_session_tokens(agent, session_path),
                         'handoffToken': transcript['handoffToken'],
                     })
@@ -2435,6 +2532,101 @@ def api_codex_continue_on_account():
         'targetCodexAccountName': target_profile['name'],
     })
 
+
+@app.route('/api/agent/kiro/continue-account', methods=['POST'])
+def api_kiro_continue_on_account():
+    """Prepare a new Kiro session on another profile with source transcript context."""
+    data = request.get_json(silent=True) or {}
+    project_name = str(data.get('project') or '').strip()
+    session_id = str(data.get('sourceSessionId') or '').strip()
+    session_path = os.path.abspath(os.path.expanduser(str(data.get('sourceSessionPath') or '')))
+    source_account_id = str(data.get('sourceKiroAccountId') or '')
+    target_account_id = str(data.get('targetKiroAccountId') or '')
+    handoff_note = str(data.get('handoffNote') or '').strip()
+    if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+        return jsonify({'error': 'Invalid source Kiro session.'}), 400
+    if len(handoff_note) > 18000:
+        return jsonify({'error': 'Handoff notes must be 18,000 characters or fewer.'}), 400
+
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    profiles = _kiro_profile_entries(profile_home)
+    source_profile = next((item for item in profiles if item['id'] == source_account_id), None)
+    target_profile = next((item for item in profiles if item['id'] == target_account_id), None)
+    if not source_profile or not target_profile:
+        return jsonify({'error': 'The source or target Kiro profile is no longer available.'}), 404
+    if os.path.normcase(os.path.realpath(source_profile['home'])) == os.path.normcase(os.path.realpath(target_profile['home'])):
+        return jsonify({'error': 'Choose a different Kiro profile to continue this conversation.'}), 400
+    allowed_root = os.path.join(source_profile['home'], 'sessions', 'cli')
+    if not session_path.lower().endswith('.json') or not _path_is_within(session_path, allowed_root):
+        return jsonify({'error': 'Source session file is outside its Kiro profile session folder.'}), 403
+
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    try:
+        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            metadata = json.load(session_file)
+        cwd = str(metadata.get('cwd') or '')
+        if str(metadata.get('session_id') or metadata.get('id') or '') != session_id or not cwd or not _path_is_within(cwd, project_path):
+            return jsonify({'error': 'Source session does not belong to this workspace.'}), 404
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the source Kiro session.'}), 404
+
+    transcript_path = os.path.splitext(session_path)[0] + '.jsonl'
+    if not os.path.isfile(transcript_path):
+        transcript_path = session_path
+    conversations = get_config_val('agent_handoff_conversations', list)
+    conversation = next((item for item in conversations if
+        item.get('project') == project['name'] and any(
+            member.get('agent') == 'kiro' and member.get('sessionId') == session_id
+            for member in item.get('sessions', []) if isinstance(member, dict)
+        )), None)
+    if not conversation:
+        conversation = {
+            'id': str(uuid.uuid4()),
+            'project': project['name'],
+            'originAgent': 'kiro',
+            'originSessionId': session_id,
+            'sessions': [{'agent': 'kiro', 'sessionId': session_id}],
+            'handoffs': [],
+        }
+        conversations.append(conversation)
+    handoff_id = str(uuid.uuid4())
+    handoff_token = uuid.uuid4().hex
+    conversation['activeHandoffId'] = handoff_id
+    conversation['activeAgent'] = 'kiro'
+    conversation['activeSessionId'] = None
+    conversation['status'] = 'pending'
+    conversation['updatedAt'] = time.time()
+    conversation.setdefault('handoffs', []).append({
+        'id': handoff_id,
+        'token': handoff_token,
+        'sourceAgent': 'kiro',
+        'sourceSessionId': session_id,
+        'sourceKiroAccountId': source_profile['id'],
+        'targetAgent': 'kiro',
+        'targetKiroAccountId': target_profile['id'],
+        'targetSessionId': None,
+        'status': 'pending',
+        'createdAt': time.time(),
+    })
+    set_config_val('agent_handoff_conversations', conversations)
+    note = f"\n\nAdditional instruction from the user: {handoff_note}" if handoff_note else ''
+    prompt = (
+        f"Continue the work from the saved Kiro conversation `{session_id}`. "
+        f"Read the original transcript at `{transcript_path}` for context. "
+        "This is a new Kiro session using a different account; do not try to resume the source session ID. "
+        "Continue from the latest user request, inspect the current workspace, and leave the source session unchanged."
+        f"{note}\n<!--TUI-HANDOFF:{handoff_token}-->"
+    )
+    return jsonify({
+        'cwd': cwd,
+        'prompt': prompt,
+        'targetKiroAccountId': target_profile['id'],
+        'targetKiroAccountName': target_profile['name'],
+    })
+
 @app.route('/api/agent/handoffs', methods=['POST'])
 def api_agent_handoff_create():
     data = request.get_json(silent=True) or {}
@@ -2531,6 +2723,9 @@ def api_session(project):
     codex_home = _codex_home_for_account_id(data.get("codexAccountId"))
     if data.get("codexAccountId") and not codex_home:
         return jsonify({"error": "Selected Codex profile was not found."}), 404
+    kiro_home = _kiro_home_for_account_id(data.get("kiroAccountId"))
+    if data.get("kiroAccountId") and not kiro_home:
+        return jsonify({"error": "Selected Kiro profile was not found."}), 404
     projects = scan_projects()
     proj_details = next((p for p in projects if p["name"] == project), None)
     if not proj_details:
@@ -2539,7 +2734,7 @@ def api_session(project):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home)
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
             
     return jsonify({
         "status": "connected",
@@ -6110,6 +6305,11 @@ def ws_join_session(data):
     if codex_account_id and not codex_home:
         emit('error', {'msg': 'Selected Codex profile was not found.'})
         return
+    kiro_account_id = data.get('kiroAccountId')
+    kiro_home = _kiro_home_for_account_id(kiro_account_id)
+    if kiro_account_id and not kiro_home:
+        emit('error', {'msg': 'Selected Kiro profile was not found.'})
+        return
     if not project:
         emit('error', {'msg': 'Project name required'})
         return
@@ -6123,7 +6323,7 @@ def ws_join_session(data):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home)
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
         session = active_sessions[session_key]
         session.add_sid(request.sid)
         
