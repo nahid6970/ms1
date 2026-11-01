@@ -259,6 +259,7 @@ function prompt { ... }
 ### Misc
 - `GET /api/fonts` - List system fonts
 - `POST /api/open-explorer` - Open path in Windows Explorer
+- `POST /api/open-t3code` - Launch or focus T3 Code and open a registered workspace with its CLI
 - `POST /shutdown` - Shutdown server
 
 ---

@@ -5350,15 +5350,60 @@ def api_open_t3code():
             "error": "T3 Code's `t3` command was not found on this machine. Install it from T3 Code → Settings → About, then restart this app."
         }), 503
 
+    # `t3 app` forwards a project to a running desktop instance, so start the
+    # registered Windows app first. Launching it again is safe: Electron focuses
+    # its existing single instance when one is already running.
     try:
-        if os.path.splitext(t3_command)[1].lower() in {'.cmd', '.bat'}:
-            # Windows command shims need cmd.exe; shell quoting keeps paths with
-            # spaces intact. The project is selected from the saved workspace list.
-            command_line = subprocess.list2cmdline([t3_command, 'app', path])
-            subprocess.Popen(command_line, cwd=path, shell=True)
-        else:
-            subprocess.Popen([t3_command, 'app', path], cwd=path)
-        return jsonify({"status": "ok"})
+        import winreg
+
+        desktop_executable = None
+        for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+            try:
+                with winreg.OpenKey(hive, r"Software\Classes\t3code\shell\open\command") as key:
+                    registered_command, _ = winreg.QueryValueEx(key, "")
+                match = re.match(r'^\s*"([^"]+\.exe)"', registered_command, re.IGNORECASE)
+                if match and os.path.isfile(match.group(1)):
+                    desktop_executable = match.group(1)
+                    break
+            except (OSError, TypeError):
+                continue
+
+        if not desktop_executable:
+            return jsonify({
+                "error": "The T3 Code desktop app was not found. Install or open T3 Code once, then try again."
+            }), 503
+
+        os.startfile(desktop_executable)
+    except OSError as exc:
+        return jsonify({"error": f"Could not start T3 Code: {exc}"}), 500
+
+    try:
+        use_cmd_shim = os.path.splitext(t3_command)[1].lower() in {'.cmd', '.bat'}
+        command_line = subprocess.list2cmdline([t3_command, 'app', path])
+        deadline = time.monotonic() + 30
+        last_error = "T3 Code is still starting."
+        while True:
+            try:
+                command = command_line if use_cmd_shim else [t3_command, 'app', path]
+                result = subprocess.run(
+                    command,
+                    cwd=path,
+                    shell=use_cmd_shim,
+                    capture_output=True,
+                    text=True,
+                    errors='replace',
+                    timeout=8,
+                    check=False,
+                )
+                if result.returncode == 0:
+                    return jsonify({"status": "ok"})
+                last_error = (result.stderr or result.stdout or "T3 Code could not open the workspace.").strip()
+            except subprocess.TimeoutExpired:
+                last_error = "T3 Code did not respond before the launch timed out."
+
+            if time.monotonic() >= deadline:
+                return jsonify({"error": last_error}), 504
+            time.sleep(1)
     except OSError as exc:
         return jsonify({"error": f"Could not start T3 Code: {exc}"}), 500
 

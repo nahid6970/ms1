@@ -1642,6 +1642,10 @@
     },
     "MS1": {
       "codex:01a19211-b96a-7151-826a-af722ed57645": "Refine Token Badge UI and Colors"
+    },
+    "myWizTree": {
+      "kiro:d7130f25-9fd1-4471-9633-4a95d0dde425": "Auto-incrementing snapshot names and dropdown fix",
+      "codex:01a14551-8649-7fe3-9e01-f3a09e13bb23": "Improve size change comparison colors and layout"
     }
   },
   "terminal_tabs": {
@@ -1652,6 +1656,24 @@
       "activePaneId": "main"
     },
     "Gemini CLI": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    },
+    "Github Manager": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    },
+    "myWizTree": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    },
+    "Code Merger": {
       "paneIds": [
         "main"
       ],
