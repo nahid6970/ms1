@@ -1483,9 +1483,9 @@ def api_session_pane_stop(project, pane_id):
         threading.Thread(target=session.kill, daemon=True).start()
     return jsonify({"success": True, "paneId": pane_id})
 
-def _agent_session_roots(profile_home, project_path):
+def _agent_session_roots(profile_home, project_path, codex_home=None):
     """Return the native session roots used by each supported local agent."""
-    codex_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
+    codex_home = os.path.abspath(codex_home or os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
     roots = [
         ('codex', os.path.join(codex_home, 'sessions')),
         ('codex', os.path.join(codex_home, 'archived_sessions')),
@@ -1936,7 +1936,12 @@ def api_agent_sessions():
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
 
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
-    session_roots = _agent_session_roots(profile_home, project['path'])
+    account_id = str(request.args.get('codexAccountId') or '')
+    selected_codex_home = _codex_home_for_account_id(account_id)
+    if account_id and not selected_codex_home:
+        return jsonify({'error': 'Selected Codex profile was not found.'}), 404
+    codex_home = os.path.abspath(selected_codex_home or os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
+    session_roots = _agent_session_roots(profile_home, project['path'], codex_home)
     title_overrides = get_config_val('agent_session_title_overrides', dict).get(project['name'], {})
 
     sessions = []
@@ -1991,6 +1996,7 @@ def api_agent_sessions():
                         'cwd': cwd,
                         'lastModified': modified_at,
                         'sessionPath': os.path.abspath(session_path),
+                        'codexHome': codex_home if agent == 'codex' else None,
                         'tokenEstimate': _estimate_agent_session_tokens(agent, session_path),
                         'handoffToken': transcript['handoffToken'],
                     })

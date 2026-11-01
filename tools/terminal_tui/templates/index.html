@@ -6415,6 +6415,7 @@ codex login</code></pre>
             if (settingsSelect) settingsSelect.value = accountId || '';
             closeCodexUsageAccountMenu();
             loadCodexLimits(true);
+            if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) openAgentSessionPicker();
         }
 
         async function openCodexUsageAccountMenu(event) {
@@ -6546,7 +6547,7 @@ codex login</code></pre>
             list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading agent sessions…</div>';
             loadCodexLimits(false);
             try {
-                const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
+                const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not load agent sessions.');
                 agentSavedSessions = data.sessions || [];
@@ -6879,7 +6880,8 @@ codex login</code></pre>
                 command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}kiro-cli chat --trust-all-tools --resume-id ${session.sessionId}`;
             } else {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
-                command = `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
+                const safeCodexHome = String(session.codexHome || '').replace(/'/g, "''");
+                command = `${safeCodexHome ? `$env:CODEX_HOME = '${safeCodexHome}'; ` : ''}${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
             }
             splitTerminal('tabs', command);
         }
@@ -7022,7 +7024,7 @@ codex login</code></pre>
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not rename this conversation.');
                 closeAgentSessionTitleModal();
-                const refresh = await fetch(`/api/agent/sessions?project=${encodeURIComponent(source.project)}`);
+                const refresh = await fetch(`/api/agent/sessions?project=${encodeURIComponent(source.project)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
                 const refreshedData = await refresh.json();
                 if (refresh.ok) agentSavedSessions = refreshedData.sessions || [];
                 else {
@@ -7061,7 +7063,7 @@ codex login</code></pre>
                 if (!response.ok) throw new Error(data.error || 'Could not delete the saved session.');
                 agentSavedSessions = agentSavedSessions.filter(item => !(item.agent === agent && item.sessionId === sessionId));
                 try {
-                    const refreshResponse = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
+                    const refreshResponse = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
                     if (refreshResponse.ok) {
                         const refreshed = await refreshResponse.json();
                         agentSavedSessions = refreshed.sessions || agentSavedSessions;
