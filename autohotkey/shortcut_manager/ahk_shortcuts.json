@@ -423,7 +423,7 @@
             "hotkey": "!g",
             "target_path": "D:\\speed\\src-tauri\\target\\release\\tempo-speed-control.exe",
             "hide_terminal": true,
-            "run_as_admin": false,
+            "run_as_admin": true,
             "enabled": true,
             "favourite": true
         }

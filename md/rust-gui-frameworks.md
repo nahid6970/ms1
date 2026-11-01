@@ -155,6 +155,7 @@ The `host:` line from `rustc -vV` should end in `windows-gnu` for this path, and
 | Vite `EBUSY` while watching `src-tauri/target/...dll` | Vite was watching Cargo's build output. Ignore `**/src-tauri/target/**` under `server.watch.ignored` in `vite.config.js`. |
 | `no method named to_string_lossy` on `process.name()` | With the `sysinfo` version in this project, `process.name()` already returns `&str`. Use `process.name().trim().to_owned()`; keep `to_string_lossy()` for filesystem paths such as `process.exe()`. |
 | `windows_sys::Win32::Foundation::BOOL` does not exist | For this windows-sys version, define the Win32 return type locally as `type BOOL = i32;`. Win32 `BOOL` is a signed 32-bit integer. |
+| `CreateThread` is missing from `Win32::System::Threading` | In windows-sys 0.61, `CreateThread` is gated behind the `Win32_Security` feature because its signature references `SECURITY_ATTRIBUTES`. Add `"Win32_Security"` to the windows-sys feature list. |
 | MinGW linker reports `export ordinal too large` while building the Tauri app library | Keep the Tauri library crate types as `staticlib` and `rlib`. Use `cdylib` for the separate injected DLL crate, not the Tauri app library. |
 | Cargo warns that the speed-hook dependency is unused | If the app depends on the hook crate specifically so Cargo emits its DLL artifact, `use tempo_speed_hook as _;` makes that intentional dependency explicit. Confirm that the DLL appears in the build output. |
 

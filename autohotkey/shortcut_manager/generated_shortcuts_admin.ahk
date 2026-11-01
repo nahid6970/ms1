@@ -28,3 +28,6 @@ TraySetIcon("C:\@delta\ms1\autohotkey\shortcut_manager\ahk_admin.ico")
         try WinMinimize("ahk_id " hwnd)
     }
 }
+
+;! Game Speed Control
+!g::Run('"D:\speed\src-tauri\target\release\tempo-speed-control.exe"', 'D:\speed\src-tauri\target\release', "Hide")
