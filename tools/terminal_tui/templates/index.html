@@ -4252,6 +4252,29 @@ codex login</code></pre>
         </div>
     </div>
 
+    <div class="modal-overlay" id="codex-account-continue-modal" role="dialog" aria-modal="true" aria-labelledby="codex-account-continue-title" onclick="if(event.target===this)closeCodexAccountContinueModal()" style="z-index:1250;">
+        <div class="modal-content" style="width:520px;max-width:92vw;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:12px;">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+                <div id="codex-account-continue-title" style="font-size:.92rem;font-weight:650;color:#f3f4f6;">Continue with another Codex account</div>
+                <div id="codex-account-continue-source" style="font-size:.68rem;color:#999;margin-top:4px;"></div>
+            </div>
+            <div style="display:grid;gap:10px;padding:14px 16px 8px;">
+                <label for="codex-account-continue-target" style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">Use account
+                    <select id="codex-account-continue-target" style="width:100%;padding:8px 9px;border:1px solid #333;border-radius:7px;background:#141414;color:#f3f4f6;font-size:.76rem;"></select>
+                </label>
+                <label for="codex-account-continue-note" style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">Optional note
+                    <textarea id="codex-account-continue-note" maxlength="18000" spellcheck="false" placeholder="What should the new session focus on?" style="width:100%;box-sizing:border-box;min-height:75px;max-height:150px;resize:vertical;padding:9px 10px;border:1px solid #303030;border-radius:7px;background:#111;color:#e5e7eb;outline:none;font:.72rem/1.5 'Fira Code',Consolas,monospace;"></textarea>
+                </label>
+                <div id="codex-account-continue-info" style="color:#9ca3af;font-size:.69rem;line-height:1.5;">A new session will read the saved transcript as context. The original session remains available under its current account.</div>
+                <div id="codex-account-continue-error" role="status" style="display:none;color:#fca5a5;font-size:.7rem;"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
+                <button type="button" id="codex-account-continue-cancel" onclick="closeCodexAccountContinueModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
+                <button type="button" id="codex-account-continue-start" onclick="startCodexAccountContinuation()" style="padding:7px 13px;border:1px solid #7c3aed;border-radius:7px;background:#6d28d9;color:#fff;cursor:pointer;font-size:.73rem;">Continue in new session</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="agent-handoff-modal" role="dialog" aria-modal="true" aria-labelledby="agent-handoff-title" onclick="if(event.target===this)closeAgentHandoffModal()" style="z-index:1220;">
         <div class="modal-content" style="width:760px;max-width:94vw;max-height:88vh;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:14px;">
             <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
@@ -5687,7 +5710,8 @@ codex login</code></pre>
             updateTerminalTabs();
         }
 
-        function createTerminalPane(projectName, paneId, projectTheme = null, initialCommand = null) {
+        function createTerminalPane(projectName, paneId, projectTheme = null, initialCommand = null, codexAccountId = undefined) {
+            const paneCodexAccountId = codexAccountId === undefined ? getSelectedCodexUsageAccount() : codexAccountId;
             const parent = document.getElementById('terminal-parent');
             const paneDiv = document.createElement('div');
             document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
@@ -5795,7 +5819,7 @@ codex login</code></pre>
             }
 
             const paneSocket = io('/pty');
-            const pane = { paneId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
+            const pane = { paneId, codexAccountId: paneCodexAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;
             fitAddon = paneFitAddon;
@@ -5847,7 +5871,7 @@ codex login</code></pre>
 
             paneSocket.on('connect', () => {
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() });
+                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir, codexAccountId: paneCodexAccountId });
                 // Instantly fit and synchronize backend PTY size upon successful connection
                 setTimeout(() => {
                     try {
@@ -6376,6 +6400,7 @@ codex login</code></pre>
         let agentSavedSessions = [];
         let codexLimitsAutoRefreshIntervalId = null;
         let codexUsageAccounts = [];
+        let codexDefaultHome = '';
         let codexLimitsLoadInFlight = false;
         let codexLimitsRefreshQueued = false;
         let kiroUsageLoadInFlight = false;
@@ -6390,6 +6415,7 @@ codex login</code></pre>
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Could not load Codex accounts.');
             codexUsageAccounts = Array.isArray(data.accounts) ? data.accounts : [];
+            codexDefaultHome = String(data.defaultCodexHome || '');
             const select = document.getElementById('settings-codex-usage-account');
             if (select) {
                 const selected = getSelectedCodexUsageAccount();
@@ -6547,7 +6573,7 @@ codex login</code></pre>
             list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading agent sessions…</div>';
             loadCodexLimits(false);
             try {
-                const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
+                const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not load agent sessions.');
                 agentSavedSessions = data.sessions || [];
@@ -6804,7 +6830,7 @@ codex login</code></pre>
             const list = document.getElementById('agent-session-list');
             const query = (document.getElementById('agent-session-search')?.value || '').trim().toLowerCase();
             const matches = agentSavedSessions.filter(session =>
-                `${session.agent} ${session.originAgent || ''} ${session.activeAgent || ''} ${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
+                `${session.agent} ${session.originAgent || ''} ${session.activeAgent || ''} ${session.codexAccountName || ''} ${session.title} ${session.cwd} ${session.sessionId}`.toLowerCase().includes(query)
             );
             if (!matches.length) {
                 list.innerHTML = `<div style="padding:26px 12px;text-align:center;color:#888;font-size:.8rem;">${agentSavedSessions.length ? 'No matching sessions.' : 'No saved agent sessions were found in this workspace.'}</div>`;
@@ -6827,24 +6853,30 @@ codex login</code></pre>
                 const tokenEstimateDisplay = tokenEstimate.replace(/^~/, '');
                 const tokenBadgeRange = getAgentTokenBadgeRange(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
+                const sessionDomKey = `${session.agent}-${session.codexAccountId || 'default'}-${session.sessionId}`.replace(/[^A-Za-z0-9_-]/g, '-');
+                const codexAccountName = session.agent === 'codex' ? (session.codexAccountName || 'Default') : '';
+                const accountBadge = session.agent === 'codex'
+                    ? `<span class="agent-session-account" data-testid="agent-session-account" title="Codex profile: ${escapeHtml(codexAccountName)}" style="flex:none;display:inline-flex;align-items:center;padding:3px 7px;border:1px solid rgba(52,211,153,.24);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.65rem;font-weight:600;white-space:nowrap;">${escapeHtml(codexAccountName)}</span>`
+                    : '';
                 const agentTrail = Array.isArray(session.agentTrail) ? session.agentTrail : [];
                 const trailMarkup = session.conversationId && session.isCurrentActiveSession && agentTrail.length > 1
                     ? `<span id="agent-session-trail-${escapeHtml(session.sessionId)}" class="agent-session-lineage" data-testid="agent-session-lineage" title="${escapeHtml(agentTrail.map(name => name === 'pi' ? 'Pi' : name === 'kiro' ? 'Kiro' : 'Codex').join(' → '))}" aria-label="Conversation agent history: ${escapeHtml(agentTrail.join(' to '))}" style="display:flex;align-items:center;justify-content:center;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;">${agentTrail.map((name, index) => `${index ? '<span aria-hidden="true" style="font-size:16px;line-height:1;color:#ddd;font-weight:700;flex:none;">›</span>' : ''}${agentSessionIconMarkup(name, 13, `trail-${session.sessionId}-${index}`)}`).join('')}</span>`
                     : '<span aria-hidden="true" class="agent-session-trail-spacer" style="flex:1;min-width:0;"></span>';
-                return `<div id="agent-session-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-row" data-testid="agent-session-row" data-agent="${escapeHtml(session.agent)}" data-session-id="${escapeHtml(session.sessionId)}" role="group" style="width:100%;padding:5px 7px;display:flex;flex-direction:row;align-items:center;gap:8px;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;color:#eee;">
-                    <button type="button" id="agent-session-open-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-open" data-testid="agent-session-open" aria-label="${escapeHtml(`Open ${agentName} session: ${sessionTitle}; active agent ${activeAgentName}; ${sessionPath}; ${date}`)}" style="flex:1;min-width:0;padding:6px 5px;border:0;background:transparent;color:inherit;cursor:pointer;display:flex;flex-direction:row;align-items:center;gap:12px;text-align:left;">
+                return `<div id="agent-session-${escapeHtml(sessionDomKey)}" class="agent-session-row" data-testid="agent-session-row" data-agent="${escapeHtml(session.agent)}" data-session-id="${escapeHtml(session.sessionId)}" data-session-path="${escapeHtml(session.sessionPath || '')}" role="group" style="width:100%;padding:5px 7px;display:flex;flex-direction:row;align-items:center;gap:8px;text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;color:#eee;">
+                    <button type="button" id="agent-session-open-${escapeHtml(sessionDomKey)}" class="agent-session-open" data-testid="agent-session-open" aria-label="${escapeHtml(`Open ${agentName} session: ${sessionTitle}; active agent ${activeAgentName}; ${codexAccountName ? `profile ${codexAccountName}; ` : ''}${sessionPath}; ${date}`)}" style="flex:1;min-width:0;padding:6px 5px;border:0;background:transparent;color:inherit;cursor:pointer;display:flex;flex-direction:row;align-items:center;gap:12px;text-align:left;">
                         ${agentIcon}
                         <span style="min-width:0;flex:1;display:flex;flex-direction:column;align-items:stretch;gap:5px;">
                             <span style="font-size:.8rem;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(sessionTitle)}</span>
                             <span style="font-size:.67rem;color:#999;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(sessionPath)}</span>
-                            <span class="agent-session-meta" data-testid="agent-session-meta" style="font-size:.67rem;color:#a1a1aa;display:flex;align-items:center;gap:8px;min-width:0;"><span class="agent-session-timestamp" data-testid="agent-session-timestamp" title="${escapeHtml(date)}" aria-label="Last activity ${escapeHtml(date)}" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid rgba(148,163,184,.22);border-radius:6px;background:rgba(148,163,184,.09);color:#d1d5db;font-size:.69rem;font-weight:600;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#a78bfa;flex:none;"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>${escapeHtml(dateLabel)}</span>${trailMarkup}</span>
+                            <span class="agent-session-meta" data-testid="agent-session-meta" style="font-size:.67rem;color:#a1a1aa;display:flex;align-items:center;gap:8px;min-width:0;">${accountBadge}<span class="agent-session-timestamp" data-testid="agent-session-timestamp" title="${escapeHtml(date)}" aria-label="Last activity ${escapeHtml(date)}" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border:1px solid rgba(148,163,184,.22);border-radius:6px;background:rgba(148,163,184,.09);color:#d1d5db;font-size:.69rem;font-weight:600;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#a78bfa;flex:none;"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>${escapeHtml(dateLabel)}</span>${trailMarkup}</span>
                         </span>
                     </button>
                     <span class="agent-session-row-actions" data-testid="agent-session-row-actions" style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:46%;">
                         <span style="display:flex;align-items:center;gap:6px;">
-                    <button type="button" id="agent-session-rename-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-rename" data-testid="agent-session-rename" title="Rename this conversation" aria-label="Rename ${agentName} conversation: ${escapeHtml(sessionTitle)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(148,163,184,.25);border-radius:6px;background:rgba(51,65,85,.18);color:#cbd5e1;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
-                    <button type="button" id="agent-session-handoff-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>
-                    <button type="button" id="agent-session-delete-${escapeHtml(session.agent)}-${escapeHtml(session.sessionId)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
+                    <button type="button" id="agent-session-rename-${escapeHtml(sessionDomKey)}" class="agent-session-rename" data-testid="agent-session-rename" title="Rename this conversation" aria-label="Rename ${agentName} conversation: ${escapeHtml(sessionTitle)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(148,163,184,.25);border-radius:6px;background:rgba(51,65,85,.18);color:#cbd5e1;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
+                    <button type="button" id="agent-session-handoff-${escapeHtml(sessionDomKey)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>
+                    ${session.agent === 'codex' ? `<button type="button" id="agent-session-continue-account-${escapeHtml(sessionDomKey)}" class="agent-session-continue-account" data-testid="agent-session-continue-account" title="Continue this conversation with another Codex account" aria-label="Continue Codex session on another account" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(52,211,153,.28);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10a4 4 0 0 1 0 8h-1"></path><path d="m13 11 3 4-3 4"></path><path d="M17 17H7a4 4 0 0 1 0-8h1"></path><path d="m11 13-3-4 3-4"></path></svg></button>` : ''}
+                    <button type="button" id="agent-session-delete-${escapeHtml(sessionDomKey)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
                         </span>
                         <span style="display:flex;align-items:center;justify-content:flex-end;gap:7px;max-width:100%;">
                             <span class="agent-session-token-estimate" data-testid="agent-session-token-estimate" data-token-range="${tokenBadgeRange}" title="Approximate tokens from readable user and assistant text; excludes tool metadata." aria-label="Approximately ${escapeHtml(tokenEstimateDisplay)} tokens" style="flex:none;display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(96,165,250,.3);border-radius:6px;font-size:.63rem;font-weight:650;line-height:1.1;white-space:nowrap;"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="m12 3 9 4.5-9 4.5-9-4.5L12 3Z"></path><path d="m3 12 9 4.5 9-4.5"></path><path d="m3 16.5 9 4.5 9-4.5"></path></svg>${escapeHtml(tokenEstimateDisplay)}</span>
@@ -6856,16 +6888,21 @@ codex login</code></pre>
             list.querySelectorAll('.agent-session-row').forEach(row => {
                 row.addEventListener('mouseenter', () => { row.style.background = 'rgba(255,255,255,.07)'; row.style.borderColor = '#333'; });
                 row.addEventListener('mouseleave', () => { row.style.background = 'transparent'; row.style.borderColor = 'transparent'; });
-                row.querySelector('.agent-session-open').addEventListener('click', () => resumeAgentSession(row.dataset.agent, row.dataset.sessionId));
-                row.querySelector('.agent-session-rename').addEventListener('click', () => renameAgentConversation(row.dataset.agent, row.dataset.sessionId));
-                row.querySelector('.agent-session-handoff').addEventListener('click', () => openAgentHandoffModal(row.dataset.agent, row.dataset.sessionId));
-                row.querySelector('.agent-session-delete').addEventListener('click', () => deleteAgentSession(row.dataset.agent, row.dataset.sessionId));
+                row.querySelector('.agent-session-open').addEventListener('click', () => resumeAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
+                row.querySelector('.agent-session-rename').addEventListener('click', () => renameAgentConversation(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
+                row.querySelector('.agent-session-handoff').addEventListener('click', () => openAgentHandoffModal(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
+                row.querySelector('.agent-session-continue-account')?.addEventListener('click', () => openCodexAccountContinueModal(row.dataset.sessionPath));
+                row.querySelector('.agent-session-delete').addEventListener('click', () => deleteAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
             });
             list.querySelectorAll('.agent-session-lineage').forEach(trail => { trail.scrollLeft = trail.scrollWidth; });
         }
 
-        function resumeAgentSession(agent, sessionId) {
-            const selectedSession = agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId);
+        function findAgentSavedSession(agent, sessionId, sessionPath = '') {
+            return agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId && (!sessionPath || item.sessionPath === sessionPath));
+        }
+
+        function resumeAgentSession(agent, sessionId, sessionPath = '') {
+            const selectedSession = findAgentSavedSession(agent, sessionId, sessionPath);
             const session = selectedSession?.activeSessionId
                 ? agentSavedSessions.find(item => item.agent === selectedSession.activeAgent && item.sessionId === selectedSession.activeSessionId) || selectedSession
                 : selectedSession;
@@ -6883,7 +6920,7 @@ codex login</code></pre>
                 const safeCodexHome = String(session.codexHome || '').replace(/'/g, "''");
                 command = `${safeCodexHome ? `$env:CODEX_HOME = '${safeCodexHome}'; ` : ''}${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo resume ${session.sessionId}`;
             }
-            splitTerminal('tabs', command);
+            splitTerminal('tabs', command, session.agent === 'codex' ? (session.codexAccountId || '') : undefined);
         }
 
         function startNewAgentSession(agent) {
@@ -6928,8 +6965,8 @@ codex login</code></pre>
             select.onchange = () => localStorage.setItem('agent-session-title-model', select.value);
         }
 
-        function renameAgentConversation(agent, sessionId) {
-            const session = agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId);
+        function renameAgentConversation(agent, sessionId, sessionPath = '') {
+            const session = findAgentSavedSession(agent, sessionId, sessionPath);
             if (!session || !activeProject) return;
             agentTitleRenameSource = { ...session, project: activeProject };
             document.getElementById('agent-session-title-input').value = session.title || '';
@@ -7024,7 +7061,7 @@ codex login</code></pre>
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not rename this conversation.');
                 closeAgentSessionTitleModal();
-                const refresh = await fetch(`/api/agent/sessions?project=${encodeURIComponent(source.project)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
+                const refresh = await fetch(`/api/agent/sessions?project=${encodeURIComponent(source.project)}`);
                 const refreshedData = await refresh.json();
                 if (refresh.ok) agentSavedSessions = refreshedData.sessions || [];
                 else {
@@ -7040,8 +7077,8 @@ codex login</code></pre>
             }
         }
 
-        async function deleteAgentSession(agent, sessionId) {
-            const session = agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId);
+        async function deleteAgentSession(agent, sessionId, sessionPath = '') {
+            const session = findAgentSavedSession(agent, sessionId, sessionPath);
             if (!session) return;
             const agentNames = { codex: 'Codex', pi: 'Pi', kiro: 'Kiro CLI' };
             const linkedNote = session.conversationId
@@ -7061,9 +7098,9 @@ codex login</code></pre>
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not delete the saved session.');
-                agentSavedSessions = agentSavedSessions.filter(item => !(item.agent === agent && item.sessionId === sessionId));
+                agentSavedSessions = agentSavedSessions.filter(item => !(item.agent === agent && item.sessionId === sessionId && item.sessionPath === session.sessionPath));
                 try {
-                    const refreshResponse = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}&codexAccountId=${encodeURIComponent(getSelectedCodexUsageAccount())}`);
+                    const refreshResponse = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
                     if (refreshResponse.ok) {
                         const refreshed = await refreshResponse.json();
                         agentSavedSessions = refreshed.sessions || agentSavedSessions;
@@ -7079,13 +7116,83 @@ codex login</code></pre>
 
         let agentHandoffSource = null;
 
+        let codexAccountContinueSource = null;
+
+        function openCodexAccountContinueModal(sessionPath) {
+            const source = agentSavedSessions.find(item => item.agent === 'codex' && item.sessionPath === sessionPath);
+            if (!source || !activeProject) return;
+            codexAccountContinueSource = source;
+            const select = document.getElementById('codex-account-continue-target');
+            const error = document.getElementById('codex-account-continue-error');
+            const start = document.getElementById('codex-account-continue-start');
+            const normalizeHome = home => String(home || '').replace(/[\\/]+$/, '').replace(/\\/g, '/').toLowerCase();
+            const sourceHome = normalizeHome(source.codexHome);
+            const profiles = [
+                { id: '', name: 'Default account', home: codexDefaultHome },
+                ...codexUsageAccounts.map(account => ({ id: account.id, name: account.name, home: account.codexHome })),
+            ].filter(profile => profile.id !== (source.codexAccountId || '') && normalizeHome(profile.home) !== sourceHome);
+            select.innerHTML = profiles.map(profile => `<option value="${escapeHtml(profile.id)}">${escapeHtml(profile.name)}</option>`).join('');
+            document.getElementById('codex-account-continue-source').textContent = `${source.title || 'Untitled chat'} · currently using ${source.codexAccountName || 'Default'}`;
+            document.getElementById('codex-account-continue-note').value = '';
+            error.textContent = profiles.length ? '' : 'Add another Codex profile in Settings → AI Usage & Accounts first.';
+            error.style.display = profiles.length ? 'none' : 'block';
+            start.disabled = profiles.length === 0;
+            start.style.opacity = profiles.length ? '1' : '.55';
+            document.getElementById('codex-account-continue-modal').classList.add('show');
+        }
+
+        function closeCodexAccountContinueModal() {
+            document.getElementById('codex-account-continue-modal')?.classList.remove('show');
+            codexAccountContinueSource = null;
+        }
+
+        async function startCodexAccountContinuation() {
+            const source = codexAccountContinueSource;
+            if (!source || !activeProject) return;
+            const start = document.getElementById('codex-account-continue-start');
+            const error = document.getElementById('codex-account-continue-error');
+            const targetAccountId = document.getElementById('codex-account-continue-target').value;
+            start.disabled = true;
+            start.textContent = 'Starting…';
+            error.style.display = 'none';
+            try {
+                const response = await fetch('/api/agent/codex/continue-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: activeProject,
+                        sourceSessionId: source.sessionId,
+                        sourceSessionPath: source.sessionPath,
+                        sourceCodexAccountId: source.codexAccountId || '',
+                        targetCodexAccountId: targetAccountId,
+                        handoffNote: document.getElementById('codex-account-continue-note').value.trim(),
+                    }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not continue with that Codex account.');
+                const encodedPrompt = encodeAgentPrompt(data.prompt);
+                const safePath = String(data.cwd || '').replace(/'/g, "''");
+                const command = `$__codexContinuePrompt = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encodedPrompt}')); ` +
+                    `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}codex --yolo $__codexContinuePrompt`;
+                closeCodexAccountContinueModal();
+                closeAgentSessionPicker();
+                splitTerminal('tabs', command, data.targetCodexAccountId || '');
+            } catch (continueError) {
+                error.textContent = String(continueError.message || continueError);
+                error.style.display = 'block';
+            } finally {
+                start.textContent = 'Continue in new session';
+                start.disabled = false;
+            }
+        }
+
         function closeAgentHandoffModal() {
             document.getElementById('agent-handoff-modal')?.classList.remove('show');
             agentHandoffSource = null;
         }
 
-        async function openAgentHandoffModal(agent, sessionId) {
-            const selectedSession = agentSavedSessions.find(item => item.agent === agent && item.sessionId === sessionId);
+        async function openAgentHandoffModal(agent, sessionId, sessionPath = '') {
+            const selectedSession = findAgentSavedSession(agent, sessionId, sessionPath);
             if (!selectedSession || !activeProject) return;
             const sourceSession = selectedSession.activeSessionId
                 ? agentSavedSessions.find(item => item.agent === selectedSession.activeAgent && item.sessionId === selectedSession.activeSessionId) || selectedSession
@@ -7178,7 +7285,7 @@ codex login</code></pre>
             }
         }
 
-        function splitTerminal(direction, initialCommand = null) {
+        function splitTerminal(direction, initialCommand = null, codexAccountId = undefined) {
             if (!activeProject) return;
             const parent = document.getElementById('terminal-parent');
             if (direction === 'stacked') {
@@ -7190,7 +7297,7 @@ codex login</code></pre>
             }
             const currentProjDetails = projects.find(p => p.name === activeProject) || {};
             const paneId = `pane-${Date.now()}-${splitPaneCounter++}`;
-            createTerminalPane(activeProject, paneId, currentProjDetails.theme, initialCommand);
+            createTerminalPane(activeProject, paneId, currentProjDetails.theme, initialCommand, codexAccountId);
             
             updateTerminalTabs();
             

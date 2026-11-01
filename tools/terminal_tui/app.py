@@ -1485,11 +1485,18 @@ def api_session_pane_stop(project, pane_id):
 
 def _agent_session_roots(profile_home, project_path, codex_home=None):
     """Return the native session roots used by each supported local agent."""
-    codex_home = os.path.abspath(codex_home or os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
-    roots = [
-        ('codex', os.path.join(codex_home, 'sessions')),
-        ('codex', os.path.join(codex_home, 'archived_sessions')),
-    ]
+    codex_homes = [os.path.abspath(codex_home)] if codex_home else [profile['home'] for profile in _codex_profile_entries(profile_home)]
+    roots = []
+    seen_homes = set()
+    for home in codex_homes:
+        normalized_home = os.path.normcase(os.path.realpath(home))
+        if normalized_home in seen_homes:
+            continue
+        seen_homes.add(normalized_home)
+        roots.extend((
+            ('codex', os.path.join(home, 'sessions')),
+            ('codex', os.path.join(home, 'archived_sessions')),
+        ))
 
     pi_agent_home = os.path.join(profile_home, '.pi', 'agent')
     pi_env_session_dir = os.environ.get('PI_CODING_AGENT_SESSION_DIR')
@@ -1658,12 +1665,29 @@ def _codex_home_for_account_id(account_id):
     return os.path.abspath(os.path.expandvars(os.path.expanduser(account['codexHome']))) if account else None
 
 
+def _codex_profile_entries(profile_home):
+    """Return the default and configured Codex homes with stable UI labels."""
+    default_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
+    profiles = [{'id': '', 'name': 'Default', 'home': default_home}]
+    known_homes = {os.path.normcase(os.path.realpath(default_home))}
+    for account in _codex_usage_accounts():
+        home = os.path.abspath(os.path.expandvars(os.path.expanduser(str(account['codexHome']))))
+        normalized_home = os.path.normcase(os.path.realpath(home))
+        if normalized_home in known_homes:
+            continue
+        known_homes.add(normalized_home)
+        profiles.append({'id': account['id'], 'name': str(account['name']).strip(), 'home': home})
+    return profiles
+
+
 @app.route('/api/codex/accounts', methods=['GET', 'POST', 'DELETE'])
 def api_codex_accounts():
-    """Manage named Codex CLI profile paths used only for quota reads."""
+    """Manage configured Codex profiles used by quota, terminals, and session continuation."""
     accounts = _codex_usage_accounts()
     if request.method == 'GET':
-        return jsonify({'accounts': accounts})
+        profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+        default_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
+        return jsonify({'accounts': accounts, 'defaultCodexHome': default_home})
 
     if request.method == 'POST':
         payload = request.get_json(silent=True) or {}
@@ -1936,18 +1960,25 @@ def api_agent_sessions():
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
 
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
-    account_id = str(request.args.get('codexAccountId') or '')
-    selected_codex_home = _codex_home_for_account_id(account_id)
-    if account_id and not selected_codex_home:
-        return jsonify({'error': 'Selected Codex profile was not found.'}), 404
-    codex_home = os.path.abspath(selected_codex_home or os.environ.get('CODEX_HOME') or os.path.join(profile_home, '.codex'))
-    session_roots = _agent_session_roots(profile_home, project['path'], codex_home)
+    codex_profiles = _codex_profile_entries(profile_home)
+    session_roots = []
+    for profile in codex_profiles:
+        session_roots.extend(
+            (agent, root, profile['id'], profile['name'], profile['home'])
+            for agent, root in _agent_session_roots(profile_home, project['path'], profile['home'])
+            if agent == 'codex'
+        )
+    session_roots.extend(
+        (agent, root, '', '', '')
+        for agent, root in _agent_session_roots(profile_home, project['path'])
+        if agent != 'codex'
+    )
     title_overrides = get_config_val('agent_session_title_overrides', dict).get(project['name'], {})
 
     sessions = []
     seen_ids = set()
 
-    for agent, session_dir in session_roots:
+    for agent, session_dir, profile_id, profile_name, codex_home in session_roots:
         if not os.path.isdir(session_dir):
             continue
         for root, _dirs, filenames in os.walk(session_dir):
@@ -1970,7 +2001,8 @@ def api_agent_sessions():
                                 metadata = first_record
 
                         session_id = str(metadata.get('session_id') or metadata.get('id') or '')
-                        if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id) or (agent, session_id) in seen_ids:
+                        session_identity = (agent, session_id, os.path.normcase(os.path.realpath(session_path)))
+                        if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id) or session_identity in seen_ids:
                             continue
                         cwd = str(metadata.get('cwd') or '')
                         if not cwd:
@@ -1988,7 +2020,7 @@ def api_agent_sessions():
                     if agent == 'kiro' and not title:
                         continue
 
-                    seen_ids.add((agent, session_id))
+                    seen_ids.add(session_identity)
                     sessions.append({
                         'agent': agent,
                         'sessionId': session_id,
@@ -1997,6 +2029,8 @@ def api_agent_sessions():
                         'lastModified': modified_at,
                         'sessionPath': os.path.abspath(session_path),
                         'codexHome': codex_home if agent == 'codex' else None,
+                        'codexAccountId': profile_id if agent == 'codex' else None,
+                        'codexAccountName': profile_name if agent == 'codex' else None,
                         'tokenEstimate': _estimate_agent_session_tokens(agent, session_path),
                         'handoffToken': transcript['handoffToken'],
                     })
@@ -2304,6 +2338,101 @@ def api_agent_session_context():
         'cwd': cwd,
         'sourceTranscriptPath': os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path,
         'handoffText': '',
+    })
+
+
+@app.route('/api/agent/codex/continue-account', methods=['POST'])
+def api_codex_continue_on_account():
+    """Prepare a new Codex session on another profile with the source transcript as context."""
+    data = request.get_json(silent=True) or {}
+    project_name = str(data.get('project') or '').strip()
+    session_id = str(data.get('sourceSessionId') or '').strip()
+    session_path = os.path.abspath(os.path.expanduser(str(data.get('sourceSessionPath') or '')))
+    source_account_id = str(data.get('sourceCodexAccountId') or '')
+    target_account_id = str(data.get('targetCodexAccountId') or '')
+    handoff_note = str(data.get('handoffNote') or '').strip()
+    if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+        return jsonify({'error': 'Invalid source Codex session.'}), 400
+    if len(handoff_note) > 18000:
+        return jsonify({'error': 'Handoff notes must be 18,000 characters or fewer.'}), 400
+
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Workspace not found.'}), 404
+    profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
+    profiles = _codex_profile_entries(profile_home)
+    source_profile = next((item for item in profiles if item['id'] == source_account_id), None)
+    target_profile = next((item for item in profiles if item['id'] == target_account_id), None)
+    if not source_profile or not target_profile:
+        return jsonify({'error': 'The source or target Codex profile is no longer available.'}), 404
+    if source_profile['id'] == target_profile['id']:
+        return jsonify({'error': 'Choose a different Codex profile to continue this conversation.'}), 400
+    allowed_roots = [os.path.join(source_profile['home'], 'sessions'), os.path.join(source_profile['home'], 'archived_sessions')]
+    if not any(_path_is_within(session_path, root) for root in allowed_roots):
+        return jsonify({'error': 'Source session file is outside its Codex profile session folders.'}), 403
+
+    project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
+    try:
+        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+            first_record = json.loads(session_file.readline())
+        metadata = first_record.get('payload') or {}
+        cwd = str(metadata.get('cwd') or '')
+        if (str(metadata.get('session_id') or metadata.get('id') or '') != session_id or
+                not cwd or not _path_is_within(cwd, project_path)):
+            return jsonify({'error': 'Source session does not belong to this workspace.'}), 404
+    except (OSError, ValueError, TypeError, AttributeError):
+        return jsonify({'error': 'Could not read the source session.'}), 404
+
+    source_transcript = session_path
+    conversations = get_config_val('agent_handoff_conversations', list)
+    conversation = next((item for item in conversations if
+        item.get('project') == project['name'] and any(
+            member.get('agent') == 'codex' and member.get('sessionId') == session_id
+            for member in item.get('sessions', []) if isinstance(member, dict)
+        )), None)
+    if not conversation:
+        conversation = {
+            'id': str(uuid.uuid4()),
+            'project': project['name'],
+            'originAgent': 'codex',
+            'originSessionId': session_id,
+            'sessions': [{'agent': 'codex', 'sessionId': session_id}],
+            'handoffs': [],
+        }
+        conversations.append(conversation)
+    handoff_id = str(uuid.uuid4())
+    handoff_token = uuid.uuid4().hex
+    conversation['activeHandoffId'] = handoff_id
+    conversation['activeAgent'] = 'codex'
+    conversation['activeSessionId'] = None
+    conversation['status'] = 'pending'
+    conversation['updatedAt'] = time.time()
+    conversation.setdefault('handoffs', []).append({
+        'id': handoff_id,
+        'token': handoff_token,
+        'sourceAgent': 'codex',
+        'sourceSessionId': session_id,
+        'sourceCodexAccountId': source_profile['id'],
+        'targetAgent': 'codex',
+        'targetCodexAccountId': target_profile['id'],
+        'targetSessionId': None,
+        'status': 'pending',
+        'createdAt': time.time(),
+    })
+    set_config_val('agent_handoff_conversations', conversations)
+    note = f"\n\nAdditional instruction from the user: {handoff_note}" if handoff_note else ''
+    prompt = (
+        f"Continue the work from the saved Codex conversation titled `{os.path.basename(session_path)}`. "
+        f"Read the complete original transcript at `{source_transcript}` for context. "
+        "This is a new Codex session using a different account; do not try to resume the source session ID. "
+        "Continue from the latest user request, inspect the current workspace, and preserve the source session unchanged."
+        f"{note}\n<!--TUI-HANDOFF:{handoff_token}-->"
+    )
+    return jsonify({
+        'cwd': cwd,
+        'prompt': prompt,
+        'targetCodexAccountId': target_profile['id'],
+        'targetCodexAccountName': target_profile['name'],
     })
 
 @app.route('/api/agent/handoffs', methods=['POST'])

@@ -1618,6 +1618,41 @@
       "status": "active",
       "updatedAt": 1793527338.041915,
       "title": "Fix Double-Click to Close Tabs"
+    },
+    {
+      "id": "8a111673-c980-4cf6-86e2-80b3e978b3fd",
+      "project": "Code Merger",
+      "originAgent": "codex",
+      "originSessionId": "01a197bc-5758-7c50-8710-0c51e122d85c",
+      "sessions": [
+        {
+          "agent": "codex",
+          "sessionId": "01a197bc-5758-7c50-8710-0c51e122d85c"
+        },
+        {
+          "agent": "codex",
+          "sessionId": "01a197bd-6904-7c63-bad5-2e7eec5a4546"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "ad07cf44-525b-470c-aafb-7e52d06d67d1",
+          "token": "cb808b1086e944f38262871669c64b93",
+          "sourceAgent": "codex",
+          "sourceSessionId": "01a197bc-5758-7c50-8710-0c51e122d85c",
+          "sourceCodexAccountId": "12aa59bd4b7349e881eb7381f410031b",
+          "targetAgent": "codex",
+          "targetCodexAccountId": "",
+          "targetSessionId": "01a197bd-6904-7c63-bad5-2e7eec5a4546",
+          "status": "active",
+          "createdAt": 1793547130.2377138
+        }
+      ],
+      "activeHandoffId": "ad07cf44-525b-470c-aafb-7e52d06d67d1",
+      "activeAgent": "codex",
+      "activeSessionId": "01a197bd-6904-7c63-bad5-2e7eec5a4546",
+      "status": "active",
+      "updatedAt": 1793547130.2377138
     }
   ],
   "agent_session_title_overrides": {
@@ -1652,9 +1687,10 @@
     "Terminal TUI": {
       "paneIds": [
         "pane-1793545619246-8",
-        "pane-1793545625751-9"
+        "pane-1793545625751-9",
+        "pane-1793546976093-10"
       ],
-      "activePaneId": "pane-1793545625751-9"
+      "activePaneId": "pane-1793546976093-10"
     },
     "Gemini CLI": {
       "paneIds": [
@@ -1676,9 +1712,13 @@
     },
     "Code Merger": {
       "paneIds": [
-        "main"
+        "main",
+        "pane-1793547060701-1",
+        "pane-1793547085189-2",
+        "pane-1793547105877-3",
+        "pane-1793547130248-4"
       ],
-      "activePaneId": "main"
+      "activePaneId": "pane-1793547130248-4"
     }
   },
   "codex_usage_accounts": [
