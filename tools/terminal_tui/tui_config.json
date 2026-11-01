@@ -1588,5 +1588,20 @@
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",
       "codex:01a192d0-e38d-7172-90fb-5e1c35795b7a": "Add Snipping Tool Option to Screenshot Script"
     }
+  },
+  "terminal_tabs": {
+    "myWizTree": {
+      "paneIds": [
+        "pane-1793509042350-1",
+        "pane-1793509356302-2"
+      ],
+      "activePaneId": "pane-1793509356302-2"
+    },
+    "Terminal TUI": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    }
   }
 }
