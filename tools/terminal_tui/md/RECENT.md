@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Show Codex Subscription Quota
+
+- Added a quota panel to the AGENT session picker showing remaining percentage and reset time from the signed-in Codex CLI.
+- The backend queries Codex's local app-server JSON-RPC interface, caches readings for two minutes, and supports manual refresh without reading credentials.
+- Verified the local CLI response currently reports a monthly window; the UI labels 5-hour, weekly, monthly, and other durations based on reported window length.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`, `recent.md`
+
 ## [2026-11-01] - Close Terminal Pane Tabs on Double-Click
 
 - Terminal pane tabs now close their pane on double-click, with shared click tracking so the tab-bar rerender after activation does not lose the second click.

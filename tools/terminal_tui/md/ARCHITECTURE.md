@@ -62,6 +62,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
 - **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex, Pi, and Kiro CLI sessions scoped to the active workspace. Rows show the matching agent icon beside session details; choosing one runs that agent CLI in a new terminal tab.
+- **Codex quota panel**: The AGENT session picker reads subscription limit windows from the signed-in local Codex CLI via its app-server JSON-RPC interface. It shows remaining percentage and reset time, with a manual refresh; it does not parse or expose local credentials.
 - **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
 - **Ctrl+F**: Open terminal output search when a terminal pane is focused.
 - **Arrow Up/Down + Enter**: Navigate and select items in the F1 palette.

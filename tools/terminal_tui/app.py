@@ -1510,6 +1510,146 @@ def _agent_session_roots(profile_home, project_path):
     return roots
 
 
+_CODEX_LIMITS_CACHE_LOCK = threading.Lock()
+_CODEX_LIMITS_CACHE = {'fetched_at': 0.0, 'data': None}
+
+
+def _codex_app_server_request(method, request_id, params=None, timeout=15):
+    """Send one JSON-RPC request to a short-lived local Codex app-server process."""
+    codex_executable = shutil.which('codex')
+    if not codex_executable:
+        raise FileNotFoundError('Codex CLI was not found on this server PATH.')
+
+    if os.name == 'nt' and codex_executable.lower().endswith(('.cmd', '.bat')):
+        command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/s', '/c',
+                   f'"{codex_executable}" app-server --listen stdio://']
+    else:
+        command = [codex_executable, 'app-server', '--listen', 'stdio://']
+
+    process = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, encoding='utf-8', errors='replace', bufsize=1,
+    )
+    lines = queue.Queue()
+
+    def read_stdout():
+        try:
+            for line in process.stdout:
+                lines.put(line)
+        finally:
+            lines.put(None)
+
+    threading.Thread(target=read_stdout, daemon=True).start()
+
+    def send(payload):
+        process.stdin.write(json.dumps(payload) + '\n')
+        process.stdin.flush()
+
+    def receive_response(expected_id):
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('Timed out waiting for the Codex CLI usage response.')
+            try:
+                line = lines.get(timeout=remaining)
+            except queue.Empty as exc:
+                raise TimeoutError('Timed out waiting for the Codex CLI usage response.') from exc
+            if line is None:
+                raise RuntimeError('Codex app-server closed before returning usage data.')
+            try:
+                message = json.loads(line)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if message.get('id') == expected_id:
+                if message.get('error'):
+                    error = message['error']
+                    raise RuntimeError(str(error.get('message') or 'Codex app-server request failed.'))
+                return message.get('result') or {}
+
+    try:
+        send({'method': 'initialize', 'id': 1, 'params': {
+            'clientInfo': {'name': 'terminal-tui', 'title': 'Terminal TUI', 'version': '1.0'}
+        }})
+        receive_response(1)
+        send({'method': 'initialized', 'params': {}})
+        send({'method': method, 'id': request_id, 'params': params or {}})
+        return receive_response(request_id)
+    finally:
+        try:
+            process.terminate()
+            process.wait(timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            try:
+                process.kill()
+            except OSError:
+                pass
+
+
+def _read_codex_rate_limits():
+    response = _codex_app_server_request('account/rateLimits/read', 2)
+    limits = response.get('rateLimits') or {}
+    if not limits:
+        by_limit_id = response.get('rateLimitsByLimitId') or {}
+        limits = next((value for value in by_limit_id.values() if isinstance(value, dict)), {})
+
+    windows = []
+    for key in ('primary', 'secondary'):
+        window = limits.get(key)
+        if not isinstance(window, dict):
+            continue
+        duration = window.get('windowDurationMins')
+        used = window.get('usedPercent')
+        if used is None:
+            continue
+        duration = int(duration) if isinstance(duration, (int, float)) else None
+        if duration is not None and duration <= 360:
+            label = '5-hour'
+        elif duration is not None and duration <= 8 * 24 * 60:
+            label = 'Weekly'
+        elif duration is not None and duration <= 32 * 24 * 60:
+            label = 'Monthly'
+        elif duration is not None:
+            label = f'{duration // (24 * 60)}-day'
+        else:
+            label = 'Current'
+        resets_at = window.get('resetsAt')
+        windows.append({
+            'label': label,
+            'usedPercent': max(0, min(100, int(used))),
+            'leftPercent': max(0, min(100, 100 - int(used))),
+            'resetsAt': int(resets_at) if isinstance(resets_at, (int, float)) else None,
+            'windowDurationMins': duration,
+        })
+
+    return {
+        'available': bool(windows),
+        'planType': str(limits.get('planType') or ''),
+        'windows': windows,
+        'fetchedAt': int(time.time()),
+    }
+
+
+@app.route('/api/codex/limits', methods=['GET'])
+def api_codex_limits():
+    """Return subscription limits reported by the signed-in local Codex CLI."""
+    force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    now = time.monotonic()
+    with _CODEX_LIMITS_CACHE_LOCK:
+        cached = _CODEX_LIMITS_CACHE['data']
+        if not force_refresh and cached is not None and now - _CODEX_LIMITS_CACHE['fetched_at'] < 120:
+            return jsonify(cached)
+
+    try:
+        data = _read_codex_rate_limits()
+    except (OSError, RuntimeError, TimeoutError, ValueError, TypeError) as exc:
+        data = {'available': False, 'windows': [], 'error': str(exc), 'fetchedAt': int(time.time())}
+
+    with _CODEX_LIMITS_CACHE_LOCK:
+        _CODEX_LIMITS_CACHE.update({'fetched_at': time.monotonic(), 'data': data})
+    return jsonify(data)
+
+
 def _path_is_within(path, root):
     try:
         normalized_path = os.path.normcase(os.path.realpath(os.path.abspath(path)))

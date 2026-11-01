@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Codex Subscription Quota** (`app.py`, `templates/index.html`):
+    * The AGENT session picker shows the quota windows, remaining percentage, plan label, and reset time reported by the signed-in local Codex CLI.
+    * Uses Codex app-server JSON-RPC with a two-minute cache and manual refresh; credentials remain in Codex CLI storage.
+
 * **[2026-11-01] Open Workspace in T3 Code** (`app.py`, `templates/index.html`):
     * Added a `T3` button beside the agent launch icons in the saved-session picker header. It opens the active workspace.
     * The backend looks up the registered project folder, launches/focuses T3 Code from its Windows protocol registration, then retries `t3 app <path>` during desktop startup.
