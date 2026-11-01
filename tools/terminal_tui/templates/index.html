@@ -3765,7 +3765,7 @@
                         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                             <label for="settings-codex-limit-auto-refresh" style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-primary);cursor:pointer;">
                                 <input type="checkbox" id="settings-codex-limit-auto-refresh" onchange="syncCodexLimitAutoRefreshSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:0;">
-                                Automatically refresh while AGENTS is open
+                                Automatically refresh while the app is open
                             </label>
                             <label for="settings-codex-limit-refresh-interval" style="font-size:.76rem;color:var(--text-secondary);">Every</label>
                             <select id="settings-codex-limit-refresh-interval" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
@@ -3776,7 +3776,7 @@
                                 <option value="15">15 minutes</option>
                             </select>
                         </div>
-                        <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">When off, the compact status-bar indicator loads on app start and uses the existing two-minute cache. Click it to refresh now.</div>
+                        <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">Automatic refresh defaults to every 5 minutes while this app is open. Turn it off to use on-start/manual refresh with the two-minute cache.</div>
                     </div>
                 </div>
 
@@ -6156,7 +6156,6 @@
             count.textContent = 'Loading saved sessions…';
             list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading agent sessions…</div>';
             loadCodexLimits(false);
-            startCodexLimitsAutoRefresh();
             try {
                 const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
                 const data = await response.json();
@@ -6174,10 +6173,6 @@
         function closeAgentSessionPicker() {
             document.getElementById('agent-session-picker-modal')?.classList.remove('show');
             document.getElementById('agent-session-picker-btn')?.setAttribute('aria-expanded', 'false');
-            if (codexLimitsAutoRefreshIntervalId !== null) {
-                clearInterval(codexLimitsAutoRefreshIntervalId);
-                codexLimitsAutoRefreshIntervalId = null;
-            }
         }
 
         function syncCodexLimitAutoRefreshSettings() {
@@ -6191,15 +6186,10 @@
                 clearInterval(codexLimitsAutoRefreshIntervalId);
                 codexLimitsAutoRefreshIntervalId = null;
             }
-            if (localStorage.getItem('codex-limit-auto-refresh') !== 'true') return;
+            if (localStorage.getItem('codex-limit-auto-refresh') === 'false') return;
             const intervalMinutes = Number(localStorage.getItem('codex-limit-refresh-interval')) || 5;
             codexLimitsAutoRefreshIntervalId = setInterval(() => {
-                const picker = document.getElementById('agent-session-picker-modal');
-                if (picker?.classList.contains('show')) loadCodexLimits(true);
-                else {
-                    clearInterval(codexLimitsAutoRefreshIntervalId);
-                    codexLimitsAutoRefreshIntervalId = null;
-                }
+                if (document.visibilityState === 'visible') loadCodexLimits(true);
             }, intervalMinutes * 60 * 1000);
         }
 
@@ -6241,6 +6231,12 @@
         }
 
         loadCodexLimits(false);
+        startCodexLimitsAutoRefresh();
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
+                loadCodexLimits(true);
+            }
+        });
 
         function renderAgentSessionNewButtons() {
             const container = document.getElementById('agent-session-new-buttons');
@@ -10052,7 +10048,7 @@
             const savedUseRealDirPrompt = localStorage.getItem('use-real-dir-prompt') === 'true';
             document.getElementById('settings-use-real-dir-prompt').checked = savedUseRealDirPrompt;
 
-            document.getElementById('settings-codex-limit-auto-refresh').checked = localStorage.getItem('codex-limit-auto-refresh') === 'true';
+            document.getElementById('settings-codex-limit-auto-refresh').checked = localStorage.getItem('codex-limit-auto-refresh') !== 'false';
             document.getElementById('settings-codex-limit-refresh-interval').value = localStorage.getItem('codex-limit-refresh-interval') || '5';
             syncCodexLimitAutoRefreshSettings();
             
@@ -10275,9 +10271,7 @@
             const codexLimitAutoRefresh = document.getElementById('settings-codex-limit-auto-refresh').checked;
             localStorage.setItem('codex-limit-auto-refresh', codexLimitAutoRefresh);
             localStorage.setItem('codex-limit-refresh-interval', document.getElementById('settings-codex-limit-refresh-interval').value || '5');
-            if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) {
-                startCodexLimitsAutoRefresh();
-            }
+            startCodexLimitsAutoRefresh();
 
             const selectedAutoScroll = document.getElementById('settings-auto-scroll').checked;
             autoScrollEnabled = selectedAutoScroll;

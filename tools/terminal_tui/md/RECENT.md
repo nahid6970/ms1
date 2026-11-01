@@ -7,7 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Replaced the pane count in the subprocess monitor with a compact Codex icon and percentage (without the “left” suffix); the tooltip includes reset information and clicking refreshes immediately.
 - The backend queries Codex's local app-server JSON-RPC interface, caches readings for two minutes, and supports manual refresh without reading credentials.
-- Added an optional automatic refresh setting (1, 2, 5, 10, or 15 minutes), active only while the AGENT picker is open and off by default.
+- Added an automatic refresh setting (1, 2, 5, 10, or 15 minutes), enabled by default at five minutes and active while the app page is open and visible; it can be disabled in Settings.
 - Verified the local CLI response currently reports a monthly window; the UI labels 5-hour, weekly, monthly, and other durations based on reported window length.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`, `recent.md`
