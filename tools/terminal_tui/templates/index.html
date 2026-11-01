@@ -3874,7 +3874,12 @@
                         <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">Automatic refresh defaults to every 5 minutes while this app is open. Turn it off to use on-start/manual refresh with the two-minute cache.</div>
                     </div>
                     <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:7px;text-transform:uppercase;letter-spacing:.4px;">Codex Usage Accounts</div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;">
+                            <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;">Codex Usage Accounts</div>
+                            <button type="button" id="settings-codex-account-info" data-testid="codex-account-info" onclick="openCodexAccountHelp()" title="How to sign into another Codex account" aria-label="Show instructions for adding a Codex account" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:rgba(59,130,246,.14);border:1px solid rgba(96,165,250,.58);border-radius:50%;color:#93c5fd;cursor:pointer;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+                            </button>
+                        </div>
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
                             <label for="settings-codex-usage-account" style="font-size:.76rem;color:var(--text-secondary);">Show quota for</label>
                             <select id="settings-codex-usage-account" onchange="selectCodexUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
@@ -3884,7 +3889,6 @@
                             <input id="settings-codex-account-home" type="text" placeholder="Codex profile folder, e.g. C:\Users\you\.codex-work" aria-label="Codex profile folder path" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
                             <button type="button" id="settings-codex-account-add" onclick="addCodexUsageAccount()" style="padding:4px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.76rem;cursor:pointer;">Add account</button>
                         </div>
-                        <div id="settings-codex-account-help" style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">In PowerShell, sign into a second profile with <code>$env:CODEX_HOME = 'C:\Users\you\.codex-work'; codex login</code>, then add that same folder here. This only reads its quota; it does not change your normal CLI login.</div>
                         <div id="settings-codex-account-list" data-testid="codex-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
                     </div>
                 </div>
@@ -4014,6 +4018,30 @@
             </form>
             </div>
         </div>
+    </div>
+
+    <div class="modal-overlay" id="codex-account-help-modal" data-testid="codex-account-help-modal" style="z-index:4100;" onclick="if(event.target===this)closeCodexAccountHelp()">
+        <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="codex-account-help-title" style="width:520px;max-width:92vw;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;">
+                <div>
+                    <h2 id="codex-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Add another Codex account</h2>
+                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Sign in once to a separate Codex home, then add that folder to the usage monitor.</div>
+                </div>
+                <button type="button" id="codex-account-help-close" onclick="closeCodexAccountHelp()" aria-label="Close instructions" style="width:28px;height:28px;flex:none;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:1.1rem;cursor:pointer;">×</button>
+            </div>
+            <ol style="margin:0;padding-left:22px;display:grid;gap:11px;color:var(--text-secondary);font-size:.78rem;line-height:1.5;">
+                <li>Open PowerShell. You do <strong style="color:var(--text-primary);">not</strong> need to log out of your usual Codex account.</li>
+                <li>Set the separate profile folder and start login:
+                    <pre id="codex-account-login-command" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;padding:10px 12px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#93c5fd;font:.76rem/1.7 Consolas,'Fira Code',monospace;"><code>$env:CODEX_HOME = 'C:\Users\nahid\.codex-00'
+codex login</code></pre>
+                </li>
+                <li>Finish signing into the second account in the browser.</li>
+                <li>Back here, enter <code style="color:#67e8f9;">C:\Users\nahid\.codex-00</code> as the profile folder, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
+            </ol>
+            <div style="margin-top:12px;padding:9px 10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.5;">
+                <strong>Optional:</strong> <code>Remove-Item Env:CODEX_HOME</code> clears the override in that PowerShell window so later commands use your default profile. It does not log out or delete either account.
+            </div>
+        </section>
     </div>
 
     <!-- Custom Extension Icons Modal Dialog -->
@@ -4842,6 +4870,7 @@
                 else if (id === 'subcmd-add-modal') closeSubcmdAddModal();
                 else if (id === 'ports-modal') closePortsMonitorModal();
                 else if (id === 'settings-modal') closeSettingsModal();
+                else if (id === 'codex-account-help-modal') closeCodexAccountHelp();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
                 else if (id === 'ai-system-prompt-modal') closeAISystemPromptModal();
                 else if (id === 'ai-model-tester-modal') closeAIModelTesterModal();
@@ -10307,6 +10336,16 @@
             document.getElementById('settings-modal').classList.remove('show');
         }
 
+        function openCodexAccountHelp() {
+            document.getElementById('codex-account-help-modal')?.classList.add('show');
+            document.getElementById('codex-account-help-close')?.focus();
+        }
+
+        function closeCodexAccountHelp() {
+            document.getElementById('codex-account-help-modal')?.classList.remove('show');
+            document.getElementById('settings-codex-account-info')?.focus();
+        }
+
         function openExtensionIconsModal() {
             closeSettingsModal();
             document.getElementById('extension-icons-modal').classList.add('show');
@@ -13636,6 +13675,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const codexAccountHelp = document.getElementById('codex-account-help-modal');
+                if (codexAccountHelp && codexAccountHelp.classList.contains('show')) { closeCodexAccountHelp(); return; }
                 const gitIgnorePreview = document.getElementById('gitignore-ai-preview-modal');
                 if (gitIgnorePreview && gitIgnorePreview.classList.contains('show')) { closeGitIgnorePreview(); return; }
                 const rcloneDestinationPicker = document.getElementById('rclone-dst-picker-modal');
