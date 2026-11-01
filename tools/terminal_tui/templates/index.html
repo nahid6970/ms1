@@ -6323,6 +6323,10 @@ codex login</code></pre>
         let agentSavedSessions = [];
         let codexLimitsAutoRefreshIntervalId = null;
         let codexUsageAccounts = [];
+        let codexLimitsLoadInFlight = false;
+        let codexLimitsRefreshQueued = false;
+        let kiroUsageLoadInFlight = false;
+        let kiroUsageRefreshQueued = false;
 
         function getSelectedCodexUsageAccount() {
             return localStorage.getItem('codex-usage-account') || '';
@@ -6528,23 +6532,53 @@ codex login</code></pre>
             }, intervalMinutes * 60 * 1000);
         }
 
+        function getUsageBrowserCacheTtlMs() {
+            if (localStorage.getItem('codex-limit-auto-refresh') === 'false') return 2 * 60 * 1000;
+            return (Number(localStorage.getItem('codex-limit-refresh-interval')) || 5) * 60 * 1000;
+        }
+
+        function readUsageBrowserCache(cacheKey, forceRefresh) {
+            if (forceRefresh) return null;
+            try {
+                const saved = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                if (saved?.data?.available && Date.now() - Number(saved.savedAt) < getUsageBrowserCacheTtlMs()) return saved.data;
+            } catch (_) { /* Ignore stale or malformed browser cache entries. */ }
+            return null;
+        }
+
+        function writeUsageBrowserCache(cacheKey, data) {
+            if (!data?.available) return;
+            try { localStorage.setItem(cacheKey, JSON.stringify({ savedAt: Date.now(), data })); }
+            catch (_) { /* Usage caching is optional if browser storage is unavailable. */ }
+        }
+
         async function loadCodexLimits(forceRefresh = false) {
+            if (codexLimitsLoadInFlight) {
+                if (forceRefresh) codexLimitsRefreshQueued = true;
+                return;
+            }
+            codexLimitsLoadInFlight = true;
             const button = document.getElementById('monitor-codex-quota');
             const value = document.getElementById('monitor-codex-quota-value');
             const icon = document.getElementById('monitor-codex-icon');
-            if (!button || !value) return;
+            if (!button || !value) { codexLimitsLoadInFlight = false; return; }
             button.style.display = 'inline-flex';
             button.disabled = true;
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('codex', 13, 'monitor-codex-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const query = new URLSearchParams();
-                if (forceRefresh) query.set('refresh', 'true');
                 const accountId = getSelectedCodexUsageAccount();
-                if (accountId) query.set('accountId', accountId);
-                const response = await fetch(`/api/codex/limits${query.size ? `?${query}` : ''}`);
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Could not read Codex limits.');
+                const cacheKey = `ai-usage-cache:codex:${accountId || 'default'}`;
+                let data = readUsageBrowserCache(cacheKey, forceRefresh);
+                if (!data) {
+                    const query = new URLSearchParams();
+                    if (forceRefresh) query.set('refresh', 'true');
+                    if (accountId) query.set('accountId', accountId);
+                    const response = await fetch(`/api/codex/limits${query.size ? `?${query}` : ''}`);
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Could not read Codex limits.');
+                    writeUsageBrowserCache(cacheKey, data);
+                }
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
                     value.textContent = '--';
                     button.title = data.error || 'Codex CLI did not report a quota window.';
@@ -6567,22 +6601,37 @@ codex login</code></pre>
                 button.setAttribute('aria-label', button.title);
             } finally {
                 button.disabled = false;
+                codexLimitsLoadInFlight = false;
+                if (codexLimitsRefreshQueued) {
+                    codexLimitsRefreshQueued = false;
+                    loadCodexLimits(true);
+                }
             }
         }
 
         async function loadKiroUsage(forceRefresh = false) {
+            if (kiroUsageLoadInFlight) {
+                if (forceRefresh) kiroUsageRefreshQueued = true;
+                return;
+            }
+            kiroUsageLoadInFlight = true;
             const button = document.getElementById('monitor-kiro-quota');
             const value = document.getElementById('monitor-kiro-quota-value');
             const icon = document.getElementById('monitor-kiro-icon');
-            if (!button || !value) return;
+            if (!button || !value) { kiroUsageLoadInFlight = false; return; }
             button.style.display = 'inline-flex';
             button.disabled = true;
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('kiro', 13, 'monitor-kiro-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const response = await fetch(`/api/kiro/usage${forceRefresh ? '?refresh=true' : ''}`);
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Could not read Kiro usage.');
+                const cacheKey = 'ai-usage-cache:kiro:default';
+                let data = readUsageBrowserCache(cacheKey, forceRefresh);
+                if (!data) {
+                    const response = await fetch(`/api/kiro/usage${forceRefresh ? '?refresh=true' : ''}`);
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Could not read Kiro usage.');
+                    writeUsageBrowserCache(cacheKey, data);
+                }
                 if (!data.available) {
                     value.textContent = '--';
                     button.title = data.error || 'Kiro CLI did not report subscription usage.';
@@ -6602,6 +6651,11 @@ codex login</code></pre>
                 button.setAttribute('aria-label', button.title);
             } finally {
                 button.disabled = false;
+                kiroUsageLoadInFlight = false;
+                if (kiroUsageRefreshQueued) {
+                    kiroUsageRefreshQueued = false;
+                    loadKiroUsage(true);
+                }
             }
         }
 
@@ -6610,8 +6664,8 @@ codex login</code></pre>
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
-                loadCodexLimits(true);
-                loadKiroUsage(true);
+                loadCodexLimits(false);
+                loadKiroUsage(false);
             }
         });
 

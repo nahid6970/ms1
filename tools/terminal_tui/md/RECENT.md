@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Avoid Repeated Usage Checks on App Reopen
+
+- Cache successful Codex and Kiro quota results in browser storage and reuse them for the configured refresh interval (or two minutes when automatic refresh is disabled).
+- Deduplicate overlapping page-load and visibility requests; manual badge refresh still bypasses the cache.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-01] - Switch Codex Quota Account from Badge
 
 - Added a right-click menu to the Codex quota badge to select the default login or a saved Codex profile.

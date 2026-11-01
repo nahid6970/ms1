@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Avoid Repeated Usage Checks on App Reopen** (`templates/index.html`):
+    * Reuse per-account Codex and Kiro quota snapshots until the selected refresh interval expires; with auto-refresh off, use a two-minute cache window.
+    * Deduplicate overlapping startup/visibility requests. Clicking a badge still forces an immediate query.
+
 * **[2026-11-01] Switch Codex Quota Account from Badge** (`templates/index.html`):
     * Right-click the Codex badge to choose the default login or a named usage profile; the badge immediately refreshes for that account.
     * Added a Manage accounts action that opens Settings → AI Usage & Accounts.
