@@ -1589,7 +1589,6 @@
             }
             /* Hide "SESSION RUNNING" text, panes count, and git info on mobile to save space */
             #monitor-session-label,
-            #monitor-panes-count,
             #monitor-git-info {
                 display: none !important;
             }
@@ -2199,7 +2198,6 @@
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
-                    <span id="monitor-panes-count">Panes: 0</span>
                     <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
                         <span id="monitor-codex-icon" aria-hidden="true"></span>
                         <span id="monitor-codex-quota-value">--</span>
@@ -6225,14 +6223,14 @@
                     return;
                 }
                 const primary = data.windows[0];
-                value.textContent = `${primary.leftPercent}% left`;
+                value.textContent = `${primary.leftPercent}%`;
                 const plan = data.planType ? `${data.planType} plan · ` : '';
                 const details = data.windows.map(windowInfo => {
                     const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
-                    return `${windowInfo.label}: ${windowInfo.leftPercent}% left${reset}`;
+                    return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
                 }).join(' | ');
                 button.title = `Codex · ${plan}${details} · Click to refresh`;
-                button.setAttribute('aria-label', `Codex quota: ${primary.leftPercent}% left. Click to refresh.`);
+                button.setAttribute('aria-label', `Codex quota: ${primary.leftPercent}% remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 button.title = `Could not read Codex quota: ${String(error.message || error)}`;
@@ -8759,8 +8757,6 @@
             // Reset UI values when stopped
             const dot = document.getElementById('monitor-status-dot');
             if (dot) dot.style.backgroundColor = '#64748b';
-            const panes = document.getElementById('monitor-panes-count');
-            if (panes) panes.innerText = 'Panes: 0';
             const cpuVal = document.getElementById('monitor-cpu-value');
             if (cpuVal) cpuVal.innerText = '0.0%';
             const ramVal = document.getElementById('monitor-ram-value');
@@ -8788,8 +8784,6 @@
                     if (generation !== statsMonitorGeneration || activeProject !== projectName) return;
                     const dot = document.getElementById('monitor-status-dot');
                     if (dot) dot.style.backgroundColor = data.panes_count > 0 ? '#10b981' : '#64748b';
-                    const panes = document.getElementById('monitor-panes-count');
-                    if (panes) panes.innerText = `Panes: ${data.panes_count}`;
                     const cpuVal = document.getElementById('monitor-cpu-value');
                     if (cpuVal) cpuVal.innerText = `${data.cpu}%`;
                     const ramVal = document.getElementById('monitor-ram-value');
