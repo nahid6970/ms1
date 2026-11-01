@@ -119,6 +119,31 @@ Set-Location .\src-tauri
 cargo run
 ```
 
+### Build and launch a standalone Tauri executable
+
+Install frontend dependencies once, then launch the development app from the project root:
+
+```powershell
+npm install
+npm run tauri dev
+```
+
+The debug executable under `src-tauri/target/debug` uses the configured Vite `devUrl`, so it needs the dev server. To build a production executable that works without Vite, run this from the project root (keep a space between npm's `--` separator and `build`):
+
+```powershell
+npm run tauri -- build
+```
+
+The Tauri `beforeBuildCommand` runs `npm run build` to create `dist` before compiling the app. In the Tempo example it also runs `npm run build:hook`, which builds the native hook DLL and copies a content-versioned DLL plus a pointer file beside the release app. The release executable can then be launched directly:
+
+```powershell
+& .\src-tauri\target\release\tempo-speed-control.exe
+```
+
+Keep the EXE in the release directory alongside `tempo_speed_hook.current` and the versioned hook DLL; moving only the EXE will make the adapter unavailable. The production frontend assets are embedded in the Tauri binary from `frontendDist`. If the game requires administrator privileges, run the controller at the same privilege level.
+
+The Tempo configuration has `bundle.active` set to `false`, so `npm run tauri -- build` builds the executable without an installer. If bundling is enabled in another project and you want to skip it, pass the Tauri flag after npm's separator with both hyphens intact: `npm run tauri -- build --no-bundle`.
+
 ### If dll-syringe requires nightly but Visual Studio Build Tools are unavailable
 
 In this project, `dll-syringe` 0.18.2 enables Rust nightly-only features. Stable Rust reports `E0554: #![feature] may not be used on the stable release channel`. The crate source includes feature gates for `linked_list_cursors` and `once_cell_try` when the `syringe` feature is enabled. [dll-syringe 0.18.2 source](https://docs.rs/crate/dll-syringe/0.18.2/source/src/lib.rs)
@@ -163,7 +188,7 @@ The `host:` line from `rustc -vV` should end in `windows-gnu` for this path, and
 
 Tauri's global-shortcut plugin can miss shortcuts in some fullscreen games. This has also been reported in the Tauri project for games using certain fullscreen/input paths. [Tauri issue #7318](https://github.com/tauri-apps/tauri/issues/7318)
 
-For the Tempo project, the workaround was to poll only the requested key combinations using Windows `GetAsyncKeyState`, detect key-down edges, and send Tauri events to the frontend. Microsoft's API documentation says the high-order bit indicates that a key is currently down; access can still return zero in some desktop or privilege-isolation situations. [Microsoft GetAsyncKeyState documentation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate)
+For the Tempo project, the workaround was to poll only the requested key combinations using Windows `GetAsyncKeyState`, detect key-down edges, and send Tauri events to the frontend. Its shortcuts attach the foreground process with `Alt+Num0`, adjust one preset with `Alt+Num+`/`Alt+Num-`, toggle with `Alt+NumDel`, and reset to normal speed with `Alt+Num1`. When Num Lock is off, the corresponding keypad keys can report as Insert, Delete, or End. Microsoft's API documentation says the high-order bit indicates that a key is currently down; access can still return zero in some desktop or privilege-isolation situations. [Microsoft GetAsyncKeyState documentation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate)
 
 This polling approach does not consume or suppress the keypress, so the game can receive the same shortcut too. Avoid shortcuts that the game already uses, and keep input hooks/shortcuts limited to offline single-player use. If a selected game is elevated, run the controller at the same privilege level; do not elevate it to get around anti-cheat or other game protections.
 
