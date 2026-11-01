@@ -148,7 +148,7 @@
           "input_value": "2:30 PM on 17 Nov",
           "use_custom_colors": false,
           "toggled": false,
-          "secondary_mode": true
+          "secondary_mode": false
         },
         {
           "id": "523e5c0e",
