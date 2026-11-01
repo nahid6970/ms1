@@ -6343,7 +6343,7 @@
                 if (agentTitleRenameSource !== source) return;
                 document.getElementById('agent-session-title-input').value = data.suggestion || '';
                 status.style.color = '#86efac';
-                status.textContent = `Suggested with ${data.model || 'Gemini'}`;
+                status.textContent = '';
             } catch (error) {
                 status.style.color = '#fca5a5';
                 status.textContent = String(error.message || error);

@@ -1037,9 +1037,10 @@ Text paste behavior is unchanged. The global `document` paste handler remains as
 - Added a Restore from Git action to the missing-folder dialog and documented the new endpoint and behavior.
 - Prevent overlapping stats polls and stale workspace restores from overwriting the active workspace.
 
-## [2026-11-01] - Single-Line Layout for Rename Modal & Gray Token Badges
+## [2026-11-01] - Single-Line Layout & Clean Title Suggestion
 
 - Ensured the conversation rename modal control row stays on a single line (`flex-wrap: nowrap` and `flex: none` on controls).
+- Removed the "Suggested with <model>" success text from the title suggestion modal.
 - Added a `'tiny'` token range for sessions with fewer than 500 estimated tokens rendered in a muted gray palette (`#94a3b8`).
 
 **Files Modified:** `templates/index.html`, `md/RECENT.md`
