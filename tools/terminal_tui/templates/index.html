@@ -1951,7 +1951,8 @@
             --token-background: rgba(225,29,72,.11);
             --token-accent: #fb7185;
         }
-        #monitor-codex-quota {
+        #monitor-codex-quota,
+        #monitor-kiro-quota {
             display: none;
             align-items: center;
             gap: 5px;
@@ -1967,7 +1968,10 @@
             cursor: pointer;
         }
         #monitor-codex-quota:hover { border-color: rgba(16,185,129,.7); background: rgba(16,185,129,.13); }
-        #monitor-codex-quota:disabled { opacity: .65; cursor: wait; }
+        #monitor-codex-quota:disabled,
+        #monitor-kiro-quota:disabled { opacity: .65; cursor: wait; }
+        #monitor-kiro-quota { border-color: rgba(167,139,250,.35); background: rgba(139,92,246,.08); color: #c4b5fd; }
+        #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
         .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -2201,6 +2205,10 @@
                     <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
                         <span id="monitor-codex-icon" aria-hidden="true"></span>
                         <span id="monitor-codex-quota-value">--</span>
+                    </button>
+                    <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
+                        <span id="monitor-kiro-icon" aria-hidden="true"></span>
+                        <span id="monitor-kiro-quota-value">--</span>
                     </button>
                     <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
                         <span style="color:#38bdf8;">⎇</span>
@@ -3761,7 +3769,7 @@
                         </div>
                     </div>
                     <div style="margin-top:12px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">Codex Quota Refresh</div>
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">AI Usage Refresh</div>
                         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                             <label for="settings-codex-limit-auto-refresh" style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-primary);cursor:pointer;">
                                 <input type="checkbox" id="settings-codex-limit-auto-refresh" onchange="syncCodexLimitAutoRefreshSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:0;">
@@ -6189,7 +6197,10 @@
             if (localStorage.getItem('codex-limit-auto-refresh') === 'false') return;
             const intervalMinutes = Number(localStorage.getItem('codex-limit-refresh-interval')) || 5;
             codexLimitsAutoRefreshIntervalId = setInterval(() => {
-                if (document.visibilityState === 'visible') loadCodexLimits(true);
+                if (document.visibilityState === 'visible') {
+                    loadCodexLimits(true);
+                    loadKiroUsage(true);
+                }
             }, intervalMinutes * 60 * 1000);
         }
 
@@ -6230,11 +6241,48 @@
             }
         }
 
+        async function loadKiroUsage(forceRefresh = false) {
+            const button = document.getElementById('monitor-kiro-quota');
+            const value = document.getElementById('monitor-kiro-quota-value');
+            const icon = document.getElementById('monitor-kiro-icon');
+            if (!button || !value) return;
+            button.style.display = 'inline-flex';
+            button.disabled = true;
+            if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('kiro', 13, 'monitor-kiro-quota');
+            if (forceRefresh) value.textContent = '…';
+            try {
+                const response = await fetch(`/api/kiro/usage${forceRefresh ? '?refresh=true' : ''}`);
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not read Kiro usage.');
+                if (!data.available) {
+                    value.textContent = '--';
+                    button.title = data.error || 'Kiro CLI did not report subscription usage.';
+                    button.setAttribute('aria-label', button.title);
+                    return;
+                }
+                const leftPercent = Number(data.leftPercent);
+                value.textContent = `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`;
+                const credits = `${Number(data.remainingCredits).toFixed(2)} of ${Number(data.includedCredits).toFixed(2)} credits remaining`;
+                const plan = data.plan ? `${data.plan} · ` : '';
+                const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
+                button.title = `Kiro · ${plan}${credits}${reset} · Click to refresh`;
+                button.setAttribute('aria-label', `Kiro quota: ${value.textContent} remaining. Click to refresh.`);
+            } catch (error) {
+                value.textContent = '--';
+                button.title = `Could not read Kiro usage: ${String(error.message || error)}`;
+                button.setAttribute('aria-label', button.title);
+            } finally {
+                button.disabled = false;
+            }
+        }
+
         loadCodexLimits(false);
+        loadKiroUsage(false);
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
                 loadCodexLimits(true);
+                loadKiroUsage(true);
             }
         });
 

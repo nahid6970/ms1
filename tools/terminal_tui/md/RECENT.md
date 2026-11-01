@@ -3,12 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
-## [2026-11-01] - Show Codex Subscription Quota
+## [2026-11-01] - Show Codex and Kiro Subscription Quota
 
-- Replaced the pane count in the subprocess monitor with a compact Codex icon and percentage (without the “left” suffix); the tooltip includes reset information and clicking refreshes immediately.
-- The backend queries Codex's local app-server JSON-RPC interface, caches readings for two minutes, and supports manual refresh without reading credentials.
-- Added an automatic refresh setting (1, 2, 5, 10, or 15 minutes), enabled by default at five minutes and active while the app page is open and visible; it can be disabled in Settings.
-- Verified the local CLI response currently reports a monthly window; the UI labels 5-hour, weekly, monthly, and other durations based on reported window length.
+- Replaced the pane count in the subprocess monitor with compact Codex and Kiro badges; each shows the remaining percentage and can be clicked to refresh.
+- Codex limits come from the local app-server JSON-RPC interface; Kiro monthly included-credit usage and reset date come from the non-interactive `/usage` CLI command.
+- Both readings cache for two minutes and refresh manually or on a shared 1, 2, 5, 10, or 15-minute interval (default 5 minutes while the app is visible).
+- Verified Kiro's current output reports 14.75 of 50 included credits used (29.5%) and a monthly reset date.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`, `recent.md`
 

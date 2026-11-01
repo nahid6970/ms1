@@ -1512,6 +1512,8 @@ def _agent_session_roots(profile_home, project_path):
 
 _CODEX_LIMITS_CACHE_LOCK = threading.Lock()
 _CODEX_LIMITS_CACHE = {'fetched_at': 0.0, 'data': None}
+_KIRO_USAGE_CACHE_LOCK = threading.Lock()
+_KIRO_USAGE_CACHE = {'fetched_at': 0.0, 'data': None}
 
 
 def _codex_app_server_request(method, request_id, params=None, timeout=15):
@@ -1647,6 +1649,70 @@ def api_codex_limits():
 
     with _CODEX_LIMITS_CACHE_LOCK:
         _CODEX_LIMITS_CACHE.update({'fetched_at': time.monotonic(), 'data': data})
+    return jsonify(data)
+
+
+def _read_kiro_usage():
+    """Read the current Kiro subscription usage through its documented CLI command."""
+    kiro_executable = shutil.which('kiro-cli')
+    if not kiro_executable:
+        raise FileNotFoundError('Kiro CLI was not found on this server PATH.')
+
+    if os.name == 'nt' and kiro_executable.lower().endswith(('.cmd', '.bat')):
+        command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/s', '/c',
+                   f'"{kiro_executable}" chat --no-interactive "/usage"']
+    else:
+        command = [kiro_executable, 'chat', '--no-interactive', '/usage']
+    creationflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
+    result = subprocess.run(
+        command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, encoding='utf-8', errors='replace', timeout=30, creationflags=creationflags,
+    )
+    if result.returncode != 0:
+        raise RuntimeError('Kiro CLI could not read subscription usage. Check that Kiro CLI is signed in.')
+
+    output = result.stdout or ''
+    usage_match = re.search(
+        r'Credits\s*\(\s*([\d,]+(?:\.\d+)?)\s+of\s+([\d,]+(?:\.\d+)?)\s+covered in plan\s*\)\s*,\s*([\d.]+)%',
+        output, re.IGNORECASE,
+    )
+    if not usage_match:
+        raise RuntimeError('Kiro CLI returned an unrecognized usage format.')
+
+    used_credits = float(usage_match.group(1).replace(',', ''))
+    included_credits = float(usage_match.group(2).replace(',', ''))
+    used_percent = max(0.0, min(100.0, float(usage_match.group(3))))
+    reset_match = re.search(r'resets\s+on\s+(\d{4}-\d{2}-\d{2})', output, re.IGNORECASE)
+    plan_match = re.search(r'\bKIRO\s+([^\r\n]+)', output, re.IGNORECASE)
+    return {
+        'available': True,
+        'plan': plan_match.group(1).strip() if plan_match else '',
+        'usedCredits': used_credits,
+        'includedCredits': included_credits,
+        'remainingCredits': max(0.0, included_credits - used_credits),
+        'leftPercent': round(100.0 - used_percent, 1),
+        'resetsOn': reset_match.group(1) if reset_match else None,
+        'fetchedAt': int(time.time()),
+    }
+
+
+@app.route('/api/kiro/usage', methods=['GET'])
+def api_kiro_usage():
+    """Return subscription usage reported by the signed-in local Kiro CLI."""
+    force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    now = time.monotonic()
+    with _KIRO_USAGE_CACHE_LOCK:
+        cached = _KIRO_USAGE_CACHE['data']
+        if not force_refresh and cached is not None and now - _KIRO_USAGE_CACHE['fetched_at'] < 120:
+            return jsonify(cached)
+
+    try:
+        data = _read_kiro_usage()
+    except (OSError, RuntimeError, TimeoutError, ValueError, TypeError, subprocess.SubprocessError) as exc:
+        data = {'available': False, 'error': str(exc), 'fetchedAt': int(time.time())}
+
+    with _KIRO_USAGE_CACHE_LOCK:
+        _KIRO_USAGE_CACHE.update({'fetched_at': time.monotonic(), 'data': data})
     return jsonify(data)
 
 
