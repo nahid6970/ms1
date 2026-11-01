@@ -3654,6 +3654,9 @@
                 <button type="button" id="settings-tab-btn-ai" onclick="switchSettingsTab('ai')" title="AI Copilot Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </button>
+                <button type="button" id="settings-tab-btn-ai-usage" onclick="switchSettingsTab('ai-usage')" title="AI Usage & Accounts" aria-label="AI Usage and Accounts" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M19 14V9h-5"/></svg>
+                </button>
                 <button type="button" id="settings-tab-btn-code-merger" onclick="switchSettingsTab('code-merger')" title="Code Merger Settings" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
                 </button>
@@ -3771,8 +3774,13 @@
                             <label for="settings-show-git-commit-hash" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show commit hashes in Git modal</label>
                         </div>
                     </div>
-                    <div style="margin-top:12px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">AI Usage Refresh</div>
+                </div>
+
+                <!-- AI Usage and Account Settings -->
+                <div id="settings-sec-ai-usage" style="display:none;margin-bottom:14px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
+                    <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">AI Usage &amp; Accounts</div>
+                    <div style="padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">Usage Refresh</div>
                         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                             <label for="settings-codex-limit-auto-refresh" style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-primary);cursor:pointer;">
                                 <input type="checkbox" id="settings-codex-limit-auto-refresh" onchange="syncCodexLimitAutoRefreshSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:0;">
@@ -3780,14 +3788,24 @@
                             </label>
                             <label for="settings-codex-limit-refresh-interval" style="font-size:.76rem;color:var(--text-secondary);">Every</label>
                             <select id="settings-codex-limit-refresh-interval" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
-                                <option value="1">1 minute</option>
-                                <option value="2">2 minutes</option>
-                                <option value="5">5 minutes</option>
-                                <option value="10">10 minutes</option>
-                                <option value="15">15 minutes</option>
+                                <option value="1">1 minute</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option>
                             </select>
                         </div>
                         <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">Automatic refresh defaults to every 5 minutes while this app is open. Turn it off to use on-start/manual refresh with the two-minute cache.</div>
+                    </div>
+                    <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:7px;text-transform:uppercase;letter-spacing:.4px;">Codex Usage Accounts</div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+                            <label for="settings-codex-usage-account" style="font-size:.76rem;color:var(--text-secondary);">Show quota for</label>
+                            <select id="settings-codex-usage-account" onchange="selectCodexUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
+                        </div>
+                        <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:7px;margin-top:8px;">
+                            <input id="settings-codex-account-name" type="text" maxlength="40" placeholder="Account name" aria-label="Codex account name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                            <input id="settings-codex-account-home" type="text" placeholder="Codex profile folder, e.g. C:\Users\you\.codex-work" aria-label="Codex profile folder path" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                            <button type="button" id="settings-codex-account-add" onclick="addCodexUsageAccount()" style="padding:4px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.76rem;cursor:pointer;">Add account</button>
+                        </div>
+                        <div id="settings-codex-account-help" style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">In PowerShell, sign into a second profile with <code>$env:CODEX_HOME = 'C:\Users\you\.codex-work'; codex login</code>, then add that same folder here. This only reads its quota; it does not change your normal CLI login.</div>
+                        <div id="settings-codex-account-list" data-testid="codex-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
                     </div>
                 </div>
 
@@ -6148,6 +6166,74 @@
 
         let agentSavedSessions = [];
         let codexLimitsAutoRefreshIntervalId = null;
+        let codexUsageAccounts = [];
+
+        function getSelectedCodexUsageAccount() {
+            return localStorage.getItem('codex-usage-account') || '';
+        }
+
+        async function loadCodexUsageAccounts() {
+            const response = await fetch('/api/codex/accounts');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not load Codex accounts.');
+            codexUsageAccounts = Array.isArray(data.accounts) ? data.accounts : [];
+            const select = document.getElementById('settings-codex-usage-account');
+            if (select) {
+                const selected = getSelectedCodexUsageAccount();
+                select.innerHTML = '<option value="">Default (current CLI login)</option>' + codexUsageAccounts.map(account =>
+                    `<option value="${escapeHtml(account.id)}">${escapeHtml(account.name)}</option>`
+                ).join('');
+                select.value = codexUsageAccounts.some(account => account.id === selected) ? selected : '';
+                if (selected && !select.value) localStorage.removeItem('codex-usage-account');
+            }
+            const list = document.getElementById('settings-codex-account-list');
+            if (list) list.innerHTML = codexUsageAccounts.length ? codexUsageAccounts.map(account =>
+                `<div data-testid="codex-usage-account" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;font-size:.72rem;min-width:0;">
+                    <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(account.codexHome)}"><strong>${escapeHtml(account.name)}</strong><span style="color:var(--text-muted);"> · ${escapeHtml(account.codexHome)}</span></span>
+                    <button type="button" aria-label="Remove ${escapeHtml(account.name)}" onclick="removeCodexUsageAccount('${escapeHtml(account.id)}')" style="flex:none;padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;">Remove</button>
+                </div>`
+            ).join('') : '<div style="font-size:.68rem;color:var(--text-muted);">No additional Codex profiles added.</div>';
+        }
+
+        function selectCodexUsageAccount(accountId) {
+            if (accountId) localStorage.setItem('codex-usage-account', accountId);
+            else localStorage.removeItem('codex-usage-account');
+            loadCodexLimits(true);
+        }
+
+        async function addCodexUsageAccount() {
+            const nameInput = document.getElementById('settings-codex-account-name');
+            const homeInput = document.getElementById('settings-codex-account-home');
+            const name = nameInput?.value.trim();
+            const codexHome = homeInput?.value.trim();
+            try {
+                const response = await fetch('/api/codex/accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, codexHome }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not add Codex account.');
+                if (nameInput) nameInput.value = '';
+                if (homeInput) homeInput.value = '';
+                localStorage.setItem('codex-usage-account', data.account.id);
+                await loadCodexUsageAccounts();
+                loadCodexLimits(true);
+            } catch (error) {
+                alert(String(error.message || error));
+            }
+        }
+
+        async function removeCodexUsageAccount(accountId) {
+            const account = codexUsageAccounts.find(item => item.id === accountId);
+            if (!account) return;
+            try {
+                const response = await fetch('/api/codex/accounts', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not remove Codex profile.');
+                if (getSelectedCodexUsageAccount() === accountId) localStorage.removeItem('codex-usage-account');
+                await loadCodexUsageAccounts();
+                loadCodexLimits(true);
+            } catch (error) {
+                alert(String(error.message || error));
+            }
+        }
 
         async function openAgentSessionPicker() {
             if (!activeProject) {
@@ -6217,7 +6303,11 @@
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('codex', 13, 'monitor-codex-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const response = await fetch(`/api/codex/limits${forceRefresh ? '?refresh=true' : ''}`);
+                const query = new URLSearchParams();
+                if (forceRefresh) query.set('refresh', 'true');
+                const accountId = getSelectedCodexUsageAccount();
+                if (accountId) query.set('accountId', accountId);
+                const response = await fetch(`/api/codex/limits${query.size ? `?${query}` : ''}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not read Codex limits.');
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
@@ -6233,8 +6323,9 @@
                     const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
                     return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
                 }).join(' | ');
-                button.title = `Codex · ${plan}${details} · Click to refresh`;
-                button.setAttribute('aria-label', `Codex quota: ${primary.leftPercent}% remaining. Click to refresh.`);
+                const accountName = data.accountName && data.accountName !== 'Default' ? `${data.accountName} · ` : '';
+                button.title = `Codex · ${accountName}${plan}${details} · Click to refresh`;
+                button.setAttribute('aria-label', `Codex ${accountName}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 button.title = `Could not read Codex quota: ${String(error.message || error)}`;
@@ -6279,7 +6370,7 @@
             }
         }
 
-        loadCodexLimits(false);
+        loadCodexUsageAccounts().then(() => loadCodexLimits(false)).catch(() => loadCodexLimits(false));
         loadKiroUsage(false);
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
@@ -10044,7 +10135,7 @@
         }
 
         function switchSettingsTab(tabName) {
-            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'code-merger', 'badge'];
+            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge'];
             tabs.forEach(t => {
                 const el = document.getElementById(`settings-sec-${t}`);
                 if (el) el.style.display = t === tabName ? 'block' : 'none';
@@ -10065,6 +10156,7 @@
         }
 
         function openSettingsModal() {
+            loadCodexUsageAccounts().catch(() => {});
             const rcloneFg = localStorage.getItem('rclone-button-fg') || '#60a5fa';
             const rcloneBg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
             document.getElementById('settings-rclone-color-fg').value = rcloneFg;

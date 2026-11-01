@@ -7,6 +7,11 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Multiple Codex Usage Profiles** (`app.py`, `templates/index.html`):
+    * Added named Codex profiles by folder path in Settings → AI Usage & Accounts.
+    * The usage query sets `CODEX_HOME` only on its isolated app-server subprocess; it does not switch the normal terminal login.
+    * Profile names and paths are stored in `tui_config.json`; CLI credentials stay in their local profile directories.
+
 * **[2026-11-01] Codex and Kiro Subscription Quotas** (`app.py`, `templates/index.html`):
     * Compact Codex and Kiro badges occupy the pane-count position and show remaining percentage; click either badge to refresh it and hover for plan, credit, and reset details.
     * Codex uses app-server JSON-RPC; Kiro uses the CLI's non-interactive `/usage` command. Both cache for two minutes and share the configurable 1/2/5/10/15-minute automatic refresh (default 5 minutes while visible).

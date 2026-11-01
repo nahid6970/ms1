@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Multiple Codex Usage Profiles
+
+- Added named Codex profile folders in Settings → AI Usage & Accounts.
+- The selected profile is queried by setting `CODEX_HOME` only for the short-lived app-server process; terminal sessions continue using their existing environment and login.
+- Profile names and folder paths are saved in `tui_config.json`; authentication files remain in the user's profile folders and are never returned to the browser.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `recent.md`
+
 ## [2026-11-01] - Show Codex and Kiro Subscription Quota
 
 - Replaced the pane count in the subprocess monitor with compact Codex and Kiro badges; each shows the remaining percentage and can be clicked to refresh.

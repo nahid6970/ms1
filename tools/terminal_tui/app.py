@@ -1511,12 +1511,12 @@ def _agent_session_roots(profile_home, project_path):
 
 
 _CODEX_LIMITS_CACHE_LOCK = threading.Lock()
-_CODEX_LIMITS_CACHE = {'fetched_at': 0.0, 'data': None}
+_CODEX_LIMITS_CACHE = {}
 _KIRO_USAGE_CACHE_LOCK = threading.Lock()
 _KIRO_USAGE_CACHE = {'fetched_at': 0.0, 'data': None}
 
 
-def _codex_app_server_request(method, request_id, params=None, timeout=15):
+def _codex_app_server_request(method, request_id, params=None, timeout=15, codex_home=None):
     """Send one JSON-RPC request to a short-lived local Codex app-server process."""
     codex_executable = shutil.which('codex')
     if not codex_executable:
@@ -1528,9 +1528,12 @@ def _codex_app_server_request(method, request_id, params=None, timeout=15):
     else:
         command = [codex_executable, 'app-server', '--listen', 'stdio://']
 
+    process_env = os.environ.copy()
+    if codex_home:
+        process_env['CODEX_HOME'] = codex_home
     process = subprocess.Popen(
         command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, encoding='utf-8', errors='replace', bufsize=1,
+        text=True, encoding='utf-8', errors='replace', bufsize=1, env=process_env,
     )
     lines = queue.Queue()
 
@@ -1588,8 +1591,8 @@ def _codex_app_server_request(method, request_id, params=None, timeout=15):
                 pass
 
 
-def _read_codex_rate_limits():
-    response = _codex_app_server_request('account/rateLimits/read', 2)
+def _read_codex_rate_limits(codex_home=None):
+    response = _codex_app_server_request('account/rateLimits/read', 2, codex_home=codex_home)
     limits = response.get('rateLimits') or {}
     if not limits:
         by_limit_id = response.get('rateLimitsByLimitId') or {}
@@ -1632,23 +1635,72 @@ def _read_codex_rate_limits():
     }
 
 
+def _codex_usage_accounts():
+    accounts = get_config_val('codex_usage_accounts', list)
+    return [account for account in accounts if isinstance(account, dict)
+            and re.fullmatch(r'[a-f0-9]{32}', str(account.get('id') or ''))
+            and str(account.get('name') or '').strip()
+            and os.path.isdir(os.path.expandvars(os.path.expanduser(str(account.get('codexHome') or ''))))]
+
+
+@app.route('/api/codex/accounts', methods=['GET', 'POST', 'DELETE'])
+def api_codex_accounts():
+    """Manage named Codex CLI profile paths used only for quota reads."""
+    accounts = _codex_usage_accounts()
+    if request.method == 'GET':
+        return jsonify({'accounts': accounts})
+
+    if request.method == 'POST':
+        payload = request.get_json(silent=True) or {}
+        name = str(payload.get('name') or '').strip()[:40]
+        raw_codex_home = str(payload.get('codexHome') or '').strip()
+        if not name or not raw_codex_home:
+            return jsonify({'error': 'Enter a name and an existing Codex profile folder.'}), 400
+        codex_home = os.path.abspath(os.path.expandvars(os.path.expanduser(raw_codex_home)))
+        if not os.path.isdir(codex_home):
+            return jsonify({'error': 'That Codex profile folder does not exist.'}), 400
+        if any(os.path.normcase(os.path.realpath(account['codexHome'])) == os.path.normcase(os.path.realpath(codex_home)) for account in accounts):
+            return jsonify({'error': 'That Codex profile folder is already added.'}), 409
+        account = {'id': uuid.uuid4().hex, 'name': name, 'codexHome': codex_home}
+        accounts.append(account)
+        set_config_val('codex_usage_accounts', accounts)
+        return jsonify({'account': account}), 201
+
+    payload = request.get_json(silent=True) or {}
+    account_id = str(payload.get('id') or '')
+    kept_accounts = [account for account in accounts if account.get('id') != account_id]
+    if len(kept_accounts) == len(accounts):
+        return jsonify({'error': 'Codex profile not found.'}), 404
+    set_config_val('codex_usage_accounts', kept_accounts)
+    with _CODEX_LIMITS_CACHE_LOCK:
+        _CODEX_LIMITS_CACHE.pop(account_id, None)
+    return jsonify({'success': True})
+
+
 @app.route('/api/codex/limits', methods=['GET'])
 def api_codex_limits():
-    """Return subscription limits reported by the signed-in local Codex CLI."""
+    """Return subscription limits for the default CLI login or a saved profile."""
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    account_id = str(request.args.get('accountId') or '')
+    account = next((item for item in _codex_usage_accounts() if item['id'] == account_id), None) if account_id else None
+    if account_id and account is None:
+        return jsonify({'available': False, 'windows': [], 'error': 'Codex profile not found.'}), 404
+    codex_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['codexHome']))) if account else None
+    cache_key = account_id or 'default'
     now = time.monotonic()
     with _CODEX_LIMITS_CACHE_LOCK:
-        cached = _CODEX_LIMITS_CACHE['data']
-        if not force_refresh and cached is not None and now - _CODEX_LIMITS_CACHE['fetched_at'] < 120:
-            return jsonify(cached)
+        cached = _CODEX_LIMITS_CACHE.get(cache_key)
+        if not force_refresh and cached and now - cached['fetched_at'] < 120:
+            return jsonify(cached['data'])
 
     try:
-        data = _read_codex_rate_limits()
+        data = _read_codex_rate_limits(codex_home)
     except (OSError, RuntimeError, TimeoutError, ValueError, TypeError) as exc:
         data = {'available': False, 'windows': [], 'error': str(exc), 'fetchedAt': int(time.time())}
+    data['accountName'] = account['name'] if account else 'Default'
 
     with _CODEX_LIMITS_CACHE_LOCK:
-        _CODEX_LIMITS_CACHE.update({'fetched_at': time.monotonic(), 'data': data})
+        _CODEX_LIMITS_CACHE[cache_key] = {'fetched_at': time.monotonic(), 'data': data}
     return jsonify(data)
 
 
