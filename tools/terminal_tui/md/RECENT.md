@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Apply Selected Codex Account to New Terminals
+
+- Pass the selected Codex profile into terminal creation and set `CODEX_HOME` in the new PowerShell session's project profile.
+- Apply the selected profile during restored pane creation as well as newly created terminal sessions; existing live shells retain their current account.
+- Clarify the selection behavior in AI Usage & Accounts settings.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`, `recent.md`
+
 ## [2026-11-01] - Expose AI Usage Timing Controls
 
 - Added independent controls for automatic polling, browser snapshot reuse, and server-side CLI result caching in AI Usage & Accounts settings.

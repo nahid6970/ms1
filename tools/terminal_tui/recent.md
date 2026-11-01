@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Apply Selected Codex Account to New Terminals** (`app.py`, `templates/index.html`):
+    * Newly created terminal shells receive the selected saved profile through `CODEX_HOME`, including sessions created while restoring workspace tabs.
+    * Existing live terminal sessions keep their current account; settings explain this behavior.
+
 * **[2026-11-01] Expose AI Usage Timing Controls** (`app.py`, `templates/index.html`):
     * Added separate settings for scheduled refresh, browser result reuse, and backend CLI-result caching.
     * Added an info popup that describes each interval and what details to provide when debugging refresh behavior.
@@ -21,7 +25,7 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 * **[2026-11-01] Multiple Codex Usage Profiles** (`app.py`, `templates/index.html`):
     * Added named Codex profiles by folder path in Settings → AI Usage & Accounts.
-    * The usage query sets `CODEX_HOME` only on its isolated app-server subprocess; it does not switch the normal terminal login.
+    * Usage queries set `CODEX_HOME` only on their isolated app-server subprocess; terminal sessions use the selected profile when they are created.
     * Profile names and paths are stored in `tui_config.json`; CLI credentials stay in their local profile directories.
 
 * **[2026-11-01] Codex and Kiro Subscription Quotas** (`app.py`, `templates/index.html`):

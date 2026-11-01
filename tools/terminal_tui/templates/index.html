@@ -3960,9 +3960,10 @@
                             </button>
                         </div>
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-                            <label for="settings-codex-usage-account" style="font-size:.76rem;color:var(--text-secondary);">Show quota for</label>
+                            <label for="settings-codex-usage-account" style="font-size:.76rem;color:var(--text-secondary);">Selected account</label>
                             <select id="settings-codex-usage-account" onchange="selectCodexUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
                         </div>
+                        <div style="margin-top:5px;font-size:.68rem;color:var(--text-muted);">The selected account is used for quota checks and newly started terminals. Existing terminal sessions keep their current account.</div>
                         <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:7px;margin-top:8px;">
                             <input id="settings-codex-account-name" type="text" maxlength="40" placeholder="Account name" aria-label="Codex account name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
                             <input id="settings-codex-account-home" type="text" placeholder="Codex profile folder, e.g. C:\Users\you\.codex-work" aria-label="Codex profile folder path" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
@@ -5846,7 +5847,7 @@ codex login</code></pre>
 
             paneSocket.on('connect', () => {
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
-                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir });
+                paneSocket.emit('join-session', { project: projectName, paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() });
                 // Instantly fit and synchronize backend PTY size upon successful connection
                 setTimeout(() => {
                     try {
@@ -10981,7 +10982,7 @@ codex login</code></pre>
                         const response = await fetch(`/api/session/${projectName}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ paneId, useRealDirName: useRealDir })
+                            body: JSON.stringify({ paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() })
                         });
                         if (restoreGeneration !== workspaceRestoreGeneration) return;
                         if (response.ok) {
@@ -10996,7 +10997,7 @@ codex login</code></pre>
                     const fallbackResponse = await fetch(`/api/session/${encodeURIComponent(projectName)}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir })
+                        body: JSON.stringify({ paneId: 'main', useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount() })
                     });
                     if (restoreGeneration !== workspaceRestoreGeneration) return;
                     if (!fallbackResponse.ok) {

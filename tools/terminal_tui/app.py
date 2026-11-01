@@ -380,7 +380,7 @@ def restart_current_process(delay_seconds=1.0):
 
 
 class TerminalSession:
-    def __init__(self, name, path, use_real_dir_name=False):
+    def __init__(self, name, path, use_real_dir_name=False, codex_home=None):
         self._kill_lock = threading.Lock()
         self._killed = False
         self.name = name
@@ -413,6 +413,12 @@ class TerminalSession:
         history_path = os.path.join(project_data_dir, "history.txt").replace("\\", "/")
         
         path_clean = path.replace("/", "\\")
+
+        # An explicitly selected Codex profile applies to this shell only.
+        codex_home_setup = ""
+        if codex_home:
+            codex_home_ps = str(codex_home).replace("'", "''")
+            codex_home_setup = f"$env:CODEX_HOME = '{codex_home_ps}'\n"
         
         if bool(use_real_dir_name):
             prompt_display_name = os.path.basename(os.path.normpath(path))
@@ -424,6 +430,7 @@ class TerminalSession:
 
 # Global project root path
 $global:PROJECT_ROOT_PATH = "{path_clean}"
+{codex_home_setup}
 
 # Terminal color capability declarations so TUI apps (Codex, fzf, etc.) use full color
 $env:TERM = "xterm-256color"
@@ -1643,6 +1650,14 @@ def _codex_usage_accounts():
             and os.path.isdir(os.path.expandvars(os.path.expanduser(str(account.get('codexHome') or ''))))]
 
 
+def _codex_home_for_account_id(account_id):
+    account_id = str(account_id or '')
+    if not account_id:
+        return None
+    account = next((item for item in _codex_usage_accounts() if item['id'] == account_id), None)
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(account['codexHome']))) if account else None
+
+
 @app.route('/api/codex/accounts', methods=['GET', 'POST', 'DELETE'])
 def api_codex_accounts():
     """Manage named Codex CLI profile paths used only for quota reads."""
@@ -2378,6 +2393,9 @@ def api_session(project):
     data = request.get_json(silent=True) or {}
     pane_id = data.get("paneId", "main")
     use_real_dir_name = data.get("useRealDirName", False)
+    codex_home = _codex_home_for_account_id(data.get("codexAccountId"))
+    if data.get("codexAccountId") and not codex_home:
+        return jsonify({"error": "Selected Codex profile was not found."}), 404
     projects = scan_projects()
     proj_details = next((p for p in projects if p["name"] == project), None)
     if not proj_details:
@@ -2386,7 +2404,7 @@ def api_session(project):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name)
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home)
             
     return jsonify({
         "status": "connected",
@@ -5952,6 +5970,11 @@ def ws_join_session(data):
     project = data.get('project')
     pane_id = data.get('paneId', 'main')
     use_real_dir_name = data.get('useRealDirName', False)
+    codex_account_id = data.get('codexAccountId')
+    codex_home = _codex_home_for_account_id(codex_account_id)
+    if codex_account_id and not codex_home:
+        emit('error', {'msg': 'Selected Codex profile was not found.'})
+        return
     if not project:
         emit('error', {'msg': 'Project name required'})
         return
@@ -5965,7 +5988,7 @@ def ws_join_session(data):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name)
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home)
         session = active_sessions[session_key]
         session.add_sid(request.sid)
         
