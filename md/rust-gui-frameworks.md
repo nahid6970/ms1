@@ -100,6 +100,90 @@ A Tauri maintainer has documented a workaround for a default app that lacked a r
 - For Tauri, use the **project-local MSVC strategy** above. This avoids changing the global GNU default while matching Tauri's documented Windows setup.
 - Use the GNU workaround only when you have a specific reason to keep every build tool on GNU and are willing to troubleshoot unsupported cases.
 
+## Tauri Windows troubleshooting notes from the Tempo project
+
+These fixes came from a specific Tauri 2 + Vite + Rust project on Windows. Treat the GNU toolchain steps as an environment-specific workaround, not a replacement for Tauri's documented MSVC recommendation above.
+
+### Run Tauri commands from the right directory
+
+For a Tauri project with `package.json` at the project root and Rust code under `src-tauri`, run the desktop app from the project root:
+
+```powershell
+npm run tauri dev
+```
+
+Running `cargo run` at the project root produces `could not find Cargo.toml`. If you specifically want to run Cargo directly, first change to `src-tauri`:
+
+```powershell
+Set-Location .\src-tauri
+cargo run
+```
+
+### If dll-syringe requires nightly but Visual Studio Build Tools are unavailable
+
+In this project, `dll-syringe` 0.18.2 enables Rust nightly-only features. Stable Rust reports `E0554: #![feature] may not be used on the stable release channel`. The crate source includes feature gates for `linked_list_cursors` and `once_cell_try` when the `syringe` feature is enabled. [dll-syringe 0.18.2 source](https://docs.rs/crate/dll-syringe/0.18.2/source/src/lib.rs)
+
+The machine already had MinGW-w64, so the project used an explicitly GNU-hosted nightly toolchain instead of MSVC. A bare `nightly` on Windows can select the MSVC host, which then fails with `link.exe not found`. Install the GNU-hosted toolchain from PowerShell:
+
+```powershell
+rustup toolchain install nightly-x86_64-pc-windows-gnu --profile minimal
+```
+
+For a project-specific pin, add `rust-toolchain.toml` at the project root:
+
+```toml
+[toolchain]
+channel = "nightly-x86_64-pc-windows-gnu"
+profile = "minimal"
+```
+
+Confirm which compiler Cargo is using with:
+
+```powershell
+rustup show active-toolchain
+rustc -vV
+where.exe x86_64-w64-mingw32-gcc
+```
+
+The `host:` line from `rustc -vV` should end in `windows-gnu` for this path, and MinGW's GCC linker must be on `PATH`. If MinGW is not installed or the project needs MSVC-only libraries, use the MSVC setup described above instead.
+
+### Build and watcher errors seen in the project
+
+| Error or warning | Cause and fix |
+|---|---|
+| `src-tauri/icons/icon.ico not found` | The icon configured for the Windows resource is missing. Add a valid `.ico` at the configured path (or correct the config path). |
+| Vite `EBUSY` while watching `src-tauri/target/...dll` | Vite was watching Cargo's build output. Ignore `**/src-tauri/target/**` under `server.watch.ignored` in `vite.config.js`. |
+| `no method named to_string_lossy` on `process.name()` | With the `sysinfo` version in this project, `process.name()` already returns `&str`. Use `process.name().trim().to_owned()`; keep `to_string_lossy()` for filesystem paths such as `process.exe()`. |
+| `windows_sys::Win32::Foundation::BOOL` does not exist | For this windows-sys version, define the Win32 return type locally as `type BOOL = i32;`. Win32 `BOOL` is a signed 32-bit integer. |
+| MinGW linker reports `export ordinal too large` while building the Tauri app library | Keep the Tauri library crate types as `staticlib` and `rlib`. Use `cdylib` for the separate injected DLL crate, not the Tauri app library. |
+| Cargo warns that the speed-hook dependency is unused | If the app depends on the hook crate specifically so Cargo emits its DLL artifact, `use tempo_speed_hook as _;` makes that intentional dependency explicit. Confirm that the DLL appears in the build output. |
+
+### Global shortcuts in fullscreen games
+
+Tauri's global-shortcut plugin can miss shortcuts in some fullscreen games. This has also been reported in the Tauri project for games using certain fullscreen/input paths. [Tauri issue #7318](https://github.com/tauri-apps/tauri/issues/7318)
+
+For the Tempo project, the workaround was to poll only the requested key combinations using Windows `GetAsyncKeyState`, detect key-down edges, and send Tauri events to the frontend. Microsoft's API documentation says the high-order bit indicates that a key is currently down; access can still return zero in some desktop or privilege-isolation situations. [Microsoft GetAsyncKeyState documentation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate)
+
+This polling approach does not consume or suppress the keypress, so the game can receive the same shortcut too. Avoid shortcuts that the game already uses, and keep input hooks/shortcuts limited to offline single-player use. If a selected game is elevated, run the controller at the same privilege level; do not elevate it to get around anti-cheat or other game protections.
+
+### Keep the Tauri app library and injected DLL separate
+
+When a project builds an injectable native adapter as well as a Tauri app, give them separate Cargo crates and crate types:
+
+```toml
+# src-tauri/Cargo.toml
+[lib]
+crate-type = ["staticlib", "rlib"]
+```
+
+```toml
+# speed-hook/Cargo.toml
+[lib]
+crate-type = ["cdylib", "rlib"]
+```
+
+This avoids making the main Tauri app library a Windows DLL just to produce the separate hook DLL.
+
 ### Result from the RustBuildCheck demo
 
 The simple Tauri demo in `C:\Users\nahid\Desktop\RustBuildCheck` was reported to build and launch successfully with the active `x86_64-pc-windows-gnu` toolchain. Its first build stopped because `icons/icon.ico` was missing; after adding the icon, the app ran. Since Tauri renders the HTML/CSS/JavaScript frontend in WebView2, this also confirms WebView2 worked for this demo on this machine.
