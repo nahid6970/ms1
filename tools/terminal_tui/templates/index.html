@@ -1238,6 +1238,17 @@
             padding: 12px 0 2px !important;
             background: var(--bg-sidebar);
         }
+        .settings-usage-cache-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 9px;
+            border-top: 1px solid var(--border-color);
+        }
+        .settings-usage-cache-control { display:flex; align-items:center; gap:8px; min-width:0; }
+        .settings-usage-cache-control label { flex:none; white-space:nowrap; font-size:.76rem; color:var(--text-secondary); }
+        .settings-usage-cache-control select { flex:1; min-width:0; width:100%; }
 
         @media (max-width: 680px) {
             #settings-modal .settings-dialog { width: 96vw !important; height: 92vh; padding: 14px !important; }
@@ -1256,6 +1267,9 @@
             }
             #settings-navigation .settings-nav-item { width: auto !important; min-width: max-content; }
             #settings-form { padding-right: 2px; }
+        }
+        @media (max-width: 600px) {
+            .settings-usage-cache-controls { grid-template-columns:minmax(0,1fr); }
         }
 
         .modal-overlay.show .modal-content {
@@ -3923,15 +3937,19 @@
                             </select>
                         </div>
                         <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">Automatic refresh defaults to every 5 minutes while this app is open. The browser reuse and server CLI cache intervals below are configured independently.</div>
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:9px;border-top:1px solid var(--border-color);">
-                            <label for="settings-ai-usage-browser-cache" style="font-size:.76rem;color:var(--text-secondary);">Reuse last reading for</label>
-                            <select id="settings-ai-usage-browser-cache" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                        <div class="settings-usage-cache-controls" data-testid="usage-cache-controls">
+                            <div class="settings-usage-cache-control">
+                                <label for="settings-ai-usage-browser-cache">Reuse last reading for</label>
+                                <select id="settings-ai-usage-browser-cache" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
                                 <option value="0">Every time (no browser cache)</option><option value="1">1 minute</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option>
-                            </select>
-                            <label for="settings-ai-usage-server-cache" style="font-size:.76rem;color:var(--text-secondary);">Server CLI cache</label>
-                            <select id="settings-ai-usage-server-cache" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                                </select>
+                            </div>
+                            <div class="settings-usage-cache-control">
+                                <label for="settings-ai-usage-server-cache">Server CLI cache</label>
+                                <select id="settings-ai-usage-server-cache" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
                                 <option value="0">Off</option><option value="30">30 seconds</option><option value="60">1 minute</option><option value="120">2 minutes</option><option value="300">5 minutes</option>
-                            </select>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
