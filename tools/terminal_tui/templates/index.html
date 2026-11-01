@@ -19426,11 +19426,17 @@ Always wrap your **entire response** in a single markdown code block.`;
         });
 
         // ── Mobile keyboard viewport fix ────────────────────────────────────────
-        // When the mobile keyboard opens, browsers shrink the viewport which
-        // causes the top header and bottom status bar to scroll off screen.
-        // This keeps the app locked to the actual visible area.
+        // When the mobile keyboard opens on mobile devices, browsers shrink the viewport.
         if (window.visualViewport) {
             const applyViewportFix = () => {
+                if (window.innerWidth > 768) {
+                    document.body.style.position = '';
+                    document.body.style.width = '';
+                    document.body.style.height = '';
+                    document.body.style.top = '';
+                    document.body.style.left = '';
+                    return;
+                }
                 const vv = window.visualViewport;
                 document.body.style.height = vv.height + 'px';
                 document.body.style.top = vv.offsetTop + 'px';
@@ -19440,6 +19446,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             };
             window.visualViewport.addEventListener('resize', applyViewportFix);
             window.visualViewport.addEventListener('scroll', applyViewportFix);
+            applyViewportFix();
         }
 
         // ── Active Ports Monitor ──────────────────────────────────────────────
