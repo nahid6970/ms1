@@ -1650,6 +1650,12 @@
         "main"
       ],
       "activePaneId": "main"
+    },
+    "Gemini CLI": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
     }
   }
 }
