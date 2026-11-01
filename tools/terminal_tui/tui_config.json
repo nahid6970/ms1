@@ -234,6 +234,28 @@
       "bookmarks": []
     },
     {
+      "name": "Speed-Hack",
+      "path": "D:\\speed",
+      "category": "gaming",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/speed-hack"
+    },
+    {
       "name": "Code Merger",
       "path": "C:\\@delta\\ms1\\tools\\code_merger",
       "category": "Tool",
@@ -1260,28 +1282,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
-    },
-    {
-      "name": "Speed-Hack",
-      "path": "D:\\speed",
-      "category": "gaming",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "gitRemote": "https://github.com/nahid6970/speed-hack"
     }
   ],
   "extension_icons": {
@@ -1719,6 +1719,20 @@
         "pane-1793547130248-4"
       ],
       "activePaneId": "pane-1793547130248-4"
+    },
+    "MS1": {
+      "paneIds": [
+        "main",
+        "pane-1793550969476-1",
+        "pane-1793551018505-2"
+      ],
+      "activePaneId": "pane-1793551018505-2"
+    },
+    "Speed-Hack": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
     }
   },
   "codex_usage_accounts": [
@@ -1727,5 +1741,6 @@
       "name": "nahid6970",
       "codexHome": "C:\\Users\\nahid\\.codex-00"
     }
-  ]
+  ],
+  "kiro_usage_accounts": []
 }

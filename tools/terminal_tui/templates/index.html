@@ -4148,21 +4148,20 @@ codex login</code></pre>
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;">
                 <div>
                     <h2 id="kiro-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Add another Kiro account</h2>
-                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Sign in to a separate Kiro home, then add that folder here.</div>
+                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Kiro profile folders separate CLI state. Verify the signed-in identity before using one as another account.</div>
                 </div>
                 <button type="button" id="kiro-account-help-close" onclick="closeKiroAccountHelp()" aria-label="Close instructions" style="width:28px;height:28px;flex:none;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:1.1rem;cursor:pointer;">×</button>
             </div>
             <ol style="margin:0;padding-left:22px;display:grid;gap:11px;color:var(--text-secondary);font-size:.78rem;line-height:1.5;">
-                <li>Open PowerShell. You do <strong style="color:var(--text-primary);">not</strong> need to log out of your usual Kiro account.</li>
-                <li>Set and create a separate profile folder, then start login:
+                <li>Open PowerShell and set a separate profile folder:
                     <pre id="kiro-account-login-command" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;padding:10px 12px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#c4b5fd;font:.76rem/1.7 Consolas,'Fira Code',monospace;"><code>$env:KIRO_HOME = 'C:\Users\you\.kiro-work'
 New-Item -ItemType Directory -Force $env:KIRO_HOME
-kiro-cli login</code></pre>
+kiro-cli whoami --format json</code></pre>
                 </li>
-                <li>Finish signing into the other account.</li>
-                <li>Back here, enter the same folder path, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
+                <li>Only continue if <code>whoami</code> shows the account you intend to use. If it still shows your usual account or <code>kiro-cli login</code> says “Already logged in,” this CLI setup has not isolated authentication. Stop here; adding the folder would only create a separate state/session profile, not a separately authenticated account.</li>
+                <li>Once the identity is correct, enter the same folder path here, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
             </ol>
-            <div style="margin-top:12px;padding:9px 10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.5;"><strong>Optional:</strong> <code>Remove-Item Env:KIRO_HOME</code> clears the override in that PowerShell window so later commands use the default profile. It does not sign out or delete either account.</div>
+            <div style="margin-top:12px;padding:9px 10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.5;"><strong>Important:</strong> <code>kiro-cli logout</code> clears authentication and affects all workspaces. Do not use it as a profile-switching step unless you intend to sign out everywhere.</div>
         </section>
     </div>
 
