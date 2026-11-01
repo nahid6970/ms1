@@ -1651,11 +1651,9 @@
   "terminal_tabs": {
     "Terminal TUI": {
       "paneIds": [
-        "main",
-        "pane-1793534696412-1",
-        "pane-1793543237025-2"
+        "main"
       ],
-      "activePaneId": "pane-1793543237025-2"
+      "activePaneId": "main"
     },
     "Gemini CLI": {
       "paneIds": [

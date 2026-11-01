@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Expose AI Usage Timing Controls** (`app.py`, `templates/index.html`):
+    * Added separate settings for scheduled refresh, browser result reuse, and backend CLI-result caching.
+    * Added an info popup that describes each interval and what details to provide when debugging refresh behavior.
+
 * **[2026-11-01] Avoid Repeated Usage Checks on App Reopen** (`templates/index.html`):
     * Reuse per-account Codex and Kiro quota snapshots until the selected refresh interval expires; with auto-refresh off, use a two-minute cache window.
     * Deduplicate overlapping startup/visibility requests. Clicking a badge still forces an immediate query.

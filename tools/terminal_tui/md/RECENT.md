@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Expose AI Usage Timing Controls
+
+- Added independent controls for automatic polling, browser snapshot reuse, and server-side CLI result caching in AI Usage & Accounts settings.
+- Added an info popup describing when each interval applies and what to report when debugging quota refresh behavior.
+- Pass the configured backend cache interval to Codex and Kiro usage endpoints; a zero value disables server-side reuse.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`, `recent.md`
+
 ## [2026-11-01] - Avoid Repeated Usage Checks on App Reopen
 
 - Cache successful Codex and Kiro quota results in browser storage and reuse them for the configured refresh interval (or two minutes when automatic refresh is disabled).

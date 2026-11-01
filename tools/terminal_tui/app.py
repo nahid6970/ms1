@@ -1681,6 +1681,10 @@ def api_codex_accounts():
 def api_codex_limits():
     """Return subscription limits for the default CLI login or a saved profile."""
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    try:
+        cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
+    except (TypeError, ValueError):
+        cache_seconds = 120
     account_id = str(request.args.get('accountId') or '')
     account = next((item for item in _codex_usage_accounts() if item['id'] == account_id), None) if account_id else None
     if account_id and account is None:
@@ -1690,7 +1694,7 @@ def api_codex_limits():
     now = time.monotonic()
     with _CODEX_LIMITS_CACHE_LOCK:
         cached = _CODEX_LIMITS_CACHE.get(cache_key)
-        if not force_refresh and cached and now - cached['fetched_at'] < 120:
+        if not force_refresh and cache_seconds and cached and now - cached['fetched_at'] < cache_seconds:
             return jsonify(cached['data'])
 
     try:
@@ -1752,10 +1756,14 @@ def _read_kiro_usage():
 def api_kiro_usage():
     """Return subscription usage reported by the signed-in local Kiro CLI."""
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    try:
+        cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
+    except (TypeError, ValueError):
+        cache_seconds = 120
     now = time.monotonic()
     with _KIRO_USAGE_CACHE_LOCK:
         cached = _KIRO_USAGE_CACHE['data']
-        if not force_refresh and cached is not None and now - _KIRO_USAGE_CACHE['fetched_at'] < 120:
+        if not force_refresh and cache_seconds and cached is not None and now - _KIRO_USAGE_CACHE['fetched_at'] < cache_seconds:
             return jsonify(cached)
 
     try:
