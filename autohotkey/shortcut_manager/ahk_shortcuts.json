@@ -415,6 +415,17 @@
             "run_as_admin": false,
             "enabled": false,
             "favourite": true
+        },
+        {
+            "name": "Game Speed Control",
+            "category": "General",
+            "description": "",
+            "hotkey": "!g",
+            "target_path": "D:\\speed\\src-tauri\\target\\release\\tempo-speed-control.exe",
+            "hide_terminal": true,
+            "run_as_admin": false,
+            "enabled": true,
+            "favourite": true
         }
     ],
     "text_shortcuts": [

@@ -444,6 +444,11 @@
             "kind": "Exe",
             "id": "T3 Code (Beta).exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "tempo-speed-control.exe",
+            "matching_strategy": "Equals"
         }
     ],
     "tray_and_multi_window_applications": [
