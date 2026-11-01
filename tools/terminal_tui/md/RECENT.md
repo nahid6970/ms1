@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-01] - Settings Sidebar Layout
+
+- Replaced the settings icon row with a labeled left sidebar and a scrollable right-hand settings panel.
+- Kept navigation usable on narrow screens by switching it to a horizontally scrollable row.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-01] - Multiple Codex Usage Profiles
 
 - Added named Codex profile folders in Settings → AI Usage & Accounts.
