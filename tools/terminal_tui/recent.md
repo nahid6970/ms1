@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Switch Codex Quota Account from Badge** (`templates/index.html`):
+    * Right-click the Codex badge to choose the default login or a named usage profile; the badge immediately refreshes for that account.
+    * Added a Manage accounts action that opens Settings → AI Usage & Accounts.
+
 * **[2026-11-01] Multiple Codex Usage Profiles** (`app.py`, `templates/index.html`):
     * Added named Codex profiles by folder path in Settings → AI Usage & Accounts.
     * The usage query sets `CODEX_HOME` only on its isolated app-server subprocess; it does not switch the normal terminal login.

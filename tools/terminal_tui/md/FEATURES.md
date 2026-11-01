@@ -198,6 +198,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Git branch, modifications count, insertions/deletions
 - Codex quota percentage and reset details from the local Codex CLI
 - Additional named Codex quota profiles, each mapped to a separate Codex home folder, with the selected profile used only for quota reads
+- Right-click the Codex quota badge to rotate the displayed quota between the default login and saved profiles
 - Kiro included credits remaining and monthly reset date from `kiro-cli /usage`
 - Manual refresh from each provider badge; optional shared 1/2/5/10/15-minute refresh interval
 

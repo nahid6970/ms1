@@ -2053,6 +2053,51 @@
         #monitor-kiro-quota { border-color: rgba(167,139,250,.35); background: rgba(139,92,246,.08); color: #c4b5fd; }
         #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
         #monitor-quota-group { display: inline-flex; align-items: center; gap: 4px; }
+        #codex-usage-account-menu {
+            position: fixed;
+            z-index: 6000;
+            display: none;
+            width: 230px;
+            max-width: calc(100vw - 16px);
+            max-height: min(320px, calc(100vh - 16px));
+            overflow-y: auto;
+            padding: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 12px 32px rgba(0,0,0,.45);
+            color: var(--text-primary);
+            font: 12px/1.35 'Segoe UI', sans-serif;
+        }
+        #codex-usage-account-menu[aria-hidden="false"] { display: block; }
+        #codex-usage-account-menu .codex-usage-menu-heading {
+            padding: 6px 9px 7px;
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+        #codex-usage-account-menu .codex-usage-menu-option,
+        #codex-usage-account-menu .codex-usage-menu-manage {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 9px;
+            border: 0;
+            border-radius: 5px;
+            background: transparent;
+            color: var(--text-primary);
+            text-align: left;
+            font: inherit;
+            cursor: pointer;
+        }
+        #codex-usage-account-menu .codex-usage-menu-option:hover,
+        #codex-usage-account-menu .codex-usage-menu-manage:hover { background: rgba(148,163,184,.13); }
+        #codex-usage-account-menu .codex-usage-menu-option[aria-checked="true"] { background: rgba(16,185,129,.12); color: #6ee7b7; }
+        #codex-usage-account-menu .codex-usage-menu-check { width: 14px; flex:none; color: #34d399; text-align:center; }
+        #codex-usage-account-menu .codex-usage-menu-separator { height:1px; margin:5px 3px; background:var(--border-color); }
         .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -2284,10 +2329,11 @@
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
                     <div id="monitor-quota-group" role="group" aria-label="AI provider quotas" data-testid="quota-indicators">
-                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
+                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" oncontextmenu="openCodexUsageAccountMenu(event)" title="Codex quota — click to refresh; right-click to switch account" aria-label="Codex quota. Click to refresh. Right-click to switch account.">
                             <span id="monitor-codex-icon" aria-hidden="true"></span>
                             <span id="monitor-codex-quota-value">--</span>
                         </button>
+                        <div id="codex-usage-account-menu" role="menu" aria-hidden="true" data-testid="codex-usage-account-menu"></div>
                         <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
                             <span id="monitor-kiro-icon" aria-hidden="true"></span>
                             <span id="monitor-kiro-quota-value">--</span>
@@ -6308,8 +6354,87 @@ codex login</code></pre>
         function selectCodexUsageAccount(accountId) {
             if (accountId) localStorage.setItem('codex-usage-account', accountId);
             else localStorage.removeItem('codex-usage-account');
+            const settingsSelect = document.getElementById('settings-codex-usage-account');
+            if (settingsSelect) settingsSelect.value = accountId || '';
+            closeCodexUsageAccountMenu();
             loadCodexLimits(true);
         }
+
+        async function openCodexUsageAccountMenu(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const menu = document.getElementById('codex-usage-account-menu');
+            if (!menu) return;
+            try { await loadCodexUsageAccounts(); } catch (_) { /* Existing accounts remain usable from the cached list. */ }
+            const selectedId = getSelectedCodexUsageAccount();
+            menu.replaceChildren();
+
+            const heading = document.createElement('div');
+            heading.className = 'codex-usage-menu-heading';
+            heading.textContent = 'Show Codex quota for';
+            menu.appendChild(heading);
+
+            const options = [{ id: '', name: 'Default (current CLI login)' }, ...codexUsageAccounts];
+            options.forEach((account, index) => {
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.id = `codex-usage-account-option-${account.id || 'default'}`;
+                option.className = 'codex-usage-menu-option';
+                option.dataset.testid = 'codex-usage-account-option';
+                option.setAttribute('role', 'menuitemradio');
+                option.setAttribute('aria-checked', account.id === selectedId ? 'true' : 'false');
+                const check = document.createElement('span');
+                check.className = 'codex-usage-menu-check';
+                check.setAttribute('aria-hidden', 'true');
+                check.textContent = account.id === selectedId ? '✓' : '';
+                const label = document.createElement('span');
+                label.textContent = account.name;
+                option.append(check, label);
+                option.addEventListener('click', () => selectCodexUsageAccount(account.id));
+                menu.appendChild(option);
+                if (index === 0 && codexUsageAccounts.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.textContent = 'Add other profiles in AI Usage & Accounts settings.';
+                    empty.style.cssText = 'padding:2px 9px 7px 31px;color:var(--text-muted);font-size:11px;';
+                    menu.appendChild(empty);
+                }
+            });
+
+            const separator = document.createElement('div');
+            separator.className = 'codex-usage-menu-separator';
+            menu.appendChild(separator);
+            const manage = document.createElement('button');
+            manage.type = 'button';
+            manage.id = 'codex-usage-account-manage';
+            manage.className = 'codex-usage-menu-manage';
+            manage.dataset.testid = 'codex-usage-account-manage';
+            manage.textContent = 'Manage accounts…';
+            manage.addEventListener('click', () => {
+                closeCodexUsageAccountMenu();
+                openSettingsModal();
+                switchSettingsTab('ai-usage');
+            });
+            menu.appendChild(manage);
+
+            menu.setAttribute('aria-hidden', 'false');
+            const bounds = menu.getBoundingClientRect();
+            const left = Math.max(8, Math.min(event.clientX, window.innerWidth - bounds.width - 8));
+            let top = event.clientY + 6;
+            if (top + bounds.height > window.innerHeight - 8) top = event.clientY - bounds.height - 6;
+            top = Math.max(8, Math.min(top, window.innerHeight - bounds.height - 8));
+            menu.style.left = `${left}px`;
+            menu.style.top = `${top}px`;
+        }
+
+        function closeCodexUsageAccountMenu() {
+            const menu = document.getElementById('codex-usage-account-menu');
+            if (menu) menu.setAttribute('aria-hidden', 'true');
+        }
+
+        document.addEventListener('pointerdown', event => {
+            const menu = document.getElementById('codex-usage-account-menu');
+            if (menu && menu.getAttribute('aria-hidden') === 'false' && !menu.contains(event.target)) closeCodexUsageAccountMenu();
+        });
 
         async function addCodexUsageAccount() {
             const nameInput = document.getElementById('settings-codex-account-name');
@@ -13675,6 +13800,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const codexAccountMenu = document.getElementById('codex-usage-account-menu');
+                if (codexAccountMenu && codexAccountMenu.getAttribute('aria-hidden') === 'false') { closeCodexUsageAccountMenu(); return; }
                 const codexAccountHelp = document.getElementById('codex-account-help-modal');
                 if (codexAccountHelp && codexAccountHelp.classList.contains('show')) { closeCodexAccountHelp(); return; }
                 const gitIgnorePreview = document.getElementById('gitignore-ai-preview-modal');
