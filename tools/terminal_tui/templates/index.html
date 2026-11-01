@@ -6161,15 +6161,16 @@
             const openT3Button = document.createElement('button');
             openT3Button.type = 'button';
             openT3Button.id = 'agent-session-open-t3code';
+            openT3Button.className = 'agent-session-open-t3code';
             openT3Button.dataset.testid = 'open-project-in-t3code';
             openT3Button.title = 'Open this workspace in T3 Code';
             openT3Button.setAttribute('aria-label', openT3Button.title);
-            openT3Button.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #303030;border-radius:6px;background:#111;color:#c4b5fd;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:-.4px;';
+            openT3Button.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid var(--accent-color);border-radius:6px;background:var(--accent-color);color:#fff;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:-.4px;';
             openT3Button.textContent = 'T3';
-            openT3Button.onmouseenter = () => { openT3Button.style.borderColor = '#7c3aed'; openT3Button.style.background = '#191323'; };
-            openT3Button.onmouseleave = () => { openT3Button.style.borderColor = '#303030'; openT3Button.style.background = '#111'; };
+            openT3Button.onmouseenter = () => { openT3Button.style.filter = 'brightness(1.16)'; };
+            openT3Button.onmouseleave = () => { openT3Button.style.filter = 'none'; };
             openT3Button.onclick = () => openProjectInT3Code(activeProject);
-            container.appendChild(openT3Button);
+            container.prepend(openT3Button);
         }
 
         function agentSessionIconMarkup(agent, size, iconId) {
