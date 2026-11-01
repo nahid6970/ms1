@@ -7,6 +7,10 @@ A Flask/Socket.IO-based terminal TUI using Xterm.js for multi-pane workspace man
 
 # Latest Implementation
 
+* **[2026-11-01] Open Workspace in T3 Code** (`app.py`, `templates/index.html`):
+    * Added a `T3` button beside the agent launch icons in the saved-session picker header. It opens the active workspace.
+    * The backend looks up the registered project folder and runs `t3 app <path>` using the installed T3 Code CLI. It returns a clear message if the folder or CLI is missing.
+
 * **[2026-10-12] Workspace Bar** (`templates/index.html`):
     * Slim `#workspace-bar` (34px, `#080c14`) sits between the toolbar and `#terminal-parent` inside `.terminal-container-wrapper`.
     * Shows only running workspaces (`p.is_active`) as chips with colored dot (uses `cardTheme.accentColor`). Active chip is highlighted in blue.

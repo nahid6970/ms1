@@ -10,6 +10,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `templates/index.html`, `recent.md`, `md/RECENT.md`
 
+## [2026-11-01] - Open Active Workspace in T3 Code
+
+- Added a T3 button beside the agent launch buttons in the saved-session picker header; it opens the active workspace in T3 Code.
+- The backend resolves a saved workspace name to its registered folder and launches `t3 app <path>`; clear errors appear if the folder or T3 CLI is unavailable.
+- The button exposes `data-testid="open-project-in-t3code"` for stable UI targeting.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`, `recent.md`
+
 ## [2026-10-31] - Show Session Token Estimates
 
 - Added an approximate token badge next to each session ID below the row action buttons.

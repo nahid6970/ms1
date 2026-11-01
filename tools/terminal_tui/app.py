@@ -5325,6 +5325,43 @@ def api_open_explorer():
     subprocess.Popen(['explorer.exe', os.path.normpath(path)])
     return jsonify({"status": "ok"})
 
+
+@app.route('/api/open-t3code', methods=['POST'])
+def api_open_t3code():
+    data = request.json or {}
+    project_name = data.get('project')
+    if not isinstance(project_name, str) or not project_name.strip():
+        return jsonify({"error": "A workspace name is required."}), 400
+
+    project = next(
+        (item for item in load_projects_config() if item.get('name') == project_name),
+        None,
+    )
+    if not project:
+        return jsonify({"error": "Workspace not found."}), 404
+
+    path = project.get('path')
+    if not isinstance(path, str) or not os.path.isdir(path):
+        return jsonify({"error": "The workspace folder does not exist."}), 400
+
+    t3_command = shutil.which('t3')
+    if not t3_command:
+        return jsonify({
+            "error": "T3 Code's `t3` command was not found on this machine. Install it from T3 Code → Settings → About, then restart this app."
+        }), 503
+
+    try:
+        if os.path.splitext(t3_command)[1].lower() in {'.cmd', '.bat'}:
+            # Windows command shims need cmd.exe; shell quoting keeps paths with
+            # spaces intact. The project is selected from the saved workspace list.
+            command_line = subprocess.list2cmdline([t3_command, 'app', path])
+            subprocess.Popen(command_line, cwd=path, shell=True)
+        else:
+            subprocess.Popen([t3_command, 'app', path], cwd=path)
+        return jsonify({"status": "ok"})
+    except OSError as exc:
+        return jsonify({"error": f"Could not start T3 Code: {exc}"}), 500
+
 @app.route('/api/select-ai-accounts-backup', methods=['POST'])
 def api_select_ai_accounts_backup():
     """Show a native backup file picker rooted in this app's project folder."""

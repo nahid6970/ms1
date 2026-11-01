@@ -6157,6 +6157,19 @@
                 };
                 container.appendChild(button);
             });
+
+            const openT3Button = document.createElement('button');
+            openT3Button.type = 'button';
+            openT3Button.id = 'agent-session-open-t3code';
+            openT3Button.dataset.testid = 'open-project-in-t3code';
+            openT3Button.title = 'Open this workspace in T3 Code';
+            openT3Button.setAttribute('aria-label', openT3Button.title);
+            openT3Button.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid #303030;border-radius:6px;background:#111;color:#c4b5fd;cursor:pointer;font-size:9px;font-weight:800;letter-spacing:-.4px;';
+            openT3Button.textContent = 'T3';
+            openT3Button.onmouseenter = () => { openT3Button.style.borderColor = '#7c3aed'; openT3Button.style.background = '#191323'; };
+            openT3Button.onmouseleave = () => { openT3Button.style.borderColor = '#303030'; openT3Button.style.background = '#111'; };
+            openT3Button.onclick = () => openProjectInT3Code(activeProject);
+            container.appendChild(openT3Button);
         }
 
         function agentSessionIconMarkup(agent, size, iconId) {
@@ -9783,6 +9796,20 @@
             }
         }
 
+        async function openProjectInT3Code(projectName) {
+            try {
+                const response = await fetch('/api/open-t3code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project: projectName })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Could not open the project in T3 Code.');
+            } catch (error) {
+                alert(error.message || 'Could not open the project in T3 Code.');
+            }
+        }
+
         function showCardContextMenu(e, proj) {
             const menu = document.getElementById('card-context-menu');
             if (!menu) return;
@@ -9793,7 +9820,7 @@
             // Reposition context menu to follow cursor
             menu.style.left = `${e.pageX}px`;
             menu.style.top = `${e.pageY}px`;
-            
+
             // Build the action buttons horizontally
             // 1. Pin Dot
             const pinDot = document.createElement('button');
@@ -11111,7 +11138,7 @@
                 const cardActions = document.createElement('div');
                 cardActions.className = 'card-actions';
                 cardActions.style = 'display: flex; gap: 6px;';
-                
+
                 // Pin Dot
                 const pinDot = document.createElement('button');
                 pinDot.className = `action-dot ${proj.pinned ? 'yellow' : 'grey'}`;

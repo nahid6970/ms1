@@ -1588,6 +1588,36 @@
       "activeSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
       "status": "active",
       "updatedAt": 1793461283.2775137
+    },
+    {
+      "id": "271117ed-8fc9-4870-b1b5-c962acdd7c68",
+      "project": "MS1",
+      "originAgent": "codex",
+      "originSessionId": "01a1958a-84f6-78a2-a90a-f2d971f489ad",
+      "sessions": [
+        {
+          "agent": "codex",
+          "sessionId": "01a1958a-84f6-78a2-a90a-f2d971f489ad"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "34d7e945-1078-4178-9ac6-9786d28dc8e8",
+          "token": "e0ada0260183492cbea3b76b8ec1ee2d",
+          "sourceAgent": "codex",
+          "sourceSessionId": "01a1958a-84f6-78a2-a90a-f2d971f489ad",
+          "targetAgent": "pi",
+          "targetSessionId": "01a1968e-c406-7305-b656-b6db636dbbec",
+          "status": "active",
+          "createdAt": 1793527293.8764656
+        }
+      ],
+      "activeHandoffId": "34d7e945-1078-4178-9ac6-9786d28dc8e8",
+      "activeAgent": "codex",
+      "activeSessionId": "01a1958a-84f6-78a2-a90a-f2d971f489ad",
+      "status": "active",
+      "updatedAt": 1793527338.041915,
+      "title": "Fix Double-Click to Close Tabs"
     }
   ],
   "agent_session_title_overrides": {
@@ -1609,6 +1639,17 @@
     "Screenshot Region": {
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",
       "codex:01a192d0-e38d-7172-90fb-5e1c35795b7a": "Add Snipping Tool Option to Screenshot Script"
+    },
+    "MS1": {
+      "codex:01a19211-b96a-7151-826a-af722ed57645": "Refine Token Badge UI and Colors"
+    }
+  },
+  "terminal_tabs": {
+    "Terminal TUI": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
     }
   }
 }
