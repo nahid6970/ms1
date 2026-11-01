@@ -1952,41 +1952,23 @@
             --token-background: rgba(225,29,72,.11);
             --token-accent: #fb7185;
         }
-        #codex-limits-panel {
-            margin: 0 14px 8px;
-            padding: 9px 11px;
-            border: 1px solid rgba(148,163,184,.2);
-            border-radius: 9px;
-            background: rgba(15,23,42,.48);
-        }
-        #codex-limits-panel-header,
-        .codex-limit-window-heading {
-            display: flex;
+        #monitor-codex-quota {
+            display: none;
             align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        #codex-limits-title { color: #e2e8f0; font-size: .72rem; font-weight: 650; }
-        #codex-limits-status { color: #94a3b8; font-size: .65rem; }
-        #codex-limits-refresh {
-            flex: none;
-            padding: 3px 7px;
-            border: 1px solid rgba(148,163,184,.3);
+            gap: 5px;
+            padding: 2px 6px;
+            border: 1px solid rgba(16,185,129,.3);
             border-radius: 5px;
-            background: #111827;
-            color: #cbd5e1;
+            background: rgba(16,185,129,.07);
+            color: #6ee7b7;
             font: inherit;
-            font-size: .65rem;
+            font-size: .68rem;
+            line-height: 1;
+            white-space: nowrap;
             cursor: pointer;
         }
-        #codex-limits-refresh:disabled { opacity: .55; cursor: wait; }
-        #codex-limits-windows { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 7px; }
-        .codex-limit-window { flex: 1 1 180px; min-width: 150px; }
-        .codex-limit-window-heading { color: #aab4c4; font-size: .68rem; }
-        .codex-limit-window-heading strong { color: #f1f5f9; font-size: .69rem; }
-        .codex-limit-track { height: 5px; margin-top: 4px; overflow: hidden; border-radius: 5px; background: #374151; }
-        .codex-limit-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg,#34d399,#60a5fa); transition: width .25s ease; }
-        .codex-limit-reset { margin-top: 3px; color: #718096; font-size: .6rem; }
+        #monitor-codex-quota:hover { border-color: rgba(16,185,129,.7); background: rgba(16,185,129,.13); }
+        #monitor-codex-quota:disabled { opacity: .65; cursor: wait; }
         .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -2218,6 +2200,10 @@
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
                     <span id="monitor-panes-count">Panes: 0</span>
+                    <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" title="Codex quota — click to refresh" aria-label="Codex quota. Click to refresh">
+                        <span id="monitor-codex-icon" aria-hidden="true"></span>
+                        <span id="monitor-codex-quota-value">--</span>
+                    </button>
                     <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
                         <span style="color:#38bdf8;">⎇</span>
                         <span id="monitor-git-branch" style="color:#38bdf8;"></span>
@@ -3776,6 +3762,24 @@
                             <label for="settings-show-git-commit-hash" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show commit hashes in Git modal</label>
                         </div>
                     </div>
+                    <div style="margin-top:12px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;">Codex Quota Refresh</div>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <label for="settings-codex-limit-auto-refresh" style="display:flex;align-items:center;gap:7px;font-size:.78rem;color:var(--text-primary);cursor:pointer;">
+                                <input type="checkbox" id="settings-codex-limit-auto-refresh" onchange="syncCodexLimitAutoRefreshSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:0;">
+                                Automatically refresh while AGENTS is open
+                            </label>
+                            <label for="settings-codex-limit-refresh-interval" style="font-size:.76rem;color:var(--text-secondary);">Every</label>
+                            <select id="settings-codex-limit-refresh-interval" style="height:28px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.76rem;">
+                                <option value="1">1 minute</option>
+                                <option value="2">2 minutes</option>
+                                <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                            </select>
+                        </div>
+                        <div style="margin-top:6px;font-size:.66rem;color:var(--text-muted);">When off, the compact status-bar indicator loads on app start and uses the existing two-minute cache. Click it to refresh now.</div>
+                    </div>
                 </div>
 
                 <!-- Tab 4: Voice Recording Settings -->
@@ -3983,16 +3987,6 @@
                 <div id="agent-session-new-buttons" role="group" aria-label="Start a new AI agent session" style="display:flex;align-items:center;gap:5px;flex:none;"></div>
                 <button id="agent-session-picker-close" onclick="closeAgentSessionPicker()" aria-label="Close session picker" title="Close" style="width:28px;height:28px;border:0;background:transparent;color:#aaa;border-radius:6px;cursor:pointer;font-size:1.2rem;">×</button>
             </div>
-            <section id="codex-limits-panel" aria-labelledby="codex-limits-title" data-testid="codex-limits-panel">
-                <div id="codex-limits-panel-header">
-                    <div style="min-width:0;">
-                        <div id="codex-limits-title">Codex quota</div>
-                        <div id="codex-limits-status" role="status" aria-live="polite">Waiting for Codex CLI…</div>
-                    </div>
-                    <button id="codex-limits-refresh" type="button" data-testid="refresh-codex-limits" onclick="loadCodexLimits(true)" title="Refresh quota from the signed-in Codex CLI">Refresh</button>
-                </div>
-                <div id="codex-limits-windows" aria-label="Codex quota windows"></div>
-            </section>
             <div style="padding:10px 14px 8px;">
                 <input id="agent-session-search" type="search" placeholder="Search chats, folders, or session IDs…" autocomplete="off" oninput="filterAgentSessions()" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#f3f4f6;outline:none;font-size:.82rem;">
             </div>
@@ -6144,6 +6138,7 @@
         }
 
         let agentSavedSessions = [];
+        let codexLimitsAutoRefreshIntervalId = null;
 
         async function openAgentSessionPicker() {
             if (!activeProject) {
@@ -6163,6 +6158,7 @@
             count.textContent = 'Loading saved sessions…';
             list.innerHTML = '<div style="padding:24px 12px;text-align:center;color:#888;font-size:.8rem;">Loading agent sessions…</div>';
             loadCodexLimits(false);
+            startCodexLimitsAutoRefresh();
             try {
                 const response = await fetch(`/api/agent/sessions?project=${encodeURIComponent(activeProject)}`);
                 const data = await response.json();
@@ -6180,64 +6176,73 @@
         function closeAgentSessionPicker() {
             document.getElementById('agent-session-picker-modal')?.classList.remove('show');
             document.getElementById('agent-session-picker-btn')?.setAttribute('aria-expanded', 'false');
+            if (codexLimitsAutoRefreshIntervalId !== null) {
+                clearInterval(codexLimitsAutoRefreshIntervalId);
+                codexLimitsAutoRefreshIntervalId = null;
+            }
+        }
+
+        function syncCodexLimitAutoRefreshSettings() {
+            const enabled = document.getElementById('settings-codex-limit-auto-refresh')?.checked === true;
+            const intervalSelect = document.getElementById('settings-codex-limit-refresh-interval');
+            if (intervalSelect) intervalSelect.disabled = !enabled;
+        }
+
+        function startCodexLimitsAutoRefresh() {
+            if (codexLimitsAutoRefreshIntervalId !== null) {
+                clearInterval(codexLimitsAutoRefreshIntervalId);
+                codexLimitsAutoRefreshIntervalId = null;
+            }
+            if (localStorage.getItem('codex-limit-auto-refresh') !== 'true') return;
+            const intervalMinutes = Number(localStorage.getItem('codex-limit-refresh-interval')) || 5;
+            codexLimitsAutoRefreshIntervalId = setInterval(() => {
+                const picker = document.getElementById('agent-session-picker-modal');
+                if (picker?.classList.contains('show')) loadCodexLimits(true);
+                else {
+                    clearInterval(codexLimitsAutoRefreshIntervalId);
+                    codexLimitsAutoRefreshIntervalId = null;
+                }
+            }, intervalMinutes * 60 * 1000);
         }
 
         async function loadCodexLimits(forceRefresh = false) {
-            const status = document.getElementById('codex-limits-status');
-            const windowsContainer = document.getElementById('codex-limits-windows');
-            const refreshButton = document.getElementById('codex-limits-refresh');
-            if (!status || !windowsContainer) return;
-            if (refreshButton) refreshButton.disabled = true;
-            status.textContent = forceRefresh ? 'Refreshing from Codex CLI…' : 'Checking Codex CLI…';
-            windowsContainer.replaceChildren();
+            const button = document.getElementById('monitor-codex-quota');
+            const value = document.getElementById('monitor-codex-quota-value');
+            const icon = document.getElementById('monitor-codex-icon');
+            if (!button || !value) return;
+            button.style.display = 'inline-flex';
+            button.disabled = true;
+            if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('codex', 13, 'monitor-codex-quota');
+            if (forceRefresh) value.textContent = '…';
             try {
                 const response = await fetch(`/api/codex/limits${forceRefresh ? '?refresh=true' : ''}`);
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not read Codex limits.');
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
-                    status.textContent = data.error || 'No quota windows were reported by Codex CLI.';
+                    value.textContent = '--';
+                    button.title = data.error || 'Codex CLI did not report a quota window.';
+                    button.setAttribute('aria-label', button.title);
                     return;
                 }
-                status.textContent = data.planType
-                    ? `${data.planType.charAt(0).toUpperCase()}${data.planType.slice(1)} plan · from Codex CLI`
-                    : 'Reported by Codex CLI';
-                data.windows.forEach(windowInfo => {
-                    const card = document.createElement('div');
-                    card.className = 'codex-limit-window';
-                    card.dataset.testid = 'codex-limit-window';
-                    const heading = document.createElement('div');
-                    heading.className = 'codex-limit-window-heading';
-                    const label = document.createElement('span');
-                    label.textContent = windowInfo.label;
-                    const left = document.createElement('strong');
-                    left.textContent = `${windowInfo.leftPercent}% left`;
-                    heading.append(label, left);
-                    const track = document.createElement('div');
-                    track.className = 'codex-limit-track';
-                    track.setAttribute('role', 'meter');
-                    track.setAttribute('aria-label', `${windowInfo.label} quota remaining`);
-                    track.setAttribute('aria-valuemin', '0');
-                    track.setAttribute('aria-valuemax', '100');
-                    track.setAttribute('aria-valuenow', String(windowInfo.leftPercent));
-                    const fill = document.createElement('div');
-                    fill.className = 'codex-limit-fill';
-                    fill.style.width = `${windowInfo.leftPercent}%`;
-                    track.appendChild(fill);
-                    card.append(heading, track);
-                    if (windowInfo.resetsAt) {
-                        const reset = document.createElement('div');
-                        reset.className = 'codex-limit-reset';
-                        reset.textContent = `Resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}`;
-                        card.appendChild(reset);
-                    }
-                    windowsContainer.appendChild(card);
-                });
+                const primary = data.windows[0];
+                value.textContent = `${primary.leftPercent}% left`;
+                const plan = data.planType ? `${data.planType} plan · ` : '';
+                const details = data.windows.map(windowInfo => {
+                    const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
+                    return `${windowInfo.label}: ${windowInfo.leftPercent}% left${reset}`;
+                }).join(' | ');
+                button.title = `Codex · ${plan}${details} · Click to refresh`;
+                button.setAttribute('aria-label', `Codex quota: ${primary.leftPercent}% left. Click to refresh.`);
             } catch (error) {
-                status.textContent = String(error.message || error);
+                value.textContent = '--';
+                button.title = `Could not read Codex quota: ${String(error.message || error)}`;
+                button.setAttribute('aria-label', button.title);
             } finally {
-                if (refreshButton) refreshButton.disabled = false;
+                button.disabled = false;
             }
         }
+
+        loadCodexLimits(false);
 
         function renderAgentSessionNewButtons() {
             const container = document.getElementById('agent-session-new-buttons');
@@ -10052,6 +10057,10 @@
 
             const savedUseRealDirPrompt = localStorage.getItem('use-real-dir-prompt') === 'true';
             document.getElementById('settings-use-real-dir-prompt').checked = savedUseRealDirPrompt;
+
+            document.getElementById('settings-codex-limit-auto-refresh').checked = localStorage.getItem('codex-limit-auto-refresh') === 'true';
+            document.getElementById('settings-codex-limit-refresh-interval').value = localStorage.getItem('codex-limit-refresh-interval') || '5';
+            syncCodexLimitAutoRefreshSettings();
             
             const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
             document.getElementById('settings-dropdown-height').value = savedDropdownHeight;
@@ -10268,6 +10277,13 @@
 
             const selectedUseRealDirPrompt = document.getElementById('settings-use-real-dir-prompt').checked;
             localStorage.setItem('use-real-dir-prompt', selectedUseRealDirPrompt);
+
+            const codexLimitAutoRefresh = document.getElementById('settings-codex-limit-auto-refresh').checked;
+            localStorage.setItem('codex-limit-auto-refresh', codexLimitAutoRefresh);
+            localStorage.setItem('codex-limit-refresh-interval', document.getElementById('settings-codex-limit-refresh-interval').value || '5');
+            if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) {
+                startCodexLimitsAutoRefresh();
+            }
 
             const selectedAutoScroll = document.getElementById('settings-auto-scroll').checked;
             autoScrollEnabled = selectedAutoScroll;
