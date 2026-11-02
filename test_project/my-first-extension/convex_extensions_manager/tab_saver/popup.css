@@ -293,6 +293,10 @@ body {
 .edit-attachment-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border: 1px solid #e0e0e8; border-radius: 6px; font-size: 12px; }
 .edit-attachment-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edit-attachment-row .attachment-remove { width: auto; height: auto; padding: 4px 8px; }
+.edit-attachment-row input { flex: 1; min-width: 0; width: 0; padding: 6px 8px; border: 1px solid #e1e4ee; border-radius: 6px; color: #303449; font: inherit; }
+#tabList { overflow-x: hidden; }
+.attachment-menu { box-sizing: border-box; overflow-x: hidden; }
+.attachment-open { display: block; width: 100%; max-width: 100%; box-sizing: border-box; }
 #addAttachmentsBtn { width: auto; height: auto; min-height: 36px; align-self: flex-start; padding: 0 14px; font-size: 13px; white-space: nowrap; }
 
 .tab-note {

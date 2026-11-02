@@ -346,7 +346,7 @@ function displayTabs(tabs) {
       const files = Array.isArray(tab.attachments) ? tab.attachments : [];
       if (!files.length) return chooseAttachments(tab.id);
       if (files.length === 1) {
-        const link = document.createElement('a'); link.href = files[0].dataUrl; link.download = files[0].name; link.target = '_blank'; link.click();
+        const link = document.createElement('a'); link.href = files[0].dataUrl; link.target = '_blank'; link.rel = 'noopener'; link.click();
         return;
       }
       showAttachmentsMenu(attachmentButton, tab);
@@ -402,14 +402,15 @@ function showAttachmentsMenu(button, tab) {
     const open = document.createElement('button');
     open.type = 'button';
     open.className = 'attachment-open';
-    open.textContent = file.name;
-    open.title = `Open ${file.name}`;
+    const fileLabel = file.displayName || file.name;
+    open.textContent = fileLabel;
+    open.title = `Open ${fileLabel}`;
     open.onclick = event => {
       event.stopPropagation();
       const link = document.createElement('a');
       link.href = file.dataUrl;
-      link.download = file.name;
       link.target = '_blank';
+      link.rel = 'noopener';
       link.click();
       menu.remove();
     };
@@ -661,7 +662,11 @@ function renderEditAttachments(tab) {
   list.innerHTML = '';
   (tab.attachments || []).forEach((file, index) => {
     const row = document.createElement('div'); row.className = 'edit-attachment-row';
-    const name = document.createElement('span'); name.textContent = file.name; name.title = file.name;
+    const name = document.createElement('input'); name.type = 'text'; name.value = file.displayName || file.name; name.title = 'Attachment name'; name.setAttribute('aria-label', 'Attachment name');
+    name.onchange = () => {
+      const displayName = name.value.trim() || file.name;
+      updateAttachments(tab.id, files => files.map((item, i) => i === index ? { ...item, displayName } : item));
+    };
     const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = 'Remove'; remove.className = 'attachment-remove';
     remove.onclick = () => updateAttachments(tab.id, files => files.filter((_, i) => i !== index));
     row.append(name, remove); list.appendChild(row);
