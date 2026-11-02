@@ -5815,7 +5815,7 @@ kiro-cli whoami --format json</code></pre>
             buttonVisibilityBtn.setAttribute('aria-label', buttonVisibilityBtn.title);
             buttonVisibilityBtn.innerText = '☷';
             buttonVisibilityBtn.style.cssText = 'position:absolute;top:6px;right:36px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:rgba(15,23,42,.9);color:var(--text-secondary);cursor:pointer;z-index:5;font-size:.82rem;line-height:1;';
-            buttonVisibilityBtn.onclick = (e) => { e.stopPropagation(); openTerminalButtonVisibilityModal(projectName); };
+            buttonVisibilityBtn.onclick = (e) => { e.stopPropagation(); openTerminalButtonVisibilityModal(); };
             paneDiv.appendChild(buttonVisibilityBtn);
 
             parent.appendChild(paneDiv);
@@ -18757,7 +18757,7 @@ Always wrap your **entire response** in a single markdown code block.`;
         function addCustomButtonToPane(paneId, btnConfig, index) {
             const paneDiv = document.querySelector(`.terminal-pane[data-pane-id="${paneId}"]`);
             if (!paneDiv) return;
-            if (isTerminalCustomButtonHidden(paneDiv.dataset.project, btnConfig)) return;
+            if (isTerminalCustomButtonHidden(btnConfig)) return;
 
             // Compute top offset: after the + button (36px) + 30px per custom button
             const existingCustom = paneDiv.querySelectorAll('.terminal-pane-custom-btn').length;
@@ -18875,15 +18875,15 @@ Always wrap your **entire response** in a single markdown code block.`;
             return JSON.stringify([String(button?.label || ''), String(button?.raw_data ?? button?.data ?? '')]);
         }
 
-        function getHiddenTerminalCustomButtons(projectName) {
+        function getHiddenTerminalCustomButtons() {
             try {
-                const value = JSON.parse(localStorage.getItem(`terminal-hidden-buttons:${projectName}`) || '[]');
+                const value = JSON.parse(localStorage.getItem('terminal-hidden-buttons') || '[]');
                 return Array.isArray(value) ? value : [];
             } catch (_) { return []; }
         }
 
-        function isTerminalCustomButtonHidden(projectName, button) {
-            return getHiddenTerminalCustomButtons(projectName).includes(terminalCustomButtonVisibilityKey(button));
+        function isTerminalCustomButtonHidden(button) {
+            return getHiddenTerminalCustomButtons().includes(terminalCustomButtonVisibilityKey(button));
         }
 
         function refreshAllPaneCustomButtons() {
@@ -18895,7 +18895,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             });
         }
 
-        function openTerminalButtonVisibilityModal(projectName) {
+        function openTerminalButtonVisibilityModal() {
             document.getElementById('terminal-button-visibility-modal')?.remove();
             const overlay = document.createElement('div');
             overlay.id = 'terminal-button-visibility-modal';
@@ -18920,7 +18920,7 @@ Always wrap your **entire response** in a single markdown code block.`;
                 empty.style.cssText = 'padding:10px 2px;color:var(--text-secondary);font-size:.76rem;';
                 list.appendChild(empty);
             }
-            const hidden = new Set(getHiddenTerminalCustomButtons(projectName));
+            const hidden = new Set(getHiddenTerminalCustomButtons());
             buttons.forEach(button => {
                 const row = document.createElement('label');
                 row.style.cssText = 'display:flex;align-items:center;gap:9px;padding:8px;border-radius:6px;color:var(--text-primary);font-size:.78rem;cursor:pointer;';
@@ -18928,11 +18928,11 @@ Always wrap your **entire response** in a single markdown code block.`;
                 checkbox.type = 'checkbox';
                 checkbox.checked = !hidden.has(terminalCustomButtonVisibilityKey(button));
                 checkbox.addEventListener('change', () => {
-                    const nextHidden = new Set(getHiddenTerminalCustomButtons(projectName));
+                    const nextHidden = new Set(getHiddenTerminalCustomButtons());
                     const key = terminalCustomButtonVisibilityKey(button);
                     if (checkbox.checked) nextHidden.delete(key);
                     else nextHidden.add(key);
-                    localStorage.setItem(`terminal-hidden-buttons:${projectName}`, JSON.stringify([...nextHidden]));
+                    localStorage.setItem('terminal-hidden-buttons', JSON.stringify([...nextHidden]));
                     refreshAllPaneCustomButtons();
                 });
                 const label = document.createElement('span');
