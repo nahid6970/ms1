@@ -146,13 +146,19 @@
           <div id="editAttachmentsList" class="edit-attachments-list"></div>
           <button id="addAttachmentsBtn" type="button" class="modal-add-btn">Add files</button>
         </div>
-        <div class="modal-field">
-          <label for="editTag">Tag</label>
-          <div class="modal-inline-row">
-            <select id="editTag" class="modal-select">
-              <option value="">No Tag</option>
-            </select>
-            <button id="addTagBtn" class="modal-add-btn">+</button>
+        <div class="tag-actions-row">
+          <div class="modal-field tag-field">
+            <label for="editTag">Tag</label>
+            <div class="modal-inline-row">
+              <select id="editTag" class="modal-select">
+                <option value="">No Tag</option>
+              </select>
+              <button id="addTagBtn" class="modal-add-btn">+</button>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button id="cancelDeadlineBtn" class="btn btn-secondary">Cancel</button>
+            <button id="saveDeadlineBtn" class="btn btn-primary">Apply</button>
           </div>
         </div>
         <div id="newTagInputContainer" class="modal-field modal-new-tag" style="display: none;">
@@ -165,10 +171,6 @@
             </div>
             <button id="saveNewTagBtn" class="modal-primary-btn">Add</button>
           </div>
-        </div>
-        <div class="modal-actions">
-          <button id="cancelDeadlineBtn" class="btn btn-secondary">Cancel</button>
-          <button id="saveDeadlineBtn" class="btn btn-primary">Apply</button>
         </div>
       </div>
     </div>

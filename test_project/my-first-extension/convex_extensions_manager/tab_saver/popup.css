@@ -784,4 +784,8 @@ body { background: #eef1fb; }
 .deadline-input-row { display: flex; gap: 12px; width: 100%; }
 .deadline-input-row > .modal-field { flex: 1 1 0; min-width: 0; }
 .deadline-input-row .modal-input { min-width: 0; padding-left: 10px; padding-right: 10px; }
+.tag-actions-row { display: flex; align-items: flex-end; gap: 10px; width: 100%; }
+.tag-actions-row .tag-field { flex: 1 1 auto; min-width: 0; }
+.tag-actions-row .modal-actions { display: flex; flex: 0 0 auto; gap: 6px; padding-bottom: 1px; }
+.tag-actions-row .modal-actions .btn { flex: 0 0 auto; min-width: 56px; padding: 9px 10px; }
 .attachment-menu { z-index: 2147483647 !important; border-color: #e2e5f0; border-radius: 10px; box-shadow: 0 12px 30px rgba(29, 35, 70, .22); }
