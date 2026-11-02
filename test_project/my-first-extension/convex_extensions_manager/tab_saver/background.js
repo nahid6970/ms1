@@ -26,12 +26,85 @@ async function convexFetch(type, path, args) {
   return result.value;
 }
 
-// Send data to Convex
-async function sendDataToConvex(data) {
+let convexSaveQueue = Promise.resolve();
+
+function readLocalStorage() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(null, result => {
+      if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+      else resolve(result);
+    });
+  });
+}
+
+function persistUploadedAttachmentIds(uploaded) {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(['savedTabs'], ({ savedTabs = [] }) => {
+      let changed = false;
+      const updatedTabs = savedTabs.map(tab => {
+        const matchingUploads = uploaded.filter(item => item.tabId === tab.id);
+        if (!matchingUploads.length) return tab;
+        let tabChanged = false;
+        const attachments = (tab.attachments || []).map(file => {
+          const match = matchingUploads.find(item => !file.storageId && item.name === file.name && item.dataUrl === file.dataUrl);
+          if (!match) return file;
+          changed = true;
+          tabChanged = true;
+          return { ...file, storageId: match.storageId };
+        });
+        return tabChanged ? { ...tab, attachments } : tab;
+      });
+      if (!changed) return resolve();
+      chrome.storage.local.set({ savedTabs: updatedTabs }, () => {
+        if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+        else resolve();
+      });
+    });
+  });
+}
+
+async function uploadAttachment(dataUrl, contentType) {
+  const uploadUrl = await convexFetch('mutation', 'functions:generateUploadUrl', {});
+  const fileResponse = await fetch(dataUrl);
+  if (!fileResponse.ok) throw new Error(`Could not read attachment (${fileResponse.status})`);
+  const blob = await fileResponse.blob();
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': contentType || blob.type || 'application/octet-stream' },
+    body: blob
+  });
+  if (!uploadResponse.ok) throw new Error(`Convex attachment upload failed (${uploadResponse.status})`);
+  const result = await uploadResponse.json();
+  if (!result.storageId) throw new Error('Convex did not return an attachment storage ID');
+  return result.storageId;
+}
+
+async function performConvexSave(data) {
   try {
+    const tabs = Array.isArray(data.savedTabs) ? data.savedTabs : [];
+    const uploadedAttachments = [];
+    for (const tab of tabs) {
+      for (const attachment of (Array.isArray(tab.attachments) ? tab.attachments : [])) {
+        if (!attachment.storageId && typeof attachment.dataUrl === 'string' && attachment.dataUrl.startsWith('data:')) {
+          attachment.storageId = await uploadAttachment(attachment.dataUrl, attachment.type);
+          uploadedAttachments.push({ tabId: tab.id, name: attachment.name, dataUrl: attachment.dataUrl, storageId: attachment.storageId });
+        }
+      }
+    }
+
+    // Keep the local data URL for offline access, and remember the cloud ID to avoid re-uploading.
+    if (uploadedAttachments.length) await persistUploadedAttachmentIds(uploadedAttachments);
+
+    const latestData = await readLocalStorage();
+    const cloudData = JSON.parse(JSON.stringify(latestData));
+    for (const tab of (cloudData.savedTabs || [])) {
+      for (const attachment of (tab.attachments || [])) {
+        if (attachment.storageId) delete attachment.dataUrl;
+      }
+    }
     const result = await convexFetch("mutation", "functions:save", {
       extensionName: EXTENSION_NAME,
-      data: data
+      data: cloudData
     });
     console.log('Data saved to Convex:', result);
     return { success: true, result };
@@ -39,6 +112,13 @@ async function sendDataToConvex(data) {
     console.error('Failed to send data to Convex:', error);
     return { success: false, error: error.message };
   }
+}
+
+// Serialize saves so storage-change autosaves cannot upload the same new file twice.
+function sendDataToConvex(data) {
+  const operation = convexSaveQueue.then(() => performConvexSave(data));
+  convexSaveQueue = operation.then(() => undefined, () => undefined);
+  return operation;
 }
 
 // Load data from Convex
@@ -361,6 +441,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'loadFromConvex') {
     loadDataFromConvex()
       .then(result => sendResponse(result))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+
+  if (message.action === 'getAttachmentUrl') {
+    convexFetch('query', 'functions:getAttachmentUrl', { storageId: message.storageId })
+      .then(url => sendResponse({ success: true, url }))
       .catch(error => sendResponse({ success: false, error: error.message }));
     return true;
   }

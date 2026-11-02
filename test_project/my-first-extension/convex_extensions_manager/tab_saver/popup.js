@@ -346,7 +346,7 @@ function displayTabs(tabs) {
       const files = Array.isArray(tab.attachments) ? tab.attachments : [];
       if (!files.length) return chooseAttachments(tab.id);
       if (files.length === 1) {
-        const link = document.createElement('a'); link.href = files[0].dataUrl; link.target = '_blank'; link.rel = 'noopener'; link.click();
+        openAttachment(tab.id, 0);
         return;
       }
       showAttachmentsMenu(attachmentButton, tab);
@@ -408,10 +408,7 @@ function showAttachmentsMenu(button, tab) {
     open.onclick = event => {
       event.stopPropagation();
       const link = document.createElement('a');
-      link.href = file.dataUrl;
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.click();
+      openAttachment(tab.id, tab.attachments.indexOf(file));
       menu.remove();
     };
     menu.appendChild(open);
@@ -424,6 +421,14 @@ function showAttachmentsMenu(button, tab) {
     }
   };
   setTimeout(() => document.addEventListener('click', close), 0);
+}
+
+function openAttachment(tabId, attachmentIndex) {
+  // Open attachments in an extension viewer so data URLs survive the popup closing.
+  const viewerUrl = new URL(chrome.runtime.getURL('attachment-viewer.html'));
+  viewerUrl.searchParams.set('tabId', String(tabId));
+  viewerUrl.searchParams.set('attachmentIndex', String(attachmentIndex));
+  chrome.tabs.create({ url: viewerUrl.href });
 }
 
 function escapeMarkdownHtml(value) {
