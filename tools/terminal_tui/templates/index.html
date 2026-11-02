@@ -7485,16 +7485,36 @@ kiro-cli whoami --format json</code></pre>
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not start the agent handoff.');
-                const encodedPrompt = encodeAgentPrompt(data.prompt);
-                const safePath = String(data.cwd || '').replace(/'/g, "''");
-                const command = `$__agentHandoff = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encodedPrompt}')); ` +
-                    `${safePath ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; ` : ''}` +
-                    (targetAgent === 'pi' ? 'pi --approve -- $__agentHandoff' :
-                        targetAgent === 'kiro' ? 'kiro-cli chat --trust-all-tools $__agentHandoff' :
-                            'codex --yolo $__agentHandoff');
+                let copied = false;
+                try {
+                    if (navigator.clipboard?.writeText) {
+                        await navigator.clipboard.writeText(data.prompt);
+                        copied = true;
+                    }
+                } catch (_) {}
+                if (!copied) {
+                    const clipboardField = document.createElement('textarea');
+                    clipboardField.value = data.prompt;
+                    clipboardField.setAttribute('readonly', '');
+                    clipboardField.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+                    document.body.appendChild(clipboardField);
+                    clipboardField.select();
+                    try { copied = document.execCommand('copy'); } catch (_) {}
+                    clipboardField.remove();
+                }
+                if (!copied) throw new Error('Could not copy the handoff to the clipboard. Check browser clipboard permissions and try again.');
+
+                const command = targetAgent === 'pi' ? 'pi --approve' :
+                    targetAgent === 'kiro' ? 'kiro-cli chat --trust-all-tools' : 'codex --yolo';
                 closeAgentHandoffModal();
                 closeAgentSessionPicker();
                 splitTerminal('tabs', command);
+                const toast = document.createElement('div');
+                toast.setAttribute('role', 'status');
+                toast.style.cssText = 'position:fixed;bottom:54px;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;padding:8px 18px;font-size:.78rem;color:var(--text-primary);z-index:9999;pointer-events:none;';
+                toast.textContent = 'Handoff copied. Paste it into the new agent session.';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3500);
             } catch (handoffError) {
                 error.textContent = String(handoffError.message || handoffError);
                 error.style.display = 'block';
