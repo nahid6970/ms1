@@ -773,4 +773,12 @@ body { background: #eef1fb; }
 .btn-settings { background: linear-gradient(135deg, #5c72e6, #7856bd); }
 .modal { z-index: 2147483645; }
 .custom-menu { z-index: 2147483646; }
+.custom-menu { min-width: 132px; padding: 5px; border: 1px solid #e3e6f1; border-radius: 10px; background: #fff; box-shadow: 0 10px 26px rgba(32, 39, 79, .18); }
+.menu-item { padding: 9px 12px; border-radius: 7px; color: #41465f; font-size: 11px; font-weight: 700; letter-spacing: .3px; text-transform: none; }
+.menu-item:hover { background: #f0f2ff; color: #5b65c8; }
+.modal-actions .btn-primary { background: linear-gradient(135deg, #5c72e6, #7856bd); color: #fff; }
+.modal-actions .btn-secondary { background: #eef0f8; color: #454b62; }
+.edit-attachment-row .attachment-remove { border: 1px solid #f2d5db; background: #fff6f7; color: #bd4055; font-size: 11px; font-weight: 700; transition: background .15s, border-color .15s; }
+.edit-attachment-row .attachment-remove:hover { border-color: #eab8c2; background: #ffeaee; }
+#addAttachmentsBtn { border-radius: 8px; box-shadow: 0 3px 8px rgba(95, 105, 203, .18); }
 .attachment-menu { z-index: 2147483647 !important; border-color: #e2e5f0; border-radius: 10px; box-shadow: 0 12px 30px rgba(29, 35, 70, .22); }
