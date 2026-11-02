@@ -6680,6 +6680,9 @@ class ContinuousThread(QThread):
         self._stop = True
 
 
+DEFAULT_VOICE_STATUS_SVG = '''<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.5 10.5V5.5C14.5 4.11929 13.3807 3 12 3C10.6193 3 9.5 4.11929 9.5 5.5V10.5C9.5 11.8807 10.6193 13 12 13C13.3807 13 14.5 11.8807 14.5 10.5ZM12 1C9.51472 1 7.5 3.01472 7.5 5.5V10.5C7.5 12.9853 9.51472 15 12 15C14.4853 15 16.5 12.9853 16.5 10.5V5.5C16.5 3.01472 14.4853 1 12 1Z" fill="currentColor"/><path d="M12 17C5.49999 17 5.99999 12 5.99999 12C5.99999 12 6.00001 11 5.00001 11C4.00001 11 3.99999 12 3.99999 12C3.99999 12 3.54013 18.4382 11 18.9657V22C11 22.5523 11.4477 23 12 23C12.5523 23 13 22.5523 13 22V18.9657C20.4599 18.4382 20 12 20 12C20 12 20 11 19 11C18 11 18 12 18 12C18 12 18.5 17 12 17Z" fill="currentColor"/></g></svg>'''
+
+
 class VoiceApp(QMainWindow):
     toggle_record_requested = pyqtSignal()
     space_press_requested = pyqtSignal()
@@ -6735,8 +6738,12 @@ class VoiceApp(QMainWindow):
                 "compact_bottom_padding": 0,
                 "expanded_top_padding": 0,
                 "expanded_bottom_padding": 0,
+                "status_svg": DEFAULT_VOICE_STATUS_SVG,
                 "hotkey": "RightAlt+Space"
             }
+            self.save_config()
+        if not self.config.get("status_svg"):
+            self.config["status_svg"] = DEFAULT_VOICE_STATUS_SVG
             self.save_config()
         if "copy_to_clipboard" not in self.config:
             self.config["copy_to_clipboard"] = True
@@ -6803,7 +6810,7 @@ class VoiceApp(QMainWindow):
         # Use IconLabel for rock-solid size (no Qt button metrics issues)
         self.status_btn = IconLabel("", {
             "font": ["JetBrainsMono NFP", 18, "bold"],
-            "svg_content": self.config.get("status_svg", ""),
+            "svg_content": self.config.get("status_svg") or DEFAULT_VOICE_STATUS_SVG,
             "icon_width": 18,
             "icon_height": 20
         })
@@ -7125,7 +7132,7 @@ class VoiceApp(QMainWindow):
         
         svg_edit = QPlainTextEdit()
         svg_edit.setPlaceholderText("<svg>...</svg> (use currentColor for status color)")
-        svg_edit.setPlainText(self.config.get("status_svg", ""))
+        svg_edit.setPlainText(self.config.get("status_svg") or DEFAULT_VOICE_STATUS_SVG)
         svg_edit.setMaximumHeight(80)
         app_layout.addWidget(QLabel("Status SVG code:"), 7, 0)
         app_layout.addWidget(svg_edit, 7, 1)
@@ -7466,7 +7473,7 @@ class VoiceApp(QMainWindow):
         import re
         mode = self.config.get("output_mode", "search")
         color = {"search": "#FF8C00", "clipboard": "#00BFFF", "gg": "#39FF14"}.get(mode, CP_GREEN)
-        svg_tpl = self.config.get("status_svg", "")
+        svg_tpl = self.config.get("status_svg") or DEFAULT_VOICE_STATUS_SVG
         if svg_tpl:
             svg_content = svg_tpl
             if "currentColor" in svg_content:
@@ -7732,7 +7739,7 @@ class VoiceApp(QMainWindow):
     def _set_status(self, color):
         """Update SVG circle color"""
         import re
-        svg_tpl = self.config.get("status_svg", "")
+        svg_tpl = self.config.get("status_svg") or DEFAULT_VOICE_STATUS_SVG
         if svg_tpl:
             svg_content = svg_tpl
             if "currentColor" in svg_content:
