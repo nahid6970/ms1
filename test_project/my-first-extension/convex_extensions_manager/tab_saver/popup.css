@@ -743,3 +743,30 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .tab-list::-webkit-scrollbar-thumb:hover, .modal-body::-webkit-scrollbar-thumb:hover {
   background: #999;
 }
+
+/* Refined popup surfaces and reliable in-popup overlays. */
+body { background: #eef1fb; }
+.container { box-shadow: 0 12px 36px rgba(33, 39, 79, .16); }
+.top-controls { background: rgba(250, 251, 255, .98); border-bottom-color: #e8eaf5; }
+.view-tabs { gap: 8px; padding: 10px 12px 8px; }
+.view-tab { border-radius: 12px; padding: 8px 11px; border-color: #e4e7f2; }
+.view-tab.active { background: linear-gradient(135deg, #596fe2, #8054b8); }
+.search-wrap { padding: 0 12px 10px; }
+.tab-search { border-radius: 10px; padding: 9px 12px; background: #fff; }
+.tab-list { padding: 10px 12px 12px; background: #f8f9fd; }
+.tab-item { min-height: 48px; padding: 8px 10px; margin-bottom: 7px; border-radius: 11px; border-color: #e8eaf1; background: #fff; box-shadow: 0 1px 3px rgba(35, 43, 80, .04); }
+.tab-item:hover { background: #fff; border-color: #c9d0fb; box-shadow: 0 4px 12px rgba(62, 78, 160, .1); transform: none; }
+.tab-title { color: #24283a; font-weight: 600; font-size: 13px; }
+.tab-doc-link { border-radius: 7px; margin-left: 6px; }
+.tab-attachments { border-radius: 7px; }
+.tab-remove { width: 23px; height: 23px; background: #fff1f2; color: #dc4256; font-size: 17px; margin-left: 7px; }
+.tab-remove:hover { background: #ffe2e6; }
+.footer { gap: 7px; padding: 9px 10px; background: #fff; border-top-color: #e8eaf1; }
+.footer .btn { border-radius: 8px; font-weight: 650; }
+.btn-primary { background: linear-gradient(135deg, #5c72e6, #7856bd); }
+.btn-secondary { background: #eef0f8; color: #454b62; }
+.btn-success { background: #e7f6f0; color: #18805d; }
+.btn-settings { background: linear-gradient(135deg, #5c72e6, #7856bd); }
+.modal { z-index: 2147483645; }
+.custom-menu { z-index: 2147483646; }
+.attachment-menu { z-index: 2147483647 !important; border-color: #e2e5f0; border-radius: 10px; box-shadow: 0 12px 30px rgba(29, 35, 70, .22); }

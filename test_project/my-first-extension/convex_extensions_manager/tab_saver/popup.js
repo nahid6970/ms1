@@ -389,6 +389,42 @@ function chooseAttachments(tabId) {
   picker.click();
 }
 
+function showAttachmentsMenu(button, tab) {
+  document.querySelectorAll('.attachment-menu').forEach(menu => menu.remove());
+  const menu = document.createElement('div');
+  menu.className = 'attachment-menu';
+  const buttonRect = button.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.zIndex = '2147483647';
+  menu.style.top = `${Math.min(buttonRect.bottom + 6, window.innerHeight - 230)}px`;
+  menu.style.left = `${Math.max(8, Math.min(buttonRect.right - 220, window.innerWidth - 228))}px`;
+  (tab.attachments || []).forEach(file => {
+    const open = document.createElement('button');
+    open.type = 'button';
+    open.className = 'attachment-open';
+    open.textContent = file.name;
+    open.title = `Open ${file.name}`;
+    open.onclick = event => {
+      event.stopPropagation();
+      const link = document.createElement('a');
+      link.href = file.dataUrl;
+      link.download = file.name;
+      link.target = '_blank';
+      link.click();
+      menu.remove();
+    };
+    menu.appendChild(open);
+  });
+  document.body.appendChild(menu);
+  const close = event => {
+    if (!menu.contains(event.target) && event.target !== button) {
+      menu.remove();
+      document.removeEventListener('click', close);
+    }
+  };
+  setTimeout(() => document.addEventListener('click', close), 0);
+}
+
 function escapeMarkdownHtml(value) {
   return value.replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
