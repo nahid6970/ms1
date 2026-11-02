@@ -289,6 +289,11 @@ body {
 .attachment-open, .attachment-add { flex: 1; min-width: 0; padding: 6px; border: 0; background: transparent; color: #34364a; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .attachment-open:hover, .attachment-add:hover { background: #f0f2ff; }
 .attachment-remove { width: 24px; height: 24px; border: 0; border-radius: 4px; background: #fff0f0; color: #d33; cursor: pointer; }
+.edit-attachments-list { display: grid; gap: 5px; margin-bottom: 6px; }
+.edit-attachment-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border: 1px solid #e0e0e8; border-radius: 6px; font-size: 12px; }
+.edit-attachment-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.edit-attachment-row .attachment-remove { width: auto; height: auto; padding: 4px 8px; }
+#addAttachmentsBtn { width: auto; height: auto; min-height: 36px; align-self: flex-start; padding: 0 14px; font-size: 13px; white-space: nowrap; }
 
 .tab-note {
   display: inline-flex;
