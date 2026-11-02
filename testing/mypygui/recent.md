@@ -1,5 +1,10 @@
 # Recent Handoff
 
+## 2026-11-03 — Voice shortcut text entry
+- Global voice hotkey recordings now skip the transcription/action windows and paste the recognized text directly into the focused app.
+- Main Settings → VOICE INPUT includes SHORTCUT LANGUAGE (English/Bangla), persisted as `shortcut_language` in `C:\@delta\ms1\tools\Voice\voice_config.json` (defaults to English).
+- Mic-button recordings retain the existing language/action UI.
+
 ## 1. Project DNA (Permanent)
 PyQt6 status bar desktop app (`mypygui_qt.py`) for system automation, script monitoring, and launcher controls, driven by config (`mypygui_config.json`) and pwsh-launching helpers (`run_command`, `open_git_cmd`).
 

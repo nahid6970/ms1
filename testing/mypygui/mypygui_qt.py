@@ -5374,6 +5374,12 @@ class StatusBar(QMainWindow):
         voice_mode_cb.setCurrentText(str(v_cfg.get("output_mode", "search")).title())
         form_voice.addRow("ACTION MODE", voice_mode_cb)
 
+        voice_lang_cb = QComboBox()
+        voice_lang_cb.addItem("English", "en-US")
+        voice_lang_cb.addItem("Bangla", "bn-BD")
+        voice_lang_cb.setCurrentIndex(0 if v_cfg.get("shortcut_language", "en-US") == "en-US" else 1)
+        form_voice.addRow("SHORTCUT LANGUAGE", voice_lang_cb)
+
         voice_spc_chk = QCheckBox("STOP ON SPACE (SPC)")
         voice_spc_chk.setChecked(v_cfg.get("stop_mode", "auto") == "space")
         form_voice.addRow("", voice_spc_chk)
@@ -5498,6 +5504,7 @@ class StatusBar(QMainWindow):
                     try:
                         with open(v_cfg_file, "r") as vf: v_data = json.load(vf)
                         v_data["output_mode"] = voice_mode_cb.currentText().lower()
+                        v_data["shortcut_language"] = voice_lang_cb.currentData()
                         v_data["stop_mode"] = "space" if voice_spc_chk.isChecked() else "auto"
                         v_data["phrase_time_limit"] = int(voice_time_le.text())
                         v_data["hotkey"] = voice_hk_cb.currentText()
@@ -6689,11 +6696,13 @@ class VoiceApp(QMainWindow):
         self._recording_active = False
         self._stop_requested = False
         self._session_id = 0
+        self._shortcut_sessions = set()
+        self._shortcut_next_recording = False
         self.load_config()
         self._compact_view = self.config.get("compact_view", False)
         self._active_language = self.config.get("language", "en-US")
         self.init_ui()
-        self.toggle_record_requested.connect(self.toggle_record)
+        self.toggle_record_requested.connect(self._toggle_record_from_hotkey)
         self.space_press_requested.connect(self._handle_space_press)
         self.transcription_ready.connect(self.on_dual_transcription)
         self.transcription_error.connect(self.on_error)
@@ -7524,6 +7533,10 @@ class VoiceApp(QMainWindow):
         else:
             self._start_single()
 
+    def _toggle_record_from_hotkey(self):
+        self._shortcut_next_recording = not self._recording_active and not self._live_recording
+        self.toggle_record()
+
     def _handle_space_press(self):
         handled = False
         if self._recording_active and self.config.get("stop_mode", "auto") == "space":
@@ -7548,6 +7561,9 @@ class VoiceApp(QMainWindow):
     def _start_single(self):
         self._session_id += 1
         session_id = self._session_id
+        if self._shortcut_next_recording:
+            self._shortcut_sessions.add(session_id)
+            self._shortcut_next_recording = False
         self._recording_active = True
         self._stop_requested = False
         self._set_status(CP_RED)
@@ -7626,6 +7642,20 @@ class VoiceApp(QMainWindow):
 
     def on_dual_transcription(self, session_id, english, bangla, english_error, bangla_error):
         if session_id != self._session_id:
+            return
+        if session_id in self._shortcut_sessions:
+            self._shortcut_sessions.discard(session_id)
+            language = self.config.get("shortcut_language", "en-US")
+            text = english if language == "en-US" else bangla
+            error = english_error if language == "en-US" else bangla_error
+            if text and text.strip():
+                paste_text(text.strip(), preserve_clipboard=False)
+                self._set_status(CP_GREEN)
+                self._update_status_icon_mode()
+                self._reset_record_btn()
+                self._recording_active = False
+            else:
+                self.on_error(session_id, error or "No speech recognized")
             return
         self._set_status(CP_GREEN)
         self._update_status_icon_mode()
@@ -7767,6 +7797,7 @@ class VoiceApp(QMainWindow):
                 paste_text(text, preserve_clipboard=False)
 
     def on_error(self, session_id, error):
+        self._shortcut_sessions.discard(session_id)
         if session_id != self._session_id:
             return
         if self._stop_requested:
