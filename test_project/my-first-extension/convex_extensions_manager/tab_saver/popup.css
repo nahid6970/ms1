@@ -792,6 +792,10 @@ body:has(.modal.show) .tab-list { overflow: hidden; }
 .tag-actions-row .tag-field { flex: 1 1 auto; min-width: 0; }
 .tag-actions-row .modal-actions { display: flex; flex: 0 0 auto; gap: 6px; padding-bottom: 1px; }
 .tag-actions-row .modal-actions .btn { flex: 0 0 auto; min-width: 56px; padding: 9px 10px; }
+.tag-actions-row .modal-inline-row .modal-select,
+.tag-actions-row #addTagBtn,
+.tag-actions-row .modal-actions .btn { height: 42px; min-height: 42px; }
+.tag-actions-row .modal-actions .btn { display: inline-flex; align-items: center; justify-content: center; padding-top: 0; padding-bottom: 0; }
 #deadlineModal .modal-theme-body { gap: 8px; padding: 12px 14px; max-height: calc(100vh - 56px); scrollbar-width: none; }
 #deadlineModal .modal-theme-body::-webkit-scrollbar { display: none; }
 #deadlineModal .modal-field { gap: 4px; }
