@@ -11269,11 +11269,6 @@ kiro-cli whoami --format json</code></pre>
                     localStorage.setItem(terminalTabsStoragePrefix + activeProject, paneIds.join(','));
                     localStorage.setItem(terminalActiveTabStoragePrefix + activeProject, activePaneId);
 
-                    fetch(`/api/projects/${encodeURIComponent(activeProject)}/terminal-tabs`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paneIds, activePaneId })
-                    }).catch(err => console.error('Failed to sync terminal tabs to server:', err));
                 }
             }
         }
@@ -11325,23 +11320,8 @@ kiro-cli whoami --format json</code></pre>
                 parent.className = 'split-tabs';
                 const useRealDir = localStorage.getItem('use-real-dir-prompt') === 'true';
 
-                let savedPaneIds = [];
-                let savedActivePaneId = '';
-                try {
-                    const tabRes = await fetch(`/api/projects/${encodeURIComponent(projectName)}/terminal-tabs`);
-                    if (tabRes.ok) {
-                        const tabData = await tabRes.json();
-                        if (Array.isArray(tabData.paneIds) && tabData.paneIds.length > 0) {
-                            savedPaneIds = tabData.paneIds;
-                            savedActivePaneId = tabData.activePaneId || savedPaneIds[0];
-                        }
-                    }
-                } catch (e) {}
-
-                if (!savedPaneIds.length) {
-                    savedPaneIds = getSavedTerminalPaneIds(projectName);
-                    savedActivePaneId = localStorage.getItem(terminalActiveTabStoragePrefix + projectName) || savedPaneIds[0];
-                }
+                const savedPaneIds = getSavedTerminalPaneIds(projectName);
+                const savedActivePaneId = localStorage.getItem(terminalActiveTabStoragePrefix + projectName) || savedPaneIds[0];
                 terminalTabRestoreDepth++;
                 try {
                     for (const paneId of savedPaneIds) {

@@ -1415,29 +1415,6 @@ def api_projects_save_layout(project):
     save_projects_config(projects)
     return jsonify({"success": True})
 
-@app.route('/api/projects/<project>/terminal-tabs', methods=['GET'])
-def api_projects_get_terminal_tabs(project):
-    terminal_tabs = get_config_val("terminal_tabs", dict)
-    proj_data = terminal_tabs.get(project, {})
-    return jsonify({
-        "paneIds": proj_data.get("paneIds", ["main"]),
-        "activePaneId": proj_data.get("activePaneId", "main")
-    })
-
-@app.route('/api/projects/<project>/terminal-tabs', methods=['POST'])
-def api_projects_save_terminal_tabs(project):
-    data = request.json or {}
-    pane_ids = data.get("paneIds", [])
-    active_pane_id = data.get("activePaneId", "")
-
-    terminal_tabs = get_config_val("terminal_tabs", dict)
-    terminal_tabs[project] = {
-        "paneIds": pane_ids,
-        "activePaneId": active_pane_id
-    }
-    set_config_val("terminal_tabs", terminal_tabs)
-    return jsonify({"success": True})
-
 @app.route('/api/sessions/reset', methods=['POST'])
 def api_sessions_reset():
     with sessions_lock:
