@@ -5390,7 +5390,7 @@ class StatusBar(QMainWindow):
 
         voice_hk_cb = QComboBox()
         voice_hk_cb.addItems(["RightAlt+Space", "RightAlt+H", "Ctrl+Space", "RightCtrl+Space", "RightCtrl+H", "Alt+H"])
-        voice_hk_cb.setCurrentText(v_cfg.get("hotkey", "RightAlt+Space"))
+        voice_hk_cb.setCurrentText(v_cfg.get("hotkey", "Ctrl+Space"))
         form_voice.addRow("HOTKEY", voice_hk_cb)
         left_col.addWidget(grp_voice)
         
@@ -6739,7 +6739,7 @@ class VoiceApp(QMainWindow):
                 "expanded_top_padding": 0,
                 "expanded_bottom_padding": 0,
                 "status_svg": DEFAULT_VOICE_STATUS_SVG,
-                "hotkey": "RightAlt+Space"
+                "hotkey": "Ctrl+Space"
             }
             self.save_config()
         if not self.config.get("status_svg"):
@@ -6788,7 +6788,7 @@ class VoiceApp(QMainWindow):
             self.config["expanded_bottom_padding"] = 0
             self.save_config()
         if "hotkey" not in self.config:
-            self.config["hotkey"] = "RightAlt+Space"
+            self.config["hotkey"] = "Ctrl+Space"
             self.save_config()
 
     def save_config(self):
@@ -7040,7 +7040,7 @@ class VoiceApp(QMainWindow):
         self.status_btn.setToolTip(f"Voice Input\nLeft Click: Record\nRight Click: Mode Menu\nCurrent: {labels.get(mode, mode)}")
 
     def show_help(self):
-        hotkey = self.config.get("hotkey", "RightAlt+Space")
+        hotkey = self.config.get("hotkey", "Ctrl+Space")
         QMessageBox.information(self, "Shortcut",
             f"Global Hotkey: {hotkey}\n"
             "SPC mode: Space stops recording\n"
@@ -7082,7 +7082,7 @@ class VoiceApp(QMainWindow):
 
         hotkey_combo = QComboBox()
         hotkey_combo.addItems(list(self.HOTKEY_OPTIONS.keys()))
-        hotkey_combo.setCurrentText(self.config.get("hotkey", "RightAlt+Space"))
+        hotkey_combo.setCurrentText(self.config.get("hotkey", "Ctrl+Space"))
         gen_layout.addWidget(QLabel("Global hotkey:"), 3, 0)
         gen_layout.addWidget(hotkey_combo, 3, 1)
         
@@ -7189,7 +7189,7 @@ class VoiceApp(QMainWindow):
             if new_hide != self.config.get("hide_record_btn", False):
                 self.config["hide_record_btn"] = new_hide
             new_hotkey = hotkey_combo.currentText()
-            if new_hotkey != self.config.get("hotkey", "RightAlt+Space"):
+            if new_hotkey != self.config.get("hotkey", "Ctrl+Space"):
                 self.config["hotkey"] = new_hotkey
                 self.restart_hotkey_listener()
             self._apply_window_layout(preserve_right_edge=True)
@@ -7343,8 +7343,8 @@ class VoiceApp(QMainWindow):
     }
 
     def setup_global_hotkey(self):
-        hotkey_name = self.config.get("hotkey", "RightAlt+Space")
-        mod_vk, trig_vk = self.HOTKEY_OPTIONS.get(hotkey_name, self.HOTKEY_OPTIONS["RightAlt+Space"])
+        hotkey_name = self.config.get("hotkey", "Ctrl+Space")
+        mod_vk, trig_vk = self.HOTKEY_OPTIONS.get(hotkey_name, self.HOTKEY_OPTIONS["Ctrl+Space"])
         self._hotkey_mod_pressed = False
 
         def _vk(key):
