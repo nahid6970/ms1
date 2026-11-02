@@ -1663,6 +1663,10 @@
         {
           "agent": "codex",
           "sessionId": "01a19ac0-88c5-7050-ac22-e63ac4141713"
+        },
+        {
+          "agent": "pi",
+          "sessionId": "01a19acb-ad1c-772e-9251-d664b151811f"
         }
       ],
       "handoffs": [
@@ -1672,16 +1676,17 @@
           "sourceAgent": "codex",
           "sourceSessionId": "01a19ac0-88c5-7050-ac22-e63ac4141713",
           "targetAgent": "pi",
-          "targetSessionId": null,
-          "status": "pending",
+          "targetSessionId": "01a19acb-ad1c-772e-9251-d664b151811f",
+          "status": "active",
           "createdAt": 1793598397.3841944
         }
       ],
       "activeHandoffId": "92c981ac-3298-43b0-8f31-b4874ed6e354",
       "activeAgent": "pi",
-      "activeSessionId": null,
-      "status": "pending",
-      "updatedAt": 1793598397.3841944
+      "activeSessionId": "01a19acb-ad1c-772e-9251-d664b151811f",
+      "status": "active",
+      "updatedAt": 1793598504.239952,
+      "title": "Reviewing implemented session handoff features"
     }
   ],
   "agent_session_title_overrides": {
@@ -1699,7 +1704,10 @@
       "codex:01a19211-b96a-7151-826a-af722ed57645": "Update token badge styling and colors",
       "kiro:86acf3e0-048c-44ee-aab1-48fc92374bba": "Style low token counts with gray color",
       "pi:01a193a3-8b42-732d-b41a-a2377822650e": "Update RECENT.md and verify token ranges",
-      "codex:01a19ac0-88c5-7050-ac22-e63ac4141713": "Implementing T3 Code Style Thread Handoff"
+      "codex:01a19ac0-88c5-7050-ac22-e63ac4141713": "Implementing T3 Code Style Thread Handoff",
+      "codex:01a197a6-f6a3-7812-939f-22a2d6b720a1": "Troubleshooting Kiro CLI Multi-Account Workarounds",
+      "codex:01a1958a-84f6-78a2-a90a-f2d971f489ad": "Auto-apply selected account to new terminal sessions",
+      "kiro:d108a669-5e6d-445a-bcc2-b977fac98c44": "Multiple Short Essays and Movie Recommendations"
     },
     "Screenshot Region": {
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",
@@ -1725,7 +1733,7 @@
         "pane-1793546976093-10",
         "pane-1793598397392-11"
       ],
-      "activePaneId": "pane-1793598397392-11"
+      "activePaneId": "pane-1793545625751-9"
     },
     "Gemini CLI": {
       "paneIds": [
@@ -1795,6 +1803,12 @@
         "pane-1793596367801-1"
       ],
       "activePaneId": "pane-1793596367801-1"
+    },
+    "Default": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
     }
   },
   "codex_usage_accounts": [
