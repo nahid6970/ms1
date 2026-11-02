@@ -5,6 +5,7 @@
   "description": "Save tabs to a list and close them. Restore them anytime!",
   "permissions": [
     "storage",
+    "unlimitedStorage",
     "tabs",
     "contextMenus",
     "scripting",

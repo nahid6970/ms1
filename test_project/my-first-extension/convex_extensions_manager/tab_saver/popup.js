@@ -263,6 +263,8 @@ function displayTabs(tabs) {
     if (tab.docLink) {
       docLinkHTML = `<a class="tab-doc-link" href="${tab.docLink}" target="_blank" title="${tab.docLink}" onclick="event.stopPropagation()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>`;
     }
+    const attachmentCount = Array.isArray(tab.attachments) ? tab.attachments.length : 0;
+    const attachmentHTML = `<button type="button" class="tab-attachments" title="${attachmentCount ? 'Click to open; right-click to add or remove files' : 'Attach files'}" aria-label="${attachmentCount ? 'Open attached files; right-click to manage' : 'Attach files'}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.82-2.82l8.49-8.48"/></svg>${attachmentCount ? `<span>${attachmentCount}</span>` : ''}</button>`;
     const noteHTML = tab.note?.trim() ? '<button type="button" class="tab-note" title="Show note" aria-label="Show note"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></button>' : '';
 
     // Tag HTML
@@ -322,6 +324,7 @@ function displayTabs(tabs) {
         <div class="tab-url">${tab.url}</div>
       </div>
       ${docLinkHTML}
+      ${attachmentHTML}
       ${noteHTML}
       ${tagHTML}
       ${deadlineHTML}
@@ -337,6 +340,18 @@ function displayTabs(tabs) {
         showNotePopover(noteBadge, tab.note, headerTitle);
       });
     }
+    const attachmentButton = tabItem.querySelector('.tab-attachments');
+    attachmentButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const files = Array.isArray(tab.attachments) ? tab.attachments : [];
+      if (!files.length) return chooseAttachments(tab.id);
+      if (files.length === 1) {
+        const link = document.createElement('a'); link.href = files[0].dataUrl; link.download = files[0].name; link.target = '_blank'; link.click();
+        return;
+      }
+      showAttachmentsMenu(attachmentButton, tab);
+    });
+    attachmentButton.addEventListener('contextmenu', (event) => { event.preventDefault(); event.stopPropagation(); showAttachmentsMenu(attachmentButton, tab); });
     tabInfo.addEventListener('click', () => {
       chrome.tabs.create({ url: tab.url });
     });
@@ -349,6 +364,40 @@ function displayTabs(tabs) {
     
     tabList.appendChild(tabItem);
   });
+}
+
+function updateAttachments(tabId, update) {
+  chrome.storage.local.get(['savedTabs'], ({ savedTabs = [] }) => {
+    const next = savedTabs.map(tab => tab.id === tabId ? { ...tab, attachments: update(Array.isArray(tab.attachments) ? tab.attachments : []) } : tab);
+    chrome.storage.local.set({ savedTabs: next }, loadTabs);
+  });
+}
+
+function chooseAttachments(tabId) {
+  const picker = document.createElement('input'); picker.type = 'file'; picker.multiple = true;
+  picker.onchange = async () => {
+    const files = await Promise.all([...picker.files].map(file => new Promise((resolve, reject) => {
+      const reader = new FileReader(); reader.onload = () => resolve({ name: file.name, type: file.type, dataUrl: reader.result }); reader.onerror = reject; reader.readAsDataURL(file);
+    })));
+    updateAttachments(tabId, existing => [...existing, ...files]);
+  };
+  picker.click();
+}
+
+function showAttachmentsMenu(button, tab) {
+  document.querySelectorAll('.attachment-menu').forEach(menu => menu.remove());
+  const menu = document.createElement('div'); menu.className = 'attachment-menu';
+  const add = document.createElement('button'); add.className = 'attachment-add'; add.textContent = '+ Add files'; add.onclick = () => chooseAttachments(tab.id); menu.appendChild(add);
+  (tab.attachments || []).forEach((file, index) => {
+    const row = document.createElement('div'); row.className = 'attachment-row';
+    const open = document.createElement('button'); open.className = 'attachment-open'; open.textContent = file.name; open.title = file.name;
+    open.onclick = () => { const link = document.createElement('a'); link.href = file.dataUrl; link.download = file.name; link.target = '_blank'; link.click(); };
+    const remove = document.createElement('button'); remove.className = 'attachment-remove'; remove.textContent = '×'; remove.title = 'Remove file'; remove.onclick = () => updateAttachments(tab.id, files => files.filter((_, i) => i !== index));
+    row.append(open, remove); menu.appendChild(row);
+  });
+  button.parentElement.appendChild(menu);
+  const close = event => { if (!menu.contains(event.target) && event.target !== button) { menu.remove(); document.removeEventListener('click', close); } };
+  setTimeout(() => document.addEventListener('click', close), 0);
 }
 
 function escapeMarkdownHtml(value) {

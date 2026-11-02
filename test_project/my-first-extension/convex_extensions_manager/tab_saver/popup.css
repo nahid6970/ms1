@@ -137,6 +137,7 @@ body {
 }
 
 .tab-item {
+  position: relative;
   display: flex;
   align-items: center;
   padding: 6px 12px;
@@ -275,6 +276,19 @@ body {
   border-color: #2d4fd6;
   transform: translateY(-1px);
 }
+
+.tab-attachments {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; margin-left: 4px; padding: 0; flex-shrink: 0;
+  border: 1px solid #a9b4c8; border-radius: 6px; background: #fff; color: #53627a; cursor: pointer;
+}
+.tab-attachments svg { width: 14px; height: 14px; }
+.tab-attachments span { position: absolute; right: -6px; top: -6px; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 8px; background: #667eea; color: white; font-size: 9px; line-height: 14px; }
+.attachment-menu { position: absolute; z-index: 20; right: 36px; top: 30px; width: 220px; max-height: 220px; overflow: auto; padding: 5px; background: white; border: 1px solid #d9d9e8; border-radius: 8px; box-shadow: 0 6px 18px #20204033; }
+.attachment-row { display: flex; align-items: center; gap: 4px; }
+.attachment-open, .attachment-add { flex: 1; min-width: 0; padding: 6px; border: 0; background: transparent; color: #34364a; text-align: left; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attachment-open:hover, .attachment-add:hover { background: #f0f2ff; }
+.attachment-remove { width: 24px; height: 24px; border: 0; border-radius: 4px; background: #fff0f0; color: #d33; cursor: pointer; }
 
 .tab-note {
   display: inline-flex;
