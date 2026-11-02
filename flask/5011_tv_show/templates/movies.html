@@ -92,7 +92,12 @@
     <div class="show-grid">
         {% for movie in movies %}
             <div class="movie-card{% if movie.watched %} completed{% endif %}{% if movie.archived %} archived{% endif %}" data-movie-id="{{ movie.id }}" data-title="{{ movie.title }}" data-year="{{ movie.year }}" data-watched="{{ 'true' if movie.watched else 'false' }}" data-archived="{{ 'true' if movie.archived else 'false' }}" data-category="{{ movie.category or '' }}" data-release-date="{{ movie.release_date or '' }}" data-digital-release="{{ movie.digital_release_date or '' }}">
-                <div class="library-card-title" title="{{ movie.title }}">{{ movie.title }}</div>
+                <div class="library-card-title" title="{{ movie.title }}">
+                    <span class="library-card-title-text">{{ movie.title }}</span>
+                    <button class="copy-card-title-button" type="button" title="Copy movie title" aria-label="Copy movie title" onclick="copyLibraryCardTitle(event, this)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+                    </button>
+                </div>
                 <div class="img-wrapper">
                     <img src="{{ movie.cover_image }}" alt="{{ movie.title }}">
                     <div class="hover-controls">

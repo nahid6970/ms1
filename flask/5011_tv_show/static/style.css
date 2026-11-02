@@ -265,6 +265,13 @@ body {
     background: #1c1c1c;
 }
 
+.library-card-title { display: flex; gap: 6px; }
+.library-card-title-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.copy-card-title-button { flex: 0 0 22px; width: 22px; height: 22px; padding: 2px; display: inline-flex; align-items: center; justify-content: center; color: #91a7c2; background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; }
+.copy-card-title-button:hover { color: #fff; border-color: #3b506c; background: #22334a; }
+.copy-card-title-button.is-copied { color: #34d399; border-color: #34d399; }
+.copy-card-title-button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
 .show-card .stars-container,
 .movie-card .stars-container {
     margin-top: 0;
@@ -2172,6 +2179,11 @@ body::before {
 }
 #episodesModal .episode-modal-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: nowrap; }
 #episodesModal .episode-modal-controls > * { margin: 0 !important; align-self: center; vertical-align: middle; }
+#episodesModal .episode-modal-title-group { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }
+#episodesModal .copy-show-title-button { display: inline-flex; flex: 0 0 30px; align-items: center; justify-content: center; width: 30px; height: 30px; padding: 0; color: #9fb2ca; background: transparent; border: 1px solid #3b506c; border-radius: 4px; cursor: pointer; transition: color .15s, background .15s, border-color .15s; }
+#episodesModal .copy-show-title-button:hover { color: #fff; background: #22334a; border-color: #587293; }
+#episodesModal .copy-show-title-button.is-copied { color: #34d399; border-color: #34d399; }
+#episodesModal .copy-show-title-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 #episodesModal .modal-title {
     min-width: 0;
     margin: 0;

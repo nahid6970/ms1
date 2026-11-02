@@ -103,7 +103,12 @@
     <div class="show-grid">
         {% for show in shows %}
             <div class="show-card{% if show.watched_count >= show.released_count and show.released_count > 0 %} completed{% endif %}{% if show.status == 'Ended' and show.watched_total_count == show.total_count and show.total_count > 0 %} ended-completed{% endif %}{% if show.archived %} archived{% endif %}" data-show-id="{{ show.id }}" data-title="{{ show.title }}" data-year="{{ show.year }}" data-status="{{ show.status or 'Continuing' }}" data-released-count="{{ show.released_count }}" data-watched-count="{{ show.watched_count }}" data-watched-total-count="{{ show.watched_total_count }}" data-total-count="{{ show.total_count }}" data-archived="{{ 'true' if show.archived else 'false' }}">
-                <div class="library-card-title" title="{{ show.title }}">{{ show.title }}</div>
+                <div class="library-card-title" title="{{ show.title }}">
+                    <span class="library-card-title-text">{{ show.title }}</span>
+                    <button class="copy-card-title-button" type="button" title="Copy show title" aria-label="Copy show title" onclick="copyLibraryCardTitle(event, this)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+                    </button>
+                </div>
                 <div class="img-wrapper">
                     <img src="{{ show.cover_image }}" alt="{{ show.title }}">
                     <div class="hover-controls">
@@ -337,7 +342,12 @@
     <div id="episodesModal" class="modal">
         <div class="modal-content episodes-modal-content">
             <div class="modal-header" style="padding-right: 30px;">
-                <h2 id="episodesModalTitle" class="modal-title"></h2>
+                <div class="episode-modal-title-group">
+                    <h2 id="episodesModalTitle" class="modal-title"></h2>
+                    <button id="copyShowTitleButton" class="copy-show-title-button" type="button" title="Copy show title" aria-label="Copy show title" onclick="copyShowTitle(this)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg>
+                    </button>
+                </div>
                 <div class="episode-modal-controls">
                     <!-- hidden selects keep existing JS logic intact -->
                     <select id="episodeSortType" class="modal-input episode-sort-select" title="Sort episodes by" hidden>

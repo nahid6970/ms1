@@ -609,6 +609,50 @@ function copyEpisodeLabel(showId, episodeId, dotEl) {
     }
 }
 
+function copyShowTitle(button) {
+    const title = document.getElementById('episodesModalTitle')?.textContent.trim();
+    if (!title) return;
+
+    const copied = () => {
+        button.title = 'Title copied!';
+        button.setAttribute('aria-label', 'Title copied');
+        button.classList.add('is-copied');
+        setTimeout(() => {
+            button.title = 'Copy show title';
+            button.setAttribute('aria-label', 'Copy show title');
+            button.classList.remove('is-copied');
+        }, 1200);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(title).then(copied).catch(() => fallbackCopy(title, copied));
+    } else {
+        fallbackCopy(title, copied);
+    }
+}
+
+function copyLibraryCardTitle(event, button) {
+    event?.stopPropagation();
+    event?.preventDefault();
+    const title = button.closest('.show-card, .movie-card')?.dataset.title?.trim();
+    if (!title) return;
+    const copied = () => {
+        button.title = 'Title copied!';
+        button.setAttribute('aria-label', 'Title copied');
+        button.classList.add('is-copied');
+        setTimeout(() => {
+            button.title = button.closest('.movie-card') ? 'Copy movie title' : 'Copy show title';
+            button.setAttribute('aria-label', button.title);
+            button.classList.remove('is-copied');
+        }, 1200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(title).then(copied).catch(() => fallbackCopy(title, copied));
+    } else {
+        fallbackCopy(title, copied);
+    }
+}
+
 function fallbackCopy(text, callback) {
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -731,7 +775,12 @@ function patchShowCard(s) {
     card.dataset.status = s.status || 'Continuing';
 
     const titleEl = card.querySelector('.library-card-title');
-    if (titleEl) { titleEl.textContent = s.title; titleEl.title = s.title; }
+    if (titleEl) {
+        const textEl = titleEl.querySelector('.library-card-title-text');
+        if (textEl) textEl.textContent = s.title;
+        else titleEl.textContent = s.title;
+        titleEl.title = s.title;
+    }
 
     const imgEl = card.querySelector('.img-wrapper img');
     if (imgEl && s.cover_image) { imgEl.src = s.cover_image; imgEl.alt = s.title; }

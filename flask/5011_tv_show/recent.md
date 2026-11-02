@@ -4,6 +4,8 @@ Flask/Python app with server-rendered Jinja templates, vanilla JavaScript, CSS, 
 
 # 2. Latest Implementation
 
+- `templates/index.html`, `templates/movies.html`, `static/script.js`, `static/style.css`: Added copy icons beside TV show and movie card titles; each copies its title and briefly shows copied feedback. The Episodes modal title copy button remains available too.
+
 - `templates/index.html`, `templates/movies.html`, `static/script.js`, `static/movies.js`, `static/style.css`, `app.py`: Added random schedule controls in the TV episode and movie metadata windows. Continuing and ended TV shows can each be randomized at a selected weekly/monthly cadence. Movies awaiting digital release use a selected weekly/monthly cadence; digitally released movies are unscheduled. Random times use the configured Auto Schedule window.
 
 - `templates/_settings_modal.html`, `static/script.js`, `app.py`: Added configurable Auto Schedule Start/End times. The Scheduled Episode Updates header action is now `RESCHEDULE`, which redistributes every active show across that time window, assigns Weekly weekdays and Monthly dates, and preserves `None` shows.
