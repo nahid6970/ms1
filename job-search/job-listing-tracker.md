@@ -5,7 +5,7 @@
 **Last updated:** 31 October 2026  
 **Tracked source:** [BD Govt Job — Bank Jobs](https://bdgovtjob.net/category/bank-jobs/)
 
-**Baseline checkpoint:** The newest listings on this category page were reviewed through **Bank Asia / Sr. Analyst–Analyst, Structured Finance (posted 28 Oct 2026)** on 31 Oct 2026. The five rows below establish the initial seen set. On the next scan, search newer entries and continue backward until reaching this known set; do not stop after five results.
+**Baseline checkpoint:** Scanned on **2 Nov 2026** through the newer entries on the category page and reached the known overlap at **Bank Asia / Sr. Analyst–Analyst, Structured Finance (posted 28 Oct 2026)**. All category entries dated after 28 Oct were reviewed; page 2 begins with 23 Oct, older than the checkpoint. Five distinct newer circulars were logged below (Nagad had two additional older/expired notices, not treated as new in this scan).
 
 ## Instructions for future checks
 
@@ -41,4 +41,9 @@ Add new records at the top of this table after each requested scan. Include one 
 
 | First seen | Source | Employer | Exact post / circular ID | Notice date | Deadline | Eligibility result | Status / changes |
 |---|---|---|---|---|---|---|---|
+| 2026-11-02 | [BD Govt Job](https://bdgovtjob.net/sonali-bank-limited-job-circular/) | Sonali Bank PLC | Supporting Staff-2 (Driver), 127 posts; regularization of current daily-wage drivers | 31 Oct 2026 | 8 Nov 2026 | ❌ Requires current Sonali daily-wage driver status, valid driving licence, and clean service record | New; not applicable to Nahid based on known profile |
+| 2026-11-02 | [BD Govt Job](https://bdgovtjob.net/mutual-trust-bank-limited-job-circular/) | Mutual Trust Bank | Management Trainee — MTB LEAD Line Program | 31 Oct 2026 | 18 Nov 2026 | ✅ Age, BBA/MBA CGPA, and SSC/HSC GPA meet stated minimums; posting anywhere in Bangladesh | New post; all strict profile details known and met |
+| 2026-11-02 | [BD Govt Job](https://bdgovtjob.net/nagad-job-circular/) | Nagad | Assistant Manager — Service Delivery | 29 Oct 2026 | 8 Nov 2026 | ❌ Requires engineering degree and 3–5 years of service-delivery/project-operations experience | New; not a profile match |
+| 2026-11-02 | [BD Govt Job](https://bdgovtjob.net/national-bank-limited-job-circular/) | National Bank Limited | Assistant Relationship Officer — Card Sales (Contractual) | 29 Oct 2026 | 10 Nov 2026 | ⚠️ Degree, grades, and age fit; fresher may apply; verify sales/customer-relations skills, Office proficiency, travel willingness, and actual branch | New post from previously seen employer; nationwide placement |
+| 2026-11-02 | [BD Govt Job](https://bdgovtjob.net/lankabangla-job-circular/) | LankaBangla Finance PLC | Credit Analyst, Retail Credit (AO–PO) | 29 Oct 2026 | 3 Nov 2026 | ⚠️ Degree and age fit; verify advanced Excel, credit/risk/financial-statement analysis skills; experience is preferred | New post from previously seen employer; Dhaka posting; deadline near |
 

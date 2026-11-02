@@ -1681,6 +1681,10 @@
     "myWizTree": {
       "kiro:d7130f25-9fd1-4471-9633-4a95d0dde425": "Auto-incrementing snapshot names and dropdown fix",
       "codex:01a14551-8649-7fe3-9e01-f3a09e13bb23": "Improve size change comparison colors and layout"
+    },
+    "TV Show - 5011": {
+      "codex:01a14e36-4bd0-74e1-8431-495d9937f732": "Fix Web App Install Missing Icon",
+      "codex:01a1430f-3870-74d3-88ee-c06d63e498b7": "Fixing npm Install Script Blocks Globally"
     }
   },
   "terminal_tabs": {
@@ -1724,15 +1728,42 @@
       "paneIds": [
         "main",
         "pane-1793550969476-1",
-        "pane-1793551018505-2"
+        "pane-1793551018505-2",
+        "pane-1793596247478-3"
       ],
-      "activePaneId": "pane-1793551018505-2"
+      "activePaneId": "pane-1793596247478-3"
     },
     "Speed-Hack": {
       "paneIds": [
         "main"
       ],
       "activePaneId": "main"
+    },
+    "TV Show - 5011": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    },
+    "Job Search": {
+      "paneIds": [
+        "main"
+      ],
+      "activePaneId": "main"
+    },
+    "db": {
+      "paneIds": [
+        "main",
+        "pane-1793596296033-1"
+      ],
+      "activePaneId": "pane-1793596296033-1"
+    },
+    "msBackups": {
+      "paneIds": [
+        "main",
+        "pane-1793596367801-1"
+      ],
+      "activePaneId": "pane-1793596367801-1"
     }
   },
   "codex_usage_accounts": [
