@@ -4881,7 +4881,6 @@ kiro-cli whoami --format json</code></pre>
         let activeProject = null;
         let wsfocusHistory = []; // tracks workspace focus order for fallback on close
         let workspaceBarClick = { projectName: null, clickedAt: 0, timer: null };
-        let terminalTabClick = { paneId: null, clickedAt: 0, timer: null };
         const PROJECT_FILTERS = ['all', 'github', 'rclone'];
         let projectFilterMode = localStorage.getItem('project-filter-mode') || 'all';
         if (!PROJECT_FILTERS.includes(projectFilterMode)) projectFilterMode = 'all';
@@ -5579,8 +5578,23 @@ kiro-cli whoami --format json</code></pre>
                 socket = pane.socket;
                 document.querySelectorAll('.terminal-pane').forEach(p => p.classList.remove('active-pane'));
                 pane.element.classList.add('active-pane');
+                terminalPanes.forEach(item => {
+                    item.element.style.display = item === pane ? '' : 'none';
+                    const tab = tabsContainer.querySelector(`.terminal-tab[data-pane-id="${item.paneId}"]`);
+                    if (!tab) return;
+                    const isActive = item === pane;
+                    tab.classList.toggle('active', isActive);
+                    tab.style.backgroundColor = isActive ? 'var(--bg-main)' : '#121824';
+                    tab.style.color = isActive ? accentCol : 'var(--text-secondary)';
+                    tab.style.borderLeftColor = isActive ? borderCol : 'var(--border-color)';
+                    tab.style.borderRightColor = isActive ? borderCol : 'var(--border-color)';
+                    tab.style.borderTopColor = isActive ? borderCol : 'var(--border-color)';
+                    tab.style.borderBottomColor = isActive ? 'var(--bg-main)' : borderCol;
+                    tab.style.marginBottom = isActive ? '-1px' : '0';
+                    tab.style.fontWeight = isActive ? '500' : 'normal';
+                    if (isActive) tab.querySelector('.terminal-tab-notification')?.remove();
+                });
                 pane.needsAttention = false;
-                updateTerminalTabs();
                 saveTerminalLayoutState();
                 setTimeout(() => {
                     try { pane.fitAddon.fit(); } catch (e) {}
@@ -5597,7 +5611,7 @@ kiro-cli whoami --format json</code></pre>
                 tab.className = `terminal-tab ${isActive ? 'active' : ''}`;
                 tab.dataset.testid = 'terminal-tab';
                 tab.dataset.paneId = pane.paneId;
-                tab.title = 'Click to activate; double-click to close';
+                tab.title = 'Click to activate; double-click or use × to close';
                 
                 // Base static styles
                 tab.style.display = 'flex';
@@ -5633,13 +5647,13 @@ kiro-cli whoami --format json</code></pre>
                 
                 // hover effect
                 tab.onmouseenter = () => {
-                    if (!isActive) {
+                    if (!tab.classList.contains('active')) {
                         tab.style.backgroundColor = '#1a2233';
                         tab.style.color = 'var(--text-primary)';
                     }
                 };
                 tab.onmouseleave = () => {
-                    if (!isActive) {
+                    if (!tab.classList.contains('active')) {
                         tab.style.backgroundColor = '#121824';
                         tab.style.color = 'var(--text-secondary)';
                     }
@@ -5669,23 +5683,12 @@ kiro-cli whoami --format json</code></pre>
                 
                 tab.onclick = (e) => {
                     e.stopPropagation();
-                    const now = Date.now();
-                    if (terminalTabClick.paneId === pane.paneId && now - terminalTabClick.clickedAt <= 500) {
-                        clearTimeout(terminalTabClick.timer);
-                        terminalTabClick = { paneId: null, clickedAt: 0, timer: null };
+                    if (e.detail > 1) {
                         closeTerminalPane(pane.paneId);
                         return;
                     }
-
-                    if (terminalTabClick.timer) clearTimeout(terminalTabClick.timer);
-                    const clickState = { paneId: pane.paneId, clickedAt: now, timer: null };
-                    clickState.timer = setTimeout(() => {
-                        if (terminalTabClick !== clickState) return;
-                        terminalTabClick = { paneId: null, clickedAt: 0, timer: null };
-                        const targetPane = terminalPanes.find(item => item.paneId === pane.paneId);
-                        if (targetPane) activateTerminalPane(targetPane);
-                    }, 550);
-                    terminalTabClick = clickState;
+                    const targetPane = terminalPanes.find(item => item.paneId === pane.paneId);
+                    if (targetPane) activateTerminalPane(targetPane);
                 };
                 
                 tabsContainer.appendChild(tab);
