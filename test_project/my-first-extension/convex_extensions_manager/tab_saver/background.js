@@ -136,12 +136,20 @@ async function loadDataFromConvex() {
 
 // Auto-save on storage changes (debounced to avoid rapid-fire Convex requests)
 let autoSaveTimer = null;
+function hasPendingAttachments(items) {
+  return (items.savedTabs || []).some(tab =>
+    (tab.attachments || []).some(file => file.dataUrl?.startsWith('data:') && !file.storageId)
+  );
+}
+
 chrome.storage.local.onChanged.addListener((changes, areaName) => {
   if (areaName === 'local') {
     updateBadge();
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(() => {
       chrome.storage.local.get(null, (items) => {
+        // New local files are uploaded when the user presses Apply in Edit.
+        if (hasPendingAttachments(items)) return;
         sendDataToConvex(items);
       });
     }, 1500);

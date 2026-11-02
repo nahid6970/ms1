@@ -685,6 +685,7 @@ document.getElementById('addAttachmentsBtn').addEventListener('click', () => {
 
 // Handle deadline and tag update
 document.getElementById('saveDeadlineBtn').onclick = () => {
+  const applyButton = document.getElementById('saveDeadlineBtn');
   const days = editDeadlineDays.value;
   const date = editDeadlineDate.value;
   const headerTitle = editHeaderTitle.value.trim();
@@ -714,10 +715,36 @@ document.getElementById('saveDeadlineBtn').onclick = () => {
       }
       return tab;
     });
+    const needsAttachmentUpload = updatedTabs.some(tab =>
+      tab.id === currentRightClickedTabId &&
+      (tab.attachments || []).some(file => file.dataUrl?.startsWith('data:') && !file.storageId)
+    );
     
     chrome.storage.local.set({ savedTabs: updatedTabs }, () => {
-      deadlineModal.classList.remove('show');
       loadTabs();
+      if (!needsAttachmentUpload) {
+        deadlineModal.classList.remove('show');
+        return;
+      }
+      applyButton.disabled = true;
+      applyButton.textContent = 'Saving…';
+      chrome.storage.local.get(null, items => {
+        chrome.runtime.sendMessage({ action: 'saveToConvex', data: items }, response => {
+          applyButton.disabled = false;
+          if (chrome.runtime.lastError || !response?.success) {
+            showButtonFeedback(applyButton, false, 'Sync failed');
+            setTimeout(() => { applyButton.textContent = 'Apply'; }, 2050);
+            console.error('Failed to sync edit and attachments:', chrome.runtime.lastError?.message || response?.error);
+            return;
+          }
+          applyButton.textContent = 'Applied';
+          setTimeout(() => {
+            deadlineModal.classList.remove('show');
+            loadTabs();
+            applyButton.textContent = 'Apply';
+          }, 450);
+        });
+      });
     });
   });
 };
