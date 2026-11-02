@@ -5389,7 +5389,7 @@ class StatusBar(QMainWindow):
         form_voice.addRow("MAX SPEAK (SEC)", voice_time_le)
 
         voice_hk_cb = QComboBox()
-        voice_hk_cb.addItems(["RightAlt+Space", "RightAlt+H", "RightCtrl+Space", "RightCtrl+H", "Alt+H"])
+        voice_hk_cb.addItems(["RightAlt+Space", "RightAlt+H", "Ctrl+Space", "RightCtrl+Space", "RightCtrl+H", "Alt+H"])
         voice_hk_cb.setCurrentText(v_cfg.get("hotkey", "RightAlt+Space"))
         form_voice.addRow("HOTKEY", voice_hk_cb)
         left_col.addWidget(grp_voice)
@@ -7336,6 +7336,7 @@ class VoiceApp(QMainWindow):
     HOTKEY_OPTIONS = {
         "RightAlt+Space": (165, 32),
         "RightAlt+H":     (165, ord('h')),
+        "Ctrl+Space":     (162, 32),
         "RightCtrl+Space":(163, 32),
         "RightCtrl+H":    (163, ord('h')),
         "Alt+H":          (None, ord('h')),
