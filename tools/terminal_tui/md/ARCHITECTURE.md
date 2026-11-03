@@ -61,7 +61,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
-- **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex, Pi, and Kiro CLI sessions scoped to the active workspace. It also launches Google Antigravity CLI (`agy`) or continues its latest conversation for the current workspace with `agy --continue`; Antigravity's own `/resume` command provides its conversation picker.
+- **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Selecting an Antigravity row resumes that conversation with `agy --conversation <id>`.
 - **AI quota indicators and profiles**: Codex, Kiro, and Antigravity icons with remaining percentages appear in the subprocess monitor. Settings → AI Usage & Accounts manages Codex and Kiro profiles and includes the Google Antigravity ACP runtime installer and one-time sign-in setup. Antigravity quota windows are read with the signed-in ACP OAuth profile; that profile is separate from `agy` and does not require an ACP process to remain active.
 - **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
 - **Ctrl+F**: Open terminal output search when a terminal pane is focused.
@@ -237,7 +237,7 @@ function prompt { ... }
 
 ### Sessions
 - `POST /api/session/<project>` - Start/connect terminal session
-- `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, and Kiro CLI conversations in the workspace, including rough readable-text token estimates
+- `GET /api/agent/sessions?project=<workspace>` - List saved Codex, Pi, Kiro CLI, and Antigravity CLI conversations, including rough readable-text token estimates where available
 - `GET /api/agent/session-context?project=<workspace>&agent=<agent>&sessionId=<id>&sessionPath=<path>` - Build editable context from a saved native session after validating its workspace and agent storage path
 - `POST /api/agent/handoffs` - Link the source session ID and native transcript path in a short prompt, then create a linked native session in the target agent
 - `DELETE /api/agent/session` - Permanently remove one validated native session file (and Kiro's transcript companion), then update linked conversation state

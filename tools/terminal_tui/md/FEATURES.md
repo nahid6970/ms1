@@ -68,7 +68,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume AI Agent Sessions
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, and Kiro CLI sessions for the active workspace. Its header also starts a new Google Antigravity CLI session with `agy` or continues the latest workspace conversation with `agy --continue`. Antigravity's own `/resume` picker can browse and search its conversation history; the AGENT list does not scrape Antigravity's private session data. Codex, Pi, and Kiro sessions resume through their native CLI flags.
+**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Antigravity sessions are read from its local conversation summary database and resume with the documented `agy --conversation <id>` command. Codex, Pi, and Kiro sessions resume through their native CLI flags.
 **Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse the sessions, then select one to resume it.
 **Files Involved:** `app.py` (`GET /api/agent/sessions`), `templates/index.html` (session picker modal and `resumeAgentSession()`)
 **Note:** The Kiro session picker currently reads JSON metadata from each profile's `sessions/cli` folder. Kiro CLI sessions stored only in its newer local database are not included by this file-based picker yet.
@@ -309,7 +309,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Unified Agent Sessions and Handoff
 **Status:** ✅ Complete
-**Description:** Browse saved Codex, Pi, and Kiro CLI sessions for the active workspace, resume native sessions, and start or continue a Google Antigravity CLI session with its documented `agy` commands.
+**Description:** Browse and resume saved Codex, Pi, Kiro CLI, and Google Antigravity CLI sessions from the AGENT session picker.
 **Implementation:** Session picker merges each agent's local session store and sorts by modification time. Each row shows an approximate token count beside the right-aligned session ID beneath its action buttons, estimated from readable user/assistant text. A handoff starts a new native target-agent session with a concise prompt containing the source agent, session ID, and original transcript file path. The target reads the source transcript directly; the source session is not copied or modified. The active switched session shows the chronological trail of surviving handoff agents beside the timestamp; the original row shows no trail when no switched session remains.
 **Files Involved:** `app.py` (routes: `/api/agent/sessions`, `/api/agent/session-context`, `/api/agent/handoffs`), `templates/index.html` (agent session picker and handoff dialog)
 **Usage:** Click **AGENT** beside the workspace selector, choose the switch icon on any session, select a different agent, and optionally add a short note. Use the adjacent trash icon to permanently delete one native session; other linked agent sessions remain.

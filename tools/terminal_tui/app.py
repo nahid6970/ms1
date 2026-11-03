@@ -2256,7 +2256,7 @@ def _estimate_agent_session_tokens(agent, session_path):
 @app.route('/api/agent/sessions', methods=['GET'])
 @app.route('/api/codex/sessions', methods=['GET'])
 def api_agent_sessions():
-    """List saved Codex, Pi, and Kiro conversations for the requested workspace."""
+    """List saved Codex, Pi, Kiro, and Antigravity CLI conversations."""
     project_name = (request.args.get('project') or '').strip()
     projects = scan_projects()
     project = next((item for item in projects if item['name'].casefold() == project_name.casefold()), None)
@@ -2344,6 +2344,60 @@ def api_agent_sessions():
                     })
                 except (OSError, ValueError, TypeError, AttributeError):
                     continue
+
+    # Antigravity CLI stores indexed session metadata in SQLite, not JSONL files.
+    try:
+        import sqlite3
+        from datetime import datetime as _datetime
+        from urllib.parse import unquote, urlparse
+
+        gemini_home = os.path.abspath(os.path.expandvars(os.path.expanduser(
+            os.environ.get('GEMINI_HOME') or os.environ.get('GEMINI_CLI_HOME') or os.path.join(profile_home, '.gemini')
+        )))
+        antigravity_summary_db = os.path.join(gemini_home, 'antigravity-cli', 'conversation_summaries.db')
+        if os.path.isfile(antigravity_summary_db):
+            db_uri = 'file:' + antigravity_summary_db.replace('\\', '/') + '?mode=ro'
+            with sqlite3.connect(db_uri, uri=True, timeout=1) as summary_db:
+                rows = summary_db.execute(
+                    'SELECT conversation_id, title, workspace_uris, last_modified_time '
+                    'FROM conversation_summaries ORDER BY last_modified_time DESC LIMIT 500'
+                ).fetchall()
+            for conversation_id, title, workspace_uris, modified_at in rows:
+                conversation_id = str(conversation_id or '')
+                if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', conversation_id):
+                    continue
+                try:
+                    uri_list = json.loads(workspace_uris or '[]')
+                except (ValueError, TypeError):
+                    uri_list = []
+                cwd = ''
+                if isinstance(uri_list, list) and uri_list:
+                    uri = str(uri_list[0] or '')
+                    parsed_uri = urlparse(uri)
+                    if parsed_uri.scheme == 'file':
+                        cwd = unquote(parsed_uri.path).lstrip('/') if re.match(r'^/[A-Za-z]:/', parsed_uri.path) else unquote(parsed_uri.path)
+                        if parsed_uri.netloc:
+                            cwd = f'\\\\{parsed_uri.netloc}{cwd.replace("/", "\\\\")}'
+                        else:
+                            cwd = cwd.replace('/', os.sep)
+                try:
+                    modified_value = str(modified_at or '')
+                    modified_value = re.sub(r'(\.\d{6})\d+', r'\1', modified_value)
+                    last_modified = _datetime.fromisoformat(modified_value.replace('Z', '+00:00')).timestamp()
+                except (ValueError, TypeError, OverflowError):
+                    last_modified = os.path.getmtime(antigravity_summary_db)
+                sessions.append({
+                    'agent': 'antigravity',
+                    'sessionId': conversation_id,
+                    'title': str(title or '').strip() or 'Antigravity conversation',
+                    'cwd': cwd,
+                    'lastModified': last_modified,
+                    'sessionPath': antigravity_summary_db,
+                    'tokenEstimate': 0,
+                    'isReadOnlySession': True,
+                })
+    except (OSError, sqlite3.Error, ValueError, TypeError, AttributeError):
+        pass
 
     sessions.sort(key=lambda item: item['lastModified'], reverse=True)
     conversations = get_config_val('agent_handoff_conversations', list)
