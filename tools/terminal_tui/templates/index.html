@@ -2046,7 +2046,8 @@
             --token-accent: #fb7185;
         }
         #monitor-codex-quota,
-        #monitor-kiro-quota {
+        #monitor-kiro-quota,
+        #monitor-antigravity-quota {
             display: none;
             align-items: center;
             gap: 5px;
@@ -2064,6 +2065,9 @@
         #monitor-codex-quota:hover { border-color: rgba(16,185,129,.7); background: rgba(16,185,129,.13); }
         #monitor-codex-quota:disabled,
         #monitor-kiro-quota:disabled { opacity: .65; cursor: wait; }
+        #monitor-antigravity-quota { border-color: rgba(34,211,238,.35); background: rgba(8,145,178,.08); color: #67e8f9; }
+        #monitor-antigravity-quota:hover { border-color: rgba(34,211,238,.75); background: rgba(8,145,178,.16); }
+        #monitor-antigravity-quota:disabled { opacity: .65; cursor: wait; }
         #monitor-kiro-quota { border-color: rgba(167,139,250,.35); background: rgba(139,92,246,.08); color: #c4b5fd; }
         #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
         #monitor-quota-group { display: inline-flex; align-items: center; gap: 4px; }
@@ -2351,6 +2355,10 @@
                         <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
                             <span id="monitor-kiro-icon" aria-hidden="true"></span>
                             <span id="monitor-kiro-quota-value">--</span>
+                        </button>
+                        <button id="monitor-antigravity-quota" type="button" data-testid="antigravity-quota-indicator" onclick="loadAntigravityUsage(true)" title="Antigravity quota — click to refresh" aria-label="Antigravity quota. Click to refresh">
+                            <span id="monitor-antigravity-icon" aria-hidden="true"></span>
+                            <span id="monitor-antigravity-quota-value">--</span>
                         </button>
                     </div>
                     <span id="monitor-git-info" style="display: none; align-items: center; gap: 6px; font-weight: 500; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background-color 0.2s;" onclick="openGitCommitModal()" onmouseenter="this.style.backgroundColor='rgba(56,189,248,0.1)'" onmouseleave="this.style.backgroundColor='transparent'" title="Click to commit and push">
@@ -3989,6 +3997,17 @@
                             <button type="button" id="settings-kiro-account-add" onclick="addKiroUsageAccount()" style="padding:4px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.76rem;cursor:pointer;">Add account</button>
                         </div>
                         <div id="settings-kiro-account-list" data-testid="kiro-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
+                    </div>
+                    <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;">Google Antigravity ACP</div>
+                        <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:var(--text-muted);">Checking ACP runtime…</div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
+                            <button type="button" id="settings-antigravity-acp-install" onclick="installAntigravityAcpRuntime()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Install ACP runtime (~560 MB)</button>
+                            <button type="button" id="settings-antigravity-acp-start" onclick="startAntigravityAcpSession()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Open ACP chat</button>
+                            <button type="button" id="settings-antigravity-continue" onclick="continueLatestAntigravitySession()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Continue latest chat</button>
+                            <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:var(--accent-color);">ACP runtime</a>
+                        </div>
+                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">ACP sign-in is separate from <code>agy</code>. Open ACP chat selects personal Google OAuth in the ACP settings, then the runtime handles sign-in. Requires Node.js 22.13+ and npm. The Antigravity usage badge reads quota windows with the signed-in ACP profile. Fixed-choice questions from the agent are not supported in this minimal ACP client.</div>
                     </div>
                 </div>
 
@@ -6762,6 +6781,7 @@ kiro-cli whoami --format json</code></pre>
                 if (document.visibilityState === 'visible') {
                     loadCodexLimits(true, false);
                     loadKiroUsage(true, false);
+                    loadAntigravityUsage(true, false);
                 }
             }, intervalMinutes * 60 * 1000);
         }
@@ -6907,13 +6927,72 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        let antigravityUsageLoadInFlight = false;
+        let antigravityUsageRefreshQueued = false;
+        async function loadAntigravityUsage(forceRefresh = false, queueIfBusy = true) {
+            if (antigravityUsageLoadInFlight) {
+                if (forceRefresh && queueIfBusy) antigravityUsageRefreshQueued = true;
+                return;
+            }
+            antigravityUsageLoadInFlight = true;
+            const button = document.getElementById('monitor-antigravity-quota');
+            const value = document.getElementById('monitor-antigravity-quota-value');
+            const icon = document.getElementById('monitor-antigravity-icon');
+            if (!button || !value) { antigravityUsageLoadInFlight = false; return; }
+            button.style.display = 'inline-flex';
+            button.disabled = true;
+            if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('antigravity', 13, 'monitor-antigravity-quota');
+            if (forceRefresh) value.textContent = '…';
+            try {
+                const cacheKey = 'ai-usage-cache:antigravity:default';
+                let data = readUsageBrowserCache(cacheKey, forceRefresh);
+                if (!data) {
+                    const query = new URLSearchParams();
+                    if (forceRefresh) query.set('refresh', 'true');
+                    query.set('cacheSeconds', String(getUsageServerCacheSeconds()));
+                    const response = await fetch(`/api/antigravity/usage?${query}`);
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Could not read Antigravity quota.');
+                    writeUsageBrowserCache(cacheKey, data);
+                }
+                if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
+                    value.textContent = '--';
+                    button.title = data.error || 'Sign in with Google through ACP to read Antigravity quota.';
+                    button.setAttribute('aria-label', button.title);
+                    return;
+                }
+                const primary = data.windows.find(item => item.id === 'gemini-5h') || data.windows[0];
+                value.textContent = `${Number(primary.leftPercent).toFixed(1)}%`;
+                const details = data.windows.map(item => {
+                    const reset = item.resetsAt ? ` · resets ${new Date(item.resetsAt).toLocaleString()}` : '';
+                    return `${item.label}: ${Number(item.leftPercent).toFixed(1)}% remaining${reset}`;
+                }).join(' | ');
+                button.title = `Antigravity · ${details} · Click to refresh`;
+                button.setAttribute('aria-label', `Antigravity Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
+            } catch (error) {
+                value.textContent = '--';
+                button.title = `Could not read Antigravity quota: ${String(error.message || error)}`;
+                button.setAttribute('aria-label', button.title);
+            } finally {
+                button.disabled = false;
+                antigravityUsageLoadInFlight = false;
+                if (antigravityUsageRefreshQueued) {
+                    antigravityUsageRefreshQueued = false;
+                    loadAntigravityUsage(true);
+                }
+            }
+        }
+
         loadCodexUsageAccounts().then(() => loadCodexLimits(false)).catch(() => loadCodexLimits(false));
         loadKiroUsageAccounts().then(() => loadKiroUsage(false)).catch(() => loadKiroUsage(false));
+        loadAntigravityUsage(false);
+        refreshAntigravityAcpStatus();
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
                 loadCodexLimits(false);
                 loadKiroUsage(false);
+                loadAntigravityUsage(false);
             }
         });
 
@@ -7121,8 +7200,122 @@ kiro-cli whoami --format json</code></pre>
             splitTerminal('tabs', `${locationCommand}${agentCommand}`);
         }
 
+        let antigravityAcpRuntimeStatus = null;
+
+        async function readAntigravityAcpResponse(response, endpoint) {
+            const body = await response.text();
+            try {
+                return JSON.parse(body);
+            } catch (_error) {
+                if (response.status === 404 || /<!doctype\s+html|<html/i.test(body.slice(0, 300))) {
+                    throw new Error(`The running app does not have the Antigravity ACP API (${endpoint}). Restart Terminal TUI, then refresh this page.`);
+                }
+                throw new Error(`The Antigravity ACP API returned an invalid response (HTTP ${response.status}).`);
+            }
+        }
+
+        async function refreshAntigravityAcpStatus() {
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            const startButton = document.getElementById('settings-antigravity-acp-start');
+            const installButton = document.getElementById('settings-antigravity-acp-install');
+            if (!statusEl) return null;
+            try {
+                const response = await fetch('/api/antigravity/acp');
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp');
+                if (!response.ok) throw new Error(data.error || 'Could not check the Antigravity ACP runtime.');
+                antigravityAcpRuntimeStatus = data;
+                if (!data.supported) {
+                    statusEl.textContent = data.error || 'The Antigravity ACP runtime is not supported on this system.';
+                    if (startButton) startButton.disabled = true;
+                    if (installButton) installButton.disabled = true;
+                    return data;
+                }
+                statusEl.textContent = data.installed
+                    ? `ACP runtime ${data.version} is installed (${data.architecture}). ${data.nodeVersion ? `Node.js ${data.nodeVersion} detected.` : 'Node.js 22.13+ and npm are required.'} ACP sign-in is managed separately from agy.`
+                    : `ACP runtime ${data.version} is not installed. The official Google download is about 560 MB. ${data.nodeVersion ? `Node.js ${data.nodeVersion} detected.` : 'Node.js 22.13+ and npm are required.'}`;
+                if (installButton) {
+                    installButton.disabled = Boolean(data.installed);
+                    if (data.installed) installButton.textContent = 'ACP runtime installed';
+                }
+                if (startButton) {
+                    startButton.disabled = !data.installed || !data.nodeAvailable;
+                    startButton.style.opacity = startButton.disabled ? '.55' : '1';
+                    startButton.title = !data.nodeAvailable ? 'Node.js and npx are required to run the ACP client.' : '';
+                }
+                return data;
+            } catch (error) {
+                statusEl.textContent = String(error.message || error);
+                if (startButton) startButton.disabled = true;
+                if (installButton) installButton.disabled = true;
+                return null;
+            }
+        }
+
+        async function installAntigravityAcpRuntime() {
+            const button = document.getElementById('settings-antigravity-acp-install');
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (!button || !statusEl) return;
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = 'Downloading ACP runtime…';
+            statusEl.textContent = 'Downloading and installing Google’s official ACP runtime. This is a large download; keep this page open.';
+            try {
+                const response = await fetch('/api/antigravity/acp/install', { method: 'POST' });
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/install');
+                if (!response.ok) throw new Error(data.error || 'Could not install the Antigravity ACP runtime.');
+                await refreshAntigravityAcpStatus();
+            } catch (error) {
+                statusEl.textContent = String(error.message || error);
+            } finally {
+                button.disabled = Boolean(antigravityAcpRuntimeStatus?.installed);
+                button.textContent = antigravityAcpRuntimeStatus?.installed ? 'ACP runtime installed' : originalText;
+            }
+        }
+
+        async function startAntigravityAcpSession() {
+            if (!activeProject) {
+                alert('Open a workspace first to start an Antigravity ACP session.');
+                return;
+            }
+            const status = antigravityAcpRuntimeStatus || await refreshAntigravityAcpStatus();
+            if (!status?.installed) {
+                alert('Install the Antigravity ACP runtime from Settings → AI Usage & Accounts first.');
+                return;
+            }
+            if (!status.nodeAvailable) {
+                alert('Install Node.js 22.13 or newer, then restart Terminal TUI.');
+                return;
+            }
+            const project = projects.find(item => item.name === activeProject);
+            const safePath = String(project?.path || '').replace(/'/g, "''");
+            const safeRuntimeDir = String(status.runtimeDirectory || '').replace(/'/g, "''");
+            const safeHelperPath = String(status.helperPath || '').replace(/'/g, "''");
+            const authSetup = [
+                "if (-not $env:GEMINI_HOME) { $env:GEMINI_HOME = Join-Path $env:USERPROFILE '.gemini' }",
+                "$settingsDirectory = Join-Path $env:GEMINI_HOME 'antigravity-acp'",
+                "$settingsPath = Join-Path $settingsDirectory 'settings.json'",
+                "New-Item -ItemType Directory -Path $settingsDirectory -Force | Out-Null",
+                "if (Test-Path -LiteralPath $settingsPath) { $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json } else { $settings = [pscustomobject]@{} }",
+                "if (-not $settings.auth) { $settings | Add-Member -NotePropertyName auth -NotePropertyValue ([pscustomobject]@{}) }",
+                "if ($settings.auth.PSObject.Properties['type']) { $settings.auth.type = 'oauth-personal' } else { $settings.auth | Add-Member -NotePropertyName type -NotePropertyValue 'oauth-personal' }",
+                "[IO.File]::WriteAllText($settingsPath, ($settings | ConvertTo-Json -Depth 32), [Text.UTF8Encoding]::new($false))",
+            ].join('; ');
+            const command = [
+                `$env:PATH = '${safeRuntimeDir};' + $env:PATH`,
+                `$env:ANTIGRAVITY_HARNESS_PATH = '${safeHelperPath}'`,
+                `$projectPath = '${safePath}'`,
+                authSetup,
+                `npx --yes acpx@latest --cwd $projectPath antigravity sessions ensure --name terminal-tui`,
+                `if ($LASTEXITCODE -eq 0) { while ($true) { $message = Read-Host 'You (type /exit to close)'; if ($message -eq '/exit') { break }; if (-not [string]::IsNullOrWhiteSpace($message)) { npx --yes acpx@latest --cwd $projectPath antigravity -s terminal-tui $message } } }`,
+            ].join('; ');
+            splitTerminal('tabs', command);
+        }
+
         function continueLatestAntigravitySession() {
-            if (!activeProject) return;
+            if (!activeProject) {
+                alert('Open a workspace first to continue an Antigravity chat.');
+                return;
+            }
             const project = projects.find(item => item.name === activeProject);
             const safePath = String(project?.path || '').replace(/'/g, "''");
             const locationCommand = safePath

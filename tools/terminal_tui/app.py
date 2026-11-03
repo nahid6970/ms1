@@ -88,6 +88,7 @@ import threading
 import subprocess
 import time
 import uuid
+import platform
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
 from winpty import PTY
@@ -1517,6 +1518,8 @@ _CODEX_LIMITS_CACHE_LOCK = threading.Lock()
 _CODEX_LIMITS_CACHE = {}
 _KIRO_USAGE_CACHE_LOCK = threading.Lock()
 _KIRO_USAGE_CACHE = {}
+_ANTIGRAVITY_USAGE_CACHE_LOCK = threading.Lock()
+_ANTIGRAVITY_USAGE_CACHE = {}
 
 
 def _codex_app_server_request(method, request_id, params=None, timeout=15, codex_home=None):
@@ -1699,6 +1702,122 @@ def _kiro_profile_entries(profile_home):
     return profiles
 
 
+_ANTIGRAVITY_ACP_VERSION = '1.4.1'
+_ANTIGRAVITY_ACP_INSTALL_LOCK = threading.Lock()
+
+
+def _antigravity_acp_runtime_paths():
+    """Return paths for the official Windows ACP runtime and its helper."""
+    architecture = platform.machine().lower()
+    arch_slug = 'arm64' if architecture in {'arm64', 'aarch64'} else 'x86_64'
+    local_app_data = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
+    install_dir = os.path.join(local_app_data, 'TerminalTUI', 'antigravity-acp', _ANTIGRAVITY_ACP_VERSION)
+    return {
+        'version': _ANTIGRAVITY_ACP_VERSION,
+        'architecture': arch_slug,
+        'directory': install_dir,
+        'server': os.path.join(install_dir, 'agy_acp_server.exe'),
+        'helper': os.path.join(install_dir, 'localharness_external.exe'),
+    }
+
+
+@app.route('/api/antigravity/acp', methods=['GET'])
+def api_antigravity_acp_status():
+    """Report whether the official Antigravity ACP runtime is installed locally."""
+    if os.name != 'nt':
+        return jsonify({'supported': False, 'installed': False, 'error': 'The current app terminal backend is Windows-only.'})
+    paths = _antigravity_acp_runtime_paths()
+    installed = os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])
+    node_path = shutil.which('node')
+    npx_path = shutil.which('npx')
+    node_version = ''
+    node_compatible = False
+    if node_path:
+        try:
+            version_result = subprocess.run(
+                [node_path, '--version'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                text=True, encoding='utf-8', errors='replace', timeout=3,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+            )
+            node_version = version_result.stdout.strip()
+            match = re.search(r'v?(\d+)\.(\d+)\.(\d+)', node_version)
+            if match:
+                node_compatible = tuple(map(int, match.groups())) >= (22, 13, 0)
+        except (OSError, subprocess.SubprocessError):
+            pass
+    return jsonify({
+        'supported': True,
+        'installed': installed,
+        'version': paths['version'],
+        'architecture': paths['architecture'],
+        'runtimeDirectory': paths['directory'],
+        'serverPath': paths['server'] if installed else None,
+        'helperPath': paths['helper'] if installed else None,
+        'nodeAvailable': bool(npx_path and node_compatible),
+        'nodeVersion': node_version,
+    })
+
+
+@app.route('/api/antigravity/acp/install', methods=['POST'])
+def api_antigravity_acp_install():
+    """Install Google's official Antigravity ACP runtime after an explicit UI action."""
+    if os.name != 'nt':
+        return jsonify({'error': 'The current app terminal backend is Windows-only.'}), 501
+    paths = _antigravity_acp_runtime_paths()
+    if paths['architecture'] not in {'x86_64', 'arm64'}:
+        return jsonify({'error': f"Windows {paths['architecture']} is not supported by the Antigravity ACP runtime."}), 501
+    if os.path.isfile(paths['server']) and os.path.isfile(paths['helper']):
+        return jsonify({'installed': True, 'version': paths['version'], 'directory': paths['directory']})
+
+    archive_url = (
+        'https://dl.google.com/agy-extensions/releases/windows/'
+        f"agy-acp-server-{paths['version']}-windows-{paths['architecture']}.zip"
+    )
+    with _ANTIGRAVITY_ACP_INSTALL_LOCK:
+        if os.path.isfile(paths['server']) and os.path.isfile(paths['helper']):
+            return jsonify({'installed': True, 'version': paths['version'], 'directory': paths['directory']})
+        import tempfile
+        import urllib.error
+        import urllib.request
+        import zipfile
+
+        parent = os.path.dirname(paths['directory'])
+        os.makedirs(parent, exist_ok=True)
+        stage_dir = tempfile.mkdtemp(prefix='.antigravity-acp-', dir=parent)
+        archive_path = os.path.join(stage_dir, 'runtime.zip')
+        extract_dir = os.path.join(stage_dir, 'extracted')
+        os.makedirs(extract_dir, exist_ok=True)
+        try:
+            with urllib.request.urlopen(archive_url, timeout=60) as response, open(archive_path, 'wb') as archive_file:
+                shutil.copyfileobj(response, archive_file, length=1024 * 1024)
+            with zipfile.ZipFile(archive_path) as archive:
+                stage_root = os.path.realpath(extract_dir)
+                for member in archive.infolist():
+                    destination = os.path.realpath(os.path.join(extract_dir, member.filename))
+                    if os.path.commonpath([stage_root, destination]) != stage_root:
+                        raise ValueError('The downloaded ACP archive contains an unsafe path.')
+                archive.extractall(extract_dir)
+            runtime_files = {}
+            for root, _dirs, filenames in os.walk(extract_dir):
+                for required in ('agy_acp_server.exe', 'localharness_external.exe'):
+                    if required in filenames:
+                        runtime_files[required] = os.path.join(root, required)
+            if len(runtime_files) != 2:
+                raise ValueError('The ACP download did not contain both required runtime files.')
+            prepared_dir = os.path.join(stage_dir, 'runtime')
+            os.makedirs(prepared_dir, exist_ok=True)
+            for filename, source in runtime_files.items():
+                shutil.copy2(source, os.path.join(prepared_dir, filename))
+            if os.path.isdir(paths['directory']):
+                shutil.rmtree(paths['directory'])
+            os.replace(prepared_dir, paths['directory'])
+            return jsonify({'installed': True, 'version': paths['version'], 'directory': paths['directory']})
+        except (OSError, ValueError, zipfile.BadZipFile, urllib.error.URLError) as exc:
+            return jsonify({'error': f'Could not install the Antigravity ACP runtime: {exc}'}), 502
+        finally:
+            shutil.rmtree(stage_dir, ignore_errors=True)
+
+
 @app.route('/api/kiro/accounts', methods=['GET', 'POST', 'DELETE'])
 def api_kiro_accounts():
     """Manage separate Kiro homes used for sign-ins and saved sessions."""
@@ -1877,6 +1996,117 @@ def api_kiro_usage():
 
     with _KIRO_USAGE_CACHE_LOCK:
         _KIRO_USAGE_CACHE[cache_key] = {'fetched_at': time.monotonic(), 'data': data}
+    return jsonify(data)
+
+
+def _read_antigravity_usage():
+    """Read Antigravity's reported quota windows using the local ACP OAuth profile."""
+    import requests
+
+    profile_home = os.path.abspath(os.path.expandvars(os.path.expanduser(
+        os.environ.get('GEMINI_HOME') or os.path.join(os.environ.get('USERPROFILE') or os.path.expanduser('~'), '.gemini')
+    )))
+    token_path = os.path.join(profile_home, 'antigravity-acp', 'acp_token.json')
+    try:
+        with open(token_path, 'r', encoding='utf-8') as token_file:
+            token = json.load(token_file)
+    except FileNotFoundError as exc:
+        raise RuntimeError('Sign in once with Open ACP chat to enable Antigravity usage.') from exc
+    except (OSError, ValueError) as exc:
+        raise RuntimeError('Could not read the Antigravity ACP sign-in profile.') from exc
+
+    required = ('client_id', 'client_secret', 'refresh_token')
+    if not isinstance(token, dict) or any(not token.get(key) for key in required):
+        raise RuntimeError('The Antigravity ACP sign-in profile is incomplete. Sign in again from Settings.')
+    refreshed = requests.post('https://oauth2.googleapis.com/token', data={
+        'client_id': token['client_id'],
+        'client_secret': token['client_secret'],
+        'refresh_token': token['refresh_token'],
+        'grant_type': 'refresh_token',
+    }, timeout=12)
+    if not refreshed.ok:
+        raise RuntimeError('Could not refresh Google sign-in for Antigravity usage. Reopen ACP chat to sign in again.')
+    access_token = (refreshed.json() or {}).get('access_token')
+    if not access_token:
+        raise RuntimeError('Google did not return an access token for Antigravity usage.')
+
+    machine = platform.machine().lower()
+    architecture = 'amd64' if machine in {'amd64', 'x86_64'} else 'arm64' if machine in {'arm64', 'aarch64'} else machine
+    os_type = {'windows': 'win32', 'darwin': 'darwin', 'linux': 'linux'}.get(platform.system().lower(), platform.system().lower())
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+        'User-Agent': f'antigravity/hub/2.24.0 (aidev_client; os_type={os_type}; arch={architecture}; cl=963137146)',
+    }
+    payload = {'project': token['project_id']} if token.get('project_id') else {}
+    merged = {}
+    errors = []
+    for host in ('daily-cloudcode-pa.googleapis.com', 'cloudcode-pa.googleapis.com'):
+        try:
+            response = requests.post(
+                f'https://{host}/v1internal:retrieveUserQuotaSummary',
+                headers=headers, json=payload, timeout=10,
+            )
+            response.raise_for_status()
+            summary = response.json()
+            groups = summary.get('groups') or [{'buckets': summary.get('buckets', [])}]
+            for group in groups:
+                group_name = str(group.get('displayName') or '').strip()
+                for bucket in group.get('buckets') or []:
+                    if bucket.get('disabled') or not isinstance(bucket.get('remainingFraction'), (int, float)):
+                        continue
+                    bucket_id = str(bucket.get('bucketId') or '')
+                    if bucket_id.startswith('gemini-argon-'):
+                        family = group_name or 'Gemini Argon'
+                    elif bucket_id.startswith('gemini-'):
+                        family = 'Gemini'
+                    elif bucket_id.startswith('3p-'):
+                        family = 'Claude & GPT (shared)'
+                    else:
+                        family = group_name or bucket_id or 'Antigravity'
+                    window = bucket.get('window')
+                    cadence = {'5h': '5-hour', 'weekly': 'Weekly'}.get(window, str(bucket.get('displayName') or 'Quota'))
+                    remaining = max(0.0, min(1.0, float(bucket['remainingFraction'])))
+                    row = {
+                        'id': bucket_id,
+                        'label': f'{family} · {cadence}',
+                        'leftPercent': round(remaining * 100, 1),
+                        'usedPercent': round((1 - remaining) * 100, 1),
+                        'resetsAt': bucket.get('resetTime'),
+                    }
+                    previous = merged.get(bucket_id)
+                    if previous is None or row['usedPercent'] > previous['usedPercent']:
+                        merged[bucket_id] = row
+        except (requests.RequestException, ValueError, TypeError) as exc:
+            errors.append(str(exc))
+
+    windows = list(merged.values())
+    if not windows:
+        raise RuntimeError('Google did not return Antigravity quota windows.' + (f' {errors[0]}' if errors else ''))
+    windows.sort(key=lambda item: (item['label'].split(' · ')[0] != 'Gemini', item['label'].split(' · ')[-1] != '5-hour'))
+    primary = next((item for item in windows if item['id'] == 'gemini-5h'), windows[0])
+    return {'available': True, 'windows': windows, 'leftPercent': primary['leftPercent'],
+            'fetchedAt': int(time.time()), 'accountName': 'Antigravity ACP'}
+
+
+@app.route('/api/antigravity/usage', methods=['GET'])
+def api_antigravity_usage():
+    """Return reported Antigravity quota windows from the authenticated ACP profile."""
+    force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
+    try:
+        cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
+    except (TypeError, ValueError):
+        cache_seconds = 120
+    with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+        cached = _ANTIGRAVITY_USAGE_CACHE.get('default')
+        if not force_refresh and cache_seconds and cached and time.monotonic() - cached['fetched_at'] < cache_seconds:
+            return jsonify(cached['data'])
+    try:
+        data = _read_antigravity_usage()
+    except (OSError, RuntimeError, TimeoutError, ValueError, TypeError) as exc:
+        data = {'available': False, 'windows': [], 'error': str(exc), 'fetchedAt': int(time.time())}
+    with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+        _ANTIGRAVITY_USAGE_CACHE['default'] = {'fetched_at': time.monotonic(), 'data': data}
     return jsonify(data)
 
 

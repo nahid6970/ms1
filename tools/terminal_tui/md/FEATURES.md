@@ -203,6 +203,9 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Right-click the Codex quota badge to rotate the displayed quota between the default login and saved profiles
 - Independent settings for visible auto-refresh cadence, browser snapshot reuse, and backend CLI-result caching, with an info popup explaining each interval
 - Kiro included credits remaining and monthly reset date from `kiro-cli /usage`
+- Google Antigravity CLI start/continue actions in Settings and the AGENT picker
+- Google Antigravity usage badge reads remaining 5-hour and weekly quota windows using the signed-in ACP profile, and shows detailed windows and reset times on hover; click the badge to refresh
+- Optional Google Antigravity ACP integration: install the official Windows runtime from Settings, then start a persistent per-workspace ACP session through `acpx`; starting the session selects personal Google OAuth in the ACP runtime settings without storing credentials, and sign-in is separate from `agy`
 - Manual refresh from each provider badge; optional shared 1/2/5/10/15-minute refresh interval
 
 ---
