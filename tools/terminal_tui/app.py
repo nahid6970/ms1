@@ -526,7 +526,12 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         # Spawn PowerShell with custom profile, bypassing main user profile
         profile_path_clean = profile_path.replace("/", "\\")
         import base64
+        local_app_data = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
+        antigravity_cli_bin = os.path.join(local_app_data, 'agy', 'bin')
         ps_cmd = f". '{profile_path_clean}'"
+        if os.path.isdir(antigravity_cli_bin):
+            safe_antigravity_cli_bin = antigravity_cli_bin.replace("'", "''")
+            ps_cmd = f"$env:PATH = '{safe_antigravity_cli_bin};' + $env:PATH; {ps_cmd}"
         encoded = base64.b64encode(ps_cmd.encode('utf-16-le')).decode('ascii')
         # No -NoProfile — let pwsh load the user's default $PROFILE first,
         # then the workspace profile (history path, custom cd, prompt) runs on top.
@@ -1721,6 +1726,39 @@ def _antigravity_acp_runtime_paths():
     }
 
 
+def _antigravity_acp_profile_home():
+    return os.path.abspath(os.path.expandvars(os.path.expanduser(
+        os.environ.get('GEMINI_HOME') or os.path.join(os.environ.get('USERPROFILE') or os.path.expanduser('~'), '.gemini')
+    )))
+
+
+def _antigravity_acp_token_path():
+    return os.path.join(_antigravity_acp_profile_home(), 'antigravity-acp', 'acp_token.json')
+
+
+def _antigravity_acp_is_authenticated():
+    """Check both ACP's profile token file and its Windows Credential Manager entry."""
+    if os.path.isfile(_antigravity_acp_token_path()):
+        return True
+    if os.name != 'nt':
+        return False
+    system_root = os.environ.get('SystemRoot', r'C:\Windows')
+    cmdkey_path = os.path.join(system_root, 'System32', 'cmdkey.exe')
+    if not os.path.isfile(cmdkey_path):
+        cmdkey_path = shutil.which('cmdkey')
+    if not cmdkey_path:
+        return False
+    try:
+        result = subprocess.run(
+            [cmdkey_path, '/list'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding='utf-8', errors='replace', timeout=5,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+        return result.returncode == 0 and 'target=gemini:antigravity' in result.stdout.casefold()
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 @app.route('/api/antigravity/acp', methods=['GET'])
 def api_antigravity_acp_status():
     """Report whether the official Antigravity ACP runtime is installed locally."""
@@ -1728,6 +1766,7 @@ def api_antigravity_acp_status():
         return jsonify({'supported': False, 'installed': False, 'error': 'The current app terminal backend is Windows-only.'})
     paths = _antigravity_acp_runtime_paths()
     installed = os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])
+    authenticated = _antigravity_acp_is_authenticated()
     node_path = shutil.which('node')
     npx_path = shutil.which('npx')
     node_version = ''
@@ -1748,6 +1787,7 @@ def api_antigravity_acp_status():
     return jsonify({
         'supported': True,
         'installed': installed,
+        'authenticated': authenticated,
         'version': paths['version'],
         'architecture': paths['architecture'],
         'runtimeDirectory': paths['directory'],
@@ -1756,6 +1796,63 @@ def api_antigravity_acp_status():
         'nodeAvailable': bool(npx_path and node_compatible),
         'nodeVersion': node_version,
     })
+
+
+@app.route('/api/antigravity/acp/logout', methods=['POST'])
+def api_antigravity_acp_logout():
+    """Sign out through Google's official ACP logout command."""
+    if os.name != 'nt':
+        return jsonify({'error': 'Antigravity ACP sign-out is currently supported only on Windows.'}), 501
+    payload = request.get_json(silent=True) or {}
+    project_name = str(payload.get('project') or '').strip()
+    project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
+    if not project:
+        return jsonify({'error': 'Open a workspace before signing out of Antigravity ACP.'}), 400
+    paths = _antigravity_acp_runtime_paths()
+    if not (os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])):
+        return jsonify({'error': 'Install the Antigravity ACP runtime first.'}), 400
+    npx_path = shutil.which('npx')
+    if not npx_path:
+        return jsonify({'error': 'Node.js and npx are required for ACP sign-out.'}), 400
+
+    process_env = os.environ.copy()
+    local_app_data = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
+    agy_bin = os.path.join(local_app_data, 'agy', 'bin')
+    process_env['PATH'] = os.pathsep.join(part for part in (paths['directory'], agy_bin, process_env.get('PATH', '')) if part)
+    process_env['ANTIGRAVITY_HARNESS_PATH'] = paths['helper']
+    process_env['GEMINI_HOME'] = _antigravity_acp_profile_home()
+    if os.path.isfile(_antigravity_acp_token_path()):
+        process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
+    else:
+        process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
+    cwd = project['path']
+    command_prefix = [npx_path, '--yes', 'acpx@latest', '--cwd', cwd, 'antigravity']
+    creationflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+    try:
+        ensure_result = subprocess.run(
+            command_prefix + ['sessions', 'ensure', '--name', 'terminal-tui-auth'],
+            cwd=cwd, env=process_env, stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding='utf-8', errors='replace', timeout=90, creationflags=creationflags,
+        )
+        if ensure_result.returncode != 0:
+            detail = (ensure_result.stderr or ensure_result.stdout or '').strip()[-800:]
+            return jsonify({'error': detail or 'Could not connect to the Antigravity ACP runtime.'}), 502
+        logout_result = subprocess.run(
+            command_prefix + ['-s', 'terminal-tui-auth', '/logout'],
+            cwd=cwd, env=process_env, stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding='utf-8', errors='replace', timeout=90, creationflags=creationflags,
+        )
+        if logout_result.returncode != 0:
+            detail = (logout_result.stderr or logout_result.stdout or '').strip()[-800:]
+            return jsonify({'error': detail or 'Google ACP sign-out did not complete.'}), 502
+    except (OSError, subprocess.SubprocessError) as exc:
+        return jsonify({'error': f'Could not sign out of Antigravity ACP: {exc}'}), 502
+
+    with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+        _ANTIGRAVITY_USAGE_CACHE.pop('default', None)
+    return jsonify({'success': True, 'authenticated': _antigravity_acp_is_authenticated()})
 
 
 @app.route('/api/antigravity/acp/install', methods=['POST'])
@@ -2003,15 +2100,13 @@ def _read_antigravity_usage():
     """Read Antigravity's reported quota windows using the local ACP OAuth profile."""
     import requests
 
-    profile_home = os.path.abspath(os.path.expandvars(os.path.expanduser(
-        os.environ.get('GEMINI_HOME') or os.path.join(os.environ.get('USERPROFILE') or os.path.expanduser('~'), '.gemini')
-    )))
+    profile_home = _antigravity_acp_profile_home()
     token_path = os.path.join(profile_home, 'antigravity-acp', 'acp_token.json')
     try:
         with open(token_path, 'r', encoding='utf-8') as token_file:
             token = json.load(token_file)
     except FileNotFoundError as exc:
-        raise RuntimeError('Sign in once with Settings → AI Usage & Accounts → Set up ACP sign-in to enable Antigravity usage.') from exc
+        raise RuntimeError('Sign in with Settings → AI Usage & Accounts → Google Antigravity ACP to enable Antigravity usage.') from exc
     except (OSError, ValueError) as exc:
         raise RuntimeError('Could not read the Antigravity ACP sign-in profile.') from exc
 

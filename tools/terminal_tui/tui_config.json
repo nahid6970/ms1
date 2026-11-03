@@ -1707,7 +1707,8 @@
       "codex:01a19ac0-88c5-7050-ac22-e63ac4141713": "Implementing T3 Code Style Thread Handoff",
       "codex:01a197a6-f6a3-7812-939f-22a2d6b720a1": "Troubleshooting Kiro CLI Multi-Account Workarounds",
       "codex:01a1958a-84f6-78a2-a90a-f2d971f489ad": "Auto-apply selected account to new terminal sessions",
-      "kiro:d108a669-5e6d-445a-bcc2-b977fac98c44": "Multiple Short Essays and Movie Recommendations"
+      "kiro:d108a669-5e6d-445a-bcc2-b977fac98c44": "Multiple Short Essays and Movie Recommendations",
+      "codex:01a19f7d-0436-7200-a6a8-04e88d26542c": "Fixing Google ACP Sign In and Sign Out UI"
     },
     "Screenshot Region": {
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",

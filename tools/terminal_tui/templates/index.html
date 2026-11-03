@@ -4003,10 +4003,10 @@
                         <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:var(--text-muted);">Checking ACP runtime…</div>
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
                             <button type="button" id="settings-antigravity-acp-install" onclick="installAntigravityAcpRuntime()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Install ACP runtime (~560 MB)</button>
-                            <button type="button" id="settings-antigravity-acp-start" onclick="setupAntigravityAcpSignIn()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Set up ACP sign-in</button>
+                            <button type="button" id="settings-antigravity-acp-auth" onclick="toggleAntigravityAcpAuth()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Sign in</button>
                             <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:var(--accent-color);">ACP runtime</a>
                         </div>
-                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">ACP sign-in is separate from <code>agy</code>. Set up ACP sign-in only once to create the Google OAuth profile. Usage checks use its saved refresh token directly; no ACP chat or background agent process is needed. Requires Node.js 22.13+ and npm for sign-in setup.</div>
+                            <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">ACP sign-in is separate from <code>agy</code>. This button signs in or out of the Google account. Sign-in opens a terminal for Google’s browser flow; usage checks use the saved ACP profile directly, with no background agent process.</div>
                     </div>
                 </div>
 
@@ -7155,7 +7155,7 @@ kiro-cli whoami --format json</code></pre>
                 const safeSessionPath = String(session.sessionPath || '').replace(/'/g, "''");
                 command = `pi --approve --session '${safeSessionPath}'`;
             } else if (session.agent === 'antigravity') {
-                command = `agy --conversation ${session.sessionId}`;
+                command = `$env:PATH = (Join-Path (Join-Path $env:LOCALAPPDATA 'agy') 'bin') + ';' + $env:PATH; agy --conversation ${session.sessionId}`;
             } else if (session.agent === 'kiro') {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
                 const safeKiroHome = String(session.kiroHome || '').replace(/'/g, "''");
@@ -7183,7 +7183,10 @@ kiro-cli whoami --format json</code></pre>
                     : agent === 'codex' ? 'codex --yolo'
                         : null;
             if (!agentCommand) return;
-            splitTerminal('tabs', `${locationCommand}${agentCommand}`);
+            const antigravityPathSetup = agent === 'antigravity'
+                ? `$env:PATH = (Join-Path (Join-Path $env:LOCALAPPDATA 'agy') 'bin') + ';' + $env:PATH; `
+                : '';
+            splitTerminal('tabs', `${locationCommand}${antigravityPathSetup}${agentCommand}`);
         }
 
         let antigravityAcpRuntimeStatus = null;
@@ -7202,7 +7205,7 @@ kiro-cli whoami --format json</code></pre>
 
         async function refreshAntigravityAcpStatus() {
             const statusEl = document.getElementById('settings-antigravity-acp-status');
-            const startButton = document.getElementById('settings-antigravity-acp-start');
+            const authButton = document.getElementById('settings-antigravity-acp-auth');
             const installButton = document.getElementById('settings-antigravity-acp-install');
             if (!statusEl) return null;
             try {
@@ -7212,26 +7215,30 @@ kiro-cli whoami --format json</code></pre>
                 antigravityAcpRuntimeStatus = data;
                 if (!data.supported) {
                     statusEl.textContent = data.error || 'The Antigravity ACP runtime is not supported on this system.';
-                    if (startButton) startButton.disabled = true;
+                    if (authButton) authButton.disabled = true;
                     if (installButton) installButton.disabled = true;
                     return data;
                 }
                 statusEl.textContent = data.installed
-                    ? `ACP runtime ${data.version} is installed (${data.architecture}). ${data.nodeVersion ? `Node.js ${data.nodeVersion} detected.` : 'Node.js 22.13+ and npm are required.'} ACP sign-in is managed separately from agy.`
+                    ? `ACP runtime ${data.version} is installed (${data.architecture}). ${data.authenticated ? 'Google account connected.' : 'No Google account connected.'} ${data.nodeVersion ? `Node.js ${data.nodeVersion} detected.` : 'Node.js 22.13+ and npm are required.'}`
                     : `ACP runtime ${data.version} is not installed. The official Google download is about 560 MB. ${data.nodeVersion ? `Node.js ${data.nodeVersion} detected.` : 'Node.js 22.13+ and npm are required.'}`;
                 if (installButton) {
                     installButton.disabled = Boolean(data.installed);
                     if (data.installed) installButton.textContent = 'ACP runtime installed';
                 }
-                if (startButton) {
-                    startButton.disabled = !data.installed || !data.nodeAvailable;
-                    startButton.style.opacity = startButton.disabled ? '.55' : '1';
-                    startButton.title = !data.nodeAvailable ? 'Node.js and npx are required to run the ACP client.' : '';
+                if (authButton) {
+                    authButton.disabled = !data.installed || !data.nodeAvailable;
+                    authButton.textContent = data.authenticated ? 'Sign out' : 'Sign in';
+                    authButton.style.background = data.authenticated ? 'var(--bg-sidebar)' : 'var(--accent-color)';
+                    authButton.style.border = data.authenticated ? '1px solid var(--border-color)' : '0';
+                    authButton.style.color = data.authenticated ? 'var(--text-primary)' : 'white';
+                    authButton.style.opacity = authButton.disabled ? '.55' : '1';
+                    authButton.title = !data.nodeAvailable ? 'Node.js 22.13+ and npm are required for ACP sign-in.' : '';
                 }
                 return data;
             } catch (error) {
                 statusEl.textContent = String(error.message || error);
-                if (startButton) startButton.disabled = true;
+                if (authButton) authButton.disabled = true;
                 if (installButton) installButton.disabled = true;
                 return null;
             }
@@ -7258,12 +7265,32 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        async function setupAntigravityAcpSignIn() {
-            if (!activeProject) {
-                alert('Open a workspace first to set up Antigravity ACP sign-in.');
+        async function toggleAntigravityAcpAuth() {
+            const status = await refreshAntigravityAcpStatus();
+            if (!status?.installed) {
+                const statusEl = document.getElementById('settings-antigravity-acp-status');
+                if (statusEl) statusEl.textContent = 'Install the ACP runtime first, then sign in.';
                 return;
             }
-            const status = antigravityAcpRuntimeStatus || await refreshAntigravityAcpStatus();
+            if (!status.nodeAvailable) {
+                const statusEl = document.getElementById('settings-antigravity-acp-status');
+                if (statusEl) statusEl.textContent = 'Node.js 22.13+ and npm are required. Install or update Node.js, then restart Terminal TUI.';
+                return;
+            }
+            if (status.authenticated) {
+                await signOutAntigravityAcp();
+                return;
+            }
+            await setupAntigravityAcpSignIn(status);
+        }
+
+        async function setupAntigravityAcpSignIn(status = null) {
+            if (!activeProject) {
+                const statusEl = document.getElementById('settings-antigravity-acp-status');
+                if (statusEl) statusEl.textContent = 'Open a workspace first; the ACP sign-in terminal runs from that folder.';
+                return;
+            }
+            status = status || await refreshAntigravityAcpStatus();
             if (!status?.installed) {
                 alert('Install the Antigravity ACP runtime from Settings → AI Usage & Accounts first.');
                 return;
@@ -7289,12 +7316,45 @@ kiro-cli whoami --format json</code></pre>
             const command = [
                 `$env:PATH = '${safeRuntimeDir};' + $env:PATH`,
                 `$env:ANTIGRAVITY_HARNESS_PATH = '${safeHelperPath}'`,
+                "$env:AGY_ACP_FORCE_FILE_STORAGE = '1'",
                 `$projectPath = '${safePath}'`,
                 authSetup,
                 `npx --yes acpx@latest --cwd $projectPath antigravity sessions ensure --name terminal-tui-auth`,
                 `if ($LASTEXITCODE -eq 0) { Write-Host 'ACP sign-in is ready. You can close this terminal; quota checks run without an ACP chat.' }`,
             ].join('; ');
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (statusEl) statusEl.textContent = 'Opening an ACP sign-in terminal. Complete Google sign-in in the browser it opens.';
             splitTerminal('tabs', command);
+        }
+
+        async function signOutAntigravityAcp() {
+            const button = document.getElementById('settings-antigravity-acp-auth');
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (!button || !statusEl) return;
+            button.disabled = true;
+            button.textContent = 'Signing out…';
+            statusEl.textContent = 'Signing out of the Google account connected to Antigravity ACP…';
+            let resultMessage = '';
+            try {
+                const response = await fetch('/api/antigravity/acp/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project: activeProject || '' }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not sign out of Antigravity ACP.');
+                await refreshAntigravityAcpStatus();
+                await loadAntigravityUsage(true);
+                resultMessage = data.authenticated
+                    ? 'Google logout completed, but the ACP profile still reports saved authentication. Sign in again or inspect the runtime profile.'
+                    : 'Signed out of Google Antigravity ACP. Use Sign in to connect another account.';
+            } catch (error) {
+                resultMessage = String(error.message || error);
+            } finally {
+                const status = await refreshAntigravityAcpStatus();
+                if (button) button.style.opacity = button.disabled ? '.55' : '1';
+                if (resultMessage) statusEl.textContent = resultMessage;
+            }
         }
 
         let agentTitleRenameSource = null;
