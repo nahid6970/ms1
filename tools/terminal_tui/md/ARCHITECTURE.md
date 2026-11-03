@@ -62,7 +62,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 ### 2.1 Global Keyboard Shortcuts
 - **F1**: Open the Quick Open palette. Capture-phase handling keeps it available while xterm has focus.
 - **AGENT toolbar action**: Opens a newest-first searchable list of saved Codex, Pi, and Kiro CLI sessions scoped to the active workspace. It also launches Google Antigravity CLI (`agy`) or continues its latest conversation for the current workspace with `agy --continue`; Antigravity's own `/resume` command provides its conversation picker.
-- **AI quota indicators and profiles**: Codex, Kiro, and Antigravity icons with remaining percentages appear in the subprocess monitor. Settings → AI Usage & Accounts manages Codex and Kiro profiles and includes a Google Antigravity ACP runtime installer/launcher. Antigravity quota windows are read with the signed-in ACP OAuth profile; ACP chat and `agy` use separate Google sign-ins.
+- **AI quota indicators and profiles**: Codex, Kiro, and Antigravity icons with remaining percentages appear in the subprocess monitor. Settings → AI Usage & Accounts manages Codex and Kiro profiles and includes the Google Antigravity ACP runtime installer and one-time sign-in setup. Antigravity quota windows are read with the signed-in ACP OAuth profile; that profile is separate from `agy` and does not require an ACP process to remain active.
 - **F5**: Refresh the current page. Capture-phase handling prevents xterm/browser focus from swallowing the shortcut.
 - **Ctrl+F**: Open terminal output search when a terminal pane is focused.
 - **Arrow Up/Down + Enter**: Navigate and select items in the F1 palette.

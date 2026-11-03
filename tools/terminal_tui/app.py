@@ -2011,7 +2011,7 @@ def _read_antigravity_usage():
         with open(token_path, 'r', encoding='utf-8') as token_file:
             token = json.load(token_file)
     except FileNotFoundError as exc:
-        raise RuntimeError('Sign in once with Open ACP chat to enable Antigravity usage.') from exc
+        raise RuntimeError('Sign in once with Settings → AI Usage & Accounts → Set up ACP sign-in to enable Antigravity usage.') from exc
     except (OSError, ValueError) as exc:
         raise RuntimeError('Could not read the Antigravity ACP sign-in profile.') from exc
 

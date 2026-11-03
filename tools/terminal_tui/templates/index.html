@@ -4003,11 +4003,11 @@
                         <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:var(--text-muted);">Checking ACP runtime…</div>
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
                             <button type="button" id="settings-antigravity-acp-install" onclick="installAntigravityAcpRuntime()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Install ACP runtime (~560 MB)</button>
-                            <button type="button" id="settings-antigravity-acp-start" onclick="startAntigravityAcpSession()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Open ACP chat</button>
+                            <button type="button" id="settings-antigravity-acp-start" onclick="setupAntigravityAcpSignIn()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Set up ACP sign-in</button>
                             <button type="button" id="settings-antigravity-continue" onclick="continueLatestAntigravitySession()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Continue latest chat</button>
                             <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:var(--accent-color);">ACP runtime</a>
                         </div>
-                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">ACP sign-in is separate from <code>agy</code>. Open ACP chat selects personal Google OAuth in the ACP settings, then the runtime handles sign-in. Requires Node.js 22.13+ and npm. The Antigravity usage badge reads quota windows with the signed-in ACP profile. Fixed-choice questions from the agent are not supported in this minimal ACP client.</div>
+                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">ACP sign-in is separate from <code>agy</code>. Set up ACP sign-in only once to create the Google OAuth profile. Usage checks use its saved refresh token directly; no ACP chat or background agent process is needed. Requires Node.js 22.13+ and npm for sign-in setup.</div>
                     </div>
                 </div>
 
@@ -7272,9 +7272,9 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        async function startAntigravityAcpSession() {
+        async function setupAntigravityAcpSignIn() {
             if (!activeProject) {
-                alert('Open a workspace first to start an Antigravity ACP session.');
+                alert('Open a workspace first to set up Antigravity ACP sign-in.');
                 return;
             }
             const status = antigravityAcpRuntimeStatus || await refreshAntigravityAcpStatus();
@@ -7305,8 +7305,8 @@ kiro-cli whoami --format json</code></pre>
                 `$env:ANTIGRAVITY_HARNESS_PATH = '${safeHelperPath}'`,
                 `$projectPath = '${safePath}'`,
                 authSetup,
-                `npx --yes acpx@latest --cwd $projectPath antigravity sessions ensure --name terminal-tui`,
-                `if ($LASTEXITCODE -eq 0) { while ($true) { $message = Read-Host 'You (type /exit to close)'; if ($message -eq '/exit') { break }; if (-not [string]::IsNullOrWhiteSpace($message)) { npx --yes acpx@latest --cwd $projectPath antigravity -s terminal-tui $message } } }`,
+                `npx --yes acpx@latest --cwd $projectPath antigravity sessions ensure --name terminal-tui-auth`,
+                `if ($LASTEXITCODE -eq 0) { Write-Host 'ACP sign-in is ready. You can close this terminal; quota checks run without an ACP chat.' }`,
             ].join('; ');
             splitTerminal('tabs', command);
         }
