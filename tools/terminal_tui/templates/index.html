@@ -6909,7 +6909,7 @@ kiro-cli whoami --format json</code></pre>
                 const accountId = getSelectedCodexUsageAccount();
                 const selectedAccount = codexUsageAccounts.find(account => account.id === accountId);
                 const shownAccountName = selectedAccount?.name || 'Default';
-                const cacheKey = `ai-usage-cache:codex:identity-v2:${accountId || 'default'}`;
+                const cacheKey = `ai-usage-cache:codex:identity-v3:${accountId || 'default'}`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
