@@ -1929,6 +1929,30 @@ def _agent_message_from_record(agent, record):
     return role, text
 
 
+def _agent_session_metadata(agent, session_path):
+    """Read top-level session metadata across native transcript formats."""
+    with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+        if agent == 'kiro':
+            return json.load(session_file)
+        first = json.loads(session_file.readline())
+    if agent == 'codex':
+        return first.get('payload') or {}
+    return first
+
+
+def _agent_transcript_records(agent, session_path):
+    """Yield message records from regular JSON and append-only JSONL sessions."""
+    with open(session_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
+        for line in transcript_file:
+            if len(line) > 2_000_000:
+                continue
+            try:
+                record = json.loads(line)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            yield record
+
+
 def _extract_agent_transcript(agent, session_path, include_history=False):
     transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
     title = ''
@@ -1936,14 +1960,7 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
     handoff_token = ''
     messages = []
     try:
-        with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
-            for line in transcript_file:
-                if len(line) > 2_000_000:
-                    continue
-                try:
-                    record = json.loads(line)
-                except (json.JSONDecodeError, TypeError):
-                    continue
+        for record in _agent_transcript_records(agent, transcript_path):
                 role, text = _agent_message_from_record(agent, record)
                 if not role or not text:
                     continue
@@ -1990,14 +2007,7 @@ def _estimate_agent_session_tokens(agent, session_path):
     transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
     readable_characters = 0
     try:
-        with open(transcript_path, 'r', encoding='utf-8', errors='replace') as transcript_file:
-            for line in transcript_file:
-                if len(line) > 2_000_000:
-                    continue
-                try:
-                    record = json.loads(line)
-                except (json.JSONDecodeError, TypeError):
-                    continue
+        for record in _agent_transcript_records(agent, transcript_path):
                 role, text = _agent_message_from_record(agent, record)
                 if not role or not text:
                     continue
@@ -2063,15 +2073,9 @@ def api_agent_sessions():
                 try:
                     modified_at = os.path.getmtime(session_path)
                     with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-                        if agent == 'kiro':
-                            metadata = json.load(session_file)
-                        else:
-                            first_record = json.loads(session_file.readline())
-                            metadata = first_record.get('payload') or {}
-                            if agent == 'pi':
-                                metadata = first_record
+                        metadata = _agent_session_metadata(agent, session_path)
 
-                        session_id = str(metadata.get('session_id') or metadata.get('id') or '')
+                        session_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
                         session_identity = (agent, session_id, os.path.normcase(os.path.realpath(session_path)))
                         if not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id) or session_identity in seen_ids:
                             continue
@@ -2190,16 +2194,14 @@ def api_agent_session_title():
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
-    expected_extension = '.json' if agent == 'kiro' else '.jsonl'
-    if (not session_path.lower().endswith(expected_extension) or
+    allowed_extension = session_path.lower().endswith('.json' if agent == 'kiro' else '.jsonl')
+    if (not allowed_extension or
             not any(_path_is_within(session_path, root) for root in allowed_roots)):
         return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
     try:
         with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
-            if agent == 'codex':
-                metadata = metadata.get('payload') or {}
-        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+            metadata = _agent_session_metadata(agent, session_path)
+        stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
         cwd = str(metadata.get('cwd') or '')
         if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
             return jsonify({'error': 'Session does not belong to this workspace.'}), 404
@@ -2243,16 +2245,14 @@ def api_agent_session_title_suggest():
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
-    expected_extension = '.json' if agent == 'kiro' else '.jsonl'
-    if (not session_path.lower().endswith(expected_extension) or
+    allowed_extension = session_path.lower().endswith('.json' if agent == 'kiro' else '.jsonl')
+    if (not allowed_extension or
             not any(_path_is_within(session_path, root) for root in allowed_roots)):
         return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
     try:
         with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
-            if agent == 'codex':
-                metadata = metadata.get('payload') or {}
-        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+            metadata = _agent_session_metadata(agent, session_path)
+        stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
         cwd = str(metadata.get('cwd') or '')
         if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
             return jsonify({'error': 'Session does not belong to this workspace.'}), 404
@@ -2314,16 +2314,14 @@ def api_agent_session_delete():
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
-    expected_extension = '.json' if agent == 'kiro' else '.jsonl'
-    if (not session_path.lower().endswith(expected_extension) or
+    allowed_extension = session_path.lower().endswith('.json' if agent == 'kiro' else '.jsonl')
+    if (not allowed_extension or
             not any(_path_is_within(session_path, root) for root in allowed_roots)):
         return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
     try:
         with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
-            if agent == 'codex':
-                metadata = metadata.get('payload') or {}
-        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+            metadata = _agent_session_metadata(agent, session_path)
+        stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
         cwd = str(metadata.get('cwd') or '')
         if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
             return jsonify({'error': 'Session does not belong to this workspace.'}), 404
@@ -2394,10 +2392,8 @@ def api_agent_session_context():
         return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
     try:
         with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = json.load(session_file) if agent == 'kiro' else json.loads(session_file.readline())
-            if agent == 'codex':
-                metadata = metadata.get('payload') or {}
-        stored_id = str(metadata.get('session_id') or metadata.get('id') or '')
+            metadata = _agent_session_metadata(agent, session_path)
+        stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
         cwd = str(metadata.get('cwd') or '')
         if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
             return jsonify({'error': 'Session does not belong to the active workspace.'}), 404
@@ -2627,11 +2623,9 @@ def api_agent_handoff_create():
         return jsonify({'error': 'Source session file is outside the configured agent session folders.'}), 403
     try:
         with open(source_session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            source_metadata = json.load(session_file) if source_agent == 'kiro' else json.loads(session_file.readline())
-            if source_agent == 'codex':
-                source_metadata = source_metadata.get('payload') or {}
+            source_metadata = _agent_session_metadata(source_agent, source_session_path)
         source_cwd = str(source_metadata.get('cwd') or '')
-        if (str(source_metadata.get('session_id') or source_metadata.get('id') or '') != session_id or
+        if (str(source_metadata.get('session_id') or source_metadata.get('sessionId') or source_metadata.get('id') or '') != session_id or
                 not source_cwd or not _path_is_within(source_cwd, project_path)):
             return jsonify({'error': 'Source session does not belong to this workspace.'}), 404
     except (OSError, ValueError, TypeError, AttributeError):

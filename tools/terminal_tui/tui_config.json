@@ -1723,6 +1723,9 @@
     "TV Show - 5011": {
       "codex:01a14e36-4bd0-74e1-8431-495d9937f732": "Fix Web App Install Missing Icon",
       "codex:01a1430f-3870-74d3-88ee-c06d63e498b7": "Fixing npm Install Script Blocks Globally"
+    },
+    "Tab Saver": {
+      "codex:01a13edb-3de4-7a31-833e-5ea0582388bc": "Add Markdown support and deadline removal"
     }
   },
   "terminal_tabs": {
@@ -1816,6 +1819,11 @@
       "id": "12aa59bd4b7349e881eb7381f410031b",
       "name": "nahid6970",
       "codexHome": "C:\\Users\\nahid\\.codex-00"
+    },
+    {
+      "id": "8bf475b91e0a403cb2376c0b9725af1c",
+      "name": "01",
+      "codexHome": "D:\\Codex\\.codex-01"
     }
   ],
   "kiro_usage_accounts": []
