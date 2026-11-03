@@ -2071,6 +2071,18 @@
         #monitor-kiro-quota { border-color: rgba(167,139,250,.35); background: rgba(139,92,246,.08); color: #c4b5fd; }
         #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
         #monitor-quota-group { display: inline-flex; align-items: center; gap: 4px; }
+        #quota-details-tooltip {
+            position: fixed; z-index: 10000; display: none; width: max-content; max-width: min(340px, calc(100vw - 20px));
+            padding: 10px 12px; border: 1px solid rgba(148,163,184,.28); border-radius: 9px;
+            background: linear-gradient(145deg, rgba(19,24,34,.98), rgba(10,14,22,.98));
+            box-shadow: 0 12px 32px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.24);
+            color: #dbe4f0; font: 12px/1.5 'Segoe UI', sans-serif; pointer-events: none; backdrop-filter: blur(10px);
+        }
+        #quota-details-tooltip.visible { display: block; animation: quota-tooltip-in .12s ease-out; }
+        #quota-details-tooltip .quota-tooltip-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; color: #f8fafc; font-size: 11px; font-weight: 700; letter-spacing: .045em; text-transform: uppercase; }
+        #quota-details-tooltip .quota-tooltip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--quota-tooltip-accent, #38bdf8); box-shadow: 0 0 9px var(--quota-tooltip-accent, #38bdf8); }
+        #quota-details-tooltip .quota-tooltip-content { color: #aebbd0; white-space: pre-line; overflow-wrap: anywhere; }
+        @keyframes quota-tooltip-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
         #codex-usage-account-menu {
             position: fixed;
             z-index: 6000;
@@ -2347,16 +2359,16 @@
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
                     <div id="monitor-quota-group" role="group" aria-label="AI provider quotas" data-testid="quota-indicators">
-                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" onclick="loadCodexLimits(true)" oncontextmenu="openCodexUsageAccountMenu(event)" title="Codex quota — click to refresh; right-click to switch account" aria-label="Codex quota. Click to refresh. Right-click to switch account.">
+                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" data-quota-tooltip data-quota-provider="Codex" data-quota-details="Click to refresh · right-click to switch account" onclick="loadCodexLimits(true)" oncontextmenu="openCodexUsageAccountMenu(event)" aria-label="Codex quota. Click to refresh. Right-click to switch account.">
                             <span id="monitor-codex-icon" aria-hidden="true"></span>
                             <span id="monitor-codex-quota-value">--</span>
                         </button>
                         <div id="codex-usage-account-menu" role="menu" aria-hidden="true" data-testid="codex-usage-account-menu"></div>
-                        <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" onclick="loadKiroUsage(true)" title="Kiro quota — click to refresh" aria-label="Kiro quota. Click to refresh">
+                        <button id="monitor-kiro-quota" type="button" data-testid="kiro-quota-indicator" data-quota-tooltip data-quota-provider="Kiro" data-quota-details="Click to refresh" onclick="loadKiroUsage(true)" aria-label="Kiro quota. Click to refresh">
                             <span id="monitor-kiro-icon" aria-hidden="true"></span>
                             <span id="monitor-kiro-quota-value">--</span>
                         </button>
-                        <button id="monitor-antigravity-quota" type="button" data-testid="antigravity-quota-indicator" onclick="loadAntigravityUsage(true)" title="Antigravity quota — click to refresh" aria-label="Antigravity quota. Click to refresh">
+                        <button id="monitor-antigravity-quota" type="button" data-testid="antigravity-quota-indicator" data-quota-tooltip data-quota-provider="Antigravity" data-quota-details="Click to refresh" onclick="loadAntigravityUsage(true)" aria-label="Antigravity quota. Click to refresh">
                             <span id="monitor-antigravity-icon" aria-hidden="true"></span>
                             <span id="monitor-antigravity-quota-value">--</span>
                         </button>
@@ -6812,6 +6824,73 @@ kiro-cli whoami --format json</code></pre>
             catch (_) { /* Usage caching is optional if browser storage is unavailable. */ }
         }
 
+        function setQuotaTooltip(button, provider, details, ariaLabel = '') {
+            if (!button) return;
+            button.dataset.quotaProvider = provider;
+            button.dataset.quotaDetails = String(details || '');
+            button.removeAttribute('title');
+            if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
+        }
+
+        function showQuotaDetailsTooltip(button) {
+            let tooltip = document.getElementById('quota-details-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'quota-details-tooltip';
+                tooltip.setAttribute('role', 'tooltip');
+                const heading = document.createElement('div');
+                heading.className = 'quota-tooltip-heading';
+                const dot = document.createElement('span');
+                dot.className = 'quota-tooltip-dot';
+                const provider = document.createElement('span');
+                provider.className = 'quota-tooltip-provider';
+                heading.append(dot, provider);
+                const content = document.createElement('div');
+                content.className = 'quota-tooltip-content';
+                tooltip.append(heading, content);
+                document.body.appendChild(tooltip);
+            }
+            tooltip.querySelector('.quota-tooltip-provider').textContent = button.dataset.quotaProvider || 'Usage';
+            tooltip.querySelector('.quota-tooltip-content').textContent = button.dataset.quotaDetails || '';
+            const accents = { Codex: '#34d399', Kiro: '#a78bfa', Antigravity: '#22d3ee' };
+            tooltip.style.setProperty('--quota-tooltip-accent', accents[button.dataset.quotaProvider] || '#38bdf8');
+            tooltip.classList.add('visible');
+            button.setAttribute('aria-describedby', tooltip.id);
+            const bounds = button.getBoundingClientRect();
+            const tooltipBounds = tooltip.getBoundingClientRect();
+            const left = Math.max(10, Math.min(bounds.left, window.innerWidth - tooltipBounds.width - 10));
+            const above = bounds.top - tooltipBounds.height - 9;
+            const top = above >= 8 ? above : Math.min(window.innerHeight - tooltipBounds.height - 8, bounds.bottom + 9);
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${Math.max(8, top)}px`;
+        }
+
+        function hideQuotaDetailsTooltip(button) {
+            document.getElementById('quota-details-tooltip')?.classList.remove('visible');
+            button?.removeAttribute('aria-describedby');
+        }
+
+        document.addEventListener('pointerover', event => {
+            const button = event.target.closest?.('[data-quota-tooltip]');
+            if (!button || event.relatedTarget?.closest?.('[data-quota-tooltip]') === button) return;
+            showQuotaDetailsTooltip(button);
+        });
+        document.addEventListener('pointerout', event => {
+            const button = event.target.closest?.('[data-quota-tooltip]');
+            if (!button || event.relatedTarget?.closest?.('[data-quota-tooltip]') === button) return;
+            hideQuotaDetailsTooltip(button);
+        });
+        document.addEventListener('focusin', event => {
+            const button = event.target.closest?.('[data-quota-tooltip]');
+            if (button) showQuotaDetailsTooltip(button);
+        });
+        document.addEventListener('focusout', event => {
+            const button = event.target.closest?.('[data-quota-tooltip]');
+            if (button) hideQuotaDetailsTooltip(button);
+        });
+        window.addEventListener('scroll', () => hideQuotaDetailsTooltip(), true);
+        window.addEventListener('resize', () => hideQuotaDetailsTooltip());
+
         async function loadCodexLimits(forceRefresh = false, queueIfBusy = true) {
             if (codexLimitsLoadInFlight) {
                 if (forceRefresh && queueIfBusy) codexLimitsRefreshQueued = true;
@@ -6844,8 +6923,8 @@ kiro-cli whoami --format json</code></pre>
                 }
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
                     value.textContent = '--';
-                    button.title = data.error || 'Codex CLI did not report a quota window.';
-                    button.setAttribute('aria-label', button.title);
+                    const errorText = data.error || 'Codex CLI did not report a quota window.';
+                    setQuotaTooltip(button, 'Codex', errorText, errorText);
                     return;
                 }
                 const primary = data.windows[0];
@@ -6857,12 +6936,11 @@ kiro-cli whoami --format json</code></pre>
                     return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
                 }).join(' | ');
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                button.title = `Codex · ${accountDescription}${plan}${details} · Click to refresh`;
-                button.setAttribute('aria-label', `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
+                setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${plan}${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
-                button.title = `Could not read Codex quota: ${String(error.message || error)}`;
-                button.setAttribute('aria-label', button.title);
+                const errorText = `Could not read Codex quota: ${String(error.message || error)}`;
+                setQuotaTooltip(button, 'Codex', errorText, errorText);
             } finally {
                 button.disabled = false;
                 codexLimitsLoadInFlight = false;
@@ -6905,8 +6983,8 @@ kiro-cli whoami --format json</code></pre>
                 }
                 if (!data.available) {
                     value.textContent = '--';
-                    button.title = data.error || 'Kiro CLI did not report subscription usage.';
-                    button.setAttribute('aria-label', button.title);
+                    const errorText = data.error || 'Kiro CLI did not report subscription usage.';
+                    setQuotaTooltip(button, 'Kiro', errorText, errorText);
                     return;
                 }
                 const leftPercent = Number(data.leftPercent);
@@ -6916,12 +6994,11 @@ kiro-cli whoami --format json</code></pre>
                 const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                button.title = `Kiro · ${accountDescription}${plan}${credits}${reset} · Click to refresh`;
-                button.setAttribute('aria-label', `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`);
+                setQuotaTooltip(button, 'Kiro', `${accountName || 'Default account'}\n${plan}${credits}${reset}\nClick to refresh`, `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
-                button.title = `Could not read Kiro usage: ${String(error.message || error)}`;
-                button.setAttribute('aria-label', button.title);
+                const errorText = `Could not read Kiro usage: ${String(error.message || error)}`;
+                setQuotaTooltip(button, 'Kiro', errorText, errorText);
             } finally {
                 button.disabled = false;
                 kiroUsageLoadInFlight = false;
@@ -6962,8 +7039,8 @@ kiro-cli whoami --format json</code></pre>
                 }
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
                     value.textContent = '--';
-                    button.title = data.error || 'Sign in with Google through ACP to read Antigravity quota.';
-                    button.setAttribute('aria-label', button.title);
+                    const errorText = data.error || 'Sign in with Google through ACP to read Antigravity quota.';
+                    setQuotaTooltip(button, 'Antigravity', errorText, errorText);
                     return;
                 }
                 const primary = data.windows.find(item => item.id === 'gemini-5h') || data.windows[0];
@@ -6972,12 +7049,11 @@ kiro-cli whoami --format json</code></pre>
                     const reset = item.resetsAt ? ` · resets ${new Date(item.resetsAt).toLocaleString()}` : '';
                     return `${item.label}: ${Number(item.leftPercent).toFixed(1)}% remaining${reset}`;
                 }).join(' | ');
-                button.title = `Antigravity · ${details} · Click to refresh`;
-                button.setAttribute('aria-label', `Antigravity Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
+                setQuotaTooltip(button, 'Antigravity', `${details}\nClick to refresh`, `Antigravity Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
-                button.title = `Could not read Antigravity quota: ${String(error.message || error)}`;
-                button.setAttribute('aria-label', button.title);
+                const errorText = `Could not read Antigravity quota: ${String(error.message || error)}`;
+                setQuotaTooltip(button, 'Antigravity', errorText, errorText);
             } finally {
                 button.disabled = false;
                 antigravityUsageLoadInFlight = false;
