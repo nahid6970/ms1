@@ -6828,6 +6828,8 @@ kiro-cli whoami --format json</code></pre>
             if (forceRefresh) value.textContent = '…';
             try {
                 const accountId = getSelectedCodexUsageAccount();
+                const selectedAccount = codexUsageAccounts.find(account => account.id === accountId);
+                const shownAccountName = selectedAccount?.name || 'Default';
                 const cacheKey = `ai-usage-cache:codex:${accountId || 'default'}`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
@@ -6848,14 +6850,15 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const primary = data.windows[0];
                 value.textContent = `${primary.leftPercent}%`;
+                const accountName = data.accountName || shownAccountName;
                 const plan = data.planType ? `${data.planType} plan · ` : '';
                 const details = data.windows.map(windowInfo => {
                     const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
                     return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
                 }).join(' | ');
-                const accountName = data.accountName && data.accountName !== 'Default' ? `${data.accountName} · ` : '';
-                button.title = `Codex · ${accountName}${plan}${details} · Click to refresh`;
-                button.setAttribute('aria-label', `Codex ${accountName}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
+                const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
+                button.title = `Codex · ${accountDescription}${plan}${details} · Click to refresh`;
+                button.setAttribute('aria-label', `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 button.title = `Could not read Codex quota: ${String(error.message || error)}`;
@@ -6881,6 +6884,8 @@ kiro-cli whoami --format json</code></pre>
             const icon = document.getElementById('monitor-kiro-icon');
             if (!button || !value) { kiroUsageLoadInFlight = false; return; }
             const accountId = getSelectedKiroUsageAccount();
+            const selectedAccount = kiroUsageAccounts.find(account => account.id === accountId);
+            const shownAccountName = selectedAccount?.name || 'Default';
             button.style.display = 'inline-flex';
             button.disabled = true;
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('kiro', 13, 'monitor-kiro-quota');
@@ -6906,12 +6911,13 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const leftPercent = Number(data.leftPercent);
                 value.textContent = `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`;
+                const accountName = data.accountName || shownAccountName;
                 const credits = `${Number(data.remainingCredits).toFixed(2)} of ${Number(data.includedCredits).toFixed(2)} credits remaining`;
                 const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
-                const accountLabel = data.accountName && data.accountName !== 'Default' ? `${data.accountName} · ` : '';
-                button.title = `Kiro · ${accountLabel}${plan}${credits}${reset} · Click to refresh`;
-                button.setAttribute('aria-label', `Kiro ${accountLabel}quota: ${value.textContent} remaining. Click to refresh.`);
+                const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
+                button.title = `Kiro · ${accountDescription}${plan}${credits}${reset} · Click to refresh`;
+                button.setAttribute('aria-label', `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 button.title = `Could not read Kiro usage: ${String(error.message || error)}`;
