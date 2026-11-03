@@ -80,6 +80,7 @@ if sys.stdout is None or sys.stderr is None:
             sys.stderr = open(os.devnull, "w")
 
 import json
+import base64
 import copy
 import shutil
 import queue
@@ -1646,6 +1647,29 @@ def _read_codex_rate_limits(codex_home=None):
     }
 
 
+def _read_codex_account_email(codex_home=None):
+    """Read the account email from Codex's cached ID token without exposing the token."""
+    home = os.path.abspath(os.path.expandvars(os.path.expanduser(
+        codex_home or os.environ.get('CODEX_HOME') or os.path.join(os.path.expanduser('~'), '.codex'))))
+    auth_path = os.path.join(home, 'auth.json')
+    try:
+        with open(auth_path, 'r', encoding='utf-8') as auth_file:
+            auth_data = json.load(auth_file)
+        id_token = str((auth_data.get('tokens') or {}).get('id_token') or '')
+        token_parts = id_token.split('.')
+        if len(token_parts) < 2:
+            return None
+        payload = token_parts[1]
+        payload += '=' * (-len(payload) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(payload.encode('ascii')))
+        email = claims.get('email') if isinstance(claims, dict) else None
+        if isinstance(email, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email.strip()):
+            return email.strip()
+    except (OSError, ValueError, TypeError, UnicodeError):
+        pass
+    return None
+
+
 def _codex_usage_accounts():
     accounts = get_config_val('codex_usage_accounts', list)
     return [account for account in accounts if isinstance(account, dict)
@@ -1998,7 +2022,7 @@ def api_codex_limits():
     if account_id and account is None:
         return jsonify({'available': False, 'windows': [], 'error': 'Codex profile not found.'}), 404
     codex_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['codexHome']))) if account else None
-    cache_key = account_id or 'default'
+    cache_key = f'identity-v2:{account_id or "default"}'
     now = time.monotonic()
     with _CODEX_LIMITS_CACHE_LOCK:
         cached = _CODEX_LIMITS_CACHE.get(cache_key)
@@ -2010,6 +2034,7 @@ def api_codex_limits():
     except (OSError, RuntimeError, TimeoutError, ValueError, TypeError) as exc:
         data = {'available': False, 'windows': [], 'error': str(exc), 'fetchedAt': int(time.time())}
     data['accountName'] = account['name'] if account else 'Default'
+    data['accountEmail'] = _read_codex_account_email(codex_home)
 
     with _CODEX_LIMITS_CACHE_LOCK:
         _CODEX_LIMITS_CACHE[cache_key] = {'fetched_at': time.monotonic(), 'data': data}
@@ -2051,8 +2076,10 @@ def _read_kiro_usage(kiro_home=None):
     used_percent = max(0.0, min(100.0, float(usage_match.group(3))))
     reset_match = re.search(r'resets\s+on\s+(\d{4}-\d{2}-\d{2})', output, re.IGNORECASE)
     plan_match = re.search(r'\bKIRO\s+([^\r\n]+)', output, re.IGNORECASE)
+    account_email = _read_kiro_account_email(kiro_home)
     return {
         'available': True,
+        'accountEmail': account_email,
         'plan': plan_match.group(1).strip() if plan_match else '',
         'usedCredits': used_credits,
         'includedCredits': included_credits,
@@ -2061,6 +2088,53 @@ def _read_kiro_usage(kiro_home=None):
         'resetsOn': reset_match.group(1) if reset_match else None,
         'fetchedAt': int(time.time()),
     }
+
+
+def _read_kiro_account_email(kiro_home=None):
+    """Read the signed-in Kiro identity when the CLI exposes it as JSON."""
+    kiro_executable = shutil.which('kiro-cli')
+    if not kiro_executable:
+        return None
+    if os.name == 'nt' and kiro_executable.lower().endswith(('.cmd', '.bat')):
+        command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/s', '/c',
+                   f'"{kiro_executable}" whoami --format json']
+    else:
+        command = [kiro_executable, 'whoami', '--format', 'json']
+    process_env = os.environ.copy()
+    if kiro_home:
+        process_env['KIRO_HOME'] = kiro_home
+    try:
+        result = subprocess.run(
+            command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding='utf-8', errors='replace', timeout=8,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0,
+            env=process_env,
+        )
+        if result.returncode != 0:
+            return None
+        identity = json.loads(result.stdout or '{}')
+    except (OSError, subprocess.SubprocessError, ValueError, TypeError):
+        return None
+
+    def find_email(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if str(key).casefold() in {'email', 'emailaddress', 'useremail'} and isinstance(item, str):
+                    candidate = item.strip()
+                    if re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', candidate):
+                        return candidate
+            for item in value.values():
+                found = find_email(item)
+                if found:
+                    return found
+        elif isinstance(value, list):
+            for item in value:
+                found = find_email(item)
+                if found:
+                    return found
+        return None
+
+    return find_email(identity)
 
 
 @app.route('/api/kiro/usage', methods=['GET'])
@@ -2074,7 +2148,7 @@ def api_kiro_usage():
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     default_home = os.path.abspath(os.environ.get('KIRO_HOME') or os.path.join(profile_home, '.kiro'))
     kiro_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['kiroHome']))) if account else default_home
-    cache_key = account_id or '__default__'
+    cache_key = f'identity-v2:{account_id or "__default__"}'
     try:
         cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
     except (TypeError, ValueError):

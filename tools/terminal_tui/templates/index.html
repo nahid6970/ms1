@@ -6909,7 +6909,7 @@ kiro-cli whoami --format json</code></pre>
                 const accountId = getSelectedCodexUsageAccount();
                 const selectedAccount = codexUsageAccounts.find(account => account.id === accountId);
                 const shownAccountName = selectedAccount?.name || 'Default';
-                const cacheKey = `ai-usage-cache:codex:${accountId || 'default'}`;
+                const cacheKey = `ai-usage-cache:codex:identity-v2:${accountId || 'default'}`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
@@ -6929,7 +6929,7 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const primary = data.windows[0];
                 value.textContent = `${primary.leftPercent}%`;
-                const accountName = data.accountName || shownAccountName;
+                const accountName = data.accountEmail || data.accountName || shownAccountName;
                 const plan = data.planType ? `${data.planType} plan · ` : '';
                 const details = data.windows.map(windowInfo => {
                     const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
@@ -6969,7 +6969,7 @@ kiro-cli whoami --format json</code></pre>
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('kiro', 13, 'monitor-kiro-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const cacheKey = `ai-usage-cache:kiro:${accountId || 'default'}`;
+                const cacheKey = `ai-usage-cache:kiro:identity-v2:${accountId || 'default'}`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
@@ -6989,7 +6989,7 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const leftPercent = Number(data.leftPercent);
                 value.textContent = `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`;
-                const accountName = data.accountName || shownAccountName;
+                const accountName = data.accountEmail || data.accountName || shownAccountName;
                 const credits = `${Number(data.remainingCredits).toFixed(2)} of ${Number(data.includedCredits).toFixed(2)} credits remaining`;
                 const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
