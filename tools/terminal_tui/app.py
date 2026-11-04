@@ -2049,9 +2049,9 @@ def _read_kiro_usage(kiro_home=None):
 
     if os.name == 'nt' and kiro_executable.lower().endswith(('.cmd', '.bat')):
         command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/s', '/c',
-                   f'"{kiro_executable}" chat --no-interactive "/usage"']
+                   f'"{kiro_executable}" chat --no-interactive --v2 "/usage"']
     else:
-        command = [kiro_executable, 'chat', '--no-interactive', '/usage']
+        command = [kiro_executable, 'chat', '--no-interactive', '--v2', '/usage']
     creationflags = getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0
     process_env = os.environ.copy()
     if kiro_home:
