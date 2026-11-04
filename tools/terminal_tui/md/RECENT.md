@@ -3,6 +3,20 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Keep Quota Reset Times Together in Tooltips
+
+- Widen the shared quota tooltip and render Codex quota windows on separate lines.
+- Keep date/time reset strings unbreakable for Codex and Antigravity while allowing the tooltip to fit narrow screens.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
+## [2026-11-04] - Show Antigravity Account and Separate Quota Lines
+
+- Display each Gemini or Claude/GPT quota window on its own tooltip line, including its reset time.
+- Identify the Google account from its ID token or the Google OpenID Connect userinfo endpoint; the token itself stays server-side.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-04] - Stabilize Antigravity ACP Authentication State
 
 - Replace the `acpx sessions ensure` plus `/logout` sign-out sequence with the ACP v1 `logout` request; it no longer requires an open workspace or Node.js.

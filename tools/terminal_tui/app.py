@@ -2406,9 +2406,24 @@ def _read_antigravity_usage():
     }, timeout=12)
     if not refreshed.ok:
         raise RuntimeError('Could not refresh Google sign-in for Antigravity usage. Reopen ACP chat to sign in again.')
-    access_token = (refreshed.json() or {}).get('access_token')
+    refreshed_data = refreshed.json() or {}
+    access_token = refreshed_data.get('access_token')
     if not access_token:
         raise RuntimeError('Google did not return an access token for Antigravity usage.')
+    account_email = _google_email_from_id_token(refreshed_data.get('id_token') or token.get('id_token'))
+    if not account_email:
+        try:
+            identity_response = requests.get(
+                'https://openidconnect.googleapis.com/v1/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'}, timeout=8,
+            )
+            if identity_response.ok:
+                identity = identity_response.json() or {}
+                candidate = identity.get('email')
+                if isinstance(candidate, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', candidate.strip()):
+                    account_email = candidate.strip()
+        except (requests.RequestException, ValueError, TypeError):
+            pass
 
     machine = platform.machine().lower()
     architecture = 'amd64' if machine in {'amd64', 'x86_64'} else 'arm64' if machine in {'arm64', 'aarch64'} else machine
@@ -2466,7 +2481,24 @@ def _read_antigravity_usage():
     windows.sort(key=lambda item: (item['label'].split(' · ')[0] != 'Gemini', item['label'].split(' · ')[-1] != '5-hour'))
     primary = next((item for item in windows if item['id'] == 'gemini-5h'), windows[0])
     return {'available': True, 'windows': windows, 'leftPercent': primary['leftPercent'],
-            'fetchedAt': int(time.time()), 'accountName': 'Antigravity ACP'}
+            'fetchedAt': int(time.time()), 'accountName': 'Google account', 'accountEmail': account_email}
+
+
+def _google_email_from_id_token(id_token):
+    """Extract the account label from a cached Google ID token without exposing it."""
+    try:
+        token_parts = str(id_token or '').split('.')
+        if len(token_parts) < 2:
+            return None
+        payload = token_parts[1]
+        payload += '=' * (-len(payload) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(payload.encode('ascii')))
+        email = claims.get('email') if isinstance(claims, dict) else None
+        if isinstance(email, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email.strip()):
+            return email.strip()
+    except (ValueError, TypeError, UnicodeError):
+        pass
+    return None
 
 
 @app.route('/api/antigravity/usage', methods=['GET'])

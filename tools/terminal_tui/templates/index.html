@@ -2072,7 +2072,7 @@
         #monitor-kiro-quota:hover { border-color: rgba(167,139,250,.75); background: rgba(139,92,246,.16); }
         #monitor-quota-group { display: inline-flex; align-items: center; gap: 4px; }
         #quota-details-tooltip {
-            position: fixed; z-index: 10000; display: none; width: max-content; max-width: min(340px, calc(100vw - 20px));
+            position: fixed; z-index: 10000; display: none; width: max-content; max-width: min(480px, calc(100vw - 20px));
             padding: 10px 12px; border: 1px solid rgba(148,163,184,.28); border-radius: 9px;
             background: linear-gradient(145deg, rgba(19,24,34,.98), rgba(10,14,22,.98));
             box-shadow: 0 12px 32px rgba(0,0,0,.42), 0 2px 8px rgba(0,0,0,.24);
@@ -2081,7 +2081,7 @@
         #quota-details-tooltip.visible { display: block; animation: quota-tooltip-in .12s ease-out; }
         #quota-details-tooltip .quota-tooltip-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; color: #f8fafc; font-size: 11px; font-weight: 700; letter-spacing: .045em; text-transform: uppercase; }
         #quota-details-tooltip .quota-tooltip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--quota-tooltip-accent, #38bdf8); box-shadow: 0 0 9px var(--quota-tooltip-accent, #38bdf8); }
-        #quota-details-tooltip .quota-tooltip-content { color: #aebbd0; white-space: pre-line; overflow-wrap: anywhere; }
+        #quota-details-tooltip .quota-tooltip-content { color: #aebbd0; white-space: pre-line; overflow-wrap: break-word; }
         @keyframes quota-tooltip-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
         #codex-usage-account-menu {
             position: fixed;
@@ -6932,9 +6932,10 @@ kiro-cli whoami --format json</code></pre>
                 const accountName = data.accountEmail || data.accountName || shownAccountName;
                 const plan = data.planType ? `${data.planType} plan · ` : '';
                 const details = data.windows.map(windowInfo => {
-                    const reset = windowInfo.resetsAt ? ` · resets ${new Date(windowInfo.resetsAt * 1000).toLocaleString()}` : '';
+                    const resetTime = windowInfo.resetsAt ? new Date(windowInfo.resetsAt * 1000).toLocaleString().replace(/\s/g, '\u00a0') : '';
+                    const reset = resetTime ? ` · resets ${resetTime}` : '';
                     return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
-                }).join(' | ');
+                }).join('\n');
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
                 setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${plan}${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
             } catch (error) {
@@ -7026,7 +7027,7 @@ kiro-cli whoami --format json</code></pre>
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('antigravity', 13, 'monitor-antigravity-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const cacheKey = 'ai-usage-cache:antigravity:default';
+                const cacheKey = 'ai-usage-cache:antigravity:default:identity-v2';
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
@@ -7045,11 +7046,13 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const primary = data.windows.find(item => item.id === 'gemini-5h') || data.windows[0];
                 value.textContent = `${Number(primary.leftPercent).toFixed(1)}%`;
+                const accountName = data.accountEmail || data.accountName || 'Google account';
                 const details = data.windows.map(item => {
-                    const reset = item.resetsAt ? ` · resets ${new Date(item.resetsAt).toLocaleString()}` : '';
+                    const resetTime = item.resetsAt ? new Date(item.resetsAt).toLocaleString().replace(/\s/g, '\u00a0') : '';
+                    const reset = resetTime ? ` · resets ${resetTime}` : '';
                     return `${item.label}: ${Number(item.leftPercent).toFixed(1)}% remaining${reset}`;
-                }).join(' | ');
-                setQuotaTooltip(button, 'Antigravity', `${details}\nClick to refresh`, `Antigravity Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
+                }).join('\n');
+                setQuotaTooltip(button, 'Antigravity', `Using: ${accountName}\n${details}\nClick to refresh`, `Antigravity account ${accountName}. Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
             } catch (error) {
                 value.textContent = '--';
                 const errorText = `Could not read Antigravity quota: ${String(error.message || error)}`;
