@@ -1744,38 +1744,6 @@ _ANTIGRAVITY_ACP_VERSION = '1.4.1'
 _ANTIGRAVITY_ACP_INSTALL_LOCK = threading.Lock()
 
 
-def _antigravity_cli_executable():
-    """Find the installed Antigravity CLI without starting an authenticated session."""
-    candidates = []
-    local_app_data = os.environ.get('LOCALAPPDATA')
-    if local_app_data:
-        candidates.append(os.path.join(local_app_data, 'agy', 'bin', 'agy.exe'))
-    found = shutil.which('agy')
-    if found:
-        candidates.append(found)
-    return next((path for path in candidates if os.path.isfile(path)), None)
-
-
-@app.route('/api/antigravity/cli', methods=['GET'])
-def api_antigravity_cli_status():
-    """Report CLI availability; authentication is owned by agy's shared keyring."""
-    executable = _antigravity_cli_executable()
-    if not executable:
-        return jsonify({'installed': False, 'authenticated': None})
-    version = None
-    try:
-        result = subprocess.run(
-            [executable, '--version'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-            text=True, encoding='utf-8', errors='replace', timeout=5,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-        )
-        if result.returncode == 0:
-            version = (result.stdout or '').strip()[:100] or None
-    except (OSError, subprocess.SubprocessError):
-        pass
-    return jsonify({'installed': True, 'authenticated': None, 'version': version})
-
-
 def _antigravity_acp_runtime_paths():
     """Return paths for the official Windows ACP runtime and its helper."""
     architecture = platform.machine().lower()
@@ -1791,93 +1759,56 @@ def _antigravity_acp_runtime_paths():
     }
 
 
-def _antigravity_acp_profile_home():
-    return os.path.abspath(os.path.expandvars(os.path.expanduser(
-        os.environ.get('GEMINI_HOME') or os.path.join(os.environ.get('USERPROFILE') or os.path.expanduser('~'), '.gemini')
-    )))
+def _antigravity_acp_accounts_root():
+    local_app_data = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
+    return os.path.join(local_app_data, 'TerminalTUI', 'antigravity-acp', 'profiles')
 
 
-def _antigravity_acp_token_path():
-    return os.path.join(_antigravity_acp_profile_home(), 'antigravity-acp', 'acp_token.json')
+def _antigravity_acp_accounts():
+    accounts = get_config_val('antigravity_acp_accounts', list)
+    return [account for account in accounts if isinstance(account, dict)
+            and re.fullmatch(r'[a-f0-9]{32}', str(account.get('id') or ''))
+            and str(account.get('name') or '').strip()]
 
 
-def _antigravity_acp_token_is_ready():
+def _antigravity_acp_profile_home(account_id=None):
+    account_id = str(account_id or 'default')
+    if account_id == 'default':
+        return os.path.abspath(os.path.expandvars(os.path.expanduser(
+            os.environ.get('GEMINI_HOME') or os.path.join(os.environ.get('USERPROFILE') or os.path.expanduser('~'), '.gemini')
+        )))
+    account = next((item for item in _antigravity_acp_accounts() if item['id'] == account_id), None)
+    if not account:
+        raise ValueError('Antigravity ACP account profile was not found.')
+    return os.path.abspath(os.path.join(_antigravity_acp_accounts_root(), account_id))
+
+
+def _antigravity_acp_token_path(account_id=None):
+    return os.path.join(_antigravity_acp_profile_home(account_id), 'antigravity-acp', 'acp_token.json')
+
+
+def _antigravity_acp_token_is_ready(account_id=None):
     try:
-        with open(_antigravity_acp_token_path(), 'r', encoding='utf-8') as token_file:
+        with open(_antigravity_acp_token_path(account_id), 'r', encoding='utf-8') as token_file:
             token = json.load(token_file)
         return isinstance(token, dict) and all(token.get(key) for key in ('client_id', 'client_secret', 'refresh_token'))
     except (OSError, ValueError, TypeError):
         return False
 
 
-def _antigravity_acp_is_authenticated():
-    """Check both ACP's profile token file and its Windows Credential Manager entry."""
-    if _antigravity_acp_token_is_ready():
-        return True
-    if os.name != 'nt':
-        return False
-    system_root = os.environ.get('SystemRoot', r'C:\Windows')
-    cmdkey_path = os.path.join(system_root, 'System32', 'cmdkey.exe')
-    if not os.path.isfile(cmdkey_path):
-        cmdkey_path = shutil.which('cmdkey')
-    if not cmdkey_path:
-        return False
-    try:
-        result = subprocess.run(
-            [cmdkey_path, '/list'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-            text=True, encoding='utf-8', errors='replace', timeout=5,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-        )
-        return result.returncode == 0 and 'target=gemini:antigravity' in result.stdout.casefold()
-    except (OSError, subprocess.SubprocessError):
-        return False
+def _antigravity_acp_is_authenticated(account_id=None):
+    """Use the OAuth token profile as ACP status, independent of the agy CLI keyring."""
+    return _antigravity_acp_token_is_ready(account_id)
 
 
-def _antigravity_acp_clear_saved_credentials():
-    """Remove ACP credentials from its profile file and Windows Credential Manager."""
-    if os.name == 'nt':
-        system_root = os.environ.get('SystemRoot', r'C:\Windows')
-        cmdkey_path = os.path.join(system_root, 'System32', 'cmdkey.exe')
-        if not os.path.isfile(cmdkey_path):
-            cmdkey_path = shutil.which('cmdkey')
-        if cmdkey_path:
-            list_result = subprocess.run(
-                [cmdkey_path, '/list'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                text=True, encoding='utf-8', errors='replace', timeout=5,
-                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-            )
-            if list_result.returncode != 0:
-                raise RuntimeError('Could not verify the Windows ACP credential state.')
-            has_credential = any(
-                line.strip().casefold().endswith('target=gemini:antigravity')
-                for line in list_result.stdout.splitlines()
-            )
-            if has_credential:
-                delete_result = subprocess.run(
-                    [cmdkey_path, '/delete:gemini:antigravity'],
-                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                    text=True, encoding='utf-8', errors='replace', timeout=10,
-                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-                )
-                if delete_result.returncode != 0:
-                    raise RuntimeError((delete_result.stdout or 'Could not remove the Windows ACP credential.').strip())
-                verify_result = subprocess.run(
-                    [cmdkey_path, '/list'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                    text=True, encoding='utf-8', errors='replace', timeout=5,
-                    creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-                )
-                if verify_result.returncode != 0 or any(
-                    line.strip().casefold().endswith('target=gemini:antigravity')
-                    for line in verify_result.stdout.splitlines()
-                ):
-                    raise RuntimeError('Windows Credential Manager still contains the ACP credential after sign-out.')
-
-    token_path = _antigravity_acp_token_path()
+def _antigravity_acp_clear_saved_credentials(account_id=None):
+    """Clear only ACP's file-backed OAuth profile; preserve the separate agy CLI login."""
+    token_path = _antigravity_acp_token_path(account_id)
     if os.path.isfile(token_path):
         os.remove(token_path)
 
 
-def _antigravity_acp_rpc_request(process, request_id, method, params=None, timeout=20):
+def _antigravity_acp_rpc_request(process, request_id, method, params=None, timeout=20, notification_callback=None):
     """Send a line-delimited ACP request and wait for its matching response."""
     response_queue = getattr(process, '_acp_response_queue', None)
     if response_queue is None:
@@ -1909,6 +1840,8 @@ def _antigravity_acp_rpc_request(process, request_id, method, params=None, timeo
         try:
             message = json.loads(line)
         except (ValueError, TypeError):
+            if notification_callback:
+                notification_callback(line)
             continue
         if message.get('id') == request_id:
             if message.get('error'):
@@ -1916,9 +1849,11 @@ def _antigravity_acp_rpc_request(process, request_id, method, params=None, timeo
                 detail = error.get('message') if isinstance(error, dict) else str(error)
                 raise RuntimeError(detail or f'Antigravity ACP rejected {method}.')
             return message.get('result') or {}
+        if notification_callback:
+            notification_callback(line)
 
 
-def _antigravity_acp_logout():
+def _antigravity_acp_logout(account_id=None):
     """Log out through ACP's auth protocol, without creating an interactive session."""
     paths = _antigravity_acp_runtime_paths()
     process_env = os.environ.copy()
@@ -1926,8 +1861,8 @@ def _antigravity_acp_logout():
     agy_bin = os.path.join(local_app_data, 'agy', 'bin')
     process_env['PATH'] = os.pathsep.join(part for part in (paths['directory'], agy_bin, process_env.get('PATH', '')) if part)
     process_env['ANTIGRAVITY_HARNESS_PATH'] = paths['helper']
-    process_env['GEMINI_HOME'] = _antigravity_acp_profile_home()
-    if os.path.isfile(_antigravity_acp_token_path()):
+    process_env['GEMINI_HOME'] = _antigravity_acp_profile_home(account_id)
+    if os.path.isfile(_antigravity_acp_token_path(account_id)):
         process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
     else:
         process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
@@ -1943,7 +1878,7 @@ def _antigravity_acp_logout():
             'protocolVersion': 1,
             'clientInfo': {'name': 'Terminal TUI', 'version': '1.0'},
             'clientCapabilities': {},
-        })
+        }, timeout=90)
         auth_capabilities = (initialized.get('agentCapabilities') or {}).get('auth') or {}
         if not initialized.get('authMethods') or not isinstance(auth_capabilities.get('logout'), dict):
             raise RuntimeError('The Antigravity ACP runtime did not advertise logout support.')
@@ -1964,8 +1899,8 @@ def _antigravity_acp_logout():
                 pass
 
 
-def _antigravity_acp_prepare_login_profile():
-    profile_home = _antigravity_acp_profile_home()
+def _antigravity_acp_prepare_login_profile(account_id=None):
+    profile_home = _antigravity_acp_profile_home(account_id)
     profile_dir = os.path.join(profile_home, 'antigravity-acp')
     settings_path = os.path.join(profile_dir, 'settings.json')
     os.makedirs(profile_dir, exist_ok=True)
@@ -1994,7 +1929,36 @@ def _antigravity_acp_prepare_login_profile():
     return profile_home
 
 
-def _antigravity_acp_login_worker(profile_home):
+def _antigravity_acp_open_auth_url(url):
+    """Open only Google's OAuth page emitted by the ACP runtime."""
+    from urllib.parse import urlsplit
+    import webbrowser
+
+    parsed = urlsplit(url)
+    if parsed.scheme != 'https' or parsed.hostname != 'accounts.google.com':
+        return False
+    try:
+        if webbrowser.open(url, new=2, autoraise=True):
+            return True
+    except (OSError, webbrowser.Error):
+        pass
+    try:
+        os.startfile(url)
+        return True
+    except (AttributeError, OSError):
+        return False
+
+
+def _antigravity_acp_capture_auth_url(output, url_queue):
+    """Find an OAuth URL in the runtime's stderr/stdout notices without logging it."""
+    for candidate in re.findall(r'https?://\S+', str(output or '')):
+        url = candidate.rstrip('"\'<>),.;]}')
+        from urllib.parse import urlsplit
+        if urlsplit(url).hostname == 'accounts.google.com':
+            url_queue.put(url)
+
+
+def _antigravity_acp_login_worker(profile_home, account_id):
     global _ANTIGRAVITY_ACP_AUTH_STATE
     process = None
     try:
@@ -2007,16 +1971,26 @@ def _antigravity_acp_login_worker(profile_home):
         process_env['GEMINI_HOME'] = profile_home
         process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
         process = subprocess.Popen(
-            [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding='utf-8', errors='replace', bufsize=1,
             cwd=profile_home, env=process_env,
             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
         )
+        auth_urls = queue.Queue()
+
+        def read_stderr():
+            try:
+                for line in process.stderr:
+                    _antigravity_acp_capture_auth_url(line, auth_urls)
+            except (OSError, ValueError):
+                pass
+
+        threading.Thread(target=read_stderr, daemon=True).start()
         initialized = _antigravity_acp_rpc_request(process, 1, 'initialize', {
             'protocolVersion': 1,
             'clientInfo': {'name': 'Terminal TUI', 'version': '1.0'},
             'clientCapabilities': {},
-        })
+        }, timeout=90)
         auth_methods = initialized.get('authMethods') or []
         method = next((item for item in auth_methods
                        if isinstance(item, dict) and item.get('id') == 'oauth-personal'
@@ -2024,15 +1998,46 @@ def _antigravity_acp_login_worker(profile_home):
         if not method:
             raise RuntimeError('The ACP runtime did not offer its oauth-personal sign-in method.')
         with _ANTIGRAVITY_ACP_AUTH_LOCK:
-            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'authenticating', 'error': '', 'startedAt': time.time()}
-        _antigravity_acp_rpc_request(process, 2, 'authenticate', {'methodId': method['id']}, timeout=600)
+            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'authenticating', 'error': '', 'startedAt': time.time(), 'accountId': account_id}
+        auth_result = queue.Queue(maxsize=1)
+
+        def authenticate():
+            try:
+                result = _antigravity_acp_rpc_request(
+                    process, 2, 'authenticate', {'methodId': method['id']}, timeout=600,
+                    notification_callback=lambda output: _antigravity_acp_capture_auth_url(output, auth_urls),
+                )
+                auth_result.put((True, result))
+            except (OSError, RuntimeError, TimeoutError, ValueError, TypeError, subprocess.SubprocessError) as exc:
+                auth_result.put((False, exc))
+
+        threading.Thread(target=authenticate, daemon=True).start()
+        auth_response = None
+        deadline = time.monotonic() + 610
+        while time.monotonic() < deadline:
+            try:
+                auth_url = auth_urls.get(timeout=0.2)
+                if not _antigravity_acp_open_auth_url(auth_url):
+                    raise RuntimeError('Could not open Google sign-in in the default browser.')
+            except queue.Empty:
+                pass
+            try:
+                auth_response = auth_result.get_nowait()
+                break
+            except queue.Empty:
+                if process.poll() is not None:
+                    raise RuntimeError('Antigravity ACP exited before Google sign-in completed.')
+        if auth_response is None:
+            raise TimeoutError('Google sign-in timed out. Start sign-in again from Settings.')
+        if not auth_response[0]:
+            raise auth_response[1]
         with _ANTIGRAVITY_USAGE_CACHE_LOCK:
-            _ANTIGRAVITY_USAGE_CACHE.pop('default', None)
+            _ANTIGRAVITY_USAGE_CACHE.pop(account_id, None)
         with _ANTIGRAVITY_ACP_AUTH_LOCK:
-            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'complete', 'error': '', 'startedAt': time.time()}
+            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'complete', 'error': '', 'startedAt': time.time(), 'accountId': account_id}
     except (OSError, RuntimeError, TimeoutError, ValueError, TypeError, subprocess.SubprocessError) as exc:
         with _ANTIGRAVITY_ACP_AUTH_LOCK:
-            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'failed', 'error': str(exc), 'startedAt': time.time()}
+            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'failed', 'error': str(exc), 'startedAt': time.time(), 'accountId': account_id}
     finally:
         if process is not None:
             try:
@@ -2057,22 +2062,85 @@ def api_antigravity_acp_status():
         return jsonify({'supported': False, 'installed': False, 'error': 'The current app terminal backend is Windows-only.'})
     paths = _antigravity_acp_runtime_paths()
     installed = os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])
-    authenticated = _antigravity_acp_is_authenticated()
-    usage_ready = _antigravity_acp_token_is_ready()
+    account_id = str(request.args.get('accountId') or 'default')
+    try:
+        profile_home = _antigravity_acp_profile_home(account_id)
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 404
+    authenticated = _antigravity_acp_is_authenticated(account_id)
+    usage_ready = _antigravity_acp_token_is_ready(account_id)
     with _ANTIGRAVITY_ACP_AUTH_LOCK:
         auth_state = dict(_ANTIGRAVITY_ACP_AUTH_STATE)
+    if auth_state.get('accountId') != account_id:
+        auth_state = {'state': 'idle', 'error': '', 'startedAt': None}
+    account = next((item for item in _antigravity_acp_accounts() if item['id'] == account_id), None)
     return jsonify({
         'supported': True,
         'installed': installed,
         'authenticated': authenticated,
         'usageReady': usage_ready,
+        'accountId': account_id,
+        'accountName': account['name'] if account else 'Default',
         'authState': auth_state['state'],
         'authError': auth_state['error'],
         'version': paths['version'],
         'architecture': paths['architecture'],
         'runtimeDirectory': paths['directory'],
-        'profileHome': _antigravity_acp_profile_home(),
+        'profileHome': profile_home,
     })
+
+
+@app.route('/api/antigravity/acp/accounts', methods=['GET', 'POST', 'DELETE'])
+def api_antigravity_acp_accounts():
+    """Manage independent ACP OAuth profile homes without disturbing other accounts."""
+    accounts = _antigravity_acp_accounts()
+    if request.method == 'GET':
+        rows = [{'id': 'default', 'name': 'Default',
+                 'authenticated': _antigravity_acp_is_authenticated('default'),
+                 'usageReady': _antigravity_acp_token_is_ready('default')}]
+        rows.extend({
+            'id': account['id'], 'name': account['name'],
+            'authenticated': _antigravity_acp_is_authenticated(account['id']),
+            'usageReady': _antigravity_acp_token_is_ready(account['id']),
+        } for account in accounts)
+        return jsonify({'accounts': rows})
+    payload = request.get_json(silent=True) or {}
+    account_id = str(payload.get('id') or '')
+    if request.method == 'POST':
+        name = str(payload.get('name') or '').strip()[:40]
+        if not name:
+            return jsonify({'error': 'Enter a name for this Google account profile.'}), 400
+        if name.casefold() == 'default' or any(str(account['name']).casefold() == name.casefold() for account in accounts):
+            return jsonify({'error': 'An Antigravity ACP profile already uses that name.'}), 409
+        account = {'id': uuid.uuid4().hex, 'name': name}
+        try:
+            os.makedirs(os.path.join(_antigravity_acp_accounts_root(), account['id']), exist_ok=False)
+        except OSError as exc:
+            return jsonify({'error': f'Could not create the ACP profile home: {exc}'}), 500
+        accounts.append(account)
+        set_config_val('antigravity_acp_accounts', accounts)
+        return jsonify({'account': account, 'authenticated': False}), 201
+
+    account = next((item for item in accounts if item['id'] == account_id), None)
+    if not account:
+        return jsonify({'error': 'Antigravity ACP profile was not found. The default profile cannot be removed.'}), 404
+    with _ANTIGRAVITY_ACP_AUTH_LOCK:
+        if _ANTIGRAVITY_ACP_AUTH_THREAD and _ANTIGRAVITY_ACP_AUTH_THREAD.is_alive() \
+                and _ANTIGRAVITY_ACP_AUTH_STATE.get('accountId') == account_id:
+            return jsonify({'error': 'Wait for sign-in to finish before removing this profile.'}), 409
+    profile_home = os.path.realpath(_antigravity_acp_profile_home(account_id))
+    accounts_root = os.path.realpath(_antigravity_acp_accounts_root())
+    if os.path.dirname(profile_home) != accounts_root:
+        return jsonify({'error': 'The profile path is outside the Antigravity ACP accounts folder.'}), 400
+    if os.path.isdir(profile_home):
+        try:
+            shutil.rmtree(profile_home)
+        except OSError as exc:
+            return jsonify({'error': f'Could not remove the ACP profile files: {exc}'}), 500
+    set_config_val('antigravity_acp_accounts', [item for item in accounts if item['id'] != account_id])
+    with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+        _ANTIGRAVITY_USAGE_CACHE.pop(account_id, None)
+    return jsonify({'success': True, 'id': account_id})
 
 
 @app.route('/api/antigravity/acp/login', methods=['POST'])
@@ -2084,16 +2152,20 @@ def api_antigravity_acp_login():
     paths = _antigravity_acp_runtime_paths()
     if not (os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])):
         return jsonify({'error': 'Install the Antigravity ACP runtime first.'}), 400
+    payload = request.get_json(silent=True) or {}
+    account_id = str(payload.get('accountId') or 'default')
     with _ANTIGRAVITY_ACP_AUTH_LOCK:
         if _ANTIGRAVITY_ACP_AUTH_THREAD and _ANTIGRAVITY_ACP_AUTH_THREAD.is_alive():
-            return jsonify({'state': _ANTIGRAVITY_ACP_AUTH_STATE['state']}), 202
+            if _ANTIGRAVITY_ACP_AUTH_STATE.get('accountId') == account_id:
+                return jsonify({'state': _ANTIGRAVITY_ACP_AUTH_STATE['state']}), 202
+            return jsonify({'error': 'Another Antigravity ACP sign-in is already in progress.'}), 409
         try:
-            profile_home = _antigravity_acp_prepare_login_profile()
+            profile_home = _antigravity_acp_prepare_login_profile(account_id)
         except (OSError, ValueError, TypeError) as exc:
             return jsonify({'error': f'Could not prepare the ACP sign-in profile: {exc}'}), 500
-        _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'starting', 'error': '', 'startedAt': time.time()}
+        _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'starting', 'error': '', 'startedAt': time.time(), 'accountId': account_id}
         _ANTIGRAVITY_ACP_AUTH_THREAD = threading.Thread(
-            target=_antigravity_acp_login_worker, args=(profile_home,), daemon=True,
+            target=_antigravity_acp_login_worker, args=(profile_home, account_id), daemon=True,
         )
         _ANTIGRAVITY_ACP_AUTH_THREAD.start()
     return jsonify({'state': 'starting'}), 202
@@ -2107,19 +2179,26 @@ def api_antigravity_acp_logout():
     paths = _antigravity_acp_runtime_paths()
     if not (os.path.isfile(paths['server']) and os.path.isfile(paths['helper'])):
         return jsonify({'error': 'Install the Antigravity ACP runtime first.'}), 400
+    payload = request.get_json(silent=True) or {}
+    account_id = str(payload.get('accountId') or 'default')
     try:
-        _antigravity_acp_logout()
-        _antigravity_acp_clear_saved_credentials()
+        _antigravity_acp_profile_home(account_id)
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 404
+    try:
+        _antigravity_acp_logout(account_id)
+        _antigravity_acp_clear_saved_credentials(account_id)
     except (OSError, RuntimeError, TimeoutError, subprocess.SubprocessError) as exc:
         return jsonify({'error': f'Could not sign out of Antigravity ACP: {exc}'}), 502
 
     with _ANTIGRAVITY_USAGE_CACHE_LOCK:
-        _ANTIGRAVITY_USAGE_CACHE.pop('default', None)
-    if _antigravity_acp_is_authenticated():
+        _ANTIGRAVITY_USAGE_CACHE.pop(account_id, None)
+    if _antigravity_acp_is_authenticated(account_id):
         return jsonify({'error': 'ACP logout completed, but saved credentials remain in the active profile.'}), 502
     with _ANTIGRAVITY_ACP_AUTH_LOCK:
-        _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'idle', 'error': '', 'startedAt': None}
-    return jsonify({'success': True, 'authenticated': False})
+        if _ANTIGRAVITY_ACP_AUTH_STATE.get('accountId') == account_id:
+            _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'idle', 'error': '', 'startedAt': None, 'accountId': account_id}
+    return jsonify({'success': True, 'authenticated': False, 'accountId': account_id})
 
 
 @app.route('/api/antigravity/acp/install', methods=['POST'])
@@ -2413,103 +2492,150 @@ def api_kiro_usage():
     return jsonify(data)
 
 
-def _read_antigravity_usage():
-    """Read quota from agy's own cached account via its headless /usage command."""
-    executable = _antigravity_cli_executable()
-    if not executable:
-        raise RuntimeError('Antigravity CLI was not found. Install agy, sign in, and refresh.')
-    process_env = os.environ.copy()
-    process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
-    cli_bin = os.path.dirname(executable)
-    process_env['PATH'] = cli_bin + os.pathsep + process_env.get('PATH', '')
-    try:
-        result = subprocess.run(
-            [executable, '--print', '/usage', '--output-format', 'json', '--print-timeout', '20s'],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            encoding='utf-8', errors='replace', timeout=25, env=process_env,
-            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise TimeoutError('Antigravity CLI quota check timed out. Open agy, confirm sign-in, then refresh.') from exc
-    except OSError as exc:
-        raise RuntimeError('Could not start Antigravity CLI for a quota refresh.') from exc
+def _read_antigravity_usage(account_id=None):
+    """Read Antigravity's reported quota windows using the local ACP OAuth profile."""
+    import requests
 
+    token_path = _antigravity_acp_token_path(account_id)
     try:
-        envelope = json.loads(result.stdout or '')
-    except (ValueError, TypeError) as exc:
-        raise RuntimeError('Antigravity CLI returned an unreadable quota response.') from exc
-    if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
-        raise RuntimeError('Antigravity CLI could not read quota. Open agy and finish Google sign-in, then refresh.')
+        with open(token_path, 'r', encoding='utf-8') as token_file:
+            token = json.load(token_file)
+    except FileNotFoundError as exc:
+        raise RuntimeError('Sign in to the selected profile in Settings → AI Usage & Accounts → Google Antigravity ACP to enable usage.') from exc
+    except (OSError, ValueError) as exc:
+        raise RuntimeError('Could not read the Antigravity ACP sign-in profile.') from exc
 
-    response_text = envelope.get('response')
-    if not isinstance(response_text, str):
-        raise RuntimeError('Antigravity CLI returned no quota data.')
-    windows = []
-    for line in response_text.splitlines():
-        columns = [part.strip() for part in line.split('\t')]
-        if len(columns) < 3:
-            continue
-        family_text, limit_text, percent_text = columns[:3]
-        match = re.search(r'(?<!\d)(\d{1,3}(?:\.\d+)?)\s*%', percent_text)
-        if not match:
-            continue
+    required = ('client_id', 'client_secret', 'refresh_token')
+    if not isinstance(token, dict) or any(not token.get(key) for key in required):
+        raise RuntimeError('The Antigravity ACP sign-in profile is incomplete. Sign in again from Settings.')
+    refreshed = requests.post('https://oauth2.googleapis.com/token', data={
+        'client_id': token['client_id'],
+        'client_secret': token['client_secret'],
+        'refresh_token': token['refresh_token'],
+        'grant_type': 'refresh_token',
+    }, timeout=12)
+    if not refreshed.ok:
+        raise RuntimeError('Could not refresh Google sign-in for Antigravity usage. Reopen ACP chat to sign in again.')
+    refreshed_data = refreshed.json() or {}
+    access_token = refreshed_data.get('access_token')
+    if not access_token:
+        raise RuntimeError('Google did not return an access token for Antigravity usage.')
+    account_email = _google_email_from_id_token(refreshed_data.get('id_token') or token.get('id_token'))
+    if not account_email:
         try:
-            remaining = max(0.0, min(100.0, float(match.group(1))))
-        except ValueError:
-            continue
-        family_lower = family_text.casefold()
-        if 'claude' in family_lower or 'gpt' in family_lower:
-            family = 'Claude & GPT (shared)'
-            prefix = 'shared'
-        elif 'gemini' in family_lower:
-            family = 'Gemini'
-            prefix = 'gemini'
-        else:
-            family = family_text or 'Antigravity'
-            prefix = re.sub(r'[^a-z0-9]+', '-', family_lower).strip('-') or 'agy'
-        cadence = '5-hour' if '5-hour' in limit_text.casefold() or '5 hour' in limit_text.casefold() else 'Weekly' if 'week' in limit_text.casefold() else limit_text or 'Quota'
-        suffix = '5h' if cadence == '5-hour' else 'weekly' if cadence == 'Weekly' else re.sub(r'[^a-z0-9]+', '-', cadence.casefold()).strip('-')
-        windows.append({
-            'id': f'{prefix}-{suffix}',
-            'label': f'{family} · {cadence}',
-            'leftPercent': round(remaining, 1),
-            'usedPercent': round(100.0 - remaining, 1),
-            'resetsAt': columns[3] if len(columns) > 3 and columns[3] else None,
-        })
-    if not windows:
-        raise RuntimeError('Antigravity CLI did not report any quota windows.')
-    windows.sort(key=lambda item: (not item['id'].startswith('gemini-'), item['id'].endswith('-weekly') is False))
-    primary = next((item for item in windows if item['id'] == 'gemini-5h'), None)
-    if primary is None:
-        primary = next((item for item in windows if item['id'].startswith('gemini-')), windows[0])
-    return {
-        'available': True,
-        'windows': windows,
-        'leftPercent': primary['leftPercent'],
-        'fetchedAt': int(time.time()),
-        'accountName': 'Antigravity CLI account',
-        'accountEmail': None,
+            identity_response = requests.get(
+                'https://openidconnect.googleapis.com/v1/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'}, timeout=8,
+            )
+            if identity_response.ok:
+                identity = identity_response.json() or {}
+                candidate = identity.get('email')
+                if isinstance(candidate, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', candidate.strip()):
+                    account_email = candidate.strip()
+        except (requests.RequestException, ValueError, TypeError):
+            pass
+
+    machine = platform.machine().lower()
+    architecture = 'amd64' if machine in {'amd64', 'x86_64'} else 'arm64' if machine in {'arm64', 'aarch64'} else machine
+    os_type = {'windows': 'win32', 'darwin': 'darwin', 'linux': 'linux'}.get(platform.system().lower(), platform.system().lower())
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+        'User-Agent': f'antigravity/hub/2.24.0 (aidev_client; os_type={os_type}; arch={architecture}; cl=963137146)',
     }
+    payload = {'project': token['project_id']} if token.get('project_id') else {}
+    merged = {}
+    errors = []
+    for host in ('daily-cloudcode-pa.googleapis.com', 'cloudcode-pa.googleapis.com'):
+        try:
+            response = requests.post(
+                f'https://{host}/v1internal:retrieveUserQuotaSummary',
+                headers=headers, json=payload, timeout=10,
+            )
+            response.raise_for_status()
+            summary = response.json()
+            groups = summary.get('groups') or [{'buckets': summary.get('buckets', [])}]
+            for group in groups:
+                group_name = str(group.get('displayName') or '').strip()
+                for bucket in group.get('buckets') or []:
+                    if bucket.get('disabled') or not isinstance(bucket.get('remainingFraction'), (int, float)):
+                        continue
+                    bucket_id = str(bucket.get('bucketId') or '')
+                    if bucket_id.startswith('gemini-argon-'):
+                        family = group_name or 'Gemini Argon'
+                    elif bucket_id.startswith('gemini-'):
+                        family = 'Gemini'
+                    elif bucket_id.startswith('3p-'):
+                        family = 'Claude & GPT (shared)'
+                    else:
+                        family = group_name or bucket_id or 'Antigravity'
+                    window = bucket.get('window')
+                    cadence = {'5h': '5-hour', 'weekly': 'Weekly'}.get(window, str(bucket.get('displayName') or 'Quota'))
+                    remaining = max(0.0, min(1.0, float(bucket['remainingFraction'])))
+                    row = {
+                        'id': bucket_id,
+                        'label': f'{family} · {cadence}',
+                        'leftPercent': round(remaining * 100, 1),
+                        'usedPercent': round((1 - remaining) * 100, 1),
+                        'resetsAt': bucket.get('resetTime'),
+                    }
+                    previous = merged.get(bucket_id)
+                    if previous is None or row['usedPercent'] > previous['usedPercent']:
+                        merged[bucket_id] = row
+        except (requests.RequestException, ValueError, TypeError) as exc:
+            errors.append(str(exc))
+
+    windows = list(merged.values())
+    if not windows:
+        raise RuntimeError('Google did not return Antigravity quota windows.' + (f' {errors[0]}' if errors else ''))
+    windows.sort(key=lambda item: (item['label'].split(' · ')[0] != 'Gemini', item['label'].split(' · ')[-1] != '5-hour'))
+    primary = next((item for item in windows if item['id'] == 'gemini-5h'), windows[0])
+    return {'available': True, 'windows': windows, 'leftPercent': primary['leftPercent'],
+            'fetchedAt': int(time.time()), 'accountName': 'Google account', 'accountEmail': account_email}
+
+
+def _google_email_from_id_token(id_token):
+    """Extract the account label from a cached Google ID token without exposing it."""
+    try:
+        token_parts = str(id_token or '').split('.')
+        if len(token_parts) < 2:
+            return None
+        payload = token_parts[1]
+        payload += '=' * (-len(payload) % 4)
+        claims = json.loads(base64.urlsafe_b64decode(payload.encode('ascii')))
+        email = claims.get('email') if isinstance(claims, dict) else None
+        if isinstance(email, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email.strip()):
+            return email.strip()
+    except (ValueError, TypeError, UnicodeError):
+        pass
+    return None
 
 
 @app.route('/api/antigravity/usage', methods=['GET'])
 def api_antigravity_usage():
-    """Return reported Antigravity quota windows from the authenticated ACP profile."""
+    """Return quota windows for the selected authenticated ACP profile."""
+    account_id = str(request.args.get('accountId') or 'default')
+    try:
+        _antigravity_acp_profile_home(account_id)
+    except ValueError as exc:
+        return jsonify({'available': False, 'error': str(exc), 'fetchedAt': int(time.time())}), 404
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
     try:
         cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
     except (TypeError, ValueError):
         cache_seconds = 120
     with _ANTIGRAVITY_USAGE_CACHE_LOCK:
-        cached = _ANTIGRAVITY_USAGE_CACHE.get('default')
+        cached = _ANTIGRAVITY_USAGE_CACHE.get(account_id)
         if not force_refresh and cache_seconds and cached and time.monotonic() - cached['fetched_at'] < cache_seconds:
             return jsonify(cached['data'])
     try:
-        data = _read_antigravity_usage()
+        data = _read_antigravity_usage(account_id)
     except (OSError, RuntimeError, TimeoutError, ValueError, TypeError) as exc:
         data = {'available': False, 'windows': [], 'error': str(exc), 'fetchedAt': int(time.time())}
+    account = next((item for item in _antigravity_acp_accounts() if item['id'] == account_id), None)
+    data['accountName'] = account['name'] if account else 'Default'
     with _ANTIGRAVITY_USAGE_CACHE_LOCK:
-        _ANTIGRAVITY_USAGE_CACHE['default'] = {'fetched_at': time.monotonic(), 'data': data}
+        _ANTIGRAVITY_USAGE_CACHE[account_id] = {'fetched_at': time.monotonic(), 'data': data}
     return jsonify(data)
 
 

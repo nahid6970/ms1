@@ -3,6 +3,22 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Open ACP OAuth Browser Flow
+
+- Capture the OAuth URL emitted by the ACP runtime and open it in the user's default browser during sign-in.
+- Keep ACP diagnostics private while draining stderr so the headless runtime cannot block on its output pipe.
+- Increase the Windows ACP initialize timeout to 90 seconds; a local startup probe took about 27 seconds to answer the first handshake.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
+## [2026-11-04] - Restore Antigravity ACP Quota Source
+
+- Restore quota reads from the ACP OAuth profile, including the account email and separate Gemini/Claude quota windows.
+- Restore the ACP runtime installer and Settings sign-in/sign-out controls, removing the dependency on the headless `agy /usage` response.
+- Add named ACP profile homes so multiple Google accounts can stay signed in; the selected profile drives the quota badge, and sign-out/removal applies only to that profile.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-04] - Remove Free-Tier Lines from Quota Tooltips
 
 - Remove the standalone Free plan labels from the Codex and Kiro rich tooltips to reduce vertical space while keeping account and quota details.

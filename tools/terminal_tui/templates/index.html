@@ -4019,13 +4019,23 @@
                         <div id="settings-kiro-account-list" data-testid="kiro-usage-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
                     </div>
                     <div style="margin-top:10px;padding:10px 12px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;">Google Antigravity CLI / ACP</div>
-                        <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:var(--text-muted);">Checking Antigravity CLI…</div>
-                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
-                            <button type="button" id="settings-antigravity-acp-auth" onclick="openAntigravityCliAuth()" style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;">Open Antigravity CLI</button>
-                            <a href="https://antigravity.google/docs/cli/acp/" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:var(--accent-color);">ACP setup</a>
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px;">Google Antigravity ACP</div>
+                        <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:var(--text-muted);">Checking ACP runtime…</div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;">
+                            <label for="settings-antigravity-acp-account" style="font-size:.72rem;color:var(--text-secondary);">Selected profile</label>
+                            <select id="settings-antigravity-acp-account" onchange="selectAntigravityAcpAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;"><option value="default">Default</option></select>
+                            <button type="button" id="settings-antigravity-acp-remove" onclick="removeAntigravityAcpAccount()" disabled style="padding:4px 8px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.7rem;cursor:pointer;opacity:.55;">Remove profile</button>
                         </div>
-                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">Sign in or out in the Antigravity CLI terminal. ACP launched by <code>agy acp</code> and quota checks use that same CLI account. Use <code>/logout</code> in the CLI to sign out. The CLI quota response does not include the account email.</div>
+                        <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:7px;margin-top:8px;">
+                            <input id="settings-antigravity-acp-account-name" type="text" maxlength="40" placeholder="New Google account name" aria-label="New Antigravity ACP account name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;">
+                            <button type="button" id="settings-antigravity-acp-add" onclick="addAntigravityAcpAccount()" style="padding:4px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;">Add account</button>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
+                            <button type="button" id="settings-antigravity-acp-install" onclick="installAntigravityAcpRuntime()" style="padding:5px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Install ACP runtime (~560 MB)</button>
+                            <button type="button" id="settings-antigravity-acp-auth" onclick="toggleAntigravityAcpAuth()" disabled style="padding:5px 10px;background:var(--accent-color);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Sign in</button>
+                            <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:var(--accent-color);">ACP runtime</a>
+                        </div>
+                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:var(--text-muted);">Each profile keeps a separate ACP sign-in. Add another profile and sign in once; selecting it switches the quota badge without signing out of other profiles. ACP sign-in remains separate from <code>agy</code>.</div>
                     </div>
                 </div>
 
@@ -7068,6 +7078,11 @@ kiro-cli whoami --format json</code></pre>
 
         let antigravityUsageLoadInFlight = false;
         let antigravityUsageRefreshQueued = false;
+        let antigravityAcpAccounts = [{ id: 'default', name: 'Default' }];
+        function getSelectedAntigravityAcpAccount() {
+            const savedId = localStorage.getItem('antigravity-acp-selected-account') || 'default';
+            return antigravityAcpAccounts.some(account => account.id === savedId) ? savedId : 'default';
+        }
         async function loadAntigravityUsage(forceRefresh = false, queueIfBusy = true) {
             if (antigravityUsageLoadInFlight) {
                 if (forceRefresh && queueIfBusy) antigravityUsageRefreshQueued = true;
@@ -7083,10 +7098,12 @@ kiro-cli whoami --format json</code></pre>
             if (icon && !icon.childElementCount) icon.innerHTML = agentSessionIconMarkup('antigravity', 13, 'monitor-antigravity-quota');
             if (forceRefresh) value.textContent = '…';
             try {
-                const cacheKey = 'ai-usage-cache:antigravity:default:identity-v3';
+                const accountId = getSelectedAntigravityAcpAccount();
+                const cacheKey = `ai-usage-cache:antigravity:${accountId}:identity-v3`;
                 let data = readUsageBrowserCache(cacheKey, forceRefresh);
                 if (!data) {
                     const query = new URLSearchParams();
+                    query.set('accountId', accountId);
                     if (forceRefresh) query.set('refresh', 'true');
                     query.set('cacheSeconds', String(getUsageServerCacheSeconds()));
                     const response = await fetch(`/api/antigravity/usage?${query}`);
@@ -7096,17 +7113,18 @@ kiro-cli whoami --format json</code></pre>
                 }
                 if (!data.available || !Array.isArray(data.windows) || !data.windows.length) {
                     value.textContent = '--';
-                    const errorText = data.error || 'Sign in with Antigravity CLI to read quota.';
-                    const settingsStatus = document.getElementById('settings-antigravity-acp-status');
-                    if (settingsStatus) settingsStatus.textContent = 'Antigravity CLI is installed, but /usage could not confirm an active signed-in account. Open the CLI and sign in, then refresh.';
+                    const errorText = data.error || 'Sign in with Google through ACP to read Antigravity quota.';
                     setQuotaTooltip(button, 'Antigravity', errorText, errorText);
                     return;
                 }
-                const settingsStatus = document.getElementById('settings-antigravity-acp-status');
-                if (settingsStatus) settingsStatus.textContent = `Antigravity CLI account confirmed by /usage${antigravityCliVersion ? ` (${antigravityCliVersion})` : ''}.`;
                 const primary = data.windows.find(item => item.id === 'gemini-5h') || data.windows[0];
                 value.textContent = `${Number(primary.leftPercent).toFixed(1)}%`;
-                const accountName = data.accountEmail || data.accountName || 'Antigravity CLI account';
+                const accountName = data.accountEmail || data.accountName || 'Google account';
+                const selectedAccount = antigravityAcpAccounts.find(account => account.id === getSelectedAntigravityAcpAccount());
+                if (selectedAccount && data.accountEmail) {
+                    selectedAccount.accountEmail = data.accountEmail;
+                    renderAntigravityAcpAccounts();
+                }
                 const details = data.windows.map(item => {
                     const resetTime = item.resetsAt ? new Date(item.resetsAt).toLocaleString().replace(/\s/g, '\u00a0') : '';
                     const reset = resetTime ? ` · resets ${resetTime}` : '';
@@ -7135,8 +7153,13 @@ kiro-cli whoami --format json</code></pre>
 
         loadCodexUsageAccounts().then(() => loadCodexLimits(false)).catch(() => loadCodexLimits(false));
         loadKiroUsageAccounts().then(() => loadKiroUsage(false)).catch(() => loadKiroUsage(false));
-        loadAntigravityUsage(false);
-        refreshAntigravityAcpStatus();
+        loadAntigravityAcpAccounts().then(() => {
+            refreshAntigravityAcpStatus();
+            loadAntigravityUsage(false);
+        }).catch(() => {
+            refreshAntigravityAcpStatus();
+            loadAntigravityUsage(false);
+        });
         startCodexLimitsAutoRefresh();
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && localStorage.getItem('codex-limit-auto-refresh') !== 'false') {
@@ -7340,43 +7363,267 @@ kiro-cli whoami --format json</code></pre>
             splitTerminal('tabs', `${locationCommand}${antigravityPathSetup}${agentCommand}`);
         }
 
-        let antigravityCliVersion = '';
+        let antigravityAcpRuntimeStatus = null;
+        let antigravityAcpAuthPollTimer = null;
+
+        function renderAntigravityAcpAccounts() {
+            const select = document.getElementById('settings-antigravity-acp-account');
+            const removeButton = document.getElementById('settings-antigravity-acp-remove');
+            if (!select) return;
+            const selectedId = getSelectedAntigravityAcpAccount();
+            select.innerHTML = '';
+            antigravityAcpAccounts.forEach(account => {
+                const option = document.createElement('option');
+                option.value = account.id;
+                option.textContent = `${account.name}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
+                select.appendChild(option);
+            });
+            select.value = selectedId;
+            if (removeButton) {
+                removeButton.disabled = selectedId === 'default';
+                removeButton.style.opacity = removeButton.disabled ? '.55' : '1';
+            }
+        }
+
+        async function loadAntigravityAcpAccounts() {
+            const response = await fetch('/api/antigravity/acp/accounts');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not load Antigravity ACP accounts.');
+            antigravityAcpAccounts = Array.isArray(data.accounts) ? data.accounts : [{ id: 'default', name: 'Default' }];
+            if (!antigravityAcpAccounts.some(account => account.id === (localStorage.getItem('antigravity-acp-selected-account') || 'default'))) {
+                localStorage.setItem('antigravity-acp-selected-account', 'default');
+            }
+            renderAntigravityAcpAccounts();
+            return antigravityAcpAccounts;
+        }
+
+        async function selectAntigravityAcpAccount(accountId) {
+            const exists = antigravityAcpAccounts.some(account => account.id === accountId);
+            if (!exists) accountId = 'default';
+            localStorage.setItem('antigravity-acp-selected-account', accountId);
+            renderAntigravityAcpAccounts();
+            await refreshAntigravityAcpStatus();
+            await loadAntigravityUsage(true);
+        }
+
+        async function addAntigravityAcpAccount() {
+            const input = document.getElementById('settings-antigravity-acp-account-name');
+            const name = input?.value.trim();
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (!name) {
+                if (statusEl) statusEl.textContent = 'Enter a name for the new ACP account profile.';
+                input?.focus();
+                return;
+            }
+            try {
+                const response = await fetch('/api/antigravity/acp/accounts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not add Antigravity ACP profile.');
+                input.value = '';
+                await loadAntigravityAcpAccounts();
+                await selectAntigravityAcpAccount(data.account.id);
+                if (statusEl) statusEl.textContent = `Profile “${name}” added. Select Sign in to connect its Google account.`;
+            } catch (error) {
+                if (statusEl) statusEl.textContent = String(error.message || error);
+            }
+        }
+
+        async function removeAntigravityAcpAccount() {
+            const accountId = getSelectedAntigravityAcpAccount();
+            const account = antigravityAcpAccounts.find(item => item.id === accountId);
+            if (!account || accountId === 'default') return;
+            if (!confirm(`Remove the “${account.name}” ACP profile and its saved sign-in?`)) return;
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            try {
+                const response = await fetch('/api/antigravity/acp/accounts', {
+                    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not remove Antigravity ACP profile.');
+                localStorage.setItem('antigravity-acp-selected-account', 'default');
+                await loadAntigravityAcpAccounts();
+                await refreshAntigravityAcpStatus();
+                await loadAntigravityUsage(true);
+            } catch (error) {
+                if (statusEl) statusEl.textContent = String(error.message || error);
+            }
+        }
+
+        async function readAntigravityAcpResponse(response, endpoint) {
+            const body = await response.text();
+            try {
+                return JSON.parse(body);
+            } catch (_error) {
+                if (response.status === 404 || /<!doctype\s+html|<html/i.test(body.slice(0, 300))) {
+                    throw new Error(`The running app does not have the Antigravity ACP API (${endpoint}). Restart Terminal TUI, then refresh this page.`);
+                }
+                throw new Error(`The Antigravity ACP API returned an invalid response (HTTP ${response.status}).`);
+            }
+        }
+
         async function refreshAntigravityAcpStatus() {
             const statusEl = document.getElementById('settings-antigravity-acp-status');
             const authButton = document.getElementById('settings-antigravity-acp-auth');
+            const installButton = document.getElementById('settings-antigravity-acp-install');
             if (!statusEl) return null;
             try {
-                const response = await fetch('/api/antigravity/cli');
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Could not check the Antigravity CLI.');
-                antigravityCliVersion = data.version || '';
+                const accountId = getSelectedAntigravityAcpAccount();
+                const response = await fetch(`/api/antigravity/acp?accountId=${encodeURIComponent(accountId)}`);
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp');
+                if (!response.ok) throw new Error(data.error || 'Could not check the Antigravity ACP runtime.');
+                antigravityAcpRuntimeStatus = data;
+                const selectedAccount = antigravityAcpAccounts.find(account => account.id === data.accountId);
+                if (selectedAccount) {
+                    selectedAccount.authenticated = Boolean(data.authenticated);
+                    renderAntigravityAcpAccounts();
+                }
+                if (!data.supported) {
+                    statusEl.textContent = data.error || 'The Antigravity ACP runtime is not supported on this system.';
+                    if (authButton) authButton.disabled = true;
+                    if (installButton) installButton.disabled = true;
+                    return data;
+                }
                 statusEl.textContent = data.installed
-                    ? `Antigravity CLI${data.version ? ` ${data.version}` : ''} is installed. Google account status is managed by the CLI.`
-                    : 'Antigravity CLI was not found. Install it before using shared CLI/ACP sign-in.';
-                if (authButton) authButton.disabled = !data.installed;
+                    ? `ACP runtime ${data.version} is installed (${data.architecture}). ${data.authenticated ? 'Google credentials are saved.' : 'No Google account connected.'} ${data.usageReady ? 'Quota profile is ready.' : data.authenticated ? 'Quota profile is missing; sign in again to enable quota checks.' : ''}`
+                    : `ACP runtime ${data.version} is not installed. The official Google download is about 560 MB.`;
+                if (data.authState === 'starting') {
+                    statusEl.textContent = 'Starting Antigravity ACP runtime. First startup can take up to 90 seconds.';
+                } else if (data.authState === 'authenticating') {
+                    statusEl.textContent = 'Opening Google sign-in in your default browser. Complete the browser flow to continue.';
+                } else if (data.authState === 'failed') {
+                    statusEl.textContent = `ACP sign-in failed: ${data.authError || 'The runtime did not complete authentication.'}`;
+                } else if (data.authState === 'complete' && !data.authenticated) {
+                    statusEl.textContent = 'Google sign-in finished, but no saved ACP credentials were found. Try signing in again.';
+                }
+                if (installButton) {
+                    installButton.disabled = Boolean(data.installed);
+                    if (data.installed) installButton.textContent = 'ACP runtime installed';
+                }
+                if (authButton) {
+                    const authInProgress = ['starting', 'authenticating'].includes(data.authState);
+                    authButton.disabled = !data.installed || authInProgress;
+                    authButton.textContent = authInProgress ? 'Signing in…' : data.authenticated ? 'Sign out' : 'Sign in';
+                    authButton.style.background = data.authenticated ? 'var(--bg-sidebar)' : 'var(--accent-color)';
+                    authButton.style.border = data.authenticated ? '1px solid var(--border-color)' : '0';
+                    authButton.style.color = data.authenticated ? 'var(--text-primary)' : 'white';
+                    authButton.style.opacity = authButton.disabled ? '.55' : '1';
+                    authButton.title = '';
+                    const accountSelect = document.getElementById('settings-antigravity-acp-account');
+                    if (accountSelect) accountSelect.disabled = authInProgress;
+                }
                 return data;
             } catch (error) {
                 statusEl.textContent = String(error.message || error);
                 if (authButton) authButton.disabled = true;
+                if (installButton) installButton.disabled = true;
                 return null;
             }
         }
 
-        async function openAntigravityCliAuth() {
+        async function installAntigravityAcpRuntime() {
+            const button = document.getElementById('settings-antigravity-acp-install');
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (!button || !statusEl) return;
+            button.disabled = true;
+            const originalText = button.textContent;
+            button.textContent = 'Downloading ACP runtime…';
+            statusEl.textContent = 'Downloading and installing Google’s official ACP runtime. This is a large download; keep this page open.';
+            try {
+                const response = await fetch('/api/antigravity/acp/install', { method: 'POST' });
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/install');
+                if (!response.ok) throw new Error(data.error || 'Could not install the Antigravity ACP runtime.');
+                await refreshAntigravityAcpStatus();
+            } catch (error) {
+                statusEl.textContent = String(error.message || error);
+            } finally {
+                button.disabled = Boolean(antigravityAcpRuntimeStatus?.installed);
+                button.textContent = antigravityAcpRuntimeStatus?.installed ? 'ACP runtime installed' : originalText;
+            }
+        }
+
+        async function toggleAntigravityAcpAuth() {
             const status = await refreshAntigravityAcpStatus();
+            if (!status?.installed) {
+                const statusEl = document.getElementById('settings-antigravity-acp-status');
+                if (statusEl) statusEl.textContent = 'Install the ACP runtime first, then sign in.';
+                return;
+            }
+            if (status.authenticated) {
+                await signOutAntigravityAcp();
+                return;
+            }
+            await setupAntigravityAcpSignIn(status);
+        }
+
+        async function setupAntigravityAcpSignIn(status = null) {
+            status = status || await refreshAntigravityAcpStatus();
+            if (!status?.installed) {
+                alert('Install the Antigravity ACP runtime from Settings → AI Usage & Accounts first.');
+                return;
+            }
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (statusEl) statusEl.textContent = 'Starting Google ACP sign-in. Complete the browser flow to continue.';
+            try {
+                const response = await fetch('/api/antigravity/acp/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountId: getSelectedAntigravityAcpAccount() }),
+                });
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/login');
+                if (!response.ok) throw new Error(data.error || 'Could not start ACP sign-in.');
+            } catch (error) {
+                if (statusEl) statusEl.textContent = `Could not start ACP sign-in: ${String(error.message || error)}`;
+                return;
+            }
+            if (antigravityAcpAuthPollTimer) clearInterval(antigravityAcpAuthPollTimer);
+            const authPollDeadline = Date.now() + 10 * 60 * 1000;
+            antigravityAcpAuthPollTimer = setInterval(async () => {
+                if (Date.now() >= authPollDeadline) {
+                    clearInterval(antigravityAcpAuthPollTimer);
+                    antigravityAcpAuthPollTimer = null;
+                    return;
+                }
+                const currentStatus = await refreshAntigravityAcpStatus();
+                if (currentStatus?.authState === 'failed') {
+                    clearInterval(antigravityAcpAuthPollTimer);
+                    antigravityAcpAuthPollTimer = null;
+                } else if (currentStatus?.authenticated || currentStatus?.authState === 'complete') {
+                    clearInterval(antigravityAcpAuthPollTimer);
+                    antigravityAcpAuthPollTimer = null;
+                    if (currentStatus?.authenticated) await loadAntigravityUsage(true);
+                }
+            }, 2000);
+        }
+
+        async function signOutAntigravityAcp() {
             const button = document.getElementById('settings-antigravity-acp-auth');
             const statusEl = document.getElementById('settings-antigravity-acp-status');
             if (!button || !statusEl) return;
-            if (!status?.installed) {
-                statusEl.textContent = 'Install Antigravity CLI first, then use its Google sign-in.';
-                return;
+            button.disabled = true;
+            button.textContent = 'Signing out…';
+            statusEl.textContent = 'Signing out of the Google account connected to Antigravity ACP…';
+            let resultMessage = '';
+            try {
+                const response = await fetch('/api/antigravity/acp/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accountId: getSelectedAntigravityAcpAccount() }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not sign out of Antigravity ACP.');
+                await refreshAntigravityAcpStatus();
+                await loadAntigravityUsage(true);
+                resultMessage = data.authenticated
+                    ? 'Google logout completed, but the ACP profile still reports saved authentication. Sign in again or inspect the runtime profile.'
+                    : 'Signed out of this ACP profile. Other saved account profiles remain signed in.';
+            } catch (error) {
+                resultMessage = String(error.message || error);
+            } finally {
+                const status = await refreshAntigravityAcpStatus();
+                if (button) button.style.opacity = button.disabled ? '.55' : '1';
+                if (resultMessage) statusEl.textContent = resultMessage;
             }
-            if (!activeProject) {
-                statusEl.textContent = 'Select a workspace first so Terminal TUI can open an Antigravity CLI terminal.';
-                return;
-            }
-            splitTerminal('tabs', 'agy\r');
-            statusEl.textContent = 'Antigravity CLI opened. Sign in there, or enter /logout to sign out; ACP reuses the CLI account.';
         }
 
         let agentTitleRenameSource = null;

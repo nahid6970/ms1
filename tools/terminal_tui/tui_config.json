@@ -1828,5 +1828,11 @@
       "codexHome": "D:\\Codex\\.codex-01"
     }
   ],
-  "kiro_usage_accounts": []
+  "kiro_usage_accounts": [],
+  "antigravity_acp_accounts": [
+    {
+      "id": "31d2feb1b85e4cb2aabd28618668fc28",
+      "name": "nahid69701@gmail.com"
+    }
+  ]
 }
