@@ -1516,7 +1516,13 @@ def _agent_session_roots(profile_home, project_path, codex_home=None, kiro_home=
         if normalized_home in seen_kiro_homes:
             continue
         seen_kiro_homes.add(normalized_home)
-        roots.append(('kiro', os.path.join(home, 'sessions', 'cli')))
+        # Kiro CLI v3 stores sessions under sessions/<workspace-hash>/<session-id>/,
+        # with metadata in session.json and the transcript in messages.jsonl.
+        # Keep the legacy CLI root too for profiles that still have v2 sessions.
+        roots.extend((
+            ('kiro', os.path.join(home, 'sessions')),
+            ('kiro', os.path.join(home, 'sessions', 'cli')),
+        ))
     return roots
 
 
@@ -2291,8 +2297,9 @@ def _path_is_within(path, root):
 def _agent_message_from_record(agent, record):
     """Return a plain user/assistant text message from a native transcript row."""
     if agent == 'kiro':
-        role = {'Prompt': 'user', 'AssistantMessage': 'assistant'}.get(record.get('kind'))
-        content = (record.get('data') or {}).get('content') or []
+        payload = record.get('payload') if isinstance(record.get('payload'), dict) else record
+        role = {'Prompt': 'user', 'AssistantMessage': 'assistant'}.get(payload.get('kind'))
+        content = (payload.get('data') or {}).get('content') or []
         if isinstance(content, list):
             text = ' '.join(
                 str(part.get('data') or '')
@@ -2328,11 +2335,25 @@ def _agent_message_from_record(agent, record):
     return role, text
 
 
+def _kiro_transcript_path(session_path):
+    """Resolve the transcript paired with legacy metadata or a v3 session.json."""
+    session_dir = os.path.dirname(session_path)
+    messages_path = os.path.join(session_dir, 'messages.jsonl')
+    if os.path.isfile(messages_path):
+        return messages_path
+    return os.path.splitext(session_path)[0] + '.jsonl'
+
+
 def _agent_session_metadata(agent, session_path):
     """Read top-level session metadata across native transcript formats."""
     with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
         if agent == 'kiro':
-            return json.load(session_file)
+            metadata = json.load(session_file)
+            if not metadata.get('cwd'):
+                workspace_paths = metadata.get('workspacePaths') or metadata.get('rootPaths') or []
+                if isinstance(workspace_paths, list) and workspace_paths:
+                    metadata['cwd'] = workspace_paths[0]
+            return metadata
         first = json.loads(session_file.readline())
     if agent == 'codex':
         return first.get('payload') or {}
@@ -2353,7 +2374,7 @@ def _agent_transcript_records(agent, session_path):
 
 
 def _extract_agent_transcript(agent, session_path, include_history=False):
-    transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
+    transcript_path = _kiro_transcript_path(session_path) if agent == 'kiro' else session_path
     title = ''
     original_prompt = ''
     handoff_token = ''
@@ -2403,7 +2424,7 @@ def _extract_agent_transcript(agent, session_path, include_history=False):
 
 def _estimate_agent_session_tokens(agent, session_path):
     """Estimate readable conversation tokens at roughly four characters per token."""
-    transcript_path = os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path
+    transcript_path = _kiro_transcript_path(session_path) if agent == 'kiro' else session_path
     readable_characters = 0
     try:
         for record in _agent_transcript_records(agent, transcript_path):
@@ -2490,6 +2511,8 @@ def api_agent_sessions():
 
                         transcript = _extract_agent_transcript(agent, session_path)
                         title = str(metadata.get('title') or '').strip() if agent == 'kiro' else ''
+                        if agent == 'kiro' and title.casefold() in {'new session', 'new chat session', 'untitled chat'}:
+                            title = ''
                         title = title_overrides.get(f'{agent}:{session_id}') or title or transcript['title']
                     if agent == 'kiro' and not title:
                         continue
@@ -2783,7 +2806,7 @@ def api_agent_session_delete():
 
     files_to_delete = [session_path]
     if agent == 'kiro':
-        companion_path = os.path.splitext(session_path)[0] + '.jsonl'
+        companion_path = _kiro_transcript_path(session_path)
         if os.path.isfile(companion_path) and any(_path_is_within(companion_path, root) for root in allowed_roots):
             files_to_delete.insert(0, companion_path)
     try:
@@ -2859,7 +2882,7 @@ def api_agent_session_context():
         'sourceSessionId': session_id,
         'sourceTitle': transcript['title'] or metadata.get('title') or 'Untitled chat',
         'cwd': cwd,
-        'sourceTranscriptPath': os.path.splitext(session_path)[0] + '.jsonl' if agent == 'kiro' else session_path,
+        'sourceTranscriptPath': _kiro_transcript_path(session_path) if agent == 'kiro' else session_path,
         'handoffText': '',
     })
 
@@ -2985,21 +3008,21 @@ def api_kiro_continue_on_account():
         return jsonify({'error': 'The source or target Kiro profile is no longer available.'}), 404
     if os.path.normcase(os.path.realpath(source_profile['home'])) == os.path.normcase(os.path.realpath(target_profile['home'])):
         return jsonify({'error': 'Choose a different Kiro profile to continue this conversation.'}), 400
-    allowed_root = os.path.join(source_profile['home'], 'sessions', 'cli')
+    allowed_root = os.path.join(source_profile['home'], 'sessions')
     if not session_path.lower().endswith('.json') or not _path_is_within(session_path, allowed_root):
         return jsonify({'error': 'Source session file is outside its Kiro profile session folder.'}), 403
 
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
     try:
         with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = json.load(session_file)
+            metadata = _agent_session_metadata('kiro', session_path)
         cwd = str(metadata.get('cwd') or '')
         if str(metadata.get('session_id') or metadata.get('id') or '') != session_id or not cwd or not _path_is_within(cwd, project_path):
             return jsonify({'error': 'Source session does not belong to this workspace.'}), 404
     except (OSError, ValueError, TypeError, AttributeError):
         return jsonify({'error': 'Could not read the source Kiro session.'}), 404
 
-    transcript_path = os.path.splitext(session_path)[0] + '.jsonl'
+    transcript_path = _kiro_transcript_path(session_path)
     if not os.path.isfile(transcript_path):
         transcript_path = session_path
     conversations = get_config_val('agent_handoff_conversations', list)
@@ -3105,7 +3128,7 @@ def api_agent_handoff_create():
 
     handoff_id = str(uuid.uuid4())
     token = uuid.uuid4().hex
-    source_transcript_path = (os.path.splitext(source_session_path)[0] + '.jsonl'
+    source_transcript_path = (_kiro_transcript_path(source_session_path)
                               if source_agent == 'kiro' else source_session_path)
     conversation['activeHandoffId'] = handoff_id
     conversation['activeAgent'] = target_agent

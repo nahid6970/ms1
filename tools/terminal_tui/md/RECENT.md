@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Include Kiro CLI v3 Chats in the Session Picker
+
+- Discover Kiro v3 sessions under `sessions/<workspace-id>/<session-id>/` while retaining the legacy `sessions/cli` scan.
+- Read v3 workspace paths and titles from `session.json`, and parse the paired `messages.jsonl` transcript for titles and token estimates.
+- Use the v3 transcript path for session context, handoffs, and deletion of the paired transcript.
+- Updated the session picker feature note to document both Kiro storage formats.
+
+**Files Modified:** `app.py`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-01] - Apply Selected Codex Account to New Terminals
 
 - Pass the selected Codex profile into terminal creation and set `CODEX_HOME` in the new PowerShell session's project profile.
