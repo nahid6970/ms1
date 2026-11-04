@@ -2082,6 +2082,14 @@
         #quota-details-tooltip .quota-tooltip-heading { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; color: #f8fafc; font-size: 11px; font-weight: 700; letter-spacing: .045em; text-transform: uppercase; }
         #quota-details-tooltip .quota-tooltip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--quota-tooltip-accent, #38bdf8); box-shadow: 0 0 9px var(--quota-tooltip-accent, #38bdf8); }
         #quota-details-tooltip .quota-tooltip-content { color: #aebbd0; white-space: pre-line; overflow-wrap: break-word; }
+        #quota-details-tooltip .quota-tooltip-rich { display: grid; gap: 4px; white-space: normal; }
+        #quota-details-tooltip .quota-tooltip-intro { color: #e2e8f0; font-weight: 600; }
+        #quota-details-tooltip .quota-tooltip-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
+        #quota-details-tooltip .quota-tooltip-percent { display: inline-flex; align-items: center; padding: 1px 5px; border: 1px solid rgba(148,163,184,.4); border-radius: 4px; color: #e2e8f0; background: rgba(148,163,184,.15); font-weight: 750; line-height: 1.2; white-space: nowrap; }
+        #quota-details-tooltip[data-quota-provider="Codex"] .quota-tooltip-percent { color: #a7f3d0; background: rgba(16,185,129,.16); border-color: rgba(52,211,153,.4); }
+        #quota-details-tooltip[data-quota-provider="Kiro"] .quota-tooltip-percent { color: #ddd6fe; background: rgba(139,92,246,.17); border-color: rgba(167,139,250,.42); }
+        #quota-details-tooltip[data-quota-provider="Antigravity"] .quota-tooltip-percent { color: #a5f3fc; background: rgba(8,145,178,.17); border-color: rgba(34,211,238,.42); }
+        #quota-details-tooltip .quota-tooltip-footer { margin-top: 2px; color: #8291a8; font-size: 11px; }
         @keyframes quota-tooltip-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
         #codex-usage-account-menu {
             position: fixed;
@@ -6824,10 +6832,11 @@ kiro-cli whoami --format json</code></pre>
             catch (_) { /* Usage caching is optional if browser storage is unavailable. */ }
         }
 
-        function setQuotaTooltip(button, provider, details, ariaLabel = '') {
+        function setQuotaTooltip(button, provider, details, ariaLabel = '', richContent = null) {
             if (!button) return;
             button.dataset.quotaProvider = provider;
             button.dataset.quotaDetails = String(details || '');
+            button._quotaTooltipRichContent = richContent;
             button.removeAttribute('title');
             if (ariaLabel) button.setAttribute('aria-label', ariaLabel);
         }
@@ -6851,7 +6860,46 @@ kiro-cli whoami --format json</code></pre>
                 document.body.appendChild(tooltip);
             }
             tooltip.querySelector('.quota-tooltip-provider').textContent = button.dataset.quotaProvider || 'Usage';
-            tooltip.querySelector('.quota-tooltip-content').textContent = button.dataset.quotaDetails || '';
+            tooltip.dataset.quotaProvider = button.dataset.quotaProvider || '';
+            const content = tooltip.querySelector('.quota-tooltip-content');
+            const richContent = button._quotaTooltipRichContent;
+            if (richContent && Array.isArray(richContent.lines)) {
+                content.classList.add('quota-tooltip-rich');
+                content.replaceChildren();
+                if (richContent.intro) {
+                    const intro = document.createElement('div');
+                    intro.className = 'quota-tooltip-intro';
+                    intro.textContent = richContent.intro;
+                    content.appendChild(intro);
+                }
+                if (richContent.subheading) {
+                    const subheading = document.createElement('div');
+                    subheading.textContent = richContent.subheading;
+                    content.appendChild(subheading);
+                }
+                richContent.lines.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'quota-tooltip-line';
+                    const label = document.createElement('span');
+                    label.textContent = `${item.label}:`;
+                    const percent = document.createElement('span');
+                    percent.className = 'quota-tooltip-percent';
+                    percent.textContent = item.percent;
+                    const suffix = document.createElement('span');
+                    suffix.textContent = item.suffix || '';
+                    row.append(label, percent, suffix);
+                    content.appendChild(row);
+                });
+                if (richContent.footer) {
+                    const footer = document.createElement('div');
+                    footer.className = 'quota-tooltip-footer';
+                    footer.textContent = richContent.footer;
+                    content.appendChild(footer);
+                }
+            } else {
+                content.classList.remove('quota-tooltip-rich');
+                content.textContent = button.dataset.quotaDetails || '';
+            }
             const accents = { Codex: '#34d399', Kiro: '#a78bfa', Antigravity: '#22d3ee' };
             tooltip.style.setProperty('--quota-tooltip-accent', accents[button.dataset.quotaProvider] || '#38bdf8');
             tooltip.classList.add('visible');
@@ -6936,8 +6984,15 @@ kiro-cli whoami --format json</code></pre>
                     const reset = resetTime ? ` · resets ${resetTime}` : '';
                     return `${windowInfo.label}: ${windowInfo.leftPercent}% remaining${reset}`;
                 }).join('\n');
+                const richLines = data.windows.map(windowInfo => {
+                    const resetTime = windowInfo.resetsAt ? new Date(windowInfo.resetsAt * 1000).toLocaleString().replace(/\s/g, '\u00a0') : '';
+                    return { label: windowInfo.label, percent: `${windowInfo.leftPercent}%`, suffix: `remaining${resetTime ? ` · resets ${resetTime}` : ''}` };
+                });
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${plan}${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`);
+                setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${plan}${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`, {
+                    intro: accountName || 'Default account', subheading: plan.trim(), lines: richLines,
+                    footer: 'Click to refresh · right-click to switch account',
+                });
             } catch (error) {
                 value.textContent = '--';
                 const errorText = `Could not read Codex quota: ${String(error.message || error)}`;
@@ -6995,7 +7050,11 @@ kiro-cli whoami --format json</code></pre>
                 const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                setQuotaTooltip(button, 'Kiro', `${accountName || 'Default account'}\n${plan}${credits}${reset}\nClick to refresh`, `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`);
+                setQuotaTooltip(button, 'Kiro', `${accountName || 'Default account'}\n${plan}${credits}${reset}\nClick to refresh`, `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`, {
+                    intro: accountName || 'Default account', subheading: plan.trim(),
+                    lines: [{ label: 'Included credits', percent: `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`, suffix: `${credits}${reset}` }],
+                    footer: 'Click to refresh',
+                });
             } catch (error) {
                 value.textContent = '--';
                 const errorText = `Could not read Kiro usage: ${String(error.message || error)}`;
@@ -7052,7 +7111,13 @@ kiro-cli whoami --format json</code></pre>
                     const reset = resetTime ? ` · resets ${resetTime}` : '';
                     return `${item.label}: ${Number(item.leftPercent).toFixed(1)}% remaining${reset}`;
                 }).join('\n');
-                setQuotaTooltip(button, 'Antigravity', `Using: ${accountName}\n${details}\nClick to refresh`, `Antigravity account ${accountName}. Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`);
+                const richLines = data.windows.map(item => {
+                    const resetTime = item.resetsAt ? new Date(item.resetsAt).toLocaleString().replace(/\s/g, '\u00a0') : '';
+                    return { label: item.label, percent: `${Number(item.leftPercent).toFixed(1)}%`, suffix: `remaining${resetTime ? ` · resets ${resetTime}` : ''}` };
+                });
+                setQuotaTooltip(button, 'Antigravity', `Using: ${accountName}\n${details}\nClick to refresh`, `Antigravity account ${accountName}. Gemini 5-hour quota: ${value.textContent} remaining. Click to refresh.`, {
+                    intro: `Using: ${accountName}`, lines: richLines, footer: 'Click to refresh',
+                });
             } catch (error) {
                 value.textContent = '--';
                 const errorText = `Could not read Antigravity quota: ${String(error.message || error)}`;

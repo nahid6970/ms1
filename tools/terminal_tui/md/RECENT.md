@@ -3,6 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Style Usage Percentages in Quota Tooltips
+
+- Present each percentage inside Codex, Kiro, and Antigravity quota tooltips in a compact provider-colored pill with coordinated foreground, background, and border colors.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-04] - Keep Quota Reset Times Together in Tooltips
 
 - Widen the shared quota tooltip and render Codex quota windows on separate lines.
