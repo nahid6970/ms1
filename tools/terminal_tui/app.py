@@ -2091,7 +2091,7 @@ def api_antigravity_acp_status():
     })
 
 
-@app.route('/api/antigravity/acp/accounts', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/antigravity/acp/accounts', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_antigravity_acp_accounts():
     """Manage independent ACP OAuth profile homes without disturbing other accounts."""
     accounts = _antigravity_acp_accounts()
@@ -2121,6 +2121,22 @@ def api_antigravity_acp_accounts():
         accounts.append(account)
         set_config_val('antigravity_acp_accounts', accounts)
         return jsonify({'account': account, 'authenticated': False}), 201
+
+    if request.method == 'PUT':
+        account = next((item for item in accounts if item['id'] == account_id), None)
+        if not account:
+            return jsonify({'error': 'Antigravity ACP profile was not found. The default profile cannot be renamed.'}), 404
+        name = str(payload.get('name') or '').strip()[:40]
+        if not name:
+            return jsonify({'error': 'Enter a name for this Google account profile.'}), 400
+        if name.casefold() == 'default' or any(
+                item['id'] != account_id and str(item['name']).casefold() == name.casefold() for item in accounts):
+            return jsonify({'error': 'An Antigravity ACP profile already uses that name.'}), 409
+        account['name'] = name
+        set_config_val('antigravity_acp_accounts', accounts)
+        with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+            _ANTIGRAVITY_USAGE_CACHE.pop(account_id, None)
+        return jsonify({'account': account})
 
     account = next((item for item in accounts if item['id'] == account_id), None)
     if not account:

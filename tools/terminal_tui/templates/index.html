@@ -4024,7 +4024,12 @@
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;">
                             <label for="settings-antigravity-acp-account" style="font-size:.72rem;color:var(--text-secondary);">Selected profile</label>
                             <select id="settings-antigravity-acp-account" onchange="selectAntigravityAcpAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;"><option value="default">Default</option></select>
+                            <button type="button" id="settings-antigravity-acp-rename" onclick="renameAntigravityAcpAccount()" disabled style="padding:4px 8px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.7rem;cursor:pointer;opacity:.55;">Rename profile</button>
                             <button type="button" id="settings-antigravity-acp-remove" onclick="removeAntigravityAcpAccount()" disabled style="padding:4px 8px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.7rem;cursor:pointer;opacity:.55;">Remove profile</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:7px;margin-top:8px;">
+                            <input id="settings-antigravity-acp-rename-input" type="text" maxlength="40" placeholder="New profile name" aria-label="New Antigravity ACP profile name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;">
+                            <button type="button" onclick="renameAntigravityAcpAccount()" style="padding:4px 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;cursor:pointer;">Rename profile</button>
                         </div>
                         <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:7px;margin-top:8px;">
                             <input id="settings-antigravity-acp-account-name" type="text" maxlength="40" placeholder="New Google account name" aria-label="New Antigravity ACP account name" style="min-width:0;height:30px;padding:4px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);font-size:.74rem;">
@@ -7369,6 +7374,7 @@ kiro-cli whoami --format json</code></pre>
         function renderAntigravityAcpAccounts() {
             const select = document.getElementById('settings-antigravity-acp-account');
             const removeButton = document.getElementById('settings-antigravity-acp-remove');
+            const renameButton = document.getElementById('settings-antigravity-acp-rename');
             if (!select) return;
             const selectedId = getSelectedAntigravityAcpAccount();
             select.innerHTML = '';
@@ -7382,6 +7388,10 @@ kiro-cli whoami --format json</code></pre>
             if (removeButton) {
                 removeButton.disabled = selectedId === 'default';
                 removeButton.style.opacity = removeButton.disabled ? '.55' : '1';
+            }
+            if (renameButton) {
+                renameButton.disabled = selectedId === 'default';
+                renameButton.style.opacity = renameButton.disabled ? '.55' : '1';
             }
         }
 
@@ -7425,6 +7435,32 @@ kiro-cli whoami --format json</code></pre>
                 await loadAntigravityAcpAccounts();
                 await selectAntigravityAcpAccount(data.account.id);
                 if (statusEl) statusEl.textContent = `Profile “${name}” added. Select Sign in to connect its Google account.`;
+            } catch (error) {
+                if (statusEl) statusEl.textContent = String(error.message || error);
+            }
+        }
+
+        async function renameAntigravityAcpAccount() {
+            const accountId = getSelectedAntigravityAcpAccount();
+            const account = antigravityAcpAccounts.find(item => item.id === accountId);
+            const input = document.getElementById('settings-antigravity-acp-rename-input');
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            if (!account || accountId === 'default') return;
+            const name = input?.value.trim();
+            if (!name) {
+                if (statusEl) statusEl.textContent = 'Enter a new name for the selected profile.';
+                input?.focus();
+                return;
+            }
+            try {
+                const response = await fetch('/api/antigravity/acp/accounts', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId, name }),
+                });
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/accounts (rename)');
+                if (!response.ok) throw new Error(data.error || 'Could not rename Antigravity ACP profile.');
+                input.value = '';
+                await loadAntigravityAcpAccounts();
+                if (statusEl) statusEl.textContent = `Profile renamed to “${data.account.name}”.`;
             } catch (error) {
                 if (statusEl) statusEl.textContent = String(error.message || error);
             }
