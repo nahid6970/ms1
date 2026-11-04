@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Stabilize Antigravity ACP Authentication State
+
+- Replace the `acpx sessions ensure` plus `/logout` sign-out sequence with the ACP v1 `logout` request; it no longer requires an open workspace or Node.js.
+- Clear and verify both the ACP OAuth profile file and the `gemini:antigravity` Windows Credential Manager entry after logout, so stale credentials cannot keep Settings on “Sign out.”
+- Report saved ACP credentials separately from the OAuth token profile needed by quota checks.
+- Start sign-in with the ACP v1 `authenticate` request using `oauth-personal`, then poll Settings and refresh quota after browser authentication completes; show runtime failures in Settings.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-04] - Include Kiro CLI v3 Chats in the Session Picker
 
 - Discover Kiro v3 sessions under `sessions/<workspace-id>/<session-id>/` while retaining the legacy `sessions/cli` scan.

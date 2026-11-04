@@ -205,7 +205,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Kiro included credits remaining and monthly reset date from `kiro-cli /usage`
 - Google Antigravity CLI start/continue actions in Settings and the AGENT picker
 - Google Antigravity usage badge reads remaining 5-hour and weekly quota windows using the signed-in ACP profile, and shows detailed windows and reset times on hover; click the badge to refresh
-- Google Antigravity ACP runtime installer with Settings controls to sign in and sign out when switching Google accounts; the saved OAuth profile is used for quota reads, and no ACP agent needs to keep running in the background
+- Google Antigravity ACP runtime installer with Settings controls to sign in and sign out when switching Google accounts; sign-out uses the ACP logout protocol directly, while Settings distinguishes saved ACP credentials from the OAuth token profile required for quota reads
 - Manual refresh from each provider badge; optional shared 1/2/5/10/15-minute refresh interval
 
 ---
