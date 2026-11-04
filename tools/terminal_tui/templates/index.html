@@ -7223,7 +7223,18 @@ kiro-cli whoami --format json</code></pre>
                     }
                     windows.forEach(windowInfo => {
                         const cadence = String(windowInfo.label || '').split('·').pop().trim();
-                        addCellText(cell, `${cadence}: ${Number(windowInfo.leftPercent).toFixed(1)}% remaining`);
+                        const line = document.createElement('div');
+                        line.style.marginBottom = '3px';
+                        const quota = document.createElement('div');
+                        quota.textContent = `${cadence}: ${Number(windowInfo.leftPercent).toFixed(1)}% remaining`;
+                        line.appendChild(quota);
+                        if (windowInfo.resetsAt) {
+                            const reset = document.createElement('div');
+                            reset.textContent = `Resets ${new Date(windowInfo.resetsAt).toLocaleString()}`;
+                            reset.style.cssText = 'font-size:.68rem;color:var(--text-muted);';
+                            line.appendChild(reset);
+                        }
+                        cell.appendChild(line);
                     });
                 };
 
