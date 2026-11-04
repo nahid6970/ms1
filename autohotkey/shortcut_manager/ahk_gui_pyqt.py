@@ -975,7 +975,7 @@ class AddEditShortcutDialog(QDialog):
             "exclude": "Exclusion Rule",
             "remap": "Key Remap",
             "launcher": "Launcher Shortcut",
-            "extapp": "External App Reference"
+            "extapp": "External App"
         }
         pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
@@ -2921,7 +2921,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Launcher Shortcut", lambda: self.open_add_dialog("launcher"))
-        self.add_menu.addAction("External App Reference", lambda: self.open_add_dialog("extapp"))
+        self.add_menu.addAction("External App", lambda: self.open_add_dialog("extapp"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
         self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
@@ -3633,7 +3633,7 @@ class AHKShortcutEditor(QMainWindow):
                     html += self.generate_shortcut_html(shortcut, "launcher", original_index, False)
 
         if external_app_shortcuts:
-            html += f'<div class="section-title"><a href="toggle-section://extapp">{get_toggle_icon("extapp")} App Shortcuts Reference</a></div>'
+            html += f'<div class="section-title"><a href="toggle-section://extapp">{get_toggle_icon("extapp")} External App</a></div>'
         if self.section_states.get("extapp", True):
             if group_by_category:
                 extapp_categories = {}
@@ -4058,7 +4058,7 @@ class AHKShortcutEditor(QMainWindow):
             # rule sub-lines below the name (same look as Favourites).
             key = "🚀 Startup"
         elif shortcut_type == "extapp":
-            key = "App Reference"
+            key = "External App"
         else: # text
             key = shortcut.get('trigger', '')
 
@@ -4097,7 +4097,7 @@ class AHKShortcutEditor(QMainWindow):
             elif shortcut_type == "startup":
                 key = "🚀 Startup"
             elif shortcut_type == "extapp":
-                key = "App Reference"
+                key = "External App"
             else:  # exclude
                 key = "🚫 Rule"
             key_width = 170
