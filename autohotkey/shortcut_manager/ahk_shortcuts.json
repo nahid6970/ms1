@@ -428,6 +428,26 @@
             "favourite": true
         }
     ],
+    "external_app_shortcuts": [
+        {
+            "name": "Google Chrome",
+            "process_name": "chrome.exe",
+            "category": "Browsers",
+            "description": "Essential Chrome navigation & tab management",
+            "shortcuts_text": "Ctrl+T | New tab\nCtrl+Shift+T | Reopen closed tab\nCtrl+W | Close active tab\nCtrl+Shift+W | Close active window\nCtrl+Tab | Switch to next tab\nCtrl+Shift+Tab | Switch to previous tab\nCtrl+Shift+I | Developer Tools\nCtrl+Shift+Delete | Clear browsing data\nCtrl+L | Focus address bar\nAlt+Left | Back\nAlt+Right | Forward",
+            "enabled": true,
+            "favourite": false
+        },
+        {
+            "name": "Windows Terminal",
+            "process_name": "wt.exe",
+            "category": "Terminal",
+            "description": "Windows Terminal pane & tab controls",
+            "shortcuts_text": "Ctrl+Shift+T | Open new tab\nCtrl+Shift+W | Close pane or tab\nAlt+Shift+Plus | Split pane vertical\nAlt+Shift+Minus | Split pane horizontal\nAlt+Left | Move focus to left pane\nAlt+Right | Move focus to right pane\nAlt+Up | Move focus to upper pane\nAlt+Down | Move focus to lower pane\nCtrl+Shift+F | Find text in buffer",
+            "enabled": true,
+            "favourite": false
+        }
+    ],
     "text_shortcuts": [
         {
             "category": "AHK",

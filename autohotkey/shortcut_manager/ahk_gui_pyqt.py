@@ -82,6 +82,149 @@ def read_text_file_content(path):
     except Exception:
         return None
 
+# ── Hotkey Normalization & Shortcut Parsing Helpers ────────────────
+KEY_ALIASES = {
+    'ESC': 'ESCAPE',
+    'RETURN': 'ENTER',
+    'CONTROL': 'CTRL',
+    'LCONTROL': 'CTRL',
+    'RCONTROL': 'CTRL',
+    'LCTRL': 'CTRL',
+    'RCTRL': 'CTRL',
+    'LALT': 'ALT',
+    'RALT': 'ALT',
+    'LSHIFT': 'SHIFT',
+    'RSHIFT': 'SHIFT',
+    'LWIN': 'WIN',
+    'RWIN': 'WIN',
+    'DEL': 'DELETE',
+    'INS': 'INSERT',
+    'PGUP': 'PAGEUP',
+    'PGDN': 'PAGEDOWN',
+    'BS': 'BACKSPACE',
+}
+
+
+def clean_key_name(k: str) -> str:
+    ku = k.strip().upper()
+    return KEY_ALIASES.get(ku, ku)
+
+
+def normalize_hotkey(hk: str) -> str:
+    """Normalize hotkey notation (both AHK e.g. '^t' and readable e.g. 'Ctrl+T')
+    into a canonical sorted format like 'Ctrl+Shift+T' or 'Alt+F4' for collision detection.
+    """
+    if not hk or not isinstance(hk, str):
+        return ''
+    s = hk.strip()
+    if not s:
+        return ''
+
+    ahk_symbols = {'^': 'Ctrl', '!': 'Alt', '+': 'Shift', '#': 'Win'}
+    modifiers = set()
+    key = ''
+
+    # Strip enclosing braces if present (e.g. {Enter}, {Esc})
+    if s.startswith('{') and s.endswith('}'):
+        s = s[1:-1]
+
+    # Check if format has word-based modifiers like 'Ctrl+...' or 'Ctrl - ...'
+    if any(sep in s for sep in ['+', '-']) and any(m in s.lower() for m in ['ctrl', 'alt', 'shift', 'win']):
+        parts = [p.strip() for p in s.replace('-', '+').split('+') if p.strip()]
+        for p in parts[:-1]:
+            pl = p.lower()
+            if pl in ('ctrl', 'control', '^'):
+                modifiers.add('Ctrl')
+            elif pl in ('alt', '!'):
+                modifiers.add('Alt')
+            elif pl in ('shift', '+'):
+                modifiers.add('Shift')
+            elif pl in ('win', 'windows', '#'):
+                modifiers.add('Win')
+            else:
+                modifiers.add(p.capitalize())
+        if parts:
+            k_part = parts[-1]
+            if k_part.startswith('{') and k_part.endswith('}'):
+                k_part = k_part[1:-1]
+            key = clean_key_name(k_part)
+    elif ' & ' in s:
+        parts = [p.strip() for p in s.split('&')]
+        for p in parts[:-1]:
+            pl = p.lower()
+            if pl in ('ctrl', 'control', '^'):
+                modifiers.add('Ctrl')
+            elif pl in ('alt', '!'):
+                modifiers.add('Alt')
+            elif pl in ('shift', '+'):
+                modifiers.add('Shift')
+            elif pl in ('win', 'windows', '#'):
+                modifiers.add('Win')
+            else:
+                modifiers.add(p.capitalize())
+        if parts:
+            k_part = parts[-1]
+            if k_part.startswith('{') and k_part.endswith('}'):
+                k_part = k_part[1:-1]
+            key = clean_key_name(k_part)
+    else:
+        # Check AHK prefix characters: ^, !, +, #
+        i = 0
+        while i < len(s):
+            ch = s[i]
+            if ch in ('<', '>'):
+                i += 1
+                if i < len(s) and s[i] in ahk_symbols:
+                    modifiers.add(ahk_symbols[s[i]])
+                    i += 1
+                continue
+            elif ch in ahk_symbols:
+                modifiers.add(ahk_symbols[ch])
+                i += 1
+            else:
+                k_part = s[i:].strip()
+                if k_part.startswith('{') and k_part.endswith('}'):
+                    k_part = k_part[1:-1]
+                key = clean_key_name(k_part)
+                break
+
+    order = ['Ctrl', 'Alt', 'Shift', 'Win']
+    sorted_mods = [m for m in order if m in modifiers]
+    for m in sorted(modifiers):
+        if m not in order:
+            sorted_mods.append(m)
+
+    if sorted_mods and key:
+        return '+'.join(sorted_mods) + '+' + key
+    elif key:
+        return key
+    return clean_key_name(s)
+
+
+def parse_shortcuts_text(text: str) -> list[dict[str, str]]:
+    """Parse multi-line shortcut syntax (Hotkey | Description or Hotkey - Description)."""
+    results = []
+    if not text:
+        return results
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or line.startswith(';'):
+            continue
+        if '|' in line:
+            parts = line.split('|', 1)
+        elif ' - ' in line:
+            parts = line.split(' - ', 1)
+        elif ':' in line and not line.startswith('http'):
+            parts = line.split(':', 1)
+        else:
+            parts = [line, '']
+        hk = parts[0].strip()
+        desc = parts[1].strip() if len(parts) > 1 else ''
+        if hk:
+            results.append({'hotkey': hk, 'description': desc})
+    return results
+
+
 # CYBERPUNK THEME PALETTE
 CP_BG = "#050505"           # Main Window Background
 CP_PANEL = "#111111"        # Panel/Input Background
@@ -831,7 +974,8 @@ class AddEditShortcutDialog(QDialog):
             "file": "File Shortcut",
             "exclude": "Exclusion Rule",
             "remap": "Key Remap",
-            "launcher": "Launcher Shortcut"
+            "launcher": "Launcher Shortcut",
+            "extapp": "External App Reference"
         }
         pretty_type = title_map.get(shortcut_type, shortcut_type.capitalize())
         self.setWindowTitle(f"{'Edit' if shortcut_data else 'Add'} {pretty_type}")
@@ -997,6 +1141,11 @@ class AddEditShortcutDialog(QDialog):
             dest_row.addWidget(self.destination_key_edit)
             dest_row.addWidget(self.record_dest_btn)
             _add_row("Dest Key:", dest_row)
+
+        elif self.shortcut_type == "extapp":
+            self.process_name_edit_extapp = QLineEdit()
+            self.process_name_edit_extapp.setPlaceholderText("e.g., chrome.exe, wt.exe (optional)")
+            _add_row("Process:", self.process_name_edit_extapp)
 
         # 3. Category Row (Including nested "🔍 Defaults" selector side-by-side)
         cat_row_layout = QHBoxLayout()
@@ -1285,6 +1434,30 @@ SendText("Hello World")"""
             
             action_layout.addWidget(self.action_edit)
             top_layout.addLayout(action_layout)
+        elif self.shortcut_type == "extapp":
+            shortcuts_layout = QVBoxLayout()
+            shortcuts_layout.addWidget(QLabel("App Shortcuts (one per line: Hotkey | Description):"))
+            self.shortcuts_text_edit = QTextEdit()
+            self.shortcuts_text_edit.setMinimumHeight(300)
+            self.shortcuts_text_edit.setMinimumWidth(400)
+            self.shortcuts_text_edit.setPlaceholderText(
+                "Ctrl+T | New tab\n"
+                "Ctrl+Shift+T | Reopen closed tab\n"
+                "Ctrl+W | Close active tab\n"
+                "Alt+Left | Navigate back\n"
+                "\n"
+                "; Lines starting with # or ; are ignored\n"
+                "; Use | or - to separate hotkey from description"
+            )
+            shortcuts_layout.addWidget(self.shortcuts_text_edit)
+
+            # Info hint
+            info_label = QLabel("ℹ️ These shortcuts are for reference only — they will NOT trigger any actions or generate AHK code.")
+            info_label.setWordWrap(True)
+            info_label.setStyleSheet(f"color: {CP_ORANGE}; font-family: 'Consolas'; font-size: 9pt; margin-top: 5px;")
+            shortcuts_layout.addWidget(info_label)
+
+            top_layout.addLayout(shortcuts_layout)
         elif self.shortcut_type == "exclude":
             excl_layout = QVBoxLayout()
             excl_layout.addWidget(QLabel("Excluded Hotkeys (one per line, blank = exclude all):"))
@@ -1400,7 +1573,7 @@ SendText("Hello World")"""
 
     def get_existing_categories(self):
         categories = set()
-        for shortcut in self.parent_window.script_shortcuts + self.parent_window.launcher_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules + self.parent_window.remap_shortcuts:
+        for shortcut in self.parent_window.script_shortcuts + self.parent_window.launcher_shortcuts + self.parent_window.external_app_shortcuts + self.parent_window.text_shortcuts + self.parent_window.startup_scripts + self.parent_window.context_shortcuts + self.parent_window.exclusion_rules + self.parent_window.remap_shortcuts:
             category = shortcut.get('category', '').strip()
             if category:
                 categories.add(category)
@@ -1630,6 +1803,9 @@ SendText("Hello World")"""
         elif self.shortcut_type == "remap":
             self.origin_key_edit.setText(self.shortcut_data.get("origin_key", ""))
             self.destination_key_edit.setText(self.shortcut_data.get("destination_key", ""))
+        elif self.shortcut_type == "extapp":
+            self.process_name_edit_extapp.setText(self.shortcut_data.get("process_name", ""))
+            self.shortcuts_text_edit.setPlainText(self.shortcut_data.get("shortcuts_text", ""))
         else: # text
             self.trigger_edit.setText(self.shortcut_data.get("trigger", ""))
             self.replacement_edit.setPlainText(self.shortcut_data.get("replacement", ""))
@@ -2120,6 +2296,16 @@ SendText("Hello World")"""
                 "destination_key": destination_key,
                 "enabled": enabled
             }
+        elif self.shortcut_type == "extapp":
+            shortcut_data = {
+                "name": name,
+                "category": category,
+                "description": description,
+                "process_name": self.process_name_edit_extapp.text().strip(),
+                "shortcuts_text": self.shortcuts_text_edit.toPlainText().strip(),
+                "enabled": enabled,
+                "favourite": favourite
+            }
         else: # self.shortcut_type == "text"
             trigger = self.trigger_edit.text().strip()
             source_file = self.source_file_edit.text().strip()
@@ -2176,6 +2362,8 @@ SendText("Hello World")"""
                 self.parent_window.remap_shortcuts.append(shortcut_data)
             elif self.shortcut_type == "launcher":
                 self.parent_window.launcher_shortcuts.append(shortcut_data)
+            elif self.shortcut_type == "extapp":
+                self.parent_window.external_app_shortcuts.append(shortcut_data)
             else:
                 self.parent_window.text_shortcuts.append(shortcut_data)
 
@@ -2526,6 +2714,7 @@ class AHKShortcutEditor(QMainWindow):
         super().__init__()
         self.script_shortcuts = []
         self.launcher_shortcuts = []
+        self.external_app_shortcuts = []
         self.text_shortcuts = []
         self.file_shortcuts = []
         self.startup_scripts = []
@@ -2554,6 +2743,7 @@ class AHKShortcutEditor(QMainWindow):
             "favourite": True,
             "script": True,
             "launcher": True,
+            "extapp": True,
             "context": True,
             "exclude": True,
             "startup": True,
@@ -2731,6 +2921,7 @@ class AHKShortcutEditor(QMainWindow):
         self.add_menu = QMenu()
         self.add_menu.addAction("Script Shortcut", lambda: self.open_add_dialog("script"))
         self.add_menu.addAction("Launcher Shortcut", lambda: self.open_add_dialog("launcher"))
+        self.add_menu.addAction("External App Reference", lambda: self.open_add_dialog("extapp"))
         self.add_menu.addAction("Text Shortcut", lambda: self.open_add_dialog("text"))
         self.add_menu.addAction("File Shortcut", lambda: self.open_add_dialog("file"))
         self.add_menu.addAction("Context Shortcut", lambda: self.open_add_dialog("context"))
@@ -2918,6 +3109,9 @@ class AHKShortcutEditor(QMainWindow):
             elif shortcut_type == "launcher" and index < len(self.launcher_shortcuts):
                 self.selected_shortcut = self.launcher_shortcuts[index]
                 self.selected_type = "launcher"
+            elif shortcut_type == "extapp" and index < len(self.external_app_shortcuts):
+                self.selected_shortcut = self.external_app_shortcuts[index]
+                self.selected_type = "extapp"
             elif shortcut_type == "text" and index < len(self.text_shortcuts):
                 self.selected_shortcut = self.text_shortcuts[index]
                 self.selected_type = "text"
@@ -2950,6 +3144,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.script_shortcuts[index]["enabled"] = not self.script_shortcuts[index].get("enabled", True)
             elif shortcut_type == "launcher" and index < len(self.launcher_shortcuts):
                 self.launcher_shortcuts[index]["enabled"] = not self.launcher_shortcuts[index].get("enabled", True)
+            elif shortcut_type == "extapp" and index < len(self.external_app_shortcuts):
+                self.external_app_shortcuts[index]["enabled"] = not self.external_app_shortcuts[index].get("enabled", True)
             elif shortcut_type == "text" and index < len(self.text_shortcuts):
                 self.text_shortcuts[index]["enabled"] = not self.text_shortcuts[index].get("enabled", True)
             elif shortcut_type == "file" and index < len(self.file_shortcuts):
@@ -3054,6 +3250,7 @@ class AHKShortcutEditor(QMainWindow):
                     data = json.load(f)
                     self.script_shortcuts = data.get("script_shortcuts", [])
                     self.launcher_shortcuts = data.get("launcher_shortcuts", [])
+                    self.external_app_shortcuts = data.get("external_app_shortcuts", [])
                     self.text_shortcuts = data.get("text_shortcuts", [])
                     self.file_shortcuts = data.get("file_shortcuts", [])
                     self.startup_scripts = data.get("startup_scripts", [])
@@ -3125,6 +3322,7 @@ class AHKShortcutEditor(QMainWindow):
             data = {
                 "script_shortcuts": self.script_shortcuts, 
                 "launcher_shortcuts": self.launcher_shortcuts, 
+                "external_app_shortcuts": self.external_app_shortcuts,
                 "text_shortcuts": self.text_shortcuts,
                 "file_shortcuts": self.file_shortcuts,
                 "startup_scripts": self.startup_scripts,
@@ -3169,6 +3367,8 @@ class AHKShortcutEditor(QMainWindow):
                           if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_launcher = [s for s in self.launcher_shortcuts
                             if search_query in f"{s.get('name', '')} {s.get('hotkey', '')} {s.get('description', '')} {s.get('category', '')} {s.get('target_path', '')}".lower()]
+        filtered_extapp = [s for s in self.external_app_shortcuts
+                          if search_query in f"{s.get('name', '')} {s.get('process_name', '')} {s.get('description', '')} {s.get('category', '')} {s.get('shortcuts_text', '')}".lower()]
         filtered_text = [s for s in self.text_shortcuts
                         if search_query in f"{s.get('name', '')} {s.get('trigger', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         filtered_file = [s for s in self.file_shortcuts
@@ -3182,7 +3382,7 @@ class AHKShortcutEditor(QMainWindow):
         filtered_remap = [s for s in self.remap_shortcuts
                          if search_query in f"{s.get('name', '')} {s.get('origin_key', '')} {s.get('destination_key', '')} {s.get('description', '')} {s.get('category', '')}".lower()]
         
-        html = self.generate_html(filtered_script, filtered_launcher, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category)
+        html = self.generate_html(filtered_script, filtered_launcher, filtered_text, filtered_file, filtered_context, filtered_exclusions, filtered_startup, filtered_remap, group_by_category, filtered_extapp)
 
         # Make sure the SVG icons referenced by the HTML are registered before parsing
         self._register_key_icons()
@@ -3217,7 +3417,8 @@ class AHKShortcutEditor(QMainWindow):
         from PyQt6.QtCore import QTimer
         QTimer.singleShot(0, backup_restore)
 
-    def generate_html(self, script_shortcuts, launcher_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, remap_shortcuts, group_by_category):
+    def generate_html(self, script_shortcuts, launcher_shortcuts, text_shortcuts, file_shortcuts, context_shortcuts, exclusion_rules, startup_scripts, remap_shortcuts, group_by_category, external_app_shortcuts=None):
+        external_app_shortcuts = external_app_shortcuts or []
         def get_toggle_icon(section):
             return "▾" if self.section_states.get(section, True) else "▸"
 
@@ -3338,6 +3539,10 @@ class AHKShortcutEditor(QMainWindow):
             if s.get('favourite', False):
                 idx = self.launcher_shortcuts.index(s)
                 all_shortcuts_with_type.append((s, 'launcher', idx))
+        for s in external_app_shortcuts:
+            if s.get('favourite', False):
+                idx = self.external_app_shortcuts.index(s)
+                all_shortcuts_with_type.append((s, 'extapp', idx))
         for s in remap_shortcuts:
             if s.get('favourite', False):
                 idx = self.remap_shortcuts.index(s)
@@ -3426,6 +3631,24 @@ class AHKShortcutEditor(QMainWindow):
                 for shortcut in sorted(launcher_shortcuts, key=lambda x: x.get('hotkey', '').lower()):
                     original_index = self.launcher_shortcuts.index(shortcut)
                     html += self.generate_shortcut_html(shortcut, "launcher", original_index, False)
+
+        if external_app_shortcuts:
+            html += f'<div class="section-title"><a href="toggle-section://extapp">{get_toggle_icon("extapp")} App Shortcuts Reference</a></div>'
+        if self.section_states.get("extapp", True):
+            if group_by_category:
+                extapp_categories = {}
+                for shortcut in external_app_shortcuts:
+                    extapp_categories.setdefault(shortcut.get('category', 'General'), []).append(shortcut)
+                for category in sorted(extapp_categories):
+                    color = self.get_category_color(category)
+                    html += f'<div class="category-header" style="color: {color};">📁 {html_escape(category)}</div>'
+                    for shortcut in sorted(extapp_categories[category], key=lambda item: item.get('name', '').lower()):
+                        original_index = self.external_app_shortcuts.index(shortcut)
+                        html += self.generate_shortcut_html(shortcut, "extapp", original_index, True)
+            else:
+                for shortcut in sorted(external_app_shortcuts, key=lambda item: item.get('name', '').lower()):
+                    original_index = self.external_app_shortcuts.index(shortcut)
+                    html += self.generate_shortcut_html(shortcut, "extapp", original_index, False)
 
         if remap_shortcuts:
             html += f"""
@@ -3761,6 +3984,15 @@ class AHKShortcutEditor(QMainWindow):
                     val = val[:30] + '...'
                 lines.append(f"{label}: {html_escape(val)}")
 
+        if shortcut_type == "extapp":
+            process = (shortcut.get('process_name', '') or '').strip()
+            if process:
+                lines.append(f"Process: {html_escape(process)}")
+            for row in parse_shortcuts_text(shortcut.get('shortcuts_text', '')):
+                detail = html_escape(row['hotkey'])
+                if row['description']:
+                    detail += f": {html_escape(row['description'])}"
+                lines.append(detail)
         if shortcut_type in ("context", "text", "file", "exclude", "startup"):
             _add("Window", "window_title", "window_title_enabled")
             _add("Process", "process_name", "process_name_enabled")
@@ -3825,6 +4057,8 @@ class AHKShortcutEditor(QMainWindow):
             # Plain key — the active/inactive window context lives on the dim
             # rule sub-lines below the name (same look as Favourites).
             key = "🚀 Startup"
+        elif shortcut_type == "extapp":
+            key = "App Reference"
         else: # text
             key = shortcut.get('trigger', '')
 
@@ -3862,6 +4096,8 @@ class AHKShortcutEditor(QMainWindow):
                 key = shortcut.get('trigger', '')
             elif shortcut_type == "startup":
                 key = "🚀 Startup"
+            elif shortcut_type == "extapp":
+                key = "App Reference"
             else:  # exclude
                 key = "🚫 Rule"
             key_width = 170
@@ -3900,7 +4136,7 @@ class AHKShortcutEditor(QMainWindow):
         # Favourites plus the Startup/Exclusion-Rules/Context categories show
         # window-context rules as dim sub-lines below the name — identical look
         # in every section, with the key column kept to the plain hotkey/label.
-        use_rules_below = is_favourite or shortcut_type in ("startup", "exclude", "context")
+        use_rules_below = is_favourite or shortcut_type in ("startup", "exclude", "context", "extapp")
         rules_html = self._build_favourite_rules(shortcut, shortcut_type) if use_rules_below else ''
 
         # Calculate background color inline for best QTextBrowser compatibility
@@ -3980,6 +4216,8 @@ class AHKShortcutEditor(QMainWindow):
         elif self.selected_type == "launcher":
             duplicated['hotkey'] = ""
             self.launcher_shortcuts.append(duplicated)
+        elif self.selected_type == "extapp":
+            self.external_app_shortcuts.append(duplicated)
         elif self.selected_type == "context":
             self.context_shortcuts.append(duplicated)
         elif self.selected_type == "exclude":
@@ -4022,6 +4260,8 @@ class AHKShortcutEditor(QMainWindow):
                 self.script_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "launcher":
                 self.launcher_shortcuts.remove(self.selected_shortcut)
+            elif self.selected_type == "extapp":
+                self.external_app_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "context":
                 self.context_shortcuts.remove(self.selected_shortcut)
             elif self.selected_type == "exclude":

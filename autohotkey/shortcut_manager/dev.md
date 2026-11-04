@@ -48,6 +48,7 @@ Requirements:
 Shortcut data is stored in `ahk_shortcuts.json` as arrays:
 
 - `script_shortcuts`
+- `external_app_shortcuts` (reference-only app hotkey lists; never generated into AHK)
 - `context_shortcuts`
 - `exclusion_rules`
 - `text_shortcuts`

@@ -94,6 +94,23 @@
 - Set a hotkey and category.
 - Generate and run the AHK script.
 
+## External App Shortcut References
+
+**Status:** Complete
+
+**Description:** Displays keyboard shortcut cheat sheets for other applications. These are reference entries only and do not register hotkeys or produce AHK code.
+
+**Implementation:**
+
+- Stored in `external_app_shortcuts`
+- Each entry has a name, optional process name, category, description, and multiline `shortcuts_text` (`Hotkey | Description` per line)
+- Entries appear in the searchable **App Shortcuts Reference** section and can be added, edited, duplicated, enabled, or removed from the ADD menu and list context actions.
+
+**Usage:**
+
+- Select **External App Reference** from the ADD menu.
+- Enter one hotkey and description per line, separated with `|` (or ` - `).
+
 ## Context Shortcuts
 
 **Status:** Complete
