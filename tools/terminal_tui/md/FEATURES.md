@@ -68,7 +68,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume AI Agent Sessions
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Antigravity sessions are read from its local conversation summary database and resume with `agy --dangerously-skip-permissions --conversation <id>`. New Antigravity sessions also start with `--dangerously-skip-permissions`. Codex, Pi, and Kiro sessions resume through their native CLI flags.
+**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Antigravity sessions are read from its local conversation summary database, resume with `agy --dangerously-skip-permissions --conversation <id>`, can be renamed in the Terminal TUI session list, and can hand off saved user requests and readable summary details to Codex, Pi, or Kiro. New Antigravity sessions also start with `--dangerously-skip-permissions`. Codex, Pi, and Kiro sessions resume through their native CLI flags.
 **Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse the sessions, then select one to resume it.
 **Files Involved:** `app.py` (`GET /api/agent/sessions`), `templates/index.html` (session picker modal and `resumeAgentSession()`)
 **Note:** The Kiro session picker reads legacy sessions from `sessions/cli` and Kiro CLI v3 sessions from `sessions/<workspace-id>/<session-id>/session.json` with their `messages.jsonl` transcripts. Both formats are filtered by their workspace path and can be resumed through the native Kiro CLI command.
@@ -309,7 +309,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Unified Agent Sessions and Handoff
 **Status:** ✅ Complete
-**Description:** Browse and resume saved Codex, Pi, Kiro CLI, and Google Antigravity CLI sessions from the AGENT session picker.
+**Description:** Browse and resume saved Codex, Pi, Kiro CLI, and Google Antigravity CLI sessions from the AGENT session picker. Antigravity conversation titles can be renamed for display in the Terminal TUI session list.
 **Implementation:** Session picker merges each agent's local session store and sorts by modification time. Each row shows an approximate token count beside the right-aligned session ID beneath its action buttons, estimated from readable user/assistant text. A handoff starts a new native target-agent session with a concise prompt containing the source agent, session ID, and original transcript file path. The target reads the source transcript directly; the source session is not copied or modified. The active switched session shows the chronological trail of surviving handoff agents beside the timestamp; the original row shows no trail when no switched session remains.
 **Files Involved:** `app.py` (routes: `/api/agent/sessions`, `/api/agent/session-context`, `/api/agent/handoffs`), `templates/index.html` (agent session picker and handoff dialog)
 **Usage:** Click **AGENT** beside the workspace selector, choose the switch icon on any session, select a different agent, and optionally add a short note. Use the adjacent trash icon to permanently delete one native session; other linked agent sessions remain.

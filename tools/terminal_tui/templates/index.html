@@ -4432,7 +4432,7 @@ kiro-cli whoami --format json</code></pre>
                 <span style="margin-left:auto;font-size:.67rem;color:#777;">Original session stays saved</span>
             </div>
             <div id="agent-handoff-import-note" data-testid="agent-handoff-import-note" style="padding:4px 16px 8px;color:#999;font-size:.7rem;">The new agent receives this session ID and its original transcript path, reads that file directly, and starts a fresh native session.</div>
-            <label for="agent-handoff-context" style="padding:2px 16px 6px;color:#999;font-size:.69rem;">Optional note for the new agent</label>
+            <label id="agent-handoff-context-label" for="agent-handoff-context" style="padding:2px 16px 6px;color:#999;font-size:.69rem;">Optional note for the new agent</label>
             <textarea id="agent-handoff-context" maxlength="18000" spellcheck="false" placeholder="Add a brief instruction if needed…" style="width:calc(100% - 32px);margin:0 16px 12px;box-sizing:border-box;min-height:100px;max-height:180px;flex:none;resize:vertical;padding:11px 12px;border:1px solid #303030;border-radius:8px;background:#111;color:#e5e7eb;outline:none;font-family:'Fira Code',Consolas,monospace;font-size:.72rem;line-height:1.55;"></textarea>
             <div id="agent-handoff-error" role="status" style="display:none;padding:0 16px 10px;color:#fca5a5;font-size:.7rem;"></div>
             <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
@@ -7433,6 +7433,8 @@ kiro-cli whoami --format json</code></pre>
                 const tokenEstimateDisplay = tokenEstimate.replace(/^~/, '');
                 const tokenBadgeRange = getAgentTokenBadgeRange(session.tokenEstimate);
                 const agentIcon = agentSessionIconMarkup(session.agent, 24, `session-${session.sessionId}`);
+                const canRenameSession = !session.isReadOnlySession || session.agent === 'antigravity';
+                const canHandoffSession = !session.isReadOnlySession || session.agent === 'antigravity';
                 const sessionProfileId = session.agent === 'codex' ? session.codexAccountId : session.agent === 'kiro' ? session.kiroAccountId : '';
                 const sessionDomKey = `${session.agent}-${sessionProfileId || 'default'}-${session.sessionId}`.replace(/[^A-Za-z0-9_-]/g, '-');
                 const profileName = session.agent === 'codex' ? (session.codexAccountName || 'Default') : session.agent === 'kiro' ? (session.kiroAccountName || 'Default') : '';
@@ -7454,8 +7456,9 @@ kiro-cli whoami --format json</code></pre>
                     </button>
                     <span class="agent-session-row-actions" data-testid="agent-session-row-actions" style="flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:46%;">
                         <span style="display:flex;align-items:center;gap:6px;">
-                    <button type="button" id="agent-session-rename-${escapeHtml(sessionDomKey)}" class="agent-session-rename" data-testid="agent-session-rename" title="Rename this conversation" aria-label="Rename ${agentName} conversation: ${escapeHtml(sessionTitle)}" style="flex:none;width:30px;height:30px;display:${session.isReadOnlySession ? 'none' : 'grid'};place-items:center;padding:0;border:1px solid rgba(148,163,184,.25);border-radius:6px;background:rgba(51,65,85,.18);color:#cbd5e1;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
-                    <button type="button" id="agent-session-handoff-${escapeHtml(sessionDomKey)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:${session.isReadOnlySession ? 'none' : 'grid'};place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>
+                    ${session.agent === 'antigravity' ? `<button type="button" id="agent-session-resume-${escapeHtml(sessionDomKey)}" class="agent-session-resume" data-testid="agent-session-resume" title="Resume this Antigravity conversation" aria-label="Resume Antigravity conversation: ${escapeHtml(sessionTitle)}" style="height:30px;display:inline-flex;align-items:center;gap:5px;padding:0 8px;border:1px solid rgba(34,211,238,.3);border-radius:6px;background:rgba(8,145,178,.1);color:#67e8f9;cursor:pointer;font-size:.68rem;"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 5 12 7-12 7z"></path></svg>Resume</button>` : ''}
+                    <button type="button" id="agent-session-rename-${escapeHtml(sessionDomKey)}" class="agent-session-rename" data-testid="agent-session-rename" title="${session.agent === 'antigravity' ? 'Rename in the Terminal TUI session list' : 'Rename this conversation'}" aria-label="Rename ${agentName} conversation: ${escapeHtml(sessionTitle)}" style="flex:none;width:30px;height:30px;display:${canRenameSession ? 'grid' : 'none'};place-items:center;padding:0;border:1px solid rgba(148,163,184,.25);border-radius:6px;background:rgba(51,65,85,.18);color:#cbd5e1;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg></button>
+                    <button type="button" id="agent-session-handoff-${escapeHtml(sessionDomKey)}" class="agent-session-handoff" data-testid="agent-session-handoff" title="Continue with another agent" aria-label="Continue ${agentName} session with another agent" style="flex:none;width:30px;height:30px;display:${canHandoffSession ? 'grid' : 'none'};place-items:center;padding:0;border:1px solid rgba(167,139,250,.25);border-radius:6px;background:rgba(124,58,237,.08);color:#c4b5fd;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4"></path><path d="M20 7H4"></path><path d="M8 21l-4-4 4-4"></path><path d="M4 17h16"></path></svg></button>
                     ${['codex', 'kiro'].includes(session.agent) ? `<button type="button" id="agent-session-continue-account-${escapeHtml(sessionDomKey)}" class="agent-session-continue-account" data-testid="agent-session-continue-account" title="Continue this conversation with another ${agentName} account" aria-label="Continue ${agentName} session on another account" style="flex:none;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid rgba(52,211,153,.28);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10a4 4 0 0 1 0 8h-1"></path><path d="m13 11 3 4-3 4"></path><path d="M17 17H7a4 4 0 0 1 0-8h1"></path><path d="m11 13-3-4 3-4"></path></svg></button>` : ''}
                     <button type="button" id="agent-session-delete-${escapeHtml(sessionDomKey)}" class="agent-session-delete" data-testid="agent-session-delete" title="Delete this saved session" aria-label="Delete ${agentName} session ${escapeHtml(session.sessionId)}" style="flex:none;width:30px;height:30px;display:${session.isReadOnlySession ? 'none' : 'grid'};place-items:center;padding:0;border:1px solid rgba(248,113,113,.24);border-radius:6px;background:rgba(127,29,29,.08);color:#f87171;cursor:pointer;"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg></button>
                         </span>
@@ -7470,6 +7473,10 @@ kiro-cli whoami --format json</code></pre>
                 row.addEventListener('mouseenter', () => { row.style.background = 'rgba(255,255,255,.07)'; row.style.borderColor = '#333'; });
                 row.addEventListener('mouseleave', () => { row.style.background = 'transparent'; row.style.borderColor = 'transparent'; });
                 row.querySelector('.agent-session-open').addEventListener('click', () => resumeAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
+                row.querySelector('.agent-session-resume')?.addEventListener('click', event => {
+                    event.stopPropagation();
+                    resumeAgentSession(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath);
+                });
                 row.querySelector('.agent-session-rename')?.addEventListener('click', () => renameAgentConversation(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
                 row.querySelector('.agent-session-handoff')?.addEventListener('click', () => openAgentHandoffModal(row.dataset.agent, row.dataset.sessionId, row.dataset.sessionPath));
                 row.querySelector('.agent-session-continue-account')?.addEventListener('click', () => {
@@ -7860,6 +7867,10 @@ kiro-cli whoami --format json</code></pre>
             agentTitleRenameSource = { ...session, project: activeProject };
             document.getElementById('agent-session-title-input').value = session.title || '';
             document.getElementById('agent-session-title-status').textContent = '';
+            document.getElementById('agent-session-title-description').textContent = agent === 'antigravity'
+                ? 'Changes the title shown in this Terminal TUI session list.'
+                : 'This changes the title shown in the session list.';
+            document.getElementById('agent-session-title-ai-suggest-btn').style.display = agent === 'antigravity' ? 'none' : '';
             populateAgentSessionTitleModelDropdown();
             document.getElementById('agent-session-title-modal').classList.add('show');
             const input = document.getElementById('agent-session-title-input');
@@ -7869,6 +7880,8 @@ kiro-cli whoami --format json</code></pre>
 
         function closeAgentSessionTitleModal() {
             document.getElementById('agent-session-title-modal')?.classList.remove('show');
+            const suggestButton = document.getElementById('agent-session-title-ai-suggest-btn');
+            if (suggestButton) suggestButton.style.display = '';
             agentTitleRenameSource = null;
         }
 
@@ -8162,12 +8175,17 @@ kiro-cli whoami --format json</code></pre>
             const context = document.getElementById('agent-handoff-context');
             const error = document.getElementById('agent-handoff-error');
             const start = document.getElementById('agent-handoff-start');
-            const agentNames = { codex: 'Codex', pi: 'Pi', kiro: 'Kiro' };
+            const agentNames = { codex: 'Codex', pi: 'Pi', kiro: 'Kiro', antigravity: 'Antigravity CLI' };
             document.getElementById('agent-handoff-source-label').textContent = `${agentNames[sourceSession.agent]} · ${sourceSession.title}`;
             [...target.options].forEach(option => { option.disabled = option.value === sourceSession.agent; });
             target.value = ['codex', 'pi', 'kiro'].find(name => name !== sourceSession.agent) || 'codex';
             context.value = '';
             context.placeholder = 'Add a brief instruction if needed…';
+            document.getElementById('agent-handoff-import-note').textContent = sourceSession.agent === 'antigravity'
+                ? 'The handoff copies AGY’s saved user requests and any readable summary or preview into a new agent session; the original stays saved.'
+                : 'The new agent receives this session ID and its original transcript path, reads that file directly, and starts a fresh native session.';
+            document.getElementById('agent-handoff-context-label').textContent = sourceSession.agent === 'antigravity'
+                ? 'Copied AGY requests and summary (editable)' : 'Optional note for the new agent';
             error.style.display = 'none';
             start.disabled = true;
             start.style.opacity = '.55';
@@ -8185,6 +8203,11 @@ kiro-cli whoami --format json</code></pre>
                 if (agentHandoffSource !== sourceSession) return;
                 context.value = data.handoffText || '';
                 context.dataset.cwd = data.cwd || sourceSession.cwd || '';
+                if (sourceSession.agent === 'antigravity' && !data.contextAvailable) {
+                    document.getElementById('agent-handoff-import-note').textContent = 'The local AGY files have no readable user requests, summary, or preview for this conversation. Add context below before continuing.';
+                    document.getElementById('agent-handoff-context-label').textContent = 'Context to copy to the new agent';
+                    context.placeholder = 'Add the important decisions, latest request, or other context from the AGY conversation…';
+                }
                 start.disabled = false;
                 start.style.opacity = '1';
             } catch (handoffError) {

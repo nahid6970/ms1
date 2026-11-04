@@ -5,6 +5,17 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-04] - Open ACP OAuth Browser Flow
 
+## [2026-11-04] - Add Antigravity CLI Session Actions
+
+- Allow Antigravity CLI conversations to be renamed in the AGENT session picker using a Terminal TUI display-title override.
+- Allow AGY conversations to hand off their saved user requests and readable summary details into a new Codex, Pi, or Kiro session.
+- Validate Antigravity conversation IDs and workspace ownership against the local conversation summary database before saving a title.
+- Start and resume `agy` sessions with the documented `--dangerously-skip-permissions` flag.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
+## [2026-11-04] - Open ACP OAuth Browser Flow
+
 - Capture the OAuth URL emitted by the ACP runtime and open it in the user's default browser during sign-in.
 - Keep ACP diagnostics private while draining stderr so the headless runtime cannot block on its output pipe.
 - Increase the Windows ACP initialize timeout to 90 seconds; a local startup probe took about 27 seconds to answer the first handshake.

@@ -1687,6 +1687,55 @@
       "status": "active",
       "updatedAt": 1793598504.239952,
       "title": "Reviewing implemented session handoff features"
+    },
+    {
+      "id": "0d985c8a-88ab-4d71-bd38-adca94fd3dbe",
+      "project": "Shortcut Manager",
+      "originAgent": "antigravity",
+      "originSessionId": "2d5843d8-afde-4ad7-b3ac-9e76404a2b7f",
+      "sessions": [
+        {
+          "agent": "antigravity",
+          "sessionId": "2d5843d8-afde-4ad7-b3ac-9e76404a2b7f"
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "4252e3fa-3b46-430c-a6c6-4446904c3568",
+          "token": "d945a84599f94446826eed9f3e7d0b43",
+          "sourceAgent": "antigravity",
+          "sourceSessionId": "2d5843d8-afde-4ad7-b3ac-9e76404a2b7f",
+          "targetAgent": "codex",
+          "targetSessionId": null,
+          "status": "pending",
+          "createdAt": 1793810935.960253
+        },
+        {
+          "id": "18faf76e-edda-448f-98ef-a7b748863cbc",
+          "token": "4727843013c9437db9da705cf2691d69",
+          "sourceAgent": "antigravity",
+          "sourceSessionId": "2d5843d8-afde-4ad7-b3ac-9e76404a2b7f",
+          "targetAgent": "codex",
+          "targetSessionId": null,
+          "status": "pending",
+          "createdAt": 1793811023.9750261
+        },
+        {
+          "id": "899d2f71-dd31-46d0-b8a8-bea79d50f72c",
+          "token": "b41fea5562e648fa9716d254302095de",
+          "sourceAgent": "antigravity",
+          "sourceSessionId": "2d5843d8-afde-4ad7-b3ac-9e76404a2b7f",
+          "targetAgent": "codex",
+          "targetSessionId": null,
+          "status": "pending",
+          "createdAt": 1793812059.6011393
+        }
+      ],
+      "activeHandoffId": "899d2f71-dd31-46d0-b8a8-bea79d50f72c",
+      "activeAgent": "codex",
+      "activeSessionId": null,
+      "status": "pending",
+      "updatedAt": 1793812059.6011393
     }
   ],
   "agent_session_title_overrides": {
