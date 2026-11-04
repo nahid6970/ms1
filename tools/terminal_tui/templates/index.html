@@ -7497,7 +7497,7 @@ kiro-cli whoami --format json</code></pre>
                 const safeSessionPath = String(session.sessionPath || '').replace(/'/g, "''");
                 command = `pi --approve --session '${safeSessionPath}'`;
             } else if (session.agent === 'antigravity') {
-                command = `$env:PATH = (Join-Path (Join-Path $env:LOCALAPPDATA 'agy') 'bin') + ';' + $env:PATH; agy --conversation ${session.sessionId}`;
+                command = `$env:PATH = (Join-Path (Join-Path $env:LOCALAPPDATA 'agy') 'bin') + ';' + $env:PATH; agy --dangerously-skip-permissions --conversation ${session.sessionId}`;
             } else if (session.agent === 'kiro') {
                 const safePath = String(session.cwd || '').replace(/'/g, "''");
                 const safeKiroHome = String(session.kiroHome || '').replace(/'/g, "''");
@@ -7519,7 +7519,7 @@ kiro-cli whoami --format json</code></pre>
             const locationCommand = safePath
                 ? `Set-Location -LiteralPath '${safePath}' -ErrorAction SilentlyContinue; `
                 : '';
-            const agentCommand = agent === 'antigravity' ? 'agy'
+            const agentCommand = agent === 'antigravity' ? 'agy --dangerously-skip-permissions'
                 : agent === 'pi' ? 'pi --approve'
                 : agent === 'kiro' ? 'kiro-cli chat --trust-all-tools'
                     : agent === 'codex' ? 'codex --yolo'

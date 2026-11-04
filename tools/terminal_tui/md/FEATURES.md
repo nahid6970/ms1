@@ -68,7 +68,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Resume AI Agent Sessions
 **Status:** ✅ Complete
-**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Antigravity sessions are read from its local conversation summary database and resume with the documented `agy --conversation <id>` command. Codex, Pi, and Kiro sessions resume through their native CLI flags.
+**Description:** The workspace toolbar's AGENT button opens a searchable, newest-first list of saved Codex, Pi, Kiro CLI, and Antigravity CLI sessions. Antigravity sessions are read from its local conversation summary database and resume with `agy --dangerously-skip-permissions --conversation <id>`. New Antigravity sessions also start with `--dangerously-skip-permissions`. Codex, Pi, and Kiro sessions resume through their native CLI flags.
 **Usage:** Open a workspace and click `AGENT` beside the workspace selector; search or browse the sessions, then select one to resume it.
 **Files Involved:** `app.py` (`GET /api/agent/sessions`), `templates/index.html` (session picker modal and `resumeAgentSession()`)
 **Note:** The Kiro session picker reads legacy sessions from `sessions/cli` and Kiro CLI v3 sessions from `sessions/<workspace-id>/<session-id>/session.json` with their `messages.jsonl` transcripts. Both formats are filtered by their workspace path and can be resumed through the native Kiro CLI command.
