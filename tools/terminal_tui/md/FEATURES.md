@@ -204,8 +204,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Independent settings for visible auto-refresh cadence, browser snapshot reuse, and backend CLI-result caching, with an info popup explaining each interval
 - Kiro included credits remaining and monthly reset date from `kiro-cli /usage`
 - Google Antigravity CLI start/continue actions in Settings and the AGENT picker
-- Google Antigravity usage badge reads remaining 5-hour and weekly quota windows using the signed-in ACP profile. Its tooltip identifies the Google account email and shows each Gemini or Claude/GPT window with its reset time on a separate line; click the badge to refresh
-- Google Antigravity ACP runtime installer with Settings controls to sign in and sign out when switching Google accounts; sign-out uses the ACP logout protocol directly, while Settings distinguishes saved ACP credentials from the OAuth token profile required for quota reads
+- Google Antigravity usage badge runs the CLI's headless `/usage` command, so quota windows come from the same account as `agy acp`. It shows Gemini and Claude/GPT quota rows with reset times; click the badge to refresh
+- Google Antigravity Settings opens the installed `agy` CLI for sign-in or `/logout`; ACP and quota checks use the CLI's shared OS keyring credentials. The `/usage` response does not include an account email, so the tooltip identifies it as the signed-in Antigravity CLI account
 - Manual refresh from each provider badge; optional shared 1/2/5/10/15-minute refresh interval
 
 ---

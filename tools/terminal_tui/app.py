@@ -1744,6 +1744,38 @@ _ANTIGRAVITY_ACP_VERSION = '1.4.1'
 _ANTIGRAVITY_ACP_INSTALL_LOCK = threading.Lock()
 
 
+def _antigravity_cli_executable():
+    """Find the installed Antigravity CLI without starting an authenticated session."""
+    candidates = []
+    local_app_data = os.environ.get('LOCALAPPDATA')
+    if local_app_data:
+        candidates.append(os.path.join(local_app_data, 'agy', 'bin', 'agy.exe'))
+    found = shutil.which('agy')
+    if found:
+        candidates.append(found)
+    return next((path for path in candidates if os.path.isfile(path)), None)
+
+
+@app.route('/api/antigravity/cli', methods=['GET'])
+def api_antigravity_cli_status():
+    """Report CLI availability; authentication is owned by agy's shared keyring."""
+    executable = _antigravity_cli_executable()
+    if not executable:
+        return jsonify({'installed': False, 'authenticated': None})
+    version = None
+    try:
+        result = subprocess.run(
+            [executable, '--version'], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding='utf-8', errors='replace', timeout=5,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+        if result.returncode == 0:
+            version = (result.stdout or '').strip()[:100] or None
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return jsonify({'installed': True, 'authenticated': None, 'version': version})
+
+
 def _antigravity_acp_runtime_paths():
     """Return paths for the official Windows ACP runtime and its helper."""
     architecture = platform.machine().lower()
@@ -2382,123 +2414,82 @@ def api_kiro_usage():
 
 
 def _read_antigravity_usage():
-    """Read Antigravity's reported quota windows using the local ACP OAuth profile."""
-    import requests
-
-    profile_home = _antigravity_acp_profile_home()
-    token_path = os.path.join(profile_home, 'antigravity-acp', 'acp_token.json')
+    """Read quota from agy's own cached account via its headless /usage command."""
+    executable = _antigravity_cli_executable()
+    if not executable:
+        raise RuntimeError('Antigravity CLI was not found. Install agy, sign in, and refresh.')
+    process_env = os.environ.copy()
+    process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
+    cli_bin = os.path.dirname(executable)
+    process_env['PATH'] = cli_bin + os.pathsep + process_env.get('PATH', '')
     try:
-        with open(token_path, 'r', encoding='utf-8') as token_file:
-            token = json.load(token_file)
-    except FileNotFoundError as exc:
-        raise RuntimeError('Sign in with Settings → AI Usage & Accounts → Google Antigravity ACP to enable Antigravity usage.') from exc
-    except (OSError, ValueError) as exc:
-        raise RuntimeError('Could not read the Antigravity ACP sign-in profile.') from exc
+        result = subprocess.run(
+            [executable, '--print', '/usage', '--output-format', 'json', '--print-timeout', '20s'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding='utf-8', errors='replace', timeout=25, env=process_env,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError('Antigravity CLI quota check timed out. Open agy, confirm sign-in, then refresh.') from exc
+    except OSError as exc:
+        raise RuntimeError('Could not start Antigravity CLI for a quota refresh.') from exc
 
-    required = ('client_id', 'client_secret', 'refresh_token')
-    if not isinstance(token, dict) or any(not token.get(key) for key in required):
-        raise RuntimeError('The Antigravity ACP sign-in profile is incomplete. Sign in again from Settings.')
-    refreshed = requests.post('https://oauth2.googleapis.com/token', data={
-        'client_id': token['client_id'],
-        'client_secret': token['client_secret'],
-        'refresh_token': token['refresh_token'],
-        'grant_type': 'refresh_token',
-    }, timeout=12)
-    if not refreshed.ok:
-        raise RuntimeError('Could not refresh Google sign-in for Antigravity usage. Reopen ACP chat to sign in again.')
-    refreshed_data = refreshed.json() or {}
-    access_token = refreshed_data.get('access_token')
-    if not access_token:
-        raise RuntimeError('Google did not return an access token for Antigravity usage.')
-    account_email = _google_email_from_id_token(refreshed_data.get('id_token') or token.get('id_token'))
-    if not account_email:
+    try:
+        envelope = json.loads(result.stdout or '')
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError('Antigravity CLI returned an unreadable quota response.') from exc
+    if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
+        raise RuntimeError('Antigravity CLI could not read quota. Open agy and finish Google sign-in, then refresh.')
+
+    response_text = envelope.get('response')
+    if not isinstance(response_text, str):
+        raise RuntimeError('Antigravity CLI returned no quota data.')
+    windows = []
+    for line in response_text.splitlines():
+        columns = [part.strip() for part in line.split('\t')]
+        if len(columns) < 3:
+            continue
+        family_text, limit_text, percent_text = columns[:3]
+        match = re.search(r'(?<!\d)(\d{1,3}(?:\.\d+)?)\s*%', percent_text)
+        if not match:
+            continue
         try:
-            identity_response = requests.get(
-                'https://openidconnect.googleapis.com/v1/userinfo',
-                headers={'Authorization': f'Bearer {access_token}'}, timeout=8,
-            )
-            if identity_response.ok:
-                identity = identity_response.json() or {}
-                candidate = identity.get('email')
-                if isinstance(candidate, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', candidate.strip()):
-                    account_email = candidate.strip()
-        except (requests.RequestException, ValueError, TypeError):
-            pass
-
-    machine = platform.machine().lower()
-    architecture = 'amd64' if machine in {'amd64', 'x86_64'} else 'arm64' if machine in {'arm64', 'aarch64'} else machine
-    os_type = {'windows': 'win32', 'darwin': 'darwin', 'linux': 'linux'}.get(platform.system().lower(), platform.system().lower())
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json',
-        'User-Agent': f'antigravity/hub/2.24.0 (aidev_client; os_type={os_type}; arch={architecture}; cl=963137146)',
-    }
-    payload = {'project': token['project_id']} if token.get('project_id') else {}
-    merged = {}
-    errors = []
-    for host in ('daily-cloudcode-pa.googleapis.com', 'cloudcode-pa.googleapis.com'):
-        try:
-            response = requests.post(
-                f'https://{host}/v1internal:retrieveUserQuotaSummary',
-                headers=headers, json=payload, timeout=10,
-            )
-            response.raise_for_status()
-            summary = response.json()
-            groups = summary.get('groups') or [{'buckets': summary.get('buckets', [])}]
-            for group in groups:
-                group_name = str(group.get('displayName') or '').strip()
-                for bucket in group.get('buckets') or []:
-                    if bucket.get('disabled') or not isinstance(bucket.get('remainingFraction'), (int, float)):
-                        continue
-                    bucket_id = str(bucket.get('bucketId') or '')
-                    if bucket_id.startswith('gemini-argon-'):
-                        family = group_name or 'Gemini Argon'
-                    elif bucket_id.startswith('gemini-'):
-                        family = 'Gemini'
-                    elif bucket_id.startswith('3p-'):
-                        family = 'Claude & GPT (shared)'
-                    else:
-                        family = group_name or bucket_id or 'Antigravity'
-                    window = bucket.get('window')
-                    cadence = {'5h': '5-hour', 'weekly': 'Weekly'}.get(window, str(bucket.get('displayName') or 'Quota'))
-                    remaining = max(0.0, min(1.0, float(bucket['remainingFraction'])))
-                    row = {
-                        'id': bucket_id,
-                        'label': f'{family} · {cadence}',
-                        'leftPercent': round(remaining * 100, 1),
-                        'usedPercent': round((1 - remaining) * 100, 1),
-                        'resetsAt': bucket.get('resetTime'),
-                    }
-                    previous = merged.get(bucket_id)
-                    if previous is None or row['usedPercent'] > previous['usedPercent']:
-                        merged[bucket_id] = row
-        except (requests.RequestException, ValueError, TypeError) as exc:
-            errors.append(str(exc))
-
-    windows = list(merged.values())
+            remaining = max(0.0, min(100.0, float(match.group(1))))
+        except ValueError:
+            continue
+        family_lower = family_text.casefold()
+        if 'claude' in family_lower or 'gpt' in family_lower:
+            family = 'Claude & GPT (shared)'
+            prefix = 'shared'
+        elif 'gemini' in family_lower:
+            family = 'Gemini'
+            prefix = 'gemini'
+        else:
+            family = family_text or 'Antigravity'
+            prefix = re.sub(r'[^a-z0-9]+', '-', family_lower).strip('-') or 'agy'
+        cadence = '5-hour' if '5-hour' in limit_text.casefold() or '5 hour' in limit_text.casefold() else 'Weekly' if 'week' in limit_text.casefold() else limit_text or 'Quota'
+        suffix = '5h' if cadence == '5-hour' else 'weekly' if cadence == 'Weekly' else re.sub(r'[^a-z0-9]+', '-', cadence.casefold()).strip('-')
+        windows.append({
+            'id': f'{prefix}-{suffix}',
+            'label': f'{family} · {cadence}',
+            'leftPercent': round(remaining, 1),
+            'usedPercent': round(100.0 - remaining, 1),
+            'resetsAt': columns[3] if len(columns) > 3 and columns[3] else None,
+        })
     if not windows:
-        raise RuntimeError('Google did not return Antigravity quota windows.' + (f' {errors[0]}' if errors else ''))
-    windows.sort(key=lambda item: (item['label'].split(' · ')[0] != 'Gemini', item['label'].split(' · ')[-1] != '5-hour'))
-    primary = next((item for item in windows if item['id'] == 'gemini-5h'), windows[0])
-    return {'available': True, 'windows': windows, 'leftPercent': primary['leftPercent'],
-            'fetchedAt': int(time.time()), 'accountName': 'Google account', 'accountEmail': account_email}
-
-
-def _google_email_from_id_token(id_token):
-    """Extract the account label from a cached Google ID token without exposing it."""
-    try:
-        token_parts = str(id_token or '').split('.')
-        if len(token_parts) < 2:
-            return None
-        payload = token_parts[1]
-        payload += '=' * (-len(payload) % 4)
-        claims = json.loads(base64.urlsafe_b64decode(payload.encode('ascii')))
-        email = claims.get('email') if isinstance(claims, dict) else None
-        if isinstance(email, str) and re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email.strip()):
-            return email.strip()
-    except (ValueError, TypeError, UnicodeError):
-        pass
-    return None
+        raise RuntimeError('Antigravity CLI did not report any quota windows.')
+    windows.sort(key=lambda item: (not item['id'].startswith('gemini-'), item['id'].endswith('-weekly') is False))
+    primary = next((item for item in windows if item['id'] == 'gemini-5h'), None)
+    if primary is None:
+        primary = next((item for item in windows if item['id'].startswith('gemini-')), windows[0])
+    return {
+        'available': True,
+        'windows': windows,
+        'leftPercent': primary['leftPercent'],
+        'fetchedAt': int(time.time()),
+        'accountName': 'Antigravity CLI account',
+        'accountEmail': None,
+    }
 
 
 @app.route('/api/antigravity/usage', methods=['GET'])

@@ -3,6 +3,16 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Use Antigravity CLI Authentication for ACP
+
+- Replace the separate 560 MB ACP runtime installer and OAuth sign-in/out controls in Settings with a button that opens the installed `agy` CLI in a terminal.
+- Document that `agy acp` shares the CLI's OS keyring credentials and that `/logout` in the CLI signs out.
+- Replace direct OAuth-token and internal Google quota API calls with the CLI's machine-readable `agy --print /usage --output-format json` response, aligning quota checks with the shared CLI/ACP account.
+- Identify the quota source as the signed-in Antigravity CLI account because the headless `/usage` response contains quotas but not an email address.
+- Add a lightweight API status endpoint for Antigravity CLI installation/version detection.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-04] - Style Usage Percentages in Quota Tooltips
 
 - Present each percentage inside Codex, Kiro, and Antigravity quota tooltips in a compact provider-colored pill with coordinated foreground, background, and border colors.
