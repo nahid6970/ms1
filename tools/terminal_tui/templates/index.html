@@ -7224,9 +7224,15 @@ kiro-cli whoami --format json</code></pre>
                     windows.forEach(windowInfo => {
                         const line = document.createElement('div');
                         line.style.marginBottom = '3px';
-                        const quota = document.createElement('div');
-                        quota.textContent = `${Number(windowInfo.leftPercent).toFixed(1)}%`;
-                        quota.style.cssText = 'font-weight:650;color:var(--text-primary);';
+                        const quota = document.createElement('span');
+                        const remainingPercent = Number(windowInfo.leftPercent);
+                        const badgeTone = remainingPercent >= 70
+                            ? { fg: '#6ee7b7', bg: 'rgba(16,185,129,.13)', border: 'rgba(52,211,153,.38)' }
+                            : remainingPercent >= 30
+                                ? { fg: '#fcd34d', bg: 'rgba(245,158,11,.13)', border: 'rgba(251,191,36,.4)' }
+                                : { fg: '#fda4af', bg: 'rgba(244,63,94,.13)', border: 'rgba(251,113,133,.4)' };
+                        quota.textContent = `${remainingPercent.toFixed(1)}%`;
+                        quota.style.cssText = `display:inline-flex;align-items:center;padding:1px 6px;border:1px solid ${badgeTone.border};border-radius:5px;background:${badgeTone.bg};color:${badgeTone.fg};font-weight:500;line-height:1.35;`;
                         line.appendChild(quota);
                         if (windowInfo.resetsAt) {
                             const reset = document.createElement('div');
@@ -7239,7 +7245,7 @@ kiro-cli whoami --format json</code></pre>
                             const duration = [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ');
                             reset.textContent = Number.isFinite(resetAt) && resetDelta > 0
                                 ? `Resets in ${duration}` : 'Reset time passed';
-                            reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:600;color:#cbd5e1;';
+                            reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:400;color:#cbd5e1;';
                             line.appendChild(reset);
                         }
                         cell.appendChild(line);
