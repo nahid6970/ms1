@@ -17,6 +17,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import shutil
+import stat
 import subprocess
 import sys
 
@@ -2130,11 +2131,16 @@ def api_antigravity_acp_accounts():
             return jsonify({'error': 'Wait for sign-in to finish before removing this profile.'}), 409
     profile_home = os.path.realpath(_antigravity_acp_profile_home(account_id))
     accounts_root = os.path.realpath(_antigravity_acp_accounts_root())
-    if os.path.dirname(profile_home) != accounts_root:
+    if os.path.normcase(os.path.dirname(profile_home)) != os.path.normcase(accounts_root):
         return jsonify({'error': 'The profile path is outside the Antigravity ACP accounts folder.'}), 400
     if os.path.isdir(profile_home):
+        def retry_readonly_delete(function, path, _exc_info):
+            # Windows can mark ACP-created credential/config files read-only.
+            os.chmod(path, stat.S_IWRITE)
+            function(path)
+
         try:
-            shutil.rmtree(profile_home)
+            shutil.rmtree(profile_home, onerror=retry_readonly_delete)
         except OSError as exc:
             return jsonify({'error': f'Could not remove the ACP profile files: {exc}'}), 500
     set_config_val('antigravity_acp_accounts', [item for item in accounts if item['id'] != account_id])

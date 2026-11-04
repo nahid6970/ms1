@@ -7446,6 +7446,7 @@ kiro-cli whoami --format json</code></pre>
                 await loadAntigravityAcpAccounts();
                 await refreshAntigravityAcpStatus();
                 await loadAntigravityUsage(true);
+                if (statusEl) statusEl.textContent = `Profile “${account.name}” and its saved sign-in were removed.`;
             } catch (error) {
                 if (statusEl) statusEl.textContent = String(error.message || error);
             }
