@@ -7222,16 +7222,24 @@ kiro-cli whoami --format json</code></pre>
                         return;
                     }
                     windows.forEach(windowInfo => {
-                        const cadence = String(windowInfo.label || '').split('·').pop().trim();
                         const line = document.createElement('div');
                         line.style.marginBottom = '3px';
                         const quota = document.createElement('div');
-                        quota.textContent = `${cadence}: ${Number(windowInfo.leftPercent).toFixed(1)}% remaining`;
+                        quota.textContent = `${Number(windowInfo.leftPercent).toFixed(1)}%`;
+                        quota.style.cssText = 'font-weight:650;color:var(--text-primary);';
                         line.appendChild(quota);
                         if (windowInfo.resetsAt) {
                             const reset = document.createElement('div');
-                            reset.textContent = `Resets ${new Date(windowInfo.resetsAt).toLocaleString()}`;
-                            reset.style.cssText = 'font-size:.68rem;color:var(--text-muted);';
+                            const resetAt = new Date(windowInfo.resetsAt).getTime();
+                            const resetDelta = resetAt - Date.now();
+                            const remainingMinutes = Number.isFinite(resetAt) ? Math.max(0, Math.ceil(resetDelta / 60000)) : 0;
+                            const days = Math.floor(remainingMinutes / 1440);
+                            const hours = Math.floor((remainingMinutes % 1440) / 60);
+                            const minutes = remainingMinutes % 60;
+                            const duration = [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ');
+                            reset.textContent = Number.isFinite(resetAt) && resetDelta > 0
+                                ? `Resets in ${duration}` : 'Reset time passed';
+                            reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:600;color:#cbd5e1;';
                             line.appendChild(reset);
                         }
                         cell.appendChild(line);
