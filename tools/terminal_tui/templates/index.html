@@ -2376,7 +2376,7 @@
                             <span id="monitor-kiro-icon" aria-hidden="true"></span>
                             <span id="monitor-kiro-quota-value">--</span>
                         </button>
-                        <button id="monitor-antigravity-quota" type="button" data-testid="antigravity-quota-indicator" data-quota-tooltip data-quota-provider="Antigravity" data-quota-details="Click to refresh" onclick="loadAntigravityUsage(true)" aria-label="Antigravity quota. Click to refresh">
+                        <button id="monitor-antigravity-quota" type="button" data-testid="antigravity-quota-indicator" data-quota-tooltip data-quota-provider="Antigravity" data-quota-details="Click to refresh · right-click to compare accounts" onclick="loadAntigravityUsage(true)" oncontextmenu="openAntigravityUsageComparison(event)" aria-label="Antigravity quota. Click to refresh. Right-click to compare all accounts">
                             <span id="monitor-antigravity-icon" aria-hidden="true"></span>
                             <span id="monitor-antigravity-quota-value">--</span>
                         </button>
@@ -4319,6 +4319,28 @@ kiro-cli whoami --format json</code></pre>
             </div>
             <div id="agent-session-list" role="listbox" aria-label="Saved AI agent sessions" style="flex:1;min-height:0;overflow-y:auto;padding:2px 10px 12px;display:flex;flex-direction:column;gap:4px;"></div>
             <div style="padding:9px 15px;border-top:1px solid rgba(255,255,255,.08);color:#777;font-size:.67rem;">Select a chat to resume it in a new terminal tab.</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="antigravity-usage-comparison-modal" role="dialog" aria-modal="true" aria-labelledby="antigravity-usage-comparison-title" onclick="if(event.target===this)closeAntigravityUsageComparison()" style="z-index:1300;">
+        <div class="modal-content" style="width:760px;max-width:94vw;max-height:84vh;padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border-color);">
+                <div style="min-width:0;flex:1;">
+                    <div id="antigravity-usage-comparison-title" style="font-size:.92rem;font-weight:650;color:var(--text-primary);">Antigravity account usage</div>
+                    <div id="antigravity-usage-comparison-status" role="status" style="font-size:.68rem;color:var(--text-muted);margin-top:4px;">Loading account usage…</div>
+                </div>
+                <button type="button" onclick="closeAntigravityUsageComparison()" aria-label="Close account usage comparison" style="width:28px;height:28px;border:0;background:transparent;color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:1.2rem;">×</button>
+            </div>
+            <div style="overflow:auto;padding:12px 16px 16px;">
+                <table style="width:100%;border-collapse:collapse;font-size:.76rem;text-align:left;">
+                    <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
+                        <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
+                        <th style="padding:8px 10px 9px;min-width:125px;">Gemini</th>
+                        <th style="padding:8px 4px 9px 10px;min-width:125px;">Claude</th>
+                    </tr></thead>
+                    <tbody id="antigravity-usage-comparison-rows"><tr><td colspan="3" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -7153,6 +7175,109 @@ kiro-cli whoami --format json</code></pre>
                     antigravityUsageRefreshQueued = false;
                     loadAntigravityUsage(true);
                 }
+            }
+        }
+
+        function closeAntigravityUsageComparison() {
+            document.getElementById('antigravity-usage-comparison-modal')?.classList.remove('show');
+        }
+
+        async function openAntigravityUsageComparison(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const modal = document.getElementById('antigravity-usage-comparison-modal');
+            const status = document.getElementById('antigravity-usage-comparison-status');
+            const rows = document.getElementById('antigravity-usage-comparison-rows');
+            if (!modal || !status || !rows) return;
+            modal.classList.add('show');
+            status.textContent = 'Loading usage for all Google profiles…';
+            rows.replaceChildren();
+            try {
+                const accountsResponse = await fetch('/api/antigravity/acp/accounts');
+                const accountsData = await accountsResponse.json();
+                if (!accountsResponse.ok) throw new Error(accountsData.error || 'Could not load Google profiles.');
+                const accounts = Array.isArray(accountsData.accounts) ? accountsData.accounts : [];
+                const results = await Promise.all(accounts.map(async account => {
+                    if (!account.usageReady) return { account, data: null };
+                    try {
+                        const query = new URLSearchParams({ accountId: account.id, cacheSeconds: String(getUsageServerCacheSeconds()) });
+                        const response = await fetch(`/api/antigravity/usage?${query}`);
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || 'Could not load usage.');
+                        return { account, data };
+                    } catch (error) {
+                        return { account, error: String(error.message || error) };
+                    }
+                }));
+
+                const addCellText = (cell, text, color = '') => {
+                    const line = document.createElement('div');
+                    line.textContent = text;
+                    if (color) line.style.color = color;
+                    cell.appendChild(line);
+                };
+                const renderQuotaCell = (cell, windows, unavailableText) => {
+                    if (!windows.length) {
+                        addCellText(cell, unavailableText || '—', 'var(--text-muted)');
+                        return;
+                    }
+                    windows.forEach(windowInfo => {
+                        const cadence = String(windowInfo.label || '').split('·').pop().trim();
+                        addCellText(cell, `${cadence}: ${Number(windowInfo.leftPercent).toFixed(1)}% remaining`);
+                    });
+                };
+
+                results.forEach(({ account, data, error }) => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid var(--border-color)';
+                    const accountCell = document.createElement('td');
+                    const geminiCell = document.createElement('td');
+                    const claudeCell = document.createElement('td');
+                    [accountCell, geminiCell, claudeCell].forEach(cell => {
+                        cell.style.padding = '10px 10px';
+                        cell.style.verticalAlign = 'top';
+                    });
+                    accountCell.style.paddingLeft = '4px';
+                    claudeCell.style.paddingRight = '4px';
+                    const email = data?.accountEmail;
+                    addCellText(accountCell, email && email.toLowerCase() !== account.name.toLowerCase()
+                        ? `${account.name} · ${email}` : account.name, 'var(--text-primary)');
+                    if (error) {
+                        renderQuotaCell(geminiCell, [], 'Unavailable');
+                        renderQuotaCell(claudeCell, [], 'Unavailable');
+                        accountCell.title = error;
+                    } else if (!data) {
+                        renderQuotaCell(geminiCell, [], 'Not signed in');
+                        renderQuotaCell(claudeCell, [], 'Not signed in');
+                    } else if (!data.available) {
+                        renderQuotaCell(geminiCell, [], 'Unavailable');
+                        renderQuotaCell(claudeCell, [], 'Unavailable');
+                        accountCell.title = data.error || 'Quota unavailable';
+                    } else {
+                        const windows = Array.isArray(data.windows) ? data.windows : [];
+                        const geminiWindows = windows.filter(item => String(item.id || '').toLowerCase().startsWith('gemini-')
+                            || String(item.label || '').toLowerCase().includes('gemini'));
+                        const claudeWindows = windows.filter(item => String(item.id || '').toLowerCase().startsWith('3p-')
+                            || /claude/i.test(String(item.label || '')));
+                        renderQuotaCell(geminiCell, geminiWindows, '—');
+                        renderQuotaCell(claudeCell, claudeWindows, '—');
+                    }
+                    row.append(accountCell, geminiCell, claudeCell);
+                    rows.appendChild(row);
+                });
+                if (!results.length) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 3;
+                    cell.style.cssText = 'padding:12px 4px;color:var(--text-muted);';
+                    cell.textContent = 'No Google profiles found.';
+                    row.appendChild(cell);
+                    rows.appendChild(row);
+                }
+                status.textContent = `Usage for ${results.length} profile${results.length === 1 ? '' : 's'}. Remaining quota is shown for each available window.`;
+            } catch (error) {
+                status.textContent = String(error.message || error);
+                rows.replaceChildren();
             }
         }
 
