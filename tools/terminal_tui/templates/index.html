@@ -7265,8 +7265,9 @@ kiro-cli whoami --format json</code></pre>
                     accountCell.style.paddingLeft = '4px';
                     claudeCell.style.paddingRight = '4px';
                     const email = data?.accountEmail;
-                    addCellText(accountCell, email && email.toLowerCase() !== account.name.toLowerCase()
-                        ? `${account.name} · ${email}` : account.name, 'var(--text-primary)');
+                    const accountLabel = account.id === 'default' ? '00' : account.name;
+                    addCellText(accountCell, email && email.toLowerCase() !== accountLabel.toLowerCase()
+                        ? `${accountLabel} · ${email}` : accountLabel, 'var(--text-primary)');
                     if (error) {
                         renderQuotaCell(geminiCell, [], 'Unavailable');
                         renderQuotaCell(claudeCell, [], 'Unavailable');
@@ -7531,7 +7532,8 @@ kiro-cli whoami --format json</code></pre>
             antigravityAcpAccounts.forEach(account => {
                 const option = document.createElement('option');
                 option.value = account.id;
-                option.textContent = `${account.name}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
+                const accountLabel = account.id === 'default' ? '00' : account.name;
+                option.textContent = `${accountLabel}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
                 select.appendChild(option);
             });
             select.value = selectedId;
