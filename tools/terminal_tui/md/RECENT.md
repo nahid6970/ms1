@@ -3,6 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-04] - Remove Free-Tier Lines from Quota Tooltips
+
+- Remove the standalone Free plan labels from the Codex and Kiro rich tooltips to reduce vertical space while keeping account and quota details.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-04] - Use Antigravity CLI Authentication for ACP
 
 - Replace the separate 560 MB ACP runtime installer and OAuth sign-in/out controls in Settings with a button that opens the installed `agy` CLI in a terminal.

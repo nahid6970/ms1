@@ -6977,7 +6977,6 @@ kiro-cli whoami --format json</code></pre>
                 const primary = data.windows[0];
                 value.textContent = `${primary.leftPercent}%`;
                 const accountName = data.accountEmail || data.accountName || shownAccountName;
-                const plan = data.planType ? `${data.planType} plan · ` : '';
                 const details = data.windows.map(windowInfo => {
                     const resetTime = windowInfo.resetsAt ? new Date(windowInfo.resetsAt * 1000).toLocaleString().replace(/\s/g, '\u00a0') : '';
                     const reset = resetTime ? ` · resets ${resetTime}` : '';
@@ -6988,8 +6987,8 @@ kiro-cli whoami --format json</code></pre>
                     return { label: windowInfo.label, percent: `${windowInfo.leftPercent}%`, suffix: `remaining${resetTime ? ` · resets ${resetTime}` : ''}` };
                 });
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${plan}${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`, {
-                    intro: accountName || 'Default account', subheading: plan.trim(), lines: richLines,
+                setQuotaTooltip(button, 'Codex', `${accountName || 'Default account'}\n${details}\nClick to refresh · right-click to switch account`, `Codex ${accountDescription}quota: ${primary.leftPercent}% remaining. Click to refresh.`, {
+                    intro: accountName || 'Default account', lines: richLines,
                     footer: 'Click to refresh · right-click to switch account',
                 });
             } catch (error) {
@@ -7046,11 +7045,10 @@ kiro-cli whoami --format json</code></pre>
                 value.textContent = `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`;
                 const accountName = data.accountEmail || data.accountName || shownAccountName;
                 const credits = `${Number(data.remainingCredits).toFixed(2)} of ${Number(data.includedCredits).toFixed(2)} credits remaining`;
-                const plan = data.plan ? `${data.plan} · ` : '';
                 const reset = data.resetsOn ? ` · resets ${data.resetsOn}` : '';
                 const accountDescription = accountName && accountName !== 'Default' ? `${accountName} · ` : '';
-                setQuotaTooltip(button, 'Kiro', `${accountName || 'Default account'}\n${plan}${credits}${reset}\nClick to refresh`, `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`, {
-                    intro: accountName || 'Default account', subheading: plan.trim(),
+                setQuotaTooltip(button, 'Kiro', `${accountName || 'Default account'}\n${credits}${reset}\nClick to refresh`, `Kiro ${accountDescription}quota: ${value.textContent} remaining. Click to refresh.`, {
+                    intro: accountName || 'Default account',
                     lines: [{ label: 'Included credits', percent: `${Number.isInteger(leftPercent) ? leftPercent : leftPercent.toFixed(1)}%`, suffix: `${credits}${reset}` }],
                     footer: 'Click to refresh',
                 });
