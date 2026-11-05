@@ -9,6 +9,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Allow Antigravity CLI conversations to be renamed in the AGENT session picker using a Terminal TUI display-title override.
 - Allow AGY conversations to hand off their saved user requests and readable summary details into a new Codex, Pi, or Kiro session.
+- Scope AGY sessions to the active workspace and add deletion of their indexed conversation files from the picker.
 - Validate Antigravity conversation IDs and workspace ownership against the local conversation summary database before saving a title.
 - Start and resume `agy` sessions with the documented `--dangerously-skip-permissions` flag.
 

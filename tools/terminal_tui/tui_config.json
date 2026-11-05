@@ -1777,6 +1777,9 @@
     },
     "Tab Saver": {
       "codex:01a13edb-3de4-7a31-833e-5ea0582388bc": "Add Markdown support and deadline removal"
+    },
+    "Shortcut Manager": {
+      "codex:01a1a787-ee6c-7ab0-8413-b07c9c4ed479": "Fix Favorites Star and Rename App Reference"
     }
   },
   "terminal_tabs": {

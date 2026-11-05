@@ -2747,10 +2747,18 @@ def _antigravity_cli_conversation_summary(session_id, session_path, project_path
     db_uri = 'file:' + summary_db.replace('\\', '/') + '?mode=ro'
     try:
         with sqlite3.connect(db_uri, uri=True, timeout=1) as db:
-            row = db.execute(
-                'SELECT title, preview, raw_summary, workspace_uris FROM conversation_summaries WHERE conversation_id = ?',
-                (session_id,),
-            ).fetchone()
+            try:
+                row = db.execute(
+                    'SELECT title, preview, raw_summary, workspace_uris, not_fully_idle FROM conversation_summaries WHERE conversation_id = ?',
+                    (session_id,),
+                ).fetchone()
+            except sqlite3.OperationalError:
+                row = db.execute(
+                    'SELECT title, preview, raw_summary, workspace_uris FROM conversation_summaries WHERE conversation_id = ?',
+                    (session_id,),
+                ).fetchone()
+                if row:
+                    row = (*row, 0)
     except sqlite3.Error:
         return None
     if not row:
@@ -2805,11 +2813,13 @@ def _antigravity_cli_conversation_summary(session_id, session_path, project_path
             pass
     return {
         'dbPath': summary_db,
+        'conversationDb': conversation_db,
         'cwd': cwd,
         'title': title,
         'preview': readable_summary_text(row[1]),
         'summary': readable_summary_text(row[2]),
         'userPrompts': user_prompts,
+        'active': bool(row[4]),
     }
 
 
@@ -3091,6 +3101,8 @@ def api_agent_sessions():
                             cwd = f'\\\\{parsed_uri.netloc}{cwd.replace("/", "\\\\")}'
                         else:
                             cwd = cwd.replace('/', os.sep)
+                if not cwd or not _path_is_within(cwd, project_path):
+                    continue
                 try:
                     modified_value = str(modified_at or '')
                     modified_value = re.sub(r'(\.\d{6})\d+', r'\1', modified_value)
@@ -3260,7 +3272,7 @@ def api_agent_session_title_suggest():
     session_path = os.path.abspath(os.path.expanduser(str(data.get('sessionPath') or '')))
     api_key = str(data.get('api_key') or '').strip()
     model = str(data.get('model') or 'gemini-2.5-flash').strip()
-    if agent not in {'codex', 'pi', 'kiro'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+    if agent not in {'codex', 'pi', 'kiro', 'antigravity'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
         return jsonify({'error': 'Invalid agent session.'}), 400
     if not api_key:
         return jsonify({'error': 'No Gemini API key found. Add one in AI Copilot settings.'}), 400
@@ -3333,38 +3345,89 @@ def api_agent_session_delete():
     agent = str(data.get('agent') or '').strip().lower()
     session_id = str(data.get('sessionId') or '').strip()
     session_path = os.path.abspath(os.path.expanduser(str(data.get('sessionPath') or '')))
-    if agent not in {'codex', 'pi', 'kiro'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
+    if agent not in {'codex', 'pi', 'kiro', 'antigravity'} or not re.fullmatch(r'[A-Za-z0-9._-]{8,128}', session_id):
         return jsonify({'error': 'Invalid agent session.'}), 400
     project = next((item for item in scan_projects() if item['name'].casefold() == project_name.casefold()), None)
     if not project:
         return jsonify({'error': 'Workspace not found.'}), 404
     project_path = os.path.normcase(os.path.realpath(os.path.abspath(project['path'])))
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
-    allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
-    allowed_extension = session_path.lower().endswith('.json' if agent == 'kiro' else '.jsonl')
-    if (not allowed_extension or
-            not any(_path_is_within(session_path, root) for root in allowed_roots)):
-        return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
-    try:
-        with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
-            metadata = _agent_session_metadata(agent, session_path)
-        stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
-        cwd = str(metadata.get('cwd') or '')
-        if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
-            return jsonify({'error': 'Session does not belong to this workspace.'}), 404
-    except (OSError, ValueError, TypeError, AttributeError):
-        return jsonify({'error': 'Could not read the saved session.'}), 404
+    files_to_delete = []
+    if agent == 'antigravity':
+        import sqlite3
 
-    files_to_delete = [session_path]
-    if agent == 'kiro':
-        companion_path = _kiro_transcript_path(session_path)
-        if os.path.isfile(companion_path) and any(_path_is_within(companion_path, root) for root in allowed_roots):
-            files_to_delete.insert(0, companion_path)
-    try:
-        for path in files_to_delete:
-            os.remove(path)
-    except OSError as exc:
-        return jsonify({'error': f'Could not delete the session file: {exc}'}), 409
+        try:
+            summary = _antigravity_cli_conversation_summary(session_id, session_path, project_path)
+        except (OSError, ValueError, TypeError, AttributeError):
+            summary = None
+        if not summary:
+            return jsonify({'error': 'Antigravity conversation was not found in this workspace.'}), 404
+        if summary['active']:
+            return jsonify({'error': 'Close this Antigravity conversation before deleting it.'}), 409
+        conversations_root = os.path.join(os.path.dirname(summary['dbPath']), 'conversations')
+        conversation_db = summary['conversationDb']
+        if not _path_is_within(conversation_db, conversations_root):
+            return jsonify({'error': 'Antigravity conversation database is outside its configured folder.'}), 403
+        brain_root = os.path.join(os.path.dirname(summary['dbPath']), 'brain')
+        brain_dir = os.path.realpath(os.path.join(brain_root, session_id))
+        if os.path.normcase(os.path.dirname(brain_dir)) != os.path.normcase(os.path.realpath(brain_root)):
+            return jsonify({'error': 'Antigravity conversation data is outside its configured folder.'}), 403
+        files_to_delete = [conversation_db, conversation_db + '-wal', conversation_db + '-shm']
+        try:
+            for path in files_to_delete:
+                if os.path.isfile(path):
+                    os.remove(path)
+            if os.path.isdir(brain_dir):
+                def retry_readonly_delete(function, path, _exc_info):
+                    os.chmod(path, stat.S_IWRITE)
+                    function(path)
+
+                shutil.rmtree(brain_dir, onerror=retry_readonly_delete)
+        except OSError as exc:
+            return jsonify({'error': f'Could not delete the Antigravity conversation files. Close the AGY session and retry: {exc}'}), 409
+        try:
+            with sqlite3.connect(summary['dbPath'], timeout=2) as summary_db:
+                deleted = summary_db.execute(
+                    'DELETE FROM conversation_summaries WHERE conversation_id = ?', (session_id,)
+                ).rowcount
+            if not deleted:
+                return jsonify({'error': 'Antigravity conversation was already removed from its index.'}), 404
+        except sqlite3.Error as exc:
+            return jsonify({'error': f'Could not update the Antigravity conversation index: {exc}'}), 409
+        title_overrides = get_config_val('agent_session_title_overrides', dict)
+        project_overrides = title_overrides.get(project['name'], {})
+        project_overrides.pop(f'antigravity:{session_id}', None)
+        if project_overrides:
+            title_overrides[project['name']] = project_overrides
+        else:
+            title_overrides.pop(project['name'], None)
+        set_config_val('agent_session_title_overrides', title_overrides)
+    else:
+        allowed_roots = [root for root_agent, root in _agent_session_roots(profile_home, project['path']) if root_agent == agent]
+        allowed_extension = session_path.lower().endswith('.json' if agent == 'kiro' else '.jsonl')
+        if (not allowed_extension or
+                not any(_path_is_within(session_path, root) for root in allowed_roots)):
+            return jsonify({'error': 'Session file is outside the configured agent session folders.'}), 403
+        try:
+            with open(session_path, 'r', encoding='utf-8', errors='replace') as session_file:
+                metadata = _agent_session_metadata(agent, session_path)
+            stored_id = str(metadata.get('session_id') or metadata.get('sessionId') or metadata.get('id') or '')
+            cwd = str(metadata.get('cwd') or '')
+            if stored_id != session_id or not cwd or not _path_is_within(cwd, project_path):
+                return jsonify({'error': 'Session does not belong to this workspace.'}), 404
+        except (OSError, ValueError, TypeError, AttributeError):
+            return jsonify({'error': 'Could not read the saved session.'}), 404
+
+        files_to_delete = [session_path]
+        if agent == 'kiro':
+            companion_path = _kiro_transcript_path(session_path)
+            if os.path.isfile(companion_path) and any(_path_is_within(companion_path, root) for root in allowed_roots):
+                files_to_delete.insert(0, companion_path)
+        try:
+            for path in files_to_delete:
+                os.remove(path)
+        except OSError as exc:
+            return jsonify({'error': f'Could not delete the session file: {exc}'}), 409
 
     conversations = get_config_val('agent_handoff_conversations', list)
     updated_conversations = []
