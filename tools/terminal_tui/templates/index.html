@@ -13188,7 +13188,7 @@ kiro-cli whoami --format json</code></pre>
                                     style="padding:5px 12px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.4);border-radius:6px;color:#34d399;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;"
                                     onmouseenter="this.style.background='rgba(16,185,129,0.22)'"
                                     onmouseleave="this.style.background='rgba(16,185,129,0.12)'">
-                                    ↑ Push now
+                                    Push now
                                 </button>
                             </div>
                         </div>`;
@@ -13213,7 +13213,7 @@ kiro-cli whoami --format json</code></pre>
         async function retryGitPush(branch) {
             if (!activeProject) return;
             const btn = document.getElementById('git-push-retry-btn');
-            if (btn) { btn.disabled = true; btn.textContent = '↑ Pushing…'; }
+            if (btn) { btn.disabled = true; btn.textContent = 'Pushing…'; }
             try {
                 const res = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/push-init`, {
                     method: 'POST',
@@ -13228,7 +13228,7 @@ kiro-cli whoami --format json</code></pre>
                         openGitCommitModal();
                     }, 1000);
                 } else {
-                    if (btn) { btn.disabled = false; btn.textContent = '↑ Push now'; }
+                    if (btn) { btn.disabled = false; btn.textContent = 'Push now'; }
                     const statusEl = document.getElementById('git-init-status');
                     if (statusEl) {
                         const errDiv = document.createElement('div');
@@ -13238,7 +13238,7 @@ kiro-cli whoami --format json</code></pre>
                     }
                 }
             } catch (e) {
-                if (btn) { btn.disabled = false; btn.textContent = '↑ Push now'; }
+                if (btn) { btn.disabled = false; btn.textContent = 'Push now'; }
             }
         }
 
