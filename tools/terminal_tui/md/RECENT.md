@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Clone into Existing Empty Workspace Folder
+
+- Allow Clone to target an already-existing empty project folder, not only a missing path.
+- Keep Clone disabled for non-empty folders and return a clear message to avoid overwriting project files.
+- Expose folder emptiness in the projects API for the GitHub Projects window.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Aggregate GitHub Project Change Checks
 
 - Moved status checking into a Check all button in the GitHub Projects window header, beside Close.

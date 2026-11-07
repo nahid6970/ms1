@@ -666,6 +666,13 @@ def load_projects_config():
 def save_projects_config(projects):
     set_config_val("projects", projects)
 
+def is_empty_directory(path):
+    try:
+        with os.scandir(path) as entries:
+            return next(entries, None) is None
+    except OSError:
+        return False
+
 def scan_projects():
     config_projects = load_projects_config()
     projects = []
@@ -705,6 +712,8 @@ def scan_projects():
         bookmarks = p.get("bookmarks", [])
         layout = p.get("layout", {})
         category = p.get("category", "")
+        project_path = os.path.expanduser(str(p.get("path") or ""))
+        path_exists = os.path.exists(project_path)
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
@@ -716,7 +725,8 @@ def scan_projects():
             "bookmarks": bookmarks,
             "layout": layout,
             "gitRemote": p.get("gitRemote", ""),
-            "pathExists": os.path.exists(os.path.expanduser(str(p.get("path") or ""))),
+            "pathExists": path_exists,
+            "pathIsEmpty": os.path.isdir(project_path) and is_empty_directory(project_path),
             "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip())
         })
     return projects
@@ -1152,8 +1162,10 @@ def api_project_git_sync_remote(project):
     cf = 0x08000000 if os.name == "nt" else 0
     try:
         if requested_action == "clone":
-            if os.path.exists(path):
-                return jsonify({"error": "The workspace path already exists. Clone is only available for a missing folder."}), 400
+            if os.path.exists(path) and not os.path.isdir(path):
+                return jsonify({"error": "The workspace path exists but is not a directory."}), 400
+            if os.path.isdir(path) and not is_empty_directory(path):
+                return jsonify({"error": "The workspace folder is not empty. Clone requires an empty folder to avoid overwriting files."}), 400
             os.makedirs(os.path.dirname(path), exist_ok=True)
             result = subprocess.run(
                 ["git", "clone", "--", remote, path], cwd=os.path.dirname(path),
