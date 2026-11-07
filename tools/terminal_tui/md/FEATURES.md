@@ -92,6 +92,12 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Implementation:** `templates/index.html` stores the selected filter in `localStorage` and applies it to both project renderers. `app.py` includes a `hasRcloneDestination` flag in the projects response; successful Rclone destination saves update the current client-side project data immediately.
 
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
+
+### GitHub Projects Manager
+**Status:** ✅ Complete
+**Description:** A button in the subprocess monitor opens a list of all workspaces with saved GitHub remotes, with Pull, Fetch, and Clone actions aligned on the right of each row.
+**Implementation:** `GET /api/projects` reports whether each configured folder exists. `POST /api/project/<project>/git/sync-remote` accepts `pull`, `fetch`, or `clone`; pull uses fast-forward-only mode, fetch only updates remote refs, and clone is available only when the configured folder is missing.
+**Files Involved:** `app.py`, `templates/index.html`
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.
 **Sub-features:**
 - Categories — group workspaces

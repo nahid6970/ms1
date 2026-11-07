@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Add GitHub Projects Manager
+
+- Added a GitHub toolbar button in the subprocess monitor that opens a list of saved GitHub-linked workspaces with Pull, Fetch, and Clone actions on each row.
+- Extended the existing remote sync API to support fast-forward-only pull, fetch, and clone into missing folders; project data now reports whether its configured folder exists.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-04] - Open ACP OAuth Browser Flow
 
 ## [2026-11-04] - Add Antigravity CLI Session Actions

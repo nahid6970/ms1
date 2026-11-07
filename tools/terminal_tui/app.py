@@ -716,6 +716,7 @@ def scan_projects():
             "bookmarks": bookmarks,
             "layout": layout,
             "gitRemote": p.get("gitRemote", ""),
+            "pathExists": os.path.exists(os.path.expanduser(str(p.get("path") or ""))),
             "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip())
         })
     return projects
@@ -1128,7 +1129,11 @@ def api_project_recreate_path(project):
 
 @app.route('/api/project/<project>/git/sync-remote', methods=['POST'])
 def api_project_git_sync_remote(project):
-    """Clone a missing workspace or fetch its configured Git remote."""
+    """Clone, fetch, or fast-forward pull a workspace's configured Git remote."""
+    data = request.get_json(silent=True) or {}
+    requested_action = str(data.get("action") or "").strip().lower()
+    if requested_action not in ("", "clone", "fetch", "pull"):
+        return jsonify({"error": "Action must be clone, fetch, or pull."}), 400
     projects = load_projects_config()
     proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
     if not proj:
@@ -1146,7 +1151,19 @@ def api_project_git_sync_remote(project):
 
     cf = 0x08000000 if os.name == "nt" else 0
     try:
-        if not os.path.exists(path):
+        if requested_action == "clone":
+            if os.path.exists(path):
+                return jsonify({"error": "The workspace path already exists. Clone is only available for a missing folder."}), 400
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            result = subprocess.run(
+                ["git", "clone", "--", remote, path], cwd=os.path.dirname(path),
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=600
+            )
+            action = "cloned"
+        elif not os.path.exists(path):
+            if requested_action in ("fetch", "pull"):
+                return jsonify({"error": "The workspace folder is missing. Use Clone to restore it."}), 400
             os.makedirs(os.path.dirname(path), exist_ok=True)
             result = subprocess.run(
                 ["git", "clone", "--", remote, path], cwd=os.path.dirname(path),
@@ -1177,12 +1194,13 @@ def api_project_git_sync_remote(project):
                 )
                 if add_remote.returncode != 0:
                     return jsonify({"error": add_remote.stderr.strip() or "Could not configure origin."}), 500
+            command = ["git", "pull", "--ff-only", "origin"] if requested_action == "pull" else ["git", "fetch", "--prune", "origin"]
             result = subprocess.run(
-                ["git", "fetch", "--prune", "origin"], cwd=path,
+                command, cwd=path,
                 capture_output=True, text=True, encoding="utf-8", errors="replace",
                 creationflags=cf, timeout=600
             )
-            action = "fetched"
+            action = "pulled" if requested_action == "pull" else "fetched"
         if result.returncode != 0:
             return jsonify({"error": (result.stderr or result.stdout or "Git operation failed.").strip()}), 500
         return jsonify({"status": action, "path": path, "output": (result.stdout or "").strip()})
