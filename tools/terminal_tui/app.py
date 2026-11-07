@@ -1238,14 +1238,25 @@ def api_project_git_sync_remote(project):
                     return jsonify({"error": local_count.stderr.strip() or "Could not count local commits."}), 500
                 ahead = int(local_count.stdout.strip() or "0")
             dirty = subprocess.run(
-                ["git", "status", "--porcelain"], cwd=path, capture_output=True,
+                ["git", "status", "--porcelain", "-uall", "--", "."], cwd=path, capture_output=True,
                 text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=15
             )
             if dirty.returncode != 0:
                 return jsonify({"error": dirty.stderr.strip() or "Could not read working tree status."}), 500
+            diff = subprocess.run(
+                ["git", "diff", "--shortstat", "HEAD", "--", "."], cwd=path, capture_output=True,
+                text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=30
+            )
+            if diff.returncode != 0:
+                return jsonify({"error": diff.stderr.strip() or "Could not read working tree diff."}), 500
+            diff_text = diff.stdout.strip()
+            insertions_match = re.search(r"(\d+) insertion", diff_text)
+            deletions_match = re.search(r"(\d+) deletion", diff_text)
             return jsonify({
                 "status": "checked", "path": path, "branch": branch_name,
                 "ahead": ahead, "behind": behind, "dirtyCount": len(dirty.stdout.splitlines()),
+                "insertions": int(insertions_match.group(1)) if insertions_match else 0,
+                "deletions": int(deletions_match.group(1)) if deletions_match else 0,
                 "remoteBranchExists": remote_exists
             })
         return jsonify({"status": action, "path": path, "output": (result.stdout or "").strip()})

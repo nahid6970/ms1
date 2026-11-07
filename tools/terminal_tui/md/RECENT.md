@@ -3,9 +3,17 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Aggregate GitHub Project Change Checks
+
+- Moved status checking into a Check all button in the GitHub Projects window header, beside Close.
+- The batch check fetches each linked project and reports changed files, added/deleted lines, and commits to push or pull.
+- Scoped file and line counts to each configured workspace folder.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Show GitHub Push and Working Tree Status
 
-- Added a Check action for each GitHub-linked project. It fetches remote refs and reports local commits to push, remote commits to pull, and uncommitted changes.
+- Added Git status comparison for local commits to push, remote commits to pull, and uncommitted changes; the follow-up above consolidates this into the modal's Check all action.
 - The comparison handles branches without a matching remote branch by counting local commits for an initial push.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
