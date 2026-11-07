@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Make Restart Button Direct
+
+- Changed `#restart-action-toggle` to immediately run the existing app restart/session reset flow.
+- Removed the confirmation prompt so the button starts restarting immediately.
+- Removed the restart/refresh menu; F5 remains the page refresh shortcut.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Clone into Existing Empty Workspace Folder
 
 - Allow Clone to target an already-existing empty project folder, not only a missing path.

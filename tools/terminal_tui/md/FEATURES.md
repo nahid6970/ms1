@@ -53,8 +53,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Global Restart and Page Refresh Controls
 **Status:** ✅ Complete
-**Description:** The global restart control offers separate actions for restarting the app and refreshing only the current page. F5 also refreshes the page.
-**Implementation:** `templates/index.html` — restart action menu and global F5 key handler.
+**Description:** Clicking the global restart button directly resets terminal sessions and restarts the app. F5 refreshes only the current page.
+**Implementation:** `templates/index.html` — `#restart-action-toggle` calls `resetAllSessions()`; the global F5 key handler calls `refreshPage()`.
 
 ## Terminal Clipboard and Refresh Recovery
 **Status:** ✅ Complete
