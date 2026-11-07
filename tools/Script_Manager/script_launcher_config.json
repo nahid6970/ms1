@@ -7014,8 +7014,8 @@
             "_runtime_is_italic": false
         },
         {
-            "name": "myWiztree",
-            "path": "C:\\@delta\\myWizTree_Directory_Scanner\\main.py",
+            "name": "Wiztree",
+            "path": "C:\\Users\\nahid\\delta\\wiztree\\main.py",
             "type": "script",
             "nf_char": "",
             "icon_path": "",
@@ -7059,8 +7059,8 @@
             "_runtime_is_italic": false
         },
         {
-            "name": "myRSS",
-            "path": "C:\\@delta\\myRSS\\main.py",
+            "name": "RSS",
+            "path": "C:\\Users\\nahid\\delta\\rss\\main.py",
             "type": "script",
             "nf_char": "",
             "icon_path": "",
