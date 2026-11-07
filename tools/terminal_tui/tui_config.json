@@ -1285,13 +1285,14 @@
     },
     {
       "name": "md files",
-      "path": "C:\\Users\\nahid\\md",
+      "path": "C:\\Users\\nahid\\delta\\md",
       "category": "",
       "pinned": false,
       "theme": {
         "background": "#000000",
         "foreground": "#d1d5db",
         "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
         "scrollbarColor": "#475569",
         "scrollbarIdleColor": "#2d3748"
       },
@@ -1301,7 +1302,8 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/md-files.git"
     },
     {
       "name": "SSH Manager",
