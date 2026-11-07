@@ -1132,8 +1132,8 @@ def api_project_git_sync_remote(project):
     """Clone, fetch, or fast-forward pull a workspace's configured Git remote."""
     data = request.get_json(silent=True) or {}
     requested_action = str(data.get("action") or "").strip().lower()
-    if requested_action not in ("", "clone", "fetch", "pull"):
-        return jsonify({"error": "Action must be clone, fetch, or pull."}), 400
+    if requested_action not in ("", "clone", "fetch", "pull", "status"):
+        return jsonify({"error": "Action must be clone, fetch, pull, or status."}), 400
     projects = load_projects_config()
     proj = next((p for p in projects if p["name"].lower() == project.lower()), None)
     if not proj:
@@ -1162,7 +1162,7 @@ def api_project_git_sync_remote(project):
             )
             action = "cloned"
         elif not os.path.exists(path):
-            if requested_action in ("fetch", "pull"):
+            if requested_action in ("fetch", "pull", "status"):
                 return jsonify({"error": "The workspace folder is missing. Use Clone to restore it."}), 400
             os.makedirs(os.path.dirname(path), exist_ok=True)
             result = subprocess.run(
@@ -1200,9 +1200,54 @@ def api_project_git_sync_remote(project):
                 capture_output=True, text=True, encoding="utf-8", errors="replace",
                 creationflags=cf, timeout=600
             )
-            action = "pulled" if requested_action == "pull" else "fetched"
+            action = "pulled" if requested_action == "pull" else "status" if requested_action == "status" else "fetched"
         if result.returncode != 0:
             return jsonify({"error": (result.stderr or result.stdout or "Git operation failed.").strip()}), 500
+        if requested_action == "status" and action == "status":
+            branch = subprocess.run(
+                ["git", "branch", "--show-current"], cwd=path, capture_output=True,
+                text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=10
+            )
+            if branch.returncode != 0:
+                return jsonify({"error": branch.stderr.strip() or "Could not determine the current branch."}), 500
+            branch_name = branch.stdout.strip()
+            if not branch_name:
+                return jsonify({"error": "This repository is in detached HEAD state; switch to a branch to check push status."}), 400
+            remote_ref = f"refs/remotes/origin/{branch_name}"
+            remote_exists = subprocess.run(
+                ["git", "show-ref", "--verify", "--quiet", remote_ref], cwd=path,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                creationflags=cf, timeout=10
+            ).returncode == 0
+            ahead = behind = 0
+            if remote_exists:
+                counts = subprocess.run(
+                    ["git", "rev-list", "--left-right", "--count", f"{remote_ref}...HEAD"], cwd=path,
+                    capture_output=True, text=True, encoding="utf-8", errors="replace",
+                    creationflags=cf, timeout=30
+                )
+                if counts.returncode != 0:
+                    return jsonify({"error": counts.stderr.strip() or "Could not compare local and remote commits."}), 500
+                behind, ahead = [int(value) for value in counts.stdout.split()[:2]]
+            else:
+                local_count = subprocess.run(
+                    ["git", "rev-list", "--count", "HEAD"], cwd=path, capture_output=True,
+                    text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=30
+                )
+                if local_count.returncode != 0:
+                    return jsonify({"error": local_count.stderr.strip() or "Could not count local commits."}), 500
+                ahead = int(local_count.stdout.strip() or "0")
+            dirty = subprocess.run(
+                ["git", "status", "--porcelain"], cwd=path, capture_output=True,
+                text=True, encoding="utf-8", errors="replace", creationflags=cf, timeout=15
+            )
+            if dirty.returncode != 0:
+                return jsonify({"error": dirty.stderr.strip() or "Could not read working tree status."}), 500
+            return jsonify({
+                "status": "checked", "path": path, "branch": branch_name,
+                "ahead": ahead, "behind": behind, "dirtyCount": len(dirty.stdout.splitlines()),
+                "remoteBranchExists": remote_exists
+            })
         return jsonify({"status": action, "path": path, "output": (result.stdout or "").strip()})
     except subprocess.TimeoutExpired:
         return jsonify({"error": "Git operation timed out."}), 504

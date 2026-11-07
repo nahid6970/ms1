@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Show GitHub Push and Working Tree Status
+
+- Added a Check action for each GitHub-linked project. It fetches remote refs and reports local commits to push, remote commits to pull, and uncommitted changes.
+- The comparison handles branches without a matching remote branch by counting local commits for an initial push.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Add GitHub Projects Manager
 
 - Added a GitHub toolbar button in the subprocess monitor that opens a list of saved GitHub-linked workspaces with Pull, Fetch, and Clone actions on each row.

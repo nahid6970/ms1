@@ -9115,6 +9115,8 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('theme-modal').classList.remove('show');
         }
 
+        const githubProjectStatusByName = new Map();
+
         function openGitHubProjectsModal() {
             renderGitHubProjectsModal();
             document.getElementById('github-projects-modal').classList.add('show');
@@ -9132,13 +9134,15 @@ kiro-cli whoami --format json</code></pre>
                 list.innerHTML = '<div style="padding:30px 12px;text-align:center;color:var(--text-muted);font-size:.82rem;">No workspaces have a GitHub remote saved. Add one in Customize Workspace.</div>';
                 return;
             }
-            list.innerHTML = linked.map((project, index) => {
+            list.innerHTML = linked.map(project => {
                 const exists = !!project.pathExists;
                 const remote = String(project.gitRemote || '');
                 const safeRemote = /^https:\/\//i.test(remote) ? `<a href="${escapeHtml(remote)}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa;text-decoration:none;">${escapeHtml(remote)}</a>` : escapeHtml(remote);
+                const status = githubProjectStatusByName.get(project.name);
                 return `<div style="display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-card);">
-                    <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${safeRemote}</div><div style="font-size:.64rem;color:${exists ? '#94a3b8' : '#fbbf24'};margin-top:3px;">${exists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}</div></div>
+                    <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${safeRemote}</div><div style="font-size:.64rem;color:${exists ? '#94a3b8' : '#fbbf24'};margin-top:3px;">${exists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}</div>${status ? `<div style="font-size:.68rem;color:${status.hasChanges ? '#fbbf24' : '#34d399'};margin-top:5px;">${escapeHtml(status.text)}</div>` : ''}</div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
+                        <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="status" ${exists ? '' : 'disabled'} title="Fetch and check local/remote changes" style="${githubProjectActionStyle('#c4b5fd')}">Check</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="pull" ${exists ? '' : 'disabled'} title="Pull using fast-forward only" style="${githubProjectActionStyle('#34d399')}">Pull</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="fetch" ${exists ? '' : 'disabled'} title="Fetch remote refs without changing files" style="${githubProjectActionStyle('#60a5fa')}">Fetch</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="clone" ${exists ? 'disabled' : ''} title="Clone into the configured workspace path" style="${githubProjectActionStyle('#fbbf24')}">Clone</button>
@@ -9160,7 +9164,7 @@ kiro-cli whoami --format json</code></pre>
             const row = button.closest('div[style*="border:1px solid"]');
             const buttons = row ? row.querySelectorAll('button') : [button];
             buttons.forEach(item => { item.disabled = true; });
-            button.textContent = action === 'clone' ? 'Cloning…' : action === 'fetch' ? 'Fetching…' : 'Pulling…';
+            button.textContent = action === 'clone' ? 'Cloning…' : action === 'fetch' || action === 'status' ? 'Fetching…' : 'Pulling…';
             message.style.display = 'block';
             message.style.color = 'var(--text-secondary)';
             message.textContent = `${action[0].toUpperCase()}${action.slice(1)} ${name}…`;
@@ -9172,10 +9176,25 @@ kiro-cli whoami --format json</code></pre>
                 if (!response.ok) throw new Error(data.error || 'Git operation failed.');
                 projects = await (await fetch('/api/projects')).json();
                 handleSearch();
+                if (action === 'status') {
+                    const changes = [];
+                    if (!data.remoteBranchExists) changes.push(`${data.ahead} local commit${data.ahead === 1 ? '' : 's'}; remote branch not created`);
+                    else {
+                        if (data.ahead) changes.push(`${data.ahead} commit${data.ahead === 1 ? '' : 's'} to push`);
+                        if (data.behind) changes.push(`${data.behind} commit${data.behind === 1 ? '' : 's'} to pull`);
+                    }
+                    if (data.dirtyCount) changes.push(`${data.dirtyCount} uncommitted change${data.dirtyCount === 1 ? '' : 's'}`);
+                    githubProjectStatusByName.set(name, {
+                        text: changes.length ? changes.join(' · ') : `${data.branch}: up to date, working tree clean`,
+                        hasChanges: changes.length > 0
+                    });
+                } else {
+                    githubProjectStatusByName.delete(name);
+                }
                 renderGitHubProjectsModal();
                 message.style.display = 'block';
                 message.style.color = '#34d399';
-                message.textContent = `${action[0].toUpperCase()}${action.slice(1)} completed for ${name}.`;
+                message.textContent = action === 'status' ? `Checked ${name}; remote refs are up to date.` : `${action[0].toUpperCase()}${action.slice(1)} completed for ${name}.`;
             } catch (err) {
                 message.style.display = 'block';
                 message.style.color = '#f87171';

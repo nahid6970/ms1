@@ -37,7 +37,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 - **Pin/unpin**: Keep important workspaces at the top
 - **Drag-to-reorder**: Custom ordering persists in `projects.json`
 - **Workspace filters**: A synchronized connected three-icon control filters the sidebar and workspace dropdown; the All layers, GitHub, and Rclone SVG icons are directly clickable. GitHub uses saved `gitRemote` URLs containing `github.com`, and Rclone uses a saved destination.
-- **GitHub Projects manager**: The second child of `#subprocess-monitor` contains a GitHub button. Its modal lists workspaces with saved GitHub remotes and provides Pull (`git pull --ff-only origin`), Fetch (`git fetch --prune origin`), and Clone (only when the configured folder is missing). `GET /api/projects` includes `pathExists`; the existing `/api/project/<project>/git/sync-remote` route accepts an `action` value.
+- **GitHub Projects manager**: The second child of `#subprocess-monitor` contains a GitHub button. Its modal lists workspaces with saved GitHub remotes and provides Check, Pull (`git pull --ff-only origin`), Fetch (`git fetch --prune origin`), and Clone (only when the configured folder is missing). Check fetches and compares `origin/<branch>` with `HEAD`, then counts uncommitted paths. `GET /api/projects` includes `pathExists`; the existing `/api/project/<project>/git/sync-remote` route accepts an `action` value.
 
 ### 1.1 Rclone Workspace Sync
 - Frontend builds `rclone check` and directional `rclone sync` commands for the active workspace and starts them in a new terminal tab.
