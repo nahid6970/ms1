@@ -159,7 +159,8 @@
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false
+    "script_enabled": false,
+    "added_at": 1794043987.2751982
   },
   {
     "Command": "",
@@ -1030,18 +1031,17 @@
     "added_at": 1792934220.167357
   },
   {
-    "name": "myRSS",
+    "name": "RSS",
     "type": "App",
     "paths": [
       "pythonw"
     ],
-    "Command": "C:\\@delta\\myRSS\\main.py",
-    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\@delta\\myRSS\\main.py\" -WindowStyle Hidden",
+    "Command": "C:\\Users\\nahid\\delta\\rss\\main.py",
+    "ps1_command": "Start-Process -FilePath \"pythonw\" -ArgumentList \"C:\\Users\\nahid\\delta\\rss\\main.py\" -WindowStyle Hidden",
     "ExecutableType": "ahk_v2",
     "run_as_admin": false,
     "hide_terminal": false,
-    "script_enabled": false,
-    "added_at": 1793368865.056352
+    "script_enabled": false
   },
   {
     "name": "T3Code",
