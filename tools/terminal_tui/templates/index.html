@@ -13398,6 +13398,22 @@ kiro-cli whoami --format json</code></pre>
                     return;
                 }
 
+                if (data.remote_url) {
+                    const initializedProject = projects.find(project => project.name === activeProject);
+                    if (initializedProject) {
+                        initializedProject.gitRemote = data.remote_url;
+                        if (contextProject && contextProject.name === activeProject) contextProject.gitRemote = data.remote_url;
+                        const remoteField = document.getElementById('theme-proj-git-remote');
+                        if (remoteField) remoteField.value = data.remote_url;
+                        const gitSyncButton = document.getElementById('workspace-git-sync-btn');
+                        if (gitSyncButton) {
+                            gitSyncButton.disabled = false;
+                            gitSyncButton.title = 'Fetch remote changes, or clone if the workspace folder is missing';
+                        }
+                        handleSearch();
+                    }
+                }
+
                 // Show step results
                 const steps = data.steps || [];
                 const pushFailed = data.push_failed;

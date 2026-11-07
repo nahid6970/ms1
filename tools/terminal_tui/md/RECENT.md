@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Save GitHub Remote on Git Initialization
+
+- Persist the generated GitHub URL in the workspace configuration when Git init adds `origin`.
+- Refresh the project list and update `#theme-proj-git-remote` plus its remote sync button after initialization.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Show Restart and Startup Progress
 
 - Added a full-screen progress view for stopping sessions, waiting for the server restart, and loading workspace data.

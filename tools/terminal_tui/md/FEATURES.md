@@ -92,6 +92,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Implementation:** `templates/index.html` stores the selected filter in `localStorage` and applies it to both project renderers. `app.py` includes a `hasRcloneDestination` flag in the projects response; successful Rclone destination saves update the current client-side project data immediately.
 
 **Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
+**Git initialization remote:** When Git initialization is given a GitHub username and repository name, the generated URL is saved as the workspace's `gitRemote`, so Customize Workspace and the GitHub Projects manager reflect it immediately.
 
 ### GitHub Projects Manager
 **Status:** ✅ Complete

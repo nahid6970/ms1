@@ -4841,7 +4841,15 @@ def api_git_init(project):
             remote_url = f"https://github.com/{github_username}/{repo_name}.git"
             ok, out = run(["git", "remote", "add", "origin", remote_url])
             if not ok and "already exists" in out:
-                run(["git", "remote", "set-url", "origin", remote_url])
+                ok, out = run(["git", "remote", "set-url", "origin", remote_url])
+            if not ok:
+                return jsonify({"error": f"Could not configure GitHub remote: {out}"}), 500
+
+            project_configs = load_projects_config()
+            configured_project = next((p for p in project_configs if p["name"].lower() == project.lower()), None)
+            if configured_project:
+                configured_project["gitRemote"] = remote_url
+                save_projects_config(project_configs)
             steps.append(f"✔ remote origin → {remote_url}")
 
             ok, out = run(["git", "push", "-u", "origin", branch])
