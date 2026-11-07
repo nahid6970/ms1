@@ -1,8 +1,15 @@
 {
     "folders": [
-        "C:\\@delta\\ms1\\md",
-        "C:/@delta/output/code_merger"
+        "C:\\@delta\\output\\code_merger",
+        "C:/Users/nahid/delta/md"
     ],
     "win_w": 600,
-    "win_h": 400
+    "win_h": 400,
+    "win_x": 660,
+    "win_y": 10,
+    "row_spacing": 0,
+    "row_height": 24,
+    "file_types": [],
+    "font_family": "Consolas",
+    "font_size": 9
 }
