@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-07] - Show Restart and Startup Progress
+
+- Added a full-screen progress view for stopping sessions, waiting for the server restart, and loading workspace data.
+- The restart flow now waits for the server to go offline and for `/api/projects` to respond before reloading; it no longer reloads into a connection-refused page on a short timeout.
+- Keep the progress view across reload and show a ready state after the dashboard startup sequence completes. Add an error and retry action if startup takes longer than 60 seconds.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-07] - Make Restart Button Direct
 
 - Changed `#restart-action-toggle` to immediately run the existing app restart/session reset flow.

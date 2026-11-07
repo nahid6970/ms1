@@ -53,8 +53,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Global Restart and Page Refresh Controls
 **Status:** ✅ Complete
-**Description:** Clicking the global restart button directly resets terminal sessions and restarts the app. F5 refreshes only the current page.
-**Implementation:** `templates/index.html` — `#restart-action-toggle` calls `resetAllSessions()`; the global F5 key handler calls `refreshPage()`.
+**Description:** Clicking the global restart button directly resets terminal sessions and restarts the app, showing startup progress until the backend responds and the workspace dashboard finishes loading. F5 refreshes only the current page.
+**Implementation:** `templates/index.html` — `#restart-action-toggle` calls `resetAllSessions()`; restart polling waits for `/api/projects` after the server goes offline, then persists a startup overlay through reload until `window.onload` completes. The global F5 key handler calls `refreshPage()`.
 
 ## Terminal Clipboard and Refresh Recovery
 **Status:** ✅ Complete

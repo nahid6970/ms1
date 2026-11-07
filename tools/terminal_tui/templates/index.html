@@ -9,6 +9,12 @@
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon-192.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <script>
+        try {
+            if (sessionStorage.getItem('terminal-tui-restart-progress') === '1') {
+                document.documentElement.classList.add('show-restart-progress');
+            }
+        } catch (_) {}
+
         // Favicon Loading Logic
         const FaviconManager = {
             originalHref: "{{ url_for('static', filename='app-icon.svg') }}",
@@ -2138,9 +2144,46 @@
         #codex-usage-account-menu .codex-usage-menu-separator { height:1px; margin:5px 3px; background:var(--border-color); }
         .agent-session-token-estimate svg { color: var(--token-accent) !important; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #restart-progress-overlay {
+            position: fixed; inset: 0; z-index: 10000; display: none; align-items: center; justify-content: center;
+            padding: 24px; background: rgba(5, 8, 14, .94); backdrop-filter: blur(12px); color: #e2e8f0;
+            font-family: 'Outfit', system-ui, sans-serif;
+        }
+        html.show-restart-progress #restart-progress-overlay { display: flex !important; }
+        #restart-progress-card {
+            width: min(440px, 100%); padding: 30px; border: 1px solid rgba(96,165,250,.22); border-radius: 18px;
+            background: linear-gradient(145deg, rgba(18,27,42,.98), rgba(10,15,24,.98));
+            box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 45px rgba(37,99,235,.08);
+        }
+        #restart-progress-mark {
+            width: 46px; height: 46px; margin-bottom: 20px; display: grid; place-items: center;
+            border: 1px solid rgba(96,165,250,.35); border-radius: 14px; color: #60a5fa;
+            background: rgba(37,99,235,.11);
+        }
+        #restart-progress-mark svg { animation: spin 1.8s linear infinite; }
+        #restart-progress-title { margin: 0; color: #f8fafc; font-size: 1.18rem; font-weight: 650; }
+        #restart-progress-detail { min-height: 22px; margin: 7px 0 22px; color: #94a3b8; font-size: .84rem; line-height: 1.5; }
+        #restart-progress-track { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(148,163,184,.16); }
+        #restart-progress-fill { width: 4%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#2563eb,#38bdf8); transition: width .45s ease; }
+        #restart-progress-state { display: flex; align-items: center; gap: 8px; margin-top: 13px; color: #64748b; font-size: .72rem; }
+        #restart-progress-dot { width: 7px; height: 7px; border-radius: 50%; background: #60a5fa; box-shadow: 0 0 10px rgba(96,165,250,.65); }
+        #restart-progress-error { display: none; margin-top: 18px; padding: 10px 12px; border: 1px solid rgba(248,113,113,.25); border-radius: 8px; color: #fca5a5; background: rgba(127,29,29,.16); font-size: .78rem; line-height: 1.5; }
+        #restart-progress-retry { display: none; margin-top: 14px; padding: 8px 13px; border: 1px solid rgba(96,165,250,.4); border-radius: 7px; color: #bfdbfe; background: rgba(37,99,235,.16); font-size: .78rem; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
+
+    <div id="restart-progress-overlay" role="status" aria-live="polite" style="display:none;">
+        <div id="restart-progress-card">
+            <div id="restart-progress-mark" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8"/></svg></div>
+            <h2 id="restart-progress-title">Starting Terminal TUI</h2>
+            <p id="restart-progress-detail">The server is online. Loading workspace data and restoring the dashboard…</p>
+            <div id="restart-progress-track" role="progressbar" aria-label="App startup progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"><div id="restart-progress-fill" style="width:88%;"></div></div>
+            <div id="restart-progress-state"><span id="restart-progress-dot"></span><span id="restart-progress-state-text">Loading dashboard</span></div>
+            <div id="restart-progress-error"></div>
+            <button id="restart-progress-retry" type="button" onclick="resetAllSessions()">Retry restart</button>
+        </div>
+    </div>
 
     <!-- Left Sidebar: Workspaces -->
     <div class="sidebar">
@@ -9562,21 +9605,89 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        let appRestartInProgress = false;
+
+        function setRestartProgress(percent, title, detail, state) {
+            document.documentElement.classList.add('show-restart-progress');
+            const titleEl = document.getElementById('restart-progress-title');
+            const detailEl = document.getElementById('restart-progress-detail');
+            const stateEl = document.getElementById('restart-progress-state-text');
+            const fillEl = document.getElementById('restart-progress-fill');
+            const trackEl = document.getElementById('restart-progress-track');
+            if (titleEl) titleEl.textContent = title;
+            if (detailEl) detailEl.textContent = detail;
+            if (stateEl) stateEl.textContent = state;
+            if (fillEl) fillEl.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+            if (trackEl) trackEl.setAttribute('aria-valuenow', String(percent));
+        }
+
+        function showRestartFailure(message) {
+            appRestartInProgress = false;
+            document.getElementById('restart-progress-title').textContent = 'Restart is taking longer than expected';
+            document.getElementById('restart-progress-detail').textContent = 'The dashboard could not confirm that the app finished starting.';
+            document.getElementById('restart-progress-state-text').textContent = 'Waiting stopped';
+            document.getElementById('restart-progress-dot').style.background = '#f87171';
+            document.getElementById('restart-progress-fill').style.background = '#ef4444';
+            const mark = document.getElementById('restart-progress-mark');
+            mark.style.color = '#f87171';
+            mark.innerHTML = '<span style="font-size:1.35rem;font-weight:700;">!</span>';
+            const error = document.getElementById('restart-progress-error');
+            error.textContent = message;
+            error.style.display = 'block';
+            document.getElementById('restart-progress-retry').style.display = 'inline-block';
+        }
+
         async function waitForServerAndReload() {
-            for (let attempt = 0; attempt < 30; attempt++) {
+            const startedAt = Date.now();
+            let serverWentOffline = false;
+            setRestartProgress(42, 'Restarting Terminal TUI', 'Waiting for the current server process to stop…', 'Restart requested');
+            while (Date.now() - startedAt < 60000) {
                 await new Promise(resolve => setTimeout(resolve, 500));
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3000);
                 try {
-                    const response = await fetch('/', { cache: 'no-store' });
-                    if (response.ok) {
-                        window.location.reload();
-                        return;
+                    const response = await fetch('/api/projects?refresh=true', { cache: 'no-store', signal: controller.signal });
+                    if (!response.ok) {
+                        serverWentOffline = true;
+                    } else {
+                        const data = await response.json();
+                        if (Array.isArray(data) && (serverWentOffline || Date.now() - startedAt >= 2500)) {
+                            setRestartProgress(88, 'App is back online', 'The server is responding. Loading the workspace dashboard…', 'Server ready');
+                            try { sessionStorage.setItem('terminal-tui-restart-progress', '1'); } catch (_) {}
+                            await new Promise(resolve => setTimeout(resolve, 700));
+                            window.location.reload();
+                            return;
+                        }
                     }
                 } catch (err) {
-                    // Server is still restarting.
+                    serverWentOffline = true;
+                } finally {
+                    clearTimeout(timeout);
+                }
+                if (serverWentOffline) {
+                    setRestartProgress(64, 'Starting the app', 'The server stopped. Waiting for the workspace API to become ready…', 'Server starting');
+                } else {
+                    setRestartProgress(42, 'Restarting Terminal TUI', 'Waiting for the current server process to stop…', 'Restart requested');
                 }
             }
+            showRestartFailure('The server has not responded within 60 seconds. Check the app process, then choose Retry restart.');
+        }
 
-            window.location.reload();
+        function completeRestartProgress() {
+            let isRestartReload = false;
+            try { isRestartReload = sessionStorage.getItem('terminal-tui-restart-progress') === '1'; } catch (_) {}
+            if (!isRestartReload) return;
+            setRestartProgress(100, 'Terminal TUI is ready', 'The server and workspace dashboard have finished loading.', 'Startup complete');
+            document.getElementById('restart-progress-dot').style.background = '#34d399';
+            document.getElementById('restart-progress-fill').style.background = 'linear-gradient(90deg,#10b981,#34d399)';
+            const mark = document.getElementById('restart-progress-mark');
+            mark.style.color = '#34d399';
+            mark.innerHTML = '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>';
+            mark.querySelector('svg').style.animation = 'none';
+            setTimeout(() => {
+                document.documentElement.classList.remove('show-restart-progress');
+                try { sessionStorage.removeItem('terminal-tui-restart-progress'); } catch (_) {}
+            }, 1200);
         }
 
         function refreshPage() {
@@ -9585,30 +9696,36 @@ kiro-cli whoami --format json</code></pre>
 
         // Reset terminal sessions, then restart the Flask app so backend code changes load.
         async function resetAllSessions() {
+            if (appRestartInProgress) return;
+            appRestartInProgress = true;
+            document.getElementById('restart-progress-error').style.display = 'none';
+            document.getElementById('restart-progress-retry').style.display = 'none';
+            document.getElementById('restart-progress-dot').style.background = '#60a5fa';
+            document.getElementById('restart-progress-fill').style.background = 'linear-gradient(90deg,#2563eb,#38bdf8)';
+            const mark = document.getElementById('restart-progress-mark');
+            mark.style.color = '#60a5fa';
+            mark.innerHTML = '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8"/></svg>';
+            setRestartProgress(8, 'Restarting Terminal TUI', 'Stopping workspace sessions and restarting the app…', 'Stopping workspace sessions');
             try {
                 const response = await fetch('/api/sessions/reset', { method: 'POST' });
-                if (response.ok) {
-                    const result = await response.json();
-                    projects = result.projects || result;
-                    
-                    clearSavedTerminalTabs();
-                    activeProject = null;
-                    clearTerminalPanes();
-                    saveTerminalLayoutState();
-                    document.title = "Workspaces";
-                    
-                    document.getElementById('terminal-wrapper').style.display = 'none';
-                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
-                    
-                    handleSearch();
-                    applySidebarWorkspacesVisibility();
-
-                    if (result.restarting) {
-                        waitForServerAndReload();
-                    }
-                }
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'The app did not accept the restart request.');
+                projects = result.projects || result;
+                clearSavedTerminalTabs();
+                activeProject = null;
+                clearTerminalPanes();
+                saveTerminalLayoutState();
+                document.title = 'Workspaces';
+                document.getElementById('terminal-wrapper').style.display = 'none';
+                document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                handleSearch();
+                applySidebarWorkspacesVisibility();
+                if (!result.restarting) throw new Error('The server did not confirm that it was restarting.');
+                setRestartProgress(28, 'Restarting Terminal TUI', 'Workspace sessions are stopped. Restarting the server process…', 'Restart requested');
+                await waitForServerAndReload();
             } catch (err) {
                 console.error("Error resetting all sessions:", err);
+                showRestartFailure(err.message || 'Could not send the restart request.');
             }
         }
 
@@ -21776,7 +21893,7 @@ Always wrap your **entire response** in a single markdown code block.`;
                 }
             }
 
-
+            completeRestartProgress();
         };
     </script>
 </body>
