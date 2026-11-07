@@ -1202,8 +1202,8 @@
       "gitRemote": "https://github.com/nahid6970/test.git"
     },
     {
-      "name": "myRSS",
-      "path": "C:\\@delta\\myRSS",
+      "name": "rss",
+      "path": "C:\\Users\\nahid\\delta\\rss",
       "category": "",
       "pinned": false,
       "theme": {
