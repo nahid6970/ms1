@@ -135,7 +135,10 @@
             "category": "Display",
             "description": "",
             "hotkey": "LAlt & c",
-            "name": "Center Apps Window"
+            "name": "Center Apps Window",
+            "run_as_admin": true,
+            "enabled": true,
+            "favourite": false
         },
         {
             "action": "Toggle_Screen_Blackout() {\n    static blackoutState := 0\n    static myGui := \"\"\n    \n    if (blackoutState = 0) {\n        blackoutState := 1\n        myGui := Gui()\n        myGui.Opt(\"+LastFound +AlwaysOnTop -Caption +ToolWindow\")\n        myGui.BackColor := \"Black\"\n        myGui.Show(\"w\" . A_ScreenWidth . \" h\" . A_ScreenHeight . \" x0 y0 NoActivate\")\n    } else {\n        blackoutState := 0\n        myGui.Destroy()\n        myGui := \"\"\n    }\n}",
