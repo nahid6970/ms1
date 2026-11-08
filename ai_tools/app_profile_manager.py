@@ -1566,6 +1566,7 @@ class AppProfileManager(QMainWindow):
     def init_ui(self):
         self.setWindowTitle("CYBERPUNK APP PROFILE MANAGER")
         self.setMinimumSize(1024, 680)
+        self.resize(1280, 800)
 
         central = QWidget()
         central.setObjectName("central")
