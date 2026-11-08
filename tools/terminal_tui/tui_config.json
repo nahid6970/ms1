@@ -802,27 +802,6 @@
       "category": "Convex Extension"
     },
     {
-      "name": "ImageChecker",
-      "path": "C:\\@delta\\ms1\\test_project\\my-first-extension\\convex_extensions_manager\\image_checker",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "category": "Convex Extension"
-    },
-    {
       "name": "AI Model List",
       "path": "C:\\@delta\\db\\ai_model_list",
       "category": "Flask",
@@ -1397,6 +1376,26 @@
       },
       "bookmarks": [],
       "gitRemote": "https://github.com/nahid6970/chrome-extension.git"
+    },
+    {
+      "name": "Image Checker",
+      "path": "C:\\Users\\nahid\\delta\\extension\\image_checker",
+      "category": "extension",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
     }
   ],
   "extension_icons": {
