@@ -9182,9 +9182,15 @@ kiro-cli whoami --format json</code></pre>
                 const remote = String(project.gitRemote || '');
                 const safeRemote = /^https:\/\//i.test(remote) ? `<a href="${escapeHtml(remote)}" target="_blank" rel="noopener noreferrer" style="color:#60a5fa;text-decoration:none;">${escapeHtml(remote)}</a>` : escapeHtml(remote);
                 const status = githubProjectStatusByName.get(project.name);
-                return `<div style="display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-card);">
+                const cardColors = status?.error
+                    ? 'border:1px solid rgba(248,113,113,.58);background:linear-gradient(135deg,rgba(127,29,29,.18),var(--bg-card));box-shadow:0 0 14px rgba(248,113,113,.07);'
+                    : status?.hasChanges
+                        ? 'border:1px solid rgba(251,191,36,.55);background:linear-gradient(135deg,rgba(120,83,12,.2),var(--bg-card));box-shadow:0 0 14px rgba(251,191,36,.06);'
+                        : 'border:1px solid var(--border-color);background:var(--bg-card);';
+                return `<div style="display:flex;align-items:center;gap:12px;padding:11px 12px;${cardColors}border-radius:9px;">
                     <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${safeRemote}</div><div style="font-size:.64rem;color:${exists ? '#94a3b8' : '#fbbf24'};margin-top:3px;">${exists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}${exists && empty ? ' · empty folder' : ''}</div>${status ? `<div style="font-size:.7rem;font-weight:500;color:${status.error ? '#f87171' : status.hasChanges ? '#94a3b8' : '#34d399'};margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span>${escapeHtml(status.filesText || status.text)}</span>${status.insertions ? `<span style="color:#22c55e;">+${status.insertions}</span>` : ''}${status.deletions ? `<span style="color:#ef4444;">-${status.deletions}</span>` : ''}${status.remoteText ? `<span style="color:${status.ahead ? '#fbbf24' : '#94a3b8'};">${escapeHtml(status.remoteText)}</span>` : ''}</div>` : ''}</div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
+                        <button type="button" class="github-project-select" data-project="${escapeHtml(project.name)}" title="Switch terminal to this project" style="${githubProjectActionStyle('#c4b5fd')}">Select</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="pull" ${exists ? '' : 'disabled'} title="Pull using fast-forward only" style="${githubProjectActionStyle('#34d399')}">Pull</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="fetch" ${exists ? '' : 'disabled'} title="Fetch remote refs without changing files" style="${githubProjectActionStyle('#60a5fa')}">Fetch</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="clone" ${exists && !empty ? 'disabled' : ''} title="Clone into the configured workspace path or its existing empty folder" style="${githubProjectActionStyle('#fbbf24')}">Clone</button>
@@ -9193,6 +9199,12 @@ kiro-cli whoami --format json</code></pre>
             }).join('');
             message.style.display = 'none';
             list.querySelectorAll('.github-project-action').forEach(button => button.addEventListener('click', () => runGitHubProjectAction(button)));
+            list.querySelectorAll('.github-project-select').forEach(button => button.addEventListener('click', () => selectGitHubProjectInTerminal(button.dataset.project)));
+        }
+
+        function selectGitHubProjectInTerminal(projectName) {
+            closeGitHubProjectsModal();
+            selectProject(projectName);
         }
 
         function githubProjectActionStyle(color) {

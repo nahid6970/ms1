@@ -96,7 +96,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ### GitHub Projects Manager
 **Status:** ✅ Complete
-**Description:** A button in the subprocess monitor opens a list of all workspaces with saved GitHub remotes. A Check all button in the window header checks every linked workspace and shows changed-file counts, additions/deletions, and commits to push or pull. Pull, Fetch, and Clone actions remain available on each row.
+**Description:** A button in the subprocess monitor opens a list of all workspaces with saved GitHub remotes. A Check all button in the window header checks every linked workspace and shows changed-file counts, additions/deletions, and commits to push or pull. Changed project cards are highlighted, and Select switches the terminal to that workspace. Pull, Fetch, and Clone actions remain available on each row.
 **Implementation:** `GET /api/projects` reports whether each configured folder exists and is empty. `POST /api/project/<project>/git/sync-remote` accepts `status`, `pull`, `fetch`, or `clone`; status fetches refs, compares the current branch with `origin/<branch>`, and counts changed files/lines scoped to the workspace folder. Pull uses fast-forward-only mode, fetch only updates remote refs, and clone works when the configured folder is missing or already exists and is empty.
 **Files Involved:** `app.py`, `templates/index.html`
 **Restore a folder to a past commit:** Each past commit has a second restore action beside Checkout. It restores the workspace subtree snapshot into the index and working tree, removes untracked files under that subtree, preserves ignored files, and leaves paths outside the workspace untouched. A confirmation explains the discarded changes before it runs.
