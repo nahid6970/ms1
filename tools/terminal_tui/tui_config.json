@@ -18,7 +18,19 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "rclone": {
+        "dest": "gu:/delta_main/",
+        "ignorelist": "C:/Users/nahid/delta/ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
     },
     {
       "name": "Default",
