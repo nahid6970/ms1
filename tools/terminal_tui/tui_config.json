@@ -9,6 +9,7 @@
         "background": "#000000",
         "foreground": "#d1d5db",
         "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
         "scrollbarColor": "#475569",
         "scrollbarIdleColor": "#2d3748"
       },
@@ -30,7 +31,9 @@
           "--dry-run": false
         },
         "transfers": "10"
-      }
+      },
+      "gitRemote": "",
+      "hideGitInit": true
     },
     {
       "name": "Default",

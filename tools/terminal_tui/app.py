@@ -725,6 +725,7 @@ def scan_projects():
             "bookmarks": bookmarks,
             "layout": layout,
             "gitRemote": p.get("gitRemote", ""),
+            "hideGitInit": bool(p.get("hideGitInit", False)),
             "pathExists": path_exists,
             "pathIsEmpty": os.path.isdir(project_path) and is_empty_directory(project_path),
             "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip())
@@ -1462,6 +1463,8 @@ def api_projects_customize():
         proj["cardTheme"] = data["cardTheme"]
     if "gitRemote" in data:
         proj["gitRemote"] = str(data["gitRemote"] or "").strip()
+    if "hideGitInit" in data:
+        proj["hideGitInit"] = bool(data["hideGitInit"])
         
     save_projects_config(projects)
     

@@ -3289,6 +3289,10 @@
                             <span>Fetch / Restore</span>
                         </button>
                     </div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px; margin-bottom: 0;">
+                        <input type="checkbox" id="theme-proj-hide-git-init" style="width:15px;height:15px;cursor:pointer;accent-color:var(--accent-color);margin:0;flex-shrink:0;">
+                        <label for="theme-proj-hide-git-init" style="font-size:0.8rem;font-weight:500;cursor:pointer;user-select:none;color:var(--text-primary);margin:0;">Hide "Init git" button for this workspace</label>
+                    </div>
                 </div>
 
                 <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; padding: 6px 10px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px;">
@@ -9103,6 +9107,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('theme-proj-path').value = contextProject.path;
             document.getElementById('theme-proj-category').value = contextProject.category || '';
             document.getElementById('theme-proj-git-remote').value = contextProject.gitRemote || '';
+            document.getElementById('theme-proj-hide-git-init').checked = !!contextProject.hideGitInit;
             const gitSyncButton = document.getElementById('workspace-git-sync-btn');
             gitSyncButton.disabled = !contextProject.gitRemote;
             gitSyncButton.title = contextProject.gitRemote ? 'Fetch remote changes, or clone if the workspace folder is missing' : 'Add and save a Git remote URL first';
@@ -9397,6 +9402,7 @@ kiro-cli whoami --format json</code></pre>
                         path: newPath,
                         category: newCategory,
                         gitRemote: document.getElementById('theme-proj-git-remote').value.trim(),
+                        hideGitInit: document.getElementById('theme-proj-hide-git-init').checked,
                         theme: theme,
                         cardTheme: cardTheme
                     })
@@ -10721,7 +10727,8 @@ kiro-cli whoami --format json</code></pre>
                         } else {
                             gitInfoEl.style.display = 'none';
                             if (gitDotMobile) gitDotMobile.style.display = 'none';
-                            if (gitInitBtn) gitInitBtn.style.display = 'flex';
+                            const activeProj = projects.find(p => p.name === activeProject);
+                            if (gitInitBtn) gitInitBtn.style.display = (activeProj && activeProj.hideGitInit) ? 'none' : 'flex';
                         }
                     }
                 }
