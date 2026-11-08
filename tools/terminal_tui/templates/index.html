@@ -2163,8 +2163,8 @@
             width: 46px; height: 46px; margin-bottom: 20px; display: grid; place-items: center;
             border: 1px solid rgba(96,165,250,.35); border-radius: 14px; color: #60a5fa;
             background: rgba(37,99,235,.11);
+            font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.5px;
         }
-        #restart-progress-mark svg { animation: spin 1.8s linear infinite; }
         #restart-progress-title { margin: 0; color: #f8fafc; font-size: 1.18rem; font-weight: 650; }
         #restart-progress-detail { min-height: 22px; margin: 7px 0 22px; color: #94a3b8; font-size: .84rem; line-height: 1.5; }
         #restart-progress-track { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(148,163,184,.16); }
@@ -2179,7 +2179,7 @@
 
     <div id="restart-progress-overlay" role="status" aria-live="polite" style="display:none;">
         <div id="restart-progress-card">
-            <div id="restart-progress-mark" aria-hidden="true"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8"/></svg></div>
+            <div id="restart-progress-mark" aria-hidden="true">88%</div>
             <h2 id="restart-progress-title">Starting Terminal TUI</h2>
             <p id="restart-progress-detail">The server is online. Loading workspace data and restoring the dashboard…</p>
             <div id="restart-progress-track" role="progressbar" aria-label="App startup progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88"><div id="restart-progress-fill" style="width:88%;"></div></div>
@@ -9656,11 +9656,14 @@ kiro-cli whoami --format json</code></pre>
             const stateEl = document.getElementById('restart-progress-state-text');
             const fillEl = document.getElementById('restart-progress-fill');
             const trackEl = document.getElementById('restart-progress-track');
+            const markEl = document.getElementById('restart-progress-mark');
             if (titleEl) titleEl.textContent = title;
             if (detailEl) detailEl.textContent = detail;
             if (stateEl) stateEl.textContent = state;
-            if (fillEl) fillEl.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+            const clampedPct = Math.max(0, Math.min(100, percent));
+            if (fillEl) fillEl.style.width = `${clampedPct}%`;
             if (trackEl) trackEl.setAttribute('aria-valuenow', String(percent));
+            if (markEl && !markEl.dataset.locked) markEl.textContent = `${clampedPct}%`;
         }
 
         function showRestartFailure(message) {
@@ -9672,7 +9675,10 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('restart-progress-fill').style.background = '#ef4444';
             const mark = document.getElementById('restart-progress-mark');
             mark.style.color = '#f87171';
-            mark.innerHTML = '<span style="font-size:1.35rem;font-weight:700;">!</span>';
+            mark.style.borderColor = 'rgba(248,113,113,.45)';
+            mark.style.background = 'rgba(239,68,68,.14)';
+            mark.dataset.locked = 'true';
+            mark.textContent = '!';
             const error = document.getElementById('restart-progress-error');
             error.textContent = message;
             error.style.display = 'block';
@@ -9724,8 +9730,10 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('restart-progress-fill').style.background = 'linear-gradient(90deg,#10b981,#34d399)';
             const mark = document.getElementById('restart-progress-mark');
             mark.style.color = '#34d399';
-            mark.innerHTML = '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>';
-            mark.querySelector('svg').style.animation = 'none';
+            mark.style.borderColor = 'rgba(52,211,153,.45)';
+            mark.style.background = 'rgba(16,185,129,.14)';
+            mark.dataset.locked = 'true';
+            mark.textContent = '✓';
             setTimeout(() => {
                 document.documentElement.classList.remove('show-restart-progress');
                 try { sessionStorage.removeItem('terminal-tui-restart-progress'); } catch (_) {}
@@ -9746,7 +9754,10 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('restart-progress-fill').style.background = 'linear-gradient(90deg,#2563eb,#38bdf8)';
             const mark = document.getElementById('restart-progress-mark');
             mark.style.color = '#60a5fa';
-            mark.innerHTML = '<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 1-2.34-5.66L20 8"/></svg>';
+            mark.style.borderColor = 'rgba(96,165,250,.35)';
+            mark.style.background = 'rgba(37,99,235,.11)';
+            mark.dataset.locked = '';
+            mark.textContent = '8%';
             setRestartProgress(8, 'Restarting Terminal TUI', 'Stopping workspace sessions and restarting the app…', 'Stopping workspace sessions');
             try {
                 const response = await fetch('/api/sessions/reset', { method: 'POST' });
