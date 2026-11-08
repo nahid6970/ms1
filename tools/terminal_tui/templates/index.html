@@ -915,7 +915,7 @@
             cursor: pointer;
             user-select: none;
             white-space: nowrap;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
             border: 1px solid transparent;
             color: var(--text-secondary);
             background: transparent;
@@ -930,7 +930,11 @@
             color: var(--accent-color);
             border-color: rgba(59,130,246,0.3);
             font-weight: 600;
+            box-shadow: 0 2px 10px rgba(37,99,235,.12);
+            transform: translateY(-1px);
         }
+        #terminal-parent { transition: opacity .18s ease, transform .18s ease, filter .18s ease; }
+        .terminal-container-wrapper.workspace-switching #terminal-parent { opacity: .55; transform: translateY(2px); filter: blur(.4px); }
         .ws-bar-chip .ws-bar-dot {
             width: 5px;
             height: 5px;
@@ -5011,6 +5015,7 @@ kiro-cli whoami --format json</code></pre>
         let activeProject = null;
         let wsfocusHistory = []; // tracks workspace focus order for fallback on close
         let workspaceBarClick = { projectName: null, clickedAt: 0, timer: null };
+        const workspaceSelectionPromises = new Map();
         const PROJECT_FILTERS = ['all', 'github', 'rclone'];
         let projectFilterMode = localStorage.getItem('project-filter-mode') || 'all';
         if (!PROJECT_FILTERS.includes(projectFilterMode)) projectFilterMode = 'all';
@@ -5604,39 +5609,46 @@ kiro-cli whoami --format json</code></pre>
 
         // Switch workspace project
         async function selectProject(projectName) {
-            if (activeProject === projectName) return;
-
-            // ── Missing folder guard ──────────────────────────────────────────
-            try {
-                const chk = await fetch(`/api/project/${encodeURIComponent(projectName)}/path-check`);
-                if (chk.ok) {
-                    const chkData = await chk.json();
-                    if (!chkData.exists) {
-                        const result = await showMissingPathDialog(projectName, chkData.path);
-                        if (result !== 'recreated') return; // user removed or cancelled
-                    }
-                }
-            } catch (_) { /* non-fatal — proceed and let the session start fail naturally */ }
-            // ─────────────────────────────────────────────────────────────────
-
+            if (activeProject === projectName) return true;
             const restoreGeneration = ++workspaceRestoreGeneration;
+            const terminalWrapper = document.getElementById('terminal-wrapper');
+            terminalWrapper?.classList.add('workspace-switching');
+
             try {
-                await restoreTerminalLayout(projectName, restoreGeneration);
-                if (restoreGeneration !== workspaceRestoreGeneration) return;
-                updateBookmarksDropdown();
-                
-                // Immediately refresh projects to show the green running dot on the card
-                fetchProjects();
-            } catch (err) {
-                if (restoreGeneration === workspaceRestoreGeneration) {
-                    activeProject = null;
-                    stopStatsMonitoring();
-                    clearTerminalPanes();
-                    document.getElementById('terminal-wrapper').style.display = 'none';
-                    document.getElementById('no-workspace-placeholder').style.display = 'flex';
-                    handleSearch();
+                try {
+                    const chk = await fetch(`/api/project/${encodeURIComponent(projectName)}/path-check`);
+                    if (chk.ok) {
+                        const chkData = await chk.json();
+                        if (!chkData.exists) {
+                            const result = await showMissingPathDialog(projectName, chkData.path);
+                            if (result !== 'recreated' || restoreGeneration !== workspaceRestoreGeneration) return false;
+                        }
+                    }
+                } catch (_) { /* non-fatal — proceed and let the session start fail naturally */ }
+                if (restoreGeneration !== workspaceRestoreGeneration) return false;
+                try {
+                    await restoreTerminalLayout(projectName, restoreGeneration);
+                    if (restoreGeneration !== workspaceRestoreGeneration) return false;
+                    updateBookmarksDropdown();
+                    // Immediately refresh projects to show the green running dot on the card
+                    fetchProjects();
+                    return true;
+                } catch (err) {
+                    if (restoreGeneration === workspaceRestoreGeneration) {
+                        activeProject = null;
+                        stopStatsMonitoring();
+                        clearTerminalPanes();
+                        document.getElementById('terminal-wrapper').style.display = 'none';
+                        document.getElementById('no-workspace-placeholder').style.display = 'flex';
+                        handleSearch();
+                    }
+                    console.error("Error setting up session:", err);
+                    return false;
                 }
-                console.error("Error setting up session:", err);
+            } finally {
+                if (restoreGeneration === workspaceRestoreGeneration) {
+                    terminalWrapper?.classList.remove('workspace-switching');
+                }
             }
         }
 
@@ -10462,34 +10474,46 @@ kiro-cli whoami --format json</code></pre>
                     : (isActive ? 'var(--accent-color)' : '#475569');
                 chip.innerHTML = `<span class="ws-bar-dot" style="background:${dotColor};"></span>${proj.name}`;
 
-                // Keep the first click from switching workspaces until the
-                // double-click window passes. Switching rebuilds this bar and
-                // can otherwise remove the chip before a native dblclick fires.
+                // Switch on the first click; use shared click state to detect
+                // a second click even if switching rebuilds the bar.
                 chip.onclick = (e) => {
                     e.stopPropagation();
                     const now = Date.now();
                     if (workspaceBarClick.projectName === proj.name && now - workspaceBarClick.clickedAt <= 500) {
                         clearTimeout(workspaceBarClick.timer);
                         workspaceBarClick = { projectName: null, clickedAt: 0, timer: null };
-                        stopProjectSession(proj.name, { silent: true });
+                        const pendingSelection = workspaceSelectionPromises.get(proj.name);
+                        if (pendingSelection) {
+                            pendingSelection.then(selected => {
+                                if (selected) stopProjectSession(proj.name, { silent: true });
+                            });
+                        } else {
+                            stopProjectSession(proj.name, { silent: true });
+                        }
                         return;
                     }
 
                     if (workspaceBarClick.timer) {
                         clearTimeout(workspaceBarClick.timer);
-                        const previousProject = workspaceBarClick.projectName;
-                        if (previousProject && previousProject !== proj.name) {
-                            selectProject(previousProject);
-                        }
                     }
 
                     const clickState = { projectName: proj.name, clickedAt: now, timer: null };
                     clickState.timer = setTimeout(() => {
                         if (workspaceBarClick !== clickState) return;
                         workspaceBarClick = { projectName: null, clickedAt: 0, timer: null };
-                        if (activeProject !== proj.name) selectProject(proj.name);
                     }, 550);
                     workspaceBarClick = clickState;
+                    if (activeProject !== proj.name) {
+                        const selection = selectProject(proj.name);
+                        if (selection && typeof selection.then === 'function') {
+                            workspaceSelectionPromises.set(proj.name, selection);
+                            selection.then(() => {
+                                if (workspaceSelectionPromises.get(proj.name) === selection) workspaceSelectionPromises.delete(proj.name);
+                            }, () => {
+                                if (workspaceSelectionPromises.get(proj.name) === selection) workspaceSelectionPromises.delete(proj.name);
+                            });
+                        }
+                    }
                 };
                 bar.appendChild(chip);
             });

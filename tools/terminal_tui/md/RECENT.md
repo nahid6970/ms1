@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-08] - Smooth Workspace Bar Switching
+
+- Start workspace switching on the first chip click instead of waiting for the double-click timeout.
+- Fade the terminal panes during workspace restoration and preserve double-click-to-stop behavior, including while a switch is still loading.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-08] - Highlight and Select GitHub Projects
 
 - Highlight GitHub project cards with local or remote changes after Check all, and show failed checks in red.

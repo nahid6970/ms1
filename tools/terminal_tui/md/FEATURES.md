@@ -106,7 +106,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Drag-to-reorder — custom ordering persisted
 - Custom PowerShell profiles with project-specific prompt, aliases, history
 - Duplicate the active workspace into the next available `-2`, `-3`, … sibling folder, copying workspace settings and files while omitting Git metadata and common generated folders
-- **Workspace bar** (top of terminal area) shows running workspace chips for quick switching — auto-hides when only one workspace is running, reappears as soon as a second one opens
+- **Workspace bar** (top of terminal area) shows running workspace chips for quick switching — single-click switches immediately with a brief terminal fade, while double-click still stops the selected workspace. It auto-hides when only one workspace is running and reappears as soon as a second one opens.
 
 ---
 
