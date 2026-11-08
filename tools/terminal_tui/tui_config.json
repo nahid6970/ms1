@@ -884,7 +884,7 @@
     },
     {
       "name": "Script Manager",
-      "path": "C:\\@delta\\ms1\\tools\\Script_Manager",
+      "path": "C:\\Users\\nahid\\delta\\Script Manager",
       "category": "Tool",
       "pinned": false,
       "theme": {
@@ -901,7 +901,8 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": []
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/script-manager.git"
     },
     {
       "name": "Rclone Status",

@@ -215,7 +215,7 @@
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\tools\\Script_Manager\\script_manager_gui_qt.py"
+                    "cmd": "C:\\Users\\nahid\\delta\\Script Manager\\script_manager_gui_qt.py"
                 },
                 "Control-Button-1": {
                     "type": "subprocess",
