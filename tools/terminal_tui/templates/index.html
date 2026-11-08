@@ -2155,7 +2155,7 @@
         }
         html.show-restart-progress #restart-progress-overlay { display: flex !important; }
         #restart-progress-card {
-            width: min(440px, 100%); padding: 30px; border: 1px solid rgba(96,165,250,.22); border-radius: 18px;
+            width: 420px; max-width: calc(100vw - 48px); padding: 30px; border: 1px solid rgba(96,165,250,.22); border-radius: 18px;
             background: linear-gradient(145deg, rgba(18,27,42,.98), rgba(10,15,24,.98));
             box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 45px rgba(37,99,235,.08);
         }
@@ -2166,7 +2166,7 @@
             font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.5px;
         }
         #restart-progress-title { margin: 0; color: #f8fafc; font-size: 1.18rem; font-weight: 650; }
-        #restart-progress-detail { min-height: 22px; margin: 7px 0 22px; color: #94a3b8; font-size: .84rem; line-height: 1.5; }
+        #restart-progress-detail { height: 42px; overflow: hidden; margin: 7px 0 22px; color: #94a3b8; font-size: .84rem; line-height: 1.5; }
         #restart-progress-track { height: 6px; overflow: hidden; border-radius: 99px; background: rgba(148,163,184,.16); }
         #restart-progress-fill { width: 4%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#2563eb,#38bdf8); transition: width .45s ease; }
         #restart-progress-state { display: flex; align-items: center; gap: 8px; margin-top: 13px; color: #64748b; font-size: .72rem; }
