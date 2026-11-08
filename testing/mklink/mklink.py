@@ -29,6 +29,9 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QH
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QFont, QIcon, QColor, QCursor
 
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+APP_ICON_FILE = os.path.join(APP_DIR, "icon.svg")
+
 # ==========================================
 # CYBERPUNK THEME PALETTE & STYLESHEET
 # ==========================================
@@ -998,6 +1001,7 @@ class OperationStatusDialog(QDialog):
 class SymlinkManager(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon(APP_ICON_FILE))
         self.setWindowTitle("Cyberpunk Symlink Manager")
         self.resize(1300, 600)
         
@@ -1899,6 +1903,7 @@ class SymlinkManager(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(APP_ICON_FILE))
     app.setStyleSheet(STYLESHEET)
     window = SymlinkManager()
     window.show()
