@@ -2,10 +2,10 @@
 
 **Purpose:** Keep a record of job listings already reviewed so a later check can identify genuinely new vacancies, including new posts from companies seen before.
 
-**Last updated:** 5 November 2026  
+**Last updated:** 8 November 2026  
 **Tracked source:** [BD Govt Job — Bank Jobs](https://bdgovtjob.net/category/bank-jobs/)
 
-**Baseline checkpoint:** Scanned on **5 Nov 2026** through page 1 entries dated 1–4 Nov and page 2, which begins with 23 Oct 2026 (older than the prior 28 Oct overlap). Latest listings and distinct posts were compared against existing records; see the 5 Nov log below.
+**Baseline checkpoint:** Rechecked on **8 Nov 2026**. Page 1 still shows the same newest bank listings published 1–4 Nov; page 2 begins with 31 Oct and reaches the recorded 28 Oct Bank Asia overlap. No new circulars since the 5 Nov scan. EBL Cards Sales deadline passed 7 Nov; the Nagad and Sonali listings show 8 Nov deadlines.
 
 ## Instructions for future checks
 
@@ -41,7 +41,7 @@ Add new records at the top of this table after each requested scan. Include one 
 
 | First seen | Source | Employer | Exact post / circular ID | Notice date | Deadline | Eligibility result | Status / changes |
 |---|---|---|---|---|---|---|---|
-| 2026-11-05 | [BD Govt Job](https://bdgovtjob.net/eastern-bank-limited-job-circular/) | Eastern Bank PLC | Trainee Officer, Cards Sales | 2 Nov 2026 (page updated 4 Nov) | 7 Nov 2026 | ⚠️ Any bachelor’s degree; fresh graduates encouraged. Profile meets degree/experience baseline; confirm interest/fit for target-based card sales and customer outreach. | New post from previously seen employer; Dhaka and major commercial cities |
+| 2026-11-05 | [BD Govt Job](https://bdgovtjob.net/eastern-bank-limited-job-circular/) | Eastern Bank PLC | Trainee Officer, Cards Sales | 2 Nov 2026 (page updated 4 Nov) | 7 Nov 2026 | ⚠️ Any bachelor’s degree; fresh graduates encouraged. Profile meets degree/experience baseline; confirm interest/fit for target-based card sales and customer outreach. | New post from previously seen employer; Dhaka and major commercial cities; deadline passed 7 Nov |
 | 2026-11-05 | [BD Govt Job](https://bdgovtjob.net/mercantile-bank-limited-job-circular/) | Mercantile Bank PLC | Four posts: Head of General Services; Head of Internal Audit; Faculty Member, MB Training Institute; Head of Financial Planning, Analysis & Business Finance | 4 Nov 2026 | 12 Nov 2026 | ❌ Requires 10–15 years’ relevant experience; HoIA also requires FCA/FCMA/CIA/CISA. | New; none match fresher profile |
 | 2026-11-05 | [BD Govt Job](https://bdgovtjob.net/ncc-bank-job-circular/) | NCC Bank PLC | New circular: Credit Administration Division Transaction Officer (JO–SO); ICT AVP–VP; Junior Software Developer (contract, 3 years); plus other specialist posts | 4 Nov 2026 | 10 or 15 Nov 2026 | ❌ Finance Transaction Officer requires 2 years’ commercial-bank CAD experience; other posts require senior ICT or software qualifications/experience. | New post from previously seen employer; Dhaka HQ |
 | 2026-11-05 | [BD Govt Job](https://bdgovtjob.net/bengal-commercial-bank-limited-job-circular/) | Bengal Commercial Bank PLC | Customer Services Officer, Branch/Sub-Branch (JO+); Relationship Manager, Branch Retail & SME Banking (JO–EO) | 4 Nov 2026 | 15 Nov 2026 | ❌ Both require relevant commercial-bank experience (3 years customer service; 2 years retail/SME banking). | New posts from previously seen employer; nationwide/branch posting |
