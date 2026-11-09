@@ -1628,6 +1628,7 @@ _ANTIGRAVITY_ACP_AUTH_THREAD = None
 _AI_RESET_WARMUP_LOCK = threading.Lock()
 _AI_RESET_WARMUP_MANUAL_LOCK = threading.Lock()
 _AI_RESET_WARMUP_MANUAL_RUNNING = set()
+_AI_RESET_WARMUP_MANUAL_STATUS = {}
 _AI_RESET_WARMUP_STOP = threading.Event()
 _AI_RESET_WARMUP_THREAD = None
 _AI_RESET_WARMUP_INTERVAL_SECONDS = 60
@@ -2036,9 +2037,14 @@ def api_ai_usage_reset_warmup():
         set_config_val('ai_usage_reset_warmup_enabled', enabled)
         if enabled:
             threading.Thread(target=_ai_reset_warmup_manual_poll, name='ai-reset-warmup-refresh', daemon=True).start()
+    state = get_config_val('ai_usage_reset_warmup_state', dict)
+    state = state if isinstance(state, dict) else {}
+    visible_state = {**state, 'statuses': {**(state.get('statuses') or {})}}
+    with _AI_RESET_WARMUP_MANUAL_LOCK:
+        visible_state['statuses'].update(_AI_RESET_WARMUP_MANUAL_STATUS)
     return jsonify({
         'enabled': _ai_reset_warmup_enabled(),
-        'state': get_config_val('ai_usage_reset_warmup_state', dict),
+        'state': visible_state,
         'accounts': [{'provider': item['provider'], 'id': item['id'], 'name': item['name']}
                      for item in _ai_reset_warmup_accounts()],
     })
@@ -2046,48 +2052,23 @@ def api_ai_usage_reset_warmup():
 
 def _ai_reset_warmup_manual_worker(account, families):
     key = f"{account['provider']}:{account['id']}"
-    state = get_config_val('ai_usage_reset_warmup_state', dict)
-    state = state if isinstance(state, dict) else {}
-    statuses = state.setdefault('statuses', {})
     try:
         with _AI_RESET_WARMUP_LOCK:
             warmed = _ai_reset_warmup_run(account, families)
             completed_at = time.time()
-            # Record the manual action against the matching long windows so auto mode
-            # does not immediately repeat the same prompt after a manual warm-up.
-            try:
-                usage = _ai_reset_warmup_read_usage(account)
-                snapshots = state.setdefault('snapshots', {})
-                account_windows = snapshots.setdefault(key, {})
-                for window in usage.get('windows') or []:
-                    if not _ai_reset_window_is_long(window):
-                        continue
-                    identity = f"{window.get('id') or ''} {window.get('label') or ''}".casefold()
-                    if account['provider'] == 'antigravity':
-                        matches_family = any(family in identity for family in families)
-                        if 'claude' in families and str(window.get('id') or '').casefold().startswith('3p-'):
-                            matches_family = True
-                        if not matches_family:
-                            continue
-                    window_id = str(window.get('id') or window.get('label') or 'long-window')
-                    previous = account_windows.get(window_id) or {}
-                    account_windows[window_id] = {**(previous if isinstance(previous, dict) else {}),
-                                                  'lastWarmedAt': completed_at, 'lastAttemptAt': completed_at}
-            except Exception:
-                pass
-            statuses[key] = {
-                'accountName': account['name'], 'provider': account['provider'],
-                'state': 'completed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
-                'modelsWarmed': warmed, 'completedAt': int(completed_at), 'error': '',
-            }
-            set_config_val('ai_usage_reset_warmup_state', state)
+            with _AI_RESET_WARMUP_MANUAL_LOCK:
+                _AI_RESET_WARMUP_MANUAL_STATUS[key] = {
+                    'accountName': account['name'], 'provider': account['provider'],
+                    'state': 'completed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
+                    'modelsWarmed': warmed, 'completedAt': int(completed_at), 'error': '',
+                }
     except Exception as exc:
-        statuses[key] = {
-            'accountName': account['name'], 'provider': account['provider'],
-            'state': 'failed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
-            'completedAt': int(time.time()), 'error': str(exc)[:400],
-        }
-        set_config_val('ai_usage_reset_warmup_state', state)
+        with _AI_RESET_WARMUP_MANUAL_LOCK:
+            _AI_RESET_WARMUP_MANUAL_STATUS[key] = {
+                'accountName': account['name'], 'provider': account['provider'],
+                'state': 'failed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
+                'completedAt': int(time.time()), 'error': str(exc)[:400],
+            }
     finally:
         with _AI_RESET_WARMUP_MANUAL_LOCK:
             _AI_RESET_WARMUP_MANUAL_RUNNING.discard(key)
@@ -2108,21 +2089,14 @@ def api_ai_usage_reset_warmup_manual():
         return jsonify({'error': 'Choose Gemini or Claude to warm up.'}), 400
     families = [family] if provider == 'antigravity' else ['codex']
     key = f"{provider}:{lookup_id}"
-    state = get_config_val('ai_usage_reset_warmup_state', dict)
-    state = state if isinstance(state, dict) else {}
-    statuses = state.setdefault('statuses', {})
     with _AI_RESET_WARMUP_MANUAL_LOCK:
         if key in _AI_RESET_WARMUP_MANUAL_RUNNING:
             return jsonify({'error': 'A warm-up is already running for this account.'}), 409
         _AI_RESET_WARMUP_MANUAL_RUNNING.add(key)
-    statuses[key] = {'accountName': account['name'], 'provider': provider, 'state': 'manual-running',
-                     'reason': 'manual warm-up', 'lastEvent': ', '.join(families), 'error': ''}
-    try:
-        set_config_val('ai_usage_reset_warmup_state', state)
-    except Exception as exc:
-        with _AI_RESET_WARMUP_MANUAL_LOCK:
-            _AI_RESET_WARMUP_MANUAL_RUNNING.discard(key)
-        return jsonify({'error': f'Could not save warm-up status: {exc}'}), 500
+        _AI_RESET_WARMUP_MANUAL_STATUS[key] = {
+            'accountName': account['name'], 'provider': provider, 'state': 'manual-running',
+            'reason': 'manual warm-up', 'lastEvent': ', '.join(families), 'error': '',
+        }
     threading.Thread(target=_ai_reset_warmup_manual_worker, args=(account, families),
                      name='ai-reset-warmup-manual', daemon=True).start()
     return jsonify({'started': True, 'key': key}), 202
