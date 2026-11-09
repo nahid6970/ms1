@@ -4046,10 +4046,10 @@
                         <div style="margin-top:9px;padding-top:8px;border-top:1px solid var(--border-color);">
                             <label for="settings-ai-reset-warmup-enabled" style="display:flex;align-items:flex-start;gap:7px;font-size:.76rem;color:var(--text-primary);cursor:pointer;">
                                 <input type="checkbox" id="settings-ai-reset-warmup-enabled" onchange="saveAIResetWarmupEnabled(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:1px 0 0;flex-shrink:0;">
-                                <span>Start each Codex and Antigravity account after a weekly or monthly quota reset</span>
+                                <span>Automatically start Codex and Antigravity accounts for weekly/monthly quota windows</span>
                             </label>
                             <div id="settings-ai-reset-warmup-status" role="status" style="margin:5px 0 0 23px;font-size:.66rem;color:var(--text-muted);">Checking reset warm-up status…</div>
-                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">Sends one short “Reply with only: OK” prompt per weekly/monthly reset. Codex 5-hour windows are skipped; prompts run through each account’s native profile without asking it to use tools.</div>
+                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">Sends one short prompt when a weekly/monthly window is full, then after a reset or local weekly/monthly cooldown. Codex 5-hour windows are skipped. This uses a small amount of quota and asks the agent not to use tools.</div>
                         </div>
                     </div>
                     <!-- Codex provider card — green theme -->
@@ -6830,7 +6830,7 @@ kiro-cli whoami --format json</code></pre>
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not save reset warm-up settings.');
                 if (status) status.textContent = data.enabled
-                    ? 'Automatic reset warm-up is on. It will trigger after the next observed weekly or monthly reset.'
+                    ? 'Automatic warm-up is on. Full weekly/monthly windows will be started; later resets will be detected from quota changes.'
                     : 'Automatic reset warm-up is off.';
                 if (data.enabled) window.setTimeout(loadAIResetWarmupSettings, 1200);
             } catch (error) {

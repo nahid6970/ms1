@@ -2039,28 +2039,78 @@
   "ai_usage_reset_warmup_state": {
     "snapshots": {
       "codex:default": {
-        "Monthly": 1794904410.0
+        "Monthly": {
+          "leftPercent": 0.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 2592000
+        }
       },
       "codex:12aa59bd4b7349e881eb7381f410031b": {
-        "Monthly": 1794904557.0
+        "Monthly": {
+          "leftPercent": 0.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 2592000
+        }
       },
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
-        "Monthly": 1794904752.0
+        "Monthly": {
+          "leftPercent": 1.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 2592000
+        }
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
-        "Monthly": 1794904864.0
+        "Monthly": {
+          "leftPercent": 93.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 2592000
+        }
       },
       "antigravity:default": {
-        "gemini-weekly": 1794838489.0,
-        "shared-weekly": 1794838489.0
+        "gemini-weekly": {
+          "leftPercent": 100.0,
+          "lastWarmedAt": 1794234299.0348783,
+          "lastAttemptAt": 1794234299.0348783,
+          "cycleSeconds": 604800
+        },
+        "shared-weekly": {
+          "leftPercent": 97.0,
+          "lastWarmedAt": 1794234299.0348783,
+          "lastAttemptAt": 1794234299.0348783,
+          "cycleSeconds": 604800
+        }
       },
       "antigravity:10d54254caee451189908030ba576cb8": {
-        "gemini-weekly": 1794283330.0,
-        "3p-weekly": 1794414244.0
+        "gemini-weekly": {
+          "leftPercent": 0.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 604800
+        },
+        "3p-weekly": {
+          "leftPercent": 0.0,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 604800
+        }
       },
       "antigravity:e6434f286cab44c5ad160abb1da63ced": {
-        "gemini-weekly": 1794285785.0,
-        "3p-weekly": 1794838496.0
+        "gemini-weekly": {
+          "leftPercent": 99.2,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 604800
+        },
+        "3p-weekly": {
+          "leftPercent": 97.1,
+          "lastWarmedAt": 0.0,
+          "lastAttemptAt": 0.0,
+          "cycleSeconds": 604800
+        }
       }
     },
     "statuses": {
@@ -2107,11 +2157,10 @@
       "antigravity:default": {
         "accountName": "Default (agy CLI)",
         "provider": "antigravity",
-        "state": "watching",
-        "lastEvent": "",
-        "lastEvents": [],
-        "lastResetAt": null,
-        "completedAt": null,
+        "state": "completed",
+        "reason": "full quota or reset detected",
+        "lastEvent": "gemini-weekly, shared-weekly",
+        "completedAt": 1794234299,
         "error": ""
       },
       "antigravity:10d54254caee451189908030ba576cb8": {

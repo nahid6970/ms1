@@ -1663,6 +1663,14 @@ def _ai_reset_window_is_long(window):
     return any(word in label for word in ('weekly', 'week', 'monthly', 'month'))
 
 
+def _ai_reset_window_cycle_seconds(window):
+    duration = window.get('windowDurationMins')
+    if isinstance(duration, (int, float)) and duration >= 24 * 60:
+        return int(duration * 60)
+    label = str(window.get('label') or '').casefold()
+    return 30 * 86400 if 'month' in label else 7 * 86400
+
+
 def _ai_reset_warmup_codex(codex_home):
     executable = shutil.which('codex')
     if not executable:
@@ -1799,7 +1807,12 @@ def _ai_reset_warmup_run(account):
 
 
 def _ai_reset_warmup_poll_once():
-    """Detect elapsed weekly/monthly reset times and run one native prompt per account/window."""
+    """Prime full long-window quotas and detect resets from usage returning to full.
+
+    Antigravity may report a rolling resetTime for an unused bucket, so resetTime alone
+    cannot identify a reset. Keep a persisted local cooldown and use the quota percentage
+    transition when one is available.
+    """
     if not _ai_reset_warmup_enabled():
         return
     now = time.time()
@@ -1815,44 +1828,65 @@ def _ai_reset_warmup_poll_once():
             windows = usage.get('windows') or []
             next_windows = {}
             due = []
+            eligible_windows = []
             for window in windows:
                 if not _ai_reset_window_is_long(window):
                     continue
-                reset_at = _ai_reset_timestamp(window.get('resetsAt'))
                 window_id = str(window.get('id') or window.get('label') or 'long-window')
-                if reset_at is None:
-                    continue
-                next_windows[window_id] = reset_at
-                previous = (snapshots.get(key) or {}).get(window_id)
-                if previous is not None and float(previous) < now and reset_at > float(previous) + 60:
-                    due.append((window_id, reset_at, float(previous)))
-            # Persist the baseline even when no reset has happened yet.
+                left_percent = window.get('leftPercent')
+                if not isinstance(left_percent, (int, float)):
+                    left_percent = 100 - float(window.get('usedPercent') or 0)
+                left_percent = max(0.0, min(100.0, float(left_percent)))
+                previous = (snapshots.get(key) or {}).get(window_id, {})
+                if not isinstance(previous, dict):
+                    # Migrate resetAt snapshots written by the first warm-up implementation.
+                    previous = {'resetsAt': previous}
+                previous_left = previous.get('leftPercent')
+                last_warmed_at = float(previous.get('lastWarmedAt') or 0)
+                last_attempt_at = float(previous.get('lastAttemptAt') or 0)
+                cycle_seconds = _ai_reset_window_cycle_seconds(window)
+                became_full = (isinstance(previous_left, (int, float)) and previous_left < 99.9 and left_percent >= 99.9)
+                cooldown_elapsed = last_warmed_at > 0 and now >= last_warmed_at + cycle_seconds
+                first_full_observation = last_warmed_at <= 0 and left_percent >= 99.9
+                if left_percent >= 99.9:
+                    eligible_windows.append(window_id)
+                    if first_full_observation or became_full or cooldown_elapsed:
+                        due.append(window_id)
+                next_windows[window_id] = {
+                    'leftPercent': left_percent,
+                    'lastWarmedAt': last_warmed_at,
+                    'lastAttemptAt': last_attempt_at,
+                    'cycleSeconds': cycle_seconds,
+                }
             if next_windows != snapshots.get(key):
                 snapshots[key] = next_windows
-            previous_events = (statuses.get(key) or {}).get('lastEvents') or []
-            due_events = [f'{window_id}:{int(previous)}' for window_id, _, previous in due]
-            pending_events = [event for event in due_events if event not in previous_events]
-            if pending_events:
+            retry_ready = any(
+                    now - float((snapshots.get(key) or {}).get(window_id, {}).get('lastAttemptAt') or 0) >= 900
+                    for window_id in due)
+            if due and retry_ready:
+                for window_id in eligible_windows:
+                    snapshots[key][window_id]['lastAttemptAt'] = now
+                set_config_val('ai_usage_reset_warmup_state', state)
                 try:
                     _ai_reset_warmup_run(account)
+                    completed_at = time.time()
+                    for window_id in eligible_windows:
+                        snapshots[key][window_id]['lastWarmedAt'] = completed_at
+                        snapshots[key][window_id]['lastAttemptAt'] = completed_at
                     statuses[key] = {
                         'accountName': account['name'], 'provider': account['provider'],
-                        'state': 'completed', 'lastEvent': ', '.join(pending_events),
-                        'lastEvents': (previous_events + pending_events)[-24:],
-                        'lastResetAt': max(int(previous) for _, _, previous in due),
-                        'completedAt': int(time.time()), 'error': '',
+                        'state': 'completed', 'reason': 'full quota or reset detected',
+                        'lastEvent': ', '.join(due), 'completedAt': int(completed_at), 'error': '',
                     }
                 except Exception as exc:
                     statuses[key] = {
                         'accountName': account['name'], 'provider': account['provider'],
-                        'state': 'failed', 'lastEvent': ', '.join(pending_events),
-                        'lastEvents': (previous_events + pending_events)[-24:],
-                        'lastResetAt': max(int(previous) for _, _, previous in due),
+                        'state': 'failed', 'lastEvent': ', '.join(due),
                         'completedAt': int(time.time()), 'error': str(exc)[:400],
                     }
             statuses.setdefault(key, {
                 'accountName': account['name'], 'provider': account['provider'], 'state': 'watching',
-                'lastEvent': '', 'lastEvents': [], 'lastResetAt': None, 'completedAt': None, 'error': '',
+                'lastEvent': '', 'completedAt': None, 'error': '',
             })
         except Exception as exc:
             old_status = statuses.get(key) or {}
