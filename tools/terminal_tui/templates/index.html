@@ -6846,7 +6846,12 @@ kiro-cli whoami --format json</code></pre>
             if (!button || button.disabled) return;
             button.disabled = true;
             button.setAttribute('aria-busy', 'true');
+            button.dataset.warmState = 'running';
             button.title = 'Sending a short prompt to this account';
+            button.setAttribute('aria-label', `Warming ${button.dataset.warmLabel || 'account'}`);
+            button.style.color = '#fbbf24';
+            button.style.borderColor = 'rgba(251,191,36,.55)';
+            button.style.background = 'rgba(245,158,11,.1)';
             const icon = button.querySelector('svg');
             if (icon) icon.style.animation = 'quota-warm-spin .8s linear infinite';
             try {
@@ -6864,18 +6869,36 @@ kiro-cli whoami --format json</code></pre>
                     const statusData = await statusResponse.json();
                     const warmStatus = statusData.state?.statuses?.[statusKey];
                     if (warmStatus?.state === 'completed') {
+                        button.dataset.warmState = 'passed';
                         button.title = `Warm-up complete${warmStatus.modelsWarmed?.length ? `: ${warmStatus.modelsWarmed.join(', ')}` : ''}`;
+                        button.setAttribute('aria-label', `Warm-up complete for ${button.dataset.warmLabel || 'account'}`);
                         return;
                     }
-                    if (warmStatus?.state === 'failed') throw new Error(warmStatus.error || 'Warm-up failed.');
+                    if (warmStatus?.state === 'failed') {
+                        button.dataset.warmState = 'failed';
+                        throw new Error(warmStatus.error || 'Warm-up failed.');
+                    }
                 }
                 throw new Error('Warm-up is still running. Check the settings status shortly.');
             } catch (error) {
                 button.title = String(error.message || error);
+                if (button.dataset.warmState !== 'passed') {
+                    button.dataset.warmState = 'failed';
+                    button.setAttribute('aria-label', `Warm-up failed for ${button.dataset.warmLabel || 'account'}`);
+                }
             } finally {
                 button.disabled = false;
                 button.removeAttribute('aria-busy');
                 if (icon) icon.style.animation = '';
+                if (button.dataset.warmState === 'passed') {
+                    button.style.color = '#34d399';
+                    button.style.borderColor = 'rgba(52,211,153,.62)';
+                    button.style.background = 'rgba(16,185,129,.12)';
+                } else if (button.dataset.warmState === 'failed') {
+                    button.style.color = '#fb7185';
+                    button.style.borderColor = 'rgba(251,113,133,.62)';
+                    button.style.background = 'rgba(244,63,94,.12)';
+                }
             }
         }
 
@@ -6891,9 +6914,24 @@ kiro-cli whoami --format json</code></pre>
             button.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>';
             button.title = `Warm ${label}`;
             button.setAttribute('aria-label', `Warm ${label}`);
+            button.dataset.warmLabel = label;
             button.style.cssText = 'width:23px;height:22px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(148,163,184,.32);border-radius:5px;background:transparent;color:var(--text-secondary);cursor:pointer;vertical-align:middle;';
             button.onmouseenter = () => { button.style.borderColor = '#22d3ee'; button.style.color = '#67e8f9'; };
-            button.onmouseleave = () => { button.style.borderColor = 'rgba(148,163,184,.32)'; button.style.color = 'var(--text-secondary)'; };
+            button.onmouseleave = () => {
+                if (button.dataset.warmState === 'passed') {
+                    button.style.borderColor = 'rgba(52,211,153,.62)';
+                    button.style.color = '#34d399';
+                    button.style.background = 'rgba(16,185,129,.12)';
+                } else if (button.dataset.warmState === 'failed') {
+                    button.style.borderColor = 'rgba(251,113,133,.62)';
+                    button.style.color = '#fb7185';
+                    button.style.background = 'rgba(244,63,94,.12)';
+                } else {
+                    button.style.borderColor = 'rgba(148,163,184,.32)';
+                    button.style.color = 'var(--text-secondary)';
+                    button.style.background = 'transparent';
+                }
+            };
             button.onclick = () => manuallyWarmUsageAccount(button, provider, accountId, family);
             return button;
         }
