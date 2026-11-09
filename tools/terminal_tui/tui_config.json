@@ -2057,16 +2057,16 @@
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
         "Monthly": {
           "leftPercent": 1.0,
-          "lastWarmedAt": 1794238049.572402,
-          "lastAttemptAt": 1794238049.572402,
+          "lastWarmedAt": 1794238040.2467217,
+          "lastAttemptAt": 1794238040.2467217,
           "cycleSeconds": 2592000
         }
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
           "leftPercent": 88.0,
-          "lastWarmedAt": 1794237896.310554,
-          "lastAttemptAt": 1794237896.310554,
+          "lastWarmedAt": 1794238057.5265028,
+          "lastAttemptAt": 1794238057.5265028,
           "cycleSeconds": 2592000
         }
       },
@@ -2138,13 +2138,9 @@
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
         "accountName": "01",
         "provider": "codex",
-        "state": "completed",
+        "state": "manual-running",
         "reason": "manual warm-up",
-        "lastEvent": "manual",
-        "modelsWarmed": [
-          "codex"
-        ],
-        "completedAt": 1794238049,
+        "lastEvent": "codex",
         "error": ""
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
@@ -2156,7 +2152,7 @@
         "modelsWarmed": [
           "codex"
         ],
-        "completedAt": 1794237896,
+        "completedAt": 1794238057,
         "error": ""
       },
       "antigravity:default": {
