@@ -13602,6 +13602,27 @@ function applyHatFormat(event) {
     showToast('Math notation applied', 'success');
 }
 
+function applySelectedCaseToText(text) {
+    let processed = text;
+    const caseFormat = selectedFormats.find(f => f.type === 'case');
+    if (!caseFormat) return processed;
+
+    const caseType = caseFormat.caseType;
+    if (caseType === 'upper') {
+        processed = processed.toUpperCase();
+    } else if (caseType === 'lower') {
+        processed = processed.toLowerCase();
+    } else if (caseType === 'proper') {
+        processed = processed.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    } else if (caseType === 'numbersToBangla') {
+        const enToBnDigits = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
+        processed = processed.replace(/[0-9]/g, digit => enToBnDigits[digit] || digit);
+    } else if (caseType === 'banglaToEnglish') {
+        processed = convertBanglaToEnglishText(processed);
+    }
+    return processed;
+}
+
 function applyMultipleFormats(lastPrefix, lastSuffix) {
     if (!quickFormatterTarget) return;
 
@@ -13617,8 +13638,10 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
 
     // Add all selected formats
     selectedFormats.forEach(format => {
-        allPrefixes += format.prefix;
-        allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
+        if (!format.type || format.type === 'format') {
+            allPrefixes += format.prefix;
+            allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
+        }
     });
 
     // Add the last clicked format only if it's not already selected
@@ -13631,7 +13654,8 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
 
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
-        const selectedText = quickFormatterSelection.text || '';
+        const rawSelectedText = quickFormatterSelection.text || '';
+        const selectedText = applySelectedCaseToText(rawSelectedText);
         const formattedText = allPrefixes + selectedText + allSuffixes;
 
         // Insert formatted text into contentEditable
@@ -13659,14 +13683,15 @@ function applyMultipleFormats(lastPrefix, lastSuffix) {
         selection.addRange(newRange);
 
         closeQuickFormatter();
-        showToast(`Applied ${totalFormats} formats`, 'success');
+        showToast(`Applied formats & transformations`, 'success');
         return;
     }
 
     // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
-    let selectedText = input.value.substring(start, end);
+    let rawSelectedText = input.value.substring(start, end);
+    let selectedText = applySelectedCaseToText(rawSelectedText);
     const shouldRefocus = !quickFormatterSelection.noRefocus;
 
     // Insert the markdown syntax
@@ -14010,13 +14035,16 @@ function applyMultipleFormatsWithColor(colorSyntax) {
 
     // Add all selected markdown formats
     selectedFormats.forEach(format => {
-        allPrefixes += format.prefix;
-        allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
+        if (!format.type || format.type === 'format') {
+            allPrefixes += format.prefix;
+            allSuffixes = format.suffix + allSuffixes; // Reverse order for closing tags
+        }
     });
 
     // Handle contenteditable (WYSIWYG mode)
     if (quickFormatterSelection.isContentEditable) {
-        const selectedText = quickFormatterSelection.text || '';
+        const rawSelectedText = quickFormatterSelection.text || '';
+        const selectedText = applySelectedCaseToText(rawSelectedText);
         const formattedText = allPrefixes + selectedText + allSuffixes;
 
         // Insert formatted text into contentEditable
@@ -14045,14 +14073,15 @@ function applyMultipleFormatsWithColor(colorSyntax) {
         selection.addRange(newRange);
 
         closeQuickFormatter();
-        showToast(`Applied color + ${selectedFormats.length} formats`, 'success');
+        showToast(`Applied color & formats`, 'success');
         return;
     }
 
     // Handle input/textarea (legacy mode)
     const start = quickFormatterSelection.start;
     const end = quickFormatterSelection.end;
-    let selectedText = input.value.substring(start, end);
+    let rawSelectedText = input.value.substring(start, end);
+    let selectedText = applySelectedCaseToText(rawSelectedText);
 
     // Insert the markdown syntax
     const newText = input.value.substring(0, start) +
