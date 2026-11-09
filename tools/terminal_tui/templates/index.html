@@ -4239,25 +4239,48 @@
     </div>
 
     <div class="modal-overlay" id="codex-account-help-modal" data-testid="codex-account-help-modal" style="z-index:4100;" onclick="if(event.target===this)closeCodexAccountHelp()">
-        <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="codex-account-help-title" style="width:520px;max-width:92vw;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
+        <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="codex-account-help-title" style="width:540px;max-width:92vw;max-height:88vh;overflow-y:auto;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;">
                 <div>
-                    <h2 id="codex-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Add another Codex account</h2>
-                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Sign in once to a separate Codex home, then add that folder to the usage monitor.</div>
+                    <h2 id="codex-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Codex accounts — setup &amp; sign-in</h2>
+                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">How to add profiles and what to do when a login expires.</div>
                 </div>
                 <button type="button" id="codex-account-help-close" onclick="closeCodexAccountHelp()" aria-label="Close instructions" style="width:28px;height:28px;flex:none;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:1.1rem;cursor:pointer;">×</button>
             </div>
-            <ol style="margin:0;padding-left:22px;display:grid;gap:11px;color:var(--text-secondary);font-size:.78rem;line-height:1.5;">
-                <li>Open PowerShell. You do <strong style="color:var(--text-primary);">not</strong> need to log out of your usual Codex account.</li>
-                <li>Set the separate profile folder and start login:
-                    <pre id="codex-account-login-command" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;padding:10px 12px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#93c5fd;font:.76rem/1.7 Consolas,'Fira Code',monospace;"><code>$env:CODEX_HOME = 'C:\Users\nahid\.codex-00'
+
+            <!-- Default profile -->
+            <div style="margin-bottom:12px;padding:11px 12px;background:rgba(16,185,129,.06);border:1px solid rgba(52,211,153,.2);border-radius:8px;">
+                <div style="font-size:.72rem;font-weight:700;color:#6ee7b7;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;">Default profile — current CLI login</div>
+                <p style="margin:0 0 7px;font-size:.77rem;line-height:1.55;color:var(--text-secondary);">The Default profile reads whatever account <code style="color:#6ee7b7;">codex</code> is currently signed into in <code>~/.codex</code>. Auth is owned by the CLI — the app just reads the cached token file.</p>
+                <div style="font-size:.72rem;font-weight:600;color:var(--text-primary);margin-bottom:5px;">If the quota badge shows an error or "not signed in":</div>
+                <pre style="margin:0;padding:8px 11px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#6ee7b7;font:.74rem/1.7 Consolas,'Fira Code',monospace;white-space:pre-wrap;overflow-wrap:anywhere;">codex login</pre>
+                <div style="margin-top:6px;font-size:.71rem;color:var(--text-muted);">Run this in any terminal. After the browser sign-in completes, click the Codex quota badge to refresh.</div>
+            </div>
+
+            <!-- Named profiles: add -->
+            <div style="margin-bottom:12px;padding:11px 12px;background:rgba(16,185,129,.06);border:1px solid rgba(52,211,153,.2);border-radius:8px;">
+                <div style="font-size:.72rem;font-weight:700;color:#6ee7b7;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;">Adding a named profile (second account)</div>
+                <p style="margin:0 0 7px;font-size:.77rem;line-height:1.55;color:var(--text-secondary);">Each named profile points to a separate <code style="color:#6ee7b7;">CODEX_HOME</code> folder with its own login. You do <strong style="color:var(--text-primary);">not</strong> need to log out of your main account.</p>
+                <ol style="margin:0;padding-left:20px;display:grid;gap:8px;color:var(--text-secondary);font-size:.76rem;line-height:1.5;">
+                    <li>Open PowerShell and sign in under a new folder:
+                        <pre id="codex-account-login-command" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0;padding:9px 11px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#93c5fd;font:.74rem/1.7 Consolas,'Fira Code',monospace;"><code>$env:CODEX_HOME = 'C:\Users\nahid\.codex-work'
 codex login</code></pre>
-                </li>
-                <li>Finish signing into the second account in the browser.</li>
-                <li>Back here, enter <code style="color:#67e8f9;">C:\Users\nahid\.codex-00</code> as the profile folder, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
-            </ol>
-            <div style="margin-top:12px;padding:9px 10px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.28);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.5;">
-                <strong>Optional:</strong> <code>Remove-Item Env:CODEX_HOME</code> clears the override in that PowerShell window so later commands use your default profile. It does not log out or delete either account.
+                    </li>
+                    <li>Complete sign-in in the browser for the second Google/OpenAI account.</li>
+                    <li>Back here, enter <code style="color:#67e8f9;">C:\Users\nahid\.codex-work</code> as the profile folder, choose a name, and click <strong style="color:var(--text-primary);">Add account</strong>.</li>
+                </ol>
+                <div style="margin-top:9px;padding:8px 9px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:6px;color:#fcd34d;font-size:.71rem;line-height:1.5;">
+                    <strong>Tip:</strong> <code>Remove-Item Env:CODEX_HOME</code> clears the override in that window so later commands use your default profile. It does not log out or delete either account.
+                </div>
+            </div>
+
+            <!-- Named profiles: if expired -->
+            <div style="padding:11px 12px;background:rgba(16,185,129,.06);border:1px solid rgba(52,211,153,.2);border-radius:8px;">
+                <div style="font-size:.72rem;font-weight:700;color:#6ee7b7;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px;">If a named profile shows an error or token expired</div>
+                <p style="margin:0 0 7px;font-size:.77rem;line-height:1.55;color:var(--text-secondary);">Codex refresh tokens are long-lived but can be revoked if you sign out or OpenAI rotates them. To re-authenticate a specific profile without touching your default account:</p>
+                <pre style="margin:0;padding:8px 11px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#6ee7b7;font:.74rem/1.7 Consolas,'Fira Code',monospace;white-space:pre-wrap;overflow-wrap:anywhere;">$env:CODEX_HOME = 'C:\Users\nahid\.codex-work'
+codex login</pre>
+                <div style="margin-top:6px;font-size:.71rem;color:var(--text-muted);">Use the same folder path you added here. After the browser flow, click the quota badge to refresh — no changes needed in the settings card.</div>
             </div>
         </section>
     </div>
