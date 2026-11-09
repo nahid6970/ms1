@@ -2064,7 +2064,7 @@
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
-          "leftPercent": 93.0,
+          "leftPercent": 91.0,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 2592000
@@ -2072,13 +2072,13 @@
       },
       "antigravity:default": {
         "gemini-weekly": {
-          "leftPercent": 100.0,
-          "lastWarmedAt": 1794234299.0348783,
-          "lastAttemptAt": 1794234299.0348783,
+          "leftPercent": 99.0,
+          "lastWarmedAt": 1794234946.6254475,
+          "lastAttemptAt": 1794234946.6254475,
           "cycleSeconds": 604800
         },
         "shared-weekly": {
-          "leftPercent": 97.0,
+          "leftPercent": 96.0,
           "lastWarmedAt": 1794234299.0348783,
           "lastAttemptAt": 1794234299.0348783,
           "cycleSeconds": 604800
@@ -2100,13 +2100,13 @@
       },
       "antigravity:e6434f286cab44c5ad160abb1da63ced": {
         "gemini-weekly": {
-          "leftPercent": 99.2,
+          "leftPercent": 98.9,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 604800
         },
         "3p-weekly": {
-          "leftPercent": 97.1,
+          "leftPercent": 96.0,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 604800
@@ -2159,8 +2159,14 @@
         "provider": "antigravity",
         "state": "completed",
         "reason": "full quota or reset detected",
-        "lastEvent": "gemini-weekly, shared-weekly",
-        "completedAt": 1794234299,
+        "lastEvent": "target Gemini and Claude models",
+        "modelsWarmed": [
+          "gemini",
+          "claude"
+        ],
+        "modelSelectionVersion": 2,
+        "modelSelectionAttemptVersion": 2,
+        "completedAt": 1794234946,
         "error": ""
       },
       "antigravity:10d54254caee451189908030ba576cb8": {

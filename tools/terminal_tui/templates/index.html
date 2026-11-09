@@ -4049,7 +4049,7 @@
                                 <span>Automatically start Codex and Antigravity accounts for weekly/monthly quota windows</span>
                             </label>
                             <div id="settings-ai-reset-warmup-status" role="status" style="margin:5px 0 0 23px;font-size:.66rem;color:var(--text-muted);">Checking reset warm-up status…</div>
-                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">Sends one short prompt when a weekly/monthly window is full, then after a reset or local weekly/monthly cooldown. Codex 5-hour windows are skipped. This uses a small amount of quota and asks the agent not to use tools.</div>
+                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">For Antigravity, sends one short Gemini prompt and one Claude prompt when a weekly window is full, then after a reset or weekly cooldown. Codex sends one prompt for long quota windows; 5-hour windows are skipped. Prompts use a small amount of quota and ask the agent not to use tools.</div>
                         </div>
                     </div>
                     <!-- Codex provider card — green theme -->
@@ -6806,14 +6806,17 @@ kiro-cli whoami --format json</code></pre>
                 if (checkbox) checkbox.checked = data.enabled === true;
                 if (!status) return;
                 const rows = Object.values((data.state || {}).statuses || {});
-                const completed = rows.filter(row => row.state === 'completed').length;
+                const completedRows = rows.filter(row => row.state === 'completed');
+                const completed = completedRows.length;
+                const warmedModels = [...new Set(completedRows.flatMap(row => Array.isArray(row.modelsWarmed) ? row.modelsWarmed : []))];
+                const modelNote = warmedModels.length ? ` Models warmed: ${warmedModels.join(' + ')}.` : '';
                 const failed = rows.filter(row => row.state === 'failed' || row.state === 'unavailable');
                 if (!data.enabled) {
                     status.textContent = 'Automatic reset warm-up is off.';
                 } else if (failed.length) {
-                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed. ${failed[0].accountName || failed[0].provider}: ${failed[0].error || failed[0].state}`;
+                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed.${modelNote} ${failed[0].accountName || failed[0].provider}: ${failed[0].error || failed[0].state}`;
                 } else {
-                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed since setup.`;
+                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed since setup.${modelNote}`;
                 }
             } catch (error) {
                 if (status) status.textContent = `Reset warm-up status unavailable: ${String(error.message || error)}`;

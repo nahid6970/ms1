@@ -1695,6 +1695,36 @@ def _ai_reset_warmup_codex(codex_home):
         raise RuntimeError(detail[-1][:400] if detail else f'Codex warm-up exited with code {result.returncode}.')
 
 
+def _ai_reset_warmup_agy_models(executable):
+    result = subprocess.run(
+        [executable, 'models'], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', timeout=30,
+        env={**os.environ, 'PATH': os.path.dirname(executable) + os.pathsep + os.environ.get('PATH', '')},
+        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+    )
+    if result.returncode != 0:
+        raise RuntimeError('Could not list models for the default agy account.')
+    model_ids = set()
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    for line in ansi_escape.sub('', result.stdout or '').splitlines():
+        match = re.search(r'\b((?:gemini|claude)[a-z0-9._/-]*)\b', line, re.IGNORECASE)
+        if match:
+            model_ids.add(match.group(1))
+    selected = {}
+    for family in ('gemini', 'claude'):
+        candidates = [model for model in model_ids if family in model.casefold()]
+        if candidates:
+            if family == 'gemini':
+                candidates.sort(key=lambda model: ('flash' not in model.casefold(), 'medium' not in model.casefold(), len(model)))
+            else:
+                candidates.sort(key=lambda model: ('sonnet' not in model.casefold(), 'thinking' in model.casefold(), len(model)))
+            selected[family] = candidates[0]
+    if len(selected) != 2:
+        missing = ', '.join(family for family in ('gemini', 'claude') if family not in selected)
+        raise RuntimeError(f'agy did not list a usable {missing} model for this account.')
+    return selected
+
+
 def _ai_reset_warmup_agy_cli():
     executable = _antigravity_cli_executable()
     if not executable:
@@ -1702,18 +1732,54 @@ def _ai_reset_warmup_agy_cli():
     process_env = os.environ.copy()
     process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
     process_env['PATH'] = os.path.dirname(executable) + os.pathsep + process_env.get('PATH', '')
-    result = subprocess.run(
-        [executable, '--print', 'Reply with only: OK. Do not use tools or access files.', '--output-format', 'json', '--print-timeout', '60s'],
-        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, encoding='utf-8', errors='replace', timeout=75, env=process_env,
-        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-    )
-    try:
-        envelope = json.loads(result.stdout or '')
-    except (ValueError, TypeError) as exc:
-        raise RuntimeError('agy returned an unreadable warm-up response.') from exc
-    if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
-        raise RuntimeError('agy could not complete the account warm-up.')
+    for family, model in _ai_reset_warmup_agy_models(executable).items():
+        result = subprocess.run(
+            [executable, '--print', 'Reply with only: OK. Do not use tools or access files.',
+             '--model', model, '--output-format', 'json', '--print-timeout', '60s'],
+            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            text=True, encoding='utf-8', errors='replace', timeout=75, env=process_env,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+        try:
+            envelope = json.loads(result.stdout or '')
+        except (ValueError, TypeError) as exc:
+            raise RuntimeError(f'agy returned an unreadable {family} warm-up response.') from exc
+        if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
+            detail = envelope.get('error') if isinstance(envelope, dict) else ''
+            raise RuntimeError(f'agy {family} warm-up failed: {detail or "no successful response"}')
+
+
+def _ai_reset_warmup_acp_model_options(session_result):
+    options = session_result.get('configOptions') or []
+    for config_option in options:
+        if not isinstance(config_option, dict):
+            continue
+        if (str(config_option.get('category') or '').casefold() == 'model'
+                or str(config_option.get('id') or '').casefold() == 'model'
+                or str(config_option.get('name') or '').casefold() == 'model'):
+            flattened = []
+            def collect(values):
+                for value in values or []:
+                    if not isinstance(value, dict):
+                        continue
+                    if isinstance(value.get('options'), list):
+                        collect(value['options'])
+                    elif value.get('value') is not None:
+                        flattened.append(value)
+            collect(config_option.get('options'))
+            selected = {}
+            for family in ('gemini', 'claude'):
+                candidates = [item for item in flattened if family in ' '.join(str(item.get(field) or '') for field in ('value', 'name', 'description')).casefold()]
+                if candidates:
+                    if family == 'gemini':
+                        candidates.sort(key=lambda item: ('flash' not in str(item.get('value') or item.get('name') or '').casefold(), 'medium' not in str(item.get('value') or item.get('name') or '').casefold()))
+                    else:
+                        candidates.sort(key=lambda item: ('sonnet' not in str(item.get('value') or item.get('name') or '').casefold(), 'thinking' in str(item.get('value') or item.get('name') or '').casefold()))
+                    selected[family] = {'configId': config_option.get('id'), 'value': candidates[0]['value']}
+            if len(selected) == 2:
+                return selected
+            break
+    raise RuntimeError('Antigravity ACP did not offer both Gemini and Claude model choices for this profile.')
 
 
 def _ai_reset_warmup_antigravity_acp(account_id):
@@ -1731,44 +1797,56 @@ def _ai_reset_warmup_antigravity_acp(account_id):
     process_env['ANTIGRAVITY_HARNESS_PATH'] = paths['helper']
     process_env['GEMINI_HOME'] = profile_home
     process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
-    process = subprocess.Popen(
-        [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-        text=True, encoding='utf-8', errors='replace', bufsize=1, cwd=profile_home, env=process_env,
-        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
-    )
-    try:
-        _antigravity_acp_rpc_request(process, 1, 'initialize', {
-            'protocolVersion': 1,
-            'clientInfo': {'name': 'Terminal TUI', 'version': '1.0'},
-            'clientCapabilities': {},
-        }, timeout=90)
-        process.stdin.write(json.dumps({'jsonrpc': '2.0', 'method': 'initialized', 'params': {}}, separators=(',', ':')) + '\n')
-        process.stdin.flush()
-        session = _antigravity_acp_rpc_request(process, 2, 'session/new', {
-            'cwd': profile_home,
-            'mcpServers': [],
-        }, timeout=90)
-        session_id = session.get('sessionId')
-        if not session_id:
-            raise RuntimeError('Antigravity ACP did not return a session ID.')
-        _antigravity_acp_rpc_request(process, 3, 'session/prompt', {
-            'sessionId': session_id,
-            'prompt': [{'type': 'text', 'text': 'Reply with only: OK. Do not use tools or access files.'}],
-        }, timeout=90)
-    finally:
+    request_id = 1
+    for family in ('gemini', 'claude'):
+        process = subprocess.Popen(
+            [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding='utf-8', errors='replace', bufsize=1, cwd=profile_home, env=process_env,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
         try:
-            process.stdin.close()
-        except (OSError, ValueError):
-            pass
-        if process.poll() is None:
+            initialized = _antigravity_acp_rpc_request(process, request_id, 'initialize', {
+                'protocolVersion': 1,
+                'clientInfo': {'name': 'Terminal TUI', 'version': '1.0'},
+                'clientCapabilities': {},
+            }, timeout=90)
+            request_id += 1
+            process.stdin.write(json.dumps({'jsonrpc': '2.0', 'method': 'initialized', 'params': {}}, separators=(',', ':')) + '\n')
+            process.stdin.flush()
+            session = _antigravity_acp_rpc_request(process, request_id, 'session/new', {
+                'cwd': profile_home,
+                'mcpServers': [],
+            }, timeout=90)
+            request_id += 1
+            session_id = session.get('sessionId')
+            if not session_id:
+                raise RuntimeError('Antigravity ACP did not return a session ID.')
+            model = _ai_reset_warmup_acp_model_options(session).get(family)
+            if not model:
+                raise RuntimeError(f'Antigravity ACP did not offer a {family} model for this profile.')
+            _antigravity_acp_rpc_request(process, request_id, 'session/set_config_option', {
+                'sessionId': session_id, 'configId': model['configId'], 'value': model['value'],
+            }, timeout=90)
+            request_id += 1
+            _antigravity_acp_rpc_request(process, request_id, 'session/prompt', {
+                'sessionId': session_id,
+                'prompt': [{'type': 'text', 'text': 'Reply with only: OK. Do not use tools or access files.'}],
+            }, timeout=90)
+            request_id += 1
+        finally:
             try:
-                process.terminate()
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=5)
-            except OSError:
+                process.stdin.close()
+            except (OSError, ValueError):
                 pass
+            if process.poll() is None:
+                try:
+                    process.terminate()
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
+                except OSError:
+                    pass
 
 
 def _ai_reset_warmup_accounts():
@@ -1800,10 +1878,13 @@ def _ai_reset_warmup_read_usage(account):
 def _ai_reset_warmup_run(account):
     if account['provider'] == 'codex':
         _ai_reset_warmup_codex(account['home'])
+        return ['codex']
     elif account['mode'] == 'agy':
         _ai_reset_warmup_agy_cli()
+        return ['gemini', 'claude']
     else:
         _ai_reset_warmup_antigravity_acp(account['id'])
+        return ['gemini', 'claude']
 
 
 def _ai_reset_warmup_poll_once():
@@ -1860,15 +1941,30 @@ def _ai_reset_warmup_poll_once():
                 }
             if next_windows != snapshots.get(key):
                 snapshots[key] = next_windows
+            account_status = statuses.get(key) or {}
+            model_migration_needed = (
+                account['provider'] == 'antigravity'
+                and account_status.get('modelSelectionVersion') != 2
+                and bool(eligible_windows)
+            )
+            first_model_migration_attempt = (
+                model_migration_needed and account_status.get('modelSelectionAttemptVersion') != 2
+            )
+            if model_migration_needed:
+                due.append('target Gemini and Claude models')
             retry_ready = any(
                     now - float((snapshots.get(key) or {}).get(window_id, {}).get('lastAttemptAt') or 0) >= 900
-                    for window_id in due)
+                    for window_id in eligible_windows)
+            if first_model_migration_attempt:
+                retry_ready = True
             if due and retry_ready:
                 for window_id in eligible_windows:
                     snapshots[key][window_id]['lastAttemptAt'] = now
+                if model_migration_needed:
+                    statuses[key] = {**account_status, 'modelSelectionAttemptVersion': 2}
                 set_config_val('ai_usage_reset_warmup_state', state)
                 try:
-                    _ai_reset_warmup_run(account)
+                    warmed_models = _ai_reset_warmup_run(account)
                     completed_at = time.time()
                     for window_id in eligible_windows:
                         snapshots[key][window_id]['lastWarmedAt'] = completed_at
@@ -1876,12 +1972,17 @@ def _ai_reset_warmup_poll_once():
                     statuses[key] = {
                         'accountName': account['name'], 'provider': account['provider'],
                         'state': 'completed', 'reason': 'full quota or reset detected',
-                        'lastEvent': ', '.join(due), 'completedAt': int(completed_at), 'error': '',
+                        'lastEvent': ', '.join(due), 'modelsWarmed': warmed_models,
+                        'modelSelectionVersion': 2 if account['provider'] == 'antigravity' else None,
+                        'modelSelectionAttemptVersion': 2 if account['provider'] == 'antigravity' else None,
+                        'completedAt': int(completed_at), 'error': '',
                     }
                 except Exception as exc:
                     statuses[key] = {
                         'accountName': account['name'], 'provider': account['provider'],
                         'state': 'failed', 'lastEvent': ', '.join(due),
+                        'modelSelectionVersion': account_status.get('modelSelectionVersion'),
+                        'modelSelectionAttemptVersion': 2 if model_migration_needed else account_status.get('modelSelectionAttemptVersion'),
                         'completedAt': int(time.time()), 'error': str(exc)[:400],
                     }
             statuses.setdefault(key, {

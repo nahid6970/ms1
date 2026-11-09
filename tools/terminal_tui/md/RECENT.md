@@ -6,7 +6,8 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-11-09] - Warm Codex and Antigravity Profiles After Long Quota Resets
 
 - Added a server-side monitor that checks configured Codex and Antigravity accounts and warms full weekly/monthly quota windows at startup; it then detects usage returning to full and uses a persisted weekly/monthly cooldown when providers expose rolling reset times.
-- After a detected reset, run one short “Reply with only: OK” prompt (with no tool use requested) in that account: Codex uses `codex exec` with its `CODEX_HOME`, named Google accounts use ACP `session/new` + `session/prompt`, and the default Google profile uses the signed-in `agy` CLI.
+- For each Antigravity account, explicitly select one available Gemini model and one available Claude model and send each a short “Reply with only: OK” prompt (with no tool use requested). Codex uses one `codex exec` prompt with the account's `CODEX_HOME`.
+- Named Google accounts use ACP model `configOptions` with `session/set_config_option` and `session/prompt`; the default Google profile discovers models with `agy models` and uses the headless CLI `--model` option.
 - Skip Codex 5-hour windows, persist per-window warm-up times to avoid duplicate prompts, and add a Settings toggle/status line. Antigravity's moving `resetTime` is not treated as a reset by itself.
 - Automatic warm-up defaults on and can be disabled under Settings → AI Usage & Accounts.
 
