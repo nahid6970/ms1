@@ -4078,31 +4078,36 @@
                     </div>
                     <!-- Antigravity provider card — cyan theme -->
                     <div id="settings-provider-card-antigravity" data-testid="provider-card-antigravity" style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(8,145,178,.09) 0%,rgba(6,182,212,.04) 100%);border:1px solid rgba(34,211,238,.28);border-radius:7px;">
-                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;">
-                            <span style="width:7px;height:7px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.6);flex-shrink:0;"></span>
-                            <div style="font-size:.72rem;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:.4px;">Google Antigravity ACP</div>
+                        <!-- Header -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;">
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <span style="width:7px;height:7px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.6);flex-shrink:0;"></span>
+                                <div style="font-size:.72rem;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:.4px;">Google Antigravity ACP</div>
+                            </div>
+                            <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" id="settings-antigravity-acp-info" data-testid="antigravity-account-info" title="About the Antigravity ACP runtime" aria-label="About Antigravity ACP runtime" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:rgba(8,145,178,.14);border:1px solid rgba(34,211,238,.5);border-radius:50%;color:#67e8f9;cursor:pointer;text-decoration:none;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+                            </a>
                         </div>
+                        <!-- Runtime status -->
                         <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:rgba(103,232,249,.65);">Checking ACP runtime…</div>
+                        <!-- Profile selector row -->
                         <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px;">
-                            <label for="settings-antigravity-acp-account" style="font-size:.72rem;color:#a5f3fc;">Selected profile</label>
-                            <select id="settings-antigravity-acp-account" onchange="selectAntigravityAcpAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.35);border-radius:5px;color:#cffafe;font-size:.74rem;"><option value="default">Default</option></select>
-                            <button type="button" id="settings-antigravity-acp-rename" onclick="renameAntigravityAcpAccount()" disabled style="padding:4px 8px;background:rgba(8,145,178,.18);border:1px solid rgba(34,211,238,.3);border-radius:5px;color:#a5f3fc;font-size:.7rem;cursor:pointer;opacity:.55;">Rename profile</button>
-                            <button type="button" id="settings-antigravity-acp-remove" onclick="removeAntigravityAcpAccount()" disabled style="padding:4px 8px;background:rgba(8,145,178,.18);border:1px solid rgba(34,211,238,.3);border-radius:5px;color:#a5f3fc;font-size:.7rem;cursor:pointer;opacity:.55;">Remove profile</button>
+                            <label for="settings-antigravity-acp-account" style="font-size:.72rem;color:#a5f3fc;flex-shrink:0;">Active profile</label>
+                            <select id="settings-antigravity-acp-account" onchange="selectAntigravityAcpAccount(this.value)" style="flex:1;min-width:0;max-width:220px;height:28px;padding:2px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.35);border-radius:5px;color:#cffafe;font-size:.74rem;"><option value="default">Default</option></select>
                         </div>
-                        <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:7px;margin-top:8px;">
-                            <input id="settings-antigravity-acp-rename-input" type="text" maxlength="40" placeholder="New profile name" aria-label="New Antigravity ACP profile name" style="min-width:0;height:30px;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.3);border-radius:5px;color:#cffafe;font-size:.74rem;" onfocus="this.style.borderColor='rgba(34,211,238,.7)'" onblur="this.style.borderColor='rgba(34,211,238,.3)'">
-                            <button type="button" onclick="renameAntigravityAcpAccount()" style="padding:4px 10px;background:rgba(8,145,178,.25);border:1px solid rgba(34,211,238,.35);border-radius:5px;color:#a5f3fc;font-size:.74rem;cursor:pointer;">Rename profile</button>
+                        <div style="margin-top:5px;font-size:.68rem;color:rgba(103,232,249,.55);">Each profile stores a separate Google sign-in. Switching profiles changes the quota badge without touching other profiles.</div>
+                        <!-- Per-profile list — rendered by renderAntigravityAcpAccounts() -->
+                        <div id="settings-antigravity-acp-account-list" data-testid="antigravity-acp-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
+                        <!-- Add new profile -->
+                        <div style="display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:8px;">
+                            <input id="settings-antigravity-acp-account-name" type="text" maxlength="40" placeholder="New profile name" aria-label="New Antigravity ACP profile name" style="min-width:0;height:30px;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.3);border-radius:5px;color:#cffafe;font-size:.74rem;" onfocus="this.style.borderColor='rgba(34,211,238,.7)'" onblur="this.style.borderColor='rgba(34,211,238,.3)'" onkeydown="if(event.key==='Enter'){event.preventDefault();addAntigravityAcpAccount();}">
+                            <button type="button" id="settings-antigravity-acp-add" onclick="addAntigravityAcpAccount()" style="padding:4px 10px;background:rgba(6,182,212,.8);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;">Add profile</button>
                         </div>
-                        <div style="display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:7px;margin-top:8px;">
-                            <input id="settings-antigravity-acp-account-name" type="text" maxlength="40" placeholder="New Google account name" aria-label="New Antigravity ACP account name" style="min-width:0;height:30px;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.3);border-radius:5px;color:#cffafe;font-size:.74rem;" onfocus="this.style.borderColor='rgba(34,211,238,.7)'" onblur="this.style.borderColor='rgba(34,211,238,.3)'">
-                            <button type="button" id="settings-antigravity-acp-add" onclick="addAntigravityAcpAccount()" style="padding:4px 10px;background:rgba(6,182,212,.8);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;">Add account</button>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;">
+                        <!-- Runtime install / sign-in -->
+                        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid rgba(34,211,238,.12);">
                             <button type="button" id="settings-antigravity-acp-install" onclick="installAntigravityAcpRuntime()" style="padding:5px 10px;background:rgba(8,145,178,.2);border:1px solid rgba(34,211,238,.35);border-radius:5px;color:#a5f3fc;font-size:.74rem;cursor:pointer;">Install ACP runtime (~560 MB)</button>
                             <button type="button" id="settings-antigravity-acp-auth" onclick="toggleAntigravityAcpAuth()" disabled style="padding:5px 10px;background:rgba(6,182,212,.8);border:0;border-radius:5px;color:white;font-size:.74rem;cursor:pointer;opacity:.55;">Sign in</button>
-                            <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.7rem;color:#22d3ee;">ACP runtime</a>
                         </div>
-                        <div style="margin-top:8px;font-size:.67rem;line-height:1.45;color:rgba(103,232,249,.6);">Each profile keeps a separate ACP sign-in. Add another profile and sign in once; selecting it switches the quota badge without signing out of other profiles. ACP sign-in remains separate from <code>agy</code>.</div>
                     </div>
                 </div>
 
@@ -7917,26 +7922,210 @@ kiro-cli whoami --format json</code></pre>
 
         function renderAntigravityAcpAccounts() {
             const select = document.getElementById('settings-antigravity-acp-account');
-            const removeButton = document.getElementById('settings-antigravity-acp-remove');
-            const renameButton = document.getElementById('settings-antigravity-acp-rename');
+            const list = document.getElementById('settings-antigravity-acp-account-list');
             if (!select) return;
             const selectedId = getSelectedAntigravityAcpAccount();
+
+            // Rebuild the <select> for quick switching
             select.innerHTML = '';
             antigravityAcpAccounts.forEach(account => {
                 const option = document.createElement('option');
                 option.value = account.id;
-                const accountLabel = account.id === 'default' ? '00' : account.name;
+                const accountLabel = account.id === 'default' ? 'Default' : account.name;
                 option.textContent = `${accountLabel}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
                 select.appendChild(option);
             });
             select.value = selectedId;
-            if (removeButton) {
-                removeButton.disabled = selectedId === 'default';
-                removeButton.style.opacity = removeButton.disabled ? '.55' : '1';
+
+            // Build per-profile list rows (mirrors Codex/Kiro style)
+            if (!list) return;
+            list.innerHTML = '';
+            antigravityAcpAccounts.forEach(account => {
+                const isDefault = account.id === 'default';
+                const accountLabel = isDefault ? 'Default' : account.name;
+                const isSelected = account.id === selectedId;
+                const isSignedIn = Boolean(account.authenticated);
+                const email = account.accountEmail || '';
+
+                const row = document.createElement('div');
+                row.id = `settings-antigravity-acp-row-${account.id}`;
+                row.dataset.testid = 'antigravity-acp-profile-row';
+                row.style.cssText = `display:flex;flex-direction:column;gap:5px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};`;
+
+                // Main row: name + badges + action buttons
+                const mainRow = document.createElement('div');
+                mainRow.style.cssText = 'display:flex;align-items:center;gap:7px;min-width:0;';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'flex:1;min-width:0;font-size:.75rem;font-weight:600;color:#cffafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                nameSpan.textContent = accountLabel;
+
+                const badgeGroup = document.createElement('span');
+                badgeGroup.style.cssText = 'display:flex;align-items:center;gap:5px;flex-shrink:0;';
+
+                // "active" badge when selected
+                if (isSelected) {
+                    const activeBadge = document.createElement('span');
+                    activeBadge.textContent = 'active';
+                    activeBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.45);background:rgba(8,145,178,.2);color:#67e8f9;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;';
+                    badgeGroup.appendChild(activeBadge);
+                }
+
+                // signed-in / not connected badge
+                const authBadge = document.createElement('span');
+                if (isSignedIn) {
+                    authBadge.textContent = email || 'signed in';
+                    authBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.3);background:rgba(6,182,212,.12);color:#a5f3fc;font-size:.62rem;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                } else {
+                    authBadge.textContent = 'not signed in';
+                    authBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(148,163,184,.18);background:rgba(148,163,184,.07);color:#94a3b8;font-size:.62rem;font-weight:600;';
+                }
+                badgeGroup.appendChild(authBadge);
+
+                const actions = document.createElement('span');
+                actions.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;';
+
+                // Use button
+                const useButton = document.createElement('button');
+                useButton.type = 'button';
+                useButton.id = `settings-antigravity-acp-use-${account.id}`;
+                useButton.dataset.testid = 'antigravity-acp-use';
+                useButton.textContent = isSelected ? 'Active' : 'Use';
+                useButton.title = isSelected ? 'This profile is already active' : `Switch to profile "${accountLabel}"`;
+                useButton.disabled = isSelected;
+                useButton.style.cssText = `padding:3px 8px;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:${isSelected ? 'rgba(8,145,178,.25)' : 'rgba(8,145,178,.12)'};color:${isSelected ? '#67e8f9' : '#a5f3fc'};font-size:.68rem;cursor:${isSelected ? 'default' : 'pointer'};opacity:${isSelected ? '.7' : '1'};`;
+                useButton.onclick = () => selectAntigravityAcpAccount(account.id);
+
+                // Edit (rename) button — only for non-default
+                if (!isDefault) {
+                    const editButton = document.createElement('button');
+                    editButton.type = 'button';
+                    editButton.id = `settings-antigravity-acp-edit-${account.id}`;
+                    editButton.dataset.testid = 'antigravity-acp-edit';
+                    editButton.title = `Rename profile "${accountLabel}"`;
+                    editButton.setAttribute('aria-label', `Rename profile ${accountLabel}`);
+                    editButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
+                    editButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+                    editButton.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel);
+                    actions.appendChild(editButton);
+
+                    // Remove button
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.id = `settings-antigravity-acp-del-${account.id}`;
+                    removeButton.dataset.testid = 'antigravity-acp-delete';
+                    removeButton.title = `Remove profile "${accountLabel}"`;
+                    removeButton.setAttribute('aria-label', `Remove profile ${accountLabel}`);
+                    removeButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(239,68,68,.28);border-radius:5px;background:rgba(239,68,68,.07);color:#fca5a5;cursor:pointer;';
+                    removeButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+                    removeButton.onclick = () => removeAntigravityAcpAccountById(account.id, accountLabel);
+                    actions.appendChild(removeButton);
+                }
+
+                actions.prepend(useButton);
+                mainRow.appendChild(nameSpan);
+                mainRow.appendChild(badgeGroup);
+                mainRow.appendChild(actions);
+                row.appendChild(mainRow);
+
+                // Inline edit form (hidden by default, toggled by edit button)
+                if (!isDefault) {
+                    const editForm = document.createElement('div');
+                    editForm.id = `settings-antigravity-acp-editform-${account.id}`;
+                    editForm.dataset.testid = 'antigravity-acp-editform';
+                    editForm.style.cssText = 'display:none;grid-template-columns:1fr auto auto;gap:6px;align-items:center;';
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.id = `settings-antigravity-acp-editinput-${account.id}`;
+                    nameInput.dataset.testid = 'antigravity-acp-editinput';
+                    nameInput.maxLength = 40;
+                    nameInput.placeholder = 'New profile name';
+                    nameInput.setAttribute('aria-label', `Rename profile ${accountLabel}`);
+                    nameInput.style.cssText = 'min-width:0;height:28px;padding:3px 8px;background:rgba(0,0,0,.35);border:1px solid rgba(34,211,238,.45);border-radius:5px;color:#cffafe;font-size:.74rem;outline:none;';
+                    nameInput.onfocus = () => { nameInput.style.borderColor = 'rgba(34,211,238,.8)'; };
+                    nameInput.onblur = () => { nameInput.style.borderColor = 'rgba(34,211,238,.45)'; };
+                    nameInput.onkeydown = (e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); saveAntigravityAcpRename(account.id, nameInput.value); }
+                        if (e.key === 'Escape') { e.preventDefault(); toggleAntigravityAcpInlineEdit(account.id, accountLabel, true); }
+                    };
+                    const saveBtn = document.createElement('button');
+                    saveBtn.type = 'button';
+                    saveBtn.id = `settings-antigravity-acp-savename-${account.id}`;
+                    saveBtn.dataset.testid = 'antigravity-acp-savename';
+                    saveBtn.textContent = 'Save';
+                    saveBtn.style.cssText = 'padding:3px 10px;border:0;border-radius:5px;background:rgba(6,182,212,.8);color:white;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
+                    saveBtn.onclick = () => saveAntigravityAcpRename(account.id, nameInput.value);
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.id = `settings-antigravity-acp-cancelname-${account.id}`;
+                    cancelBtn.dataset.testid = 'antigravity-acp-cancelname';
+                    cancelBtn.textContent = 'Cancel';
+                    cancelBtn.style.cssText = 'padding:3px 8px;border:1px solid rgba(34,211,238,.25);border-radius:5px;background:transparent;color:#94a3b8;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
+                    cancelBtn.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel, true);
+                    editForm.appendChild(nameInput);
+                    editForm.appendChild(saveBtn);
+                    editForm.appendChild(cancelBtn);
+                    row.appendChild(editForm);
+                }
+
+                list.appendChild(row);
+            });
+        }
+
+        function toggleAntigravityAcpInlineEdit(accountId, currentName, forceClose = false) {
+            const form = document.getElementById(`settings-antigravity-acp-editform-${accountId}`);
+            const input = document.getElementById(`settings-antigravity-acp-editinput-${accountId}`);
+            const editBtn = document.getElementById(`settings-antigravity-acp-edit-${accountId}`);
+            if (!form) return;
+            const isOpen = form.style.display !== 'none';
+            if (forceClose || isOpen) {
+                form.style.display = 'none';
+                if (editBtn) editBtn.style.background = 'rgba(8,145,178,.12)';
+            } else {
+                form.style.display = 'grid';
+                if (input) { input.value = currentName; input.focus(); input.select(); }
+                if (editBtn) editBtn.style.background = 'rgba(34,211,238,.2)';
             }
-            if (renameButton) {
-                renameButton.disabled = selectedId === 'default';
-                renameButton.style.opacity = renameButton.disabled ? '.55' : '1';
+        }
+
+        async function saveAntigravityAcpRename(accountId, newName) {
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            const name = (newName || '').trim();
+            if (!name) {
+                const input = document.getElementById(`settings-antigravity-acp-editinput-${accountId}`);
+                if (statusEl) statusEl.textContent = 'Enter a new name for this profile.';
+                if (input) input.focus();
+                return;
+            }
+            try {
+                const response = await fetch('/api/antigravity/acp/accounts', {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId, name }),
+                });
+                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/accounts (rename)');
+                if (!response.ok) throw new Error(data.error || 'Could not rename this profile.');
+                await loadAntigravityAcpAccounts();
+                if (statusEl) statusEl.textContent = `Profile renamed to "${data.account.name}".`;
+            } catch (error) {
+                if (statusEl) statusEl.textContent = String(error.message || error);
+            }
+        }
+
+        async function removeAntigravityAcpAccountById(accountId, accountLabel) {
+            if (!confirm(`Remove the "${accountLabel}" ACP profile and its saved sign-in?`)) return;
+            const statusEl = document.getElementById('settings-antigravity-acp-status');
+            try {
+                const response = await fetch('/api/antigravity/acp/accounts', {
+                    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not remove this profile.');
+                localStorage.setItem('antigravity-acp-selected-account', 'default');
+                await loadAntigravityAcpAccounts();
+                await refreshAntigravityAcpStatus();
+                await loadAntigravityUsage(true);
+                if (statusEl) statusEl.textContent = `Profile "${accountLabel}" and its saved sign-in were removed.`;
+            } catch (error) {
+                if (statusEl) statusEl.textContent = String(error.message || error);
             }
         }
 
@@ -7986,51 +8175,19 @@ kiro-cli whoami --format json</code></pre>
         }
 
         async function renameAntigravityAcpAccount() {
+            // Legacy shim — opens the inline rename form for the currently selected profile
             const accountId = getSelectedAntigravityAcpAccount();
             const account = antigravityAcpAccounts.find(item => item.id === accountId);
-            const input = document.getElementById('settings-antigravity-acp-rename-input');
-            const statusEl = document.getElementById('settings-antigravity-acp-status');
             if (!account || accountId === 'default') return;
-            const name = input?.value.trim();
-            if (!name) {
-                if (statusEl) statusEl.textContent = 'Enter a new name for the selected profile.';
-                input?.focus();
-                return;
-            }
-            try {
-                const response = await fetch('/api/antigravity/acp/accounts', {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId, name }),
-                });
-                const data = await readAntigravityAcpResponse(response, '/api/antigravity/acp/accounts (rename)');
-                if (!response.ok) throw new Error(data.error || 'Could not rename Antigravity ACP profile.');
-                input.value = '';
-                await loadAntigravityAcpAccounts();
-                if (statusEl) statusEl.textContent = `Profile renamed to “${data.account.name}”.`;
-            } catch (error) {
-                if (statusEl) statusEl.textContent = String(error.message || error);
-            }
+            toggleAntigravityAcpInlineEdit(accountId, account.name);
         }
 
         async function removeAntigravityAcpAccount() {
+            // Legacy shim — delegates to removeAntigravityAcpAccountById for selected profile
             const accountId = getSelectedAntigravityAcpAccount();
             const account = antigravityAcpAccounts.find(item => item.id === accountId);
             if (!account || accountId === 'default') return;
-            if (!confirm(`Remove the “${account.name}” ACP profile and its saved sign-in?`)) return;
-            const statusEl = document.getElementById('settings-antigravity-acp-status');
-            try {
-                const response = await fetch('/api/antigravity/acp/accounts', {
-                    method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId }),
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Could not remove Antigravity ACP profile.');
-                localStorage.setItem('antigravity-acp-selected-account', 'default');
-                await loadAntigravityAcpAccounts();
-                await refreshAntigravityAcpStatus();
-                await loadAntigravityUsage(true);
-                if (statusEl) statusEl.textContent = `Profile “${account.name}” and its saved sign-in were removed.`;
-            } catch (error) {
-                if (statusEl) statusEl.textContent = String(error.message || error);
-            }
+            await removeAntigravityAcpAccountById(accountId, account.name);
         }
 
         async function readAntigravityAcpResponse(response, endpoint) {
