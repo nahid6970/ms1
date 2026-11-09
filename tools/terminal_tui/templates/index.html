@@ -7973,41 +7973,66 @@ kiro-cli whoami --format json</code></pre>
             list.innerHTML = '';
             // Always render a Default row first — reads quota from the agy CLI
             (function renderDefaultRow() {
-                const defaultAccount = antigravityAcpAccounts.find(a => a.id === 'default') || { id: 'default', name: 'Default', authenticated: false };
                 const isSelected = effectiveSelectedId === 'default';
-                const isSignedIn = Boolean(defaultAccount.authenticated);
                 const row = document.createElement('div');
                 row.id = 'settings-antigravity-acp-row-default';
                 row.dataset.testid = 'antigravity-acp-profile-row';
-                row.style.cssText = `display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};min-width:0;`;
+                row.style.cssText = `display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};min-width:0;`;
+
+                // Left info col matching named rows
+                const infoCol = document.createElement('span');
+                infoCol.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;';
+                const nameRow = document.createElement('span');
+                nameRow.style.cssText = 'display:flex;align-items:center;gap:5px;min-width:0;';
                 const nameSpan = document.createElement('span');
-                nameSpan.style.cssText = 'flex:1;min-width:0;font-size:.75rem;font-weight:600;color:#cffafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                nameSpan.style.cssText = 'font-size:.75rem;font-weight:600;color:#cffafe;';
                 nameSpan.textContent = 'Default';
-                const badgeGroup = document.createElement('span');
-                badgeGroup.style.cssText = 'display:flex;align-items:center;gap:5px;flex-shrink:0;';
-                const cliTag = document.createElement('span');
-                cliTag.textContent = 'agy CLI';
-                cliTag.title = 'Uses the agy CLI command to read quota \u2014 reflects whichever account agy is signed into';
-                cliTag.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.25);background:rgba(8,145,178,.1);color:#67e8f9;font-size:.62rem;font-weight:600;font-family:monospace;';
-                badgeGroup.appendChild(cliTag);
+                nameRow.appendChild(nameSpan);
                 if (isSelected) {
-                    const activeBadge = document.createElement('span');
-                    activeBadge.textContent = 'active';
-                    activeBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.45);background:rgba(8,145,178,.2);color:#67e8f9;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;';
-                    badgeGroup.appendChild(activeBadge);
+                    const activeDot = document.createElement('span');
+                    activeDot.style.cssText = 'flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#22d3ee;box-shadow:0 0 5px rgba(34,211,238,.7);';
+                    activeDot.title = 'Active profile';
+                    nameRow.appendChild(activeDot);
                 }
+                const subLabel = document.createElement('span');
+                subLabel.style.cssText = 'font-size:.67rem;color:#67e8f9;font-family:monospace;';
+                subLabel.title = 'Uses the agy CLI command \u2014 reflects whichever account agy is signed into';
+                subLabel.textContent = 'agy --print /usage';
+                infoCol.appendChild(nameRow);
+                infoCol.appendChild(subLabel);
+
+                // Right: 3 icon slots — use + two placeholders to keep alignment with named rows
+                const actions = document.createElement('span');
+                actions.style.cssText = 'display:flex;align-items:center;gap:3px;flex-shrink:0;';
+
                 const useButton = document.createElement('button');
                 useButton.type = 'button';
                 useButton.id = 'settings-antigravity-acp-use-default';
                 useButton.dataset.testid = 'antigravity-acp-use';
-                useButton.textContent = isSelected ? 'Active' : 'Use';
-                useButton.title = isSelected ? 'Default profile is already active' : 'Switch to Default (agy CLI account)';
+                useButton.title = isSelected ? 'Active profile' : 'Switch to Default (agy CLI)';
+                useButton.setAttribute('aria-label', isSelected ? 'Default profile is active' : 'Switch to Default profile');
                 useButton.disabled = isSelected;
-                useButton.style.cssText = `padding:3px 8px;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:${isSelected ? 'rgba(8,145,178,.25)' : 'rgba(8,145,178,.12)'};color:${isSelected ? '#67e8f9' : '#a5f3fc'};font-size:.68rem;cursor:${isSelected ? 'default' : 'pointer'};opacity:${isSelected ? '.7' : '1'};flex-shrink:0;`;
-                useButton.onclick = () => selectAntigravityAcpAccount('default');
-                row.appendChild(nameSpan);
-                row.appendChild(badgeGroup);
-                row.appendChild(useButton);
+                if (isSelected) {
+                    useButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+                    useButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.5);border-radius:5px;background:rgba(8,145,178,.25);color:#67e8f9;cursor:default;';
+                } else {
+                    useButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+                    useButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
+                    useButton.onmouseenter = () => { useButton.style.borderColor = 'rgba(34,211,238,.7)'; useButton.style.background = 'rgba(8,145,178,.25)'; };
+                    useButton.onmouseleave = () => { useButton.style.borderColor = 'rgba(34,211,238,.3)'; useButton.style.background = 'rgba(8,145,178,.12)'; };
+                }
+                useButton.onclick = () => !isSelected && selectAntigravityAcpAccount('default');
+                // Two empty spacers to align with named rows that have edit + delete
+                const spacer1 = document.createElement('span');
+                spacer1.style.cssText = 'width:26px;height:26px;flex-shrink:0;';
+                const spacer2 = document.createElement('span');
+                spacer2.style.cssText = 'width:26px;height:26px;flex-shrink:0;';
+                actions.appendChild(useButton);
+                actions.appendChild(spacer1);
+                actions.appendChild(spacer2);
+
+                row.appendChild(infoCol);
+                row.appendChild(actions);
                 list.appendChild(row);
             })();
             if (!namedAccounts.length) {
@@ -8028,71 +8053,94 @@ kiro-cli whoami --format json</code></pre>
                 row.dataset.testid = 'antigravity-acp-profile-row';
                 row.style.cssText = `display:flex;flex-direction:column;gap:5px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};`;
 
+                // Main row: left info + fixed-width right icons
                 const mainRow = document.createElement('div');
-                mainRow.style.cssText = 'display:flex;align-items:center;gap:7px;min-width:0;';
+                mainRow.style.cssText = 'display:flex;align-items:center;gap:8px;min-width:0;';
 
+                // Left: name + email stacked
+                const infoCol = document.createElement('span');
+                infoCol.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;';
+
+                const nameRow = document.createElement('span');
+                nameRow.style.cssText = 'display:flex;align-items:center;gap:5px;min-width:0;';
                 const nameSpan = document.createElement('span');
-                nameSpan.style.cssText = 'flex:1;min-width:0;font-size:.75rem;font-weight:600;color:#cffafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                nameSpan.style.cssText = 'font-size:.75rem;font-weight:600;color:#cffafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
                 nameSpan.textContent = accountLabel;
-
-                const badgeGroup = document.createElement('span');
-                badgeGroup.style.cssText = 'display:flex;align-items:center;gap:5px;flex-shrink:0;';
-
                 if (isSelected) {
-                    const activeBadge = document.createElement('span');
-                    activeBadge.textContent = 'active';
-                    activeBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.45);background:rgba(8,145,178,.2);color:#67e8f9;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;';
-                    badgeGroup.appendChild(activeBadge);
-                }
-
-                const authBadge = document.createElement('span');
-                if (isSignedIn) {
-                    authBadge.textContent = email || 'signed in';
-                    authBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.3);background:rgba(6,182,212,.12);color:#a5f3fc;font-size:.62rem;font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                    const activeDot = document.createElement('span');
+                    activeDot.style.cssText = 'flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#22d3ee;box-shadow:0 0 5px rgba(34,211,238,.7);';
+                    activeDot.title = 'Active profile';
+                    nameRow.appendChild(nameSpan);
+                    nameRow.appendChild(activeDot);
                 } else {
-                    authBadge.textContent = 'not signed in';
-                    authBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(148,163,184,.18);background:rgba(148,163,184,.07);color:#94a3b8;font-size:.62rem;font-weight:600;';
+                    nameRow.appendChild(nameSpan);
                 }
-                badgeGroup.appendChild(authBadge);
+                infoCol.appendChild(nameRow);
 
+                const emailSpan = document.createElement('span');
+                emailSpan.style.cssText = 'font-size:.67rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                if (isSignedIn) {
+                    emailSpan.textContent = email || 'signed in';
+                    emailSpan.style.color = email ? '#67e8f9' : '#a5f3fc';
+                } else {
+                    emailSpan.textContent = 'not signed in';
+                    emailSpan.style.color = '#64748b';
+                }
+                infoCol.appendChild(emailSpan);
+
+                // Right: fixed-width icon buttons — always same 3 slots
                 const actions = document.createElement('span');
-                actions.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;';
+                actions.style.cssText = 'display:flex;align-items:center;gap:3px;flex-shrink:0;';
 
+                // Use / Active icon button (26x26)
                 const useButton = document.createElement('button');
                 useButton.type = 'button';
                 useButton.id = `settings-antigravity-acp-use-${account.id}`;
                 useButton.dataset.testid = 'antigravity-acp-use';
-                useButton.textContent = isSelected ? 'Active' : 'Use';
-                useButton.title = isSelected ? 'This profile is already active' : `Switch to profile "${accountLabel}"`;
+                useButton.title = isSelected ? 'Active profile' : `Use profile "${accountLabel}"`;
+                useButton.setAttribute('aria-label', isSelected ? `Profile ${accountLabel} is active` : `Switch to profile ${accountLabel}`);
                 useButton.disabled = isSelected;
-                useButton.style.cssText = `padding:3px 8px;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:${isSelected ? 'rgba(8,145,178,.25)' : 'rgba(8,145,178,.12)'};color:${isSelected ? '#67e8f9' : '#a5f3fc'};font-size:.68rem;cursor:${isSelected ? 'default' : 'pointer'};opacity:${isSelected ? '.7' : '1'};`;
-                useButton.onclick = () => selectAntigravityAcpAccount(account.id);
+                if (isSelected) {
+                    useButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+                    useButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.5);border-radius:5px;background:rgba(8,145,178,.25);color:#67e8f9;cursor:default;';
+                } else {
+                    useButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+                    useButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
+                    useButton.onmouseenter = () => { useButton.style.borderColor = 'rgba(34,211,238,.7)'; useButton.style.background = 'rgba(8,145,178,.25)'; };
+                    useButton.onmouseleave = () => { useButton.style.borderColor = 'rgba(34,211,238,.3)'; useButton.style.background = 'rgba(8,145,178,.12)'; };
+                }
+                useButton.onclick = () => !isSelected && selectAntigravityAcpAccount(account.id);
 
+                // Edit (pencil) icon button
                 const editButton = document.createElement('button');
                 editButton.type = 'button';
                 editButton.id = `settings-antigravity-acp-edit-${account.id}`;
                 editButton.dataset.testid = 'antigravity-acp-edit';
                 editButton.title = `Rename profile "${accountLabel}"`;
                 editButton.setAttribute('aria-label', `Rename profile ${accountLabel}`);
-                editButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
+                editButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.25);border-radius:5px;background:transparent;color:#7dd3fc;cursor:pointer;';
                 editButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+                editButton.onmouseenter = () => { editButton.style.borderColor = 'rgba(34,211,238,.6)'; editButton.style.background = 'rgba(8,145,178,.15)'; };
+                editButton.onmouseleave = () => { editButton.style.borderColor = 'rgba(34,211,238,.25)'; editButton.style.background = 'transparent'; };
                 editButton.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel);
 
+                // Delete (trash) icon button
                 const removeButton = document.createElement('button');
                 removeButton.type = 'button';
                 removeButton.id = `settings-antigravity-acp-del-${account.id}`;
                 removeButton.dataset.testid = 'antigravity-acp-delete';
                 removeButton.title = `Remove profile "${accountLabel}"`;
                 removeButton.setAttribute('aria-label', `Remove profile ${accountLabel}`);
-                removeButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(239,68,68,.28);border-radius:5px;background:rgba(239,68,68,.07);color:#fca5a5;cursor:pointer;';
+                removeButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(239,68,68,.2);border-radius:5px;background:transparent;color:#f87171;cursor:pointer;';
                 removeButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+                removeButton.onmouseenter = () => { removeButton.style.borderColor = 'rgba(239,68,68,.5)'; removeButton.style.background = 'rgba(239,68,68,.1)'; };
+                removeButton.onmouseleave = () => { removeButton.style.borderColor = 'rgba(239,68,68,.2)'; removeButton.style.background = 'transparent'; };
                 removeButton.onclick = () => removeAntigravityAcpAccountById(account.id, accountLabel);
 
                 actions.appendChild(useButton);
                 actions.appendChild(editButton);
                 actions.appendChild(removeButton);
-                mainRow.appendChild(nameSpan);
-                mainRow.appendChild(badgeGroup);
+                mainRow.appendChild(infoCol);
                 mainRow.appendChild(actions);
                 row.appendChild(mainRow);
 
