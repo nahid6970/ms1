@@ -4046,10 +4046,10 @@
                         <div style="margin-top:9px;padding-top:8px;border-top:1px solid var(--border-color);">
                             <label for="settings-ai-reset-warmup-enabled" style="display:flex;align-items:flex-start;gap:7px;font-size:.76rem;color:var(--text-primary);cursor:pointer;">
                                 <input type="checkbox" id="settings-ai-reset-warmup-enabled" onchange="saveAIResetWarmupEnabled(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:1px 0 0;flex-shrink:0;">
-                                <span>Automatically start Codex and Antigravity accounts for weekly/monthly quota windows</span>
+                                <span><strong>Automatic quota-reset warm-up</strong><br><span style="font-size:.68rem;color:var(--text-muted);">Turn this off to stop automatic prompts. Manual Warm buttons in the usage tables still work.</span></span>
                             </label>
                             <div id="settings-ai-reset-warmup-status" role="status" style="margin:5px 0 0 23px;font-size:.66rem;color:var(--text-muted);">Checking reset warm-up status…</div>
-                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">For Antigravity, sends one short Gemini prompt and one Claude prompt when a weekly window is full, then after a reset or weekly cooldown. Codex sends one prompt for long quota windows; 5-hour windows are skipped. Prompts use a small amount of quota and ask the agent not to use tools.</div>
+                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">When on, sends a short prompt when a weekly/monthly window is full or resets. Codex skips 5-hour windows. Prompts use quota and ask the agent not to use tools.</div>
                         </div>
                     </div>
                     <!-- Codex provider card — green theme -->
@@ -6843,6 +6843,43 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        async function manuallyWarmUsageAccount(button, provider, accountId, family = '') {
+            if (!button || button.disabled) return;
+            const original = button.textContent;
+            button.disabled = true;
+            button.textContent = 'Starting…';
+            button.title = 'Sending a short prompt to this account';
+            try {
+                const response = await fetch('/api/ai-usage/reset-warmup/manual', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, accountId, family })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not start warm-up.');
+                button.textContent = 'Warming…';
+                const statusKey = `${provider}:${accountId || 'default'}`;
+                for (let attempt = 0; attempt < 50; attempt += 1) {
+                    await new Promise(resolve => window.setTimeout(resolve, 1200));
+                    const statusResponse = await fetch('/api/ai-usage/reset-warmup');
+                    const statusData = await statusResponse.json();
+                    const warmStatus = statusData.state?.statuses?.[statusKey];
+                    if (warmStatus?.state === 'completed') {
+                        button.textContent = 'Warmed';
+                        button.title = `Warm-up complete${warmStatus.modelsWarmed?.length ? `: ${warmStatus.modelsWarmed.join(', ')}` : ''}`;
+                        return;
+                    }
+                    if (warmStatus?.state === 'failed') throw new Error(warmStatus.error || 'Warm-up failed.');
+                }
+                throw new Error('Warm-up is still running. Check the settings status shortly.');
+            } catch (error) {
+                button.textContent = 'Retry';
+                button.title = String(error.message || error);
+            } finally {
+                button.disabled = false;
+                window.setTimeout(() => { if (button.isConnected && button.textContent !== 'Starting…' && button.textContent !== 'Warming…') button.textContent = original; }, 5000);
+            }
+        }
+
         function getSelectedCodexUsageAccount() {
             return localStorage.getItem('codex-usage-account') || '';
         }
@@ -7040,6 +7077,17 @@ kiro-cli whoami --format json</code></pre>
                         };
                     }
                     useCell.appendChild(useBtn);
+
+                    const warmBtn = document.createElement('button');
+                    warmBtn.type = 'button';
+                    warmBtn.textContent = 'Warm';
+                    warmBtn.title = `Send a short Codex prompt for ${accountLabel}`;
+                    warmBtn.setAttribute('aria-label', `Warm up ${accountLabel} Codex account`);
+                    warmBtn.style.cssText = 'display:block;margin:6px auto 0;padding:3px 8px;border:1px solid rgba(52,211,153,.38);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.7rem;cursor:pointer;';
+                    warmBtn.onmouseenter = () => { warmBtn.style.borderColor = '#34d399'; warmBtn.style.background = 'rgba(16,185,129,.16)'; };
+                    warmBtn.onmouseleave = () => { warmBtn.style.borderColor = 'rgba(52,211,153,.38)'; warmBtn.style.background = 'rgba(16,185,129,.08)'; };
+                    warmBtn.onclick = () => manuallyWarmUsageAccount(warmBtn, 'codex', account.id || '');
+                    useCell.appendChild(warmBtn);
 
                     row.append(accountCell, fiveHourCell, weeklyCell, useCell);
                     rows.appendChild(row);
@@ -7784,6 +7832,18 @@ kiro-cli whoami --format json</code></pre>
                         cell.appendChild(line);
                     });
                 };
+                const addFamilyWarmButton = (cell, account, family) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.textContent = 'Warm';
+                    button.title = `Send a short ${family === 'gemini' ? 'Gemini' : 'Claude'} prompt for ${account.name || account.id}`;
+                    button.setAttribute('aria-label', `Warm ${family} for ${account.name || account.id}`);
+                    button.style.cssText = 'margin-top:5px;padding:2px 7px;border:1px solid rgba(34,211,238,.38);border-radius:5px;background:rgba(8,145,178,.08);color:#67e8f9;font-size:.68rem;cursor:pointer;';
+                    button.onmouseenter = () => { button.style.borderColor = '#22d3ee'; button.style.background = 'rgba(8,145,178,.16)'; };
+                    button.onmouseleave = () => { button.style.borderColor = 'rgba(34,211,238,.38)'; button.style.background = 'rgba(8,145,178,.08)'; };
+                    button.onclick = () => manuallyWarmUsageAccount(button, 'antigravity', account.id, family);
+                    cell.appendChild(button);
+                };
 
                 const activeId = getSelectedAntigravityAcpAccount();
                 results.forEach(({ account, data, error }) => {
@@ -7823,6 +7883,8 @@ kiro-cli whoami --format json</code></pre>
                         renderQuotaCell(geminiCell, geminiWindows, '—');
                         renderQuotaCell(claudeCell, claudeWindows, '—');
                     }
+                    addFamilyWarmButton(geminiCell, account, 'gemini');
+                    addFamilyWarmButton(claudeCell, account, 'claude');
                     // Use / Used button (like Codex comparison)
                     const isActive = account.id === activeId;
                     const useBtn = document.createElement('button');

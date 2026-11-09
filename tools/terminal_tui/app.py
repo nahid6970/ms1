@@ -1695,7 +1695,7 @@ def _ai_reset_warmup_codex(codex_home):
         raise RuntimeError(detail[-1][:400] if detail else f'Codex warm-up exited with code {result.returncode}.')
 
 
-def _ai_reset_warmup_agy_models(executable):
+def _ai_reset_warmup_agy_models(executable, families=('gemini', 'claude')):
     result = subprocess.run(
         [executable, 'models'], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', timeout=30,
@@ -1711,7 +1711,7 @@ def _ai_reset_warmup_agy_models(executable):
         if match:
             model_ids.add(match.group(1))
     selected = {}
-    for family in ('gemini', 'claude'):
+    for family in families:
         candidates = [model for model in model_ids if family in model.casefold()]
         if candidates:
             if family == 'gemini':
@@ -1719,20 +1719,20 @@ def _ai_reset_warmup_agy_models(executable):
             else:
                 candidates.sort(key=lambda model: ('sonnet' not in model.casefold(), 'thinking' in model.casefold(), len(model)))
             selected[family] = candidates[0]
-    if len(selected) != 2:
-        missing = ', '.join(family for family in ('gemini', 'claude') if family not in selected)
+    if len(selected) != len(families):
+        missing = ', '.join(family for family in families if family not in selected)
         raise RuntimeError(f'agy did not list a usable {missing} model for this account.')
     return selected
 
 
-def _ai_reset_warmup_agy_cli():
+def _ai_reset_warmup_agy_cli(families=('gemini', 'claude')):
     executable = _antigravity_cli_executable()
     if not executable:
         raise RuntimeError('Antigravity CLI (agy) was not found.')
     process_env = os.environ.copy()
     process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
     process_env['PATH'] = os.path.dirname(executable) + os.pathsep + process_env.get('PATH', '')
-    for family, model in _ai_reset_warmup_agy_models(executable).items():
+    for family, model in _ai_reset_warmup_agy_models(executable, families).items():
         result = subprocess.run(
             [executable, '--print', 'Reply with only: OK. Do not use tools or access files.',
              '--model', model, '--output-format', 'json', '--print-timeout', '60s'],
@@ -1749,7 +1749,7 @@ def _ai_reset_warmup_agy_cli():
             raise RuntimeError(f'agy {family} warm-up failed: {detail or "no successful response"}')
 
 
-def _ai_reset_warmup_acp_model_options(session_result):
+def _ai_reset_warmup_acp_model_options(session_result, families=('gemini', 'claude')):
     options = session_result.get('configOptions') or []
     for config_option in options:
         if not isinstance(config_option, dict):
@@ -1768,7 +1768,7 @@ def _ai_reset_warmup_acp_model_options(session_result):
                         flattened.append(value)
             collect(config_option.get('options'))
             selected = {}
-            for family in ('gemini', 'claude'):
+            for family in families:
                 candidates = [item for item in flattened if family in ' '.join(str(item.get(field) or '') for field in ('value', 'name', 'description')).casefold()]
                 if candidates:
                     if family == 'gemini':
@@ -1776,13 +1776,13 @@ def _ai_reset_warmup_acp_model_options(session_result):
                     else:
                         candidates.sort(key=lambda item: ('sonnet' not in str(item.get('value') or item.get('name') or '').casefold(), 'thinking' in str(item.get('value') or item.get('name') or '').casefold()))
                     selected[family] = {'configId': config_option.get('id'), 'value': candidates[0]['value']}
-            if len(selected) == 2:
+            if len(selected) == len(families):
                 return selected
             break
     raise RuntimeError('Antigravity ACP did not offer both Gemini and Claude model choices for this profile.')
 
 
-def _ai_reset_warmup_antigravity_acp(account_id):
+def _ai_reset_warmup_antigravity_acp(account_id, families=('gemini', 'claude')):
     paths = _antigravity_acp_runtime_paths()
     if not os.path.isfile(paths['server']):
         raise RuntimeError('The Antigravity ACP runtime is not installed.')
@@ -1798,7 +1798,7 @@ def _ai_reset_warmup_antigravity_acp(account_id):
     process_env['GEMINI_HOME'] = profile_home
     process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
     request_id = 1
-    for family in ('gemini', 'claude'):
+    for family in families:
         process = subprocess.Popen(
             [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
             text=True, encoding='utf-8', errors='replace', bufsize=1, cwd=profile_home, env=process_env,
@@ -1821,7 +1821,7 @@ def _ai_reset_warmup_antigravity_acp(account_id):
             session_id = session.get('sessionId')
             if not session_id:
                 raise RuntimeError('Antigravity ACP did not return a session ID.')
-            model = _ai_reset_warmup_acp_model_options(session).get(family)
+            model = _ai_reset_warmup_acp_model_options(session, families).get(family)
             if not model:
                 raise RuntimeError(f'Antigravity ACP did not offer a {family} model for this profile.')
             _antigravity_acp_rpc_request(process, request_id, 'session/set_config_option', {
@@ -1875,16 +1875,18 @@ def _ai_reset_warmup_read_usage(account):
     return _read_antigravity_usage(account['id'])
 
 
-def _ai_reset_warmup_run(account):
+def _ai_reset_warmup_run(account, families=None):
     if account['provider'] == 'codex':
         _ai_reset_warmup_codex(account['home'])
         return ['codex']
     elif account['mode'] == 'agy':
-        _ai_reset_warmup_agy_cli()
-        return ['gemini', 'claude']
+        selected = tuple(families or ('gemini', 'claude'))
+        _ai_reset_warmup_agy_cli(selected)
+        return list(selected)
     else:
-        _ai_reset_warmup_antigravity_acp(account['id'])
-        return ['gemini', 'claude']
+        selected = tuple(families or ('gemini', 'claude'))
+        _ai_reset_warmup_antigravity_acp(account['id'], selected)
+        return list(selected)
 
 
 def _ai_reset_warmup_poll_once():
@@ -1942,6 +1944,8 @@ def _ai_reset_warmup_poll_once():
             if next_windows != snapshots.get(key):
                 snapshots[key] = next_windows
             account_status = statuses.get(key) or {}
+            if account_status.get('state') == 'manual-running':
+                continue
             model_migration_needed = (
                 account['provider'] == 'antigravity'
                 and account_status.get('modelSelectionVersion') != 2
@@ -2034,6 +2038,80 @@ def api_ai_usage_reset_warmup():
         'accounts': [{'provider': item['provider'], 'id': item['id'], 'name': item['name']}
                      for item in _ai_reset_warmup_accounts()],
     })
+
+
+def _ai_reset_warmup_manual_worker(account, families):
+    key = f"{account['provider']}:{account['id']}"
+    state = get_config_val('ai_usage_reset_warmup_state', dict)
+    state = state if isinstance(state, dict) else {}
+    statuses = state.setdefault('statuses', {})
+    try:
+        with _AI_RESET_WARMUP_LOCK:
+            warmed = _ai_reset_warmup_run(account, families)
+            completed_at = time.time()
+            # Record the manual action against the matching long windows so auto mode
+            # does not immediately repeat the same prompt after a manual warm-up.
+            try:
+                usage = _ai_reset_warmup_read_usage(account)
+                snapshots = state.setdefault('snapshots', {})
+                account_windows = snapshots.setdefault(key, {})
+                for window in usage.get('windows') or []:
+                    if not _ai_reset_window_is_long(window):
+                        continue
+                    identity = f"{window.get('id') or ''} {window.get('label') or ''}".casefold()
+                    if account['provider'] == 'antigravity':
+                        matches_family = any(family in identity for family in families)
+                        if 'claude' in families and str(window.get('id') or '').casefold().startswith('3p-'):
+                            matches_family = True
+                        if not matches_family:
+                            continue
+                    window_id = str(window.get('id') or window.get('label') or 'long-window')
+                    previous = account_windows.get(window_id) or {}
+                    account_windows[window_id] = {**(previous if isinstance(previous, dict) else {}),
+                                                  'lastWarmedAt': completed_at, 'lastAttemptAt': completed_at}
+            except Exception:
+                pass
+            statuses[key] = {
+                'accountName': account['name'], 'provider': account['provider'],
+                'state': 'completed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
+                'modelsWarmed': warmed, 'completedAt': int(completed_at), 'error': '',
+            }
+            set_config_val('ai_usage_reset_warmup_state', state)
+    except Exception as exc:
+        statuses[key] = {
+            'accountName': account['name'], 'provider': account['provider'],
+            'state': 'failed', 'reason': 'manual warm-up', 'lastEvent': 'manual',
+            'completedAt': int(time.time()), 'error': str(exc)[:400],
+        }
+        set_config_val('ai_usage_reset_warmup_state', state)
+
+
+@app.route('/api/ai-usage/reset-warmup/manual', methods=['POST'])
+def api_ai_usage_reset_warmup_manual():
+    payload = request.get_json(silent=True) or {}
+    provider = str(payload.get('provider') or '').strip().lower()
+    account_id = str(payload.get('accountId') or '').strip()
+    family = str(payload.get('family') or '').strip().lower()
+    lookup_id = account_id or ('default' if provider == 'codex' else '')
+    account = next((item for item in _ai_reset_warmup_accounts()
+                    if item['provider'] == provider and item['id'] == lookup_id), None)
+    if not account:
+        return jsonify({'error': 'That signed-in account is not available for warm-up.'}), 404
+    if provider == 'antigravity' and family not in ('gemini', 'claude'):
+        return jsonify({'error': 'Choose Gemini or Claude to warm up.'}), 400
+    families = [family] if provider == 'antigravity' else ['codex']
+    key = f"{provider}:{lookup_id}"
+    state = get_config_val('ai_usage_reset_warmup_state', dict)
+    state = state if isinstance(state, dict) else {}
+    statuses = state.setdefault('statuses', {})
+    if (statuses.get(key) or {}).get('state') == 'manual-running':
+        return jsonify({'error': 'A warm-up is already running for this account.'}), 409
+    statuses[key] = {'accountName': account['name'], 'provider': provider, 'state': 'manual-running',
+                     'reason': 'manual warm-up', 'lastEvent': ', '.join(families), 'error': ''}
+    set_config_val('ai_usage_reset_warmup_state', state)
+    threading.Thread(target=_ai_reset_warmup_manual_worker, args=(account, families),
+                     name='ai-reset-warmup-manual', daemon=True).start()
+    return jsonify({'started': True, 'key': key}), 202
 
 
 def _codex_app_server_request(method, request_id, params=None, timeout=15, codex_home=None):

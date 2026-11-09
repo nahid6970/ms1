@@ -2064,7 +2064,7 @@
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
-          "leftPercent": 90.0,
+          "leftPercent": 88.0,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 2592000
@@ -2073,12 +2073,12 @@
       "antigravity:default": {
         "gemini-weekly": {
           "leftPercent": 99.0,
-          "lastWarmedAt": 1794234946.6254475,
-          "lastAttemptAt": 1794234946.6254475,
+          "lastWarmedAt": 1794236635.0797236,
+          "lastAttemptAt": 1794236635.0797236,
           "cycleSeconds": 604800
         },
         "shared-weekly": {
-          "leftPercent": 96.0,
+          "leftPercent": 95.0,
           "lastWarmedAt": 1794234299.0348783,
           "lastAttemptAt": 1794234299.0348783,
           "cycleSeconds": 604800
@@ -2106,7 +2106,7 @@
           "cycleSeconds": 604800
         },
         "3p-weekly": {
-          "leftPercent": 96.0,
+          "leftPercent": 95.0,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 604800
@@ -2159,14 +2159,14 @@
         "provider": "antigravity",
         "state": "completed",
         "reason": "full quota or reset detected",
-        "lastEvent": "target Gemini and Claude models",
+        "lastEvent": "gemini-weekly",
         "modelsWarmed": [
           "gemini",
           "claude"
         ],
         "modelSelectionVersion": 2,
         "modelSelectionAttemptVersion": 2,
-        "completedAt": 1794234946,
+        "completedAt": 1794236635,
         "error": ""
       },
       "antigravity:10d54254caee451189908030ba576cb8": {
