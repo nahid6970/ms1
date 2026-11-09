@@ -2035,7 +2035,7 @@
       "name": "01"
     }
   ],
-  "ai_usage_reset_warmup_enabled": true,
+  "ai_usage_reset_warmup_enabled": false,
   "ai_usage_reset_warmup_state": {
     "snapshots": {
       "codex:default": {

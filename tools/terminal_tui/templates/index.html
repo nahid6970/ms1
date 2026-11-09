@@ -6880,6 +6880,19 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        function createWarmupIconButton(provider, accountId, family, label) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>';
+            button.title = `Warm ${label}`;
+            button.setAttribute('aria-label', `Warm ${label}`);
+            button.style.cssText = 'width:23px;height:22px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(148,163,184,.32);border-radius:5px;background:transparent;color:var(--text-secondary);cursor:pointer;vertical-align:middle;';
+            button.onmouseenter = () => { button.style.borderColor = '#22d3ee'; button.style.color = '#67e8f9'; };
+            button.onmouseleave = () => { button.style.borderColor = 'rgba(148,163,184,.32)'; button.style.color = 'var(--text-secondary)'; };
+            button.onclick = () => manuallyWarmUsageAccount(button, provider, accountId, family);
+            return button;
+        }
+
         function getSelectedCodexUsageAccount() {
             return localStorage.getItem('codex-usage-account') || '';
         }
@@ -6940,11 +6953,17 @@ kiro-cli whoami --format json</code></pre>
             status.textContent = 'Loading usage for all Codex profiles…';
             rows.replaceChildren();
 
-            const renderQuotaCell = (cell, windows, unavailableText) => {
+            const renderQuotaCell = (cell, windows, unavailableText, account = null) => {
                 if (!windows.length) {
                     const line = document.createElement('div');
                     line.textContent = unavailableText || '—';
                     line.style.color = 'var(--text-muted)';
+                    if (account) {
+                        line.style.display = 'flex';
+                        line.style.alignItems = 'center';
+                        line.style.gap = '5px';
+                        line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
+                    }
                     cell.appendChild(line);
                     return;
                 }
@@ -6963,6 +6982,12 @@ kiro-cli whoami --format json</code></pre>
                     quota.textContent = `${remainingPercent.toFixed(1)}%`;
                     quota.style.cssText = `display:inline-flex;align-items:center;padding:1px 6px;border:1px solid ${badgeTone.border};border-radius:5px;background:${badgeTone.bg};color:${badgeTone.fg};font-weight:500;line-height:1.35;`;
                     line.appendChild(quota);
+                    if (account) {
+                        line.style.display = 'flex';
+                        line.style.alignItems = 'center';
+                        line.style.gap = '5px';
+                        line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
+                    }
                     if (windowInfo.resetsAt) {
                         const reset = document.createElement('div');
                         // resetsAt from app-server path is unix seconds; from direct path is also unix seconds
@@ -7044,16 +7069,16 @@ kiro-cli whoami --format json</code></pre>
                     if (error) {
                         accountCell.title = error;
                         renderQuotaCell(fiveHourCell, [], 'Unavailable');
-                        renderQuotaCell(weeklyCell, [], 'Unavailable');
+                        renderQuotaCell(weeklyCell, [], 'Unavailable', account);
                     } else if (!data?.available) {
                         accountCell.title = data?.error || 'Quota unavailable';
                         renderQuotaCell(fiveHourCell, [], data?.error ? 'Not signed in' : '—');
-                        renderQuotaCell(weeklyCell, [], '—');
+                        renderQuotaCell(weeklyCell, [], '—', account);
                     } else {
                         const windows = Array.isArray(data.windows) ? data.windows : [];
                         // Primary = first window, secondary = second window (backend returns them in order)
                         renderQuotaCell(fiveHourCell, windows.slice(0, 1), '—');
-                        renderQuotaCell(weeklyCell, windows.slice(1, 2), '—');
+                        renderQuotaCell(weeklyCell, windows.slice(1, 2), '—', account);
                     }
 
                     // Use button / active indicator
@@ -7077,17 +7102,6 @@ kiro-cli whoami --format json</code></pre>
                         };
                     }
                     useCell.appendChild(useBtn);
-
-                    const warmBtn = document.createElement('button');
-                    warmBtn.type = 'button';
-                    warmBtn.textContent = 'Warm';
-                    warmBtn.title = `Send a short Codex prompt for ${accountLabel}`;
-                    warmBtn.setAttribute('aria-label', `Warm up ${accountLabel} Codex account`);
-                    warmBtn.style.cssText = 'display:block;margin:6px auto 0;padding:3px 8px;border:1px solid rgba(52,211,153,.38);border-radius:6px;background:rgba(16,185,129,.08);color:#6ee7b7;font-size:.7rem;cursor:pointer;';
-                    warmBtn.onmouseenter = () => { warmBtn.style.borderColor = '#34d399'; warmBtn.style.background = 'rgba(16,185,129,.16)'; };
-                    warmBtn.onmouseleave = () => { warmBtn.style.borderColor = 'rgba(52,211,153,.38)'; warmBtn.style.background = 'rgba(16,185,129,.08)'; };
-                    warmBtn.onclick = () => manuallyWarmUsageAccount(warmBtn, 'codex', account.id || '');
-                    useCell.appendChild(warmBtn);
 
                     row.append(accountCell, fiveHourCell, weeklyCell, useCell);
                     rows.appendChild(row);
@@ -7796,9 +7810,13 @@ kiro-cli whoami --format json</code></pre>
                     if (color) line.style.color = color;
                     cell.appendChild(line);
                 };
-                const renderQuotaCell = (cell, windows, unavailableText) => {
+                const renderQuotaCell = (cell, windows, unavailableText, account, family) => {
                     if (!windows.length) {
-                        addCellText(cell, unavailableText || '—', 'var(--text-muted)');
+                        const line = document.createElement('div');
+                        line.style.cssText = 'display:flex;align-items:center;gap:5px;color:var(--text-muted);';
+                        line.append(document.createTextNode(unavailableText || '—'));
+                        line.appendChild(createWarmupIconButton('antigravity', account.id, family, `${family} for ${account.name || account.id}`));
+                        cell.appendChild(line);
                         return;
                     }
                     windows.forEach(windowInfo => {
@@ -7816,6 +7834,10 @@ kiro-cli whoami --format json</code></pre>
                         quota.textContent = `${remainingPercent.toFixed(1)}%`;
                         quota.style.cssText = `display:inline-flex;align-items:center;padding:1px 6px;border:1px solid ${badgeTone.border};border-radius:5px;background:${badgeTone.bg};color:${badgeTone.fg};font-weight:500;line-height:1.35;`;
                         line.appendChild(quota);
+                        line.style.display = 'flex';
+                        line.style.alignItems = 'center';
+                        line.style.gap = '5px';
+                        line.appendChild(createWarmupIconButton('antigravity', account.id, family, `${family} for ${account.name || account.id}`));
                         if (windowInfo.resetsAt) {
                             const reset = document.createElement('div');
                             const resetAt = new Date(windowInfo.resetsAt).getTime();
@@ -7832,19 +7854,6 @@ kiro-cli whoami --format json</code></pre>
                         cell.appendChild(line);
                     });
                 };
-                const addFamilyWarmButton = (cell, account, family) => {
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.textContent = 'Warm';
-                    button.title = `Send a short ${family === 'gemini' ? 'Gemini' : 'Claude'} prompt for ${account.name || account.id}`;
-                    button.setAttribute('aria-label', `Warm ${family} for ${account.name || account.id}`);
-                    button.style.cssText = 'margin-top:5px;padding:2px 7px;border:1px solid rgba(34,211,238,.38);border-radius:5px;background:rgba(8,145,178,.08);color:#67e8f9;font-size:.68rem;cursor:pointer;';
-                    button.onmouseenter = () => { button.style.borderColor = '#22d3ee'; button.style.background = 'rgba(8,145,178,.16)'; };
-                    button.onmouseleave = () => { button.style.borderColor = 'rgba(34,211,238,.38)'; button.style.background = 'rgba(8,145,178,.08)'; };
-                    button.onclick = () => manuallyWarmUsageAccount(button, 'antigravity', account.id, family);
-                    cell.appendChild(button);
-                };
-
                 const activeId = getSelectedAntigravityAcpAccount();
                 results.forEach(({ account, data, error }) => {
                     const row = document.createElement('tr');
@@ -7864,15 +7873,15 @@ kiro-cli whoami --format json</code></pre>
                     addCellText(accountCell, email && email.toLowerCase() !== accountLabel.toLowerCase()
                         ? `${accountLabel} · ${email}` : accountLabel, 'var(--text-primary)');
                     if (error) {
-                        renderQuotaCell(geminiCell, [], 'Unavailable');
-                        renderQuotaCell(claudeCell, [], 'Unavailable');
+                        renderQuotaCell(geminiCell, [], 'Unavailable', account, 'gemini');
+                        renderQuotaCell(claudeCell, [], 'Unavailable', account, 'claude');
                         accountCell.title = error;
                     } else if (!data) {
-                        renderQuotaCell(geminiCell, [], 'Not signed in');
-                        renderQuotaCell(claudeCell, [], 'Not signed in');
+                        renderQuotaCell(geminiCell, [], 'Not signed in', account, 'gemini');
+                        renderQuotaCell(claudeCell, [], 'Not signed in', account, 'claude');
                     } else if (!data.available) {
-                        renderQuotaCell(geminiCell, [], 'Unavailable');
-                        renderQuotaCell(claudeCell, [], 'Unavailable');
+                        renderQuotaCell(geminiCell, [], 'Unavailable', account, 'gemini');
+                        renderQuotaCell(claudeCell, [], 'Unavailable', account, 'claude');
                         accountCell.title = data.error || 'Quota unavailable';
                     } else {
                         const windows = Array.isArray(data.windows) ? data.windows : [];
@@ -7880,11 +7889,9 @@ kiro-cli whoami --format json</code></pre>
                             || String(item.label || '').toLowerCase().includes('gemini'));
                         const claudeWindows = windows.filter(item => String(item.id || '').toLowerCase().startsWith('3p-')
                             || /claude/i.test(String(item.label || '')));
-                        renderQuotaCell(geminiCell, geminiWindows, '—');
-                        renderQuotaCell(claudeCell, claudeWindows, '—');
+                        renderQuotaCell(geminiCell, geminiWindows, '—', account, 'gemini');
+                        renderQuotaCell(claudeCell, claudeWindows, '—', account, 'claude');
                     }
-                    addFamilyWarmButton(geminiCell, account, 'gemini');
-                    addFamilyWarmButton(claudeCell, account, 'claude');
                     // Use / Used button (like Codex comparison)
                     const isActive = account.id === activeId;
                     const useBtn = document.createElement('button');
