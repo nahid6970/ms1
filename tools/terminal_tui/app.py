@@ -1745,10 +1745,16 @@ def _codex_oauth_refresh(refresh_token):
 
 
 def _parse_codex_wham_windows(usage):
-    """Parse the wham/usage response into the same window shape used by the app-server path."""
+    """Parse the wham/usage response into the same window shape used by the app-server path.
+
+    The API nests windows under usage['rate_limit']['primary_window'] /
+    usage['rate_limit']['secondary_window'], not at the top level.
+    """
+    rate_limit = usage.get('rate_limit') or {}
     windows = []
     for key in ('primary_window', 'secondary_window'):
-        window = usage.get(key)
+        # Accept both top-level (legacy) and nested under rate_limit
+        window = rate_limit.get(key) or usage.get(key)
         if not isinstance(window, dict):
             continue
         used = window.get('used_percent')
@@ -1772,7 +1778,7 @@ def _parse_codex_wham_windows(usage):
             label = 'Current'
             duration_mins = None
         reset_at = window.get('reset_at')
-        # reset_at from wham is an ISO timestamp string; convert to unix seconds
+        # reset_at from wham is a unix timestamp integer (not ISO string)
         reset_ts = None
         if isinstance(reset_at, str):
             try:
@@ -1790,7 +1796,7 @@ def _parse_codex_wham_windows(usage):
             'leftPercent': round(max(0.0, 100.0 - used_clamped), 1),
             'resetsAt': reset_ts,
             'windowDurationMins': duration_mins,
-            'limitReached': bool(window.get('limit_reached')),
+            'limitReached': bool(rate_limit.get('limit_reached') or window.get('limit_reached')),
         })
     return windows
 
@@ -1832,14 +1838,16 @@ def _read_codex_rate_limits_direct(codex_home=None):
     if not windows:
         raise RuntimeError('Codex wham/usage returned no quota windows.')
 
-    # Extract plan type from the nested allowed/plan fields if present
+    # plan_type and email are top-level fields in the wham response
     plan_type = str(usage.get('plan_type') or usage.get('chatgpt_plan_type') or '')
+    account_email = str(usage.get('email') or '')
 
     return {
         'available': True,
         'planType': plan_type,
         'windows': windows,
         'fetchedAt': int(time.time()),
+        'accountEmail': account_email or None,
         'source': 'direct',
     }
 

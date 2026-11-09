@@ -4419,8 +4419,8 @@ kiro-cli whoami --format json</code></pre>
                 <table style="width:100%;border-collapse:collapse;font-size:.76rem;text-align:left;">
                     <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
                         <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
-                        <th style="padding:8px 10px 9px;min-width:110px;">5-hour</th>
-                        <th style="padding:8px 10px 9px;min-width:110px;">Weekly</th>
+                        <th style="padding:8px 10px 9px;min-width:110px;">Primary window</th>
+                        <th style="padding:8px 10px 9px;min-width:110px;">Secondary window</th>
                         <th style="padding:8px 4px 9px 10px;width:68px;text-align:center;">Use</th>
                     </tr></thead>
                     <tbody id="codex-usage-comparison-rows"><tr><td colspan="4" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
@@ -6836,10 +6836,9 @@ kiro-cli whoami --format json</code></pre>
                         renderQuotaCell(weeklyCell, [], '—');
                     } else {
                         const windows = Array.isArray(data.windows) ? data.windows : [];
-                        const fiveHourWindows = windows.filter(w => (w.windowDurationMins && w.windowDurationMins <= 360) || w.label === '5-hour');
-                        const weeklyWindows = windows.filter(w => (w.windowDurationMins && w.windowDurationMins > 360 && w.windowDurationMins <= 8 * 24 * 60) || w.label === 'Weekly');
-                        renderQuotaCell(fiveHourCell, fiveHourWindows, '—');
-                        renderQuotaCell(weeklyCell, weeklyWindows, '—');
+                        // Primary = first window, secondary = second window (backend returns them in order)
+                        renderQuotaCell(fiveHourCell, windows.slice(0, 1), '—');
+                        renderQuotaCell(weeklyCell, windows.slice(1, 2), '—');
                     }
 
                     // Use button / active indicator
