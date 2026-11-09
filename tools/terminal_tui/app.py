@@ -1625,6 +1625,280 @@ _ANTIGRAVITY_USAGE_CACHE = {}
 _ANTIGRAVITY_ACP_AUTH_LOCK = threading.Lock()
 _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'idle', 'error': '', 'startedAt': None}
 _ANTIGRAVITY_ACP_AUTH_THREAD = None
+_AI_RESET_WARMUP_LOCK = threading.Lock()
+_AI_RESET_WARMUP_STOP = threading.Event()
+_AI_RESET_WARMUP_THREAD = None
+_AI_RESET_WARMUP_INTERVAL_SECONDS = 60
+
+
+def _ai_reset_warmup_enabled():
+    return bool(get_config_val('ai_usage_reset_warmup_enabled', lambda: True))
+
+
+def _ai_reset_timestamp(value):
+    if isinstance(value, (int, float)):
+        number = float(value)
+        return number / 1000 if number > 1e11 else number
+    if isinstance(value, str) and value.strip():
+        try:
+            import datetime
+            text = value.strip()
+            if re.fullmatch(r'\d+(?:\.\d+)?', text):
+                number = float(text)
+                return number / 1000 if number > 1e11 else number
+            parsed = datetime.datetime.fromisoformat(text.replace('Z', '+00:00'))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=datetime.timezone.utc)
+            return parsed.timestamp()
+        except (ValueError, TypeError, OverflowError):
+            return None
+    return None
+
+
+def _ai_reset_window_is_long(window):
+    duration = window.get('windowDurationMins')
+    if isinstance(duration, (int, float)):
+        return duration >= 24 * 60
+    label = str(window.get('label') or '').casefold()
+    return any(word in label for word in ('weekly', 'week', 'monthly', 'month'))
+
+
+def _ai_reset_warmup_codex(codex_home):
+    executable = shutil.which('codex')
+    if not executable:
+        raise RuntimeError('Codex CLI was not found on the server PATH.')
+    prompt = 'Reply with only: OK. Do not use tools or access files.'
+    args = ['exec', '--sandbox', 'read-only', '--skip-git-repo-check', '-C', codex_home, prompt]
+    if os.name == 'nt' and executable.lower().endswith(('.cmd', '.bat')):
+        command = [os.environ.get('COMSPEC', 'cmd.exe'), '/d', '/s', '/c',
+                   f'"{executable}" {subprocess.list2cmdline(args)}']
+    else:
+        command = [executable, *args]
+    process_env = os.environ.copy()
+    process_env['CODEX_HOME'] = codex_home
+    result = subprocess.run(
+        command, cwd=codex_home, env=process_env, stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        encoding='utf-8', errors='replace', timeout=90,
+        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or '').strip().splitlines()
+        raise RuntimeError(detail[-1][:400] if detail else f'Codex warm-up exited with code {result.returncode}.')
+
+
+def _ai_reset_warmup_agy_cli():
+    executable = _antigravity_cli_executable()
+    if not executable:
+        raise RuntimeError('Antigravity CLI (agy) was not found.')
+    process_env = os.environ.copy()
+    process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
+    process_env['PATH'] = os.path.dirname(executable) + os.pathsep + process_env.get('PATH', '')
+    result = subprocess.run(
+        [executable, '--print', 'Reply with only: OK. Do not use tools or access files.', '--output-format', 'json', '--print-timeout', '60s'],
+        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, encoding='utf-8', errors='replace', timeout=75, env=process_env,
+        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+    )
+    try:
+        envelope = json.loads(result.stdout or '')
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError('agy returned an unreadable warm-up response.') from exc
+    if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
+        raise RuntimeError('agy could not complete the account warm-up.')
+
+
+def _ai_reset_warmup_antigravity_acp(account_id):
+    paths = _antigravity_acp_runtime_paths()
+    if not os.path.isfile(paths['server']):
+        raise RuntimeError('The Antigravity ACP runtime is not installed.')
+    profile_home = _antigravity_acp_profile_home(account_id)
+    token_path = _antigravity_acp_token_path(account_id)
+    if not os.path.isfile(token_path):
+        raise RuntimeError('This Antigravity ACP profile is not signed in.')
+    process_env = os.environ.copy()
+    local_app_data = os.environ.get('LOCALAPPDATA') or os.path.join(os.path.expanduser('~'), 'AppData', 'Local')
+    agy_bin = os.path.join(local_app_data, 'agy', 'bin')
+    process_env['PATH'] = os.pathsep.join(part for part in (paths['directory'], agy_bin, process_env.get('PATH', '')) if part)
+    process_env['ANTIGRAVITY_HARNESS_PATH'] = paths['helper']
+    process_env['GEMINI_HOME'] = profile_home
+    process_env['AGY_ACP_FORCE_FILE_STORAGE'] = '1'
+    process = subprocess.Popen(
+        [paths['server']], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        text=True, encoding='utf-8', errors='replace', bufsize=1, cwd=profile_home, env=process_env,
+        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+    )
+    try:
+        _antigravity_acp_rpc_request(process, 1, 'initialize', {
+            'protocolVersion': 1,
+            'clientInfo': {'name': 'Terminal TUI', 'version': '1.0'},
+            'clientCapabilities': {},
+        }, timeout=90)
+        process.stdin.write(json.dumps({'jsonrpc': '2.0', 'method': 'initialized', 'params': {}}, separators=(',', ':')) + '\n')
+        process.stdin.flush()
+        session = _antigravity_acp_rpc_request(process, 2, 'session/new', {
+            'cwd': profile_home,
+            'mcpServers': [],
+        }, timeout=90)
+        session_id = session.get('sessionId')
+        if not session_id:
+            raise RuntimeError('Antigravity ACP did not return a session ID.')
+        _antigravity_acp_rpc_request(process, 3, 'session/prompt', {
+            'sessionId': session_id,
+            'prompt': [{'type': 'text', 'text': 'Reply with only: OK. Do not use tools or access files.'}],
+        }, timeout=90)
+    finally:
+        try:
+            process.stdin.close()
+        except (OSError, ValueError):
+            pass
+        if process.poll() is None:
+            try:
+                process.terminate()
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+            except OSError:
+                pass
+
+
+def _ai_reset_warmup_accounts():
+    profile_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(os.path.expanduser('~'), '.codex'))
+    codex_accounts = [{'id': 'default', 'name': 'Default', 'codexHome': profile_home}]
+    codex_accounts.extend(_codex_usage_accounts())
+    seen_codex_homes = set()
+    for account in codex_accounts:
+        home = os.path.abspath(os.path.expandvars(os.path.expanduser(account.get('codexHome') or profile_home)))
+        normalized_home = os.path.normcase(os.path.realpath(home))
+        if normalized_home in seen_codex_homes:
+            continue
+        seen_codex_homes.add(normalized_home)
+        if os.path.isfile(os.path.join(home, 'auth.json')):
+            yield {'provider': 'codex', 'id': account['id'], 'name': account['name'], 'home': home}
+    if _antigravity_cli_executable():
+        yield {'provider': 'antigravity', 'id': 'default', 'name': 'Default (agy CLI)', 'mode': 'agy'}
+    for account in _antigravity_acp_accounts():
+        if account.get('usageReady') or _antigravity_acp_token_is_ready(account['id']):
+            yield {'provider': 'antigravity', 'id': account['id'], 'name': account['name'], 'mode': 'acp'}
+
+
+def _ai_reset_warmup_read_usage(account):
+    if account['provider'] == 'codex':
+        return _read_codex_rate_limits(account['home'])
+    return _read_antigravity_usage(account['id'])
+
+
+def _ai_reset_warmup_run(account):
+    if account['provider'] == 'codex':
+        _ai_reset_warmup_codex(account['home'])
+    elif account['mode'] == 'agy':
+        _ai_reset_warmup_agy_cli()
+    else:
+        _ai_reset_warmup_antigravity_acp(account['id'])
+
+
+def _ai_reset_warmup_poll_once():
+    """Detect elapsed weekly/monthly reset times and run one native prompt per account/window."""
+    if not _ai_reset_warmup_enabled():
+        return
+    now = time.time()
+    state = get_config_val('ai_usage_reset_warmup_state', dict)
+    if not isinstance(state, dict):
+        state = {}
+    snapshots = state.setdefault('snapshots', {})
+    statuses = state.setdefault('statuses', {})
+    for account in _ai_reset_warmup_accounts():
+        key = f"{account['provider']}:{account['id']}"
+        try:
+            usage = _ai_reset_warmup_read_usage(account)
+            windows = usage.get('windows') or []
+            next_windows = {}
+            due = []
+            for window in windows:
+                if not _ai_reset_window_is_long(window):
+                    continue
+                reset_at = _ai_reset_timestamp(window.get('resetsAt'))
+                window_id = str(window.get('id') or window.get('label') or 'long-window')
+                if reset_at is None:
+                    continue
+                next_windows[window_id] = reset_at
+                previous = (snapshots.get(key) or {}).get(window_id)
+                if previous is not None and float(previous) < now and reset_at > float(previous) + 60:
+                    due.append((window_id, reset_at, float(previous)))
+            # Persist the baseline even when no reset has happened yet.
+            if next_windows != snapshots.get(key):
+                snapshots[key] = next_windows
+            previous_events = (statuses.get(key) or {}).get('lastEvents') or []
+            due_events = [f'{window_id}:{int(previous)}' for window_id, _, previous in due]
+            pending_events = [event for event in due_events if event not in previous_events]
+            if pending_events:
+                try:
+                    _ai_reset_warmup_run(account)
+                    statuses[key] = {
+                        'accountName': account['name'], 'provider': account['provider'],
+                        'state': 'completed', 'lastEvent': ', '.join(pending_events),
+                        'lastEvents': (previous_events + pending_events)[-24:],
+                        'lastResetAt': max(int(previous) for _, _, previous in due),
+                        'completedAt': int(time.time()), 'error': '',
+                    }
+                except Exception as exc:
+                    statuses[key] = {
+                        'accountName': account['name'], 'provider': account['provider'],
+                        'state': 'failed', 'lastEvent': ', '.join(pending_events),
+                        'lastEvents': (previous_events + pending_events)[-24:],
+                        'lastResetAt': max(int(previous) for _, _, previous in due),
+                        'completedAt': int(time.time()), 'error': str(exc)[:400],
+                    }
+            statuses.setdefault(key, {
+                'accountName': account['name'], 'provider': account['provider'], 'state': 'watching',
+                'lastEvent': '', 'lastEvents': [], 'lastResetAt': None, 'completedAt': None, 'error': '',
+            })
+        except Exception as exc:
+            old_status = statuses.get(key) or {}
+            statuses[key] = {**old_status, 'accountName': account['name'], 'provider': account['provider'],
+                             'state': 'unavailable', 'error': str(exc)[:400]}
+    set_config_val('ai_usage_reset_warmup_state', state)
+
+
+def _ai_reset_warmup_loop():
+    # The first pass records a baseline; only subsequent observed reset transitions trigger a prompt.
+    while not _AI_RESET_WARMUP_STOP.is_set():
+        try:
+            with _AI_RESET_WARMUP_LOCK:
+                _ai_reset_warmup_poll_once()
+        except Exception as exc:
+            print(f'AI quota reset warm-up monitor failed: {exc}')
+        _AI_RESET_WARMUP_STOP.wait(_AI_RESET_WARMUP_INTERVAL_SECONDS)
+
+
+def _ai_reset_warmup_manual_poll():
+    with _AI_RESET_WARMUP_LOCK:
+        _ai_reset_warmup_poll_once()
+
+
+def _start_ai_reset_warmup_monitor():
+    global _AI_RESET_WARMUP_THREAD
+    if _AI_RESET_WARMUP_THREAD and _AI_RESET_WARMUP_THREAD.is_alive():
+        return
+    _AI_RESET_WARMUP_STOP.clear()
+    _AI_RESET_WARMUP_THREAD = threading.Thread(target=_ai_reset_warmup_loop, name='ai-reset-warmup', daemon=True)
+    _AI_RESET_WARMUP_THREAD.start()
+
+
+@app.route('/api/ai-usage/reset-warmup', methods=['GET', 'POST'])
+def api_ai_usage_reset_warmup():
+    if request.method == 'POST':
+        enabled = bool((request.get_json(silent=True) or {}).get('enabled'))
+        set_config_val('ai_usage_reset_warmup_enabled', enabled)
+        if enabled:
+            threading.Thread(target=_ai_reset_warmup_manual_poll, name='ai-reset-warmup-refresh', daemon=True).start()
+    return jsonify({
+        'enabled': _ai_reset_warmup_enabled(),
+        'state': get_config_val('ai_usage_reset_warmup_state', dict),
+        'accounts': [{'provider': item['provider'], 'id': item['id'], 'name': item['name']}
+                     for item in _ai_reset_warmup_accounts()],
+    })
 
 
 def _codex_app_server_request(method, request_id, params=None, timeout=15, codex_home=None):
@@ -9243,6 +9517,7 @@ def api_kill_process_by_pid():
 
 
 if __name__ == '__main__':
+    _start_ai_reset_warmup_monitor()
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     
     import socket

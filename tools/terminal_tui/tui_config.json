@@ -2017,6 +2017,11 @@
       "id": "8bf475b91e0a403cb2376c0b9725af1c",
       "name": "01",
       "codexHome": "D:\\Codex\\.codex-01"
+    },
+    {
+      "id": "8c3b65fbfe944a57a36156d3e153e9a3",
+      "name": "02",
+      "codexHome": "D:\\Codex\\.codex-02"
     }
   ],
   "kiro_usage_accounts": [],
@@ -2029,5 +2034,106 @@
       "id": "e6434f286cab44c5ad160abb1da63ced",
       "name": "01"
     }
-  ]
+  ],
+  "ai_usage_reset_warmup_enabled": true,
+  "ai_usage_reset_warmup_state": {
+    "snapshots": {
+      "codex:default": {
+        "Monthly": 1794904410.0
+      },
+      "codex:12aa59bd4b7349e881eb7381f410031b": {
+        "Monthly": 1794904557.0
+      },
+      "codex:8bf475b91e0a403cb2376c0b9725af1c": {
+        "Monthly": 1794904752.0
+      },
+      "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
+        "Monthly": 1794904864.0
+      },
+      "antigravity:default": {
+        "gemini-weekly": 1794838489.0,
+        "shared-weekly": 1794838489.0
+      },
+      "antigravity:10d54254caee451189908030ba576cb8": {
+        "gemini-weekly": 1794283330.0,
+        "3p-weekly": 1794414244.0
+      },
+      "antigravity:e6434f286cab44c5ad160abb1da63ced": {
+        "gemini-weekly": 1794285785.0,
+        "3p-weekly": 1794838496.0
+      }
+    },
+    "statuses": {
+      "codex:default": {
+        "accountName": "Default",
+        "provider": "codex",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "codex:12aa59bd4b7349e881eb7381f410031b": {
+        "accountName": "00",
+        "provider": "codex",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "codex:8bf475b91e0a403cb2376c0b9725af1c": {
+        "accountName": "01",
+        "provider": "codex",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
+        "accountName": "02",
+        "provider": "codex",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "antigravity:default": {
+        "accountName": "Default (agy CLI)",
+        "provider": "antigravity",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "antigravity:10d54254caee451189908030ba576cb8": {
+        "accountName": "00",
+        "provider": "antigravity",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      },
+      "antigravity:e6434f286cab44c5ad160abb1da63ced": {
+        "accountName": "01",
+        "provider": "antigravity",
+        "state": "watching",
+        "lastEvent": "",
+        "lastEvents": [],
+        "lastResetAt": null,
+        "completedAt": null,
+        "error": ""
+      }
+    }
+  }
 }

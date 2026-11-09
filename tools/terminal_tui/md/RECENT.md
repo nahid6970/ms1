@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-09] - Warm Codex and Antigravity Profiles After Long Quota Resets
+
+- Added a server-side reset monitor that checks configured Codex and Antigravity accounts and detects weekly/monthly reset transitions.
+- After a detected reset, run one short “Reply with only: OK” prompt (with no tool use requested) in that account: Codex uses `codex exec` with its `CODEX_HOME`, named Google accounts use ACP `session/new` + `session/prompt`, and the default Google profile uses the signed-in `agy` CLI.
+- Skip Codex 5-hour windows, persist reset snapshots to avoid duplicate prompts, and add a Settings toggle/status line. The monitor records an initial baseline before reacting to later reset transitions.
+- Automatic warm-up defaults on and can be disabled under Settings → AI Usage & Accounts.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-09] - Codex Right-Click Quota Comparison Table
 
 - Right-click on the Codex quota badge now opens `#codex-usage-comparison-modal` — a table mirroring the Antigravity ACP comparison modal.

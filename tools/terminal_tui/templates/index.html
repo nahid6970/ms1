@@ -4043,6 +4043,14 @@
                                 </select>
                             </div>
                         </div>
+                        <div style="margin-top:9px;padding-top:8px;border-top:1px solid var(--border-color);">
+                            <label for="settings-ai-reset-warmup-enabled" style="display:flex;align-items:flex-start;gap:7px;font-size:.76rem;color:var(--text-primary);cursor:pointer;">
+                                <input type="checkbox" id="settings-ai-reset-warmup-enabled" onchange="saveAIResetWarmupEnabled(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--accent-color);margin:1px 0 0;flex-shrink:0;">
+                                <span>Start each Codex and Antigravity account after a weekly or monthly quota reset</span>
+                            </label>
+                            <div id="settings-ai-reset-warmup-status" role="status" style="margin:5px 0 0 23px;font-size:.66rem;color:var(--text-muted);">Checking reset warm-up status…</div>
+                            <div style="margin:4px 0 0 23px;font-size:.65rem;color:var(--text-muted);">Sends one short “Reply with only: OK” prompt per weekly/monthly reset. Codex 5-hour windows are skipped; prompts run through each account’s native profile without asking it to use tools.</div>
+                        </div>
                     </div>
                     <!-- Codex provider card — green theme -->
                     <div id="settings-provider-card-codex" data-testid="provider-card-codex" style="margin-top:10px;padding:10px 12px;background:linear-gradient(135deg,rgba(16,185,129,.08) 0%,rgba(6,148,101,.04) 100%);border:1px solid rgba(52,211,153,.28);border-radius:7px;">
@@ -6787,6 +6795,50 @@ kiro-cli whoami --format json</code></pre>
         let codexLimitsRefreshQueued = false;
         let kiroUsageLoadInFlight = false;
         let kiroUsageRefreshQueued = false;
+
+        async function loadAIResetWarmupSettings() {
+            const checkbox = document.getElementById('settings-ai-reset-warmup-enabled');
+            const status = document.getElementById('settings-ai-reset-warmup-status');
+            try {
+                const response = await fetch('/api/ai-usage/reset-warmup');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not load reset warm-up settings.');
+                if (checkbox) checkbox.checked = data.enabled === true;
+                if (!status) return;
+                const rows = Object.values((data.state || {}).statuses || {});
+                const completed = rows.filter(row => row.state === 'completed').length;
+                const failed = rows.filter(row => row.state === 'failed' || row.state === 'unavailable');
+                if (!data.enabled) {
+                    status.textContent = 'Automatic reset warm-up is off.';
+                } else if (failed.length) {
+                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed. ${failed[0].accountName || failed[0].provider}: ${failed[0].error || failed[0].state}`;
+                } else {
+                    status.textContent = `Watching ${data.accounts.length} account(s); ${completed} warm-up(s) completed since setup.`;
+                }
+            } catch (error) {
+                if (status) status.textContent = `Reset warm-up status unavailable: ${String(error.message || error)}`;
+            }
+        }
+
+        async function saveAIResetWarmupEnabled(enabled) {
+            const status = document.getElementById('settings-ai-reset-warmup-status');
+            try {
+                const response = await fetch('/api/ai-usage/reset-warmup', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: Boolean(enabled) })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not save reset warm-up settings.');
+                if (status) status.textContent = data.enabled
+                    ? 'Automatic reset warm-up is on. It will trigger after the next observed weekly or monthly reset.'
+                    : 'Automatic reset warm-up is off.';
+                if (data.enabled) window.setTimeout(loadAIResetWarmupSettings, 1200);
+            } catch (error) {
+                if (status) status.textContent = `Could not save reset warm-up setting: ${String(error.message || error)}`;
+                const checkbox = document.getElementById('settings-ai-reset-warmup-enabled');
+                if (checkbox) checkbox.checked = !enabled;
+            }
+        }
 
         function getSelectedCodexUsageAccount() {
             return localStorage.getItem('codex-usage-account') || '';
@@ -12566,6 +12618,7 @@ kiro-cli whoami --format json</code></pre>
 
         function openSettingsModal() {
             loadCodexUsageAccounts().catch(() => {});
+            loadAIResetWarmupSettings();
             const rcloneFg = localStorage.getItem('rclone-button-fg') || '#60a5fa';
             const rcloneBg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
             document.getElementById('settings-rclone-color-fg').value = rcloneFg;
