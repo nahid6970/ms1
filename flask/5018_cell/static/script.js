@@ -12413,7 +12413,27 @@ function toggleFormatSelection(prefix, suffix, event) {
         selectedFormats.splice(index, 1);
     } else {
         // Add to selection
-        selectedFormats.push({ key: formatKey, prefix, suffix });
+        selectedFormats.push({ key: formatKey, prefix, suffix, type: 'format' });
+    }
+
+    updateFormatCheckmarks();
+    return false;
+}
+
+function toggleCaseSelection(caseType, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    const formatKey = `case:${caseType}`;
+    const index = selectedFormats.findIndex(f => f.key === formatKey);
+
+    if (index >= 0) {
+        selectedFormats.splice(index, 1);
+    } else {
+        selectedFormats = selectedFormats.filter(f => f.type !== 'case');
+        selectedFormats.push({ key: formatKey, caseType, type: 'case' });
     }
 
     updateFormatCheckmarks();
@@ -12429,12 +12449,30 @@ function updateFormatCheckmarks() {
         const buttons = document.querySelectorAll('.format-btn');
         buttons.forEach(btn => {
             const onclick = btn.getAttribute('onclick');
-            if (onclick && onclick.includes(`'${format.prefix}'`) && onclick.includes(`'${format.suffix}'`)) {
-                if (!btn.querySelector('.format-checkmark')) {
-                    const checkmark = document.createElement('span');
-                    checkmark.className = 'format-checkmark';
-                    checkmark.textContent = '✓';
-                    btn.appendChild(checkmark);
+            if (onclick) {
+                if (!format.type || format.type === 'format') {
+                    if (format.prefix && format.suffix && onclick.includes(`'${format.prefix}'`) && onclick.includes(`'${format.suffix}'`)) {
+                        if (!btn.querySelector('.format-checkmark')) {
+                            const checkmark = document.createElement('span');
+                            checkmark.className = 'format-checkmark';
+                            checkmark.textContent = '✓';
+                            btn.appendChild(checkmark);
+                        }
+                    }
+                } else if (format.type === 'case') {
+                    if ((format.caseType === 'upper' && onclick.includes("changeTextCase('upper'")) ||
+                        (format.caseType === 'lower' && onclick.includes("changeTextCase('lower'")) ||
+                        (format.caseType === 'proper' && onclick.includes("changeTextCase('proper'")) ||
+                        (format.caseType === 'bangla' && onclick.includes("changeTextCase('bangla'")) ||
+                        (format.caseType === 'banglaToEnglish' && onclick.includes("convertBanglaToEnglish")) ||
+                        (format.caseType === 'numbersToBangla' && onclick.includes("convertNumbersToBangla"))) {
+                        if (!btn.querySelector('.format-checkmark')) {
+                            const checkmark = document.createElement('span');
+                            checkmark.className = 'format-checkmark';
+                            checkmark.textContent = '✓';
+                            btn.appendChild(checkmark);
+                        }
+                    }
                 }
             }
         });

@@ -1417,24 +1417,30 @@
         </div>
 
         <div class="quick-formatter-separator"></div>
-        <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Text Case</div>
+        <div class="quick-formatter-title" style="font-size: 12px; margin-top: 8px;">Text Case <span style="font-size: 11px; color: #666;">(Right-click to select)</span></div>
         <div class="quick-formatter-options">
-            <button class="format-btn" onclick="changeTextCase('upper', event)" title="UPPERCASE">
+            <button class="format-btn" onclick="changeTextCase('upper', event)"
+                oncontextmenu="return toggleCaseSelection('upper', event)" title="UPPERCASE (Right-click to select)">
                 ABC
             </button>
-            <button class="format-btn" onclick="changeTextCase('lower', event)" title="lowercase">
+            <button class="format-btn" onclick="changeTextCase('lower', event)"
+                oncontextmenu="return toggleCaseSelection('lower', event)" title="lowercase (Right-click to select)">
                 abc
             </button>
-            <button class="format-btn" onclick="changeTextCase('proper', event)" title="Proper Case">
+            <button class="format-btn" onclick="changeTextCase('proper', event)"
+                oncontextmenu="return toggleCaseSelection('proper', event)" title="Proper Case (Right-click to select)">
                 Abc
             </button>
-            <button class="format-btn" onclick="changeTextCase('bangla', event)" title="Convert English to Bangla phonetically" style="font-size: 16px;">
+            <button class="format-btn" onclick="changeTextCase('bangla', event)"
+                oncontextmenu="return toggleCaseSelection('bangla', event)" title="Convert English to Bangla phonetically (Right-click to select)" style="font-size: 16px;">
                 বাং
             </button>
-            <button class="format-btn" onclick="convertBanglaToEnglish(event)" title="Convert Bangla to English phonetically" style="font-size: 12px; font-weight: 600;">
+            <button class="format-btn" onclick="convertBanglaToEnglish(event)"
+                oncontextmenu="return toggleCaseSelection('banglaToEnglish', event)" title="Convert Bangla to English phonetically (Right-click to select)" style="font-size: 12px; font-weight: 600;">
                 EN
             </button>
-            <button class="format-btn" onclick="convertNumbersToBangla(event)" title="Convert English numbers to Bangla digits" style="font-size: 14px;">
+            <button class="format-btn" onclick="convertNumbersToBangla(event)"
+                oncontextmenu="return toggleCaseSelection('numbersToBangla', event)" title="Convert English numbers to Bangla digits (Right-click to select)" style="font-size: 14px;">
                 ১২৩
             </button>
         </div>
