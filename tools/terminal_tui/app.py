@@ -2597,6 +2597,7 @@ def api_codex_accounts():
         payload = request.get_json(silent=True) or {}
         account_id = str(payload.get('id') or '')
         new_name = str(payload.get('name') or '').strip()[:40]
+        raw_codex_home = str(payload.get('codexHome') or '').strip()
         if not account_id:
             return jsonify({'error': 'Missing account id.'}), 400
         if not new_name:
@@ -2604,8 +2605,15 @@ def api_codex_accounts():
         account = next((item for item in accounts if item.get('id') == account_id), None)
         if account is None:
             return jsonify({'error': 'Codex profile not found.'}), 404
+        if raw_codex_home:
+            codex_home = os.path.abspath(os.path.expandvars(os.path.expanduser(raw_codex_home)))
+            if not os.path.isdir(codex_home):
+                return jsonify({'error': 'That Codex profile folder does not exist.'}), 400
+            account['codexHome'] = codex_home
         account['name'] = new_name
         set_config_val('codex_usage_accounts', accounts)
+        with _CODEX_LIMITS_CACHE_LOCK:
+            _CODEX_LIMITS_CACHE.pop(account_id, None)
         return jsonify({'account': account})
 
     payload = request.get_json(silent=True) or {}

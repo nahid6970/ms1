@@ -4429,6 +4429,36 @@ kiro-cli whoami --format json</code></pre>
         </div>
     </div>
 
+    <div class="modal-overlay" id="codex-account-edit-modal" role="dialog" aria-modal="true" aria-labelledby="codex-account-edit-title" onclick="if(event.target===this)closeCodexAccountEditModal()" style="z-index:1350;">
+        <div class="modal-content" style="width:480px;max-width:92vw;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:12px;">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+                <div id="codex-account-edit-title" style="font-size:.92rem;font-weight:650;color:#f3f4f6;">Edit Codex profile</div>
+                <div style="font-size:.68rem;color:#999;margin-top:3px;">Change the label or the profile folder path.</div>
+            </div>
+            <div style="padding:14px 16px 8px;display:grid;gap:10px;">
+                <label style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">
+                    Label
+                    <input id="codex-account-edit-name" type="text" maxlength="40" autocomplete="off"
+                           style="height:30px;padding:4px 9px;background:rgba(0,0,0,.35);border:1px solid rgba(52,211,153,.35);border-radius:6px;color:#d1fae5;font-size:.76rem;outline:none;"
+                           onfocus="this.style.borderColor='rgba(52,211,153,.75)'" onblur="this.style.borderColor='rgba(52,211,153,.35)'"
+                           onkeydown="if(event.key==='Enter'){event.preventDefault();saveCodexAccountEdit()}if(event.key==='Escape')closeCodexAccountEditModal()">
+                </label>
+                <label style="display:grid;gap:5px;font-size:.72rem;color:#aaa;">
+                    Profile folder path
+                    <input id="codex-account-edit-home" type="text" autocomplete="off" placeholder="e.g. C:\Users\you\.codex-work"
+                           style="height:30px;padding:4px 9px;background:rgba(0,0,0,.35);border:1px solid rgba(52,211,153,.35);border-radius:6px;color:#d1fae5;font-size:.76rem;outline:none;"
+                           onfocus="this.style.borderColor='rgba(52,211,153,.75)'" onblur="this.style.borderColor='rgba(52,211,153,.35)'"
+                           onkeydown="if(event.key==='Enter'){event.preventDefault();saveCodexAccountEdit()}if(event.key==='Escape')closeCodexAccountEditModal()">
+                </label>
+                <div id="codex-account-edit-error" role="status" style="display:none;color:#fca5a5;font-size:.7rem;"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);">
+                <button type="button" id="codex-account-edit-cancel" onclick="closeCodexAccountEditModal()" style="padding:7px 12px;border:1px solid #333;border-radius:7px;background:#141414;color:#bbb;cursor:pointer;font-size:.73rem;">Cancel</button>
+                <button type="button" id="codex-account-edit-save" onclick="saveCodexAccountEdit()" style="padding:7px 13px;border:1px solid rgba(52,211,153,.5);border-radius:7px;background:rgba(16,185,129,.75);color:#fff;cursor:pointer;font-size:.73rem;font-weight:600;">Save changes</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="agent-session-title-modal" role="dialog" aria-modal="true" aria-labelledby="agent-session-title-heading" onclick="if(event.target===this)closeAgentSessionTitleModal()" style="z-index:1240;">
         <div class="modal-content" style="width:500px;max-width:92vw;padding:0;display:flex;flex-direction:column;overflow:hidden;background:#0b0b0b;border:1px solid #2b2b2b;border-radius:12px;">
             <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
@@ -6999,35 +7029,52 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function openCodexAccountEditRow(accountId) {
-            const row = document.getElementById(`codex-account-row-${accountId}`);
-            if (!row) return;
             const account = codexUsageAccounts.find(a => a.id === accountId);
             if (!account) return;
-            row.innerHTML = '';
-            row.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:6px;padding:6px 8px;background:var(--bg-main);border:1px solid rgba(52,211,153,.45);border-radius:5px;font-size:.72rem;';
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = account.name;
-            input.maxLength = 40;
-            input.setAttribute('aria-label', 'New profile name');
-            input.style.cssText = 'min-width:0;height:26px;padding:3px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(52,211,153,.5);border-radius:4px;color:#d1fae5;font-size:.72rem;outline:none;';
-            input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') saveCodexAccountRename(accountId, input.value);
-                if (e.key === 'Escape') loadCodexUsageAccounts();
-            });
-            const saveBtn = document.createElement('button');
-            saveBtn.type = 'button';
-            saveBtn.textContent = 'Save';
-            saveBtn.style.cssText = 'padding:2px 9px;background:rgba(16,185,129,.8);border:0;border-radius:4px;color:#fff;font-size:.7rem;cursor:pointer;white-space:nowrap;';
-            saveBtn.onclick = () => saveCodexAccountRename(accountId, input.value);
-            const cancelBtn = document.createElement('button');
-            cancelBtn.type = 'button';
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.style.cssText = 'padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);font-size:.7rem;cursor:pointer;white-space:nowrap;';
-            cancelBtn.onclick = () => loadCodexUsageAccounts();
-            row.append(input, saveBtn, cancelBtn);
-            input.focus();
-            input.select();
+            const nameInput = document.getElementById('codex-account-edit-name');
+            const homeInput = document.getElementById('codex-account-edit-home');
+            const errorEl = document.getElementById('codex-account-edit-error');
+            const modal = document.getElementById('codex-account-edit-modal');
+            if (!nameInput || !homeInput || !modal) return;
+            nameInput.value = account.name;
+            homeInput.value = account.codexHome || '';
+            if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+            modal.dataset.editAccountId = accountId;
+            modal.classList.add('show');
+            setTimeout(() => nameInput.focus(), 60);
+        }
+
+        function closeCodexAccountEditModal() {
+            const modal = document.getElementById('codex-account-edit-modal');
+            if (modal) { modal.classList.remove('show'); delete modal.dataset.editAccountId; }
+        }
+
+        async function saveCodexAccountEdit() {
+            const modal = document.getElementById('codex-account-edit-modal');
+            const nameInput = document.getElementById('codex-account-edit-name');
+            const homeInput = document.getElementById('codex-account-edit-home');
+            const errorEl = document.getElementById('codex-account-edit-error');
+            const saveBtn = document.getElementById('codex-account-edit-save');
+            const accountId = modal?.dataset.editAccountId;
+            if (!accountId || !nameInput || !homeInput) return;
+            const name = nameInput.value.trim();
+            const codexHome = homeInput.value.trim();
+            if (!name) { if (errorEl) { errorEl.textContent = 'Enter a label.'; errorEl.style.display = ''; } nameInput.focus(); return; }
+            if (!codexHome) { if (errorEl) { errorEl.textContent = 'Enter the profile folder path.'; errorEl.style.display = ''; } homeInput.focus(); return; }
+            if (saveBtn) saveBtn.disabled = true;
+            if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+            try {
+                const response = await fetch('/api/codex/accounts', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId, name, codexHome }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not save changes.');
+                closeCodexAccountEditModal();
+                await loadCodexUsageAccounts();
+                loadCodexLimits(true);
+            } catch (error) {
+                if (errorEl) { errorEl.textContent = String(error.message || error); errorEl.style.display = ''; }
+            } finally {
+                if (saveBtn) saveBtn.disabled = false;
+            }
         }
 
         async function saveCodexAccountRename(accountId, newName) {
