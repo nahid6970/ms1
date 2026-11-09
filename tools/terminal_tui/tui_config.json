@@ -2064,7 +2064,7 @@
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
-          "leftPercent": 91.0,
+          "leftPercent": 90.0,
           "lastWarmedAt": 0.0,
           "lastAttemptAt": 0.0,
           "cycleSeconds": 2592000
