@@ -6844,10 +6844,11 @@ kiro-cli whoami --format json</code></pre>
 
         async function manuallyWarmUsageAccount(button, provider, accountId, family = '') {
             if (!button || button.disabled) return;
-            const original = button.textContent;
             button.disabled = true;
-            button.textContent = 'Starting…';
+            button.setAttribute('aria-busy', 'true');
             button.title = 'Sending a short prompt to this account';
+            const icon = button.querySelector('svg');
+            if (icon) icon.style.animation = 'quota-warm-spin .8s linear infinite';
             try {
                 const response = await fetch('/api/ai-usage/reset-warmup/manual', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -6855,7 +6856,7 @@ kiro-cli whoami --format json</code></pre>
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not start warm-up.');
-                button.textContent = 'Warming…';
+                button.title = 'Warm-up running…';
                 const statusKey = `${provider}:${accountId || 'default'}`;
                 for (let attempt = 0; attempt < 50; attempt += 1) {
                     await new Promise(resolve => window.setTimeout(resolve, 1200));
@@ -6863,7 +6864,6 @@ kiro-cli whoami --format json</code></pre>
                     const statusData = await statusResponse.json();
                     const warmStatus = statusData.state?.statuses?.[statusKey];
                     if (warmStatus?.state === 'completed') {
-                        button.textContent = 'Warmed';
                         button.title = `Warm-up complete${warmStatus.modelsWarmed?.length ? `: ${warmStatus.modelsWarmed.join(', ')}` : ''}`;
                         return;
                     }
@@ -6871,15 +6871,21 @@ kiro-cli whoami --format json</code></pre>
                 }
                 throw new Error('Warm-up is still running. Check the settings status shortly.');
             } catch (error) {
-                button.textContent = 'Retry';
                 button.title = String(error.message || error);
             } finally {
                 button.disabled = false;
-                window.setTimeout(() => { if (button.isConnected && button.textContent !== 'Starting…' && button.textContent !== 'Warming…') button.textContent = original; }, 5000);
+                button.removeAttribute('aria-busy');
+                if (icon) icon.style.animation = '';
             }
         }
 
         function createWarmupIconButton(provider, accountId, family, label) {
+            if (!document.getElementById('quota-warm-icon-animation')) {
+                const style = document.createElement('style');
+                style.id = 'quota-warm-icon-animation';
+                style.textContent = '@keyframes quota-warm-spin{to{transform:rotate(360deg)}}';
+                document.head.appendChild(style);
+            }
             const button = document.createElement('button');
             button.type = 'button';
             button.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>';

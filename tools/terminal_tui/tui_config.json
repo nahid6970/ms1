@@ -2049,8 +2049,8 @@
       "codex:12aa59bd4b7349e881eb7381f410031b": {
         "Monthly": {
           "leftPercent": 0.0,
-          "lastWarmedAt": 0.0,
-          "lastAttemptAt": 0.0,
+          "lastWarmedAt": 1794237883.2005866,
+          "lastAttemptAt": 1794237883.2005866,
           "cycleSeconds": 2592000
         }
       },
@@ -2065,16 +2065,16 @@
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
           "leftPercent": 88.0,
-          "lastWarmedAt": 1794237770.4530485,
-          "lastAttemptAt": 1794237770.4530485,
+          "lastWarmedAt": 1794237896.310554,
+          "lastAttemptAt": 1794237896.310554,
           "cycleSeconds": 2592000
         }
       },
       "antigravity:default": {
         "gemini-weekly": {
           "leftPercent": 99.0,
-          "lastWarmedAt": 1794236635.0797236,
-          "lastAttemptAt": 1794236635.0797236,
+          "lastWarmedAt": 1794237842.1017942,
+          "lastAttemptAt": 1794237842.1017942,
           "cycleSeconds": 604800
         },
         "shared-weekly": {
@@ -2126,11 +2126,13 @@
       "codex:12aa59bd4b7349e881eb7381f410031b": {
         "accountName": "00",
         "provider": "codex",
-        "state": "watching",
-        "lastEvent": "",
-        "lastEvents": [],
-        "lastResetAt": null,
-        "completedAt": null,
+        "state": "completed",
+        "reason": "manual warm-up",
+        "lastEvent": "manual",
+        "modelsWarmed": [
+          "codex"
+        ],
+        "completedAt": 1794237883,
         "error": ""
       },
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
@@ -2152,15 +2154,19 @@
         "modelsWarmed": [
           "codex"
         ],
-        "completedAt": 1794237770,
+        "completedAt": 1794237896,
         "error": ""
       },
       "antigravity:default": {
         "accountName": "Default (agy CLI)",
         "provider": "antigravity",
-        "state": "manual-running",
+        "state": "completed",
         "reason": "manual warm-up",
-        "lastEvent": "gemini",
+        "lastEvent": "manual",
+        "modelsWarmed": [
+          "gemini"
+        ],
+        "completedAt": 1794237842,
         "error": ""
       },
       "antigravity:10d54254caee451189908030ba576cb8": {
