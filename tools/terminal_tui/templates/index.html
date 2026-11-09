@@ -1200,36 +1200,49 @@
         }
         #settings-layout { display: flex; flex: 1; min-height: 0; gap: 0; }
         #settings-navigation {
-            flex: 0 0 215px;
-            min-width: 190px;
+            flex: 0 0 225px;
+            min-width: 200px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            padding: 2px 14px 2px 0;
+            gap: 6px;
+            padding: 12px;
             margin-right: 18px;
-            border-right: 1px solid var(--border-color);
+            background: color-mix(in srgb, var(--bg-sidebar) 75%, var(--bg-main));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
         }
         #settings-navigation .settings-nav-item {
             width: 100% !important;
             height: auto !important;
-            min-height: 40px;
+            min-height: 42px;
             flex: none;
             justify-content: flex-start !important;
-            gap: 11px;
-            padding: 8px 10px !important;
-            border-color: transparent !important;
+            gap: 12px;
+            padding: 10px 12px !important;
+            border: 1px solid transparent !important;
             border-radius: 8px !important;
             color: var(--text-secondary) !important;
             text-align: left;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #settings-navigation .settings-nav-item:hover {
+            background: color-mix(in srgb, var(--accent-color) 8%, var(--bg-sidebar)) !important;
+            color: var(--text-primary) !important;
+            border-color: color-mix(in srgb, var(--accent-color) 15%, var(--border-color)) !important;
         }
         #settings-navigation .settings-nav-item::after { content: attr(data-label); font-size: .8rem; font-weight: 500; }
         #settings-navigation .settings-nav-item.active {
             color: var(--accent-color) !important;
-            background: color-mix(in srgb, var(--accent-color) 13%, transparent) !important;
-            border-color: color-mix(in srgb, var(--accent-color) 16%, transparent) !important;
+            background: color-mix(in srgb, var(--accent-color) 16%, transparent) !important;
+            border-color: color-mix(in srgb, var(--accent-color) 30%, transparent) !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-color) 15%, transparent);
         }
-        #settings-navigation .settings-nav-item svg { flex: none; }
+        #settings-navigation .settings-nav-item svg { flex: none; transition: transform 0.2s; }
+        #settings-navigation .settings-nav-item:hover svg { transform: scale(1.08); }
         #settings-form {
             flex: 1;
             min-width: 0;
@@ -3857,6 +3870,7 @@
             </div>
             <div id="settings-layout">
             <nav id="settings-navigation" aria-label="Settings sections">
+                <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 8px 8px 8px; margin-bottom: 2px; border-bottom: 1px solid var(--border-color);">Settings Menu</div>
                 <button type="button" class="settings-nav-item active" data-label="General & Typography" aria-label="General & Typography" id="settings-tab-btn-general" onclick="switchSettingsTab('general')" title="General & Typography" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 </button>
