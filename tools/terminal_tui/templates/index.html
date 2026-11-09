@@ -3895,7 +3895,7 @@
                 <button type="button" class="settings-nav-item" data-label="Workspace Badge" aria-label="Current Workspace Badge" id="settings-tab-btn-badge" onclick="switchSettingsTab('badge')" title="Current Workspace Badge" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 </button>
-                <button type="button" class="settings-nav-item" data-label="Extension Icons" aria-label="Custom Extension Icons" id="settings-tab-btn-icons" onclick="openExtensionIconsModal()" title="Custom Extension Icons" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
+                <button type="button" class="settings-nav-item" data-label="Extension Icons" aria-label="Custom Extension Icons" id="settings-tab-btn-icons" onclick="switchSettingsTab('icons')" title="Custom Extension Icons" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                 </button>
             </nav>
@@ -4241,6 +4241,27 @@
                     </div>
                 </div>
 
+                <!-- Tab 9: File Extension Icons -->
+                <div id="settings-sec-icons" style="display: none; margin-bottom: 16px; padding: 12px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px;">
+                    <div style="font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">File Extension Icons</div>
+                    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 12px;">Map file extensions to custom SVG elements. Separate multiple extensions with commas.</div>
+                    
+                    <!-- List of existing mappings -->
+                    <div id="extension-icons-list" style="min-height: 160px; max-height: 240px; overflow-y: auto; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); display: flex; flex-direction: column;">
+                        <!-- Mappings will be injected here dynamically -->
+                    </div>
+                    
+                    <!-- Add new mapping form -->
+                    <div style="padding: 10px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-primary);">Add New Icon Mapping</div>
+                        <div style="display: flex; gap: 8px; flex-direction: column;">
+                            <input type="text" id="new-ext-input" placeholder="Extensions (e.g. .txt, .log)" style="padding: 6px 10px; font-size: 0.8rem; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                            <textarea id="new-svg-input" placeholder="SVG Code (e.g. <svg>...</svg>)" style="height: 70px; padding: 6px 10px; font-size: 0.75rem; font-family: 'Fira Code', monospace; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; resize: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="addExtensionIconMapping()" style="align-self: flex-end; padding: 5px 12px; font-size: 0.78rem;">Add Mapping</button>
+                    </div>
+                </div>
+
 
 
                 <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
@@ -4392,37 +4413,7 @@ kiro-cli whoami --format json</code></pre>
         </section>
     </div>
 
-    <!-- Custom Extension Icons Modal Dialog -->
-    <div class="modal-overlay" id="extension-icons-modal">
-        <div class="modal-content" style="width: 580px; max-width: 95vw; max-height: 85vh; padding: 24px; display: flex; flex-direction: column;">
-            <div class="modal-header" style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
-                <div>
-                    <h2 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0;">File Extension Icons</h2>
-                    <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Map file extensions to custom SVG elements. Separate multiple extensions with commas.</div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="closeExtensionIconsModal()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1;">✕</button>
-            </div>
-            
-            <!-- List of existing mappings -->
-            <div id="extension-icons-list" style="flex: 1; overflow-y: auto; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); display: flex; flex-direction: column;">
-                <!-- Mappings will be injected here dynamically -->
-            </div>
-            
-            <!-- Add new mapping form -->
-            <div style="padding: 12px; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px;">
-                <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-primary);">Add New Icon Mapping</div>
-                <div style="display: flex; gap: 8px; flex-direction: column;">
-                    <input type="text" id="new-ext-input" placeholder="Extensions (e.g. .txt, .log)" style="padding: 6px 10px; font-size: 0.8rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <textarea id="new-svg-input" placeholder="SVG Code (e.g. <svg>...</svg>)" style="height: 80px; padding: 6px 10px; font-size: 0.75rem; font-family: 'Fira Code', monospace; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; resize: none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addExtensionIconMapping()" style="align-self: flex-end; padding: 6px 14px; font-size: 0.78rem;">Add Mapping</button>
-            </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0;">
-                <button type="button" class="btn btn-secondary" onclick="closeExtensionIconsModal()" style="padding: 6px 14px; font-size: 0.8rem;">Close</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Horizontal Context Menu Overlay for Card Actions -->
     <div id="card-context-menu"></div>
@@ -5348,7 +5339,7 @@ kiro-cli whoami --format json</code></pre>
                 else if (id === 'rclone-dst-picker-modal') closeRcloneDestinationPicker();
                 else if (id === 'split-select-modal') closeSplitSelectModal();
                 else if (id === 'framework-select-modal') closeFrameworkSelectModal();
-                else if (id === 'extension-icons-modal') closeExtensionIconsModal();
+
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
                 else if (id === 'subcmd-add-modal') closeSubcmdAddModal();
@@ -12556,7 +12547,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function switchSettingsTab(tabName) {
-            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge'];
+            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge', 'icons'];
             tabs.forEach(t => {
                 const el = document.getElementById(`settings-sec-${t}`);
                 if (el) el.style.display = t === tabName ? 'block' : 'none';
@@ -12568,6 +12559,9 @@ kiro-cli whoami --format json</code></pre>
                     else btn.removeAttribute('aria-current');
                 }
             });
+            if (tabName === 'icons') {
+                renderExtensionIconsList();
+            }
         }
 
         function openSettingsModal() {
@@ -12693,15 +12687,11 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function openExtensionIconsModal() {
-            closeSettingsModal();
-            document.getElementById('extension-icons-modal').classList.add('show');
-            renderExtensionIconsList();
+            openSettingsModal();
+            switchSettingsTab('icons');
         }
 
-        function closeExtensionIconsModal() {
-            document.getElementById('extension-icons-modal').classList.remove('show');
-            openSettingsModal();
-        }
+        function closeExtensionIconsModal() {}
 
         function renderExtensionIconsList() {
             const listEl = document.getElementById('extension-icons-list');
