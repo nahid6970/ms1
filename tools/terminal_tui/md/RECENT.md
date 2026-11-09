@@ -3,6 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-09] - Show Antigravity Reset Countdown in Total Hours
+
+- In the Antigravity account comparison table, render reset countdowns as total hours and minutes (for example, `167h 52m`) instead of days, hours, and minutes.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-09] - Warm Codex and Antigravity Profiles After Long Quota Resets
 
 - Added a server-side monitor that checks configured Codex and Antigravity accounts and warms full weekly/monthly quota windows at startup; it then detects usage returning to full and uses a persisted weekly/monthly cooldown when providers expose rolling reset times.

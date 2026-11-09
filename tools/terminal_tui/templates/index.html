@@ -7773,10 +7773,9 @@ kiro-cli whoami --format json</code></pre>
                             const resetAt = new Date(windowInfo.resetsAt).getTime();
                             const resetDelta = resetAt - Date.now();
                             const remainingMinutes = Number.isFinite(resetAt) ? Math.max(0, Math.ceil(resetDelta / 60000)) : 0;
-                            const days = Math.floor(remainingMinutes / 1440);
-                            const hours = Math.floor((remainingMinutes % 1440) / 60);
+                            const hours = Math.floor(remainingMinutes / 60);
                             const minutes = remainingMinutes % 60;
-                            const duration = [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ');
+                            const duration = `${hours}h ${minutes}m`;
                             reset.textContent = Number.isFinite(resetAt) && resetDelta > 0
                                 ? `Resets in ${duration}` : 'Reset time passed';
                             reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:400;color:#cbd5e1;';
