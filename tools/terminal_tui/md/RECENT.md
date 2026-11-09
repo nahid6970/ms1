@@ -3,6 +3,27 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-09] - Codex Right-Click Quota Comparison Table
+
+- Right-click on the Codex quota badge now opens `#codex-usage-comparison-modal` — a table mirroring the Antigravity ACP comparison modal.
+- Table has four columns: **Account** (name + email), **5-hour** window, **Weekly** window, **Use** (active account switcher button).
+- Each quota cell shows a colour-coded percent badge (green ≥70%, yellow ≥30%, red <30%) and a "Resets in Xh Ym" countdown, matching the ACP style.
+- The **Use** column shows a green ✓ for the currently active profile and a clickable **Use** button for others; clicking it calls `selectCodexUsageAccount` and closes the modal.
+- Added `closeCodexUsageComparison` and `openCodexUsageComparison` functions. The existing `openCodexUsageAccountMenu` dropdown is preserved for Settings-triggered calls.
+- Badge `data-quota-details` and `aria-label` updated to "right-click to compare accounts".
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
+## [2026-11-09] - Codex Direct OAuth Quota Reading (ACP-style)
+
+- Added `_read_codex_auth_json`, `_codex_oauth_refresh`, `_parse_codex_wham_windows`, and `_read_codex_rate_limits_direct` to `app.py`.
+- `_read_codex_rate_limits` now tries the direct HTTP path first: reads `auth.json`, refreshes the access token via `auth.openai.com/oauth/token` (client ID `app_EMoamEEZ73f0CkXaXp7hrann`), then calls `chatgpt.com/backend-api/wham/usage` — no `codex` CLI binary required.
+- Falls back silently to the existing `codex app-server` subprocess path if the direct call fails.
+- Response shape is identical to the existing path; a `source` field (`"direct"` or `"app-server"`) is added for diagnostics.
+- Works for all named Codex profiles (each with their own `CODEX_HOME`/`auth.json`) exactly the same way named Antigravity ACP profiles work.
+
+**Files Modified:** `app.py`, `md/RECENT.md`
+
 ## [2026-11-08] - Smooth Workspace Bar Switching
 
 - Start workspace switching on the first chip click instead of waiting for the double-click timeout.

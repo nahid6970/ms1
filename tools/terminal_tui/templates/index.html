@@ -2410,7 +2410,7 @@
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
                     </span>
                     <div id="monitor-quota-group" role="group" aria-label="AI provider quotas" data-testid="quota-indicators">
-                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" data-quota-tooltip data-quota-provider="Codex" data-quota-details="Click to refresh · right-click to switch account" onclick="loadCodexLimits(true)" oncontextmenu="openCodexUsageAccountMenu(event)" aria-label="Codex quota. Click to refresh. Right-click to switch account.">
+                        <button id="monitor-codex-quota" type="button" data-testid="codex-quota-indicator" data-quota-tooltip data-quota-provider="Codex" data-quota-details="Click to refresh · right-click to compare accounts" onclick="loadCodexLimits(true)" oncontextmenu="openCodexUsageComparison(event)" aria-label="Codex quota. Click to refresh. Right-click to compare all accounts.">
                             <span id="monitor-codex-icon" aria-hidden="true"></span>
                             <span id="monitor-codex-quota-value">--</span>
                         </button>
@@ -4401,6 +4401,29 @@ kiro-cli whoami --format json</code></pre>
                         <th style="padding:8px 4px 9px 10px;min-width:125px;">Claude</th>
                     </tr></thead>
                     <tbody id="antigravity-usage-comparison-rows"><tr><td colspan="3" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="codex-usage-comparison-modal" role="dialog" aria-modal="true" aria-labelledby="codex-usage-comparison-title" onclick="if(event.target===this)closeCodexUsageComparison()" style="z-index:1300;">
+        <div class="modal-content" style="width:680px;max-width:94vw;max-height:84vh;padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border-color);">
+                <div style="min-width:0;flex:1;">
+                    <div id="codex-usage-comparison-title" style="font-size:.92rem;font-weight:650;color:var(--text-primary);">Codex account usage</div>
+                    <div id="codex-usage-comparison-status" role="status" style="font-size:.68rem;color:var(--text-muted);margin-top:4px;">Loading account usage…</div>
+                </div>
+                <button type="button" onclick="closeCodexUsageComparison()" aria-label="Close Codex account usage comparison" style="width:28px;height:28px;border:0;background:transparent;color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:1.2rem;">×</button>
+            </div>
+            <div style="overflow:auto;padding:12px 16px 16px;">
+                <table style="width:100%;border-collapse:collapse;font-size:.76rem;text-align:left;">
+                    <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
+                        <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
+                        <th style="padding:8px 10px 9px;min-width:110px;">5-hour</th>
+                        <th style="padding:8px 10px 9px;min-width:110px;">Weekly</th>
+                        <th style="padding:8px 4px 9px 10px;width:68px;text-align:center;">Use</th>
+                    </tr></thead>
+                    <tbody id="codex-usage-comparison-rows"><tr><td colspan="4" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -6687,6 +6710,178 @@ kiro-cli whoami --format json</code></pre>
             closeCodexUsageAccountMenu();
             loadCodexLimits(true);
             if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) openAgentSessionPicker();
+        }
+
+        function closeCodexUsageComparison() {
+            document.getElementById('codex-usage-comparison-modal')?.classList.remove('show');
+        }
+
+        async function openCodexUsageComparison(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const modal = document.getElementById('codex-usage-comparison-modal');
+            const status = document.getElementById('codex-usage-comparison-status');
+            const rows = document.getElementById('codex-usage-comparison-rows');
+            if (!modal || !status || !rows) return;
+            modal.classList.add('show');
+            status.textContent = 'Loading usage for all Codex profiles…';
+            rows.replaceChildren();
+
+            const renderQuotaCell = (cell, windows, unavailableText) => {
+                if (!windows.length) {
+                    const line = document.createElement('div');
+                    line.textContent = unavailableText || '—';
+                    line.style.color = 'var(--text-muted)';
+                    cell.appendChild(line);
+                    return;
+                }
+                windows.forEach(windowInfo => {
+                    const line = document.createElement('div');
+                    line.style.marginBottom = '3px';
+                    const remainingPercent = Number(windowInfo.leftPercent);
+                    const badgeTone = remainingPercent >= 70
+                        ? { fg: '#6ee7b7', bg: 'rgba(16,185,129,.13)', border: 'rgba(52,211,153,.38)' }
+                        : remainingPercent >= 30
+                            ? { fg: '#fcd34d', bg: 'rgba(245,158,11,.13)', border: 'rgba(251,191,36,.4)' }
+                            : { fg: '#fda4af', bg: 'rgba(244,63,94,.13)', border: 'rgba(251,113,133,.4)' };
+                    const quota = document.createElement('span');
+                    quota.textContent = `${remainingPercent.toFixed(1)}%`;
+                    quota.style.cssText = `display:inline-flex;align-items:center;padding:1px 6px;border:1px solid ${badgeTone.border};border-radius:5px;background:${badgeTone.bg};color:${badgeTone.fg};font-weight:500;line-height:1.35;`;
+                    line.appendChild(quota);
+                    if (windowInfo.resetsAt) {
+                        const reset = document.createElement('div');
+                        // resetsAt from app-server path is unix seconds; from direct path is also unix seconds
+                        const resetTs = windowInfo.resetsAt > 1e10 ? windowInfo.resetsAt : windowInfo.resetsAt * 1000;
+                        const resetAt = new Date(resetTs).getTime();
+                        const resetDelta = resetAt - Date.now();
+                        const remainingMinutes = Number.isFinite(resetAt) ? Math.max(0, Math.ceil(resetDelta / 60000)) : 0;
+                        const days = Math.floor(remainingMinutes / 1440);
+                        const hours = Math.floor((remainingMinutes % 1440) / 60);
+                        const minutes = remainingMinutes % 60;
+                        const duration = [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ');
+                        reset.textContent = Number.isFinite(resetAt) && resetDelta > 0 ? `Resets in ${duration}` : 'Reset time passed';
+                        reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:400;color:#cbd5e1;';
+                        line.appendChild(reset);
+                    }
+                    cell.appendChild(line);
+                });
+            };
+
+            try {
+                let accountsData;
+                try {
+                    const accountsResponse = await fetch('/api/codex/accounts');
+                    accountsData = await accountsResponse.json();
+                    if (!accountsResponse.ok) throw new Error(accountsData.error || 'Could not load Codex profiles.');
+                } catch (_) {
+                    accountsData = { accounts: [] };
+                }
+                const accounts = [
+                    { id: '', name: 'Default' },
+                    ...(Array.isArray(accountsData.accounts) ? accountsData.accounts : []),
+                ];
+                const selectedId = getSelectedCodexUsageAccount();
+
+                const results = await Promise.all(accounts.map(async account => {
+                    try {
+                        const query = new URLSearchParams({ cacheSeconds: String(getUsageServerCacheSeconds()) });
+                        if (account.id) query.set('accountId', account.id);
+                        const response = await fetch(`/api/codex/limits?${query}`);
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || 'Could not load usage.');
+                        return { account, data };
+                    } catch (error) {
+                        return { account, error: String(error.message || error) };
+                    }
+                }));
+
+                results.forEach(({ account, data, error }) => {
+                    const row = document.createElement('tr');
+                    row.id = `codex-comparison-row-${account.id || 'default'}`;
+                    row.style.borderBottom = '1px solid var(--border-color)';
+                    const accountCell = document.createElement('td');
+                    const fiveHourCell = document.createElement('td');
+                    const weeklyCell = document.createElement('td');
+                    const useCell = document.createElement('td');
+                    [accountCell, fiveHourCell, weeklyCell, useCell].forEach(cell => {
+                        cell.style.padding = '10px 10px';
+                        cell.style.verticalAlign = 'top';
+                    });
+                    accountCell.style.paddingLeft = '4px';
+                    useCell.style.paddingRight = '4px';
+                    useCell.style.textAlign = 'center';
+                    useCell.style.verticalAlign = 'middle';
+
+                    // Account label
+                    const isActive = account.id === selectedId;
+                    const email = data?.accountEmail;
+                    const accountLabel = account.id === '' ? 'Default' : account.name;
+                    const nameEl = document.createElement('div');
+                    nameEl.style.cssText = 'font-weight:600;color:var(--text-primary);';
+                    nameEl.textContent = accountLabel;
+                    accountCell.appendChild(nameEl);
+                    if (email) {
+                        const emailEl = document.createElement('div');
+                        emailEl.style.cssText = 'font-size:.68rem;color:var(--text-muted);margin-top:2px;';
+                        emailEl.textContent = email;
+                        accountCell.appendChild(emailEl);
+                    }
+                    if (error) {
+                        accountCell.title = error;
+                        renderQuotaCell(fiveHourCell, [], 'Unavailable');
+                        renderQuotaCell(weeklyCell, [], 'Unavailable');
+                    } else if (!data?.available) {
+                        accountCell.title = data?.error || 'Quota unavailable';
+                        renderQuotaCell(fiveHourCell, [], data?.error ? 'Not signed in' : '—');
+                        renderQuotaCell(weeklyCell, [], '—');
+                    } else {
+                        const windows = Array.isArray(data.windows) ? data.windows : [];
+                        const fiveHourWindows = windows.filter(w => (w.windowDurationMins && w.windowDurationMins <= 360) || w.label === '5-hour');
+                        const weeklyWindows = windows.filter(w => (w.windowDurationMins && w.windowDurationMins > 360 && w.windowDurationMins <= 8 * 24 * 60) || w.label === 'Weekly');
+                        renderQuotaCell(fiveHourCell, fiveHourWindows, '—');
+                        renderQuotaCell(weeklyCell, weeklyWindows, '—');
+                    }
+
+                    // Use button / active indicator
+                    const useBtn = document.createElement('button');
+                    useBtn.type = 'button';
+                    useBtn.id = `codex-comparison-use-${account.id || 'default'}`;
+                    useBtn.dataset.testid = 'codex-comparison-use';
+                    useBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    useBtn.setAttribute('aria-label', isActive ? `Using ${accountLabel}` : `Switch to ${accountLabel}`);
+                    if (isActive) {
+                        useBtn.textContent = '✓';
+                        useBtn.style.cssText = 'width:28px;height:28px;border:1px solid rgba(52,211,153,.5);border-radius:6px;background:rgba(16,185,129,.15);color:#34d399;font-size:.85rem;cursor:default;';
+                    } else {
+                        useBtn.textContent = 'Use';
+                        useBtn.style.cssText = 'padding:3px 8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:.7rem;cursor:pointer;';
+                        useBtn.onmouseenter = () => { useBtn.style.borderColor = '#34d399'; useBtn.style.color = '#34d399'; };
+                        useBtn.onmouseleave = () => { useBtn.style.borderColor = 'var(--border-color)'; useBtn.style.color = 'var(--text-secondary)'; };
+                        useBtn.onclick = () => {
+                            selectCodexUsageAccount(account.id);
+                            closeCodexUsageComparison();
+                        };
+                    }
+                    useCell.appendChild(useBtn);
+
+                    row.append(accountCell, fiveHourCell, weeklyCell, useCell);
+                    rows.appendChild(row);
+                });
+
+                if (!results.length) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 4;
+                    cell.style.cssText = 'padding:12px 4px;color:var(--text-muted);';
+                    cell.textContent = 'No Codex profiles found.';
+                    row.appendChild(cell);
+                    rows.appendChild(row);
+                }
+                status.textContent = `${results.length} profile${results.length === 1 ? '' : 's'}. Remaining quota per window. Click Use to switch the active account.`;
+            } catch (error) {
+                status.textContent = String(error.message || error);
+                rows.replaceChildren();
+            }
         }
 
         async function openCodexUsageAccountMenu(event) {

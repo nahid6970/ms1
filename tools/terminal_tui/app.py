@@ -1702,7 +1702,160 @@ def _codex_app_server_request(method, request_id, params=None, timeout=15, codex
                 pass
 
 
+def _read_codex_auth_json(codex_home=None):
+    """Read and validate the Codex OAuth credential cache from auth.json."""
+    home = os.path.abspath(os.path.expandvars(os.path.expanduser(
+        codex_home or os.environ.get('CODEX_HOME') or os.path.join(os.path.expanduser('~'), '.codex'))))
+    auth_path = os.path.join(home, 'auth.json')
+    try:
+        with open(auth_path, 'r', encoding='utf-8') as auth_file:
+            auth_data = json.load(auth_file)
+    except FileNotFoundError as exc:
+        raise RuntimeError('Sign in to Codex first — auth.json was not found.') from exc
+    except (OSError, ValueError) as exc:
+        raise RuntimeError('Could not read the Codex auth.json file.') from exc
+    tokens = auth_data.get('tokens') or {}
+    required = ('refresh_token', 'access_token')
+    if not isinstance(tokens, dict) or any(not tokens.get(k) for k in required):
+        raise RuntimeError('Codex auth.json is missing required token fields. Run `codex login` to refresh it.')
+    return auth_data, tokens
+
+
+def _codex_oauth_refresh(refresh_token):
+    """Exchange a Codex refresh_token for a fresh access_token via auth.openai.com."""
+    import requests
+    # The client ID is hardcoded in the Codex CLI — same for all installations.
+    response = requests.post(
+        'https://auth.openai.com/oauth/token',
+        data={
+            'grant_type': 'refresh_token',
+            'client_id': 'app_EMoamEEZ73f0CkXaXp7hrann',
+            'refresh_token': refresh_token,
+        },
+        headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        timeout=12,
+    )
+    if not response.ok:
+        raise RuntimeError(f'Could not refresh Codex OAuth token (HTTP {response.status_code}). Run `codex login` again.')
+    data = response.json() or {}
+    access_token = data.get('access_token')
+    if not access_token:
+        raise RuntimeError('OpenAI did not return an access token during Codex token refresh.')
+    return access_token, data
+
+
+def _parse_codex_wham_windows(usage):
+    """Parse the wham/usage response into the same window shape used by the app-server path."""
+    windows = []
+    for key in ('primary_window', 'secondary_window'):
+        window = usage.get(key)
+        if not isinstance(window, dict):
+            continue
+        used = window.get('used_percent')
+        if used is None:
+            continue
+        limit_secs = window.get('limit_window_seconds')
+        limit_secs = int(limit_secs) if isinstance(limit_secs, (int, float)) else None
+        if limit_secs is not None and limit_secs <= 18000:
+            label = '5-hour'
+            duration_mins = limit_secs // 60
+        elif limit_secs is not None and limit_secs <= 7 * 24 * 3600:
+            label = 'Weekly'
+            duration_mins = limit_secs // 60
+        elif limit_secs is not None and limit_secs <= 32 * 24 * 3600:
+            label = 'Monthly'
+            duration_mins = limit_secs // 60
+        elif limit_secs is not None:
+            label = f'{limit_secs // (24 * 3600)}-day'
+            duration_mins = limit_secs // 60
+        else:
+            label = 'Current'
+            duration_mins = None
+        reset_at = window.get('reset_at')
+        # reset_at from wham is an ISO timestamp string; convert to unix seconds
+        reset_ts = None
+        if isinstance(reset_at, str):
+            try:
+                import datetime
+                dt = datetime.datetime.fromisoformat(reset_at.replace('Z', '+00:00'))
+                reset_ts = int(dt.timestamp())
+            except (ValueError, TypeError):
+                pass
+        elif isinstance(reset_at, (int, float)):
+            reset_ts = int(reset_at)
+        used_clamped = max(0, min(100, float(used)))
+        windows.append({
+            'label': label,
+            'usedPercent': round(used_clamped, 1),
+            'leftPercent': round(max(0.0, 100.0 - used_clamped), 1),
+            'resetsAt': reset_ts,
+            'windowDurationMins': duration_mins,
+            'limitReached': bool(window.get('limit_reached')),
+        })
+    return windows
+
+
+def _read_codex_rate_limits_direct(codex_home=None):
+    """Read Codex quota directly via the wham/usage HTTP API, no CLI subprocess needed.
+
+    Mirrors the pattern used by _read_antigravity_usage:
+      1. Read auth.json for stored OAuth credentials.
+      2. Refresh the access_token via auth.openai.com.
+      3. Call chatgpt.com/backend-api/wham/usage with the fresh token.
+    """
+    import requests
+
+    auth_data, tokens = _read_codex_auth_json(codex_home)
+    refresh_token = tokens['refresh_token']
+    access_token, refreshed = _codex_oauth_refresh(refresh_token)
+
+    # Prefer account_id from tokens dict; fall back to top-level field
+    account_id = (tokens.get('account_id') or auth_data.get('account_id') or '').strip()
+
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json',
+    }
+    if account_id:
+        headers['ChatGPT-Account-Id'] = account_id
+
+    response = requests.get(
+        'https://chatgpt.com/backend-api/wham/usage',
+        headers=headers,
+        timeout=12,
+    )
+    if not response.ok:
+        raise RuntimeError(f'Codex wham/usage request failed (HTTP {response.status_code}).')
+    usage = response.json() or {}
+
+    windows = _parse_codex_wham_windows(usage)
+    if not windows:
+        raise RuntimeError('Codex wham/usage returned no quota windows.')
+
+    # Extract plan type from the nested allowed/plan fields if present
+    plan_type = str(usage.get('plan_type') or usage.get('chatgpt_plan_type') or '')
+
+    return {
+        'available': True,
+        'planType': plan_type,
+        'windows': windows,
+        'fetchedAt': int(time.time()),
+        'source': 'direct',
+    }
+
+
 def _read_codex_rate_limits(codex_home=None):
+    """Return Codex subscription rate-limit windows.
+
+    Tries the direct HTTP path (wham/usage via OAuth) first — no CLI needed.
+    Falls back to the app-server subprocess if the direct path fails.
+    """
+    try:
+        return _read_codex_rate_limits_direct(codex_home)
+    except Exception:
+        pass  # fall through to app-server path
+
+    # --- app-server fallback ---
     response = _codex_app_server_request('account/rateLimits/read', 2, codex_home=codex_home)
     limits = response.get('rateLimits') or {}
     if not limits:
@@ -1743,6 +1896,7 @@ def _read_codex_rate_limits(codex_home=None):
         'planType': str(limits.get('planType') or ''),
         'windows': windows,
         'fetchedAt': int(time.time()),
+        'source': 'app-server',
     }
 
 
