@@ -2057,8 +2057,8 @@
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
         "Monthly": {
           "leftPercent": 1.0,
-          "lastWarmedAt": 1794238040.2467217,
-          "lastAttemptAt": 1794238040.2467217,
+          "lastWarmedAt": 1794239367.1990945,
+          "lastAttemptAt": 1794239367.1990945,
           "cycleSeconds": 2592000
         }
       },
@@ -2117,10 +2117,11 @@
       "codex:default": {
         "accountName": "Default",
         "provider": "codex",
-        "state": "manual-running",
+        "state": "failed",
         "reason": "manual warm-up",
-        "lastEvent": "codex",
-        "error": ""
+        "lastEvent": "manual",
+        "completedAt": 1794239359,
+        "error": "ERROR: You’ve hit your usage limit. To continue using Codex and get access to GPT-5.3-Codex, start a free trial of Plus today (https://chatgpt.com/explore/plus), or try again at Nov 17th, 2026 2:33 PM."
       },
       "codex:12aa59bd4b7349e881eb7381f410031b": {
         "accountName": "00",
@@ -2137,9 +2138,13 @@
       "codex:8bf475b91e0a403cb2376c0b9725af1c": {
         "accountName": "01",
         "provider": "codex",
-        "state": "manual-running",
+        "state": "completed",
         "reason": "manual warm-up",
-        "lastEvent": "codex",
+        "lastEvent": "manual",
+        "modelsWarmed": [
+          "codex"
+        ],
+        "completedAt": 1794239367,
         "error": ""
       },
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {

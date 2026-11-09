@@ -1626,6 +1626,8 @@ _ANTIGRAVITY_ACP_AUTH_LOCK = threading.Lock()
 _ANTIGRAVITY_ACP_AUTH_STATE = {'state': 'idle', 'error': '', 'startedAt': None}
 _ANTIGRAVITY_ACP_AUTH_THREAD = None
 _AI_RESET_WARMUP_LOCK = threading.Lock()
+_AI_RESET_WARMUP_MANUAL_LOCK = threading.Lock()
+_AI_RESET_WARMUP_MANUAL_RUNNING = set()
 _AI_RESET_WARMUP_STOP = threading.Event()
 _AI_RESET_WARMUP_THREAD = None
 _AI_RESET_WARMUP_INTERVAL_SECONDS = 60
@@ -1944,7 +1946,9 @@ def _ai_reset_warmup_poll_once():
             if next_windows != snapshots.get(key):
                 snapshots[key] = next_windows
             account_status = statuses.get(key) or {}
-            if account_status.get('state') == 'manual-running':
+            with _AI_RESET_WARMUP_MANUAL_LOCK:
+                manual_running = key in _AI_RESET_WARMUP_MANUAL_RUNNING
+            if manual_running:
                 continue
             model_migration_needed = (
                 account['provider'] == 'antigravity'
@@ -2084,6 +2088,9 @@ def _ai_reset_warmup_manual_worker(account, families):
             'completedAt': int(time.time()), 'error': str(exc)[:400],
         }
         set_config_val('ai_usage_reset_warmup_state', state)
+    finally:
+        with _AI_RESET_WARMUP_MANUAL_LOCK:
+            _AI_RESET_WARMUP_MANUAL_RUNNING.discard(key)
 
 
 @app.route('/api/ai-usage/reset-warmup/manual', methods=['POST'])
@@ -2104,11 +2111,18 @@ def api_ai_usage_reset_warmup_manual():
     state = get_config_val('ai_usage_reset_warmup_state', dict)
     state = state if isinstance(state, dict) else {}
     statuses = state.setdefault('statuses', {})
-    if (statuses.get(key) or {}).get('state') == 'manual-running':
-        return jsonify({'error': 'A warm-up is already running for this account.'}), 409
+    with _AI_RESET_WARMUP_MANUAL_LOCK:
+        if key in _AI_RESET_WARMUP_MANUAL_RUNNING:
+            return jsonify({'error': 'A warm-up is already running for this account.'}), 409
+        _AI_RESET_WARMUP_MANUAL_RUNNING.add(key)
     statuses[key] = {'accountName': account['name'], 'provider': provider, 'state': 'manual-running',
                      'reason': 'manual warm-up', 'lastEvent': ', '.join(families), 'error': ''}
-    set_config_val('ai_usage_reset_warmup_state', state)
+    try:
+        set_config_val('ai_usage_reset_warmup_state', state)
+    except Exception as exc:
+        with _AI_RESET_WARMUP_MANUAL_LOCK:
+            _AI_RESET_WARMUP_MANUAL_RUNNING.discard(key)
+        return jsonify({'error': f'Could not save warm-up status: {exc}'}), 500
     threading.Thread(target=_ai_reset_warmup_manual_worker, args=(account, families),
                      name='ai-reset-warmup-manual', daemon=True).start()
     return jsonify({'started': True, 'key': key}), 202
