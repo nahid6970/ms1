@@ -2065,8 +2065,8 @@
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "Monthly": {
           "leftPercent": 88.0,
-          "lastWarmedAt": 0.0,
-          "lastAttemptAt": 0.0,
+          "lastWarmedAt": 1794237770.4530485,
+          "lastAttemptAt": 1794237770.4530485,
           "cycleSeconds": 2592000
         }
       },
@@ -2117,12 +2117,11 @@
       "codex:default": {
         "accountName": "Default",
         "provider": "codex",
-        "state": "watching",
-        "lastEvent": "",
-        "lastEvents": [],
-        "lastResetAt": null,
-        "completedAt": null,
-        "error": ""
+        "state": "failed",
+        "reason": "manual warm-up",
+        "lastEvent": "manual",
+        "completedAt": 1794237759,
+        "error": "ERROR: You’ve hit your usage limit. To continue using Codex and get access to GPT-5.3-Codex, start a free trial of Plus today (https://chatgpt.com/explore/plus), or try again at Nov 17th, 2026 2:33 PM."
       },
       "codex:12aa59bd4b7349e881eb7381f410031b": {
         "accountName": "00",
@@ -2147,26 +2146,21 @@
       "codex:8c3b65fbfe944a57a36156d3e153e9a3": {
         "accountName": "02",
         "provider": "codex",
-        "state": "watching",
-        "lastEvent": "",
-        "lastEvents": [],
-        "lastResetAt": null,
-        "completedAt": null,
+        "state": "completed",
+        "reason": "manual warm-up",
+        "lastEvent": "manual",
+        "modelsWarmed": [
+          "codex"
+        ],
+        "completedAt": 1794237770,
         "error": ""
       },
       "antigravity:default": {
         "accountName": "Default (agy CLI)",
         "provider": "antigravity",
-        "state": "completed",
-        "reason": "full quota or reset detected",
-        "lastEvent": "gemini-weekly",
-        "modelsWarmed": [
-          "gemini",
-          "claude"
-        ],
-        "modelSelectionVersion": 2,
-        "modelSelectionAttemptVersion": 2,
-        "completedAt": 1794236635,
+        "state": "manual-running",
+        "reason": "manual warm-up",
+        "lastEvent": "gemini",
         "error": ""
       },
       "antigravity:10d54254caee451189908030ba576cb8": {

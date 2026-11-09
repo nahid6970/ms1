@@ -4514,11 +4514,10 @@ kiro-cli whoami --format json</code></pre>
                 <table style="width:100%;border-collapse:collapse;font-size:.76rem;text-align:left;">
                     <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
                         <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
-                        <th style="padding:8px 10px 9px;min-width:110px;">Primary window</th>
-                        <th style="padding:8px 10px 9px;min-width:110px;">Secondary window</th>
+                        <th style="padding:8px 10px 9px;min-width:150px;">Usage</th>
                         <th style="padding:8px 4px 9px 10px;width:68px;text-align:center;">Use</th>
                     </tr></thead>
-                    <tbody id="codex-usage-comparison-rows"><tr><td colspan="4" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
+                    <tbody id="codex-usage-comparison-rows"><tr><td colspan="3" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -7040,10 +7039,9 @@ kiro-cli whoami --format json</code></pre>
                     row.id = `codex-comparison-row-${account.id || 'default'}`;
                     row.style.borderBottom = '1px solid var(--border-color)';
                     const accountCell = document.createElement('td');
-                    const fiveHourCell = document.createElement('td');
-                    const weeklyCell = document.createElement('td');
+                    const usageCell = document.createElement('td');
                     const useCell = document.createElement('td');
-                    [accountCell, fiveHourCell, weeklyCell, useCell].forEach(cell => {
+                    [accountCell, usageCell, useCell].forEach(cell => {
                         cell.style.padding = '10px 10px';
                         cell.style.verticalAlign = 'top';
                     });
@@ -7068,17 +7066,13 @@ kiro-cli whoami --format json</code></pre>
                     }
                     if (error) {
                         accountCell.title = error;
-                        renderQuotaCell(fiveHourCell, [], 'Unavailable');
-                        renderQuotaCell(weeklyCell, [], 'Unavailable', account);
+                        renderQuotaCell(usageCell, [], 'Unavailable', account);
                     } else if (!data?.available) {
                         accountCell.title = data?.error || 'Quota unavailable';
-                        renderQuotaCell(fiveHourCell, [], data?.error ? 'Not signed in' : '—');
-                        renderQuotaCell(weeklyCell, [], '—', account);
+                        renderQuotaCell(usageCell, [], data?.error ? 'Not signed in' : '—', account);
                     } else {
                         const windows = Array.isArray(data.windows) ? data.windows : [];
-                        // Primary = first window, secondary = second window (backend returns them in order)
-                        renderQuotaCell(fiveHourCell, windows.slice(0, 1), '—');
-                        renderQuotaCell(weeklyCell, windows.slice(1, 2), '—', account);
+                        renderQuotaCell(usageCell, windows.slice(0, 1), '—', account);
                     }
 
                     // Use button / active indicator
@@ -7103,20 +7097,20 @@ kiro-cli whoami --format json</code></pre>
                     }
                     useCell.appendChild(useBtn);
 
-                    row.append(accountCell, fiveHourCell, weeklyCell, useCell);
+                    row.append(accountCell, usageCell, useCell);
                     rows.appendChild(row);
                 });
 
                 if (!results.length) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
-                    cell.colSpan = 4;
+                    cell.colSpan = 3;
                     cell.style.cssText = 'padding:12px 4px;color:var(--text-muted);';
                     cell.textContent = 'No Codex profiles found.';
                     row.appendChild(cell);
                     rows.appendChild(row);
                 }
-                status.textContent = `${results.length} profile${results.length === 1 ? '' : 's'}. Remaining quota per window. Click Use to switch the active account.`;
+                status.textContent = `${results.length} profile${results.length === 1 ? '' : 's'}. Click Use to switch the active account.`;
             } catch (error) {
                 status.textContent = String(error.message || error);
                 rows.replaceChildren();
