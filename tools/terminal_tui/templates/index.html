@@ -4403,9 +4403,10 @@ kiro-cli whoami --format json</code></pre>
                     <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
                         <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
                         <th style="padding:8px 10px 9px;min-width:125px;">Gemini</th>
-                        <th style="padding:8px 4px 9px 10px;min-width:125px;">Claude</th>
+                        <th style="padding:8px 10px 9px;min-width:125px;">Claude</th>
+                        <th style="padding:8px 4px 9px 10px;width:60px;text-align:center;">Use</th>
                     </tr></thead>
-                    <tbody id="antigravity-usage-comparison-rows"><tr><td colspan="3" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
+                    <tbody id="antigravity-usage-comparison-rows"><tr><td colspan="4" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -7501,7 +7502,13 @@ kiro-cli whoami --format json</code></pre>
         let antigravityAcpAccounts = [{ id: 'default', name: 'Default' }];
         function getSelectedAntigravityAcpAccount() {
             const savedId = localStorage.getItem('antigravity-acp-selected-account') || 'default';
-            return antigravityAcpAccounts.some(account => account.id === savedId) ? savedId : 'default';
+            const namedAccounts = antigravityAcpAccounts.filter(account => account.id !== 'default');
+            // If Default is saved but named profiles exist, transparently use the first named profile
+            if (savedId === 'default' && namedAccounts.length > 0) {
+                localStorage.setItem('antigravity-acp-selected-account', namedAccounts[0].id);
+                return namedAccounts[0].id;
+            }
+            return antigravityAcpAccounts.some(account => account.id === savedId) ? savedId : (namedAccounts[0]?.id || 'default');
         }
         async function loadAntigravityUsage(forceRefresh = false, queueIfBusy = true) {
             if (antigravityUsageLoadInFlight) {
@@ -7589,7 +7596,9 @@ kiro-cli whoami --format json</code></pre>
                 const accountsResponse = await fetch('/api/antigravity/acp/accounts');
                 const accountsData = await accountsResponse.json();
                 if (!accountsResponse.ok) throw new Error(accountsData.error || 'Could not load Google profiles.');
-                const accounts = Array.isArray(accountsData.accounts) ? accountsData.accounts : [];
+                // Skip the Default profile — it duplicates named profiles and is not useful to compare
+                const allAccounts = Array.isArray(accountsData.accounts) ? accountsData.accounts : [];
+                const accounts = allAccounts.filter(account => account.id !== 'default');
                 const results = await Promise.all(accounts.map(async account => {
                     if (!account.usageReady) return { account, data: null };
                     try {
@@ -7647,20 +7656,22 @@ kiro-cli whoami --format json</code></pre>
                     });
                 };
 
+                const activeId = getSelectedAntigravityAcpAccount();
                 results.forEach(({ account, data, error }) => {
                     const row = document.createElement('tr');
                     row.style.borderBottom = '1px solid var(--border-color)';
                     const accountCell = document.createElement('td');
                     const geminiCell = document.createElement('td');
                     const claudeCell = document.createElement('td');
-                    [accountCell, geminiCell, claudeCell].forEach(cell => {
+                    const useCell = document.createElement('td');
+                    [accountCell, geminiCell, claudeCell, useCell].forEach(cell => {
                         cell.style.padding = '10px 10px';
                         cell.style.verticalAlign = 'top';
                     });
                     accountCell.style.paddingLeft = '4px';
-                    claudeCell.style.paddingRight = '4px';
+                    useCell.style.cssText = 'padding:10px 4px 10px 10px;text-align:center;vertical-align:middle;';
                     const email = data?.accountEmail;
-                    const accountLabel = account.id === 'default' ? '00' : account.name;
+                    const accountLabel = account.name;
                     addCellText(accountCell, email && email.toLowerCase() !== accountLabel.toLowerCase()
                         ? `${accountLabel} · ${email}` : accountLabel, 'var(--text-primary)');
                     if (error) {
@@ -7683,15 +7694,37 @@ kiro-cli whoami --format json</code></pre>
                         renderQuotaCell(geminiCell, geminiWindows, '—');
                         renderQuotaCell(claudeCell, claudeWindows, '—');
                     }
-                    row.append(accountCell, geminiCell, claudeCell);
+                    // Use / Used button (like Codex comparison)
+                    const isActive = account.id === activeId;
+                    const useBtn = document.createElement('button');
+                    useBtn.type = 'button';
+                    useBtn.id = `antigravity-comparison-use-${account.id}`;
+                    useBtn.dataset.testid = 'antigravity-comparison-use';
+                    useBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    useBtn.setAttribute('aria-label', isActive ? `Using ${accountLabel}` : `Switch to ${accountLabel}`);
+                    if (isActive) {
+                        useBtn.textContent = 'Used';
+                        useBtn.style.cssText = 'padding:3px 8px;border:1px solid rgba(34,211,238,.5);border-radius:6px;background:rgba(8,145,178,.18);color:#67e8f9;font-size:.7rem;font-weight:600;cursor:default;';
+                    } else {
+                        useBtn.textContent = 'Use';
+                        useBtn.style.cssText = 'padding:3px 8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:.7rem;cursor:pointer;';
+                        useBtn.onmouseenter = () => { useBtn.style.borderColor = '#22d3ee'; useBtn.style.color = '#22d3ee'; };
+                        useBtn.onmouseleave = () => { useBtn.style.borderColor = 'var(--border-color)'; useBtn.style.color = 'var(--text-secondary)'; };
+                        useBtn.onclick = () => {
+                            selectAntigravityAcpAccount(account.id);
+                            closeAntigravityUsageComparison();
+                        };
+                    }
+                    useCell.appendChild(useBtn);
+                    row.append(accountCell, geminiCell, claudeCell, useCell);
                     rows.appendChild(row);
                 });
                 if (!results.length) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
-                    cell.colSpan = 3;
+                    cell.colSpan = 4;
                     cell.style.cssText = 'padding:12px 4px;color:var(--text-muted);';
-                    cell.textContent = 'No Google profiles found.';
+                    cell.textContent = 'No named Google profiles found. Add a profile in Settings → AI Usage & Accounts.';
                     row.appendChild(cell);
                     rows.appendChild(row);
                 }
@@ -7924,26 +7957,39 @@ kiro-cli whoami --format json</code></pre>
             const select = document.getElementById('settings-antigravity-acp-account');
             const list = document.getElementById('settings-antigravity-acp-account-list');
             if (!select) return;
-            const selectedId = getSelectedAntigravityAcpAccount();
+            const namedAccounts = antigravityAcpAccounts.filter(account => account.id !== 'default');
 
-            // Rebuild the <select> for quick switching
+            // If Default is selected but named profiles exist, auto-migrate to first named profile
+            const storedId = localStorage.getItem('antigravity-acp-selected-account') || 'default';
+            if (storedId === 'default' && namedAccounts.length > 0) {
+                localStorage.setItem('antigravity-acp-selected-account', namedAccounts[0].id);
+            }
+            const effectiveSelectedId = namedAccounts.length > 0
+                ? (localStorage.getItem('antigravity-acp-selected-account') || namedAccounts[0].id)
+                : 'default';
+
+            // Rebuild the <select> — only named profiles when they exist, otherwise Default fallback
             select.innerHTML = '';
-            antigravityAcpAccounts.forEach(account => {
+            const displayAccounts = namedAccounts.length > 0 ? namedAccounts : antigravityAcpAccounts;
+            displayAccounts.forEach(account => {
                 const option = document.createElement('option');
                 option.value = account.id;
                 const accountLabel = account.id === 'default' ? 'Default' : account.name;
                 option.textContent = `${accountLabel}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
                 select.appendChild(option);
             });
-            select.value = selectedId;
+            select.value = effectiveSelectedId;
 
-            // Build per-profile list rows (mirrors Codex/Kiro style)
+            // Build per-profile list rows — only named profiles
             if (!list) return;
             list.innerHTML = '';
-            antigravityAcpAccounts.forEach(account => {
-                const isDefault = account.id === 'default';
-                const accountLabel = isDefault ? 'Default' : account.name;
-                const isSelected = account.id === selectedId;
+            if (!namedAccounts.length) {
+                list.innerHTML = '<div style="font-size:.68rem;color:rgba(103,232,249,.45);padding:4px 2px;">No named profiles yet. Add one below to keep a separate Google sign-in.</div>';
+                return;
+            }
+            namedAccounts.forEach(account => {
+                const accountLabel = account.name;
+                const isSelected = account.id === effectiveSelectedId;
                 const isSignedIn = Boolean(account.authenticated);
                 const email = account.accountEmail || '';
 
@@ -7952,7 +7998,6 @@ kiro-cli whoami --format json</code></pre>
                 row.dataset.testid = 'antigravity-acp-profile-row';
                 row.style.cssText = `display:flex;flex-direction:column;gap:5px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};`;
 
-                // Main row: name + badges + action buttons
                 const mainRow = document.createElement('div');
                 mainRow.style.cssText = 'display:flex;align-items:center;gap:7px;min-width:0;';
 
@@ -7963,7 +8008,6 @@ kiro-cli whoami --format json</code></pre>
                 const badgeGroup = document.createElement('span');
                 badgeGroup.style.cssText = 'display:flex;align-items:center;gap:5px;flex-shrink:0;';
 
-                // "active" badge when selected
                 if (isSelected) {
                     const activeBadge = document.createElement('span');
                     activeBadge.textContent = 'active';
@@ -7971,7 +8015,6 @@ kiro-cli whoami --format json</code></pre>
                     badgeGroup.appendChild(activeBadge);
                 }
 
-                // signed-in / not connected badge
                 const authBadge = document.createElement('span');
                 if (isSignedIn) {
                     authBadge.textContent = email || 'signed in';
@@ -7985,7 +8028,6 @@ kiro-cli whoami --format json</code></pre>
                 const actions = document.createElement('span');
                 actions.style.cssText = 'display:flex;align-items:center;gap:4px;flex-shrink:0;';
 
-                // Use button
                 const useButton = document.createElement('button');
                 useButton.type = 'button';
                 useButton.id = `settings-antigravity-acp-use-${account.id}`;
@@ -7996,77 +8038,71 @@ kiro-cli whoami --format json</code></pre>
                 useButton.style.cssText = `padding:3px 8px;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:${isSelected ? 'rgba(8,145,178,.25)' : 'rgba(8,145,178,.12)'};color:${isSelected ? '#67e8f9' : '#a5f3fc'};font-size:.68rem;cursor:${isSelected ? 'default' : 'pointer'};opacity:${isSelected ? '.7' : '1'};`;
                 useButton.onclick = () => selectAntigravityAcpAccount(account.id);
 
-                // Edit (rename) button — only for non-default
-                if (!isDefault) {
-                    const editButton = document.createElement('button');
-                    editButton.type = 'button';
-                    editButton.id = `settings-antigravity-acp-edit-${account.id}`;
-                    editButton.dataset.testid = 'antigravity-acp-edit';
-                    editButton.title = `Rename profile "${accountLabel}"`;
-                    editButton.setAttribute('aria-label', `Rename profile ${accountLabel}`);
-                    editButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
-                    editButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-                    editButton.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel);
-                    actions.appendChild(editButton);
+                const editButton = document.createElement('button');
+                editButton.type = 'button';
+                editButton.id = `settings-antigravity-acp-edit-${account.id}`;
+                editButton.dataset.testid = 'antigravity-acp-edit';
+                editButton.title = `Rename profile "${accountLabel}"`;
+                editButton.setAttribute('aria-label', `Rename profile ${accountLabel}`);
+                editButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:rgba(8,145,178,.12);color:#a5f3fc;cursor:pointer;';
+                editButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+                editButton.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel);
 
-                    // Remove button
-                    const removeButton = document.createElement('button');
-                    removeButton.type = 'button';
-                    removeButton.id = `settings-antigravity-acp-del-${account.id}`;
-                    removeButton.dataset.testid = 'antigravity-acp-delete';
-                    removeButton.title = `Remove profile "${accountLabel}"`;
-                    removeButton.setAttribute('aria-label', `Remove profile ${accountLabel}`);
-                    removeButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(239,68,68,.28);border-radius:5px;background:rgba(239,68,68,.07);color:#fca5a5;cursor:pointer;';
-                    removeButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
-                    removeButton.onclick = () => removeAntigravityAcpAccountById(account.id, accountLabel);
-                    actions.appendChild(removeButton);
-                }
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.id = `settings-antigravity-acp-del-${account.id}`;
+                removeButton.dataset.testid = 'antigravity-acp-delete';
+                removeButton.title = `Remove profile "${accountLabel}"`;
+                removeButton.setAttribute('aria-label', `Remove profile ${accountLabel}`);
+                removeButton.style.cssText = 'width:26px;height:26px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(239,68,68,.28);border-radius:5px;background:rgba(239,68,68,.07);color:#fca5a5;cursor:pointer;';
+                removeButton.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+                removeButton.onclick = () => removeAntigravityAcpAccountById(account.id, accountLabel);
 
-                actions.prepend(useButton);
+                actions.appendChild(useButton);
+                actions.appendChild(editButton);
+                actions.appendChild(removeButton);
                 mainRow.appendChild(nameSpan);
                 mainRow.appendChild(badgeGroup);
                 mainRow.appendChild(actions);
                 row.appendChild(mainRow);
 
-                // Inline edit form (hidden by default, toggled by edit button)
-                if (!isDefault) {
-                    const editForm = document.createElement('div');
-                    editForm.id = `settings-antigravity-acp-editform-${account.id}`;
-                    editForm.dataset.testid = 'antigravity-acp-editform';
-                    editForm.style.cssText = 'display:none;grid-template-columns:1fr auto auto;gap:6px;align-items:center;';
-                    const nameInput = document.createElement('input');
-                    nameInput.type = 'text';
-                    nameInput.id = `settings-antigravity-acp-editinput-${account.id}`;
-                    nameInput.dataset.testid = 'antigravity-acp-editinput';
-                    nameInput.maxLength = 40;
-                    nameInput.placeholder = 'New profile name';
-                    nameInput.setAttribute('aria-label', `Rename profile ${accountLabel}`);
-                    nameInput.style.cssText = 'min-width:0;height:28px;padding:3px 8px;background:rgba(0,0,0,.35);border:1px solid rgba(34,211,238,.45);border-radius:5px;color:#cffafe;font-size:.74rem;outline:none;';
-                    nameInput.onfocus = () => { nameInput.style.borderColor = 'rgba(34,211,238,.8)'; };
-                    nameInput.onblur = () => { nameInput.style.borderColor = 'rgba(34,211,238,.45)'; };
-                    nameInput.onkeydown = (e) => {
-                        if (e.key === 'Enter') { e.preventDefault(); saveAntigravityAcpRename(account.id, nameInput.value); }
-                        if (e.key === 'Escape') { e.preventDefault(); toggleAntigravityAcpInlineEdit(account.id, accountLabel, true); }
-                    };
-                    const saveBtn = document.createElement('button');
-                    saveBtn.type = 'button';
-                    saveBtn.id = `settings-antigravity-acp-savename-${account.id}`;
-                    saveBtn.dataset.testid = 'antigravity-acp-savename';
-                    saveBtn.textContent = 'Save';
-                    saveBtn.style.cssText = 'padding:3px 10px;border:0;border-radius:5px;background:rgba(6,182,212,.8);color:white;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
-                    saveBtn.onclick = () => saveAntigravityAcpRename(account.id, nameInput.value);
-                    const cancelBtn = document.createElement('button');
-                    cancelBtn.type = 'button';
-                    cancelBtn.id = `settings-antigravity-acp-cancelname-${account.id}`;
-                    cancelBtn.dataset.testid = 'antigravity-acp-cancelname';
-                    cancelBtn.textContent = 'Cancel';
-                    cancelBtn.style.cssText = 'padding:3px 8px;border:1px solid rgba(34,211,238,.25);border-radius:5px;background:transparent;color:#94a3b8;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
-                    cancelBtn.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel, true);
-                    editForm.appendChild(nameInput);
-                    editForm.appendChild(saveBtn);
-                    editForm.appendChild(cancelBtn);
-                    row.appendChild(editForm);
-                }
+                // Inline edit form
+                const editForm = document.createElement('div');
+                editForm.id = `settings-antigravity-acp-editform-${account.id}`;
+                editForm.dataset.testid = 'antigravity-acp-editform';
+                editForm.style.cssText = 'display:none;grid-template-columns:1fr auto auto;gap:6px;align-items:center;';
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.id = `settings-antigravity-acp-editinput-${account.id}`;
+                nameInput.dataset.testid = 'antigravity-acp-editinput';
+                nameInput.maxLength = 40;
+                nameInput.placeholder = 'New profile name';
+                nameInput.setAttribute('aria-label', `Rename profile ${accountLabel}`);
+                nameInput.style.cssText = 'min-width:0;height:28px;padding:3px 8px;background:rgba(0,0,0,.35);border:1px solid rgba(34,211,238,.45);border-radius:5px;color:#cffafe;font-size:.74rem;outline:none;';
+                nameInput.onfocus = () => { nameInput.style.borderColor = 'rgba(34,211,238,.8)'; };
+                nameInput.onblur = () => { nameInput.style.borderColor = 'rgba(34,211,238,.45)'; };
+                nameInput.onkeydown = (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); saveAntigravityAcpRename(account.id, nameInput.value); }
+                    if (e.key === 'Escape') { e.preventDefault(); toggleAntigravityAcpInlineEdit(account.id, accountLabel, true); }
+                };
+                const saveBtn = document.createElement('button');
+                saveBtn.type = 'button';
+                saveBtn.id = `settings-antigravity-acp-savename-${account.id}`;
+                saveBtn.dataset.testid = 'antigravity-acp-savename';
+                saveBtn.textContent = 'Save';
+                saveBtn.style.cssText = 'padding:3px 10px;border:0;border-radius:5px;background:rgba(6,182,212,.8);color:white;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
+                saveBtn.onclick = () => saveAntigravityAcpRename(account.id, nameInput.value);
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.id = `settings-antigravity-acp-cancelname-${account.id}`;
+                cancelBtn.dataset.testid = 'antigravity-acp-cancelname';
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.style.cssText = 'padding:3px 8px;border:1px solid rgba(34,211,238,.25);border-radius:5px;background:transparent;color:#94a3b8;font-size:.72rem;cursor:pointer;white-space:nowrap;height:28px;';
+                cancelBtn.onclick = () => toggleAntigravityAcpInlineEdit(account.id, accountLabel, true);
+                editForm.appendChild(nameInput);
+                editForm.appendChild(saveBtn);
+                editForm.appendChild(cancelBtn);
+                row.appendChild(editForm);
 
                 list.appendChild(row);
             });

@@ -2022,7 +2022,11 @@
   "kiro_usage_accounts": [],
   "antigravity_acp_accounts": [
     {
-      "id": "31d2feb1b85e4cb2aabd28618668fc28",
+      "id": "10d54254caee451189908030ba576cb8",
+      "name": "00"
+    },
+    {
+      "id": "e6434f286cab44c5ad160abb1da63ced",
       "name": "01"
     }
   ]
