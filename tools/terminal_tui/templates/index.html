@@ -4502,7 +4502,7 @@ kiro-cli whoami --format json</code></pre>
     </div>
 
     <div class="modal-overlay" id="codex-usage-comparison-modal" role="dialog" aria-modal="true" aria-labelledby="codex-usage-comparison-title" onclick="if(event.target===this)closeCodexUsageComparison()" style="z-index:1300;">
-        <div class="modal-content" style="width:680px;max-width:94vw;max-height:84vh;padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;">
+        <div class="modal-content" style="width:760px;max-width:94vw;max-height:84vh;padding:0;display:flex;flex-direction:column;overflow:hidden;border-radius:12px;">
             <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border-color);">
                 <div style="min-width:0;flex:1;">
                     <div id="codex-usage-comparison-title" style="font-size:.92rem;font-weight:650;color:var(--text-primary);">Codex account usage</div>
@@ -4514,10 +4514,11 @@ kiro-cli whoami --format json</code></pre>
                 <table style="width:100%;border-collapse:collapse;font-size:.76rem;text-align:left;">
                     <thead><tr style="color:var(--text-secondary);border-bottom:1px solid var(--border-color);">
                         <th style="padding:8px 10px 9px 4px;min-width:150px;">Account</th>
-                        <th style="padding:8px 10px 9px;min-width:150px;">Usage</th>
+                        <th style="padding:8px 10px 9px;min-width:68px;">Quota</th>
+                        <th style="padding:8px 10px 9px;min-width:110px;">Remaining</th>
                         <th style="padding:8px 4px 9px 10px;width:68px;text-align:center;">Use</th>
                     </tr></thead>
-                    <tbody id="codex-usage-comparison-rows"><tr><td colspan="3" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
+                    <tbody id="codex-usage-comparison-rows"><tr><td colspan="4" style="padding:12px 4px;color:var(--text-muted);">Loading…</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -6996,23 +6997,22 @@ kiro-cli whoami --format json</code></pre>
             status.textContent = 'Loading usage for all Codex profiles…';
             rows.replaceChildren();
 
-            const renderQuotaCell = (cell, windows, unavailableText, account = null) => {
+            const renderQuotaCell = (cell, windows, unavailableText, account) => {
                 if (!windows.length) {
                     const line = document.createElement('div');
                     line.textContent = unavailableText || '—';
                     line.style.color = 'var(--text-muted)';
-                    if (account) {
-                        line.style.display = 'flex';
-                        line.style.alignItems = 'center';
-                        line.style.gap = '5px';
-                        line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
-                    }
+                    line.style.display = 'flex';
+                    line.style.alignItems = 'center';
+                    line.style.gap = '5px';
+                    line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
                     cell.appendChild(line);
                     return;
                 }
                 windows.forEach(windowInfo => {
                     const line = document.createElement('div');
                     line.style.marginBottom = '3px';
+                    line.style.display = 'block';
                     const remainingPercent = Number(windowInfo.leftPercent);
                     const badgeTone = remainingPercent <= 0
                         ? { fg: '#6b7280', bg: 'rgba(107,114,128,.10)', border: 'rgba(107,114,128,.28)' }
@@ -7025,14 +7025,23 @@ kiro-cli whoami --format json</code></pre>
                     quota.textContent = `${remainingPercent.toFixed(1)}%`;
                     quota.style.cssText = `display:inline-flex;align-items:center;padding:1px 6px;border:1px solid ${badgeTone.border};border-radius:5px;background:${badgeTone.bg};color:${badgeTone.fg};font-weight:500;line-height:1.35;`;
                     line.appendChild(quota);
-                    if (account) {
-                        line.style.display = 'flex';
-                        line.style.alignItems = 'center';
-                        line.style.gap = '5px';
-                        line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
-                    }
+                    line.style.display = 'flex';
+                    line.style.alignItems = 'center';
+                    line.style.gap = '5px';
+                    line.appendChild(createWarmupIconButton('codex', account.id || '', '', `${account.name || 'Codex'} account`));
+                    cell.appendChild(line);
+                });
+            };
+            const renderRemainingCell = (cell, windows) => {
+                if (!windows.length) {
+                    cell.textContent = '—';
+                    cell.style.color = 'var(--text-muted)';
+                    return;
+                }
+                windows.forEach(windowInfo => {
+                    const remaining = document.createElement('div');
+                    remaining.style.cssText = 'min-height:22px;display:flex;align-items:center;color:#cbd5e1;font-size:.72rem;white-space:nowrap;';
                     if (windowInfo.resetsAt) {
-                        const reset = document.createElement('div');
                         // resetsAt from app-server path is unix seconds; from direct path is also unix seconds
                         const resetTs = windowInfo.resetsAt > 1e10 ? windowInfo.resetsAt : windowInfo.resetsAt * 1000;
                         const resetAt = new Date(resetTs).getTime();
@@ -7041,12 +7050,13 @@ kiro-cli whoami --format json</code></pre>
                         const days = Math.floor(remainingMinutes / 1440);
                         const hours = Math.floor((remainingMinutes % 1440) / 60);
                         const minutes = remainingMinutes % 60;
-                        const duration = [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ');
-                        reset.textContent = Number.isFinite(resetAt) && resetDelta > 0 ? `Resets in ${duration}` : 'Reset time passed';
-                        reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:400;color:#cbd5e1;';
-                        line.appendChild(reset);
+                        remaining.textContent = Number.isFinite(resetAt) && resetDelta > 0
+                            ? [days ? `${days}d` : '', hours ? `${hours}h` : '', `${minutes}m`].filter(Boolean).join(' ')
+                            : '—';
+                    } else {
+                        remaining.textContent = '—';
                     }
-                    cell.appendChild(line);
+                    cell.appendChild(remaining);
                 });
             };
 
@@ -7083,13 +7093,15 @@ kiro-cli whoami --format json</code></pre>
                     row.id = `codex-comparison-row-${account.id || 'default'}`;
                     row.style.borderBottom = '1px solid var(--border-color)';
                     const accountCell = document.createElement('td');
-                    const usageCell = document.createElement('td');
+                    const quotaCell = document.createElement('td');
+                    const remainingCell = document.createElement('td');
                     const useCell = document.createElement('td');
-                    [accountCell, usageCell, useCell].forEach(cell => {
+                    [accountCell, quotaCell, remainingCell, useCell].forEach(cell => {
                         cell.style.padding = '10px 10px';
                         cell.style.verticalAlign = 'top';
                     });
                     accountCell.style.paddingLeft = '4px';
+                    remainingCell.style.verticalAlign = 'middle';
                     useCell.style.paddingRight = '4px';
                     useCell.style.textAlign = 'center';
                     useCell.style.verticalAlign = 'middle';
@@ -7110,13 +7122,17 @@ kiro-cli whoami --format json</code></pre>
                     }
                     if (error) {
                         accountCell.title = error;
-                        renderQuotaCell(usageCell, [], 'Unavailable', account);
+                        renderQuotaCell(quotaCell, [], 'Unavailable', account);
+                        renderRemainingCell(remainingCell, []);
                     } else if (!data?.available) {
                         accountCell.title = data?.error || 'Quota unavailable';
-                        renderQuotaCell(usageCell, [], data?.error ? 'Not signed in' : '—', account);
+                        renderQuotaCell(quotaCell, [], data?.error ? 'Not signed in' : '—', account);
+                        renderRemainingCell(remainingCell, []);
                     } else {
                         const windows = Array.isArray(data.windows) ? data.windows : [];
-                        renderQuotaCell(usageCell, windows.slice(0, 1), '—', account);
+                        const displayedWindow = windows.slice(0, 1);
+                        renderQuotaCell(quotaCell, displayedWindow, '—', account);
+                        renderRemainingCell(remainingCell, displayedWindow);
                     }
 
                     // Use button / active indicator
@@ -7141,14 +7157,14 @@ kiro-cli whoami --format json</code></pre>
                     }
                     useCell.appendChild(useBtn);
 
-                    row.append(accountCell, usageCell, useCell);
+                    row.append(accountCell, quotaCell, remainingCell, useCell);
                     rows.appendChild(row);
                 });
 
                 if (!results.length) {
                     const row = document.createElement('tr');
                     const cell = document.createElement('td');
-                    cell.colSpan = 3;
+                    cell.colSpan = 4;
                     cell.style.cssText = 'padding:12px 4px;color:var(--text-muted);';
                     cell.textContent = 'No Codex profiles found.';
                     row.appendChild(cell);
