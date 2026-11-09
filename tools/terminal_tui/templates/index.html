@@ -6695,9 +6695,12 @@ kiro-cli whoami --format json</code></pre>
             }
             const list = document.getElementById('settings-codex-account-list');
             if (list) list.innerHTML = codexUsageAccounts.length ? codexUsageAccounts.map(account =>
-                `<div data-testid="codex-usage-account" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;font-size:.72rem;min-width:0;">
+                `<div id="codex-account-row-${escapeHtml(account.id)}" data-testid="codex-usage-account" style="display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:5px;font-size:.72rem;min-width:0;">
                     <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(account.codexHome)}"><strong>${escapeHtml(account.name)}</strong><span style="color:var(--text-muted);"> · ${escapeHtml(account.codexHome)}</span></span>
-                    <button type="button" aria-label="Remove ${escapeHtml(account.name)}" onclick="removeCodexUsageAccount('${escapeHtml(account.id)}')" style="flex:none;padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;">Remove</button>
+                    <span style="display:flex;gap:4px;flex:none;">
+                        <button type="button" aria-label="Rename ${escapeHtml(account.name)}" onclick="openCodexAccountEditRow('${escapeHtml(account.id)}')" title="Rename" style="padding:2px 6px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;line-height:1;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                        <button type="button" aria-label="Remove ${escapeHtml(account.name)}" onclick="removeCodexUsageAccount('${escapeHtml(account.id)}')" style="padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);cursor:pointer;font-size:.7rem;">Remove</button>
+                    </span>
                 </div>`
             ).join('') : '<div style="font-size:.68rem;color:var(--text-muted);">No additional Codex profiles added.</div>';
         }
@@ -6995,6 +6998,52 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        function openCodexAccountEditRow(accountId) {
+            const row = document.getElementById(`codex-account-row-${accountId}`);
+            if (!row) return;
+            const account = codexUsageAccounts.find(a => a.id === accountId);
+            if (!account) return;
+            row.innerHTML = '';
+            row.style.cssText = 'display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:6px;padding:6px 8px;background:var(--bg-main);border:1px solid rgba(52,211,153,.45);border-radius:5px;font-size:.72rem;';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = account.name;
+            input.maxLength = 40;
+            input.setAttribute('aria-label', 'New profile name');
+            input.style.cssText = 'min-width:0;height:26px;padding:3px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(52,211,153,.5);border-radius:4px;color:#d1fae5;font-size:.72rem;outline:none;';
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') saveCodexAccountRename(accountId, input.value);
+                if (e.key === 'Escape') loadCodexUsageAccounts();
+            });
+            const saveBtn = document.createElement('button');
+            saveBtn.type = 'button';
+            saveBtn.textContent = 'Save';
+            saveBtn.style.cssText = 'padding:2px 9px;background:rgba(16,185,129,.8);border:0;border-radius:4px;color:#fff;font-size:.7rem;cursor:pointer;white-space:nowrap;';
+            saveBtn.onclick = () => saveCodexAccountRename(accountId, input.value);
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.style.cssText = 'padding:2px 7px;background:transparent;border:1px solid var(--border-color);border-radius:4px;color:var(--text-secondary);font-size:.7rem;cursor:pointer;white-space:nowrap;';
+            cancelBtn.onclick = () => loadCodexUsageAccounts();
+            row.append(input, saveBtn, cancelBtn);
+            input.focus();
+            input.select();
+        }
+
+        async function saveCodexAccountRename(accountId, newName) {
+            const name = (newName || '').trim();
+            if (!name) return;
+            try {
+                const response = await fetch('/api/codex/accounts', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: accountId, name }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not rename Codex profile.');
+                await loadCodexUsageAccounts();
+                loadCodexLimits(true);
+            } catch (error) {
+                alert(String(error.message || error));
+                await loadCodexUsageAccounts();
+            }
+        }
         async function loadKiroUsageAccounts() {
             const response = await fetch('/api/kiro/accounts');
             const data = await response.json();

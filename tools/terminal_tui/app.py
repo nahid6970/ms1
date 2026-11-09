@@ -2568,7 +2568,7 @@ def api_kiro_accounts():
     return jsonify({'success': True, 'id': account_id})
 
 
-@app.route('/api/codex/accounts', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/codex/accounts', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def api_codex_accounts():
     """Manage configured Codex profiles used by quota, terminals, and session continuation."""
     accounts = _codex_usage_accounts()
@@ -2592,6 +2592,21 @@ def api_codex_accounts():
         accounts.append(account)
         set_config_val('codex_usage_accounts', accounts)
         return jsonify({'account': account}), 201
+
+    if request.method == 'PUT':
+        payload = request.get_json(silent=True) or {}
+        account_id = str(payload.get('id') or '')
+        new_name = str(payload.get('name') or '').strip()[:40]
+        if not account_id:
+            return jsonify({'error': 'Missing account id.'}), 400
+        if not new_name:
+            return jsonify({'error': 'Enter a name for the profile.'}), 400
+        account = next((item for item in accounts if item.get('id') == account_id), None)
+        if account is None:
+            return jsonify({'error': 'Codex profile not found.'}), 404
+        account['name'] = new_name
+        set_config_val('codex_usage_accounts', accounts)
+        return jsonify({'account': account})
 
     payload = request.get_json(silent=True) or {}
     account_id = str(payload.get('id') or '')
