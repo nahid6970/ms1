@@ -7901,7 +7901,7 @@ kiro-cli whoami --format json</code></pre>
                             const minutes = remainingMinutes % 60;
                             const duration = `${hours}h ${minutes}m`;
                             reset.textContent = Number.isFinite(resetAt) && resetDelta > 0
-                                ? `Resets in ${duration}` : 'Reset time passed';
+                                ? duration : '—';
                             reset.style.cssText = 'margin-top:2px;font-size:.72rem;font-weight:400;color:#cbd5e1;';
                             line.appendChild(reset);
                         }
