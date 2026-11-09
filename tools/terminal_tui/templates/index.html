@@ -4084,9 +4084,9 @@
                                 <span style="width:7px;height:7px;border-radius:50%;background:#06b6d4;box-shadow:0 0 6px rgba(6,182,212,.6);flex-shrink:0;"></span>
                                 <div style="font-size:.72rem;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:.4px;">Google Antigravity ACP</div>
                             </div>
-                            <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" id="settings-antigravity-acp-info" data-testid="antigravity-account-info" title="About the Antigravity ACP runtime" aria-label="About Antigravity ACP runtime" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:rgba(8,145,178,.14);border:1px solid rgba(34,211,238,.5);border-radius:50%;color:#67e8f9;cursor:pointer;text-decoration:none;">
+                            <button type="button" id="settings-antigravity-acp-info" data-testid="antigravity-account-info" onclick="openAntigravityAccountHelp()" title="Profile setup and sign-in help" aria-label="Show Antigravity ACP profile setup and sign-in help" style="width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;background:rgba(8,145,178,.14);border:1px solid rgba(34,211,238,.5);border-radius:50%;color:#67e8f9;cursor:pointer;text-decoration:none;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-                            </a>
+                            </button>
                         </div>
                         <!-- Runtime status -->
                         <div id="settings-antigravity-acp-status" role="status" style="font-size:.7rem;line-height:1.5;color:rgba(103,232,249,.65);">Checking ACP runtime…</div>
@@ -4299,6 +4299,59 @@ kiro-cli whoami --format json</code></pre>
                 <div style="padding:9px 10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;"><strong style="color:#fcd34d;">Server CLI cache</strong><div style="color:var(--text-secondary);margin-top:3px;">How long the backend may reuse the last CLI result for normal requests. “Off” always runs the CLI for a non-forced request when the browser cache misses. Manual and scheduled refreshes always bypass this cache.</div></div>
             </div>
             <div style="margin-top:11px;padding:9px 10px;background:rgba(59,130,246,.09);border:1px solid rgba(96,165,250,.25);border-radius:7px;color:#bfdbfe;font-size:.72rem;line-height:1.5;">Useful when debugging: tell the AI the three values shown under <strong>AI Usage &amp; Accounts → Usage Refresh &amp; Caching</strong>, and whether the check happened on app open, scheduled refresh, or badge click.</div>
+        </section>
+    </div>
+
+    <!-- Antigravity Account Help Modal -->
+    <div class="modal-overlay" id="antigravity-account-help-modal" data-testid="antigravity-account-help-modal" style="z-index:4100;" onclick="if(event.target===this)closeAntigravityAccountHelp()">
+        <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="antigravity-account-help-title" style="width:560px;max-width:92vw;max-height:88vh;overflow-y:auto;padding:20px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:12px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;">
+                <div>
+                    <h2 id="antigravity-account-help-title" style="margin:0;font-size:1rem;color:var(--text-primary);">Google Antigravity ACP — profiles &amp; sign-in</h2>
+                    <div style="margin-top:5px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">How to set up profiles and what to do when sign-in expires.</div>
+                </div>
+                <button type="button" id="antigravity-account-help-close" onclick="closeAntigravityAccountHelp()" aria-label="Close instructions" style="width:28px;height:28px;flex:none;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-secondary);font-size:1.1rem;cursor:pointer;">×</button>
+            </div>
+
+            <!-- Default profile section -->
+            <div style="margin-bottom:14px;padding:11px 12px;background:rgba(8,145,178,.07);border:1px solid rgba(34,211,238,.2);border-radius:8px;">
+                <div style="font-size:.72rem;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Default profile — reads from agy CLI</div>
+                <p style="margin:0 0 8px;font-size:.77rem;line-height:1.55;color:var(--text-secondary);">The Default profile runs <code style="color:#67e8f9;">agy --print /usage</code> as a subprocess and shows whichever Google account the <code>agy</code> CLI is currently signed into. It does not hold its own OAuth token — auth is entirely owned by <code>agy</code>.</p>
+                <div style="font-size:.72rem;font-weight:600;color:var(--text-primary);margin-bottom:5px;">If the quota badge shows an error or "not signed in":</div>
+                <pre style="margin:0;padding:8px 11px;background:#0b1220;border:1px solid #334155;border-radius:7px;color:#93c5fd;font:.74rem/1.7 Consolas,'Fira Code',monospace;white-space:pre-wrap;overflow-wrap:anywhere;">agy auth login</pre>
+                <div style="margin-top:7px;font-size:.71rem;color:var(--text-muted);">Run this in any terminal. <code>agy</code> will open a browser for Google sign-in. After completion, click the Default quota badge to refresh.</div>
+            </div>
+
+            <!-- Named profiles section -->
+            <div style="margin-bottom:14px;padding:11px 12px;background:rgba(8,145,178,.07);border:1px solid rgba(34,211,238,.2);border-radius:8px;">
+                <div style="font-size:.72rem;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Named profiles — independent ACP OAuth sign-ins</div>
+                <p style="margin:0 0 8px;font-size:.77rem;line-height:1.55;color:var(--text-secondary);">Each named profile stores its own Google OAuth token file at <code style="color:#67e8f9;">%LOCALAPPDATA%\TerminalTUI\antigravity-acp\profiles\&lt;id&gt;\antigravity-acp\acp_token.json</code>. The app exchanges the <code>refresh_token</code> with Google directly when reading quota — no <code>agy</code> CLI involved.</p>
+
+                <div style="font-size:.72rem;font-weight:600;color:var(--text-primary);margin-bottom:6px;">To add a new named profile:</div>
+                <ol style="margin:0 0 10px;padding-left:20px;display:grid;gap:7px;color:var(--text-secondary);font-size:.76rem;line-height:1.5;">
+                    <li>Make sure the ACP runtime is installed — click <strong style="color:var(--text-primary);">Install ACP runtime</strong> if the button is enabled.</li>
+                    <li>Type a name in the <em>New profile name</em> input and click <strong style="color:var(--text-primary);">Add profile</strong>. This creates an isolated folder on disk.</li>
+                    <li>The new profile is selected automatically. Click <strong style="color:var(--text-primary);">Sign in</strong> — a Google OAuth browser tab opens.</li>
+                    <li>Complete sign-in in the browser. The status text updates to "Google credentials are saved" when done.</li>
+                    <li>The quota badge now reads from the new profile.</li>
+                </ol>
+
+                <div style="font-size:.72rem;font-weight:600;color:var(--text-primary);margin-bottom:5px;">If quota shows an error or "sign in again" for a named profile:</div>
+                <p style="margin:0 0 6px;font-size:.76rem;line-height:1.5;color:var(--text-secondary);">Google refresh tokens rarely expire on their own, but they are revoked if you change your Google password, revoke the app's access in <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" style="color:#22d3ee;">Google Account → Third-party apps</a>, or sign out from this settings card. To fix:</p>
+                <ol style="margin:0;padding-left:20px;display:grid;gap:6px;color:var(--text-secondary);font-size:.76rem;line-height:1.5;">
+                    <li>Select the affected profile in the list.</li>
+                    <li>Click <strong style="color:var(--text-primary);">Sign out</strong> (clears the stale token file).</li>
+                    <li>Click <strong style="color:var(--text-primary);">Sign in</strong> and complete the Google browser flow again.</li>
+                </ol>
+            </div>
+
+            <!-- Key differences -->
+            <div style="padding:9px 10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:7px;color:#fcd34d;font-size:.72rem;line-height:1.55;">
+                <strong>ACP sign-in vs agy CLI sign-in are separate.</strong> Signing in to a named profile here does not affect <code>agy auth</code>, and running <code>agy auth logout</code> in the terminal does not affect named profiles. Each is independent.
+            </div>
+            <div style="margin-top:8px;text-align:right;">
+                <a href="https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp" target="_blank" rel="noopener noreferrer" style="font-size:.71rem;color:#22d3ee;">ACP runtime on GitHub ↗</a>
+            </div>
         </section>
     </div>
 
@@ -5266,6 +5319,7 @@ kiro-cli whoami --format json</code></pre>
                 else if (id === 'settings-modal') closeSettingsModal();
                 else if (id === 'codex-account-help-modal') closeCodexAccountHelp();
                 else if (id === 'kiro-account-help-modal') closeKiroAccountHelp();
+                else if (id === 'antigravity-account-help-modal') closeAntigravityAccountHelp();
                 else if (id === 'ai-usage-timing-help-modal') closeAIUsageTimingHelp();
                 else if (id === 'ai-model-filter-modal') closeAIModelFilterModal();
                 else if (id === 'ai-system-prompt-modal') closeAISystemPromptModal();
@@ -12579,6 +12633,16 @@ kiro-cli whoami --format json</code></pre>
         function closeKiroAccountHelp() {
             document.getElementById('kiro-account-help-modal')?.classList.remove('show');
             document.getElementById('settings-kiro-account-info')?.focus();
+        }
+
+        function openAntigravityAccountHelp() {
+            document.getElementById('antigravity-account-help-modal')?.classList.add('show');
+            document.getElementById('antigravity-account-help-close')?.focus();
+        }
+
+        function closeAntigravityAccountHelp() {
+            document.getElementById('antigravity-account-help-modal')?.classList.remove('show');
+            document.getElementById('settings-antigravity-acp-info')?.focus();
         }
 
         function openAIUsageTimingHelp() {

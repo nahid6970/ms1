@@ -213,6 +213,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Google Antigravity CLI start/continue actions in Settings and the AGENT picker
 - Google Antigravity usage badge reads remaining 5-hour and weekly quota windows using the signed-in ACP profile. Its tooltip identifies the Google account email and shows each Gemini or Claude/GPT window with its reset time on a separate line; click the badge to refresh
 - Google Antigravity ACP runtime installer with named, independently signed-in account profiles; select a profile to drive the quota badge, or add/remove profiles without signing out of others. Sign-out uses the ACP logout protocol for only the selected profile
+- **Antigravity profile system:** Default profile runs `agy --print /usage` CLI subprocess (auth owned by the `agy` keyring). Named profiles each store an independent Google OAuth token in `%LOCALAPPDATA%\TerminalTUI\antigravity-acp\profiles\<uuid>\antigravity-acp\acp_token.json`; the app exchanges the `refresh_token` directly with Google to read quota — no CLI involved. If the CLI badge errors, run `agy auth login` in a terminal. If a named profile errors, use Sign out → Sign in in the settings card to refresh the stored token. ACP sign-in and `agy auth` are fully independent and do not affect each other.
 - Manual refresh from each provider badge; optional shared 1/2/5/10/15-minute refresh interval
 
 ---
