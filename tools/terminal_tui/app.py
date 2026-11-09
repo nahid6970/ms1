@@ -2788,8 +2788,109 @@ def api_kiro_usage():
     return jsonify(data)
 
 
+def _antigravity_cli_executable():
+    """Find the installed Antigravity CLI (agy) without starting an authenticated session."""
+    candidates = []
+    local_app_data = os.environ.get('LOCALAPPDATA')
+    if local_app_data:
+        candidates.append(os.path.join(local_app_data, 'agy', 'bin', 'agy.exe'))
+    found = shutil.which('agy')
+    if found:
+        candidates.append(found)
+    return next((path for path in candidates if os.path.isfile(path)), None)
+
+
+def _read_antigravity_usage_via_cli():
+    """Read quota from agy's own cached account via its headless /usage command."""
+    executable = _antigravity_cli_executable()
+    if not executable:
+        raise RuntimeError('Antigravity CLI (agy) was not found. Install agy and sign in, then refresh.')
+    process_env = os.environ.copy()
+    process_env.pop('AGY_ACP_FORCE_FILE_STORAGE', None)
+    cli_bin = os.path.dirname(executable)
+    process_env['PATH'] = cli_bin + os.pathsep + process_env.get('PATH', '')
+    try:
+        result = subprocess.run(
+            [executable, '--print', '/usage', '--output-format', 'json', '--print-timeout', '20s'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            encoding='utf-8', errors='replace', timeout=25, env=process_env,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError('Antigravity CLI quota check timed out. Open agy, confirm sign-in, then refresh.') from exc
+    except OSError as exc:
+        raise RuntimeError('Could not start Antigravity CLI for a quota refresh.') from exc
+
+    try:
+        envelope = json.loads(result.stdout or '')
+    except (ValueError, TypeError) as exc:
+        raise RuntimeError('Antigravity CLI returned an unreadable quota response.') from exc
+    if result.returncode != 0 or not isinstance(envelope, dict) or envelope.get('status') != 'SUCCESS':
+        raise RuntimeError('Antigravity CLI could not read quota. Open agy and finish Google sign-in, then refresh.')
+
+    response_text = envelope.get('response')
+    if not isinstance(response_text, str):
+        raise RuntimeError('Antigravity CLI returned no quota data.')
+    windows = []
+    for line in response_text.splitlines():
+        columns = [part.strip() for part in line.split('\t')]
+        if len(columns) < 3:
+            continue
+        family_text, limit_text, percent_text = columns[:3]
+        match = re.search(r'(?<!\d)(\d{1,3}(?:\.\d+)?)\s*%', percent_text)
+        if not match:
+            continue
+        try:
+            remaining = max(0.0, min(100.0, float(match.group(1))))
+        except ValueError:
+            continue
+        family_lower = family_text.casefold()
+        if 'claude' in family_lower or 'gpt' in family_lower:
+            family = 'Claude & GPT (shared)'
+            prefix = 'shared'
+        elif 'gemini' in family_lower:
+            family = 'Gemini'
+            prefix = 'gemini'
+        else:
+            family = family_text or 'Antigravity'
+            prefix = re.sub(r'[^a-z0-9]+', '-', family_lower).strip('-') or 'agy'
+        cadence = ('5-hour' if '5-hour' in limit_text.casefold() or '5 hour' in limit_text.casefold()
+                   else 'Weekly' if 'week' in limit_text.casefold() else limit_text or 'Quota')
+        suffix = ('5h' if cadence == '5-hour' else 'weekly' if cadence == 'Weekly'
+                  else re.sub(r'[^a-z0-9]+', '-', cadence.casefold()).strip('-'))
+        windows.append({
+            'id': f'{prefix}-{suffix}',
+            'label': f'{family} · {cadence}',
+            'leftPercent': round(remaining, 1),
+            'usedPercent': round(100.0 - remaining, 1),
+            'resetsAt': columns[3] if len(columns) > 3 and columns[3] else None,
+        })
+    if not windows:
+        raise RuntimeError('Antigravity CLI did not report any quota windows.')
+    windows.sort(key=lambda item: (not item['id'].startswith('gemini-'), not item['id'].endswith('-5h')))
+    primary = next((item for item in windows if item['id'] == 'gemini-5h'), None)
+    if primary is None:
+        primary = next((item for item in windows if item['id'].startswith('gemini-')), windows[0])
+    return {
+        'available': True,
+        'windows': windows,
+        'leftPercent': primary['leftPercent'],
+        'fetchedAt': int(time.time()),
+        'accountName': 'agy CLI account',
+        'accountEmail': None,
+    }
+
+
 def _read_antigravity_usage(account_id=None):
-    """Read Antigravity's reported quota windows using the local ACP OAuth profile."""
+    """Read Antigravity quota windows.
+
+    For the Default profile, delegates to the agy CLI subprocess so it uses
+    whatever account agy is currently signed into via its own keyring.
+    For named profiles, reads from the ACP OAuth token stored for that profile.
+    """
+    if str(account_id or 'default') == 'default':
+        return _read_antigravity_usage_via_cli()
+
     import requests
 
     token_path = _antigravity_acp_token_path(account_id)

@@ -7502,13 +7502,7 @@ kiro-cli whoami --format json</code></pre>
         let antigravityAcpAccounts = [{ id: 'default', name: 'Default' }];
         function getSelectedAntigravityAcpAccount() {
             const savedId = localStorage.getItem('antigravity-acp-selected-account') || 'default';
-            const namedAccounts = antigravityAcpAccounts.filter(account => account.id !== 'default');
-            // If Default is saved but named profiles exist, transparently use the first named profile
-            if (savedId === 'default' && namedAccounts.length > 0) {
-                localStorage.setItem('antigravity-acp-selected-account', namedAccounts[0].id);
-                return namedAccounts[0].id;
-            }
-            return antigravityAcpAccounts.some(account => account.id === savedId) ? savedId : (namedAccounts[0]?.id || 'default');
+            return antigravityAcpAccounts.some(account => account.id === savedId) ? savedId : 'default';
         }
         async function loadAntigravityUsage(forceRefresh = false, queueIfBusy = true) {
             if (antigravityUsageLoadInFlight) {
@@ -7596,9 +7590,8 @@ kiro-cli whoami --format json</code></pre>
                 const accountsResponse = await fetch('/api/antigravity/acp/accounts');
                 const accountsData = await accountsResponse.json();
                 if (!accountsResponse.ok) throw new Error(accountsData.error || 'Could not load Google profiles.');
-                // Skip the Default profile — it duplicates named profiles and is not useful to compare
-                const allAccounts = Array.isArray(accountsData.accounts) ? accountsData.accounts : [];
-                const accounts = allAccounts.filter(account => account.id !== 'default');
+                // Include all profiles including Default (which now reads from the agy CLI)
+                const accounts = Array.isArray(accountsData.accounts) ? accountsData.accounts : [];
                 const results = await Promise.all(accounts.map(async account => {
                     if (!account.usageReady) return { account, data: null };
                     try {
@@ -7671,7 +7664,7 @@ kiro-cli whoami --format json</code></pre>
                     accountCell.style.paddingLeft = '4px';
                     useCell.style.cssText = 'padding:10px 4px 10px 10px;text-align:center;vertical-align:middle;';
                     const email = data?.accountEmail;
-                    const accountLabel = account.name;
+                    const accountLabel = account.id === 'default' ? 'Default (agy CLI)' : account.name;
                     addCellText(accountCell, email && email.toLowerCase() !== accountLabel.toLowerCase()
                         ? `${accountLabel} · ${email}` : accountLabel, 'var(--text-primary)');
                     if (error) {
@@ -7959,22 +7952,17 @@ kiro-cli whoami --format json</code></pre>
             if (!select) return;
             const namedAccounts = antigravityAcpAccounts.filter(account => account.id !== 'default');
 
-            // If Default is selected but named profiles exist, auto-migrate to first named profile
+            // Determine effective selected ID — no longer auto-migrating away from Default
             const storedId = localStorage.getItem('antigravity-acp-selected-account') || 'default';
-            if (storedId === 'default' && namedAccounts.length > 0) {
-                localStorage.setItem('antigravity-acp-selected-account', namedAccounts[0].id);
-            }
-            const effectiveSelectedId = namedAccounts.length > 0
-                ? (localStorage.getItem('antigravity-acp-selected-account') || namedAccounts[0].id)
-                : 'default';
+            const effectiveSelectedId = antigravityAcpAccounts.some(a => a.id === storedId) ? storedId : 'default';
 
             // Rebuild the <select> — only named profiles when they exist, otherwise Default fallback
             select.innerHTML = '';
-            const displayAccounts = namedAccounts.length > 0 ? namedAccounts : antigravityAcpAccounts;
-            displayAccounts.forEach(account => {
+            // Always include all accounts (Default + named) in the dropdown
+            antigravityAcpAccounts.forEach(account => {
                 const option = document.createElement('option');
                 option.value = account.id;
-                const accountLabel = account.id === 'default' ? 'Default' : account.name;
+                const accountLabel = account.id === 'default' ? 'Default (agy CLI)' : account.name;
                 option.textContent = `${accountLabel}${account.accountEmail ? ` · ${account.accountEmail}` : account.authenticated ? ' · signed in' : ''}`;
                 select.appendChild(option);
             });
@@ -7983,8 +7971,50 @@ kiro-cli whoami --format json</code></pre>
             // Build per-profile list rows — only named profiles
             if (!list) return;
             list.innerHTML = '';
+            // Always render a Default row first — reads quota from the agy CLI
+            (function renderDefaultRow() {
+                const defaultAccount = antigravityAcpAccounts.find(a => a.id === 'default') || { id: 'default', name: 'Default', authenticated: false };
+                const isSelected = effectiveSelectedId === 'default';
+                const isSignedIn = Boolean(defaultAccount.authenticated);
+                const row = document.createElement('div');
+                row.id = 'settings-antigravity-acp-row-default';
+                row.dataset.testid = 'antigravity-acp-profile-row';
+                row.style.cssText = `display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:6px;border:1px solid ${isSelected ? 'rgba(34,211,238,.45)' : 'rgba(34,211,238,.18)'};background:${isSelected ? 'rgba(8,145,178,.13)' : 'rgba(8,145,178,.05)'};min-width:0;`;
+                const nameSpan = document.createElement('span');
+                nameSpan.style.cssText = 'flex:1;min-width:0;font-size:.75rem;font-weight:600;color:#cffafe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+                nameSpan.textContent = 'Default';
+                const badgeGroup = document.createElement('span');
+                badgeGroup.style.cssText = 'display:flex;align-items:center;gap:5px;flex-shrink:0;';
+                const cliTag = document.createElement('span');
+                cliTag.textContent = 'agy CLI';
+                cliTag.title = 'Uses the agy CLI command to read quota \u2014 reflects whichever account agy is signed into';
+                cliTag.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.25);background:rgba(8,145,178,.1);color:#67e8f9;font-size:.62rem;font-weight:600;font-family:monospace;';
+                badgeGroup.appendChild(cliTag);
+                if (isSelected) {
+                    const activeBadge = document.createElement('span');
+                    activeBadge.textContent = 'active';
+                    activeBadge.style.cssText = 'padding:1px 6px;border-radius:5px;border:1px solid rgba(34,211,238,.45);background:rgba(8,145,178,.2);color:#67e8f9;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;';
+                    badgeGroup.appendChild(activeBadge);
+                }
+                const useButton = document.createElement('button');
+                useButton.type = 'button';
+                useButton.id = 'settings-antigravity-acp-use-default';
+                useButton.dataset.testid = 'antigravity-acp-use';
+                useButton.textContent = isSelected ? 'Active' : 'Use';
+                useButton.title = isSelected ? 'Default profile is already active' : 'Switch to Default (agy CLI account)';
+                useButton.disabled = isSelected;
+                useButton.style.cssText = `padding:3px 8px;border:1px solid rgba(34,211,238,.3);border-radius:5px;background:${isSelected ? 'rgba(8,145,178,.25)' : 'rgba(8,145,178,.12)'};color:${isSelected ? '#67e8f9' : '#a5f3fc'};font-size:.68rem;cursor:${isSelected ? 'default' : 'pointer'};opacity:${isSelected ? '.7' : '1'};flex-shrink:0;`;
+                useButton.onclick = () => selectAntigravityAcpAccount('default');
+                row.appendChild(nameSpan);
+                row.appendChild(badgeGroup);
+                row.appendChild(useButton);
+                list.appendChild(row);
+            })();
             if (!namedAccounts.length) {
-                list.innerHTML = '<div style="font-size:.68rem;color:rgba(103,232,249,.45);padding:4px 2px;">No named profiles yet. Add one below to keep a separate Google sign-in.</div>';
+                const hint = document.createElement('div');
+                hint.style.cssText = 'font-size:.68rem;color:rgba(103,232,249,.45);padding:4px 2px;';
+                hint.textContent = 'No named profiles yet. Add one below to keep a separate Google sign-in.';
+                list.appendChild(hint);
                 return;
             }
             namedAccounts.forEach(account => {
@@ -8260,8 +8290,11 @@ kiro-cli whoami --format json</code></pre>
                     if (installButton) installButton.disabled = true;
                     return data;
                 }
+                const isDefaultProfile = getSelectedAntigravityAcpAccount() === 'default';
                 statusEl.textContent = data.installed
-                    ? `ACP runtime ${data.version} is installed (${data.architecture}). ${data.authenticated ? 'Google credentials are saved.' : 'No Google account connected.'} ${data.usageReady ? 'Quota profile is ready.' : data.authenticated ? 'Quota profile is missing; sign in again to enable quota checks.' : ''}`
+                    ? (isDefaultProfile
+                        ? `ACP runtime ${data.version} is installed (${data.architecture}). Default profile uses the agy CLI — sign in via agy to update quota.`
+                        : `ACP runtime ${data.version} is installed (${data.architecture}). ${data.authenticated ? 'Google credentials are saved.' : 'No Google account connected.'} ${data.usageReady ? 'Quota profile is ready.' : data.authenticated ? 'Quota profile is missing; sign in again to enable quota checks.' : ''}`)
                     : `ACP runtime ${data.version} is not installed. The official Google download is about 560 MB.`;
                 if (data.authState === 'starting') {
                     statusEl.textContent = 'Starting Antigravity ACP runtime. First startup can take up to 90 seconds.';
