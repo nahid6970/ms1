@@ -6845,6 +6845,7 @@ kiro-cli whoami --format json</code></pre>
 
         async function manuallyWarmUsageAccount(button, provider, accountId, family = '') {
             if (!button || button.disabled) return;
+            const warmStartedAt = Date.now();
             button.disabled = true;
             button.setAttribute('aria-busy', 'true');
             button.dataset.warmState = 'running';
@@ -6888,6 +6889,8 @@ kiro-cli whoami --format json</code></pre>
                     button.setAttribute('aria-label', `Warm-up failed for ${button.dataset.warmLabel || 'account'}`);
                 }
             } finally {
+                const animationRemaining = 850 - (Date.now() - warmStartedAt);
+                if (animationRemaining > 0) await new Promise(resolve => window.setTimeout(resolve, animationRemaining));
                 button.disabled = false;
                 button.removeAttribute('aria-busy');
                 if (icon) icon.style.animation = '';
