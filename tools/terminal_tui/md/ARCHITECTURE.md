@@ -42,6 +42,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 
 ### 1.1 Rclone Workspace Sync
 - Frontend builds `rclone check` and directional `rclone sync` commands for the active workspace and starts them in a new terminal tab.
+- The subprocess monitor includes a separate Rclone Projects modal listing workspaces with saved destinations. Its header Check difference action checks all eligible workspaces, while each row can be checked individually. `POST /api/project/<project>/rclone/check` runs `rclone check --fast-list --size-only -v` with the saved exclude list and returns difference/error/matching/missing counts plus relevant detail lines for the GUI.
 - The centered Rclone modal sizes to its contents, grows when the ignore suggestion preview appears, and keeps the action footer visible while the content area scrolls.
 - The header button reflects the active workspace's saved destination. Its configured foreground and background colors support presets and custom colors stored in browser local storage.
 - Pressing Tab in the destination field opens a combined local/Rclone folder browser. Local browsing uses the filesystem; remote browsing lists only configured Rclone remotes through `GET /api/rclone/destination-directories`.

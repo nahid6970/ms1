@@ -728,7 +728,8 @@ def scan_projects():
             "hideGitInit": bool(p.get("hideGitInit", False)),
             "pathExists": path_exists,
             "pathIsEmpty": os.path.isdir(project_path) and is_empty_directory(project_path),
-            "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip())
+            "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip()),
+            "rcloneDestination": str((p.get("rclone") or {}).get("dest") or "")
         })
     return projects
 
@@ -8071,6 +8072,60 @@ def api_rclone_save_settings(project):
         proj['rclone']['transfers'] = data['transfers']
     save_projects_config(projects)
     return jsonify({'status': 'ok'})
+
+
+@app.route('/api/project/<project>/rclone/check', methods=['POST'])
+def api_rclone_check(project):
+    """Compare a workspace with its saved Rclone destination and return a readable summary."""
+    projects = load_projects_config()
+    proj = next((p for p in projects if p.get('name') == project), None)
+    if proj is None:
+        return jsonify({'error': 'Project not found'}), 404
+    source = os.path.abspath(os.path.expanduser(str(proj.get('path') or '').strip()))
+    settings = proj.get('rclone') or {}
+    destination = str(settings.get('dest') or '').strip()
+    if not source or not os.path.isdir(source):
+        return jsonify({'error': 'Workspace folder is missing or unavailable.'}), 400
+    if not destination:
+        return jsonify({'error': 'No Rclone destination is saved for this workspace.'}), 400
+    rclone_bin = shutil.which('rclone')
+    if not rclone_bin:
+        return jsonify({'error': 'rclone was not found on the server PATH.'}), 500
+
+    command = [rclone_bin, 'check', source, destination, '--fast-list', '--size-only', '-v']
+    ignorelist = str(settings.get('ignorelist') or DEFAULT_IGNORELIST).strip()
+    if ignorelist:
+        try:
+            with open(os.path.expanduser(ignorelist), 'r', encoding='utf-8-sig') as filter_file:
+                for line in filter_file:
+                    pattern = line.strip()
+                    if pattern and not pattern.startswith('#'):
+                        command.extend(['--exclude', pattern])
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            return jsonify({'error': f'Could not read Rclone ignore list: {exc}'}), 400
+
+    try:
+        result = subprocess.run(command, cwd=source, capture_output=True, text=True,
+                                encoding='utf-8', errors='replace', creationflags=0x08000000 if os.name == 'nt' else 0,
+                                timeout=900)
+    except subprocess.TimeoutExpired:
+        return jsonify({'error': 'Rclone check timed out after 15 minutes.'}), 504
+    except OSError as exc:
+        return jsonify({'error': f'Could not run rclone check: {exc}'}), 500
+
+    output = (result.stdout or '') + (result.stderr or '')
+    import re
+    differences = int(re.search(r'NOTICE: union root .*?: (\d+) differences found', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) differences found', output) else 0
+    errors = int(re.search(r'NOTICE: union root .*?: (\d+) errors while checking', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) errors while checking', output) else 0
+    matching = int(re.search(r'NOTICE: union root .*?: (\d+) matching files', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) matching files', output) else 0
+    missing = int(re.search(r'NOTICE: union root .*?: (\d+) files missing', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) files missing', output) else 0
+    detail_lines = [line for line in output.splitlines() if ' ERROR :' in line or ' NOTICE:' in line and ('symlink' in line.lower() or 'union root' in line.lower())]
+    return jsonify({'ok': result.returncode == 0, 'differences': differences, 'errors': errors,
+                    'matching': matching, 'missing': missing, 'details': detail_lines[:80],
+                    'summary': 'No differences found' if differences == 0 and errors == 0 else f'{differences} differences found · {errors} errors',
+                    'exitCode': result.returncode})
 
 
 @app.route('/api/project/<project>/rclone/scan', methods=['GET'])

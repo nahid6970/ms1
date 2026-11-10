@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-10] - Add Rclone Projects Difference Manager
+
+- Added a separate Rclone Projects button and modal beside the existing GitHub project manager.
+- Added individual checks and a header Check difference action to run `rclone check` for configured workspaces; the GUI summarizes matching, missing, differing, and error counts and exposes relevant detail lines.
+- Added the `/api/project/<project>/rclone/check` route, using saved destinations and ignore patterns.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-09] - Show Antigravity Reset Countdown in Total Hours
 
 - In the Antigravity account comparison table, render reset countdowns as total hours and minutes (for example, `167h 52m`) instead of days, hours, and minutes.
