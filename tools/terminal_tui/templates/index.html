@@ -10053,10 +10053,32 @@ kiro-cli whoami --format json</code></pre>
                 const details = status?.details?.length ? `<details style="margin-top:6px;"><summary style="cursor:pointer;color:var(--text-muted);font-size:.66rem;">Show check output</summary><pre style="white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:auto;margin:5px 0 0;color:#cbd5e1;font-size:.65rem;">${escapeHtml(status.details.join('\n'))}</pre></details>` : '';
                 return `<div style="display:flex;align-items:flex-start;gap:12px;padding:11px 12px;${card}border-radius:9px;background:var(--bg-card);">
                     <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${escapeHtml(project.rcloneDestination || 'Configured Rclone remote')}</div><div style="font-size:.64rem;color:${project.pathExists ? '#94a3b8' : '#f87171'};margin-top:3px;">${project.pathExists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}</div>${status ? `<div style="font-size:.7rem;color:${color};margin-top:6px;">${escapeHtml(status.summary || status.error || 'Checking…')}${status.matching != null ? ` · ${status.matching.toLocaleString()} matching files` : ''}${status.missing ? ` · ${status.missing} missing` : ''}</div>${details}` : ''}</div>
-                    <button type="button" class="rclone-project-check" data-project="${escapeHtml(project.name)}" ${project.pathExists ? '' : 'disabled'} style="padding:6px 9px;border:1px solid rgba(96,165,250,.45);border-radius:6px;background:rgba(96,165,250,.08);color:#60a5fa;font-size:.68rem;font-weight:600;cursor:pointer;">Check</button>
+                    <div style="display:flex;gap:5px;flex-shrink:0;">
+                        <button type="button" class="rclone-project-select" data-project="${escapeHtml(project.name)}" style="padding:6px 9px;border:1px solid rgba(196,181,253,.45);border-radius:6px;background:rgba(196,181,253,.08);color:#c4b5fd;font-size:.68rem;font-weight:600;cursor:pointer;">Select</button>
+                        <button type="button" class="rclone-project-check" data-project="${escapeHtml(project.name)}" ${project.pathExists ? '' : 'disabled'} style="padding:6px 9px;border:1px solid rgba(96,165,250,.45);border-radius:6px;background:rgba(96,165,250,.08);color:#60a5fa;font-size:.68rem;font-weight:600;cursor:pointer;">Check</button>
+                        <button type="button" class="rclone-project-sync" data-project="${escapeHtml(project.name)}" ${project.pathExists ? '' : 'disabled'} title="Sync from the workspace folder to its saved destination" style="padding:6px 9px;border:1px solid rgba(34,197,94,.45);border-radius:6px;background:rgba(34,197,94,.08);color:#4ade80;font-size:.68rem;font-weight:600;cursor:pointer;">SRC → DST</button>
+                    </div>
                 </div>`;
             }).join('');
             list.querySelectorAll('.rclone-project-check').forEach(button => button.addEventListener('click', () => checkRcloneProject(button.dataset.project, button)));
+            list.querySelectorAll('.rclone-project-select').forEach(button => button.addEventListener('click', () => selectRcloneProjectInTerminal(button.dataset.project)));
+            list.querySelectorAll('.rclone-project-sync').forEach(button => button.addEventListener('click', () => syncRcloneProjectToDestination(button.dataset.project, button)));
+        }
+        async function selectRcloneProjectInTerminal(projectName) {
+            closeRcloneProjectsModal();
+            await selectProject(projectName);
+        }
+        async function syncRcloneProjectToDestination(projectName, button) {
+            if (button) { button.disabled = true; button.textContent = 'Starting…'; }
+            closeRcloneProjectsModal();
+            try {
+                const selected = await selectProject(projectName);
+                if (!selected) return;
+                await rcloneLoadSettings();
+                await rcloneRun('src_to_dst');
+            } finally {
+                if (button?.isConnected) { button.disabled = false; button.textContent = 'SRC → DST'; }
+            }
         }
         async function checkRcloneProject(name, button) {
             const original = button?.textContent || 'Check';

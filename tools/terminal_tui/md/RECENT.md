@@ -7,6 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Added a separate Rclone Projects button and modal beside the existing GitHub project manager.
 - Added individual checks and a header Check difference action to run `rclone check` for configured workspaces; the GUI summarizes matching, missing, differing, and error counts and exposes relevant detail lines.
+- Added per-card Select and SRC → DST actions, matching the GitHub manager's project selection and the existing Rclone sync command behavior.
 - Added the `/api/project/<project>/rclone/check` route, using saved destinations and ignore patterns.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
