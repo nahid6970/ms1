@@ -2,10 +2,10 @@
 
 **Purpose:** Keep a record of job listings already reviewed so a later check can identify genuinely new vacancies, including new posts from companies seen before.
 
-**Last updated:** 8 November 2026  
+**Last updated:** 10 November 2026  
 **Tracked source:** [BD Govt Job — Bank Jobs](https://bdgovtjob.net/category/bank-jobs/)
 
-**Baseline checkpoint:** Rechecked on **8 Nov 2026**. Page 1 still shows the same newest bank listings published 1–4 Nov; page 2 begins with 31 Oct and reaches the recorded 28 Oct Bank Asia overlap. No new circulars since the 5 Nov scan. EBL Cards Sales deadline passed 7 Nov; the Nagad and Sonali listings show 8 Nov deadlines.
+**Baseline checkpoint:** Rechecked on **10 Nov 2026**. The newest bank-category cards remain the same notices published 1–4 Nov, all already logged in this tracker (including the previously recorded NCC, Mercantile, Al-Arafah, Bengal Commercial, Shimanto, ONE Bank, EBL, Nagad, MTB, and Modhumoti notices). No new bank-category listing appeared since the 8 Nov checkpoint. This scan checked the visible newest category feed; older entries were not re-audited. EBL Cards Sales, Nagad, and Sonali deadlines have passed; NCC and Shimanto deadlines are 10 Nov.
 
 ## Instructions for future checks
 
