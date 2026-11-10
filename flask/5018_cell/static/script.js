@@ -10698,6 +10698,49 @@ function nextSingleRow() {
     }
 }
 
+// Hold the single-row navigation buttons to scan through rows quickly.
+let singleRowHoldDelay = null;
+let singleRowHoldRepeat = null;
+let singleRowHoldRepeated = false;
+
+function bindSingleRowHold(button, navigate) {
+    if (!window.singleRowHoldListenersBound) {
+        const stopHolding = () => {
+            clearTimeout(singleRowHoldDelay);
+            clearInterval(singleRowHoldRepeat);
+            singleRowHoldDelay = singleRowHoldRepeat = null;
+        };
+        document.addEventListener('pointerup', stopHolding);
+        document.addEventListener('pointercancel', stopHolding);
+        window.addEventListener('blur', stopHolding);
+        window.singleRowHoldListenersBound = true;
+    }
+    button.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || button.disabled || !singleRowMode) return;
+        clearTimeout(singleRowHoldDelay);
+        clearInterval(singleRowHoldRepeat);
+        singleRowHoldRepeated = false;
+        singleRowHoldDelay = setTimeout(() => {
+            singleRowHoldRepeat = setInterval(() => {
+                const currentButton = document.getElementById(button.id);
+                if (!singleRowMode || !currentButton || currentButton.disabled) {
+                    clearInterval(singleRowHoldRepeat);
+                    singleRowHoldRepeat = null;
+                    return;
+                }
+                singleRowHoldRepeated = true;
+                navigate();
+            }, 80);
+        }, 350);
+    });
+    button.addEventListener('click', (event) => {
+        if (!singleRowHoldRepeated) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        singleRowHoldRepeated = false;
+    }, true);
+}
+
 function updateSingleRowButtons() {
     const sheet = tableData.sheets[currentSheet];
     const prevBtn = document.getElementById('btnPrevRow');
@@ -11064,6 +11107,8 @@ function renderTable(preserveScroll = true) {
                 `<span id="singleRowCounter" class="single-row-counter" onclick="toggleSingleRowMode()" style="display: ${singleRowActive ? 'inline-flex' : 'none'};" title="Click to exit Single Row View">${singleRowIndex + 1}/${sheet?.rows?.length ?? 0}</span>` +
                 `<button onclick="nextSingleRow()" id="btnNextRow" title="Next Row" class="btn-header-toggle" ${nextDisabled ? 'disabled' : ''}><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3l5 5-5 5"/></svg></button>` +
                 `</span>`;
+            bindSingleRowHold(toggleSpan.querySelector('#btnPrevRow'), prevSingleRow);
+            bindSingleRowHold(toggleSpan.querySelector('#btnNextRow'), nextSingleRow);
             headerCell.appendChild(toggleSpan);
         }
 
