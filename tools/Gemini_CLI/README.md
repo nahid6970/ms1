@@ -76,6 +76,7 @@ python .\gemini_terminal_cli\gemini_cli.py /system .\system_instruction.md
 - `/summ` - summarize & condense conversation into a structured briefing to reduce token usage for subsequent turns
 - `/mm` - open the model picker
 - `/test` - test all models and auto-hide failures
+- `/testapi` - test every saved API account with the currently selected model
 - `/addapi` - add a named API key
 - `/loadapi` - load the first saved API account, or a named one
 - `/loops <n>` - set the max tool-call loops for a turn

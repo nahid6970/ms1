@@ -1142,6 +1142,7 @@ if Completer is not None:
             ("/summ", "Summarize and condense conversation to reduce tokens"),
             ("/mm", "Open model picker / switch model"),
             ("/test", "Test all models and hide failures"),
+            ("/testapi", "Test saved API accounts with the selected model"),
             ("/api", "Open API account picker"),
             ("/settings", "Open interactive CLI settings"),
             ("/device", "Show automatically detected terminal OS"),
@@ -5491,6 +5492,7 @@ def print_help() -> None:
               /summ                 Summarize & compress conversation into compact context
               /mm                   Open the model picker
               /test                 Test all models and hide failures
+              /testapi              Test saved API accounts with the selected model
               /api                  Open the API account picker
               /device               Show detected terminal OS and input mode
               /add_device          List/add/remove named SSH devices
@@ -7285,6 +7287,22 @@ def main() -> int:
                             client.model = chosen
                             info(f"Model set to {client.model}")
                             persist_selection()
+                    continue
+                if command == "/testapi":
+                    accounts = ensure_api_accounts_loaded()
+                    print(f"Testing API accounts with selected model: {client.model}")
+                    if not accounts:
+                        warn("No saved API accounts found. Add one with /addapi.")
+                        continue
+                    passed = 0
+                    for account_name, account_key in accounts.items():
+                        try:
+                            result = test_model(GeminiClient(account_key, client.model), client.model)
+                            print(f"  PASS  {account_name} ({result.strip()[:80]})")
+                            passed += 1
+                        except Exception as exc:
+                            print(f"  FAIL  {account_name}: {str(exc).replace(chr(10), ' ')[:160]}")
+                    print(f"API check complete: {passed}/{len(accounts)} accounts passed for {client.model}.")
                     continue
                 if command == "/api":
                     accounts = ensure_api_accounts_loaded()
