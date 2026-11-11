@@ -834,7 +834,8 @@
 
         #terminal-parent {
             width: 100%;
-            height: 100%;
+            height: auto;
+            flex: 1;
             display: flex;
             gap: 8px;
             min-width: 0;
@@ -2417,7 +2418,8 @@
         <div class="terminal-container-wrapper" id="terminal-wrapper" style="display: none; flex-direction: column;">
             <div id="workspace-bar" class="hidden"></div>
             <div id="terminal-parent" style="flex: 1; min-height: 0;"></div>
-            <div id="subprocess-monitor" style="height: 28px; background-color: var(--bg-sidebar); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: monospace; font-size: 0.72rem; color: var(--text-secondary); user-select: none;">
+        </div>
+        <div id="subprocess-monitor" style="height: 28px; min-height: 28px; flex-shrink: 0; background-color: var(--bg-sidebar); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: monospace; font-size: 0.72rem; color: var(--text-secondary); user-select: none;">
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #64748b; display: inline-block;" id="monitor-status-dot"></span>
@@ -2510,7 +2512,6 @@
                     </span>
                 </div>
             </div>
-        </div>
     </div>
 
 
@@ -11604,6 +11605,8 @@ kiro-cli whoami --format json</code></pre>
             if (branchEl) { branchEl.style.display = 'none'; branchEl.setAttribute('data-has-git', 'false'); }
             const gitInfoEl = document.getElementById('monitor-git-info');
             if (gitInfoEl) gitInfoEl.style.display = 'none';
+            const gitDotMobile = document.getElementById('monitor-git-dot-mobile');
+            if (gitDotMobile) gitDotMobile.style.display = 'none';
             const gitInitBtn = document.getElementById('monitor-git-init-btn');
             if (gitInitBtn) gitInitBtn.style.display = 'none';
         }
