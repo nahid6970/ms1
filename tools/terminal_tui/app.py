@@ -96,7 +96,7 @@ import uuid
 import platform
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
-from winpty import PTY
+from winpty import Backend, PTY
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -394,7 +394,13 @@ class TerminalSession:
         self.path = path
         self.cols = 100
         self.rows = 30
-        self.pty = PTY(self.cols, self.rows)
+        # Prefer the native pseudo console so PowerShell stays attached to this
+        # web terminal instead of opening a separate Windows console window.
+        self.pty = PTY(
+            self.cols,
+            self.rows,
+            backend=Backend.ConPTY if os.name == 'nt' else None,
+        )
         self.history = ""
         self.history_lock = threading.Lock()
         

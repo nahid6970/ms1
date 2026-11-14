@@ -7003,7 +7003,9 @@ kiro-cli whoami --format json</code></pre>
             if (document.getElementById('agent-session-picker-modal')?.classList.contains('show')) openAgentSessionPicker();
         }
 
+        let codexUsageComparisonGeneration = 0;
         function closeCodexUsageComparison() {
+            codexUsageComparisonGeneration++;
             document.getElementById('codex-usage-comparison-modal')?.classList.remove('show');
         }
 
@@ -7014,6 +7016,8 @@ kiro-cli whoami --format json</code></pre>
             const status = document.getElementById('codex-usage-comparison-status');
             const rows = document.getElementById('codex-usage-comparison-rows');
             if (!modal || !status || !rows) return;
+            if (modal.classList.contains('show')) return;
+            const generation = ++codexUsageComparisonGeneration;
             modal.classList.add('show');
             status.textContent = 'Loading usage for all Codex profiles…';
             rows.replaceChildren();
@@ -7102,6 +7106,7 @@ kiro-cli whoami --format json</code></pre>
                         return { account, error: String(error.message || error) };
                     }
                 }));
+                if (generation !== codexUsageComparisonGeneration || !modal.classList.contains('show')) return;
 
                 results.forEach(({ account, data, error }) => {
                     const row = document.createElement('tr');
@@ -7182,6 +7187,7 @@ kiro-cli whoami --format json</code></pre>
                 }
                 status.textContent = `${results.length} profile${results.length === 1 ? '' : 's'}. Click Use to switch the active account.`;
             } catch (error) {
+                if (generation !== codexUsageComparisonGeneration || !modal.classList.contains('show')) return;
                 status.textContent = String(error.message || error);
                 rows.replaceChildren();
             }
@@ -7835,7 +7841,9 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        let antigravityUsageComparisonGeneration = 0;
         function closeAntigravityUsageComparison() {
+            antigravityUsageComparisonGeneration++;
             document.getElementById('antigravity-usage-comparison-modal')?.classList.remove('show');
         }
 
@@ -7873,6 +7881,8 @@ kiro-cli whoami --format json</code></pre>
             const status = document.getElementById('antigravity-usage-comparison-status');
             const rows = document.getElementById('antigravity-usage-comparison-rows');
             if (!modal || !status || !rows) return;
+            if (modal.classList.contains('show')) return;
+            const generation = ++antigravityUsageComparisonGeneration;
             modal.classList.add('show');
             status.textContent = 'Loading usage for all Google profiles…';
             rows.replaceChildren();
@@ -7894,6 +7904,7 @@ kiro-cli whoami --format json</code></pre>
                         return { account, error: String(error.message || error) };
                     }
                 }));
+                if (generation !== antigravityUsageComparisonGeneration || !modal.classList.contains('show')) return;
 
                 const addCellText = (cell, text, color = '') => {
                     const line = document.createElement('div');
@@ -8017,6 +8028,7 @@ kiro-cli whoami --format json</code></pre>
                 }
                 status.textContent = `Usage for ${results.length} profile${results.length === 1 ? '' : 's'}. Remaining quota is shown for each available window.`;
             } catch (error) {
+                if (generation !== antigravityUsageComparisonGeneration || !modal.classList.contains('show')) return;
                 status.textContent = String(error.message || error);
                 rows.replaceChildren();
             }
