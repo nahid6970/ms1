@@ -10203,44 +10203,48 @@ kiro-cli whoami --format json</code></pre>
             message.style.display = 'block';
             message.style.color = 'var(--text-secondary)';
             message.textContent = `Checking ${linked.length} GitHub project${linked.length === 1 ? '' : 's'}…`;
-            linked.forEach(project => githubProjectStatusByName.set(project.name, { text: 'Checking…', filesText: 'Checking…', hasChanges: false }));
+            linked.forEach(project => githubProjectStatusByName.set(project.name, { text: 'Queued', filesText: 'Queued', hasChanges: false }));
             renderGitHubProjectsModal();
-            checkButton.disabled = true;
-            checkButton.textContent = 'Checking…';
-            const results = await Promise.allSettled(linked.map(async project => {
-                const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/sync-remote`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'status' })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Git status check failed.');
-                const filesText = data.dirtyCount
-                    ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed`
-                    : 'Working tree clean';
-                let remoteText = '';
-                if (!data.remoteBranchExists) remoteText = `${data.ahead} commit${data.ahead === 1 ? '' : 's'} to push · remote branch missing`;
-                else {
-                    const remoteParts = [];
-                    if (data.ahead) remoteParts.push(`${data.ahead} to push`);
-                    if (data.behind) remoteParts.push(`${data.behind} to pull`);
-                    remoteText = remoteParts.join(' · ');
-                }
-                githubProjectStatusByName.set(project.name, {
-                    filesText, insertions: data.insertions, deletions: data.deletions,
-                    remoteText, ahead: data.ahead, behind: data.behind,
-                    hasChanges: !!(data.dirtyCount || data.ahead || data.behind),
-                    text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
-                });
-                return project.name;
-            }));
             const failed = [];
-            results.forEach((result, index) => {
-                if (result.status === 'rejected') {
-                    const error = result.reason?.message || 'Git status check failed.';
-                    githubProjectStatusByName.set(linked[index].name, { text: error, filesText: error, error: true, hasChanges: true });
-                    failed.push(linked[index].name);
+            let completed = 0;
+            // A single worker avoids launching many Git processes at once, which can
+            // saturate CPU and disk on machines with many linked workspaces.
+            for (const project of linked) {
+                githubProjectStatusByName.set(project.name, { text: 'Checking…', filesText: 'Checking…', hasChanges: false });
+                message.textContent = `Checking ${project.name} (${completed + 1}/${linked.length})…`;
+                renderGitHubProjectsModal();
+                try {
+                    const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/sync-remote`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'status' })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Git status check failed.');
+                    const filesText = data.dirtyCount
+                        ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed`
+                        : 'Working tree clean';
+                    let remoteText = '';
+                    if (!data.remoteBranchExists) remoteText = `${data.ahead} commit${data.ahead === 1 ? '' : 's'} to push · remote branch missing`;
+                    else {
+                        const remoteParts = [];
+                        if (data.ahead) remoteParts.push(`${data.ahead} to push`);
+                        if (data.behind) remoteParts.push(`${data.behind} to pull`);
+                        remoteText = remoteParts.join(' · ');
+                    }
+                    githubProjectStatusByName.set(project.name, {
+                        filesText, insertions: data.insertions, deletions: data.deletions,
+                        remoteText, ahead: data.ahead, behind: data.behind,
+                        hasChanges: !!(data.dirtyCount || data.ahead || data.behind),
+                        text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
+                    });
+                } catch (error) {
+                    const errorText = error?.message || 'Git status check failed.';
+                    githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true });
+                    failed.push(project.name);
                 }
-            });
-            renderGitHubProjectsModal();
+                completed++;
+                renderGitHubProjectsModal();
+                message.textContent = `Checked ${completed} of ${linked.length} GitHub projects…`;
+            }
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';
             message.style.display = 'block';

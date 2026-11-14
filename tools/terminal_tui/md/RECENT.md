@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-14] - Smooth GitHub Projects Check All
+
+- Changed GitHub Check all from launching every status request concurrently to a sequential queue, with one workspace checked at a time.
+- Show queued/checking states and incremental progress/results in the project cards while the queue runs; individual failures do not stop later checks.
+- This limits concurrent Git subprocess load on CPU and disk when many workspaces are linked.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-10] - Add Rclone Projects Difference Manager
 
 - Added a separate Rclone Projects button and modal beside the existing GitHub project manager.
