@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-14] - Add Project Check Settings and Change Badges
+
+- Added Settings → Project Checks with a configurable concurrent project count and independent GitHub/Rclone auto-check toggles and intervals.
+- Applied the concurrency limit to both Check all batches; auto-checks reuse the same queue controls.
+- Added count badges to the GitHub and Rclone toolbar buttons for projects with changes or check errors.
+- Auto-check preferences and intervals are stored in browser local storage.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-14] - Smooth GitHub Projects Check All
 
 - Changed GitHub Check all from launching every status request concurrently to a sequential queue, with one workspace checked at a time.

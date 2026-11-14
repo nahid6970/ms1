@@ -2464,11 +2464,13 @@
                     <button id="code-merger-btn" class="sbicon-btn" onclick="toggleCodeMergerPopover(event)" title="Code Merger — prep files & apply AI responses" style="color: #22d3ee; border-color: rgba(34, 211, 238, 0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/><path d="M16 6h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/></svg>
                     </button>
-                    <button id="github-projects-btn" class="sbicon-btn" onclick="openGitHubProjectsModal()" title="GitHub projects — pull, fetch, or clone" aria-label="GitHub projects" style="color:#facc15; border-color:rgba(250,204,21,0.4);">
+                    <button id="github-projects-btn" class="sbicon-btn" onclick="openGitHubProjectsModal()" title="GitHub projects — pull, fetch, or clone" aria-label="GitHub projects" style="position:relative;color:#facc15; border-color:rgba(250,204,21,0.4);">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.53v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.5-1.28-1.24-1.62-1.24-1.62-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15 1 1.71 2.62 1.22 3.26.93.1-.72.39-1.22.71-1.5-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.95 0 0 .94-.3 3.06 1.15a10.65 10.65 0 0 1 5.57 0c2.12-1.45 3.06-1.15 3.06-1.15.61 1.53.23 2.67.11 2.95.72.78 1.15 1.78 1.15 3 0 4.29-2.61 5.23-5.1 5.51.4.35.76 1.02.76 2.06V22c0 .29.2.63.76.52A11.1 11.1 0 0 0 12 .9z"/></svg>
+                        <span id="github-projects-notification" style="display:none;position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:10px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--bg-sidebar);"></span>
                     </button>
-                    <button id="rclone-projects-btn" class="sbicon-btn" onclick="openRcloneProjectsModal()" title="Rclone projects — check local and remote differences" aria-label="Rclone projects" style="color:#60a5fa;border-color:rgba(96,165,250,.4);">
+                    <button id="rclone-projects-btn" class="sbicon-btn" onclick="openRcloneProjectsModal()" title="Rclone projects — check local and remote differences" aria-label="Rclone projects" style="position:relative;color:#60a5fa;border-color:rgba(96,165,250,.4);">
                         <svg width="12" height="12" viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M31 3 5 18v28l26 15 26-15V18L31 3Zm0 8 17 10-17 10-17-10 17-10ZM12 28l15 10v15L12 43V28Zm38 0v15L35 53V38l15-10Z"/></svg>
+                        <span id="rclone-projects-notification" style="display:none;position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:10px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center;box-shadow:0 0 0 2px var(--bg-sidebar);"></span>
                     </button>
                     <!-- Screenshot/Image Upload button -->
                     <input type="file" id="screenshot-file-input" accept="image/*" multiple style="display: none;" onchange="handleScreenshotFileSelect(event)">
@@ -3881,6 +3883,9 @@
                 <button type="button" class="settings-nav-item" data-label="Sidebar & Layout" aria-label="Sidebar & Layout" id="settings-tab-btn-layout" onclick="switchSettingsTab('layout')" title="Sidebar & Layout" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
                 </button>
+                <button type="button" class="settings-nav-item" data-label="Project Checks" aria-label="Project Check Settings" id="settings-tab-btn-project-checks" onclick="switchSettingsTab('project-checks')" title="Project Checks" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;transition:all .2s;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><path d="m8 2 1 2M16 2l-1 2"/></svg>
+                </button>
                 <button type="button" class="settings-nav-item" data-label="Terminal & Editor" aria-label="Terminal & Editor Behavior" id="settings-tab-btn-behavior" onclick="switchSettingsTab('behavior')" title="Terminal & Editor Behavior" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
                 </button>
@@ -3905,6 +3910,33 @@
             </nav>
             
             <form id="settings-form" onsubmit="handleSaveSettings(event)">
+                <div id="settings-sec-project-checks" style="display:none;margin-bottom:16px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
+                    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Project Checks & Notifications</div>
+                    <div style="display:grid;gap:12px;">
+                        <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                            <div style="font-size:.78rem;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Check all load</div>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-secondary);">Projects to check at once
+                                <input type="number" id="settings-project-check-concurrency" min="1" max="8" step="1" value="1" style="width:60px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);">
+                            </label>
+                            <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Lower values reduce CPU and disk load. 1 checks projects sequentially.</div>
+                        </div>
+                        <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                            <div style="font-size:.78rem;font-weight:600;color:#facc15;margin-bottom:8px;">GitHub auto-check</div>
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-autocheck-enabled" style="accent-color:#facc15;"> Enable</label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-github-autocheck-interval" min="1" max="1440" step="1" value="15" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
+                            </div>
+                        </div>
+                        <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                            <div style="font-size:.78rem;font-weight:600;color:#60a5fa;margin-bottom:8px;">Rclone auto-check</div>
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-autocheck-enabled" style="accent-color:#60a5fa;"> Enable</label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-rclone-autocheck-interval" min="1" max="1440" step="1" value="30" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
+                            </div>
+                        </div>
+                        <div style="font-size:.7rem;color:var(--text-muted);">When checks find changed projects, a red count badge appears on the matching GitHub or Rclone button.</div>
+                    </div>
+                </div>
                 <!-- Tab 1: General Settings -->
                 <div id="settings-sec-general">
                     <div class="form-group" style="margin-bottom: 20px;">
@@ -10117,29 +10149,80 @@ kiro-cli whoami --format json</code></pre>
                 if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
                 rcloneProjectStatusByName.set(name, data);
             } catch (error) { rcloneProjectStatusByName.set(name, {error:error.message || 'Rclone check failed.'}); }
-            renderRcloneProjectsModal();
+            renderRcloneProjectsModal(); updateProjectChangeBadges();
         }
-        async function checkAllRcloneProjects() {
+        let rcloneProjectCheckRunning = false;
+        async function checkAllRcloneProjects(options = {}) {
             const linked = (projects || []).filter(project => project.hasRcloneDestination && project.pathExists);
             const button = document.getElementById('rclone-projects-check-all');
             const message = document.getElementById('rclone-projects-message');
-            if (!linked.length) return;
+            if (!linked.length || rcloneProjectCheckRunning) return;
+            rcloneProjectCheckRunning = true;
             button.disabled = true; button.textContent = 'Checking…';
             message.style.display='block'; message.style.color='var(--text-secondary)'; message.textContent=`Checking ${linked.length} Rclone project${linked.length === 1 ? '' : 's'}…`;
-            linked.forEach(project => rcloneProjectStatusByName.set(project.name, {summary:'Checking…'})); renderRcloneProjectsModal();
-            const results = await Promise.allSettled(linked.map(async project => {
-                const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/rclone/check`, {method:'POST'});
-                const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
-                rcloneProjectStatusByName.set(project.name, data);
-            }));
             const failed = [];
-            results.forEach((result,index) => { if (result.status === 'rejected') { failed.push(linked[index].name); rcloneProjectStatusByName.set(linked[index].name,{error:result.reason?.message || 'Rclone check failed.'}); } });
-            renderRcloneProjectsModal(); button.disabled=false; button.textContent='Check difference';
+            linked.forEach(project => rcloneProjectStatusByName.set(project.name, {summary:'Queued…'})); renderRcloneProjectsModal();
+            let nextIndex = 0, completed = 0;
+            const worker = async () => {
+                while (nextIndex < linked.length) {
+                    const index = nextIndex++, project = linked[index];
+                    rcloneProjectStatusByName.set(project.name, {summary:'Checking…'});
+                    message.textContent = `Checking ${project.name} (${completed + 1}/${linked.length})…`;
+                    renderRcloneProjectsModal(); message.style.display='block'; message.style.color='var(--text-secondary)';
+                    try {
+                        const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/rclone/check`, {method:'POST'});
+                        const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
+                        rcloneProjectStatusByName.set(project.name, data);
+                    } catch (error) {
+                        failed.push(project.name); rcloneProjectStatusByName.set(project.name,{error:error?.message || 'Rclone check failed.'});
+                    }
+                    completed++; renderRcloneProjectsModal(); message.style.display='block'; message.style.color='var(--text-secondary)'; updateProjectChangeBadges();
+                    message.textContent = `Checked ${completed} of ${linked.length} Rclone projects…`;
+                }
+            };
+            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency(), linked.length)}, worker)); }
+            finally { rcloneProjectCheckRunning = false; }
+            button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
             message.textContent=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}.`;
         }
 
         const githubProjectStatusByName = new Map();
+        let githubProjectCheckRunning = false;
+        let githubAutoCheckTimer = null;
+        let rcloneAutoCheckTimer = null;
+
+        function getProjectCheckConcurrency() {
+            return Math.max(1, Math.min(8, parseInt(localStorage.getItem('project-check-concurrency'), 10) || 1));
+        }
+
+        function updateProjectChangeBadges() {
+            const gitCount = [...githubProjectStatusByName.values()].filter(status => status.error || status.hasChanges).length;
+            const rcloneCount = [...rcloneProjectStatusByName.values()].filter(status => status.error || Number(status.differences) > 0 || Number(status.errors) > 0 || Number(status.missing) > 0).length;
+            const setBadge = (id, count) => {
+                const badge = document.getElementById(id);
+                if (!badge) return;
+                badge.textContent = count > 99 ? '99+' : String(count);
+                badge.style.display = count ? 'block' : 'none';
+                badge.parentElement.title = count ? `${count} project${count === 1 ? '' : 's'} with detected changes` : badge.parentElement.getAttribute('aria-label');
+            };
+            setBadge('github-projects-notification', gitCount);
+            setBadge('rclone-projects-notification', rcloneCount);
+        }
+
+        function configureProjectAutoChecks() {
+            if (githubAutoCheckTimer) clearInterval(githubAutoCheckTimer);
+            if (rcloneAutoCheckTimer) clearInterval(rcloneAutoCheckTimer);
+            githubAutoCheckTimer = rcloneAutoCheckTimer = null;
+            if (localStorage.getItem('github-autocheck-enabled') === 'true') {
+                const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('github-autocheck-interval'), 10) || 15));
+                githubAutoCheckTimer = setInterval(() => checkAllGitHubProjects({automatic:true}), minutes * 60 * 1000);
+            }
+            if (localStorage.getItem('rclone-autocheck-enabled') === 'true') {
+                const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('rclone-autocheck-interval'), 10) || 30));
+                rcloneAutoCheckTimer = setInterval(() => checkAllRcloneProjects({automatic:true}), minutes * 60 * 1000);
+            }
+        }
 
         function openGitHubProjectsModal() {
             renderGitHubProjectsModal();
@@ -10193,11 +10276,12 @@ kiro-cli whoami --format json</code></pre>
             return `min-width:54px;padding:6px 9px;border:1px solid ${color}66;border-radius:6px;background:${color}12;color:${color};font-size:.68rem;font-weight:600;cursor:pointer;`;
         }
 
-        async function checkAllGitHubProjects() {
+        async function checkAllGitHubProjects(options = {}) {
             const linked = (projects || []).filter(project => /github\.com/i.test(project.gitRemote || ''));
             const checkButton = document.getElementById('github-projects-check-all');
             const message = document.getElementById('github-projects-message');
-            if (!linked.length) return;
+            if (!linked.length || githubProjectCheckRunning) return;
+            githubProjectCheckRunning = true;
             checkButton.disabled = true;
             checkButton.textContent = 'Checking…';
             message.style.display = 'block';
@@ -10206,47 +10290,50 @@ kiro-cli whoami --format json</code></pre>
             linked.forEach(project => githubProjectStatusByName.set(project.name, { text: 'Queued', filesText: 'Queued', hasChanges: false }));
             renderGitHubProjectsModal();
             const failed = [];
-            let completed = 0;
-            // A single worker avoids launching many Git processes at once, which can
-            // saturate CPU and disk on machines with many linked workspaces.
-            for (const project of linked) {
-                githubProjectStatusByName.set(project.name, { text: 'Checking…', filesText: 'Checking…', hasChanges: false });
-                message.textContent = `Checking ${project.name} (${completed + 1}/${linked.length})…`;
-                renderGitHubProjectsModal();
-                try {
-                    const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/sync-remote`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'status' })
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Git status check failed.');
-                    const filesText = data.dirtyCount
-                        ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed`
-                        : 'Working tree clean';
-                    let remoteText = '';
-                    if (!data.remoteBranchExists) remoteText = `${data.ahead} commit${data.ahead === 1 ? '' : 's'} to push · remote branch missing`;
-                    else {
-                        const remoteParts = [];
-                        if (data.ahead) remoteParts.push(`${data.ahead} to push`);
-                        if (data.behind) remoteParts.push(`${data.behind} to pull`);
-                        remoteText = remoteParts.join(' · ');
+            let completed = 0, nextIndex = 0;
+            const worker = async () => {
+                while (nextIndex < linked.length) {
+                    const index = nextIndex++, project = linked[index];
+                    githubProjectStatusByName.set(project.name, { text: 'Checking…', filesText: 'Checking…', hasChanges: false });
+                    message.textContent = `Checking ${project.name} (${completed + 1}/${linked.length})…`;
+                    renderGitHubProjectsModal(); message.style.display = 'block'; message.style.color = 'var(--text-secondary)';
+                    try {
+                        const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/sync-remote`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'status' })
+                        });
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.error || 'Git status check failed.');
+                        const filesText = data.dirtyCount
+                            ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed`
+                            : 'Working tree clean';
+                        let remoteText = '';
+                        if (!data.remoteBranchExists) remoteText = `${data.ahead} commit${data.ahead === 1 ? '' : 's'} to push · remote branch missing`;
+                        else {
+                            const remoteParts = [];
+                            if (data.ahead) remoteParts.push(`${data.ahead} to push`);
+                            if (data.behind) remoteParts.push(`${data.behind} to pull`);
+                            remoteText = remoteParts.join(' · ');
+                        }
+                        githubProjectStatusByName.set(project.name, {
+                            filesText, insertions: data.insertions, deletions: data.deletions,
+                            remoteText, ahead: data.ahead, behind: data.behind,
+                            hasChanges: !!(data.dirtyCount || data.ahead || data.behind),
+                            text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
+                        });
+                    } catch (error) {
+                        const errorText = error?.message || 'Git status check failed.';
+                        githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true });
+                        failed.push(project.name);
                     }
-                    githubProjectStatusByName.set(project.name, {
-                        filesText, insertions: data.insertions, deletions: data.deletions,
-                        remoteText, ahead: data.ahead, behind: data.behind,
-                        hasChanges: !!(data.dirtyCount || data.ahead || data.behind),
-                        text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
-                    });
-                } catch (error) {
-                    const errorText = error?.message || 'Git status check failed.';
-                    githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true });
-                    failed.push(project.name);
+                    completed++; renderGitHubProjectsModal(); message.style.display = 'block'; message.style.color = 'var(--text-secondary)'; updateProjectChangeBadges();
+                    message.textContent = `Checked ${completed} of ${linked.length} GitHub projects…`;
                 }
-                completed++;
-                renderGitHubProjectsModal();
-                message.textContent = `Checked ${completed} of ${linked.length} GitHub projects…`;
-            }
+            };
+            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency(), linked.length)}, worker)); }
+            finally { githubProjectCheckRunning = false; }
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';
+            updateProjectChangeBadges();
             message.style.display = 'block';
             message.style.color = failed.length ? '#fbbf24' : '#34d399';
             message.textContent = failed.length
@@ -10275,6 +10362,7 @@ kiro-cli whoami --format json</code></pre>
                 handleSearch();
                 githubProjectStatusByName.delete(name);
                 renderGitHubProjectsModal();
+                updateProjectChangeBadges();
                 message.style.display = 'block';
                 message.style.color = '#34d399';
                 message.textContent = `${action[0].toUpperCase()}${action.slice(1)} completed for ${name}.`;
@@ -12856,7 +12944,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function switchSettingsTab(tabName) {
-            const tabs = ['general', 'layout', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge', 'icons'];
+            const tabs = ['general', 'layout', 'project-checks', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge', 'icons'];
             tabs.forEach(t => {
                 const el = document.getElementById(`settings-sec-${t}`);
                 if (el) el.style.display = t === tabName ? 'block' : 'none';
@@ -12881,6 +12969,11 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-rclone-color-fg').value = rcloneFg;
             document.getElementById('settings-rclone-color-bg').value = rcloneBg;
             document.getElementById('settings-rclone-color-preset').value = getRcloneButtonColorPreset(rcloneFg, rcloneBg);
+            document.getElementById('settings-project-check-concurrency').value = localStorage.getItem('project-check-concurrency') || '1';
+            document.getElementById('settings-github-autocheck-enabled').checked = localStorage.getItem('github-autocheck-enabled') === 'true';
+            document.getElementById('settings-github-autocheck-interval').value = localStorage.getItem('github-autocheck-interval') || '15';
+            document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
+            document.getElementById('settings-rclone-autocheck-interval').value = localStorage.getItem('rclone-autocheck-interval') || '30';
 
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
@@ -13140,6 +13233,15 @@ kiro-cli whoami --format json</code></pre>
 
         function handleSaveSettings(event) {
             event.preventDefault();
+            const checkConcurrency = Math.max(1, Math.min(8, parseInt(document.getElementById('settings-project-check-concurrency').value, 10) || 1));
+            const githubCheckInterval = Math.max(1, Math.min(1440, parseInt(document.getElementById('settings-github-autocheck-interval').value, 10) || 15));
+            const rcloneCheckInterval = Math.max(1, Math.min(1440, parseInt(document.getElementById('settings-rclone-autocheck-interval').value, 10) || 30));
+            localStorage.setItem('project-check-concurrency', String(checkConcurrency));
+            localStorage.setItem('github-autocheck-enabled', document.getElementById('settings-github-autocheck-enabled').checked);
+            localStorage.setItem('github-autocheck-interval', String(githubCheckInterval));
+            localStorage.setItem('rclone-autocheck-enabled', document.getElementById('settings-rclone-autocheck-enabled').checked);
+            localStorage.setItem('rclone-autocheck-interval', String(rcloneCheckInterval));
+            configureProjectAutoChecks();
             const selectedFont = selectedFontValue || "'Fira Code', Consolas, monospace";
             localStorage.setItem('terminal-font-family', selectedFont);
             
@@ -22933,6 +23035,8 @@ Always wrap your **entire response** in a single markdown code block.`;
             await loadSubcmdsMap();
             await fetchProjects();
             applySidebarWorkspacesVisibility();
+            updateProjectChangeBadges();
+            configureProjectAutoChecks();
             
             const savedActiveProject = localStorage.getItem('active-project');
             if (savedActiveProject) {
