@@ -7,6 +7,8 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Added Settings → Project Checks with a configurable concurrent project count and independent GitHub/Rclone auto-check toggles and intervals.
 - Added independent GitHub and Rclone concurrency limits; each Check all batch and its auto-check uses its own queue setting.
+- Removed the concurrency cap; setting a manager's concurrency to 0 checks every eligible project at once.
+- Added a GitHub manual Check all override to run every project concurrently on demand; scheduled checks continue using the GitHub concurrency value.
 - Added count badges to the GitHub and Rclone toolbar buttons for projects with changes or check errors.
 - Auto-check preferences and intervals are stored in browser local storage.
 
