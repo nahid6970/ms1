@@ -3914,25 +3914,22 @@
                     <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Project Checks & Notifications</div>
                     <div style="display:grid;gap:12px;">
                         <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                            <div style="font-size:.78rem;font-weight:600;color:var(--text-primary);margin-bottom:8px;">Check all load</div>
-                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-secondary);">Projects to check at once
-                                <input type="number" id="settings-project-check-concurrency" min="1" max="8" step="1" value="1" style="width:60px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);">
-                            </label>
-                            <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Lower values reduce CPU and disk load. 1 checks projects sequentially.</div>
-                        </div>
-                        <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
                             <div style="font-size:.78rem;font-weight:600;color:#facc15;margin-bottom:8px;">GitHub auto-check</div>
                             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-autocheck-enabled" style="accent-color:#facc15;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-github-autocheck-interval" min="1" max="1440" step="1" value="15" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-github-check-concurrency" min="1" max="8" step="1" value="1" style="width:58px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                             </div>
+                            <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">1 checks GitHub projects sequentially with the lowest load.</div>
                         </div>
                         <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
                             <div style="font-size:.78rem;font-weight:600;color:#60a5fa;margin-bottom:8px;">Rclone auto-check</div>
                             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-autocheck-enabled" style="accent-color:#60a5fa;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-rclone-autocheck-interval" min="1" max="1440" step="1" value="30" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-rclone-check-concurrency" min="1" max="8" step="1" value="1" style="width:58px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                             </div>
+                            <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">1 checks Rclone projects sequentially with the lowest load.</div>
                         </div>
                         <div style="font-size:.7rem;color:var(--text-muted);">When checks find changed projects, a red count badge appears on the matching GitHub or Rclone button.</div>
                     </div>
@@ -10180,7 +10177,7 @@ kiro-cli whoami --format json</code></pre>
                     message.textContent = `Checked ${completed} of ${linked.length} Rclone projects…`;
                 }
             };
-            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency(), linked.length)}, worker)); }
+            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency('rclone'), linked.length)}, worker)); }
             finally { rcloneProjectCheckRunning = false; }
             button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
@@ -10192,8 +10189,9 @@ kiro-cli whoami --format json</code></pre>
         let githubAutoCheckTimer = null;
         let rcloneAutoCheckTimer = null;
 
-        function getProjectCheckConcurrency() {
-            return Math.max(1, Math.min(8, parseInt(localStorage.getItem('project-check-concurrency'), 10) || 1));
+        function getProjectCheckConcurrency(type) {
+            const key = type === 'rclone' ? 'rclone-check-concurrency' : 'github-check-concurrency';
+            return Math.max(1, Math.min(8, parseInt(localStorage.getItem(key), 10) || 1));
         }
 
         function updateProjectChangeBadges() {
@@ -10329,7 +10327,7 @@ kiro-cli whoami --format json</code></pre>
                     message.textContent = `Checked ${completed} of ${linked.length} GitHub projects…`;
                 }
             };
-            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency(), linked.length)}, worker)); }
+            try { await Promise.all(Array.from({length:Math.min(getProjectCheckConcurrency('github'), linked.length)}, worker)); }
             finally { githubProjectCheckRunning = false; }
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';
@@ -12969,7 +12967,8 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-rclone-color-fg').value = rcloneFg;
             document.getElementById('settings-rclone-color-bg').value = rcloneBg;
             document.getElementById('settings-rclone-color-preset').value = getRcloneButtonColorPreset(rcloneFg, rcloneBg);
-            document.getElementById('settings-project-check-concurrency').value = localStorage.getItem('project-check-concurrency') || '1';
+            document.getElementById('settings-github-check-concurrency').value = localStorage.getItem('github-check-concurrency') || '1';
+            document.getElementById('settings-rclone-check-concurrency').value = localStorage.getItem('rclone-check-concurrency') || '1';
             document.getElementById('settings-github-autocheck-enabled').checked = localStorage.getItem('github-autocheck-enabled') === 'true';
             document.getElementById('settings-github-autocheck-interval').value = localStorage.getItem('github-autocheck-interval') || '15';
             document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
@@ -13233,10 +13232,12 @@ kiro-cli whoami --format json</code></pre>
 
         function handleSaveSettings(event) {
             event.preventDefault();
-            const checkConcurrency = Math.max(1, Math.min(8, parseInt(document.getElementById('settings-project-check-concurrency').value, 10) || 1));
+            const githubCheckConcurrency = Math.max(1, Math.min(8, parseInt(document.getElementById('settings-github-check-concurrency').value, 10) || 1));
+            const rcloneCheckConcurrency = Math.max(1, Math.min(8, parseInt(document.getElementById('settings-rclone-check-concurrency').value, 10) || 1));
             const githubCheckInterval = Math.max(1, Math.min(1440, parseInt(document.getElementById('settings-github-autocheck-interval').value, 10) || 15));
             const rcloneCheckInterval = Math.max(1, Math.min(1440, parseInt(document.getElementById('settings-rclone-autocheck-interval').value, 10) || 30));
-            localStorage.setItem('project-check-concurrency', String(checkConcurrency));
+            localStorage.setItem('github-check-concurrency', String(githubCheckConcurrency));
+            localStorage.setItem('rclone-check-concurrency', String(rcloneCheckConcurrency));
             localStorage.setItem('github-autocheck-enabled', document.getElementById('settings-github-autocheck-enabled').checked);
             localStorage.setItem('github-autocheck-interval', String(githubCheckInterval));
             localStorage.setItem('rclone-autocheck-enabled', document.getElementById('settings-rclone-autocheck-enabled').checked);
