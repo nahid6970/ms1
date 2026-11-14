@@ -10237,7 +10237,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         async function smokeTestProjectNotification(type) {
-            const title = type === 'rclone' ? 'Rclone project check' : 'GitHub project check';
+            const title = type === 'rclone' ? 'Rclone' : 'GitHub';
             if (!('Notification' in window)) {
                 setProjectNotificationTestStatus('Desktop notifications are not supported by this browser.', '#f87171');
                 return;
@@ -10251,7 +10251,7 @@ kiro-cli whoami --format json</code></pre>
                         : 'Notification permission was not granted.', '#fbbf24');
                     return;
                 }
-                const notification = new Notification(`${title} · test`, {
+                const notification = new Notification(title, {
                     body: type === 'rclone'
                         ? 'Example project: 3 differences, 1 missing\nAnother project: check errors'
                         : 'Example project: 2 files changed, 1 commit to pull\nAnother project: 1 commit to push',
@@ -10321,7 +10321,7 @@ kiro-cli whoami --format json</code></pre>
             });
             if (changed.length > projectLines.length) projectLines.push(`+ ${changed.length - projectLines.length} more project${changed.length - projectLines.length === 1 ? '' : 's'}`);
             try {
-                const notification = new Notification(`${isRclone ? 'Rclone' : 'GitHub'}: ${changed.length} project${changed.length === 1 ? '' : 's'} with changes`, {
+                const notification = new Notification(isRclone ? 'Rclone' : 'GitHub', {
                     body: projectLines.join('\n'),
                     tag: `terminal-tui-${type}-project-changes-${Date.now()}`,
                     requireInteraction: true,
