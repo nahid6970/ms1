@@ -3920,8 +3920,10 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-github-autocheck-interval" min="1" max="1440" step="1" value="15" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-github-check-concurrency" min="0" step="1" value="1" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-manual-check-all" style="accent-color:#facc15;"> Manual Check all ignores this limit</label>
-                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-notifications-enabled" style="accent-color:#facc15;"> Desktop notifications</label>
-                                <button type="button" onclick="smokeTestProjectNotification('github')" style="padding:5px 9px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.4);border-radius:5px;color:#facc15;font-size:.7rem;cursor:pointer;">Test notification</button>
+                                <div style="flex-basis:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                    <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-notifications-enabled" style="accent-color:#facc15;"> Desktop notifications</label>
+                                    <button type="button" onclick="smokeTestProjectNotification('github')" style="padding:5px 9px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.4);border-radius:5px;color:#facc15;font-size:.7rem;cursor:pointer;">Test notification</button>
+                                </div>
                             </div>
                             <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Use 0 to check all GitHub projects at once; 1 checks sequentially.</div>
                         </div>
@@ -3931,8 +3933,10 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-autocheck-enabled" style="accent-color:#60a5fa;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-rclone-autocheck-interval" min="1" max="1440" step="1" value="30" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-rclone-check-concurrency" min="0" step="1" value="1" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
-                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-notifications-enabled" style="accent-color:#60a5fa;"> Desktop notifications</label>
-                                <button type="button" onclick="smokeTestProjectNotification('rclone')" style="padding:5px 9px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
+                                <div style="flex-basis:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                                    <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-notifications-enabled" style="accent-color:#60a5fa;"> Desktop notifications</label>
+                                    <button type="button" onclick="smokeTestProjectNotification('rclone')" style="padding:5px 9px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
+                                </div>
                             </div>
                             <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Use 0 to check all Rclone projects at once; 1 checks sequentially.</div>
                         </div>
