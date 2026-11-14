@@ -50,7 +50,10 @@ def ensure_dependencies() -> None:
         command = [sys.executable, "-m", "pip", "install", *missing]
 
     try:
-        subprocess.check_call(command)
+        subprocess.check_call(
+            command,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0,
+        )
     except (OSError, subprocess.CalledProcessError) as exc:
         packages = ", ".join(missing)
         raise RuntimeError(
@@ -374,6 +377,7 @@ def restart_current_process(delay_seconds=1.0):
         subprocess.Popen(
             [sys.executable, "-c", helper_code, str(delay_seconds), os.getcwd(), sys.executable, *sys.argv],
             close_fds=True,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0,
         )
         os._exit(0)
 
@@ -2027,6 +2031,7 @@ def _codex_app_server_request(method, request_id, params=None, timeout=15, codex
     process = subprocess.Popen(
         command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
         text=True, encoding='utf-8', errors='replace', bufsize=1, env=process_env,
+        creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0,
     )
     lines = queue.Queue()
 
