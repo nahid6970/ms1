@@ -10253,8 +10253,8 @@ kiro-cli whoami --format json</code></pre>
                 }
                 const notification = new Notification(`${title} · test`, {
                     body: type === 'rclone'
-                        ? 'Example project — 3 differences, 1 missing\nAnother project — check errors'
-                        : 'Example project — 2 files changed, 1 commit to pull\nAnother project — 1 commit to push',
+                        ? 'Example project: 3 differences, 1 missing\nAnother project: check errors'
+                        : 'Example project: 2 files changed, 1 commit to pull\nAnother project: 1 commit to push',
                     tag: `terminal-tui-${type}-notification-test-${Date.now()}`,
                     requireInteraction: true,
                     renotify: true
@@ -10302,13 +10302,13 @@ kiro-cli whoami --format json</code></pre>
             if (!changed.length) { pending.clear(); return; }
             const projectLines = changed.slice(0, 5).map(project => {
                 const status = statusMap.get(project.name);
-                if (status?.error) return `${project.name} — check failed: ${status.error}`;
+                if (status?.error) return `${project.name}: check failed: ${status.error}`;
                 if (isRclone) {
                     const parts = [];
                     if (Number(status?.differences) > 0) parts.push(`${status.differences} differences`);
                     if (Number(status?.missing) > 0) parts.push(`${status.missing} missing`);
                     if (Number(status?.errors) > 0) parts.push(`${status.errors} errors`);
-                    return `${project.name} — ${parts.join(', ') || status?.summary || 'changes detected'}`;
+                    return `${project.name}: ${parts.join(', ') || status?.summary || 'changes detected'}`;
                 }
                 const parts = [];
                 if (status?.dirtyCount) parts.push(`${status.dirtyCount} file${status.dirtyCount === 1 ? '' : 's'} changed`);
@@ -10317,7 +10317,7 @@ kiro-cli whoami --format json</code></pre>
                 if (status?.ahead) parts.push(`${status.ahead} to push`);
                 if (status?.behind) parts.push(`${status.behind} to pull`);
                 if (status?.remoteBranchExists === false) parts.push('remote branch missing');
-                return `${project.name} — ${parts.join(', ') || status?.filesText || 'changes detected'}`;
+                return `${project.name}: ${parts.join(', ') || status?.filesText || 'changes detected'}`;
             });
             if (changed.length > projectLines.length) projectLines.push(`+ ${changed.length - projectLines.length} more project${changed.length - projectLines.length === 1 ? '' : 's'}`);
             try {
