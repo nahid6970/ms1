@@ -15,6 +15,9 @@ Read this file only when relevant to the current task. When reading, reference t
 - Added independent GitHub and Rclone desktop notification toggles under Settings → Project Checks.
 - Added a per-manager smoke-test button that requests browser notification permission and displays a sample desktop notification.
 - Completed batches notify with the provider in the title and a per-project list of file/remote changes or Rclone differences; clicking opens the relevant project manager. Smoke tests show example project lines in the same format.
+- Added independent notification intervals for GitHub and Rclone; pending changed projects are grouped into alerts on that cadence, independently of scan intervals.
+- If a notification interval fires during an active check, defer the desktop alert until that check completes and use its final results.
+- Change notifications request persistent interaction and use unique tags so later interval alerts create a new Windows/browser notification instead of silently replacing the previous one.
 
 **Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 - Added count badges to the GitHub and Rclone toolbar buttons for projects with changes or check errors.
