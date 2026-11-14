@@ -3920,6 +3920,8 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-github-autocheck-interval" min="1" max="1440" step="1" value="15" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-github-check-concurrency" min="0" step="1" value="1" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-manual-check-all" style="accent-color:#facc15;"> Manual Check all ignores this limit</label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-notifications-enabled" style="accent-color:#facc15;"> Desktop notifications</label>
+                                <button type="button" onclick="smokeTestProjectNotification('github')" style="padding:5px 9px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.4);border-radius:5px;color:#facc15;font-size:.7rem;cursor:pointer;">Test notification</button>
                             </div>
                             <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Use 0 to check all GitHub projects at once; 1 checks sequentially.</div>
                         </div>
@@ -3929,10 +3931,12 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-autocheck-enabled" style="accent-color:#60a5fa;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-rclone-autocheck-interval" min="1" max="1440" step="1" value="30" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-rclone-check-concurrency" min="0" step="1" value="1" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
+                                <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-notifications-enabled" style="accent-color:#60a5fa;"> Desktop notifications</label>
+                                <button type="button" onclick="smokeTestProjectNotification('rclone')" style="padding:5px 9px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
                             </div>
                             <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Use 0 to check all Rclone projects at once; 1 checks sequentially.</div>
                         </div>
-                        <div style="font-size:.7rem;color:var(--text-muted);">When checks find changed projects, a red count badge appears on the matching GitHub or Rclone button.</div>
+                        <div id="project-notification-test-status" role="status" style="font-size:.7rem;color:var(--text-muted);">When enabled, desktop notifications appear when a check finds changed projects. A red count badge also appears on the matching manager button.</div>
                     </div>
                 </div>
                 <!-- Tab 1: General Settings -->
@@ -10180,6 +10184,7 @@ kiro-cli whoami --format json</code></pre>
             };
             try { await Promise.all(Array.from({length:getProjectCheckConcurrency('rclone', linked.length)}, worker)); }
             finally { rcloneProjectCheckRunning = false; }
+            notifyProjectChanges('rclone', linked);
             button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
             message.textContent=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}.`;
@@ -10209,6 +10214,80 @@ kiro-cli whoami --format json</code></pre>
             };
             setBadge('github-projects-notification', gitCount);
             setBadge('rclone-projects-notification', rcloneCount);
+        }
+
+        function setProjectNotificationTestStatus(message, color = 'var(--text-muted)') {
+            const status = document.getElementById('project-notification-test-status');
+            if (status) { status.textContent = message; status.style.color = color; }
+        }
+
+        async function smokeTestProjectNotification(type) {
+            const title = type === 'rclone' ? 'Rclone project check' : 'GitHub project check';
+            if (!('Notification' in window)) {
+                setProjectNotificationTestStatus('Desktop notifications are not supported by this browser.', '#f87171');
+                return;
+            }
+            try {
+                let permission = Notification.permission;
+                if (permission === 'default') permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    setProjectNotificationTestStatus(permission === 'denied'
+                        ? 'Notifications are blocked for this site. Allow them in browser site settings, then test again.'
+                        : 'Notification permission was not granted.', '#fbbf24');
+                    return;
+                }
+                const notification = new Notification(`${title} · test`, {
+                    body: type === 'rclone'
+                        ? 'Example project — 3 differences, 1 missing\nAnother project — check errors'
+                        : 'Example project — 2 files changed, 1 commit to pull\nAnother project — 1 commit to push',
+                    tag: `terminal-tui-${type}-notification-test`
+                });
+                notification.onclick = () => { window.focus(); type === 'rclone' ? openRcloneProjectsModal() : openGitHubProjectsModal(); notification.close(); };
+                setProjectNotificationTestStatus(`${title} test sent. Enable Desktop notifications above to receive change alerts.`, '#34d399');
+            } catch (error) {
+                setProjectNotificationTestStatus(`Could not show notification: ${error?.message || error}`, '#f87171');
+            }
+        }
+
+        function notifyProjectChanges(type, projectList) {
+            const isRclone = type === 'rclone';
+            const enabledKey = isRclone ? 'rclone-notifications-enabled' : 'github-notifications-enabled';
+            if (localStorage.getItem(enabledKey) !== 'true' || !('Notification' in window) || Notification.permission !== 'granted') return;
+            const statusMap = isRclone ? rcloneProjectStatusByName : githubProjectStatusByName;
+            const changed = projectList.filter(project => {
+                const status = statusMap.get(project.name);
+                return isRclone
+                    ? !!(status?.error || Number(status?.differences) > 0 || Number(status?.errors) > 0 || Number(status?.missing) > 0)
+                    : !!(status?.error || status?.hasChanges);
+            });
+            if (!changed.length) return;
+            const projectLines = changed.slice(0, 5).map(project => {
+                const status = statusMap.get(project.name);
+                if (status?.error) return `${project.name} — check failed: ${status.error}`;
+                if (isRclone) {
+                    const parts = [];
+                    if (Number(status?.differences) > 0) parts.push(`${status.differences} differences`);
+                    if (Number(status?.missing) > 0) parts.push(`${status.missing} missing`);
+                    if (Number(status?.errors) > 0) parts.push(`${status.errors} errors`);
+                    return `${project.name} — ${parts.join(', ') || status?.summary || 'changes detected'}`;
+                }
+                const parts = [];
+                if (status?.dirtyCount) parts.push(`${status.dirtyCount} file${status.dirtyCount === 1 ? '' : 's'} changed`);
+                if (status?.insertions) parts.push(`+${status.insertions}`);
+                if (status?.deletions) parts.push(`-${status.deletions}`);
+                if (status?.ahead) parts.push(`${status.ahead} to push`);
+                if (status?.behind) parts.push(`${status.behind} to pull`);
+                if (status?.remoteBranchExists === false) parts.push('remote branch missing');
+                return `${project.name} — ${parts.join(', ') || status?.filesText || 'changes detected'}`;
+            });
+            if (changed.length > projectLines.length) projectLines.push(`+ ${changed.length - projectLines.length} more project${changed.length - projectLines.length === 1 ? '' : 's'}`);
+            try {
+                const notification = new Notification(`${isRclone ? 'Rclone' : 'GitHub'}: ${changed.length} project${changed.length === 1 ? '' : 's'} with changes`, {
+                    body: projectLines.join('\n'),
+                    tag: `terminal-tui-${type}-project-changes`
+                });
+                notification.onclick = () => { window.focus(); isRclone ? openRcloneProjectsModal() : openGitHubProjectsModal(); notification.close(); };
+            } catch (error) { console.warn('Could not show project change notification:', error); }
         }
 
         function configureProjectAutoChecks() {
@@ -10316,9 +10395,9 @@ kiro-cli whoami --format json</code></pre>
                             remoteText = remoteParts.join(' · ');
                         }
                         githubProjectStatusByName.set(project.name, {
-                            filesText, insertions: data.insertions, deletions: data.deletions,
-                            remoteText, ahead: data.ahead, behind: data.behind,
-                            hasChanges: !!(data.dirtyCount || data.ahead || data.behind),
+                            filesText, dirtyCount: data.dirtyCount, insertions: data.insertions, deletions: data.deletions,
+                            remoteText, remoteBranchExists: data.remoteBranchExists, ahead: data.ahead, behind: data.behind,
+                            hasChanges: !!(data.dirtyCount || data.ahead || data.behind || data.remoteBranchExists === false),
                             text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
                         });
                     } catch (error) {
@@ -10335,6 +10414,7 @@ kiro-cli whoami --format json</code></pre>
                 : getProjectCheckConcurrency('github', linked.length);
             try { await Promise.all(Array.from({length:concurrency}, worker)); }
             finally { githubProjectCheckRunning = false; }
+            notifyProjectChanges('github', linked);
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';
             updateProjectChangeBadges();
@@ -12976,6 +13056,8 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-github-check-concurrency').value = localStorage.getItem('github-check-concurrency') ?? '1';
             document.getElementById('settings-rclone-check-concurrency').value = localStorage.getItem('rclone-check-concurrency') ?? '1';
             document.getElementById('settings-github-manual-check-all').checked = localStorage.getItem('github-manual-check-all') === 'true';
+            document.getElementById('settings-github-notifications-enabled').checked = localStorage.getItem('github-notifications-enabled') === 'true';
+            document.getElementById('settings-rclone-notifications-enabled').checked = localStorage.getItem('rclone-notifications-enabled') === 'true';
             document.getElementById('settings-github-autocheck-enabled').checked = localStorage.getItem('github-autocheck-enabled') === 'true';
             document.getElementById('settings-github-autocheck-interval').value = localStorage.getItem('github-autocheck-interval') || '15';
             document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
@@ -13250,6 +13332,8 @@ kiro-cli whoami --format json</code></pre>
             localStorage.setItem('github-check-concurrency', String(githubCheckConcurrency));
             localStorage.setItem('rclone-check-concurrency', String(rcloneCheckConcurrency));
             localStorage.setItem('github-manual-check-all', document.getElementById('settings-github-manual-check-all').checked);
+            localStorage.setItem('github-notifications-enabled', document.getElementById('settings-github-notifications-enabled').checked);
+            localStorage.setItem('rclone-notifications-enabled', document.getElementById('settings-rclone-notifications-enabled').checked);
             localStorage.setItem('github-autocheck-enabled', document.getElementById('settings-github-autocheck-enabled').checked);
             localStorage.setItem('github-autocheck-interval', String(githubCheckInterval));
             localStorage.setItem('rclone-autocheck-enabled', document.getElementById('settings-rclone-autocheck-enabled').checked);

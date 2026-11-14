@@ -9,6 +9,14 @@ Read this file only when relevant to the current task. When reading, reference t
 - Added independent GitHub and Rclone concurrency limits; each Check all batch and its auto-check uses its own queue setting.
 - Removed the concurrency cap; setting a manager's concurrency to 0 checks every eligible project at once.
 - Added a GitHub manual Check all override to run every project concurrently on demand; scheduled checks continue using the GitHub concurrency value.
+
+## [2026-11-14] - Add Desktop Notifications for Project Changes
+
+- Added independent GitHub and Rclone desktop notification toggles under Settings → Project Checks.
+- Added a per-manager smoke-test button that requests browser notification permission and displays a sample desktop notification.
+- Completed batches notify with the provider in the title and a per-project list of file/remote changes or Rclone differences; clicking opens the relevant project manager. Smoke tests show example project lines in the same format.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 - Added count badges to the GitHub and Rclone toolbar buttons for projects with changes or check errors.
 - Auto-check preferences and intervals are stored in browser local storage.
 
