@@ -118,6 +118,21 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **AI ignore suggestions:** The ✨ action scans folder names at all depths and immediate file/subfolder counts, plus up to 40 top-level filenames, up to 200 extensions, and up to 12,000 characters of `.gitignore`. Known heavy and hidden folders are reported as pruned and not recursively scanned. The AI receives at most 500 directory records (favoring folders with more immediate files), never individual file paths. Suggestions appear in the preview before the user saves them. The modal expands to fit the preview when possible; on smaller screens, its content scrolls while the action buttons stay visible. The Gemini model is selectable and remembered locally. An absolute ignorelist path outside the workspace falls back to `<workspace>/ignorelist.txt` and updates the field.
 **Files Involved:** `app.py` (`/api/project/<project>/rclone/check`, `/api/project/<project>/rclone/scan`, `/api/project/<project>/rclone/suggest-ignore`, `/api/rclone/destination-directories`, `/api/local/directories`, `/api/local/directories/create`), `templates/index.html` (Rclone project manager, sync modal, color settings, and local folder pickers)
 
+---
+
+## Project Change Notifications
+**Status:** ✅ Complete
+**Description:** Independent notification toggles for GitHub and Rclone project checks. Each manager has two separate options — **Desktop notifications** (persistent Windows toast via winotify, stays until dismissed) and **Tray icon notification** (Windows system tray icon via pywin32). Either, both, or neither can be enabled at the same time.
+**Implementation:**
+- `trayNotificationsEnabled` and `notificationsEnabled` are stored per manager in the `project_auto_checks` section of `tui_config.json` and mirrored to `localStorage`.
+- `_send_project_check_toast` (winotify) fires for desktop notifications; `_send_project_check_tray` (pywin32 message loop) fires for tray notifications.
+- `_send_project_check_tray` creates a hidden window, adds a tray icon with a summary tooltip (provider name + changed project lines), and runs `PumpMessages()` until the user clicks the icon. On click it opens `http://127.0.0.1:5577/` in the default browser and removes the icon.
+- `POST /api/project-check-notify` accepts `{manager, results, toastNotification, trayNotification}` and fires only the requested types in a daemon thread.
+- `dispatchProjectChangeNotification` in JS checks both localStorage keys, skips both when neither is enabled, and passes the flags to the server endpoint.
+- The Flask background auto-check worker reads `trayNotificationsEnabled` from `tui_config.json` alongside `notificationsEnabled`.
+**Settings location:** Settings → Project Checks → GitHub auto-check / Rclone auto-check sub-cards, below the existing "Desktop notifications" checkbox.
+**Files Involved:** `app.py` (`_send_project_check_tray`, `_send_project_check_toast`, `/api/project-check-notify`, `DEFAULT_PROJECT_AUTO_CHECK_SETTINGS`, `_normalized_project_auto_check_settings`), `templates/index.html` (checkboxes, `loadProjectCheckSettings`, `handleSaveSettings`, `dispatchProjectChangeNotification`)
+
 ## Git .gitignore AI Suggestion
 **Status:** ✅ Complete
 **Description:** An AI action beside the Git modal heading scans the workspace file and folder paths, then suggests a project-specific `.gitignore` or updates the existing one.

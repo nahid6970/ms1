@@ -3,6 +3,27 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Persistent Tray Icon Notification (Click to Open)
+
+- Rewrote `_send_project_check_tray` to use a Windows message loop (`win32gui.PumpMessages`) instead of `time.sleep`, so the tray icon stays in the notification area indefinitely without blocking or showing a "Python" process alongside it.
+- Removed the balloon tooltip from the tray implementation; the icon now shows a compact summary in its tooltip text (hover).
+- Clicking the tray icon (left, right, or double-click) opens `http://127.0.0.1:5577/` in the default browser and removes the icon.
+- The function runs in its own daemon thread so the message loop does not block Flask.
+
+**Files Modified:** `app.py`, `md/RECENT.md`
+
+## [2026-11-15] - Add Tray Icon Notification Option
+
+- Added an independent "Tray icon notification" toggle below "Desktop notifications" in both the GitHub and Rclone sections of Settings → Project Checks.
+- When enabled, project change events place a persistent icon in the Windows system tray (notification area) using `pywin32` (`win32gui`/`win32api`) — no winotify dependency.
+- Either or both toggles can be enabled at the same time; disabling both suppresses all notifications.
+- `trayNotificationsEnabled` is persisted alongside `notificationsEnabled` in `tui_config.json` and localStorage.
+- `/api/project-check-notify` now accepts `toastNotification` and `trayNotification` boolean fields in its request body, and fires only the requested notification types.
+- The background auto-check worker also respects `trayNotificationsEnabled` from the saved settings.
+- The browser Notification fallback inside `dispatchProjectChangeNotification` is now skipped when `toastEnabled` is false (tray-only mode).
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-15] - Put Provider Icons Beside Toast Titles
 
 - Removed the large app-logo override from GitHub and Rclone notifications.
