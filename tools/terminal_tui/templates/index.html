@@ -10776,11 +10776,11 @@ kiro-cli whoami --format json</code></pre>
             updateProjectChangeBadges();
             const withChanges = [...githubProjectStatusByName.values()].filter(s => s.hasChanges && !s.error).length;
             const changesSuffix = withChanges
-                ? ` · ${withChanges} project${withChanges === 1 ? '' : 's'} with changes`
-                : ' · all clean';
+                ? ` · <span style="color:#fbbf24;font-weight:600;">${withChanges} project${withChanges === 1 ? '' : 's'} with changes</span>`
+                : ` · <span style="color:#34d399;">all clean</span>`;
             message.style.display = 'block';
             message.style.color = failed.length ? '#fbbf24' : '#34d399';
-            message.textContent = failed.length
+            message.innerHTML = failed.length
                 ? `Checked ${linked.length - failed.length} of ${linked.length}; failed: ${failed.join(', ')}.${changesSuffix}`
                 : `Checked all ${linked.length} GitHub project${linked.length === 1 ? '' : 's'}${changesSuffix}.`;
         }
