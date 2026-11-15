@@ -9,6 +9,7 @@ from __future__ import annotations
 #     "PyAudio",
 #     "SpeechRecognition",
 #     "psutil",
+#     "winotify",
 #     "pywinpty",
 #     "requests",
 # ]
@@ -29,6 +30,7 @@ DEPENDENCIES = (
     ("psutil", "psutil"),
     ("requests", "requests"),
     ("speech_recognition", "SpeechRecognition"),
+    ("winotify", "winotify"),
     ("winpty", "pywinpty"),
 )
 
@@ -107,6 +109,27 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 PORT = 5577
 BASE_DIR = r"C:\@delta\ms1\tools"
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_config.json')
+
+DEFAULT_PROJECT_AUTO_CHECK_SETTINGS = {
+    "github": {"enabled": False, "intervalMinutes": 15, "concurrency": 1,
+               "manualCheckAll": False, "notificationsEnabled": False},
+    "rclone": {"enabled": False, "intervalMinutes": 30, "concurrency": 1,
+               "notificationsEnabled": False},
+}
+_project_auto_check_lock = threading.RLock()
+_project_auto_check_wakeup = threading.Event()
+_project_auto_check_state = {
+    "github": {"nextRunAt": None, "running": False, "lastCompletedAt": None},
+    "rclone": {"nextRunAt": None, "running": False, "lastCompletedAt": None},
+}
+_PROJECT_CHECK_LOCKS = {}
+_PROJECT_CHECK_LOCKS_GUARD = threading.Lock()
+
+
+def _project_check_lock(manager, project_name):
+    key = (manager, str(project_name).casefold())
+    with _PROJECT_CHECK_LOCKS_GUARD:
+        return _PROJECT_CHECK_LOCKS.setdefault(key, threading.RLock())
 
 _CONFIG_CACHE = None
 _CONFIG_LOCK = threading.Lock()
@@ -764,6 +787,53 @@ def api_projects_get():
     return jsonify(scan_projects())
 
 
+def _normalized_project_auto_check_settings(raw=None):
+    raw = raw if isinstance(raw, dict) else {}
+    normalized = copy.deepcopy(DEFAULT_PROJECT_AUTO_CHECK_SETTINGS)
+    def bounded_int(value, fallback, minimum, maximum=None):
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = fallback
+        parsed = max(minimum, parsed)
+        return min(maximum, parsed) if maximum is not None else parsed
+
+    for manager in ("github", "rclone"):
+        values = raw.get(manager) if isinstance(raw.get(manager), dict) else {}
+        target = normalized[manager]
+        target["enabled"] = bool(values.get("enabled", target["enabled"]))
+        target["intervalMinutes"] = bounded_int(values.get("intervalMinutes"), target["intervalMinutes"], 1, 1440)
+        target["concurrency"] = bounded_int(values.get("concurrency"), target["concurrency"], 0)
+        target["notificationsEnabled"] = bool(values.get("notificationsEnabled", target["notificationsEnabled"]))
+        if manager == "github":
+            target["manualCheckAll"] = bool(values.get("manualCheckAll", target["manualCheckAll"]))
+    return normalized
+
+
+@app.route('/api/project-check-settings', methods=['GET', 'POST'])
+def api_project_check_settings():
+    raw = get_config_val("project_auto_checks", dict)
+    initialized = bool(raw)
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        settings = _normalized_project_auto_check_settings(data)
+        set_config_val("project_auto_checks", settings)
+        with _project_auto_check_lock:
+            for state in _project_auto_check_state.values():
+                state["nextRunAt"] = None
+        _project_auto_check_wakeup.set()
+        raw = settings
+        initialized = True
+
+    with _project_auto_check_lock:
+        state = copy.deepcopy(_project_auto_check_state)
+    for manager_state in state.values():
+        if manager_state["nextRunAt"] is not None:
+            manager_state["nextRunAt"] = int(manager_state["nextRunAt"] * 1000)
+    return jsonify({"settings": _normalized_project_auto_check_settings(raw),
+                    "initialized": initialized, "state": state})
+
+
 @app.route('/api/local/directories', methods=['GET'])
 def api_local_directories():
     """List local filesystem folders for the Add Workspace directory picker."""
@@ -1151,6 +1221,11 @@ def api_project_recreate_path(project):
 
 @app.route('/api/project/<project>/git/sync-remote', methods=['POST'])
 def api_project_git_sync_remote(project):
+    with _project_check_lock("github", project):
+        return _api_project_git_sync_remote(project)
+
+
+def _api_project_git_sync_remote(project):
     """Clone, fetch, or fast-forward pull a workspace's configured Git remote."""
     data = request.get_json(silent=True) or {}
     requested_action = str(data.get("action") or "").strip().lower()
@@ -8039,6 +8114,11 @@ def api_rclone_save_settings(project):
 
 @app.route('/api/project/<project>/rclone/check', methods=['POST'])
 def api_rclone_check(project):
+    with _project_check_lock("rclone", project):
+        return _api_rclone_check(project)
+
+
+def _api_rclone_check(project):
     """Compare a workspace with its saved Rclone destination and return a readable summary."""
     projects = load_projects_config()
     proj = next((p for p in projects if p.get('name') == project), None)
@@ -9736,7 +9816,139 @@ def api_kill_process_by_pid():
 
 
 if __name__ == '__main__':
+    def _project_check_response_json(response):
+        if isinstance(response, tuple):
+            response = response[0]
+        return response.get_json(silent=True) if hasattr(response, "get_json") else None
+
+    def _run_server_project_check(manager, project):
+        endpoint = api_rclone_check if manager == "rclone" else api_project_git_sync_remote
+        payload = {} if manager == "rclone" else {"action": "status"}
+        with app.test_request_context(method="POST", json=payload):
+            response = endpoint(project["name"])
+        return _project_check_response_json(response) or {"error": "The check returned no result."}
+
+    def _show_project_check_toast(manager, results):
+        changed = []
+        for project_name, result in results:
+            if result.get("error"):
+                changed.append(f"{project_name}: check failed")
+            elif manager == "rclone":
+                parts = []
+                if int(result.get("differences") or 0) > 0:
+                    parts.append(f"{result['differences']} differences")
+                if int(result.get("missing") or 0) > 0:
+                    parts.append(f"{result['missing']} missing")
+                if int(result.get("errors") or 0) > 0:
+                    parts.append(f"{result['errors']} errors")
+                if parts:
+                    changed.append(f"{project_name}: {', '.join(parts)}")
+                elif result.get("ok") is False:
+                    changed.append(f"{project_name}: check failed")
+            else:
+                parts = []
+                if int(result.get("dirtyCount") or 0) > 0:
+                    parts.append(f"{result['dirtyCount']} files changed")
+                if int(result.get("ahead") or 0) > 0:
+                    parts.append(f"{result['ahead']} to push")
+                if int(result.get("behind") or 0) > 0:
+                    parts.append(f"{result['behind']} to pull")
+                if result.get("remoteBranchExists") is False:
+                    parts.append("remote branch missing")
+                if parts:
+                    changed.append(f"{project_name}: {', '.join(parts)}")
+
+        if not changed:
+            return
+        checked_at = time.strftime("%b %d, %Y, %I:%M %p")
+        body_lines = changed[:5]
+        if len(changed) > 5:
+            body_lines.append(f"+ {len(changed) - 5} more project(s)")
+        try:
+            from winotify import Notification
+            provider = "Rclone" if manager == "rclone" else "GitHub"
+            Notification(
+                app_id=provider,
+                title=f"{checked_at} (Checked)",
+                msg="\n".join(body_lines),
+                duration="long",
+            ).show()
+        except Exception as exc:
+            print(f"Could not show {manager} project check notification: {exc}")
+
+    def _project_auto_check_worker(manager, settings):
+        try:
+            projects_to_check = []
+            for project in load_projects_config():
+                path = os.path.expanduser(str(project.get("path") or ""))
+                if not os.path.isdir(path):
+                    continue
+                if manager == "github":
+                    if str(project.get("gitRemote") or "").strip():
+                        projects_to_check.append(project)
+                elif str((project.get("rclone") or {}).get("dest") or "").strip():
+                    projects_to_check.append(project)
+
+            if projects_to_check:
+                from concurrent.futures import ThreadPoolExecutor, as_completed
+                workers = len(projects_to_check) if settings["concurrency"] == 0 else min(settings["concurrency"], len(projects_to_check))
+                results = []
+                with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+                    pending = {executor.submit(_run_server_project_check, manager, project): project for project in projects_to_check}
+                    for future in as_completed(pending):
+                        project = pending[future]
+                        try:
+                            result = future.result()
+                        except Exception as exc:
+                            result = {"error": str(exc)}
+                        results.append((project["name"], result))
+                current_settings = _normalized_project_auto_check_settings(get_config_val("project_auto_checks", dict))
+                if current_settings[manager]["notificationsEnabled"]:
+                    _show_project_check_toast(manager, results)
+        except Exception as exc:
+            print(f"Background {manager} project check failed: {exc}")
+        finally:
+            completed_at = time.time()
+            current_settings = _normalized_project_auto_check_settings(get_config_val("project_auto_checks", dict))
+            with _project_auto_check_lock:
+                state = _project_auto_check_state[manager]
+                state["running"] = False
+                state["lastCompletedAt"] = int(completed_at * 1000)
+                if current_settings[manager]["enabled"]:
+                    state["nextRunAt"] = completed_at + current_settings[manager]["intervalMinutes"] * 60
+
+    def _project_auto_check_scheduler():
+        while True:
+            settings = _normalized_project_auto_check_settings(get_config_val("project_auto_checks", dict))
+            now = time.time()
+            due = []
+            with _project_auto_check_lock:
+                for manager, manager_settings in settings.items():
+                    state = _project_auto_check_state[manager]
+                    if not manager_settings["enabled"]:
+                        state["nextRunAt"] = None
+                        continue
+                    if state["running"]:
+                        continue
+                    if state["nextRunAt"] is None:
+                        state["nextRunAt"] = now + manager_settings["intervalMinutes"] * 60
+                    elif now >= state["nextRunAt"]:
+                        state["nextRunAt"] = None
+                        state["running"] = True
+                        due.append((manager, copy.deepcopy(manager_settings)))
+            for manager, manager_settings in due:
+                threading.Thread(target=_project_auto_check_worker, args=(manager, manager_settings),
+                                 name=f"{manager}-project-auto-check", daemon=True).start()
+            _project_auto_check_wakeup.wait(1)
+            _project_auto_check_wakeup.clear()
+
+    def _start_project_auto_check_scheduler():
+        thread = threading.Thread(target=_project_auto_check_scheduler,
+                                  name="project-auto-check-scheduler", daemon=True)
+        thread.start()
+
     _start_ai_reset_warmup_monitor()
+    _start_project_auto_check_scheduler()
     debug_enabled = os.environ.get("TERMINAL_TUI_DEBUG") == "1"
     
     import socket

@@ -10254,11 +10254,9 @@ kiro-cli whoami --format json</code></pre>
 
         const githubProjectStatusByName = new Map();
         let githubProjectCheckRunning = false;
-        let githubAutoCheckTimer = null;
-        let rcloneAutoCheckTimer = null;
-        let githubAutoCheckNextAt = null;
-        let rcloneAutoCheckNextAt = null;
         let projectAutoCheckCountdownTimer = null;
+        let projectAutoCheckStatusPollTimer = null;
+        let projectAutoCheckServerState = {github:{}, rclone:{}};
 
         function getProjectCheckConcurrency(type, projectCount) {
             const key = type === 'rclone' ? 'rclone-check-concurrency' : 'github-check-concurrency';
@@ -10369,70 +10367,98 @@ kiro-cli whoami --format json</code></pre>
 
         function refreshProjectAutoCheckCountdowns() {
             [
-                {type:'github', elementId:'settings-github-check-countdown', running:() => githubProjectCheckRunning, nextAt:() => githubAutoCheckNextAt},
-                {type:'rclone', elementId:'settings-rclone-check-countdown', running:() => rcloneProjectCheckRunning, nextAt:() => rcloneAutoCheckNextAt}
-            ].forEach(({type, elementId, running, nextAt}) => {
+                {type:'github', elementId:'settings-github-check-countdown'},
+                {type:'rclone', elementId:'settings-rclone-check-countdown'}
+            ].forEach(({type, elementId}) => {
                 const element = document.getElementById(elementId);
                 if (!element) return;
-                if (localStorage.getItem(`${type}-autocheck-enabled`) !== 'true') {
+                const state = projectAutoCheckServerState[type] || {};
+                const enabled = document.getElementById(`settings-${type}-autocheck-enabled`)?.checked ?? localStorage.getItem(`${type}-autocheck-enabled`) === 'true';
+                if (!enabled) {
                     element.textContent = '(disabled)';
                     return;
                 }
-                if (running()) {
+                if (state.running || (type === 'github' ? githubProjectCheckRunning : rcloneProjectCheckRunning)) {
                     element.textContent = '(checking now…)';
                     return;
                 }
-                const target = nextAt();
+                const target = state.nextRunAt;
                 if (!target) {
                     element.textContent = '(scheduling…)';
                     return;
                 }
                 const totalSeconds = Math.max(0, Math.ceil((target - Date.now()) / 1000));
-                element.textContent = `(${Math.floor(totalSeconds / 60)}m ${String(totalSeconds % 60).padStart(2, '0')}s)`;
+                element.textContent = `(${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s)`;
             });
         }
 
-        function scheduleProjectAutoCheck(type, minutes) {
-            const isRclone = type === 'rclone';
-            const delay = minutes * 60 * 1000;
-            if (isRclone) rcloneAutoCheckNextAt = Date.now() + delay;
-            else githubAutoCheckNextAt = Date.now() + delay;
-            const timer = setTimeout(async () => {
-                if (isRclone) { rcloneAutoCheckTimer = null; rcloneAutoCheckNextAt = null; }
-                else { githubAutoCheckTimer = null; githubAutoCheckNextAt = null; }
-                refreshProjectAutoCheckCountdowns();
-                try {
-                    if (localStorage.getItem(`${type}-autocheck-enabled`) === 'true') {
-                        await (isRclone ? checkAllRcloneProjects({automatic:true}) : checkAllGitHubProjects({automatic:true}));
-                    }
-                } finally {
-                    if (localStorage.getItem(`${type}-autocheck-enabled`) === 'true') {
-                        const currentMinutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem(`${type}-autocheck-interval`), 10) || (isRclone ? 30 : 15)));
-                        scheduleProjectAutoCheck(type, currentMinutes);
-                    }
-                    refreshProjectAutoCheckCountdowns();
+        async function refreshProjectAutoCheckServerState() {
+            try {
+                const response = await fetch('/api/project-check-settings', {cache:'no-store'});
+                if (response.ok) {
+                    const data = await response.json();
+                    projectAutoCheckServerState = data.state || projectAutoCheckServerState;
                 }
-            }, delay);
-            if (isRclone) rcloneAutoCheckTimer = timer;
-            else githubAutoCheckTimer = timer;
+            } catch (error) {
+                console.warn('Could not refresh project check countdowns:', error);
+            }
             refreshProjectAutoCheckCountdowns();
         }
 
         function configureProjectAutoChecks() {
-            if (githubAutoCheckTimer) clearTimeout(githubAutoCheckTimer);
-            if (rcloneAutoCheckTimer) clearTimeout(rcloneAutoCheckTimer);
-            githubAutoCheckTimer = rcloneAutoCheckTimer = null;
-            githubAutoCheckNextAt = rcloneAutoCheckNextAt = null;
-            if (localStorage.getItem('github-autocheck-enabled') === 'true') {
-                const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('github-autocheck-interval'), 10) || 15));
-                scheduleProjectAutoCheck('github', minutes);
-            }
-            if (localStorage.getItem('rclone-autocheck-enabled') === 'true') {
-                const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('rclone-autocheck-interval'), 10) || 30));
-                scheduleProjectAutoCheck('rclone', minutes);
-            }
             if (!projectAutoCheckCountdownTimer) projectAutoCheckCountdownTimer = setInterval(refreshProjectAutoCheckCountdowns, 1000);
+            if (!projectAutoCheckStatusPollTimer) projectAutoCheckStatusPollTimer = setInterval(refreshProjectAutoCheckServerState, 5000);
+            refreshProjectAutoCheckServerState();
             refreshProjectAutoCheckCountdowns();
+        }
+
+        async function loadProjectCheckSettings() {
+            const response = await fetch('/api/project-check-settings', {cache:'no-store'});
+            if (!response.ok) throw new Error('Could not load project check settings.');
+            let data = await response.json();
+            let settings = data.settings || {};
+            if (!data.initialized) {
+                const storedConcurrency = key => {
+                    const value = Number.parseInt(localStorage.getItem(key), 10);
+                    return Number.isFinite(value) && value >= 0 ? value : 1;
+                };
+                settings = {
+                    github: {
+                        enabled: localStorage.getItem('github-autocheck-enabled') === 'true',
+                        intervalMinutes: Number.parseInt(localStorage.getItem('github-autocheck-interval'), 10) || 15,
+                        concurrency: storedConcurrency('github-check-concurrency'),
+                        manualCheckAll: localStorage.getItem('github-manual-check-all') === 'true',
+                        notificationsEnabled: localStorage.getItem('github-notifications-enabled') === 'true'
+                    },
+                    rclone: {
+                        enabled: localStorage.getItem('rclone-autocheck-enabled') === 'true',
+                        intervalMinutes: Number.parseInt(localStorage.getItem('rclone-autocheck-interval'), 10) || 30,
+                        concurrency: storedConcurrency('rclone-check-concurrency'),
+                        notificationsEnabled: localStorage.getItem('rclone-notifications-enabled') === 'true'
+                    }
+                };
+                const saved = await fetch('/api/project-check-settings', {
+                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(settings)
+                });
+                if (!saved.ok) throw new Error('Could not migrate project check settings to tui_config.json.');
+                data = await saved.json();
+                settings = data.settings || settings;
+            }
+            const apply = (type, values) => {
+                document.getElementById(`settings-${type}-autocheck-enabled`).checked = !!values.enabled;
+                document.getElementById(`settings-${type}-autocheck-interval`).value = String(values.intervalMinutes);
+                document.getElementById(`settings-${type}-check-concurrency`).value = String(values.concurrency);
+                document.getElementById(`settings-${type}-notifications-enabled`).checked = !!values.notificationsEnabled;
+                localStorage.setItem(`${type}-autocheck-enabled`, String(!!values.enabled));
+                localStorage.setItem(`${type}-autocheck-interval`, String(values.intervalMinutes));
+                localStorage.setItem(`${type}-check-concurrency`, String(values.concurrency));
+                localStorage.setItem(`${type}-notifications-enabled`, String(!!values.notificationsEnabled));
+            };
+            apply('github', settings.github || {});
+            apply('rclone', settings.rclone || {});
+            document.getElementById('settings-github-manual-check-all').checked = !!settings.github?.manualCheckAll;
+            localStorage.setItem('github-manual-check-all', String(!!settings.github?.manualCheckAll));
+            projectAutoCheckServerState = data.state || projectAutoCheckServerState;
         }
 
         function openGitHubProjectsModal() {
@@ -13453,7 +13479,7 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        function handleSaveSettings(event) {
+        async function handleSaveSettings(event) {
             event.preventDefault();
             const concurrencyValue = elementId => {
                 const value = Number.parseInt(document.getElementById(elementId).value, 10);
@@ -13474,6 +13500,24 @@ kiro-cli whoami --format json</code></pre>
             localStorage.setItem('github-autocheck-interval', String(githubCheckInterval));
             localStorage.setItem('rclone-autocheck-enabled', document.getElementById('settings-rclone-autocheck-enabled').checked);
             localStorage.setItem('rclone-autocheck-interval', String(rcloneCheckInterval));
+            const checkSettingsResponse = await fetch('/api/project-check-settings', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    github:{enabled:document.getElementById('settings-github-autocheck-enabled').checked,
+                        intervalMinutes:githubCheckInterval, concurrency:githubCheckConcurrency,
+                        manualCheckAll:document.getElementById('settings-github-manual-check-all').checked,
+                        notificationsEnabled:document.getElementById('settings-github-notifications-enabled').checked},
+                    rclone:{enabled:document.getElementById('settings-rclone-autocheck-enabled').checked,
+                        intervalMinutes:rcloneCheckInterval, concurrency:rcloneCheckConcurrency,
+                        notificationsEnabled:document.getElementById('settings-rclone-notifications-enabled').checked}
+                })
+            });
+            if (!checkSettingsResponse.ok) {
+                alert('Could not save GitHub and Rclone check settings to tui_config.json.');
+                return;
+            }
+            const checkSettingsData = await checkSettingsResponse.json();
+            projectAutoCheckServerState = checkSettingsData.state || projectAutoCheckServerState;
             configureProjectAutoChecks();
             const selectedFont = selectedFontValue || "'Fira Code', Consolas, monospace";
             localStorage.setItem('terminal-font-family', selectedFont);
@@ -23267,6 +23311,11 @@ Always wrap your **entire response** in a single markdown code block.`;
             await loadExtensionIconsMap();
             await loadSubcmdsMap();
             await fetchProjects();
+            try {
+                await loadProjectCheckSettings();
+            } catch (error) {
+                console.error('Could not load saved project check settings:', error);
+            }
             applySidebarWorkspacesVisibility();
             updateProjectChangeBadges();
             configureProjectAutoChecks();

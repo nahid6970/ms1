@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Run Project Auto-Checks in Flask
+
+- Persisted independent GitHub and Rclone auto-check, concurrency, and notification settings in the `project_auto_checks` section of `tui_config.json`; existing browser settings migrate on first load.
+- Added a Flask scheduler that runs checks and Windows toast notifications while the browser page is closed, provided the app remains running in the signed-in desktop session.
+- The settings countdown now reads each manager's next scheduled run and active state from Flask.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-15] - Show Project Auto-Check Countdown
 
 - Added independent live countdowns in the GitHub and Rclone settings sections, displayed as minutes and seconds until each next scheduled check.
