@@ -10484,6 +10484,8 @@ kiro-cli whoami --format json</code></pre>
                     errors: status.errors ?? 0,
                     ok: !status.error,
                     dirtyCount: status.dirtyCount ?? 0,
+                    insertions: status.insertions ?? 0,
+                    deletions: status.deletions ?? 0,
                     ahead: status.ahead ?? 0,
                     behind: status.behind ?? 0,
                     remoteBranchExists: status.remoteBranchExists,

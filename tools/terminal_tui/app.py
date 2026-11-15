@@ -9878,7 +9878,11 @@ def _send_project_check_toast(manager, results):
         else:
             parts = []
             if int(result.get('dirtyCount') or 0) > 0:
-                parts.append(f"{result['dirtyCount']} files changed")
+                parts.append(f"{result['dirtyCount']} file{'s' if int(result.get('dirtyCount') or 0) != 1 else ''} changed")
+            if int(result.get('insertions') or 0) > 0:
+                parts.append(f"+{result['insertions']}")
+            if int(result.get('deletions') or 0) > 0:
+                parts.append(f"-{result['deletions']}")
             if int(result.get('ahead') or 0) > 0:
                 parts.append(f"{result['ahead']} to push")
             if int(result.get('behind') or 0) > 0:
@@ -10159,7 +10163,12 @@ if __name__ == '__main__':
             else:
                 parts = []
                 if int(result.get("dirtyCount") or 0) > 0:
-                    parts.append(f"{result['dirtyCount']} files changed")
+                    n = int(result.get("dirtyCount") or 0)
+                    parts.append(f"{n} file{'s' if n != 1 else ''} changed")
+                if int(result.get("insertions") or 0) > 0:
+                    parts.append(f"+{result['insertions']}")
+                if int(result.get("deletions") or 0) > 0:
+                    parts.append(f"-{result['deletions']}")
                 if int(result.get("ahead") or 0) > 0:
                     parts.append(f"{result['ahead']} to push")
                 if int(result.get("behind") or 0) > 0:
