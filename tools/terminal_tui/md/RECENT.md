@@ -8,6 +8,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Removed separate GitHub and Rclone notification interval settings and timers.
 - When desktop notifications are enabled, send alerts immediately after a completed manual or automatic check finds changes.
 - Kept the independent auto-check intervals and project concurrency settings.
+- Simplified notification timestamps to one local date/time labeled `(Checked)`.
 
 **Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 

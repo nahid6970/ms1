@@ -10246,7 +10246,7 @@ kiro-cli whoami --format json</code></pre>
                     return;
                 }
                 const notification = new Notification(title, {
-                    body: `${formatProjectNotificationTime()} (Checked)\n${formatProjectNotificationTime()} (Notify)\n\n${type === 'rclone'
+                    body: `${formatProjectNotificationTime()} (Checked)\n\n${type === 'rclone'
                         ? 'Example project: 3 differences, 1 missing\nAnother project: check errors'
                         : 'Example project: 2 files changed, 1 commit to pull\nAnother project: 1 commit to push'}`,
                     tag: `terminal-tui-${type}-notification-test-${Date.now()}`,
@@ -10297,7 +10297,7 @@ kiro-cli whoami --format json</code></pre>
             const notificationShownAt = Date.now();
             try {
                 const notification = new Notification(isRclone ? 'Rclone' : 'GitHub', {
-                    body: `${formatProjectNotificationTime(lastCheckCompletedAt || notificationShownAt)} (Checked)\n${formatProjectNotificationTime(notificationShownAt)} (Notify)\n\n${projectLines.join('\n')}`,
+                    body: `${formatProjectNotificationTime(lastCheckCompletedAt || notificationShownAt)} (Checked)\n\n${projectLines.join('\n')}`,
                     tag: `terminal-tui-${type}-project-changes-${Date.now()}`,
                     timestamp: notificationShownAt,
                     requireInteraction: true,
