@@ -114,9 +114,10 @@ CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tui_conf
 
 DEFAULT_PROJECT_AUTO_CHECK_SETTINGS = {
     "github": {"enabled": False, "intervalMinutes": 15, "concurrency": 1,
-               "manualCheckAll": False, "notificationsEnabled": False},
+               "manualCheckAll": False, "notificationsEnabled": False,
+               "trayNotificationsEnabled": False},
     "rclone": {"enabled": False, "intervalMinutes": 30, "concurrency": 1,
-               "notificationsEnabled": False},
+               "notificationsEnabled": False, "trayNotificationsEnabled": False},
 }
 _project_auto_check_lock = threading.RLock()
 _project_auto_check_wakeup = threading.Event()
@@ -808,6 +809,7 @@ def _normalized_project_auto_check_settings(raw=None):
         target["intervalMinutes"] = bounded_int(values.get("intervalMinutes"), target["intervalMinutes"], 1, 1440)
         target["concurrency"] = bounded_int(values.get("concurrency"), target["concurrency"], 0)
         target["notificationsEnabled"] = bool(values.get("notificationsEnabled", target["notificationsEnabled"]))
+        target["trayNotificationsEnabled"] = bool(values.get("trayNotificationsEnabled", target["trayNotificationsEnabled"]))
         if manager == "github":
             target["manualCheckAll"] = bool(values.get("manualCheckAll", target["manualCheckAll"]))
     return normalized
@@ -9847,6 +9849,161 @@ def api_kill_process_by_pid():
         return jsonify({"error": str(e)}), 500
 
 
+def _send_project_check_tray(manager, results):
+    """Add a persistent tray icon for project check results.
+    The icon stays in the notification area until the user clicks it —
+    clicking opens the app in the browser and removes the icon.
+    Uses win32gui/win32api (pywin32) only — no winotify dependency.
+    Safe to call at any time; no-ops silently on non-Windows or missing pywin32.
+    ``results`` is a list of (name, result_dict) pairs.
+    """
+    if os.name != 'nt':
+        return
+    try:
+        import win32api
+        import win32con
+        import win32gui
+    except ImportError:
+        return
+
+    changed = []
+    for project_name, result in results:
+        if result.get('error'):
+            changed.append(f"{project_name}: check failed")
+        elif manager == 'rclone':
+            parts = []
+            if int(result.get('differences') or 0) > 0:
+                parts.append(f"{result['differences']} differences")
+            if int(result.get('missing') or 0) > 0:
+                parts.append(f"{result['missing']} missing")
+            if int(result.get('errors') or 0) > 0:
+                parts.append(f"{result['errors']} errors")
+            if parts:
+                changed.append(f"{project_name}: {', '.join(parts)}")
+            elif result.get('ok') is False:
+                changed.append(f"{project_name}: check failed")
+        else:
+            parts = []
+            if int(result.get('dirtyCount') or 0) > 0:
+                parts.append(f"{result['dirtyCount']} file{'s' if int(result.get('dirtyCount') or 0) != 1 else ''} changed")
+            if int(result.get('insertions') or 0) > 0:
+                parts.append(f"+{result['insertions']}")
+            if int(result.get('deletions') or 0) > 0:
+                parts.append(f"-{result['deletions']}")
+            if int(result.get('ahead') or 0) > 0:
+                parts.append(f"{result['ahead']} to push")
+            if int(result.get('behind') or 0) > 0:
+                parts.append(f"{result['behind']} to pull")
+            if result.get('remoteBranchExists') is False:
+                parts.append('remote branch missing')
+            if parts:
+                changed.append(f"{project_name}: {', '.join(parts)}")
+
+    if not changed:
+        return
+
+    provider = 'Rclone' if manager == 'rclone' else 'GitHub'
+    # Tooltip text — Windows caps tray tooltips at 128 chars
+    summary_lines = changed[:3]
+    if len(changed) > 3:
+        summary_lines.append(f'+ {len(changed) - 3} more')
+    tooltip = f"{provider}: {len(changed)} changed\n" + '\n'.join(summary_lines)
+    tooltip = tooltip[:127]
+
+    # Determine the app URL from Flask's server config (default 5577)
+    try:
+        port = int(os.environ.get('TERMINAL_TUI_PORT', 5577))
+    except (ValueError, TypeError):
+        port = 5577
+    app_url = f"http://127.0.0.1:{port}/"
+
+    WM_TRAY_MSG = win32con.WM_USER + 20
+    NIM_ADD     = 0x00000000
+    NIM_DELETE  = 0x00000002
+    NIF_MESSAGE = 0x00000001
+    NIF_ICON    = 0x00000002
+    NIF_TIP     = 0x00000004
+
+    # Load the custom icon if available, else fall back to the app's stock info icon
+    icon_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'static', 'images', 'notifications',
+        'rclone.ico' if manager == 'rclone' else 'github.ico'
+    )
+    icon_flags = win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE
+    try:
+        hicon = win32gui.LoadImage(
+            0, icon_path, win32con.IMAGE_ICON, 0, 0, icon_flags
+        ) if os.path.exists(icon_path) else win32gui.LoadIcon(0, win32con.IDI_INFORMATION)
+    except Exception:
+        hicon = win32gui.LoadIcon(0, win32con.IDI_INFORMATION)
+
+    hwnd_box = [None]  # mutable container so the wndproc closure can reference it
+
+    def wndproc(hwnd, msg, wparam, lparam):
+        # Left-click (up) or double-click on the tray icon → open app and remove icon
+        if msg == WM_TRAY_MSG and lparam in (
+            win32con.WM_LBUTTONUP, win32con.WM_LBUTTONDBLCLK,
+            win32con.WM_RBUTTONUP,  # right-click also dismisses
+        ):
+            try:
+                import webbrowser
+                webbrowser.open(app_url)
+            except Exception:
+                pass
+            # Schedule removal via a posted quit so we're not inside the callback
+            win32gui.PostQuitMessage(0)
+            return 0
+        return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
+
+    class_name = f"TerminalTuiTray_{manager}_{id(changed)}"
+    wc = win32gui.WNDCLASS()
+    wc.lpszClassName = class_name
+    wc.lpfnWndProc   = wndproc
+    try:
+        win32gui.RegisterClass(wc)
+    except Exception:
+        pass
+
+    try:
+        hwnd = win32gui.CreateWindow(
+            class_name, "", 0, 0, 0,
+            win32con.CW_USEDEFAULT, win32con.CW_USEDEFAULT,
+            0, 0, 0, None
+        )
+        hwnd_box[0] = hwnd
+    except Exception as exc:
+        print(f'Could not create tray window for {manager}: {exc}')
+        return
+
+    nid = (hwnd, 0, NIF_ICON | NIF_MESSAGE | NIF_TIP,
+           WM_TRAY_MSG, hicon, tooltip)
+    try:
+        win32gui.Shell_NotifyIcon(NIM_ADD, nid)
+    except Exception as exc:
+        print(f'Could not add tray icon for {manager}: {exc}')
+        try:
+            win32gui.DestroyWindow(hwnd)
+        except Exception:
+            pass
+        return
+
+    # Run a message loop — blocks until PostQuitMessage is called (user clicks)
+    try:
+        win32gui.PumpMessages()
+    except Exception:
+        pass
+    finally:
+        try:
+            win32gui.Shell_NotifyIcon(NIM_DELETE, (hwnd, 0))
+        except Exception:
+            pass
+        try:
+            win32gui.DestroyWindow(hwnd)
+        except Exception:
+            pass
+
+
 def _send_project_check_toast(manager, results):
     """Send a persistent Windows reminder toast for project check results.
     Safe to call at any time — no-ops silently on non-Windows or if winotify
@@ -10022,9 +10179,10 @@ def _register_project_notification_identity_global(provider):
 
 @app.route('/api/project-check-notify', methods=['POST'])
 def api_project_check_notify():
-    """Send a persistent Windows reminder toast for project check results.
-    Body: {"manager": "rclone"|"github", "results": [[name, {…}], …]}
-    Non-blocking — the toast is sent in a daemon thread.
+    """Send a persistent Windows reminder toast and/or tray balloon for project check results.
+    Body: {"manager": "rclone"|"github", "results": [[name, {…}], …],
+           "toastNotification": true, "trayNotification": true}
+    Non-blocking — notifications are sent in a daemon thread.
     """
     data = request.json or {}
     manager = data.get('manager', 'rclone')
@@ -10033,9 +10191,14 @@ def api_project_check_notify():
         return jsonify({'ok': False, 'reason': 'No results provided'}), 400
     results = [(str(r[0]), r[1] if len(r) > 1 and isinstance(r[1], dict) else {})
                for r in raw_results if isinstance(r, (list, tuple)) and r]
+    send_toast = data.get('toastNotification', True)
+    send_tray  = data.get('trayNotification', False)
 
     def _send():
-        _send_project_check_toast(manager, results)
+        if send_toast:
+            _send_project_check_toast(manager, results)
+        if send_tray:
+            _send_project_check_tray(manager, results)
 
     threading.Thread(target=_send, daemon=True).start()
     return jsonify({'ok': True})
@@ -10254,6 +10417,8 @@ if __name__ == '__main__':
                 current_settings = _normalized_project_auto_check_settings(get_config_val("project_auto_checks", dict))
                 if current_settings[manager]["notificationsEnabled"]:
                     _show_project_check_toast(manager, results)
+                if current_settings[manager]["trayNotificationsEnabled"]:
+                    _send_project_check_tray(manager, results)
         except Exception as exc:
             print(f"Background {manager} project check failed: {exc}")
         finally:

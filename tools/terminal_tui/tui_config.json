@@ -2228,16 +2228,18 @@
   "project_auto_checks": {
     "github": {
       "enabled": true,
-      "intervalMinutes": 30,
+      "intervalMinutes": 60,
       "concurrency": 1,
       "manualCheckAll": true,
-      "notificationsEnabled": true
+      "notificationsEnabled": true,
+      "trayNotificationsEnabled": false
     },
     "rclone": {
       "enabled": true,
       "intervalMinutes": 120,
       "concurrency": 0,
-      "notificationsEnabled": true
+      "notificationsEnabled": true,
+      "trayNotificationsEnabled": false
     }
   }
 }

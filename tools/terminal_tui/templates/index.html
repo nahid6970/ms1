@@ -3926,6 +3926,7 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-manual-check-all" style="accent-color:#facc15;"> Manual Check all ignores this limit</label>
                                 <div style="flex-basis:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                                     <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-notifications-enabled" style="accent-color:#facc15;"> Desktop notifications</label>
+                                    <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-tray-notifications-enabled" style="accent-color:#facc15;"> Tray icon notification</label>
                                     <button type="button" onclick="smokeTestProjectNotification('github')" style="padding:5px 9px;background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.4);border-radius:5px;color:#facc15;font-size:.7rem;cursor:pointer;">Test notification</button>
                                 </div>
                             </div>
@@ -3939,6 +3940,7 @@
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Projects at once<input type="number" id="settings-rclone-check-concurrency" min="0" step="1" value="1" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
                                 <div style="flex-basis:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                                     <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-notifications-enabled" style="accent-color:#60a5fa;"> Desktop notifications</label>
+                                    <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-tray-notifications-enabled" style="accent-color:#60a5fa;"> Tray icon notification</label>
                                     <button type="button" onclick="smokeTestProjectNotification('rclone')" style="padding:5px 9px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
                                 </div>
                             </div>
@@ -10462,8 +10464,11 @@ kiro-cli whoami --format json</code></pre>
         function dispatchProjectChangeNotification(type, projectList) {
             const isRclone = type === 'rclone';
             const enabledKey = isRclone ? 'rclone-notifications-enabled' : 'github-notifications-enabled';
+            const trayKey = isRclone ? 'rclone-tray-notifications-enabled' : 'github-tray-notifications-enabled';
             const statusMap = isRclone ? rcloneProjectStatusByName : githubProjectStatusByName;
-            if (localStorage.getItem(enabledKey) !== 'true') return;
+            const toastEnabled = localStorage.getItem(enabledKey) === 'true';
+            const trayEnabled  = localStorage.getItem(trayKey) === 'true';
+            if (!toastEnabled && !trayEnabled) return;
             const changed = projectList.filter(project => {
                 const status = statusMap.get(project.name);
                 return isRclone
@@ -10494,11 +10499,11 @@ kiro-cli whoami --format json</code></pre>
             fetch('/api/project-check-notify', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({manager: type, results})
+                body: JSON.stringify({manager: type, results, toastNotification: toastEnabled, trayNotification: trayEnabled})
             }).catch(() => {});
 
             // Also send browser notification as fallback (useful when server isn't Windows / winotify missing)
-            if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            if (!toastEnabled || !('Notification' in window) || Notification.permission !== 'granted') return;
             const projectLines = changed.slice(0, 5).map(project => {
                 const status = statusMap.get(project.name);
                 if (status?.error) return `${project.name}: check failed: ${status.error}`;
@@ -10598,13 +10603,15 @@ kiro-cli whoami --format json</code></pre>
                         intervalMinutes: Number.parseInt(localStorage.getItem('github-autocheck-interval'), 10) || 15,
                         concurrency: storedConcurrency('github-check-concurrency'),
                         manualCheckAll: localStorage.getItem('github-manual-check-all') === 'true',
-                        notificationsEnabled: localStorage.getItem('github-notifications-enabled') === 'true'
+                        notificationsEnabled: localStorage.getItem('github-notifications-enabled') === 'true',
+                        trayNotificationsEnabled: localStorage.getItem('github-tray-notifications-enabled') === 'true'
                     },
                     rclone: {
                         enabled: localStorage.getItem('rclone-autocheck-enabled') === 'true',
                         intervalMinutes: Number.parseInt(localStorage.getItem('rclone-autocheck-interval'), 10) || 30,
                         concurrency: storedConcurrency('rclone-check-concurrency'),
-                        notificationsEnabled: localStorage.getItem('rclone-notifications-enabled') === 'true'
+                        notificationsEnabled: localStorage.getItem('rclone-notifications-enabled') === 'true',
+                        trayNotificationsEnabled: localStorage.getItem('rclone-tray-notifications-enabled') === 'true'
                     }
                 };
                 const saved = await fetch('/api/project-check-settings', {
@@ -10619,10 +10626,12 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById(`settings-${type}-autocheck-interval`).value = String(values.intervalMinutes);
                 document.getElementById(`settings-${type}-check-concurrency`).value = String(values.concurrency);
                 document.getElementById(`settings-${type}-notifications-enabled`).checked = !!values.notificationsEnabled;
+                document.getElementById(`settings-${type}-tray-notifications-enabled`).checked = !!values.trayNotificationsEnabled;
                 localStorage.setItem(`${type}-autocheck-enabled`, String(!!values.enabled));
                 localStorage.setItem(`${type}-autocheck-interval`, String(values.intervalMinutes));
                 localStorage.setItem(`${type}-check-concurrency`, String(values.concurrency));
                 localStorage.setItem(`${type}-notifications-enabled`, String(!!values.notificationsEnabled));
+                localStorage.setItem(`${type}-tray-notifications-enabled`, String(!!values.trayNotificationsEnabled));
             };
             apply('github', settings.github || {});
             apply('rclone', settings.rclone || {});
@@ -13387,6 +13396,8 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-github-manual-check-all').checked = localStorage.getItem('github-manual-check-all') === 'true';
             document.getElementById('settings-github-notifications-enabled').checked = localStorage.getItem('github-notifications-enabled') === 'true';
             document.getElementById('settings-rclone-notifications-enabled').checked = localStorage.getItem('rclone-notifications-enabled') === 'true';
+            document.getElementById('settings-github-tray-notifications-enabled').checked = localStorage.getItem('github-tray-notifications-enabled') === 'true';
+            document.getElementById('settings-rclone-tray-notifications-enabled').checked = localStorage.getItem('rclone-tray-notifications-enabled') === 'true';
             document.getElementById('settings-github-autocheck-enabled').checked = localStorage.getItem('github-autocheck-enabled') === 'true';
             document.getElementById('settings-github-autocheck-interval').value = localStorage.getItem('github-autocheck-interval') || '15';
             document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
@@ -13663,6 +13674,8 @@ kiro-cli whoami --format json</code></pre>
             localStorage.setItem('github-manual-check-all', document.getElementById('settings-github-manual-check-all').checked);
             localStorage.setItem('github-notifications-enabled', document.getElementById('settings-github-notifications-enabled').checked);
             localStorage.setItem('rclone-notifications-enabled', document.getElementById('settings-rclone-notifications-enabled').checked);
+            localStorage.setItem('github-tray-notifications-enabled', document.getElementById('settings-github-tray-notifications-enabled').checked);
+            localStorage.setItem('rclone-tray-notifications-enabled', document.getElementById('settings-rclone-tray-notifications-enabled').checked);
             localStorage.removeItem('github-notification-interval');
             localStorage.removeItem('rclone-notification-interval');
             localStorage.setItem('github-autocheck-enabled', document.getElementById('settings-github-autocheck-enabled').checked);
@@ -13675,10 +13688,12 @@ kiro-cli whoami --format json</code></pre>
                     github:{enabled:document.getElementById('settings-github-autocheck-enabled').checked,
                         intervalMinutes:githubCheckInterval, concurrency:githubCheckConcurrency,
                         manualCheckAll:document.getElementById('settings-github-manual-check-all').checked,
-                        notificationsEnabled:document.getElementById('settings-github-notifications-enabled').checked},
+                        notificationsEnabled:document.getElementById('settings-github-notifications-enabled').checked,
+                        trayNotificationsEnabled:document.getElementById('settings-github-tray-notifications-enabled').checked},
                     rclone:{enabled:document.getElementById('settings-rclone-autocheck-enabled').checked,
                         intervalMinutes:rcloneCheckInterval, concurrency:rcloneCheckConcurrency,
-                        notificationsEnabled:document.getElementById('settings-rclone-notifications-enabled').checked}
+                        notificationsEnabled:document.getElementById('settings-rclone-notifications-enabled').checked,
+                        trayNotificationsEnabled:document.getElementById('settings-rclone-tray-notifications-enabled').checked}
                 })
             });
             if (!checkSettingsResponse.ok) {
