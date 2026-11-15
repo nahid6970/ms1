@@ -4109,6 +4109,10 @@
                             <label for="settings-codex-usage-account" style="font-size:.76rem;color:#a7f3d0;">Selected account</label>
                             <select id="settings-codex-usage-account" onchange="selectCodexUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(52,211,153,.35);border-radius:5px;color:#d1fae5;font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
                         </div>
+                        <label for="settings-default-codex-cli-enabled" style="display:flex;align-items:flex-start;gap:7px;margin-top:7px;font-size:.72rem;color:#d1fae5;cursor:pointer;">
+                            <input type="checkbox" id="settings-default-codex-cli-enabled" checked onchange="saveDefaultCliAccountSetting('codex',this.checked)" style="width:15px;height:15px;flex:none;margin:1px 0 0;accent-color:#10b981;">
+                            <span><strong>Enable default Codex account checks</strong><br><span style="color:rgba(167,243,208,.6);">Turn off to skip the default account quota check and warm-up. Saved profiles remain enabled.</span></span>
+                        </label>
                         <div style="margin-top:5px;font-size:.68rem;color:rgba(167,243,208,.6);">The selected account is used for quota checks and newly started terminals. Existing terminal sessions keep their current account.</div>
                         <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:7px;margin-top:8px;">
                             <input id="settings-codex-account-name" type="text" maxlength="40" placeholder="Account name" aria-label="Codex account name" style="min-width:0;height:30px;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(52,211,153,.3);border-radius:5px;color:#d1fae5;font-size:.76rem;" onfocus="this.style.borderColor='rgba(52,211,153,.7)'" onblur="this.style.borderColor='rgba(52,211,153,.3)'">
@@ -4132,6 +4136,10 @@
                             <label for="settings-kiro-usage-account" style="font-size:.76rem;color:#ddd6fe;">Selected account</label>
                             <select id="settings-kiro-usage-account" onchange="selectKiroUsageAccount(this.value)" style="height:28px;max-width:220px;padding:2px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(167,139,250,.35);border-radius:5px;color:#ede9fe;font-size:.76rem;"><option value="">Default (current CLI login)</option></select>
                         </div>
+                        <label for="settings-default-kiro-cli-enabled" style="display:flex;align-items:flex-start;gap:7px;margin-top:7px;font-size:.72rem;color:#ede9fe;cursor:pointer;">
+                            <input type="checkbox" id="settings-default-kiro-cli-enabled" checked onchange="saveDefaultCliAccountSetting('kiro',this.checked)" style="width:15px;height:15px;flex:none;margin:1px 0 0;accent-color:#8b5cf6;">
+                            <span><strong>Enable default Kiro CLI checks</strong><br><span style="color:rgba(221,214,254,.6);">Turn off to skip the default Kiro usage command. Saved profiles remain enabled.</span></span>
+                        </label>
                         <div style="margin-top:5px;font-size:.68rem;color:rgba(221,214,254,.6);">New terminals and Kiro usage checks use the selected profile. Existing terminal sessions keep their current profile.</div>
                         <div style="display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) auto;gap:7px;margin-top:8px;">
                             <input id="settings-kiro-account-name" type="text" maxlength="40" placeholder="Account name" aria-label="Kiro account name" style="min-width:0;height:30px;padding:4px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(167,139,250,.3);border-radius:5px;color:#ede9fe;font-size:.76rem;" onfocus="this.style.borderColor='rgba(167,139,250,.7)'" onblur="this.style.borderColor='rgba(167,139,250,.3)'">
@@ -4159,6 +4167,10 @@
                             <label for="settings-antigravity-acp-account" style="font-size:.72rem;color:#a5f3fc;flex-shrink:0;">Active profile</label>
                             <select id="settings-antigravity-acp-account" onchange="selectAntigravityAcpAccount(this.value)" style="flex:1;min-width:0;max-width:220px;height:28px;padding:2px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(34,211,238,.35);border-radius:5px;color:#cffafe;font-size:.74rem;"><option value="default">Default</option></select>
                         </div>
+                        <label for="settings-default-antigravity-cli-enabled" style="display:flex;align-items:flex-start;gap:7px;margin-top:7px;font-size:.72rem;color:#cffafe;cursor:pointer;">
+                            <input type="checkbox" id="settings-default-antigravity-cli-enabled" checked onchange="saveDefaultCliAccountSetting('antigravity',this.checked)" style="width:15px;height:15px;flex:none;margin:1px 0 0;accent-color:#06b6d4;">
+                            <span><strong>Enable default agy CLI checks</strong><br><span style="color:rgba(103,232,249,.55);">Turn off to skip the default agy usage command and warm-up. Saved profiles remain enabled.</span></span>
+                        </label>
                         <div style="margin-top:5px;font-size:.68rem;color:rgba(103,232,249,.55);">Each profile stores a separate Google sign-in. Switching profiles changes the quota badge without touching other profiles.</div>
                         <!-- Per-profile list — rendered by renderAntigravityAcpAccounts() -->
                         <div id="settings-antigravity-acp-account-list" data-testid="antigravity-acp-account-list" style="display:grid;gap:5px;margin-top:8px;"></div>
@@ -6876,6 +6888,50 @@ kiro-cli whoami --format json</code></pre>
                 }
             } catch (error) {
                 if (status) status.textContent = `Reset warm-up status unavailable: ${String(error.message || error)}`;
+            }
+        }
+
+        const defaultCliAccountSettingIds = {
+            codex: 'settings-default-codex-cli-enabled',
+            kiro: 'settings-default-kiro-cli-enabled',
+            antigravity: 'settings-default-antigravity-cli-enabled',
+        };
+
+        async function loadDefaultCliAccountSettings() {
+            try {
+                const response = await fetch('/api/ai-usage/default-cli');
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not load default CLI account settings.');
+                Object.entries(defaultCliAccountSettingIds).forEach(([provider, id]) => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) checkbox.checked = data.enabled?.[provider] !== false;
+                });
+            } catch (error) {
+                console.warn('Could not load default CLI account settings:', error);
+            }
+        }
+
+        async function saveDefaultCliAccountSetting(provider, enabled) {
+            const checkbox = document.getElementById(defaultCliAccountSettingIds[provider]);
+            if (!checkbox) return;
+            checkbox.disabled = true;
+            try {
+                const response = await fetch('/api/ai-usage/default-cli', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, enabled: Boolean(enabled) }),
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not save default CLI account setting.');
+                checkbox.checked = data.enabled?.[provider] !== false;
+                if (provider === 'codex') loadCodexLimits(true);
+                else if (provider === 'kiro') loadKiroUsage(true);
+                else if (provider === 'antigravity') loadAntigravityUsage(true);
+            } catch (error) {
+                checkbox.checked = !enabled;
+                alert(String(error.message || error));
+            } finally {
+                checkbox.disabled = false;
             }
         }
 
@@ -13066,6 +13122,7 @@ kiro-cli whoami --format json</code></pre>
         function openSettingsModal() {
             loadCodexUsageAccounts().catch(() => {});
             loadAIResetWarmupSettings();
+            loadDefaultCliAccountSettings();
             const rcloneFg = localStorage.getItem('rclone-button-fg') || '#60a5fa';
             const rcloneBg = localStorage.getItem('rclone-button-bg') || '#1e3a5f';
             document.getElementById('settings-rclone-color-fg').value = rcloneFg;

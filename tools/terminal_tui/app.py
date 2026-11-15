@@ -1649,6 +1649,18 @@ def _ai_reset_warmup_enabled():
     return bool(get_config_val('ai_usage_reset_warmup_enabled', lambda: True))
 
 
+_AI_USAGE_DEFAULT_CLI_CONFIG_KEYS = {
+    'codex': 'ai_usage_codex_default_cli_enabled',
+    'kiro': 'ai_usage_kiro_default_cli_enabled',
+    'antigravity': 'ai_usage_antigravity_default_cli_enabled',
+}
+
+
+def _ai_usage_default_cli_enabled(provider):
+    config_key = _AI_USAGE_DEFAULT_CLI_CONFIG_KEYS.get(str(provider or '').strip().lower())
+    return True if not config_key else bool(get_config_val(config_key, lambda: True))
+
+
 def _ai_reset_timestamp(value):
     if isinstance(value, (int, float)):
         number = float(value)
@@ -1771,7 +1783,8 @@ def _ai_reset_warmup_agy_cli(families=('gemini', 'claude'), profile_home=None):
 
 def _ai_reset_warmup_accounts():
     profile_home = os.path.abspath(os.environ.get('CODEX_HOME') or os.path.join(os.path.expanduser('~'), '.codex'))
-    codex_accounts = [{'id': 'default', 'name': 'Default', 'codexHome': profile_home}]
+    codex_accounts = ([{'id': 'default', 'name': 'Default', 'codexHome': profile_home}]
+                      if _ai_usage_default_cli_enabled('codex') else [])
     codex_accounts.extend(_codex_usage_accounts())
     seen_codex_homes = set()
     for account in codex_accounts:
@@ -1782,7 +1795,7 @@ def _ai_reset_warmup_accounts():
         seen_codex_homes.add(normalized_home)
         if os.path.isfile(os.path.join(home, 'auth.json')):
             yield {'provider': 'codex', 'id': account['id'], 'name': account['name'], 'home': home}
-    if _antigravity_cli_executable():
+    if _ai_usage_default_cli_enabled('antigravity') and _antigravity_cli_executable():
         yield {'provider': 'antigravity', 'id': 'default', 'name': 'Default (agy CLI)', 'mode': 'agy'}
     for account in _antigravity_acp_accounts():
         if account.get('usageReady') or _antigravity_acp_token_is_ready(account['id']):
@@ -1965,6 +1978,33 @@ def api_ai_usage_reset_warmup():
         'accounts': [{'provider': item['provider'], 'id': item['id'], 'name': item['name']}
                      for item in _ai_reset_warmup_accounts()],
     })
+
+
+@app.route('/api/ai-usage/default-cli', methods=['GET', 'POST'])
+def api_ai_usage_default_cli_settings():
+    if request.method == 'POST':
+        payload = request.get_json(silent=True) or {}
+        provider = str(payload.get('provider') or '').strip().lower()
+        config_key = _AI_USAGE_DEFAULT_CLI_CONFIG_KEYS.get(provider)
+        if not config_key:
+            return jsonify({'error': 'Choose Codex, Kiro, or Antigravity.'}), 400
+        if not isinstance(payload.get('enabled'), bool):
+            return jsonify({'error': 'The enabled value must be true or false.'}), 400
+        set_config_val(config_key, payload['enabled'])
+        if provider == 'codex' and not payload['enabled']:
+            with _CODEX_LIMITS_CACHE_LOCK:
+                _CODEX_LIMITS_CACHE.pop('identity-v2:default', None)
+        elif provider == 'kiro' and not payload['enabled']:
+            with _KIRO_USAGE_CACHE_LOCK:
+                _KIRO_USAGE_CACHE.pop('identity-v2:__default__', None)
+        elif provider == 'antigravity' and not payload['enabled']:
+            with _ANTIGRAVITY_USAGE_CACHE_LOCK:
+                _ANTIGRAVITY_USAGE_CACHE.pop('default', None)
+
+    return jsonify({'enabled': {
+        provider: _ai_usage_default_cli_enabled(provider)
+        for provider in _AI_USAGE_DEFAULT_CLI_CONFIG_KEYS
+    }})
 
 
 def _ai_reset_warmup_manual_worker(account, families):
@@ -3032,6 +3072,8 @@ def api_codex_limits():
     account = next((item for item in _codex_usage_accounts() if item['id'] == account_id), None) if account_id else None
     if account_id and account is None:
         return jsonify({'available': False, 'windows': [], 'error': 'Codex profile not found.'}), 404
+    if not account_id and not _ai_usage_default_cli_enabled('codex'):
+        return jsonify({'available': False, 'windows': [], 'error': 'Default Codex account checks are disabled in AI Usage settings.'})
     codex_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['codexHome']))) if account else None
     cache_key = f'identity-v2:{account_id or "default"}'
     now = time.monotonic()
@@ -3156,6 +3198,8 @@ def api_kiro_usage():
     account = next((item for item in _kiro_usage_accounts() if item['id'] == account_id), None) if account_id else None
     if account_id and not account:
         return jsonify({'available': False, 'error': 'Selected Kiro profile was not found.', 'fetchedAt': int(time.time())}), 404
+    if not account_id and not _ai_usage_default_cli_enabled('kiro'):
+        return jsonify({'available': False, 'error': 'Default Kiro account checks are disabled in AI Usage settings.', 'fetchedAt': int(time.time())})
     profile_home = os.environ.get('USERPROFILE') or os.path.expanduser('~')
     default_home = os.path.abspath(os.environ.get('KIRO_HOME') or os.path.join(profile_home, '.kiro'))
     kiro_home = os.path.abspath(os.path.expandvars(os.path.expanduser(account['kiroHome']))) if account else default_home
@@ -3409,6 +3453,8 @@ def api_antigravity_usage():
         _antigravity_acp_profile_home(account_id)
     except ValueError as exc:
         return jsonify({'available': False, 'error': str(exc), 'fetchedAt': int(time.time())}), 404
+    if account_id == 'default' and not _ai_usage_default_cli_enabled('antigravity'):
+        return jsonify({'available': False, 'windows': [], 'error': 'Default agy account checks are disabled in AI Usage settings.', 'fetchedAt': int(time.time())})
     force_refresh = request.args.get('refresh', '').lower() in {'1', 'true', 'yes'}
     try:
         cache_seconds = max(0, min(3600, int(request.args.get('cacheSeconds', '120'))))
