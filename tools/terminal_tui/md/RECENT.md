@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Live Change Count in GitHub and Rclone Modal Status Bar
+
+- The `#github-projects-message` bar now stays visible after any project has been checked and shows a live summary: "N of M checked · X projects with changes" (amber bold) or "· all clean" (green). It updates after each individual project finishes, so the count fills in incrementally during a Check all run.
+- The completion message after Check all finishes now appends a colored suffix: `Checked all 13 GitHub projects · 2 projects with changes.` — the suffix is amber bold for changes, green for all clean.
+- Same treatment applied to `#rclone-projects-message`: live count updates inside `renderRcloneProjectsModal` during a run, and the final "Checked all N Rclone projects" line appends "· X projects with changes" or "· all in sync" in the matching colors.
+- Both use `innerHTML` for the colored `<span>` suffixes; the base text color remains the existing green/amber per failures.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-15] - Persistent Tray Icon Notification (Click to Open)
 
 - Rewrote `_send_project_check_tray` to use a Windows message loop (`win32gui.PumpMessages`) instead of `time.sleep`, so the tray icon stays in the notification area indefinitely without blocking or showing a "Python" process alongside it.

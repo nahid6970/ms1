@@ -10276,6 +10276,23 @@ kiro-cli whoami --format json</code></pre>
             list.querySelectorAll('.rclone-project-check').forEach(button => button.addEventListener('click', () => checkRcloneProject(button.dataset.project, button)));
             list.querySelectorAll('.rclone-project-select').forEach(button => button.addEventListener('click', () => selectRcloneProjectInTerminal(button.dataset.project)));
             list.querySelectorAll('.rclone-project-sync').forEach(button => button.addEventListener('click', () => syncRcloneProjectToDestination(button.dataset.project, button)));
+            const rcloneMessage = document.getElementById('rclone-projects-message');
+            if (rcloneMessage && !rcloneProjectCheckRunning) {
+                const checkedRclone = linked.filter(p => rcloneProjectStatusByName.has(p.name) && rcloneProjectStatusByName.get(p.name).checkedAt);
+                if (checkedRclone.length) {
+                    const rcloneWithChanges = [...rcloneProjectStatusByName.values()].filter(s => !s.error && (Number(s.differences) > 0 || Number(s.errors) > 0 || Number(s.missing) > 0)).length;
+                    const rcloneWithErrors = [...rcloneProjectStatusByName.values()].filter(s => s.error).length;
+                    const rparts = [];
+                    if (rcloneWithChanges) rparts.push(`<span style="color:#fbbf24;font-weight:600;">${rcloneWithChanges} project${rcloneWithChanges === 1 ? '' : 's'} with changes</span>`);
+                    if (rcloneWithErrors) rparts.push(`<span style="color:#f87171;font-weight:600;">${rcloneWithErrors} error${rcloneWithErrors === 1 ? '' : 's'}</span>`);
+                    if (!rparts.length) rparts.push(`<span style="color:#34d399;font-weight:600;">all in sync</span>`);
+                    rcloneMessage.style.display = 'block';
+                    rcloneMessage.style.color = 'var(--text-secondary)';
+                    rcloneMessage.innerHTML = `${checkedRclone.length} of ${linked.length} checked · ${rparts.join(' · ')}`;
+                } else if (!rcloneMessage.textContent.trim()) {
+                    rcloneMessage.style.display = 'none';
+                }
+            }
         }
         async function selectRcloneProjectInTerminal(projectName) {
             closeRcloneProjectsModal();
@@ -10338,8 +10355,12 @@ kiro-cli whoami --format json</code></pre>
             try { await Promise.all(Array.from({length:getProjectCheckConcurrency('rclone', linked.length)}, worker)); }
             finally { rcloneProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
             button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
+            const rcloneFinalWithChanges = [...rcloneProjectStatusByName.values()].filter(s => !s.error && (Number(s.differences) > 0 || Number(s.errors) > 0 || Number(s.missing) > 0)).length;
+            const rcloneChangeSuffix = rcloneFinalWithChanges
+                ? ` · <span style="color:#fbbf24;font-weight:600;">${rcloneFinalWithChanges} project${rcloneFinalWithChanges === 1 ? '' : 's'} with changes</span>`
+                : ` · <span style="color:#34d399;">all in sync</span>`;
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
-            message.textContent=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}.`;
+            message.innerHTML=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.${rcloneChangeSuffix}` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}${rcloneChangeSuffix}.`;
         }
 
         const githubProjectStatusByName = new Map();
