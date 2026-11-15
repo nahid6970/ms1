@@ -616,27 +616,6 @@
       "category": "Convex Project"
     },
     {
-      "name": "myhome",
-      "path": "C:\\@delta\\db\\@Convex\\myhome-convex",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#ffd747",
-        "textColor": "#000000",
-        "pathColor": "#424242",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "category": "Convex Project"
-    },
-    {
       "name": "Shortcut Manager",
       "path": "C:\\@delta\\ms1\\autohotkey\\shortcut_manager",
       "category": "Tool - Autohotkey - AHK",
@@ -1442,6 +1421,26 @@
       },
       "bookmarks": [],
       "gitRemote": "https://github.com/nahid6970/foldersync.git"
+    },
+    {
+      "name": "myhome",
+      "path": "C:\\Users\\nahid\\delta\\myhome_convex",
+      "category": "convex",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": []
     }
   ],
   "extension_icons": {
