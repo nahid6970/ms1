@@ -10256,6 +10256,7 @@ kiro-cli whoami --format json</code></pre>
         let githubProjectCheckRunning = false;
         let projectAutoCheckCountdownTimer = null;
         let projectAutoCheckStatusPollTimer = null;
+        let projectAutoCheckResultsPollTimer = null;
         let projectAutoCheckServerState = {github:{}, rclone:{}};
 
         function getProjectCheckConcurrency(type, projectCount) {
@@ -10277,6 +10278,63 @@ kiro-cli whoami --format json</code></pre>
             };
             setBadge('github-projects-notification', gitCount);
             setBadge('rclone-projects-notification', rcloneCount);
+        }
+
+        async function refreshProjectAutoCheckResults() {
+            try {
+                const response = await fetch('/api/project-check-results', {cache:'no-store'});
+                if (!response.ok) return;
+                const payload = await response.json();
+                const allResults = payload.results || {};
+                let resultsChanged = false;
+                const applyManager = (type, statusMap, isEligible) => {
+                    const eligible = new Set((projects || []).filter(isEligible).map(project => project.name));
+                    for (const name of statusMap.keys()) {
+                        if (!eligible.has(name)) { statusMap.delete(name); resultsChanged = true; }
+                    }
+                    Object.entries(allResults[type] || {}).forEach(([name, result]) => {
+                        if (!eligible.has(name)) return;
+                        const previous = statusMap.get(name);
+                        if (Number(previous?.checkedAt) >= Number(result.checkedAt)) return;
+                        if (result.error) {
+                            statusMap.set(name, type === 'github'
+                                ? {text:result.error, filesText:result.error, error:true, hasChanges:true, checkedAt:result.checkedAt}
+                                : {...result, checkedAt:result.checkedAt});
+                            resultsChanged = true;
+                            return;
+                        }
+                        if (type === 'rclone') {
+                            statusMap.set(name, {...result, checkedAt:result.checkedAt});
+                            resultsChanged = true;
+                            return;
+                        }
+                        const filesText = result.dirtyCount
+                            ? `${result.dirtyCount} file${result.dirtyCount === 1 ? '' : 's'} changed`
+                            : 'Working tree clean';
+                        let remoteText = '';
+                        if (!result.remoteBranchExists) remoteText = `${result.ahead || 0} commit${Number(result.ahead) === 1 ? '' : 's'} to push · remote branch missing`;
+                        else {
+                            const remoteParts = [];
+                            if (result.ahead) remoteParts.push(`${result.ahead} to push`);
+                            if (result.behind) remoteParts.push(`${result.behind} to pull`);
+                            remoteText = remoteParts.join(' · ');
+                        }
+                        statusMap.set(name, {
+                            ...result, filesText, remoteText,
+                            hasChanges:!!(result.dirtyCount || result.ahead || result.behind || result.remoteBranchExists === false),
+                            text:`${filesText}${remoteText ? ` · ${remoteText}` : ''}`
+                        });
+                        resultsChanged = true;
+                    });
+                };
+                applyManager('github', githubProjectStatusByName, project => /github\.com/i.test(project.gitRemote || '') && project.pathExists);
+                applyManager('rclone', rcloneProjectStatusByName, project => project.hasRcloneDestination && project.pathExists);
+                updateProjectChangeBadges();
+                if (resultsChanged && document.getElementById('github-projects-modal')?.classList.contains('show')) renderGitHubProjectsModal();
+                if (resultsChanged && document.getElementById('rclone-projects-modal')?.classList.contains('show')) renderRcloneProjectsModal();
+            } catch (error) {
+                console.warn('Could not refresh background project check results:', error);
+            }
         }
 
         function setProjectNotificationTestStatus(message, color = 'var(--text-muted)') {
@@ -10408,7 +10466,9 @@ kiro-cli whoami --format json</code></pre>
         function configureProjectAutoChecks() {
             if (!projectAutoCheckCountdownTimer) projectAutoCheckCountdownTimer = setInterval(refreshProjectAutoCheckCountdowns, 1000);
             if (!projectAutoCheckStatusPollTimer) projectAutoCheckStatusPollTimer = setInterval(refreshProjectAutoCheckServerState, 5000);
+            if (!projectAutoCheckResultsPollTimer) projectAutoCheckResultsPollTimer = setInterval(refreshProjectAutoCheckResults, 5000);
             refreshProjectAutoCheckServerState();
+            refreshProjectAutoCheckResults();
             refreshProjectAutoCheckCountdowns();
         }
 

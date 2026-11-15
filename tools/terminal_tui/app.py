@@ -122,6 +122,7 @@ _project_auto_check_state = {
     "github": {"nextRunAt": None, "running": False, "lastCompletedAt": None},
     "rclone": {"nextRunAt": None, "running": False, "lastCompletedAt": None},
 }
+_project_auto_check_results = {"github": {}, "rclone": {}}
 _PROJECT_CHECK_LOCKS = {}
 _PROJECT_CHECK_LOCKS_GUARD = threading.Lock()
 
@@ -832,6 +833,13 @@ def api_project_check_settings():
             manager_state["nextRunAt"] = int(manager_state["nextRunAt"] * 1000)
     return jsonify({"settings": _normalized_project_auto_check_settings(raw),
                     "initialized": initialized, "state": state})
+
+
+@app.route('/api/project-check-results', methods=['GET'])
+def api_project_check_results():
+    with _project_auto_check_lock:
+        results = copy.deepcopy(_project_auto_check_results)
+    return jsonify({"results": results})
 
 
 @app.route('/api/local/directories', methods=['GET'])
@@ -9889,6 +9897,9 @@ if __name__ == '__main__':
                 elif str((project.get("rclone") or {}).get("dest") or "").strip():
                     projects_to_check.append(project)
 
+            if not projects_to_check:
+                with _project_auto_check_lock:
+                    _project_auto_check_results[manager] = {}
             if projects_to_check:
                 from concurrent.futures import ThreadPoolExecutor, as_completed
                 workers = len(projects_to_check) if settings["concurrency"] == 0 else min(settings["concurrency"], len(projects_to_check))
@@ -9902,6 +9913,12 @@ if __name__ == '__main__':
                         except Exception as exc:
                             result = {"error": str(exc)}
                         results.append((project["name"], result))
+                checked_at = int(time.time() * 1000)
+                with _project_auto_check_lock:
+                    _project_auto_check_results[manager] = {
+                        project_name: {**result, "checkedAt": checked_at}
+                        for project_name, result in results
+                    }
                 current_settings = _normalized_project_auto_check_settings(get_config_val("project_auto_checks", dict))
                 if current_settings[manager]["notificationsEnabled"]:
                     _show_project_check_toast(manager, results)

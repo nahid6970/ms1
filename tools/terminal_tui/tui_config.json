@@ -2235,7 +2235,7 @@
     },
     "rclone": {
       "enabled": true,
-      "intervalMinutes": 120,
+      "intervalMinutes": 1,
       "concurrency": 0,
       "notificationsEnabled": true
     }

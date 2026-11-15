@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Refresh Project Badges from Background Checks
+
+- Kept the latest GitHub and Rclone auto-check results in Flask memory and exposed them through a read-only endpoint.
+- The open page polls those results and restores the manager button badges and project row statuses without writing check results to `tui_config.json`.
+- Background result badges reset on Flask restart and repopulate after the next scheduled checks.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-15] - Run Project Auto-Checks in Flask
 
 - Persisted independent GitHub and Rclone auto-check, concurrency, and notification settings in the `project_auto_checks` section of `tui_config.json`; existing browser settings migrate on first load.
