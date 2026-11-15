@@ -3914,7 +3914,7 @@
                     <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Project Checks & Notifications</div>
                     <div style="display:grid;gap:12px;">
                         <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                            <div style="font-size:.78rem;font-weight:600;color:#facc15;margin-bottom:8px;">GitHub auto-check</div>
+                            <div style="display:flex;align-items:baseline;gap:6px;font-size:.78rem;font-weight:600;color:#facc15;margin-bottom:8px;">GitHub auto-check <span id="settings-github-check-countdown" role="status" style="font-size:.72rem;font-weight:400;">(Auto-check is disabled)</span></div>
                             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-github-autocheck-enabled" style="accent-color:#facc15;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-github-autocheck-interval" min="1" max="1440" step="1" value="15" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
@@ -3928,7 +3928,7 @@
                             <div style="font-size:.68rem;color:var(--text-muted);margin-top:5px;">Use 0 to check all GitHub projects at once; 1 checks sequentially.</div>
                         </div>
                         <div style="padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                            <div style="font-size:.78rem;font-weight:600;color:#60a5fa;margin-bottom:8px;">Rclone auto-check</div>
+                            <div style="display:flex;align-items:baseline;gap:6px;font-size:.78rem;font-weight:600;color:#60a5fa;margin-bottom:8px;">Rclone auto-check <span id="settings-rclone-check-countdown" role="status" style="font-size:.72rem;font-weight:400;">(Auto-check is disabled)</span></div>
                             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);"><input type="checkbox" id="settings-rclone-autocheck-enabled" style="accent-color:#60a5fa;"> Enable</label>
                                 <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);">Interval (minutes)<input type="number" id="settings-rclone-autocheck-interval" min="1" max="1440" step="1" value="30" style="width:68px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"></label>
@@ -10221,6 +10221,7 @@ kiro-cli whoami --format json</code></pre>
             const message = document.getElementById('rclone-projects-message');
             if (!linked.length || rcloneProjectCheckRunning) return;
             rcloneProjectCheckRunning = true;
+            refreshProjectAutoCheckCountdowns();
             button.disabled = true; button.textContent = 'Checking…';
             message.style.display='block'; message.style.color='var(--text-secondary)'; message.textContent=`Checking ${linked.length} Rclone project${linked.length === 1 ? '' : 's'}…`;
             const failed = [];
@@ -10244,7 +10245,7 @@ kiro-cli whoami --format json</code></pre>
                 }
             };
             try { await Promise.all(Array.from({length:getProjectCheckConcurrency('rclone', linked.length)}, worker)); }
-            finally { rcloneProjectCheckRunning = false; }
+            finally { rcloneProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
             dispatchProjectChangeNotification('rclone', linked);
             button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
@@ -10255,6 +10256,9 @@ kiro-cli whoami --format json</code></pre>
         let githubProjectCheckRunning = false;
         let githubAutoCheckTimer = null;
         let rcloneAutoCheckTimer = null;
+        let githubAutoCheckNextAt = null;
+        let rcloneAutoCheckNextAt = null;
+        let projectAutoCheckCountdownTimer = null;
 
         function getProjectCheckConcurrency(type, projectCount) {
             const key = type === 'rclone' ? 'rclone-check-concurrency' : 'github-check-concurrency';
@@ -10363,18 +10367,72 @@ kiro-cli whoami --format json</code></pre>
             } catch (error) { console.warn('Could not show project change notification:', error); }
         }
 
+        function refreshProjectAutoCheckCountdowns() {
+            [
+                {type:'github', elementId:'settings-github-check-countdown', running:() => githubProjectCheckRunning, nextAt:() => githubAutoCheckNextAt},
+                {type:'rclone', elementId:'settings-rclone-check-countdown', running:() => rcloneProjectCheckRunning, nextAt:() => rcloneAutoCheckNextAt}
+            ].forEach(({type, elementId, running, nextAt}) => {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                if (localStorage.getItem(`${type}-autocheck-enabled`) !== 'true') {
+                    element.textContent = '(disabled)';
+                    return;
+                }
+                if (running()) {
+                    element.textContent = '(checking now…)';
+                    return;
+                }
+                const target = nextAt();
+                if (!target) {
+                    element.textContent = '(scheduling…)';
+                    return;
+                }
+                const totalSeconds = Math.max(0, Math.ceil((target - Date.now()) / 1000));
+                element.textContent = `(${Math.floor(totalSeconds / 60)}m ${String(totalSeconds % 60).padStart(2, '0')}s)`;
+            });
+        }
+
+        function scheduleProjectAutoCheck(type, minutes) {
+            const isRclone = type === 'rclone';
+            const delay = minutes * 60 * 1000;
+            if (isRclone) rcloneAutoCheckNextAt = Date.now() + delay;
+            else githubAutoCheckNextAt = Date.now() + delay;
+            const timer = setTimeout(async () => {
+                if (isRclone) { rcloneAutoCheckTimer = null; rcloneAutoCheckNextAt = null; }
+                else { githubAutoCheckTimer = null; githubAutoCheckNextAt = null; }
+                refreshProjectAutoCheckCountdowns();
+                try {
+                    if (localStorage.getItem(`${type}-autocheck-enabled`) === 'true') {
+                        await (isRclone ? checkAllRcloneProjects({automatic:true}) : checkAllGitHubProjects({automatic:true}));
+                    }
+                } finally {
+                    if (localStorage.getItem(`${type}-autocheck-enabled`) === 'true') {
+                        const currentMinutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem(`${type}-autocheck-interval`), 10) || (isRclone ? 30 : 15)));
+                        scheduleProjectAutoCheck(type, currentMinutes);
+                    }
+                    refreshProjectAutoCheckCountdowns();
+                }
+            }, delay);
+            if (isRclone) rcloneAutoCheckTimer = timer;
+            else githubAutoCheckTimer = timer;
+            refreshProjectAutoCheckCountdowns();
+        }
+
         function configureProjectAutoChecks() {
-            if (githubAutoCheckTimer) clearInterval(githubAutoCheckTimer);
-            if (rcloneAutoCheckTimer) clearInterval(rcloneAutoCheckTimer);
+            if (githubAutoCheckTimer) clearTimeout(githubAutoCheckTimer);
+            if (rcloneAutoCheckTimer) clearTimeout(rcloneAutoCheckTimer);
             githubAutoCheckTimer = rcloneAutoCheckTimer = null;
+            githubAutoCheckNextAt = rcloneAutoCheckNextAt = null;
             if (localStorage.getItem('github-autocheck-enabled') === 'true') {
                 const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('github-autocheck-interval'), 10) || 15));
-                githubAutoCheckTimer = setInterval(() => checkAllGitHubProjects({automatic:true}), minutes * 60 * 1000);
+                scheduleProjectAutoCheck('github', minutes);
             }
             if (localStorage.getItem('rclone-autocheck-enabled') === 'true') {
                 const minutes = Math.max(1, Math.min(1440, parseInt(localStorage.getItem('rclone-autocheck-interval'), 10) || 30));
-                rcloneAutoCheckTimer = setInterval(() => checkAllRcloneProjects({automatic:true}), minutes * 60 * 1000);
+                scheduleProjectAutoCheck('rclone', minutes);
             }
+            if (!projectAutoCheckCountdownTimer) projectAutoCheckCountdownTimer = setInterval(refreshProjectAutoCheckCountdowns, 1000);
+            refreshProjectAutoCheckCountdowns();
         }
 
         function openGitHubProjectsModal() {
@@ -10435,6 +10493,7 @@ kiro-cli whoami --format json</code></pre>
             const message = document.getElementById('github-projects-message');
             if (!linked.length || githubProjectCheckRunning) return;
             githubProjectCheckRunning = true;
+            refreshProjectAutoCheckCountdowns();
             checkButton.disabled = true;
             checkButton.textContent = 'Checking…';
             message.style.display = 'block';
@@ -10487,7 +10546,7 @@ kiro-cli whoami --format json</code></pre>
                 ? linked.length
                 : getProjectCheckConcurrency('github', linked.length);
             try { await Promise.all(Array.from({length:concurrency}, worker)); }
-            finally { githubProjectCheckRunning = false; }
+            finally { githubProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
             dispatchProjectChangeNotification('github', linked);
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';

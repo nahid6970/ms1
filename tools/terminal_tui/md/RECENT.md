@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Show Project Auto-Check Countdown
+
+- Added independent live countdowns in the GitHub and Rclone settings sections, displayed as minutes and seconds until each next scheduled check.
+- Countdown status changes to “Checking now…” while that manager's project check is running and returns to the next interval after completion.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-15] - Notify When Each Project Check Completes
 
 - Removed separate GitHub and Rclone notification interval settings and timers.

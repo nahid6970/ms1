@@ -2221,5 +2221,8 @@
         "error": ""
       }
     }
-  }
+  },
+  "ai_usage_kiro_default_cli_enabled": true,
+  "ai_usage_antigravity_default_cli_enabled": false,
+  "ai_usage_codex_default_cli_enabled": true
 }
