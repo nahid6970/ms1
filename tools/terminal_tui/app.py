@@ -5821,6 +5821,7 @@ def api_git_suggest_ignore(project):
     data = request.get_json() or {}
     api_key = (data.get('api_key') or '').strip()
     model = (data.get('model') or 'gemini-2.5-flash').strip()
+    allow_no_git = bool(data.get('allow_no_git', False))
     if not api_key:
         return jsonify({'error': 'No Gemini API key found. Add one in AI Copilot settings.'}), 400
     if not re.fullmatch(r'[A-Za-z0-9._-]{1,100}', model):
@@ -5836,13 +5837,14 @@ def api_git_suggest_ignore(project):
 
     cf = 0x08000000 if sys.platform == 'win32' else 0
     try:
-        git_check = subprocess.run(
-            ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
-            capture_output=True, text=True, encoding='utf-8', errors='replace',
-            creationflags=cf, timeout=5
-        )
-        if git_check.returncode != 0:
-            return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
+        if not allow_no_git:
+            git_check = subprocess.run(
+                ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
+                capture_output=True, text=True, encoding='utf-8', errors='replace',
+                creationflags=cf, timeout=5
+            )
+            if git_check.returncode != 0:
+                return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
 
         import heapq
         import random
@@ -5986,6 +5988,7 @@ def api_git_save_ignore(project):
     """Save a reviewed .gitignore proposal at the active workspace root."""
     data = request.get_json() or {}
     content = data.get('content')
+    allow_no_git = bool(data.get('allow_no_git', False))
     if not isinstance(content, str):
         return jsonify({'error': 'GitIgnore content is required.'}), 400
     if len(content.encode('utf-8')) > 512 * 1024:
@@ -6000,13 +6003,14 @@ def api_git_save_ignore(project):
         return jsonify({'error': 'Workspace folder does not exist.'}), 404
     cf = 0x08000000 if sys.platform == 'win32' else 0
     try:
-        git_check = subprocess.run(
-            ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
-            capture_output=True, text=True, encoding='utf-8', errors='replace',
-            creationflags=cf, timeout=5
-        )
-        if git_check.returncode != 0:
-            return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
+        if not allow_no_git:
+            git_check = subprocess.run(
+                ['git', 'rev-parse', '--show-toplevel'], cwd=workspace,
+                capture_output=True, text=True, encoding='utf-8', errors='replace',
+                creationflags=cf, timeout=5
+            )
+            if git_check.returncode != 0:
+                return jsonify({'error': 'This workspace is not inside a Git repository.'}), 400
 
         import tempfile
         gitignore_path = os.path.join(workspace, '.gitignore')
