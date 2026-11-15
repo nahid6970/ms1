@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Notify When Each Project Check Completes
+
+- Removed separate GitHub and Rclone notification interval settings and timers.
+- When desktop notifications are enabled, send alerts immediately after a completed manual or automatic check finds changes.
+- Kept the independent auto-check intervals and project concurrency settings.
+
+**Files Modified:** `templates/index.html`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-15] - Add Timestamps to Project Notifications
 
 - Added the latest completed check time and the notification display time to GitHub and Rclone desktop notification bodies, formatted using the browser's local time.
