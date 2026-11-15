@@ -9836,6 +9836,19 @@ if __name__ == '__main__':
             response = endpoint(project["name"])
         return _project_check_response_json(response) or {"error": "The check returned no result."}
 
+    def _register_project_notification_identity(provider):
+        if os.name != "nt":
+            return
+        import winreg
+        icon_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), "static", "images", "notifications",
+            "rclone-transparent.png" if provider == "Rclone" else "github-transparent.png",
+        ))
+        key_path = rf"Software\Classes\AppUserModelId\{provider}"
+        with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
+            winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, provider)
+            winreg.SetValueEx(key, "IconUri", 0, winreg.REG_EXPAND_SZ, icon_path)
+
     def _show_project_check_toast(manager, results):
         changed = []
         for project_name, result in results:
@@ -9875,6 +9888,7 @@ if __name__ == '__main__':
         try:
             from winotify import Notification
             provider = "Rclone" if manager == "rclone" else "GitHub"
+            _register_project_notification_identity(provider)
             Notification(
                 app_id=provider,
                 title=f"{checked_at} (Checked)",

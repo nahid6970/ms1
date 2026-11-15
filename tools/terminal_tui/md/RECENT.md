@@ -3,6 +3,28 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-15] - Put Provider Icons Beside Toast Titles
+
+- Removed the large app-logo override from GitHub and Rclone notifications.
+- Registered each provider's PNG as its Windows notification app icon, so Windows can show it in the small attribution row beside the provider name.
+- Made the attribution icons transparent and increased the visible marks; the Rclone cloud alert uses the provided SVG.
+
+**Files Modified:** `app.py`, `md/RECENT.md`
+
+## [2026-11-15] - Use Provided SVGs for Project Notifications
+
+- Added the supplied Git and Rclone icon artwork as SVG source assets and rendered transparent PNG variants for Windows toast notifications.
+- The server selects the provider-specific icon when showing a notification.
+
+**Files Modified:** `app.py`, `static/images/notifications/github.svg`, `static/images/notifications/github.png`, `static/images/notifications/rclone.svg`, `static/images/notifications/rclone.png`, `md/RECENT.md`
+
+## [2026-11-15] - Add GitHub and Rclone Toast Icons
+
+- Added separate GitHub and Rclone icons to the left side of their Windows toast content.
+- Toasts continue to use the provider name as the app title and show the checked time and changed projects.
+
+**Files Modified:** `app.py`, `static/images/notifications/github.png`, `static/images/notifications/rclone.png`, `md/RECENT.md`
+
 ## [2026-11-15] - Refresh Project Badges from Background Checks
 
 - Kept the latest GitHub and Rclone auto-check results in Flask memory and exposed them through a read-only endpoint.
