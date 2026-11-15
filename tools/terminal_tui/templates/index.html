@@ -166,6 +166,10 @@
                 transform: scale(1.05);
             }
         }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
 
         /* Remove width/height limits of AI Copilot Popover */
         #ai-copilot-popover {
@@ -10169,11 +10173,91 @@ kiro-cli whoami --format json</code></pre>
             }
             list.innerHTML = linked.map(project => {
                 const status = rcloneProjectStatusByName.get(project.name);
-                const color = status?.error ? '#f87171' : status?.differences || status?.errors ? '#fbbf24' : '#34d399';
-                const card = status?.error ? 'border:1px solid rgba(248,113,113,.55);' : status?.differences || status?.errors ? 'border:1px solid rgba(251,191,36,.5);' : 'border:1px solid var(--border-color);';
-                const details = status?.details?.length ? `<details style="margin-top:6px;"><summary style="cursor:pointer;color:var(--text-muted);font-size:.66rem;">Show check output</summary><pre style="white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:auto;margin:5px 0 0;color:#cbd5e1;font-size:.65rem;">${escapeHtml(status.details.join('\n'))}</pre></details>` : '';
-                return `<div style="display:flex;align-items:flex-start;gap:12px;padding:11px 12px;${card}border-radius:9px;background:var(--bg-card);">
-                    <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${escapeHtml(project.rcloneDestination || 'Configured Rclone remote')}</div><div style="font-size:.64rem;color:${project.pathExists ? '#94a3b8' : '#f87171'};margin-top:3px;">${project.pathExists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}</div>${status ? `<div style="font-size:.7rem;color:${color};margin-top:6px;">${escapeHtml(status.summary || status.error || 'Checking…')}${status.matching != null ? ` · ${status.matching.toLocaleString()} matching files` : ''}${status.missing ? ` · ${status.missing} missing` : ''}</div>${details}` : ''}</div>
+                const hasError = !!status?.error;
+                const hasDiff = !hasError && (Number(status?.differences) > 0 || Number(status?.errors) > 0 || Number(status?.missing) > 0);
+                const isChecking = !hasError && !hasDiff && status?.summary === 'Checking…';
+                const isQueued  = !hasError && !hasDiff && status?.summary === 'Queued…';
+                const cardStyle = hasError
+                    ? 'border:1px solid rgba(248,113,113,.55);background:linear-gradient(135deg,rgba(127,29,29,.18),var(--bg-card));box-shadow:0 0 14px rgba(248,113,113,.07);'
+                    : hasDiff
+                        ? 'border:1px solid rgba(251,191,36,.5);background:linear-gradient(135deg,rgba(120,83,12,.2),var(--bg-card));box-shadow:0 0 14px rgba(251,191,36,.06);'
+                        : 'border:1px solid var(--border-color);background:var(--bg-card);';
+
+                // Use pre-parsed categories from server; fall back to JS parsing if unavailable
+                let changedFiles = status?.changedFiles || [];
+                let missingFiles = status?.missingFiles || [];
+                let symlinkFiles = status?.symlinkFiles || [];
+                let otherLines   = status?.otherLines   || [];
+                if (!changedFiles.length && !missingFiles.length && !symlinkFiles.length && status?.details?.length) {
+                    for (const line of status.details) {
+                        const m = line.match(/(?:ERROR|NOTICE)[: ]+(.+?): (.+)$/i);
+                        if (m) {
+                            const [, filePath, reason] = m;
+                            const rl = reason.toLowerCase();
+                            if (rl.includes('sizes differ')) changedFiles.push(filePath.trim());
+                            else if (rl.includes('not in')) missingFiles.push(filePath.trim());
+                            else if (rl.includes('symlink')) symlinkFiles.push(filePath.trim());
+                            else if (!line.toLowerCase().includes('union root')) otherLines.push(line);
+                        } else if (!line.toLowerCase().includes('union root')) {
+                            otherLines.push(line);
+                        }
+                    }
+                }
+
+                const pill = (label, count, color, bg) => count > 0
+                    ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:${bg};border:1px solid ${color}66;color:${color};font-size:.62rem;font-weight:700;">${label} <span>${count}</span></span>`
+                    : '';
+
+                const fileList = (files, color) => files.length
+                    ? `<div style="margin-top:5px;display:flex;flex-direction:column;gap:1px;">${files.slice(0,8).map(f =>
+                        `<div style="display:flex;align-items:center;gap:5px;padding:2px 0;">
+                            <span style="color:${color};font-size:.6rem;flex-shrink:0;">●</span>
+                            <code style="font-size:.64rem;color:#cbd5e1;font-family:'Fira Code',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml(f)}</code>
+                        </div>`).join('')}${files.length > 8 ? `<div style="font-size:.6rem;color:var(--text-muted);padding:2px 0 0 14px;">+${files.length - 8} more</div>` : ''}</div>`
+                    : '';
+
+                let statusHtml = '';
+                if (status) {
+                    if (isChecking || isQueued) {
+                        statusHtml = `<div style="font-size:.7rem;color:var(--text-muted);margin-top:5px;display:flex;align-items:center;gap:5px;">
+                            <span style="width:8px;height:8px;border-radius:50%;background:#60a5fa;animation:pulse 1.2s infinite;display:inline-block;"></span>
+                            ${escapeHtml(status.summary)}
+                        </div>`;
+                    } else if (hasError) {
+                        statusHtml = `<div style="font-size:.7rem;color:#f87171;margin-top:5px;">${escapeHtml(status.error)}</div>`;
+                    } else if (status.ok === false || hasDiff) {
+                        statusHtml = `<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px;">
+                            ${pill('changed', changedFiles.length || Number(status.differences) - (missingFiles.length || Number(status.missing)), '#fbbf24', 'rgba(251,191,36,.1)')}
+                            ${pill('missing', missingFiles.length || Number(status.missing), '#fb923c', 'rgba(251,146,60,.1)')}
+                            ${pill('errors', Number(status.errors), '#f87171', 'rgba(248,113,113,.1)')}
+                            ${pill('symlinks', symlinkFiles.length, '#a78bfa', 'rgba(167,139,250,.1)')}
+                            ${status.matching != null ? `<span style="font-size:.62rem;color:#34d399;padding:2px 0;">✓ ${Number(status.matching).toLocaleString()} matching</span>` : ''}
+                        </div>
+                        ${fileList(changedFiles, '#fbbf24')}
+                        ${fileList(missingFiles, '#fb923c')}
+                        ${fileList(symlinkFiles, '#a78bfa')}
+                        ${otherLines.length && !changedFiles.length && !missingFiles.length ? `<details style="margin-top:5px;"><summary style="cursor:pointer;color:var(--text-muted);font-size:.65rem;">Show raw output</summary><pre style="white-space:pre-wrap;word-break:break-word;max-height:120px;overflow:auto;margin:4px 0 0;color:#94a3b8;font-size:.62rem;">${escapeHtml(otherLines.join('\n'))}</pre></details>` : ''}`;
+                    } else if (status.matching != null) {
+                        statusHtml = `<div style="font-size:.7rem;color:#34d399;margin-top:5px;display:flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            In sync · ${Number(status.matching).toLocaleString()} matching files
+                        </div>`;
+                    }
+                }
+
+                const checkedLabel = status?.checkedAt
+                    ? `<span style="font-size:.6rem;color:var(--text-muted);margin-left:4px;">· ${new Intl.DateTimeFormat(undefined,{timeStyle:'short'}).format(status.checkedAt)}</span>`
+                    : '';
+
+                return `<div style="display:flex;align-items:flex-start;gap:12px;padding:11px 12px;${cardStyle}border-radius:9px;">
+                    <div style="min-width:0;flex:1;">
+                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                            <span style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</span>${checkedLabel}
+                        </div>
+                        <div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${escapeHtml(project.rcloneDestination || 'Configured Rclone remote')}</div>
+                        <div style="font-size:.64rem;color:${project.pathExists ? '#94a3b8' : '#f87171'};margin-top:2px;">${project.pathExists ? escapeHtml(project.path || '') : 'Workspace folder missing'}</div>
+                        ${statusHtml}
+                    </div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
                         <button type="button" class="rclone-project-select" data-project="${escapeHtml(project.name)}" style="padding:6px 9px;border:1px solid rgba(196,181,253,.45);border-radius:6px;background:rgba(196,181,253,.08);color:#c4b5fd;font-size:.68rem;font-weight:600;cursor:pointer;">Select</button>
                         <button type="button" class="rclone-project-check" data-project="${escapeHtml(project.name)}" ${project.pathExists ? '' : 'disabled'} style="padding:6px 9px;border:1px solid rgba(96,165,250,.45);border-radius:6px;background:rgba(96,165,250,.08);color:#60a5fa;font-size:.68rem;font-weight:600;cursor:pointer;">Check</button>
@@ -10381,7 +10465,7 @@ kiro-cli whoami --format json</code></pre>
             const isRclone = type === 'rclone';
             const enabledKey = isRclone ? 'rclone-notifications-enabled' : 'github-notifications-enabled';
             const statusMap = isRclone ? rcloneProjectStatusByName : githubProjectStatusByName;
-            if (localStorage.getItem(enabledKey) !== 'true' || !('Notification' in window) || Notification.permission !== 'granted') return;
+            if (localStorage.getItem(enabledKey) !== 'true') return;
             const changed = projectList.filter(project => {
                 const status = statusMap.get(project.name);
                 return isRclone
@@ -10389,6 +10473,32 @@ kiro-cli whoami --format json</code></pre>
                     : !!(status?.error || status?.hasChanges);
             });
             if (!changed.length) return;
+
+            // Build results payload for server-side persistent toast
+            const results = changed.map(project => {
+                const status = statusMap.get(project.name) || {};
+                return [project.name, {
+                    error: status.error || null,
+                    differences: status.differences ?? 0,
+                    missing: status.missing ?? 0,
+                    errors: status.errors ?? 0,
+                    ok: !status.error,
+                    dirtyCount: status.dirtyCount ?? 0,
+                    ahead: status.ahead ?? 0,
+                    behind: status.behind ?? 0,
+                    remoteBranchExists: status.remoteBranchExists,
+                }];
+            });
+
+            // Try server-side persistent toast first (stays until dismissed)
+            fetch('/api/project-check-notify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({manager: type, results})
+            }).catch(() => {});
+
+            // Also send browser notification as fallback (useful when server isn't Windows / winotify missing)
+            if (!('Notification' in window) || Notification.permission !== 'granted') return;
             const projectLines = changed.slice(0, 5).map(project => {
                 const status = statusMap.get(project.name);
                 if (status?.error) return `${project.name}: check failed: ${status.error}`;

@@ -8175,8 +8175,30 @@ def _api_rclone_check(project):
     matching = int(re.search(r'NOTICE: union root .*?: (\d+) matching files', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) matching files', output) else 0
     missing = int(re.search(r'NOTICE: union root .*?: (\d+) files missing', output).group(1)) if re.search(r'NOTICE: union root .*?: (\d+) files missing', output) else 0
     detail_lines = [line for line in output.splitlines() if ' ERROR :' in line or ' NOTICE:' in line and ('symlink' in line.lower() or 'union root' in line.lower())]
+
+    # Parse detail lines into structured categories for the UI
+    changed_files, missing_files, symlink_files, other_lines = [], [], [], []
+    _file_path_re = re.compile(r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} (?:ERROR|NOTICE)[: ]+(.+?): (.+)$')
+    for line in detail_lines:
+        m = _file_path_re.match(line)
+        if m:
+            path_part, reason = m.group(1).strip(), m.group(2).strip()
+            reason_lower = reason.lower()
+            if 'sizes differ' in reason_lower:
+                changed_files.append(path_part)
+            elif 'not in' in reason_lower:
+                missing_files.append(path_part)
+            elif 'symlink' in reason_lower:
+                symlink_files.append(path_part)
+            else:
+                other_lines.append(line)
+        elif 'union root' not in line.lower():
+            other_lines.append(line)
+
     return jsonify({'ok': result.returncode == 0, 'differences': differences, 'errors': errors,
                     'matching': matching, 'missing': missing, 'details': detail_lines[:80],
+                    'changedFiles': changed_files[:60], 'missingFiles': missing_files[:60],
+                    'symlinkFiles': symlink_files[:30], 'otherLines': other_lines[:20],
                     'summary': 'No differences found' if differences == 0 and errors == 0 else f'{differences} differences found · {errors} errors',
                     'exitCode': result.returncode})
 
@@ -9825,7 +9847,199 @@ def api_kill_process_by_pid():
         return jsonify({"error": str(e)}), 500
 
 
+def _send_project_check_toast(manager, results):
+    """Send a persistent Windows reminder toast for project check results.
+    Safe to call at any time — no-ops silently on non-Windows or if winotify
+    is not installed.  ``results`` is a list of (name, result_dict) pairs.
+    """
+    if os.name != 'nt':
+        return
+    try:
+        import winotify
+    except ImportError:
+        return
+
+    changed = []
+    for project_name, result in results:
+        if result.get('error'):
+            changed.append(f"{project_name}: check failed")
+        elif manager == 'rclone':
+            parts = []
+            if int(result.get('differences') or 0) > 0:
+                parts.append(f"{result['differences']} differences")
+            if int(result.get('missing') or 0) > 0:
+                parts.append(f"{result['missing']} missing")
+            if int(result.get('errors') or 0) > 0:
+                parts.append(f"{result['errors']} errors")
+            if parts:
+                changed.append(f"{project_name}: {', '.join(parts)}")
+            elif result.get('ok') is False:
+                changed.append(f"{project_name}: check failed")
+        else:
+            parts = []
+            if int(result.get('dirtyCount') or 0) > 0:
+                parts.append(f"{result['dirtyCount']} files changed")
+            if int(result.get('ahead') or 0) > 0:
+                parts.append(f"{result['ahead']} to push")
+            if int(result.get('behind') or 0) > 0:
+                parts.append(f"{result['behind']} to pull")
+            if result.get('remoteBranchExists') is False:
+                parts.append('remote branch missing')
+            if parts:
+                changed.append(f"{project_name}: {', '.join(parts)}")
+
+    if not changed:
+        return
+
+    checked_at = time.strftime('%b %d, %Y, %I:%M %p')
+    body_lines = changed[:5]
+    if len(changed) > 5:
+        body_lines.append(f'+ {len(changed) - 5} more project(s)')
+    provider = 'Rclone' if manager == 'rclone' else 'GitHub'
+
+    try:
+        _register_project_notification_identity_global(provider)
+    except Exception as exc:
+        print(f'Could not register {provider} notification icon: {exc}')
+
+    _project_notification_template_lock_global = getattr(
+        _send_project_check_toast, '_template_lock', None)
+    if _project_notification_template_lock_global is None:
+        import threading as _t
+        _send_project_check_toast._template_lock = _t.Lock()
+        _project_notification_template_lock_global = _send_project_check_toast._template_lock
+
+    try:
+        notification = winotify.Notification(
+            app_id=provider,
+            title=f'{checked_at} (Checked)',
+            msg='\n'.join(body_lines),
+            duration='long',
+        )
+        with _project_notification_template_lock_global:
+            original_template = winotify.TEMPLATE
+            reminder_template = original_template.replace(
+                '<toast {launch} duration="{duration}">',
+                '<toast {launch} duration="{duration}" scenario="reminder">',
+                1,
+            ).replace(
+                '{actions}',
+                '{actions}<action activationType="system" arguments="dismiss" content="Dismiss" />',
+                1,
+            )
+            try:
+                winotify.TEMPLATE = reminder_template
+                notification.show()
+            finally:
+                winotify.TEMPLATE = original_template
+    except Exception as exc:
+        print(f'Could not show {manager} project check notification: {exc}')
+
+
+def _register_project_notification_identity_global(provider):
+    """Register the notification identity (shortcut + AppUserModelId) for the
+    given provider name. Only effective on Windows. Idempotent."""
+    if os.name != 'nt':
+        return
+    import ctypes
+    import struct
+    import win32com.client
+    import winreg
+
+    icon_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__), 'static', 'images', 'notifications',
+        'rclone.ico' if provider == 'Rclone' else 'github.ico'))
+    shortcut_dir = os.path.join(
+        os.environ.get('APPDATA', ''), 'Microsoft', 'Windows',
+        'Start Menu', 'Programs', 'Terminal TUI Notifications')
+    os.makedirs(shortcut_dir, exist_ok=True)
+    shortcut_path = os.path.join(shortcut_dir, f'{provider}.lnk')
+    if not os.path.exists(shortcut_path):
+        shell = win32com.client.Dispatch('WScript.Shell')
+        shortcut = shell.CreateShortcut(shortcut_path)
+        shortcut.TargetPath = os.path.abspath(__file__)
+        shortcut.Description = f'Open Terminal TUI from a {provider} notification'
+        shortcut.Save()
+
+    class _Guid(ctypes.Structure):
+        _fields_ = [('Data1', ctypes.c_ulong), ('Data2', ctypes.c_ushort),
+                    ('Data3', ctypes.c_ushort), ('Data4', ctypes.c_ubyte * 8)]
+
+    class _PropVariant(ctypes.Structure):
+        _fields_ = [('vt', ctypes.c_ushort), ('_pad', ctypes.c_ushort * 3),
+                    ('pwszVal', ctypes.c_wchar_p)]
+
+    class _PropertyKey(ctypes.Structure):
+        _fields_ = [('fmtid', _Guid), ('pid', ctypes.c_ulong)]
+
+    fmtid = _Guid.from_buffer_copy(
+        struct.pack('<IHH8s', 0x9F4C2855, 0x9F79, 0x4B39,
+                    bytes.fromhex('A8D0E1D42DE1D5F3')))
+    property_key = _PropertyKey(fmtid, 5)
+    store = ctypes.c_void_p()
+    shell32 = ctypes.WinDLL('shell32', use_last_error=True)
+    get_store = shell32.SHGetPropertyStoreFromParsingName
+    get_store.argtypes = [ctypes.c_wchar_p, ctypes.c_void_p, ctypes.c_int,
+                          ctypes.POINTER(_Guid), ctypes.POINTER(ctypes.c_void_p)]
+    get_store.restype = ctypes.c_long
+    property_store_iid = _Guid.from_buffer_copy(
+        struct.pack('<IHH8s', 0x886D8EEB, 0x8CF2, 0x4446,
+                    bytes.fromhex('8D02CDBA1DBDCF99')))
+    result = get_store(shortcut_path, None, 0,
+                       ctypes.byref(property_store_iid), ctypes.byref(store))
+    if result < 0:
+        raise OSError(f'Could not open notification shortcut property store (HRESULT {result:#x}).')
+    try:
+        vtable = ctypes.cast(store, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p))).contents
+        set_value = ctypes.WINFUNCTYPE(
+            ctypes.c_long, ctypes.c_void_p,
+            ctypes.POINTER(_PropertyKey), ctypes.POINTER(_PropVariant))(vtable[6])
+        commit = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p)(vtable[7])
+        app_id_buffer = ctypes.create_unicode_buffer(provider)
+        app_id_value = _PropVariant()
+        app_id_value.vt = 31
+        app_id_value.pwszVal = ctypes.cast(app_id_buffer, ctypes.c_wchar_p)
+        result = set_value(store, ctypes.byref(property_key), ctypes.byref(app_id_value))
+        if result < 0:
+            raise OSError(f'Could not set notification shortcut AppUserModelID (HRESULT {result:#x}).')
+        result = commit(store)
+        if result < 0:
+            raise OSError(f'Could not save notification shortcut AppUserModelID (HRESULT {result:#x}).')
+    finally:
+        release = ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)(vtable[2])
+        release(store)
+
+    key_path = rf'Software\Classes\AppUserModelId\{provider}'
+    with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, key_path, 0,
+                            winreg.KEY_SET_VALUE) as key:
+        winreg.SetValueEx(key, 'DisplayName', 0, winreg.REG_SZ, provider)
+        winreg.SetValueEx(key, 'IconUri', 0, winreg.REG_EXPAND_SZ, icon_path)
+
+
+@app.route('/api/project-check-notify', methods=['POST'])
+def api_project_check_notify():
+    """Send a persistent Windows reminder toast for project check results.
+    Body: {"manager": "rclone"|"github", "results": [[name, {…}], …]}
+    Non-blocking — the toast is sent in a daemon thread.
+    """
+    data = request.json or {}
+    manager = data.get('manager', 'rclone')
+    raw_results = data.get('results', [])
+    if not raw_results:
+        return jsonify({'ok': False, 'reason': 'No results provided'}), 400
+    results = [(str(r[0]), r[1] if len(r) > 1 and isinstance(r[1], dict) else {})
+               for r in raw_results if isinstance(r, (list, tuple)) and r]
+
+    def _send():
+        _send_project_check_toast(manager, results)
+
+    threading.Thread(target=_send, daemon=True).start()
+    return jsonify({'ok': True})
+
+
 if __name__ == '__main__':
+    _project_notification_template_lock = threading.Lock()
+
     def _project_check_response_json(response):
         if isinstance(response, tuple):
             response = response[0]
@@ -9967,13 +10181,29 @@ if __name__ == '__main__':
         except Exception as exc:
             print(f"Could not register the {provider} notification icon; sending toast with the default app icon: {exc}")
         try:
-            from winotify import Notification
-            Notification(
+            import winotify
+            notification = winotify.Notification(
                 app_id=provider,
                 title=f"{checked_at} (Checked)",
                 msg="\n".join(body_lines),
                 duration="long",
-            ).show()
+            )
+            with _project_notification_template_lock:
+                original_template = winotify.TEMPLATE
+                reminder_template = original_template.replace(
+                    '<toast {launch} duration="{duration}">',
+                    '<toast {launch} duration="{duration}" scenario="reminder">',
+                    1,
+                ).replace(
+                    "{actions}",
+                    '{actions}<action activationType="system" arguments="dismiss" content="Dismiss" />',
+                    1,
+                )
+                try:
+                    winotify.TEMPLATE = reminder_template
+                    notification.show()
+                finally:
+                    winotify.TEMPLATE = original_template
         except Exception as exc:
             print(f"Could not show {manager} project check notification: {exc}")
 
