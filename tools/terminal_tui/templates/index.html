@@ -10155,8 +10155,8 @@ kiro-cli whoami --format json</code></pre>
                 const response = await fetch(`/api/project/${encodeURIComponent(name)}/rclone/check`, {method:'POST'});
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
-                rcloneProjectStatusByName.set(name, data);
-            } catch (error) { rcloneProjectStatusByName.set(name, {error:error.message || 'Rclone check failed.'}); }
+                rcloneProjectStatusByName.set(name, {...data, checkedAt: Date.now()});
+            } catch (error) { rcloneProjectStatusByName.set(name, {error:error.message || 'Rclone check failed.', checkedAt: Date.now()}); }
             renderRcloneProjectsModal(); updateProjectChangeBadges();
             updateProjectNotificationQueue('rclone', [{name}]);
             if (rcloneNotificationDue) dispatchProjectChangeNotification('rclone');
@@ -10182,9 +10182,9 @@ kiro-cli whoami --format json</code></pre>
                     try {
                         const response = await fetch(`/api/project/${encodeURIComponent(project.name)}/rclone/check`, {method:'POST'});
                         const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
-                        rcloneProjectStatusByName.set(project.name, data);
+                        rcloneProjectStatusByName.set(project.name, {...data, checkedAt: Date.now()});
                     } catch (error) {
-                        failed.push(project.name); rcloneProjectStatusByName.set(project.name,{error:error?.message || 'Rclone check failed.'});
+                        failed.push(project.name); rcloneProjectStatusByName.set(project.name,{error:error?.message || 'Rclone check failed.', checkedAt: Date.now()});
                     }
                     completed++; renderRcloneProjectsModal(); message.style.display='block'; message.style.color='var(--text-secondary)'; updateProjectChangeBadges();
                     message.textContent = `Checked ${completed} of ${linked.length} Rclone projects…`;
@@ -10236,6 +10236,10 @@ kiro-cli whoami --format json</code></pre>
             if (status) { status.textContent = message; status.style.color = color; }
         }
 
+        function formatProjectNotificationTime(timestamp = Date.now()) {
+            return new Intl.DateTimeFormat(undefined, {dateStyle:'medium', timeStyle:'short'}).format(timestamp);
+        }
+
         async function smokeTestProjectNotification(type) {
             const title = type === 'rclone' ? 'Rclone' : 'GitHub';
             if (!('Notification' in window)) {
@@ -10252,10 +10256,11 @@ kiro-cli whoami --format json</code></pre>
                     return;
                 }
                 const notification = new Notification(title, {
-                    body: type === 'rclone'
+                    body: `${formatProjectNotificationTime()} (Checked)\n${formatProjectNotificationTime()} (Notify)\n\n${type === 'rclone'
                         ? 'Example project: 3 differences, 1 missing\nAnother project: check errors'
-                        : 'Example project: 2 files changed, 1 commit to pull\nAnother project: 1 commit to push',
+                        : 'Example project: 2 files changed, 1 commit to pull\nAnother project: 1 commit to push'}`,
                     tag: `terminal-tui-${type}-notification-test-${Date.now()}`,
+                    timestamp: Date.now(),
                     requireInteraction: true,
                     renotify: true
                 });
@@ -10320,10 +10325,13 @@ kiro-cli whoami --format json</code></pre>
                 return `${project.name}: ${parts.join(', ') || status?.filesText || 'changes detected'}`;
             });
             if (changed.length > projectLines.length) projectLines.push(`+ ${changed.length - projectLines.length} more project${changed.length - projectLines.length === 1 ? '' : 's'}`);
+            const lastCheckCompletedAt = Math.max(...changed.map(project => Number(statusMap.get(project.name)?.checkedAt) || 0));
+            const notificationShownAt = Date.now();
             try {
                 const notification = new Notification(isRclone ? 'Rclone' : 'GitHub', {
-                    body: projectLines.join('\n'),
+                    body: `${formatProjectNotificationTime(lastCheckCompletedAt || notificationShownAt)} (Checked)\n${formatProjectNotificationTime(notificationShownAt)} (Notify)\n\n${projectLines.join('\n')}`,
                     tag: `terminal-tui-${type}-project-changes-${Date.now()}`,
+                    timestamp: notificationShownAt,
                     requireInteraction: true,
                     renotify: true
                 });
@@ -10436,6 +10444,7 @@ kiro-cli whoami --format json</code></pre>
                         });
                         const data = await response.json();
                         if (!response.ok) throw new Error(data.error || 'Git status check failed.');
+                        const checkedAt = Date.now();
                         const filesText = data.dirtyCount
                             ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed`
                             : 'Working tree clean';
@@ -10449,13 +10458,13 @@ kiro-cli whoami --format json</code></pre>
                         }
                         githubProjectStatusByName.set(project.name, {
                             filesText, dirtyCount: data.dirtyCount, insertions: data.insertions, deletions: data.deletions,
-                            remoteText, remoteBranchExists: data.remoteBranchExists, ahead: data.ahead, behind: data.behind,
+                            remoteText, remoteBranchExists: data.remoteBranchExists, ahead: data.ahead, behind: data.behind, checkedAt,
                             hasChanges: !!(data.dirtyCount || data.ahead || data.behind || data.remoteBranchExists === false),
                             text: `${filesText}${remoteText ? ` · ${remoteText}` : ''}`
                         });
                     } catch (error) {
                         const errorText = error?.message || 'Git status check failed.';
-                        githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true });
+                        githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true, checkedAt: Date.now() });
                         failed.push(project.name);
                     }
                     completed++; renderGitHubProjectsModal(); message.style.display = 'block'; message.style.color = 'var(--text-secondary)'; updateProjectChangeBadges();
