@@ -10,6 +10,7 @@ from __future__ import annotations
 #     "SpeechRecognition",
 #     "psutil",
 #     "winotify",
+#     "pywin32",
 #     "pywinpty",
 #     "requests",
 # ]
@@ -31,6 +32,7 @@ DEPENDENCIES = (
     ("requests", "requests"),
     ("speech_recognition", "SpeechRecognition"),
     ("winotify", "winotify"),
+    ("win32com", "pywin32"),
     ("winpty", "pywinpty"),
 )
 
@@ -9839,11 +9841,85 @@ if __name__ == '__main__':
     def _register_project_notification_identity(provider):
         if os.name != "nt":
             return
+        import ctypes
+        import struct
+        import win32com.client
         import winreg
         icon_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), "static", "images", "notifications",
             "rclone-transparent.png" if provider == "Rclone" else "github-transparent.png",
         ))
+        icon_file = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), "static", "images", "notifications",
+            "rclone.ico" if provider == "Rclone" else "github.ico",
+        ))
+        start_menu_dir = os.path.join(
+            os.environ.get("APPDATA", os.path.expanduser("~")),
+            "Microsoft", "Windows", "Start Menu", "Programs", "Terminal TUI Notifications",
+        )
+        os.makedirs(start_menu_dir, exist_ok=True)
+        shortcut_path = os.path.join(start_menu_dir, f"{provider}.lnk")
+        shell = win32com.client.Dispatch("WScript.Shell")
+        shortcut = shell.CreateShortcut(shortcut_path)
+        shortcut.TargetPath = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "explorer.exe")
+        shortcut.Arguments = "http://127.0.0.1:5577/"
+        shortcut.WorkingDirectory = os.path.dirname(__file__)
+        shortcut.Description = f"Open Terminal TUI from a {provider} notification"
+        shortcut.IconLocation = f"{icon_file},0"
+        shortcut.Save()
+
+        class _Guid(ctypes.Structure):
+            _fields_ = [("Data1", ctypes.c_uint32), ("Data2", ctypes.c_uint16),
+                        ("Data3", ctypes.c_uint16), ("Data4", ctypes.c_ubyte * 8)]
+
+        class _PropertyKey(ctypes.Structure):
+            _fields_ = [("fmtid", _Guid), ("pid", ctypes.c_uint32)]
+
+        class _VariantUnion(ctypes.Union):
+            _fields_ = [("pwszVal", ctypes.c_wchar_p), ("pointer", ctypes.c_void_p),
+                        ("ullVal", ctypes.c_uint64)]
+
+        class _PropVariant(ctypes.Structure):
+            _anonymous_ = ("value",)
+            _fields_ = [("vt", ctypes.c_uint16), ("reserved1", ctypes.c_uint16),
+                        ("reserved2", ctypes.c_uint16), ("reserved3", ctypes.c_uint16),
+                        ("value", _VariantUnion)]
+
+        fmtid = _Guid.from_buffer_copy(
+            struct.pack("<IHH8s", 0x9F4C2855, 0x9F79, 0x4B39, bytes.fromhex("A8D0E1D42DE1D5F3"))
+        )
+        property_key = _PropertyKey(fmtid, 5)  # PKEY_AppUserModel_ID
+        store = ctypes.c_void_p()
+        shell32 = ctypes.WinDLL("shell32", use_last_error=True)
+        get_store = shell32.SHGetPropertyStoreFromParsingName
+        get_store.argtypes = [ctypes.c_wchar_p, ctypes.c_void_p, ctypes.c_int,
+                              ctypes.POINTER(_Guid), ctypes.POINTER(ctypes.c_void_p)]
+        get_store.restype = ctypes.c_long
+        property_store_iid = _Guid.from_buffer_copy(
+            struct.pack("<IHH8s", 0x886D8EEB, 0x8CF2, 0x4446, bytes.fromhex("8D02CDBA1DBDCF99"))
+        )
+        result = get_store(shortcut_path, None, 0, ctypes.byref(property_store_iid), ctypes.byref(store))
+        if result < 0:
+            raise OSError(f"Could not open notification shortcut property store (HRESULT {result:#x}).")
+        try:
+            vtable = ctypes.cast(store, ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p))).contents
+            set_value = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p,
+                                           ctypes.POINTER(_PropertyKey), ctypes.POINTER(_PropVariant))(vtable[6])
+            commit = ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p)(vtable[7])
+            app_id_buffer = ctypes.create_unicode_buffer(provider)
+            app_id_value = _PropVariant()
+            app_id_value.vt = 31  # VT_LPWSTR
+            app_id_value.pwszVal = ctypes.cast(app_id_buffer, ctypes.c_wchar_p)
+            result = set_value(store, ctypes.byref(property_key), ctypes.byref(app_id_value))
+            if result < 0:
+                raise OSError(f"Could not set notification shortcut AppUserModelID (HRESULT {result:#x}).")
+            result = commit(store)
+            if result < 0:
+                raise OSError(f"Could not save notification shortcut AppUserModelID (HRESULT {result:#x}).")
+        finally:
+            release = ctypes.WINFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)(vtable[2])
+            release(store)
+
         key_path = rf"Software\Classes\AppUserModelId\{provider}"
         with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
             winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, provider)
