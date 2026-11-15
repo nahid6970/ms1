@@ -4833,25 +4833,21 @@ kiro-cli whoami --format json</code></pre>
             <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:16px;">
                 Leave username &amp; repo name empty to only init locally without pushing.
             </div>
-            <!-- .gitignore pre-init section -->
-            <div style="margin-bottom:16px; padding:10px 12px; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.2); border-radius:8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <div style="flex:1; min-width:0;">
-                    <div style="font-size:0.76rem; color:#c084fc; font-weight:600; margin-bottom:2px;">Set up .gitignore before initializing</div>
-                    <div id="git-init-gitignore-status" style="font-size:0.72rem; color:var(--text-muted);">AI scans your project and suggests what to ignore.</div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <button id="git-init-btn" onclick="initGitRepo()"
+                        style="padding:8px 20px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); border-radius:8px; color:#a5b4fc; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
+                        onmouseenter="this.style.background='rgba(99,102,241,0.3)'; this.style.borderColor='rgba(99,102,241,0.75)'"
+                        onmouseleave="this.style.background='rgba(99,102,241,0.18)'; this.style.borderColor='rgba(99,102,241,0.5)'">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
+                        Initialize
+                    </button>
+                    <button id="git-init-gitignore-btn" onclick="suggestGitIgnorePreInit()" title="Scan workspace and suggest a .gitignore file (no git required)" style="display:inline-flex; align-items:center; gap:5px; padding:8px 14px; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.35); border-radius:8px; color:#c084fc; font-size:0.85rem; font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s; white-space:nowrap;" onmouseenter="this.style.background='rgba(168,85,247,0.2)'" onmouseleave="this.style.background='rgba(168,85,247,0.1)'">
+                        <span id="git-init-gitignore-icon">✨</span> .gitignore
+                    </button>
                 </div>
-                <button id="git-init-gitignore-btn" onclick="suggestGitIgnorePreInit()" title="Scan workspace and suggest a .gitignore file (no git required)" style="display:inline-flex; align-items:center; gap:5px; padding:5px 11px; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.35); border-radius:6px; color:#c084fc; font-size:0.76rem; font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s; white-space:nowrap; flex-shrink:0;" onmouseenter="this.style.background='rgba(168,85,247,0.2)'" onmouseleave="this.style.background='rgba(168,85,247,0.1)'">
-                    <span id="git-init-gitignore-icon">✨</span> .gitignore
-                </button>
-            </div>
-            <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
-                <button id="git-init-btn" onclick="initGitRepo()"
-                    style="padding:8px 20px; background:rgba(99,102,241,0.18); border:1px solid rgba(99,102,241,0.5); border-radius:8px; color:#a5b4fc; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;"
-                    onmouseenter="this.style.background='rgba(99,102,241,0.3)'; this.style.borderColor='rgba(99,102,241,0.75)'"
-                    onmouseleave="this.style.background='rgba(99,102,241,0.18)'; this.style.borderColor='rgba(99,102,241,0.5)'">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg>
-                    Initialize
-                </button>
-                <div id="git-init-status" style="font-size:0.75rem; color:var(--text-secondary); flex:1; min-width:0;"></div>
+                <div id="git-init-status" style="font-size:0.75rem; color:var(--text-secondary);"></div>
+                <div id="git-init-gitignore-status" style="font-size:0.75rem; color:var(--text-muted); display:none;"></div>
             </div>
         </div>
     </div>
@@ -14973,7 +14969,7 @@ kiro-cli whoami --format json</code></pre>
             if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg> Initialize`; }
             // Reset gitignore pre-init section
             const gitignoreStatus = document.getElementById('git-init-gitignore-status');
-            if (gitignoreStatus) { gitignoreStatus.style.color = 'var(--text-muted)'; gitignoreStatus.textContent = 'AI scans your project and suggests what to ignore.'; }
+            if (gitignoreStatus) { gitignoreStatus.style.color = 'var(--text-muted)'; gitignoreStatus.textContent = ''; gitignoreStatus.style.display = 'none'; }
             const gitignoreBtn = document.getElementById('git-init-gitignore-btn');
             if (gitignoreBtn) { gitignoreBtn.disabled = false; const ico = document.getElementById('git-init-gitignore-icon'); if (ico) ico.textContent = '✨'; }
         }
@@ -21688,16 +21684,21 @@ Always wrap your **entire response** in a single markdown code block.`;
             const icon = document.getElementById('git-init-gitignore-icon');
             const statusEl = document.getElementById('git-init-gitignore-status');
             const apiKey = localStorage.getItem('gemini-api-key') || '';
+
+            const showStatus = (msg, color) => {
+                statusEl.style.color = color || 'var(--text-secondary)';
+                statusEl.textContent = msg;
+                statusEl.style.display = msg ? '' : 'none';
+            };
+
             if (!apiKey) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = 'No Gemini API key — add one in AI Copilot settings.';
+                showStatus('No Gemini API key — add one in AI Copilot settings.', '#ef4444');
                 return;
             }
             const model = document.getElementById('git-ai-model-select')?.value || 'gemini-2.5-flash';
             button.disabled = true;
             icon.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
-            statusEl.style.color = 'var(--text-secondary)';
-            statusEl.textContent = 'Scanning workspace…';
+            showStatus('Scanning workspace…', 'var(--text-secondary)');
             try {
                 const response = await fetch(`/api/project/${encodeURIComponent(project)}/git/suggest-ignore`, {
                     method: 'POST',
@@ -21719,11 +21720,9 @@ Always wrap your **entire response** in a single markdown code block.`;
                 document.getElementById('gitignore-ai-save-status').style.color = 'var(--text-secondary)';
                 document.getElementById('gitignore-ai-save-btn').textContent = data.exists ? 'Update .gitignore' : 'Create .gitignore';
                 document.getElementById('gitignore-ai-preview-modal').classList.add('show');
-                statusEl.style.color = '#22c55e';
-                statusEl.textContent = 'Review and save .gitignore, then initialize.';
+                showStatus('Review suggestion above, then initialize when ready.', '#22c55e');
             } catch (error) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = `Failed: ${error.message}`;
+                showStatus(`Failed: ${error.message}`, '#ef4444');
             } finally {
                 button.disabled = false;
                 icon.textContent = '✨';
@@ -21805,7 +21804,7 @@ Always wrap your **entire response** in a single markdown code block.`;
                 await refreshGitChangedFilesAfterIgnoreSave(project);
                 if (gitIgnoreProposalAllowNoGit) {
                     const preInitStatus = document.getElementById('git-init-gitignore-status');
-                    if (preInitStatus) { preInitStatus.style.color = '#22c55e'; preInitStatus.textContent = '.gitignore saved ✓ — ready to initialize.'; }
+                    if (preInitStatus) { preInitStatus.style.color = '#22c55e'; preInitStatus.textContent = '.gitignore saved ✓ — ready to initialize.'; preInitStatus.style.display = ''; }
                 } else {
                     const gitStatus = document.getElementById('git-status-msg');
                     gitStatus.style.color = '#22c55e';
