@@ -9961,10 +9961,13 @@ if __name__ == '__main__':
         body_lines = changed[:5]
         if len(changed) > 5:
             body_lines.append(f"+ {len(changed) - 5} more project(s)")
+        provider = "Rclone" if manager == "rclone" else "GitHub"
+        try:
+            _register_project_notification_identity(provider)
+        except Exception as exc:
+            print(f"Could not register the {provider} notification icon; sending toast with the default app icon: {exc}")
         try:
             from winotify import Notification
-            provider = "Rclone" if manager == "rclone" else "GitHub"
-            _register_project_notification_identity(provider)
             Notification(
                 app_id=provider,
                 title=f"{checked_at} (Checked)",
@@ -10050,6 +10053,11 @@ if __name__ == '__main__':
             _project_auto_check_wakeup.clear()
 
     def _start_project_auto_check_scheduler():
+        for provider in ("GitHub", "Rclone"):
+            try:
+                _register_project_notification_identity(provider)
+            except Exception as exc:
+                print(f"Could not register the {provider} notification app icon: {exc}")
         thread = threading.Thread(target=_project_auto_check_scheduler,
                                   name="project-auto-check-scheduler", daemon=True)
         thread.start()
