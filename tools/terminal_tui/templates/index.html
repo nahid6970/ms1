@@ -10296,7 +10296,6 @@ kiro-cli whoami --format json</code></pre>
                 rcloneProjectStatusByName.set(name, {...data, checkedAt: Date.now()});
             } catch (error) { rcloneProjectStatusByName.set(name, {error:error.message || 'Rclone check failed.', checkedAt: Date.now()}); }
             renderRcloneProjectsModal(); updateProjectChangeBadges();
-            dispatchProjectChangeNotification('rclone', [{name}]);
         }
         let rcloneProjectCheckRunning = false;
         async function checkAllRcloneProjects(options = {}) {
@@ -10330,7 +10329,6 @@ kiro-cli whoami --format json</code></pre>
             };
             try { await Promise.all(Array.from({length:getProjectCheckConcurrency('rclone', linked.length)}, worker)); }
             finally { rcloneProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
-            dispatchProjectChangeNotification('rclone', linked);
             button.disabled=false; button.textContent='Check difference'; updateProjectChangeBadges();
             message.style.color=failed.length ? '#fbbf24' : '#34d399';
             message.textContent=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}.`;
@@ -10745,7 +10743,6 @@ kiro-cli whoami --format json</code></pre>
                 : getProjectCheckConcurrency('github', linked.length);
             try { await Promise.all(Array.from({length:concurrency}, worker)); }
             finally { githubProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
-            dispatchProjectChangeNotification('github', linked);
             checkButton.disabled = false;
             checkButton.textContent = 'Check all';
             updateProjectChangeBadges();
