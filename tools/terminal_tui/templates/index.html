@@ -10406,6 +10406,10 @@ kiro-cli whoami --format json</code></pre>
                     Object.entries(allResults[type] || {}).forEach(([name, result]) => {
                         if (!eligible.has(name)) return;
                         const previous = statusMap.get(name);
+                        // A result request may have started before a manual check and
+                        // returned after it began. Keep the active progress state in
+                        // the modal instead of restoring the previous scan's details.
+                        if (previous?.summary === 'Checking…' || previous?.summary === 'Queued…') return;
                         if (Number(previous?.checkedAt) >= Number(result.checkedAt)) return;
                         if (result.error) {
                             statusMap.set(name, type === 'github'
