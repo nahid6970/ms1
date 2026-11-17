@@ -34,6 +34,7 @@ DATA_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\data.json')
 STATE_FILE = normalize_path(r'C:\@delta\output\5018_output\sheet_active.json')
 CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\custom_syntaxes.json')
 QUICK_TEXTS_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\quick_texts.json')
+SYNTAX_REPLACE_PINS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'syntax_replace_pins.json')
 SETTINGS_FILE = normalize_path(r'C:\@delta\db\5018_cell\setting.json')
 
 def load_data():
@@ -321,6 +322,30 @@ def save_quick_texts():
     items = request.json
     with open(QUICK_TEXTS_FILE, 'w', encoding='utf-8') as f:
         json.dump(items, f, indent=2, ensure_ascii=False)
+    return jsonify({'success': True})
+
+@app.route('/api/syntax-replace-pins', methods=['GET'])
+def get_syntax_replace_pins():
+    try:
+        with open(SYNTAX_REPLACE_PINS_FILE, 'r', encoding='utf-8') as f:
+            pins = json.load(f)
+        return jsonify(pins if isinstance(pins, list) else [])
+    except FileNotFoundError:
+        return jsonify([])
+    except (OSError, json.JSONDecodeError):
+        return jsonify([])
+
+@app.route('/api/syntax-replace-pins', methods=['POST'])
+def save_syntax_replace_pins():
+    pins = request.get_json(silent=True)
+    if not isinstance(pins, list) or any(
+        not isinstance(item, dict)
+        or not all(isinstance(item.get(key), str) for key in ('find', 'replace', 'side'))
+        for item in pins
+    ):
+        return jsonify({'success': False, 'error': 'Expected a list of find/replace/side patterns'}), 400
+    with open(SYNTAX_REPLACE_PINS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(pins, f, indent=2, ensure_ascii=False)
     return jsonify({'success': True})
 
 @app.route('/api/settings', methods=['GET'])

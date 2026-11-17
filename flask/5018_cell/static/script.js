@@ -19362,44 +19362,94 @@ function updateSyntaxReplacePreviewFromUI() {
 }
 
 // Load and display syntax replacement history
-function loadSyntaxReplaceHistory() {
+let syntaxReplacePins = [];
+
+async function loadSyntaxReplaceHistory() {
     const historyContainer = document.getElementById('syntaxReplaceHistory');
     const historySection = document.getElementById('syntaxHistorySection');
     if (!historyContainer) return;
 
-    const history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]');
-    
-    if (history.length === 0) {
-        historySection.style.display = 'none';
-        return;
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]'); } catch (_) {}
+    try {
+        const response = await fetch('/api/syntax-replace-pins');
+        if (response.ok) syntaxReplacePins = await response.json();
+    } catch (error) {
+        console.warn('Could not load pinned syntax patterns:', error);
     }
+    if (!Array.isArray(syntaxReplacePins)) syntaxReplacePins = [];
 
-    historySection.style.display = 'block';
     historyContainer.innerHTML = '';
+    const pinsContainer = document.getElementById('syntaxReplacePins');
+    pinsContainer.innerHTML = '';
+    const pinnedLabel = document.getElementById('syntaxPinnedLabel');
+    const recentLabel = document.getElementById('syntaxRecentLabel');
 
-    history.forEach((item, index) => {
+    const samePattern = (a, b) => a.find === b.find && (a.replace || '') === (b.replace || '') && (a.side || 'both') === (b.side || 'both');
+    const createHistoryRow = (item, isPinned, removeAction) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:stretch;gap:3px;';
         const historyBtn = document.createElement('button');
-        historyBtn.style.cssText = 'padding: 4px 8px; background: #fff; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 11px; text-align: left; display: flex; justify-content: space-between; align-items: center;';
-        
+        historyBtn.style.cssText = 'flex:1;min-width:0;padding:4px 8px;background:#fff;border:1px solid #ddd;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px;text-align:left;display:flex;align-items:center;';
         const replaceLabel = item.replace || '(remove)';
         const sideLabel = item.side !== 'both' ? ` [${item.side}]` : '';
-        
-        historyBtn.innerHTML = `<span style="color: #d00;">${escapeHtml(item.find)}</span> <span style="color: #666; margin: 0 5px;">→</span> <span style="color: #0a0;">${escapeHtml(replaceLabel)}</span><span style="color: #999; font-size: 9px; margin-left: auto;">${sideLabel}</span>`;
-        
+        historyBtn.innerHTML = `<span style="color:#d00;overflow-wrap:anywhere;">${escapeHtml(item.find)}</span><span style="color:#666;margin:0 5px;">→</span><span style="color:#0a0;overflow-wrap:anywhere;">${escapeHtml(replaceLabel)}</span><span style="color:#999;font-size:9px;margin-left:auto;white-space:nowrap;">${sideLabel}</span>`;
         historyBtn.onclick = () => useSyntaxHistoryItem(item);
-        
-        // Add delete button
-        const deleteBtn = document.createElement('span');
-        deleteBtn.innerHTML = ' ×';
-        deleteBtn.style.cssText = 'margin-left: 8px; color: #ccc; font-weight: bold; padding: 0 4px;';
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            deleteSyntaxHistoryItem(index);
+        const pinBtn = document.createElement('button');
+        pinBtn.type = 'button';
+        pinBtn.title = isPinned ? 'Unpin pattern' : 'Pin pattern to local JSON file';
+        pinBtn.textContent = isPinned ? '★' : '☆';
+        pinBtn.style.cssText = `border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;color:${isPinned ? '#d99a00' : '#777'};font-size:16px;padding:0 6px;`;
+        pinBtn.onclick = (event) => {
+            event.stopPropagation();
+            if (isPinned) unpinSyntaxPattern(item);
+            else pinSyntaxPattern(item);
         };
-        
-        historyBtn.appendChild(deleteBtn);
-        historyContainer.appendChild(historyBtn);
+        row.append(historyBtn, pinBtn);
+        if (removeAction) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.textContent = '×';
+            deleteBtn.title = 'Remove from recent patterns';
+            deleteBtn.style.cssText = 'border:1px solid #eee;border-radius:4px;background:#fff;color:#aaa;cursor:pointer;font-weight:bold;padding:0 7px;';
+            deleteBtn.onclick = (event) => { event.stopPropagation(); removeAction(); };
+            row.appendChild(deleteBtn);
+        }
+        return row;
+    };
+
+    syntaxReplacePins.forEach(item => pinsContainer.appendChild(createHistoryRow(item, true, () => unpinSyntaxPattern(item))));
+    history.forEach(item => {
+        historyContainer.appendChild(createHistoryRow(item, syntaxReplacePins.some(pin => samePattern(pin, item)), () => deleteSyntaxHistoryItem(item)));
     });
+
+    pinnedLabel.style.display = syntaxReplacePins.length ? 'block' : 'none';
+    recentLabel.style.display = history.length ? 'block' : 'none';
+    historySection.style.display = (history.length || syntaxReplacePins.length) ? 'block' : 'none';
+}
+
+async function saveSyntaxReplacePins() {
+    try {
+        const response = await fetch('/api/syntax-replace-pins', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(syntaxReplacePins)
+        });
+        if (!response.ok) throw new Error('Request failed');
+        loadSyntaxReplaceHistory();
+    } catch (error) {
+        showToast('Could not save pinned patterns to the JSON file', 'error');
+    }
+}
+
+function pinSyntaxPattern(item) {
+    if (syntaxReplacePins.some(pin => pin.find === item.find && (pin.replace || '') === (item.replace || '') && (pin.side || 'both') === (item.side || 'both'))) return;
+    syntaxReplacePins.unshift({ find: item.find, replace: item.replace || '', side: item.side || 'both' });
+    saveSyntaxReplacePins();
+}
+
+function unpinSyntaxPattern(item) {
+    syntaxReplacePins = syntaxReplacePins.filter(pin => !(pin.find === item.find && (pin.replace || '') === (item.replace || '') && (pin.side || 'both') === (item.side || 'both')));
+    saveSyntaxReplacePins();
 }
 
 function useSyntaxHistoryItem(item) {
@@ -19430,9 +19480,9 @@ function saveSyntaxToHistory(find, replace, side) {
     loadSyntaxReplaceHistory();
 }
 
-function deleteSyntaxHistoryItem(index) {
+function deleteSyntaxHistoryItem(item) {
     let history = JSON.parse(localStorage.getItem('syntaxReplaceHistory') || '[]');
-    history.splice(index, 1);
+    history = history.filter(entry => !(entry.find === item.find && (entry.replace || '') === (item.replace || '') && (entry.side || 'both') === (item.side || 'both')));
     localStorage.setItem('syntaxReplaceHistory', JSON.stringify(history));
     loadSyntaxReplaceHistory();
 }

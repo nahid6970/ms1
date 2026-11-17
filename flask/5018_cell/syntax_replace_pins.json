@@ -1,0 +1,17 @@
+[
+  {
+    "find": "### text",
+    "replace": "##text##",
+    "side": "both"
+  },
+  {
+    "find": "## text",
+    "replace": "#1.5#text#/#",
+    "side": "both"
+  },
+  {
+    "find": "* **text1** text2",
+    "replace": "- **text1** text2",
+    "side": "both"
+  }
+]

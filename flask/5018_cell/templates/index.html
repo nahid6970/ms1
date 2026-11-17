@@ -1592,7 +1592,9 @@
                 
                 <!-- NEW: Recent Syntax History Section -->
                 <div id="syntaxHistorySection" style="margin-bottom: 15px; display: none;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600; font-size: 11px; color: #666;">Recent Patterns:</label>
+                    <label id="syntaxPinnedLabel" style="display: none; margin-bottom: 5px; font-weight: 600; font-size: 11px; color: #666;">Pinned Patterns:</label>
+                    <div id="syntaxReplacePins" style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px;"></div>
+                    <label id="syntaxRecentLabel" style="display: none; margin-bottom: 5px; font-weight: 600; font-size: 11px; color: #666;">Recent Patterns:</label>
                     <div id="syntaxReplaceHistory" style="display: flex; flex-direction: column; gap: 4px;">
                         <!-- History items will be inserted here -->
                     </div>
