@@ -19419,13 +19419,14 @@ async function loadSyntaxReplaceHistory() {
     };
 
     syntaxReplacePins.forEach(item => pinsContainer.appendChild(createHistoryRow(item, true, () => unpinSyntaxPattern(item))));
-    history.forEach(item => {
-        historyContainer.appendChild(createHistoryRow(item, syntaxReplacePins.some(pin => samePattern(pin, item)), () => deleteSyntaxHistoryItem(item)));
+    history.filter(item => !syntaxReplacePins.some(pin => samePattern(pin, item))).forEach(item => {
+        historyContainer.appendChild(createHistoryRow(item, false, () => deleteSyntaxHistoryItem(item)));
     });
 
     pinnedLabel.style.display = syntaxReplacePins.length ? 'block' : 'none';
-    recentLabel.style.display = history.length ? 'block' : 'none';
-    historySection.style.display = (history.length || syntaxReplacePins.length) ? 'block' : 'none';
+    const unpinnedHistoryCount = history.filter(item => !syntaxReplacePins.some(pin => samePattern(pin, item))).length;
+    recentLabel.style.display = unpinnedHistoryCount ? 'block' : 'none';
+    historySection.style.display = (unpinnedHistoryCount || syntaxReplacePins.length) ? 'block' : 'none';
 }
 
 async function saveSyntaxReplacePins() {
