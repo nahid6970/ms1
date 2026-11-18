@@ -1940,6 +1940,96 @@ td input::-moz-selection {
     flex-direction: column;
 }
 
+/* Syntax replacer: keep large pattern collections from pushing its preview off-screen. */
+#syntaxReplacerModal .syntax-replacer-content {
+    width: min(920px, calc(100vw - 32px));
+    max-width: 920px;
+    max-height: calc(100vh - 32px);
+    margin: auto;
+}
+
+#syntaxReplacerModal .modal-header {
+    flex: 0 0 auto;
+    padding: 14px 20px;
+}
+
+#syntaxReplacerModal .syntax-replacer-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+    align-content: start;
+    gap: 14px 20px;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 20px;
+}
+
+#syntaxReplacerModal .syntax-replacer-controls,
+#syntaxReplacerModal .syntax-history-section {
+    min-width: 0;
+}
+
+#syntaxReplacerModal .syntax-history-section {
+    max-height: 390px;
+    overflow-y: auto;
+    padding: 2px 5px 2px 0;
+    scrollbar-gutter: stable;
+}
+
+#syntaxReplacerModal .syntax-history-section > label {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 4px 0;
+    background: #fff;
+}
+
+#syntaxReplacerModal .syntax-replace-preview {
+    grid-column: 1 / -1;
+    min-width: 0;
+    max-height: 180px;
+    overflow: auto;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #e3e6ea;
+    border-radius: 7px;
+    background: #f7f8fa;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+#syntaxReplacerModal .modal-footer {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 12px 20px;
+}
+
+@media (max-width: 680px) {
+    #syntaxReplacerModal .syntax-replacer-content {
+        width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+    }
+
+    #syntaxReplacerModal .syntax-replacer-body {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px 14px;
+    }
+
+    #syntaxReplacerModal .syntax-history-section {
+        max-height: 145px;
+    }
+
+    #syntaxReplacerModal .syntax-replace-preview {
+        grid-column: 1;
+        max-height: 140px;
+    }
+
+    #syntaxReplacerModal .modal-footer {
+        padding: 10px 14px;
+    }
+}
+
 .modal-header {
     display: flex;
     justify-content: space-between;
