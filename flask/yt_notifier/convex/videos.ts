@@ -278,13 +278,13 @@ export const unreadCount = query({
       filteredChannels.map((channel) => [channel.channelId, channel.shortsThresholdSeconds ?? 180]),
     );
 
-    // Cap at 3000 most recent videos — unread videos are always recent ones.
-    // Avoids reading the entire table on every nav badge update.
+    // Use by_isNew index to read only unseen videos — avoids scanning the full table.
+    // Cap at 2000 as a safety ceiling; in practice all unseen videos are recent.
     const unseen = await ctx.db
       .query("videos")
-      .withIndex("by_published")
+      .withIndex("by_isNew", (q) => q.eq("isNew", true))
       .order("desc")
-      .take(3000);
+      .take(2000);
 
     return unseen
       .filter((video) => enabledChannelIds.has(video.channelId))

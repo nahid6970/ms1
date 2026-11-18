@@ -122,6 +122,14 @@ export const youtubeDataApiKey = internalQuery({
   },
 });
 
+export const updateFeedLimit = mutation({
+  args: { feedLimit: v.number() },
+  handler: async (ctx, { feedLimit }) => {
+    if (feedLimit < 0 || feedLimit > 5000) return;
+    await upsertSetting(ctx, FEED_LIMIT_KEY, feedLimit);
+  },
+});
+
 export const recordQuotaUsage = internalMutation({
   args: {
     units: v.number(),

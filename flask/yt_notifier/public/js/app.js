@@ -913,12 +913,7 @@ window.toggleRead = async function toggleRead(id) {
 };
 
 window.toggleShort = async function toggleShort(id) {
-  try {
-    await callConvex("mutation", "videos:toggleShort", { id });
-    await renderFeed();
-  } catch (err) {
-    flash(err.message, "danger");
-  }
+  await updateVideoFlag(id, "isShort", "videos:toggleShort", "fa-mobile-screen-button", "text-amber-300", "text-slate-300");
 };
 
 
@@ -938,47 +933,63 @@ window.markAllSeen = async function markAllSeen() {
 
 async function renderFeed() {
   const urlParams = new URLSearchParams(location.search);
-  const config = await callConvex("query", "settings:config");
-  const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
-  const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
+
+  // Read URL params before we know config defaults, so we can pass them into
+  // the parallel fetch. category/subCategory will be resolved after config arrives.
   const folder = urlParams.get("folder") || "";
   const channelId = urlParams.get("channelId") || "";
   const playlistId = urlParams.get("playlistId") || "";
   const playlistTitleFromUrl = urlParams.get("playlistTitle") || "";
   const sortBy = urlParams.get("sortBy") || "date-desc";
 
-  const [allVideos, counts, categories, channels, avatarVideos] = await Promise.all([
-    callConvex("query", "videos:list", {
-      category: urlCategory,
-      subCategory: urlSubCategory || undefined,
-      folder: folder || undefined,
-      channelId: channelId || undefined,
-      playlistId: playlistId || undefined,
-    }),
+  // Fetch config in parallel with the rest — eliminates the serial RTT.
+  const [config, counts, categories, channels] = await Promise.all([
+    callConvex("query", "settings:config"),
+    // counts args don't depend on config defaults, so we can fire them now.
+    // category/subCategory from URL are used directly; default-filter fallback
+    // is applied below after config resolves.
     callConvex("query", "videos:counts", {
       folder: folder || undefined,
       channelId: channelId || undefined,
-      category: urlCategory,
-      subCategory: urlSubCategory || undefined,
+      category: urlParams.get("category") || "all",
+      subCategory: urlParams.get("subCategory") || undefined,
     }),
     callConvex("query", "channels:categories"),
     callConvex("query", "channels:list"),
-    callConvex("query", "videos:list", {
-      category: urlCategory,
-      subCategory: urlSubCategory || undefined,
-      folder: folder || undefined,
-      playlistId: playlistId || undefined,
-    }),
   ]);
+
+  const urlCategory = urlParams.get("category") || config.defaultFeedFilter || "all";
+  const urlSubCategory = urlParams.get("subCategory") || (urlCategory === "shorts" ? (config.defaultShortsFilter || "all") : "all");
+
+  // If the config-resolved category differs from what counts used, re-fetch counts.
+  // (Only happens on first load when no ?category= is in the URL and config has a non-"all" default.)
+  const rawCategory = urlParams.get("category") || "all";
+  const needsCountsRefetch = rawCategory !== urlCategory;
+  const finalCounts = needsCountsRefetch
+    ? await callConvex("query", "videos:counts", {
+        folder: folder || undefined,
+        channelId: channelId || undefined,
+        category: urlCategory,
+        subCategory: urlSubCategory || undefined,
+      })
+    : counts;
+
+  const allVideos = await callConvex("query", "videos:list", {
+    category: urlCategory,
+    subCategory: urlSubCategory || undefined,
+    folder: folder || undefined,
+    channelId: channelId || undefined,
+    playlistId: playlistId || undefined,
+  });
 
   const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
   currentFeedVideos = new Map(videos.map((video) => [video._id, video]));
   currentFeedCategories = categories;
 
-  const feedTotal = counts.feedTotal ?? videos.length;
+  const feedTotal = finalCounts.feedTotal ?? videos.length;
 
   renderNav({
-    counts,
+    counts: finalCounts,
     currentCount: feedTotal,
     showSeen: config.showSeen,
     feedLimit: config.feedLimit,
@@ -990,7 +1001,9 @@ async function renderFeed() {
   });
 
   renderFolderPills(categories, folder, urlCategory, urlSubCategory);
-  renderChannelAvatarsBar(channels, avatarVideos, channelId, urlCategory, folder, urlSubCategory, playlistId, playlistTitleFromUrl, allVideos);
+  // avatarVideos: derive from allVideos (no channelId filter) — avoids a duplicate query.
+  // For the channel-scoped view, allVideos is filtered above; pass the full set for the avatar bar.
+  renderChannelAvatarsBar(channels, allVideos, channelId, urlCategory, folder, urlSubCategory, playlistId, playlistTitleFromUrl, allVideos);
 
   // Playlist header banner
   const existingBanner = document.getElementById("playlistBanner");
@@ -1680,16 +1693,8 @@ window.changeChannelSort = async function changeChannelSort(sortMethod) {
 window.changeFeedLimitFromHeader = async function changeFeedLimitFromHeader(newLimit) {
   try {
     const limitNum = Number(newLimit);
-    const config = await callConvex("query", "settings:config");
-    await callConvex("mutation", "settings:updateConfig", {
-      showSeen: config.showSeen,
-      hideShorts: config.hideShorts,
-      hidePrivate: config.hidePrivate,
-      unseenFirst: config.unseenFirst,
-      defaultFeedFilter: config.defaultFeedFilter,
-      defaultShortsFilter: config.defaultShortsFilter,
-      feedLimit: limitNum,
-    });
+    // Use the single-field mutation — no need to read the full config first.
+    await callConvex("mutation", "settings:updateFeedLimit", { feedLimit: limitNum });
     flash(`Feed limit updated to ${limitNum === 0 ? "All" : limitNum} videos!`, "success");
     if (PAGE === "feed") await renderFeed();
   } catch (err) {
@@ -1722,11 +1727,15 @@ function sortChannelsList(channels, sortMethod) {
 }
 
 async function renderChannels({ refreshNav = true, keepQuery = false } = {}) {
-  const [channels, categories, settings, unread] = await Promise.all([
+  const baseQueries = [
     callConvex("query", "channels:list"),
     callConvex("query", "channels:categories"),
     callConvex("query", "settings:get"),
-    callConvex("query", "videos:unreadCount"),
+  ];
+  const [channels, categories, settings, unread] = await Promise.all([
+    ...baseQueries,
+    // Only fetch unreadCount when it will actually be used to update the nav.
+    refreshNav ? callConvex("query", "videos:unreadCount") : Promise.resolve(0),
   ]);
   if (refreshNav) renderNav({ unreadCount: unread, showSeen: settings });
 
