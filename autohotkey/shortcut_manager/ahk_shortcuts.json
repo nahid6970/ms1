@@ -514,7 +514,7 @@
         {
             "category": "Text",
             "description": "",
-            "enabled": true,
+            "enabled": false,
             "name": "Percentage %",
             "replacement": "℅",
             "trigger": ";%"
@@ -710,7 +710,7 @@
             "description": "",
             "trigger": "##",
             "replacement": "##text##",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "third bracket",
@@ -726,7 +726,7 @@
             "description": "",
             "trigger": "((",
             "replacement": "(text)",
-            "enabled": true
+            "enabled": false
         },
         {
             "name": "Menmotics create with novels etc",
@@ -906,6 +906,24 @@
             "enabled": true,
             "favourite": true,
             "source_file": ""
+        },
+        {
+            "name": "Router Password",
+            "category": "General",
+            "description": "",
+            "trigger": ";boot",
+            "replacement": "admin123",
+            "source_file": "",
+            "delivery_method": "paste",
+            "show_as_menu": false,
+            "window_title": "",
+            "process_name": "",
+            "window_class": "",
+            "window_title_enabled": true,
+            "process_name_enabled": true,
+            "window_class_enabled": true,
+            "enabled": true,
+            "favourite": false
         }
     ],
     "file_shortcuts": [
