@@ -77,21 +77,7 @@ export const list = query({
       enabledChannels.map((c) => [c.channelId, c.shortsThresholdSeconds ?? 180]),
     );
 
-    let q = ctx.db.query("videos").withIndex("by_published").order("desc");
-
     const effectiveCategory = category === "shorts" ? (subCategory || "all") : category;
-
-    if (effectiveCategory === "unseen") {
-      q = q.filter((f) => f.eq(f.field("isNew"), true));
-    } else if (effectiveCategory === "seen") {
-      q = q.filter((f) => f.eq(f.field("isNew"), false));
-    } else if (effectiveCategory === "favorites") {
-      q = q.filter((f) => f.eq(f.field("isFavorite"), true));
-    } else if (effectiveCategory === "watchlater") {
-      q = q.filter((f) => f.eq(f.field("isWatchLater"), true));
-    } else if (effectiveCategory === "long") {
-      q = q.filter((f) => f.eq(f.field("isLong"), true));
-    }
 
     const isShortsView = category === "shorts";
     const isBlockedView = effectiveCategory === "blocked";
@@ -102,7 +88,17 @@ export const list = query({
     // window can leave a numeric feed page partly empty even when older matches exist.
     // Read the same bounded recent window for every feed, then apply feedLimit below.
     const takeAmount = 10000;
-    const videos = await q.take(takeAmount);
+    const videos = effectiveCategory === "unseen"
+      ? await ctx.db.query("videos").withIndex("by_isNew", (q) => q.eq("isNew", true)).order("desc").take(takeAmount)
+      : effectiveCategory === "seen"
+        ? await ctx.db.query("videos").withIndex("by_isNew", (q) => q.eq("isNew", false)).order("desc").take(takeAmount)
+        : effectiveCategory === "favorites"
+          ? await ctx.db.query("videos").withIndex("by_isFavorite", (q) => q.eq("isFavorite", true)).order("desc").take(takeAmount)
+          : effectiveCategory === "watchlater"
+            ? await ctx.db.query("videos").withIndex("by_isWatchLater", (q) => q.eq("isWatchLater", true)).order("desc").take(takeAmount)
+            : effectiveCategory === "long"
+              ? await ctx.db.query("videos").withIndex("by_isLong", (q) => q.eq("isLong", true)).order("desc").take(takeAmount)
+              : await ctx.db.query("videos").withIndex("by_published").order("desc").take(takeAmount);
 
     const filtered = videos
       .filter((video) => enabledChannelIds.has(video.channelId))
@@ -501,7 +497,7 @@ export const markAllSeen = mutation({
 
     const unseen = await ctx.db
       .query("videos")
-      .filter((f) => f.eq(f.field("isNew"), true))
+      .withIndex("by_isNew", (q) => q.eq("isNew", true))
       .collect();
 
     let marked = 0;

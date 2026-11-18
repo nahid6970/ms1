@@ -721,6 +721,34 @@ async function refreshNavOnly() {
   renderNav({ counts, showSeen: config.showSeen, feedLimit: config.feedLimit, category: urlCategory, subCategory: urlSubCategory, folder });
 }
 
+// Keep the current feed data available so small card actions can update locally
+// without re-running the five-query feed load.
+let currentFeedVideos = new Map();
+let currentFeedCategories = [];
+
+async function updateVideoFlag(id, field, mutation, iconClass, activeClass, inactiveClass) {
+  const video = currentFeedVideos.get(id);
+  if (!video) {
+    await callConvex("mutation", mutation, { id });
+    renderFeed().catch((err) => flash(err.message, "danger"));
+    return;
+  }
+  const previous = Boolean(video[field]);
+  video[field] = !previous;
+  const article = document.querySelector(`[data-video-id="${CSS.escape(id)}"]`);
+  const optimisticCard = article && videoCard(video, currentFeedCategories);
+  if (article && optimisticCard) article.outerHTML = optimisticCard;
+  try {
+    await callConvex("mutation", mutation, { id });
+    refreshNavOnly().catch((err) => console.warn("Could not refresh feed counts", err));
+  } catch (err) {
+    video[field] = previous;
+    const currentCard = document.querySelector(`[data-video-id="${CSS.escape(id)}"]`);
+    if (currentCard) currentCard.outerHTML = videoCard(video, currentFeedCategories);
+    flash(err.message, "danger");
+  }
+}
+
 /* --------------------------------- feed page ------------------------------- */
 
 function videoCard(video, categories = []) {
@@ -757,26 +785,26 @@ function videoCard(video, categories = []) {
   }).join("");
 
   return `
-  <article class="motion-card group relative z-0 soft-panel ${cardTone} border rounded-none overflow-visible transition-all duration-300 hover:z-50 hover:-translate-y-1">
+  <article data-video-id="${esc(video._id)}" class="motion-card group relative z-0 soft-panel ${cardTone} border rounded-none overflow-visible transition-all duration-300 hover:z-50 hover:-translate-y-1">
     <div class="relative aspect-video bg-slate-950 overflow-hidden">
       <a href="${esc(video.link)}" target="_blank" class="absolute inset-0">
       <img src="https://img.youtube.com/vi/${esc(video.videoId)}/hqdefault.jpg" alt="${esc(video.title)}" class="${imageTone} w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
       <div class="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent opacity-90 group-hover:opacity-60 transition"></div>
       </a>
       <div class="absolute right-3 top-3 z-10 flex items-center gap-2">
-        <button onclick="toggleWatchLater('${esc(video._id)}')" class="${isWatchLater ? "inline-flex opacity-100 text-sky-400 border border-sky-500/50 bg-sky-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isWatchLater ? "Remove from Watch Later" : "Add to Watch Later"}">
+        <button data-action="isWatchLater" onclick="toggleWatchLater('${esc(video._id)}')" class="${isWatchLater ? "inline-flex opacity-100 text-sky-400 border border-sky-500/50 bg-sky-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-sky-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isWatchLater ? "Remove from Watch Later" : "Add to Watch Later"}">
           <i class="${isWatchLater ? "fa-solid" : "fa-regular"} fa-clock text-sm"></i>
         </button>
         <button onclick="toggleLong('${esc(video._id)}')" class="${isLong ? "inline-flex opacity-100 text-violet-400 border border-violet-500/50 bg-violet-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-violet-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isLong ? "Remove from Long Videos" : "Add to Long Videos"}">
           <i class="fa-solid fa-hourglass text-sm"></i>
         </button>
-        <button onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
+        <button data-action="isFavorite" onclick="toggleFavorite('${esc(video._id)}')" class="${isFavorite ? "inline-flex opacity-100 text-amber-400 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-400 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${isFavorite ? "Remove from Saved" : "Save for Later"}">
           <i class="${isFavorite ? "fa-solid" : "fa-regular"} fa-star text-sm"></i>
         </button>
         <button onclick="removeVideo('${esc(video._id)}')" class="hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-300 shadow-lg backdrop-blur transition-all duration-200 hover:bg-rose-600 hover:text-white" title="Delete video from feeds" aria-label="Delete video from feeds">
           <i class="fa-solid fa-trash text-sm"></i>
         </button>
-        <button onclick="toggleRead('${esc(video._id)}')" class="hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition-all duration-200 hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
+        <button data-action="isNew" onclick="toggleRead('${esc(video._id)}')" class="hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 h-9 w-9 items-center justify-center rounded-lg bg-slate-950/80 text-slate-200 shadow-lg backdrop-blur transition-all duration-200 hover:bg-red-600 hover:text-white" title="${isNew ? "Mark as seen" : "Mark as unseen"}" aria-label="${isNew ? "Mark as seen" : "Mark as unseen"}">
           ${eyeIcon(isNew)}
         </button>
         <button onclick="toggleShort('${esc(video._id)}')" class="${video.isShort ? "inline-flex opacity-100 text-amber-300 border border-amber-500/50 bg-amber-950/80" : "hidden group-hover:inline-flex opacity-0 group-hover:opacity-100 text-slate-300 hover:text-amber-300 bg-slate-950/80"} h-9 w-9 items-center justify-center rounded-lg shadow-lg backdrop-blur transition-all duration-200 hover:bg-slate-900" title="${video.isShort ? "Marked as Short (click to unmark)" : "Click to mark as Short"}">
@@ -832,12 +860,7 @@ window.changeChannelFolderFromCard = async function changeChannelFolderFromCard(
 };
 
 window.toggleFavorite = async function toggleFavorite(id) {
-  try {
-    await callConvex("mutation", "videos:toggleFavorite", { id });
-    await renderFeed();
-  } catch (err) {
-    flash(err.message, "danger");
-  }
+  await updateVideoFlag(id, "isFavorite", "videos:toggleFavorite", "fa-star", "text-amber-400", "text-slate-300");
 };
 
 window.removeVideo = async function removeVideo(id) {
@@ -852,12 +875,7 @@ window.removeVideo = async function removeVideo(id) {
 };
 
 window.toggleWatchLater = async function toggleWatchLater(id) {
-  try {
-    await callConvex("mutation", "videos:toggleWatchLater", { id });
-    await renderFeed();
-  } catch (err) {
-    flash(err.message, "danger");
-  }
+  await updateVideoFlag(id, "isWatchLater", "videos:toggleWatchLater", "fa-clock", "text-sky-400", "text-slate-300");
 };
 
 window.toggleVideoFolderMenu = function toggleVideoFolderMenu(event, videoId) {
@@ -886,22 +904,12 @@ window.selectVideoFolder = async function selectVideoFolder(event, encodedCatego
 };
 
 window.toggleLong = async function toggleLong(id) {
-  try {
-    await callConvex("mutation", "videos:toggleLong", { id });
-    await renderFeed();
-  } catch (err) {
-    flash(err.message, "danger");
-  }
+  await updateVideoFlag(id, "isLong", "videos:toggleLong", "fa-hourglass", "text-violet-400", "text-slate-300");
 };
 
 
 window.toggleRead = async function toggleRead(id) {
-  try {
-    await callConvex("mutation", "videos:toggleRead", { id });
-    await renderFeed();
-  } catch (err) {
-    flash(err.message, "danger");
-  }
+  await updateVideoFlag(id, "isNew", "videos:toggleRead", "fa-eye", "text-slate-200", "text-slate-200");
 };
 
 window.toggleShort = async function toggleShort(id) {
@@ -964,6 +972,8 @@ async function renderFeed() {
   ]);
 
   const videos = channelId ? allVideos.filter((v) => v.channelId === channelId) : allVideos;
+  currentFeedVideos = new Map(videos.map((video) => [video._id, video]));
+  currentFeedCategories = categories;
 
   const feedTotal = counts.feedTotal ?? videos.length;
 

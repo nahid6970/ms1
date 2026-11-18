@@ -41,6 +41,7 @@ export default defineSchema({
     .index("by_videoId", ["videoId"])
     .index("by_published", ["published"])
     .index("by_isNew", ["isNew", "published"])
+    .index("by_isFavorite", ["isFavorite", "published"])
     .index("by_isWatchLater", ["isWatchLater", "published"])
     .index("by_isLong", ["isLong", "published"]),
 
