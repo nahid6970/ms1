@@ -515,7 +515,7 @@
                 </div>
                 <div class="settings-section settings-page" data-settings-page="shortcuts">
                     <div class="settings-page-heading"><div class="settings-eyebrow">QUICK REFERENCE</div><h3 class="settings-section-title">Shortcuts</h3><p class="settings-description">Keyboard commands for editing and navigating.</p></div>
-                    <div class="settings-item settings-action-card"><div><strong>Keyboard shortcuts</strong><p class="settings-description">Open the complete shortcut reference.</p></div><button class="settings-action-button" onclick="showKeyboardShortcuts()">View shortcuts <span>↗</span></button></div>
+                    <div id="settingsShortcutsReference" class="settings-shortcuts-reference"></div>
                 </div>
 
                 <div class="settings-section settings-page" data-settings-page="ai">
@@ -1162,7 +1162,7 @@
                 <h2>⌨️ Keyboard Shortcuts</h2>
                 <span class="close" onclick="closeKeyboardShortcuts()">&times;</span>
             </div>
-            <div style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+            <div id="keyboardShortcutsReferenceSource" style="padding: 24px; max-height: 70vh; overflow-y: auto;">
 
                 <h3 style="color: #007bff; margin: 0 0 10px;">🎯 Navigation</h3>
                 <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">

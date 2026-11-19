@@ -51,6 +51,12 @@ window.onload = function () {
 };
 
 function initializeApp() {
+    const shortcutsSource = document.getElementById('keyboardShortcutsReferenceSource');
+    const shortcutsTarget = document.getElementById('settingsShortcutsReference');
+    if (shortcutsSource && shortcutsTarget) {
+        shortcutsTarget.replaceChildren(...Array.from(shortcutsSource.children, element => element.cloneNode(true)));
+    }
+
     // Set up form handlers
     document.getElementById('columnForm').onsubmit = handleColumnFormSubmit;
     document.getElementById('renameForm').onsubmit = handleRenameFormSubmit;

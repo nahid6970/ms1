@@ -21,7 +21,7 @@
     "isBold": true,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "\u00bf\u00bf"
+    "marker": "¿¿"
   },
   {
     "bgColor": "#80E5FF",
@@ -29,7 +29,7 @@
     "isBold": false,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "\u00a1\u00a1"
+    "marker": "¡¡"
   },
   {
     "bgColor": "transparent",
@@ -37,7 +37,7 @@
     "isBold": true,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "\u022d\u022d"
+    "marker": "ȭȭ"
   },
   {
     "bgColor": "transparent",
@@ -45,7 +45,7 @@
     "isBold": true,
     "isItalic": true,
     "isUnderline": false,
-    "marker": "\u0194\u0194"
+    "marker": "ƔƔ"
   },
   {
     "bgColor": "transparent",
@@ -53,7 +53,7 @@
     "isBold": true,
     "isItalic": true,
     "isUnderline": true,
-    "marker": "\u00db\u00db"
+    "marker": "ÛÛ"
   },
   {
     "bgColor": "#C2FF80",
@@ -61,7 +61,7 @@
     "isBold": true,
     "isItalic": true,
     "isUnderline": false,
-    "marker": "\u2714\ufe0f\u2714\ufe0f"
+    "marker": "✔️✔️"
   },
   {
     "bgColor": "#212529",
@@ -69,7 +69,7 @@
     "isBold": true,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "\u1d03\u1d03"
+    "marker": "ᴃᴃ"
   },
   {
     "bgColor": "transparent",
@@ -77,6 +77,6 @@
     "isBold": false,
     "isItalic": false,
     "isUnderline": true,
-    "marker": "\u2195\u2195"
+    "marker": "↕↕"
   }
 ]

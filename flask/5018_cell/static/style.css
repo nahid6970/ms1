@@ -5606,6 +5606,12 @@ td.has-cell-ai-rank > .markdown-preview {
 .settings-empty { padding:35px 12px; color:#8790a0; text-align:center; font-size:13px; }
 .settings-content .custom-syntax-list { margin-top:16px; }
 .settings-content [hidden] { display:none !important; }
+.settings-shortcuts-reference h3 { margin:18px 0 8px !important; color:#3949ab !important; font-size:14px; }
+.settings-shortcuts-reference h3:first-child { margin-top:0 !important; }
+.settings-shortcuts-reference table { width:100%; border-collapse:collapse; margin-bottom:14px !important; font-size:12px; }
+.settings-shortcuts-reference td { padding:8px 10px !important; border-bottom:1px solid #edf0f4; }
+.settings-shortcuts-reference td:first-child { width:190px; border-radius:5px 0 0 5px; color:#374258; }
+.settings-shortcuts-reference td:last-child { color:#5f6878; }
 
 @media (max-width: 640px) {
     .settings-modal { width:96vw !important; height:90vh; max-height:90vh; }
