@@ -3643,19 +3643,19 @@ def generate_static_html(data, custom_syntaxes):
                         if (safeStyles) out.setAttribute('style', safeStyles);
                         continue;
                     }
-                    if (!allowedAttrs.has(attr.name) || /url\\s*\\(/i.test(attr.value) && !['clip-path','mask'].includes(attr.name)) continue;
-                    if (['clip-path','mask'].includes(attr.name) && !/^url\\(#[\\w-]+\\)$/.test(attr.value)) continue;
-                    out.setAttribute(attr.name, attr.value);
+                    const attrName = attr.name.toLowerCase() === 'viewbox' ? 'viewBox' : attr.name;
+                    if (!allowedAttrs.has(attrName) || /url\\s*\\(/i.test(attr.value) && !['clip-path','mask'].includes(attrName)) continue;
+                    if (['clip-path','mask'].includes(attrName) && !/^url\\(#[\\w-]+\\)$/.test(attr.value)) continue;
+                    out.setAttribute(attrName, attr.value);
                 }
                 node.childNodes.forEach(child => out.appendChild(clean(child)));
                 return out;
             };
             const wrapper = document.createElement('div');
             const cleanSvg = clean(root);
-            if (scalePercent !== null) {
-                const existingStyle = cleanSvg.getAttribute('style') || '';
-                cleanSvg.setAttribute('style', `${existingStyle};width:${scalePercent}%;height:auto;max-width:100%;display:block`);
-            }
+            const existingStyle = cleanSvg.getAttribute('style') || '';
+            const sizingStyle = scalePercent !== null ? `width:${scalePercent}%;` : '';
+            cleanSvg.setAttribute('style', `${existingStyle};${sizingStyle}height:auto;max-width:100%;display:block`);
             wrapper.appendChild(cleanSvg);
             return wrapper.innerHTML;
         }

@@ -3744,6 +3744,12 @@ function highlightSyntax(text) {
     if (!text) return "";
 
     const isCleanMode = document.getElementById('dataTable')?.classList.contains('clean-markdown-mode');
+
+    // For very large content (e.g. raw SVG code), skip expensive regex passes and just escape
+    if (text.length > 20000) {
+        return escapeHtml(text);
+    }
+
     let formatted = escapeHtml(text);
 
     // Rule: Math \(...\)
@@ -3949,6 +3955,12 @@ function extractRawText(element) {
             return; // Skip rendered math nodes
         }
 
+        // Skip rendered SVG subtrees — reconstruct the raw SVG text from outerHTML instead
+        if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'svg') {
+            text += node.outerHTML;
+            return;
+        }
+
         if (node.nodeType === Node.TEXT_NODE) {
             text += node.textContent;
         } else if (node.nodeName === 'BR') {
@@ -4075,6 +4087,18 @@ function extractRawTextBeforeCaret(element, range) {
 
         if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
             return; // Skip rendered math nodes
+        }
+
+        // Skip rendered SVG subtrees — count them as opaque text blocks
+        if (node.nodeType === Node.ELEMENT_NODE && node.nodeName === 'svg') {
+            if (node === stopNode || node.contains(stopNode)) {
+                // Caret is inside the SVG — treat the whole SVG as a single unit before caret
+                text += node.outerHTML;
+                stopped = true;
+            } else {
+                text += node.outerHTML;
+            }
+            return;
         }
 
         // If this is the stopNode and it's a text node, add substring and stop
@@ -4761,7 +4785,10 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
             
             // Re-render if line count changed (lines joined/split) and content has special formatting
             // This ensures list indentation, table styling, and other line-based formatting updates immediately
-            const hasSpecialFormatting = /^(\-{1,5})\s/m.test(newRawValue) || newRawValue.includes('|') || newRawValue.includes('Table*');
+            // Skip re-render for SVG content (too large/complex, no benefit mid-type) or large content
+            const hasSvg = newRawValue.includes('<svg');
+            const hasSpecialFormatting = !hasSvg && newRawValue.length < 20000 &&
+                (/^(\-{1,5})\s/m.test(newRawValue) || newRawValue.includes('|') || newRawValue.includes('Table*'));
             
             if (currentLineCount !== previousLineCount && hasSpecialFormatting && !isDeleteOp) {
                 // Re-render with highlightSyntax
@@ -5841,19 +5868,19 @@ function sanitizeCellSvg(svgText, scalePercent = null) {
                 if (safeStyles) out.setAttribute('style', safeStyles);
                 continue;
             }
-            if (!allowedAttrs.has(attr.name) || /url\s*\(/i.test(attr.value) && attr.name !== 'clip-path' && attr.name !== 'mask') continue;
-            if (['clip-path','mask'].includes(attr.name) && !/^url\(#[\w-]+\)$/.test(attr.value)) continue;
-            out.setAttribute(attr.name, attr.value);
+            const attrName = attr.name.toLowerCase() === 'viewbox' ? 'viewBox' : attr.name;
+            if (!allowedAttrs.has(attrName) || /url\s*\(/i.test(attr.value) && attrName !== 'clip-path' && attrName !== 'mask') continue;
+            if (['clip-path','mask'].includes(attrName) && !/^url\(#[\w-]+\)$/.test(attr.value)) continue;
+            out.setAttribute(attrName, attr.value);
         }
         node.childNodes.forEach(child => out.appendChild(clean(child)));
         return out;
     };
     const wrapper = document.createElement('div');
     const cleanSvg = clean(root);
-    if (scalePercent !== null) {
-        const existingStyle = cleanSvg.getAttribute('style') || '';
-        cleanSvg.setAttribute('style', `${existingStyle};width:${scalePercent}%;height:auto;max-width:100%;display:block`);
-    }
+    const existingStyle = cleanSvg.getAttribute('style') || '';
+    const sizingStyle = scalePercent !== null ? `width:${scalePercent}%;` : '';
+    cleanSvg.setAttribute('style', `${existingStyle};${sizingStyle}height:auto;max-width:100%;display:block`);
     wrapper.appendChild(cleanSvg);
     return wrapper.innerHTML;
 }
