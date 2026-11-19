@@ -8134,6 +8134,88 @@ def api_rclone_check(project):
         return _api_rclone_check(project)
 
 
+@app.route('/api/project/<project>/rclone/sync-stream', methods=['POST'])
+def api_rclone_sync_stream(project):
+    """Run a saved Rclone sync and stream its output as newline-delimited JSON."""
+    data = request.get_json(silent=True) or {}
+    direction = data.get('direction', 'src_to_dst')
+    if direction not in ('src_to_dst', 'dst_to_src'):
+        return jsonify({'error': 'Invalid Rclone sync direction.'}), 400
+    projects = load_projects_config()
+    proj = next((p for p in projects if p.get('name') == project), None)
+    if proj is None:
+        return jsonify({'error': 'Project not found.'}), 404
+    raw_source = str(proj.get('path') or '').strip()
+    if not raw_source:
+        return jsonify({'error': 'Workspace folder is not configured.'}), 400
+    source = os.path.abspath(os.path.expanduser(raw_source))
+    settings = proj.get('rclone') or {}
+    destination = str(settings.get('dest') or '').strip()
+    if not os.path.isdir(source):
+        return jsonify({'error': 'Workspace folder is missing or unavailable.'}), 400
+    if not destination:
+        return jsonify({'error': 'No Rclone destination is saved for this workspace.'}), 400
+    rclone_bin = shutil.which('rclone')
+    if not rclone_bin:
+        return jsonify({'error': 'rclone was not found on the server PATH.'}), 500
+
+    flags = settings.get('flags') if isinstance(settings.get('flags'), dict) else {}
+    from_path, to_path = (source, destination) if direction == 'src_to_dst' else (destination, source)
+    command = [rclone_bin, 'sync', from_path, to_path, '-v', '--stats', '1s', '--stats-one-line']
+    if flags.get('--fast-list', True):
+        command.append('--fast-list')
+    if flags.get('--size-only', True):
+        command.append('--size-only')
+    if flags.get('--track-renames', False):
+        command.append('--track-renames')
+    if flags.get('--dry-run', False):
+        command.append('--dry-run')
+    try:
+        transfers = int(settings.get('transfers', 10))
+        if 1 <= transfers <= 64:
+            command.extend(['--transfers', str(transfers)])
+    except (TypeError, ValueError):
+        pass
+
+    ignorelist = str(settings.get('ignorelist') or DEFAULT_IGNORELIST).strip()
+    if ignorelist:
+        try:
+            with open(os.path.expanduser(ignorelist), 'r', encoding='utf-8-sig') as filter_file:
+                for line in filter_file:
+                    pattern = line.strip()
+                    if pattern and not pattern.startswith('#'):
+                        command.extend(['--exclude', pattern])
+        except FileNotFoundError:
+            pass
+        except OSError as exc:
+            return jsonify({'error': f'Could not read Rclone ignore list: {exc}'}), 400
+
+    def stream_output():
+        process = None
+        try:
+            process = subprocess.Popen(
+                command, cwd=source, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                text=True, encoding='utf-8', errors='replace', bufsize=1,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0) if os.name == 'nt' else 0)
+            yield json.dumps({'type': 'start', 'dryRun': bool(flags.get('--dry-run', False))}) + '\n'
+            for line in process.stdout:
+                yield json.dumps({'type': 'output', 'line': line.rstrip('\r\n')}) + '\n'
+            return_code = process.wait()
+            yield json.dumps({'type': 'done', 'returnCode': return_code}) + '\n'
+        except OSError as exc:
+            yield json.dumps({'type': 'error', 'error': f'Could not run Rclone: {exc}'}) + '\n'
+        finally:
+            if process and process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+
+    return Response(stream_with_context(stream_output()), mimetype='application/x-ndjson',
+                    headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
+
 def _api_rclone_check(project):
     """Compare a workspace with its saved Rclone destination and return a readable summary."""
     projects = load_projects_config()

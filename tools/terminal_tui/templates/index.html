@@ -4793,6 +4793,24 @@ kiro-cli whoami --format json</code></pre>
                 </div>
             </div>
             <div id="rclone-projects-list" style="overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:120px;"></div>
+            <section id="rclone-projects-sync-output" aria-live="polite" style="display:none;flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border-color);">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
+                    <div id="rclone-projects-sync-title" style="font-size:.72rem;font-weight:600;color:#4ade80;">Rclone sync</div>
+                    <div id="rclone-projects-sync-state" style="font-size:.66rem;color:var(--text-secondary);">Starting…</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.65rem;color:var(--text-secondary);margin:4px 0 6px;">
+                    <span id="rclone-projects-sync-progress-label">Preparing sync…</span>
+                    <span id="rclone-projects-sync-progress-rate"></span>
+                </div>
+                <div style="height:5px;overflow:hidden;border-radius:8px;background:rgba(148,163,184,.18);margin-bottom:8px;">
+                    <div id="rclone-projects-sync-progress-bar" style="height:100%;width:0;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .25s ease;"></div>
+                </div>
+                <div id="rclone-projects-sync-activity" style="max-height:106px;overflow:auto;display:flex;flex-direction:column;gap:3px;"></div>
+                <details style="margin-top:6px;">
+                    <summary id="rclone-projects-sync-raw-toggle" style="cursor:pointer;font-size:.62rem;color:var(--text-muted);">Raw output</summary>
+                    <pre id="rclone-projects-sync-log" style="box-sizing:border-box;max-height:120px;overflow:auto;margin:5px 0 0;padding:7px 9px;border-radius:6px;background:rgba(0,0,0,.28);color:#94a3b8;font:.6rem/1.45 'Fira Code',monospace;white-space:pre-wrap;word-break:break-word;"></pre>
+                </details>
+            </section>
             <div id="rclone-projects-message" role="status" style="display:none;padding:8px 18px;border-top:1px solid var(--border-color);font-size:.75rem;color:var(--text-secondary);"></div>
         </div>
     </div>
@@ -10298,16 +10316,113 @@ kiro-cli whoami --format json</code></pre>
             closeRcloneProjectsModal();
             await selectProject(projectName);
         }
-        async function syncRcloneProjectToDestination(projectName, button) {
-            if (button) { button.disabled = true; button.textContent = 'Starting…'; }
-            closeRcloneProjectsModal();
+        let rcloneModalSyncRunning = false;
+        async function syncRcloneProjectToDestination(projectName, button, direction = 'src_to_dst') {
+            if (rcloneModalSyncRunning) return;
+            const project = (projects || []).find(item => item.name === projectName);
+            if (!project) return;
+            rcloneModalSyncRunning = true;
+            const output = document.getElementById('rclone-projects-sync-output');
+            const log = document.getElementById('rclone-projects-sync-log');
+            const activity = document.getElementById('rclone-projects-sync-activity');
+            const title = document.getElementById('rclone-projects-sync-title');
+            const state = document.getElementById('rclone-projects-sync-state');
+            const progressLabel = document.getElementById('rclone-projects-sync-progress-label');
+            const progressRate = document.getElementById('rclone-projects-sync-progress-rate');
+            const progressBar = document.getElementById('rclone-projects-sync-progress-bar');
+            const rawToggle = document.getElementById('rclone-projects-sync-raw-toggle');
+            const syncButtons = document.querySelectorAll('#rclone-projects-list .rclone-project-sync');
+            syncButtons.forEach(item => { item.disabled = true; item.style.opacity = '.55'; });
+            output.style.display = 'block';
+            title.textContent = `${projectName} · ${direction === 'src_to_dst' ? 'SRC → DST' : 'DST → SRC'}`;
+            state.textContent = 'Connecting…'; state.style.color = 'var(--text-secondary)';
+            progressLabel.textContent = 'Preparing sync…'; progressRate.textContent = ''; progressBar.style.width = '0%';
+            log.textContent = ''; activity.replaceChildren();
+            rawToggle.textContent = 'Raw output'; rawToggle.parentElement.open = false;
+            const actionCounts = {copied:0, removed:0, warning:0, errors:0};
+            const addActivity = (kind, text, color) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:4px;background:rgba(148,163,184,.055);font-size:.63rem;line-height:1.4;';
+                const badge = document.createElement('span'); badge.textContent = kind;
+                badge.style.cssText = `flex-shrink:0;font-size:.57rem;font-weight:700;color:${color};`;
+                const detail = document.createElement('span'); detail.textContent = text;
+                detail.style.cssText = 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;';
+                detail.title = text; row.append(badge, detail); activity.appendChild(row);
+                while (activity.children.length > 40) activity.firstElementChild.remove();
+                activity.scrollTop = activity.scrollHeight;
+            };
+            const consumeRcloneOutput = line => {
+                log.textContent += `${line}\n`;
+                const rawLines = log.textContent.split('\n');
+                if (rawLines.length > 501) log.textContent = rawLines.slice(-501).join('\n');
+                rawToggle.textContent = `Raw output · ${Math.min(500, rawLines.length - 1)} lines`;
+                const levelMatch = line.match(/\b(INFO|NOTICE|WARNING|ERROR)\s*:\s*/i);
+                const level = levelMatch?.[1]?.toUpperCase() || '';
+                const message = levelMatch ? line.slice(levelMatch.index + levelMatch[0].length).trim() : line.trim();
+                const stat = line.match(/([\d.]+\s*[KMGTPE]?i?B)\s*\/\s*([\d.]+\s*[KMGTPE]?i?B),\s*([\d-]+)%?,\s*([^,]+),\s*ETA\s*([^\s(]+)(?:\s+\(xfr#(\d+)\/(\d+)\))?/i);
+                if (stat) {
+                    const percent = Number.parseInt(stat[3], 10);
+                    const isScanning = stat[1].trim() === '0 B' && stat[2].trim() === '0 B';
+                    progressLabel.textContent = isScanning ? 'Scanning files…' : stat[7] ? `${stat[6]} of ${stat[7]} transfers · ${stat[1]} of ${stat[2]}` : `${stat[1]} of ${stat[2]}`;
+                    progressRate.textContent = isScanning ? '' : `${stat[4].trim()} · ETA ${stat[5]}`;
+                    if (Number.isFinite(percent)) progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+                    return;
+                }
+                if (/^Set directory modification time/i.test(message)) return;
+                if (/^Copied(?: \(|$)/i.test(message)) { actionCounts.copied++; addActivity('COPIED', message, '#4ade80'); }
+                else if (/^(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; addActivity('REMOVED', message, '#fb923c'); }
+                else if (level === 'ERROR') { actionCounts.errors++; addActivity('ERROR', message, '#f87171'); }
+                else if (level === 'WARNING' || level === 'NOTICE') { actionCounts.warning++; addActivity('NOTICE', message, '#fbbf24'); }
+            };
+            output.scrollIntoView({behavior:'smooth', block:'nearest'});
             try {
-                const selected = await selectProject(projectName);
-                if (!selected) return;
-                await rcloneLoadSettings();
-                await rcloneRun('src_to_dst');
+                const response = await fetch(`/api/project/${encodeURIComponent(projectName)}/rclone/sync-stream`, {
+                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({direction})
+                });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Sync request failed (${response.status}).`);
+                }
+                if (!response.body) throw new Error('This browser does not support live sync output.');
+                state.textContent = 'Running…'; state.style.color = '#60a5fa';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let pending = '', returnCode = null, dryRun = false;
+                while (true) {
+                    const {value, done} = await reader.read();
+                    pending += decoder.decode(value || new Uint8Array(), {stream:!done});
+                    const lines = pending.split('\n'); pending = lines.pop() || '';
+                    for (const raw of lines) {
+                        if (!raw.trim()) continue;
+                        const event = JSON.parse(raw);
+                        if (event.type === 'start') { dryRun = !!event.dryRun; state.textContent = dryRun ? 'Dry run · running…' : 'Running…'; }
+                        else if (event.type === 'output') consumeRcloneOutput(event.line);
+                        else if (event.type === 'done') returnCode = Number(event.returnCode);
+                        else if (event.type === 'error') throw new Error(event.error || 'Rclone sync failed.');
+                    }
+                    if (done) break;
+                }
+                if (pending.trim()) consumeRcloneOutput(pending);
+                if (returnCode === 0) {
+                    state.textContent = dryRun ? 'Dry run complete' : 'Sync complete';
+                    state.style.color = '#34d399';
+                    progressBar.style.width = '100%';
+                    progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.warning} notices`;
+                    progressRate.textContent = '';
+                } else {
+                    state.textContent = `Sync failed · exit ${returnCode ?? 'unknown'}`;
+                    state.style.color = '#f87171';
+                    progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.errors} errors`;
+                    progressRate.textContent = '';
+                }
+            } catch (error) {
+                state.textContent = 'Sync failed'; state.style.color = '#f87171';
+                consumeRcloneOutput(`ERROR: ${error?.message || 'Rclone sync failed.'}`);
+                progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.errors} errors`;
             } finally {
-                if (button?.isConnected) { button.disabled = false; button.textContent = 'SRC → DST'; }
+                rcloneModalSyncRunning = false;
+                syncButtons.forEach(item => { item.disabled = false; item.style.opacity = ''; });
+                if (button?.isConnected) button.disabled = false;
             }
         }
         async function checkRcloneProject(name, button) {

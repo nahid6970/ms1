@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
+
+- Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.
+- Added a compact progress bar, transfer rate, file action and notice list, and completion/dry-run/error states; repeated idle stats display as "Scanning files…".
+- Kept timestamped raw output available in a collapsed details section.
+- Added `POST /api/project/<project>/rclone/sync-stream`, which uses the project's saved destination, flags, transfer count, and exclude patterns and streams newline-delimited JSON.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-15] - Live Change Count in GitHub and Rclone Modal Status Bar
 
 - The `#github-projects-message` bar now stays visible after any project has been checked and shows a live summary: "N of M checked · X projects with changes" (amber bold) or "· all clean" (green). It updates after each individual project finishes, so the count fills in incrementally during a Check all run.
