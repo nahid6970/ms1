@@ -2211,6 +2211,7 @@ def generate_static_html(data, custom_syntaxes):
                         cellValue.includes('^') || 
                         cellValue.includes('~') || 
                         cellValue.includes('ŝŝ') ||  // Text stroke syntax
+                        cellValue.includes('<svg') || // Inline SVG cell content
                         cellValue.includes('{fg:') || 
                         cellValue.includes('{bg:') || 
                         cellValue.includes('{link:') || 
@@ -2312,6 +2313,7 @@ def generate_static_html(data, custom_syntaxes):
         function stripMarkdown(text, preserveLinks = false) {
             if (!text) return "";
             let stripped = text;
+            stripped = stripped.replace(/<svg\\b[\\s\\S]*?<\\/svg\\s*>/gi, ' [SVG] ');
 
             if (!preserveLinks) {
                 // Remove old link markers but keep both URL and text: {link:url}text{/} -> url text
@@ -3617,7 +3619,43 @@ def generate_static_html(data, custom_syntaxes):
             }).join('\\n');
         }
 
+        function sanitizeCellSvg(svgText) {
+            const parsed = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+            const root = parsed.documentElement;
+            if (!root || root.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return '';
+            const allowedTags = new Set(['svg','g','path','rect','circle','ellipse','line','polyline','polygon','text','tspan','defs','lineargradient','radialgradient','stop','clippath','mask','title','desc']);
+            const allowedAttrs = new Set(['viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','stroke','stroke-width','stroke-linecap','stroke-linejoin','stroke-dasharray','opacity','transform','font-size','font-family','font-weight','text-anchor','offset','stop-color','stop-opacity','id','xmlns','preserveAspectRatio','clip-path','mask']);
+            const clean = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue);
+                if (node.nodeType !== Node.ELEMENT_NODE || !allowedTags.has(node.localName.toLowerCase())) return document.createDocumentFragment();
+                const out = document.createElementNS('http://www.w3.org/2000/svg', node.localName);
+                for (const attr of Array.from(node.attributes)) {
+                    if (!allowedAttrs.has(attr.name) || /url\\s*\\(/i.test(attr.value) && !['clip-path','mask'].includes(attr.name)) continue;
+                    if (['clip-path','mask'].includes(attr.name) && !/^url\\(#[\\w-]+\\)$/.test(attr.value)) continue;
+                    out.setAttribute(attr.name, attr.value);
+                }
+                node.childNodes.forEach(child => out.appendChild(clean(child)));
+                return out;
+            };
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(clean(root));
+            return wrapper.innerHTML;
+        }
+
         function parseMarkdown(text, cellStyle = {}) {
+            if (!text) return '';
+            const svgBlocks = [];
+            const prepared = String(text).replace(/<svg\\b[\\s\\S]*?<\\/svg\\s*>/gi, svg => {
+                const token = `CELL_SVG_BLOCK_${svgBlocks.length}_END`;
+                svgBlocks.push(sanitizeCellSvg(svg));
+                return token;
+            });
+            let html = parseMarkdownCore(prepared, cellStyle);
+            svgBlocks.forEach((svg, index) => { html = html.replace(`CELL_SVG_BLOCK_${index}_END`, svg); });
+            return html;
+        }
+
+        function parseMarkdownCore(text, cellStyle = {}) {
             if (!text) return '';
 
             // Distribute formatting tags across table pipes (Syntax Sugar)
