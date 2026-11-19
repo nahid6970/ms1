@@ -5660,6 +5660,27 @@ td.has-cell-ai-rank > .markdown-preview {
     background: #fcfcfc;
 }
 
+.custom-syntax-migration {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 9px 16px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f7faff;
+    color: #526078;
+    font-size: 12px;
+}
+
+.custom-syntax-migration span {
+    flex: 1 1 220px;
+}
+
+.custom-syntax-migration .btn {
+    padding: 5px 9px;
+    font-size: 11px;
+}
+
 /* Columns */
 .cs-col-marker {
     flex: 0 0 80px;

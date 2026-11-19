@@ -2235,10 +2235,13 @@ async function saveData(options = {}) {
         const result = await response.json();
         if (result.success) {
             showToast('Data saved successfully!', 'success');
+            return true;
         }
+        return false;
     } catch (error) {
         console.error('Error saving data:', error);
         showToast('Error saving data!', 'error');
+        return false;
     }
 }
 
@@ -3520,8 +3523,12 @@ function getCustomSyntaxParts(syntax) {
 
 function getCustomSyntaxRegex(syntax, contentPattern = '(.+?)', htmlEscaped = false) {
     const parts = getCustomSyntaxParts(syntax);
-    const prefix = htmlEscaped ? escapeHtml(parts.prefix) : parts.prefix;
-    const suffix = htmlEscaped ? escapeHtml(parts.suffix) : parts.suffix;
+    return getSyntaxPairRegex(parts.prefix, parts.suffix, contentPattern, htmlEscaped);
+}
+
+function getSyntaxPairRegex(prefix, suffix, contentPattern = '(.+?)', htmlEscaped = false) {
+    prefix = htmlEscaped ? escapeHtml(prefix || '') : (prefix || '');
+    suffix = htmlEscaped ? escapeHtml(suffix || '') : (suffix || '');
     if (!prefix || !suffix) return null;
     const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return new RegExp(escapeRegex(prefix) + contentPattern + escapeRegex(suffix), 'g');
@@ -17409,6 +17416,39 @@ function renderCustomColorSyntaxList() {
         `;
 
         list.appendChild(item);
+
+        if (syntax.migrationFrom) {
+            const currentParts = getCustomSyntaxParts(syntax);
+            const oldParts = syntax.migrationFrom;
+            const hasChanged = oldParts.prefix !== currentParts.prefix || oldParts.suffix !== currentParts.suffix;
+            if (hasChanged) {
+                const { matches, cells } = countCustomSyntaxMigration(index);
+                const migrationPanel = document.createElement('div');
+                migrationPanel.className = 'custom-syntax-migration';
+                const countMessage = document.createElement('span');
+                countMessage.textContent = matches
+                    ? `Found ${matches} uses in ${cells} cell${cells === 1 ? '' : 's'} using ${oldParts.prefix}…${oldParts.suffix}.`
+                    : `No uses found for ${oldParts.prefix}…${oldParts.suffix}.`;
+                migrationPanel.appendChild(countMessage);
+
+                if (matches) {
+                    const applyButton = document.createElement('button');
+                    applyButton.type = 'button';
+                    applyButton.className = 'btn btn-primary';
+                    applyButton.textContent = 'Apply to cells';
+                    applyButton.onclick = () => applyCustomSyntaxMigration(index);
+                    migrationPanel.appendChild(applyButton);
+                }
+
+                const dismissButton = document.createElement('button');
+                dismissButton.type = 'button';
+                dismissButton.className = 'btn btn-secondary';
+                dismissButton.textContent = 'Keep existing cell text';
+                dismissButton.onclick = () => dismissCustomSyntaxMigration(index);
+                migrationPanel.appendChild(dismissButton);
+                list.appendChild(migrationPanel);
+            }
+        }
     });
 
     // Also update the Quick Highlights section in F3 formatter
@@ -17452,12 +17492,81 @@ function addCustomPrefixSuffixSyntax() {
 
 function updateCustomSyntax(index, field, value) {
     if (customColorSyntaxes[index]) {
-        customColorSyntaxes[index][field] = value;
+        const syntax = customColorSyntaxes[index];
+        if (['marker', 'prefix', 'suffix'].includes(field)) {
+            const oldParts = getCustomSyntaxParts(syntax);
+            if (!syntax.migrationFrom) syntax.migrationFrom = oldParts;
+            syntax[field] = value;
+            const nextParts = getCustomSyntaxParts(syntax);
+            if (syntax.migrationFrom.prefix === nextParts.prefix && syntax.migrationFrom.suffix === nextParts.suffix) {
+                delete syntax.migrationFrom;
+            }
+        } else {
+            syntax[field] = value;
+        }
         rebuildCustomSyntaxCache();
         saveCustomColorSyntaxes();
         renderCustomColorSyntaxList();
         renderTable(); // Re-render to apply changes
     }
+}
+
+function countCustomSyntaxMigration(index) {
+    const syntax = customColorSyntaxes[index];
+    if (!syntax?.migrationFrom) return { matches: 0, cells: 0 };
+    const { prefix, suffix } = syntax.migrationFrom;
+    const regex = getSyntaxPairRegex(prefix, suffix);
+    if (!regex) return { matches: 0, cells: 0 };
+
+    let matches = 0;
+    let cells = 0;
+    tableData.sheets.forEach(sheet => {
+        (sheet.rows || []).forEach(row => {
+            row.forEach(value => {
+                if (typeof value !== 'string') return;
+                const cellMatches = [...value.matchAll(regex)];
+                if (cellMatches.length) {
+                    matches += cellMatches.length;
+                    cells++;
+                }
+            });
+        });
+    });
+    return { matches, cells };
+}
+
+async function applyCustomSyntaxMigration(index) {
+    const syntax = customColorSyntaxes[index];
+    if (!syntax?.migrationFrom) return;
+    const count = countCustomSyntaxMigration(index);
+    if (!count.matches) return;
+
+    const regex = getSyntaxPairRegex(syntax.migrationFrom.prefix, syntax.migrationFrom.suffix);
+    const { prefix, suffix } = getCustomSyntaxParts(syntax);
+    tableData.sheets.forEach(sheet => {
+        (sheet.rows || []).forEach(row => {
+            row.forEach((value, colIndex) => {
+                if (typeof value !== 'string') return;
+                row[colIndex] = value.replace(regex, (_match, content) => `${prefix}${content}${suffix}`);
+            });
+        });
+    });
+
+    if (!(await saveData())) return;
+    delete syntax.migrationFrom;
+    await saveCustomColorSyntaxes();
+    rebuildCustomSyntaxCache();
+    renderCustomColorSyntaxList();
+    renderTable();
+    showToast(`Updated ${count.matches} syntax use${count.matches === 1 ? '' : 's'} in ${count.cells} cell${count.cells === 1 ? '' : 's'}`, 'success');
+}
+
+function dismissCustomSyntaxMigration(index) {
+    const syntax = customColorSyntaxes[index];
+    if (!syntax) return;
+    delete syntax.migrationFrom;
+    saveCustomColorSyntaxes();
+    renderCustomColorSyntaxList();
 }
 
 function removeCustomSyntax(index) {
