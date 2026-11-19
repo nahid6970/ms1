@@ -5822,12 +5822,25 @@ function sanitizeCellSvg(svgText) {
     const root = parsed.documentElement;
     if (!root || root.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return '';
     const allowedTags = new Set(['svg','g','path','rect','circle','ellipse','line','polyline','polygon','text','tspan','defs','lineargradient','radialgradient','stop','clippath','mask','title','desc']);
-    const allowedAttrs = new Set(['viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','stroke','stroke-width','stroke-linecap','stroke-linejoin','stroke-dasharray','opacity','transform','font-size','font-family','font-weight','text-anchor','offset','stop-color','stop-opacity','id','xmlns','preserveAspectRatio','clip-path','mask']);
+    const allowedAttrs = new Set(['viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','transform','font-size','font-family','font-weight','text-anchor','dominant-baseline','offset','stop-color','stop-opacity','id','xmlns','preserveAspectRatio','clip-path','mask']);
+    const allowedStyleProps = new Set(['fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','font-size','font-family','font-weight','text-anchor','dominant-baseline','stop-color','stop-opacity']);
     const clean = (node) => {
         if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue);
         if (node.nodeType !== Node.ELEMENT_NODE || !allowedTags.has(node.localName.toLowerCase())) return document.createDocumentFragment();
         const out = document.createElementNS('http://www.w3.org/2000/svg', node.localName);
         for (const attr of Array.from(node.attributes)) {
+            if (attr.name.toLowerCase() === 'style') {
+                const safeStyles = attr.value.split(';').map(rule => {
+                    const colon = rule.indexOf(':');
+                    if (colon < 0) return '';
+                    const name = rule.slice(0, colon).trim().toLowerCase();
+                    const value = rule.slice(colon + 1).trim();
+                    if (!allowedStyleProps.has(name) || /url\s*\(|expression\s*\(|javascript:/i.test(value)) return '';
+                    return `${name}:${value}`;
+                }).filter(Boolean).join(';');
+                if (safeStyles) out.setAttribute('style', safeStyles);
+                continue;
+            }
             if (!allowedAttrs.has(attr.name) || /url\s*\(/i.test(attr.value) && attr.name !== 'clip-path' && attr.name !== 'mask') continue;
             if (['clip-path','mask'].includes(attr.name) && !/^url\(#[\w-]+\)$/.test(attr.value)) continue;
             out.setAttribute(attr.name, attr.value);
