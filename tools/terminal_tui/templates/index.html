@@ -10352,10 +10352,6 @@ kiro-cli whoami --format json</code></pre>
                 activity.scrollTop = activity.scrollHeight;
             };
             const consumeRcloneOutput = line => {
-                log.textContent += `${line}\n`;
-                const rawLines = log.textContent.split('\n');
-                if (rawLines.length > 501) log.textContent = rawLines.slice(-501).join('\n');
-                rawToggle.textContent = `Raw output · ${Math.min(500, rawLines.length - 1)} lines`;
                 const levelMatch = line.match(/\b(INFO|NOTICE|WARNING|ERROR)\s*:\s*/i);
                 const level = levelMatch?.[1]?.toUpperCase() || '';
                 const message = levelMatch ? line.slice(levelMatch.index + levelMatch[0].length).trim() : line.trim();
@@ -10368,6 +10364,12 @@ kiro-cli whoami --format json</code></pre>
                     if (Number.isFinite(percent)) progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
                     return;
                 }
+                // Keep per-file events in Raw output; the repetitive transfer
+                // statistics above are already represented by the progress UI.
+                log.textContent += `${line}\n`;
+                const rawLines = log.textContent.split('\n');
+                if (rawLines.length > 501) log.textContent = rawLines.slice(-501).join('\n');
+                rawToggle.textContent = `Raw output · ${Math.min(500, rawLines.length - 1)} lines`;
                 if (/^Set directory modification time/i.test(message)) return;
                 if (/^Copied(?: \(|$)/i.test(message)) { actionCounts.copied++; addActivity('COPIED', message, '#4ade80'); }
                 else if (/^(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; addActivity('REMOVED', message, '#fb923c'); }
