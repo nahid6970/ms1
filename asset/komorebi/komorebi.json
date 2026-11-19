@@ -449,6 +449,11 @@
             "kind": "Exe",
             "id": "tempo-speed-control.exe",
             "matching_strategy": "Equals"
+        },
+        {
+            "kind": "Exe",
+            "id": "tailscale-ipn.exe",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
