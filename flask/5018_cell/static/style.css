@@ -568,7 +568,6 @@ body {
 .btn-clear-search,
 .btn-move-matches {
     position: absolute;
-    right: 8px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -588,7 +587,7 @@ body {
 
 .btn-voice-search {
     position: absolute;
-    right: 60px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -619,8 +618,12 @@ body {
     50% { opacity: 0.5; }
 }
 .btn-move-matches {
-    right: 30px;
+    right: 62px;
     font-size: 14px;
+}
+
+.btn-clear-search {
+    right: 35px;
 }
 
 .btn-clear-search:hover,
