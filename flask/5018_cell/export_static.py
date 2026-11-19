@@ -3619,7 +3619,7 @@ def generate_static_html(data, custom_syntaxes):
             }).join('\\n');
         }
 
-        function sanitizeCellSvg(svgText) {
+        function sanitizeCellSvg(svgText, scalePercent = null) {
             const parsed = new DOMParser().parseFromString(svgText, 'image/svg+xml');
             const root = parsed.documentElement;
             if (!root || root.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return '';
@@ -3651,18 +3651,27 @@ def generate_static_html(data, custom_syntaxes):
                 return out;
             };
             const wrapper = document.createElement('div');
-            wrapper.appendChild(clean(root));
+            const cleanSvg = clean(root);
+            if (scalePercent !== null) {
+                const existingStyle = cleanSvg.getAttribute('style') || '';
+                cleanSvg.setAttribute('style', `${existingStyle};width:${scalePercent}%;height:auto;max-width:100%;display:block`);
+            }
+            wrapper.appendChild(cleanSvg);
             return wrapper.innerHTML;
         }
 
         function parseMarkdown(text, cellStyle = {}) {
             if (!text) return '';
             const svgBlocks = [];
-            const prepared = String(text).replace(/<svg\\b[\\s\\S]*?<\\/svg\\s*>/gi, svg => {
+            const addSvgToken = (svg, scalePercent = null) => {
                 const token = `CELL_SVG_BLOCK_${svgBlocks.length}_END`;
-                svgBlocks.push(sanitizeCellSvg(svg));
+                const scale = scalePercent === null ? null : Math.max(1, Math.min(100, parseFloat(scalePercent)));
+                svgBlocks.push(sanitizeCellSvg(svg, scale));
                 return token;
-            });
+            };
+            let prepared = String(text).replace(/(?:^|\\n)\\s*(\\d+(?:\\.\\d+)?)%\\s*\\n\\s*(<svg\\b[\\s\\S]*?<\\/svg\\s*>)/gi,
+                (match, percent, svg) => `\\n${addSvgToken(svg, percent)}`);
+            prepared = prepared.replace(/<svg\\b[\\s\\S]*?<\\/svg\\s*>/gi, svg => addSvgToken(svg));
             let html = parseMarkdownCore(prepared, cellStyle);
             svgBlocks.forEach((svg, index) => { html = html.replace(`CELL_SVG_BLOCK_${index}_END`, svg); });
             return html;
