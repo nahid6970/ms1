@@ -4796,7 +4796,10 @@ kiro-cli whoami --format json</code></pre>
             <section id="rclone-projects-sync-output" aria-live="polite" style="display:none;flex-shrink:0;padding:10px 14px;border-top:1px solid var(--border-color);">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
                     <div id="rclone-projects-sync-title" style="font-size:.72rem;font-weight:600;color:#4ade80;">Rclone sync</div>
-                    <div id="rclone-projects-sync-state" style="font-size:.66rem;color:var(--text-secondary);">Starting…</div>
+                    <div style="display:flex;align-items:center;gap:7px;">
+                        <div id="rclone-projects-sync-state" style="font-size:.66rem;color:var(--text-secondary);">Starting…</div>
+                        <button id="rclone-projects-sync-close" type="button" onclick="dismissRcloneProjectSyncOutput()" aria-label="Close sync output" title="Close sync output" style="display:none;width:19px;height:19px;align-items:center;justify-content:center;padding:0;border:1px solid rgba(148,163,184,.35);border-radius:5px;background:rgba(148,163,184,.08);color:var(--text-secondary);font-size:14px;line-height:1;cursor:pointer;">×</button>
+                    </div>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.65rem;color:var(--text-secondary);margin:4px 0 6px;">
                     <span id="rclone-projects-sync-progress-label">Preparing sync…</span>
@@ -10194,6 +10197,11 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('rclone-projects-modal').classList.add('show');
         }
         function closeRcloneProjectsModal() { document.getElementById('rclone-projects-modal').classList.remove('show'); }
+        function dismissRcloneProjectSyncOutput() {
+            if (rcloneModalSyncRunning) return;
+            const output = document.getElementById('rclone-projects-sync-output');
+            if (output) output.style.display = 'none';
+        }
         function renderRcloneProjectsModal() {
             const list = document.getElementById('rclone-projects-list');
             const linked = (projects || []).filter(project => project.hasRcloneDestination);
@@ -10337,9 +10345,11 @@ kiro-cli whoami --format json</code></pre>
             const transferredTotal = document.getElementById('rclone-projects-sync-total');
             const averageSpeed = document.getElementById('rclone-projects-sync-average');
             const rawToggle = document.getElementById('rclone-projects-sync-raw-toggle');
+            const closeOutput = document.getElementById('rclone-projects-sync-close');
             const syncButtons = document.querySelectorAll('#rclone-projects-list .rclone-project-sync');
             syncButtons.forEach(item => { item.disabled = true; item.style.opacity = '.55'; });
             output.style.display = 'block';
+            closeOutput.style.display = 'none';
             title.textContent = `${projectName} · ${direction === 'src_to_dst' ? 'SRC → DST' : 'DST → SRC'}`;
             state.textContent = 'Connecting…'; state.style.color = 'var(--text-secondary)';
             progressLabel.textContent = 'Preparing sync…'; progressRate.textContent = ''; progressBar.style.width = '0%';
@@ -10446,11 +10456,13 @@ kiro-cli whoami --format json</code></pre>
                     progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.errors} errors`;
                     progressRate.textContent = '';
                 }
+                closeOutput.style.display = 'inline-flex';
             } catch (error) {
                 state.textContent = 'Sync failed'; state.style.color = '#f87171';
                 consumeRcloneOutput(`ERROR: ${error?.message || 'Rclone sync failed.'}`);
                 updateTransferTotals();
                 progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.errors} errors`;
+                closeOutput.style.display = 'inline-flex';
             } finally {
                 rcloneModalSyncRunning = false;
                 syncButtons.forEach(item => { item.disabled = false; item.style.opacity = ''; });
