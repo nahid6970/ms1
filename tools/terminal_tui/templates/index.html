@@ -4805,6 +4805,10 @@ kiro-cli whoami --format json</code></pre>
                 <div style="height:5px;overflow:hidden;border-radius:8px;background:rgba(148,163,184,.18);margin-bottom:8px;">
                     <div id="rclone-projects-sync-progress-bar" style="height:100%;width:0;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .25s ease;"></div>
                 </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 7px;font-size:.62rem;color:var(--text-muted);">
+                    <span id="rclone-projects-sync-total">Transferred 0 B</span>
+                    <span id="rclone-projects-sync-average">Average speed —</span>
+                </div>
                 <div id="rclone-projects-sync-activity" style="max-height:106px;overflow:auto;display:flex;flex-direction:column;gap:3px;"></div>
                 <details style="margin-top:6px;">
                     <summary id="rclone-projects-sync-raw-toggle" style="cursor:pointer;font-size:.62rem;color:var(--text-muted);">Raw output</summary>
@@ -10330,6 +10334,8 @@ kiro-cli whoami --format json</code></pre>
             const progressLabel = document.getElementById('rclone-projects-sync-progress-label');
             const progressRate = document.getElementById('rclone-projects-sync-progress-rate');
             const progressBar = document.getElementById('rclone-projects-sync-progress-bar');
+            const transferredTotal = document.getElementById('rclone-projects-sync-total');
+            const averageSpeed = document.getElementById('rclone-projects-sync-average');
             const rawToggle = document.getElementById('rclone-projects-sync-raw-toggle');
             const syncButtons = document.querySelectorAll('#rclone-projects-list .rclone-project-sync');
             syncButtons.forEach(item => { item.disabled = true; item.style.opacity = '.55'; });
@@ -10337,9 +10343,29 @@ kiro-cli whoami --format json</code></pre>
             title.textContent = `${projectName} · ${direction === 'src_to_dst' ? 'SRC → DST' : 'DST → SRC'}`;
             state.textContent = 'Connecting…'; state.style.color = 'var(--text-secondary)';
             progressLabel.textContent = 'Preparing sync…'; progressRate.textContent = ''; progressBar.style.width = '0%';
+            transferredTotal.textContent = 'Transferred 0 B'; averageSpeed.textContent = 'Average speed —';
             log.textContent = ''; activity.replaceChildren();
             rawToggle.textContent = 'Raw output'; rawToggle.parentElement.open = false;
             const actionCounts = {copied:0, removed:0, warning:0, errors:0};
+            let syncStartedAt = performance.now(), transferredBytes = 0;
+            const parseBytes = value => {
+                const match = String(value).trim().match(/^([\d.]+)\s*(B|KiB|MiB|GiB|TiB|PiB|KB|MB|GB|TB)$/i);
+                if (!match) return 0;
+                const units = {b:0,kib:1,mib:2,gib:3,tib:4,pib:5,kb:1,mb:2,gb:3,tb:4};
+                const base = /iB$/i.test(match[2]) ? 1024 : 1000;
+                return Number(match[1]) * Math.pow(base, units[match[2].toLowerCase()]);
+            };
+            const formatBytes = value => {
+                if (!Number.isFinite(value) || value <= 0) return '0 B';
+                const units = ['B','KiB','MiB','GiB','TiB','PiB'];
+                const unitIndex = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+                return `${(value / Math.pow(1024, unitIndex)).toFixed(unitIndex ? 2 : 0)} ${units[unitIndex]}`;
+            };
+            const updateTransferTotals = () => {
+                const elapsedSeconds = Math.max((performance.now() - syncStartedAt) / 1000, 0.001);
+                transferredTotal.textContent = `Transferred ${formatBytes(transferredBytes)}`;
+                averageSpeed.textContent = `Average speed ${formatBytes(transferredBytes / elapsedSeconds)}/s`;
+            };
             const addActivity = (kind, text, color) => {
                 const row = document.createElement('div');
                 row.style.cssText = 'display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:4px;background:rgba(148,163,184,.055);font-size:.63rem;line-height:1.4;';
@@ -10358,6 +10384,8 @@ kiro-cli whoami --format json</code></pre>
                 const stat = line.match(/([\d.]+\s*[KMGTPE]?i?B)\s*\/\s*([\d.]+\s*[KMGTPE]?i?B),\s*([\d-]+)%?,\s*([^,]+),\s*ETA\s*([^\s(]+)(?:\s+\(xfr#(\d+)\/(\d+)\))?/i);
                 if (stat) {
                     const percent = Number.parseInt(stat[3], 10);
+                    transferredBytes = parseBytes(stat[1]);
+                    updateTransferTotals();
                     const isScanning = stat[1].trim() === '0 B' && stat[2].trim() === '0 B';
                     progressLabel.textContent = isScanning ? 'Scanning files…' : stat[7] ? `${stat[6]} of ${stat[7]} transfers · ${stat[1]} of ${stat[2]}` : `${stat[1]} of ${stat[2]}`;
                     progressRate.textContent = isScanning ? '' : `${stat[4].trim()} · ETA ${stat[5]}`;
@@ -10397,7 +10425,7 @@ kiro-cli whoami --format json</code></pre>
                     for (const raw of lines) {
                         if (!raw.trim()) continue;
                         const event = JSON.parse(raw);
-                        if (event.type === 'start') { dryRun = !!event.dryRun; state.textContent = dryRun ? 'Dry run · running…' : 'Running…'; }
+                        if (event.type === 'start') { syncStartedAt = performance.now(); dryRun = !!event.dryRun; state.textContent = dryRun ? 'Dry run · running…' : 'Running…'; }
                         else if (event.type === 'output') consumeRcloneOutput(event.line);
                         else if (event.type === 'done') returnCode = Number(event.returnCode);
                         else if (event.type === 'error') throw new Error(event.error || 'Rclone sync failed.');
@@ -10405,6 +10433,7 @@ kiro-cli whoami --format json</code></pre>
                     if (done) break;
                 }
                 if (pending.trim()) consumeRcloneOutput(pending);
+                updateTransferTotals();
                 if (returnCode === 0) {
                     state.textContent = dryRun ? 'Dry run complete' : 'Sync complete';
                     state.style.color = '#34d399';
@@ -10420,6 +10449,7 @@ kiro-cli whoami --format json</code></pre>
             } catch (error) {
                 state.textContent = 'Sync failed'; state.style.color = '#f87171';
                 consumeRcloneOutput(`ERROR: ${error?.message || 'Rclone sync failed.'}`);
+                updateTransferTotals();
                 progressLabel.textContent = `${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.errors} errors`;
             } finally {
                 rcloneModalSyncRunning = false;
