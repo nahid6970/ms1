@@ -5848,9 +5848,9 @@ function sanitizeCellSvg(svgText, scalePercent = null) {
     const parsed = new DOMParser().parseFromString(svgText, 'image/svg+xml');
     const root = parsed.documentElement;
     if (!root || root.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return '';
-    const allowedTags = new Set(['svg','g','path','rect','circle','ellipse','line','polyline','polygon','text','tspan','defs','lineargradient','radialgradient','stop','clippath','mask','title','desc']);
-    const allowedAttrs = new Set(['viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','transform','font-size','font-family','font-weight','text-anchor','dominant-baseline','offset','stop-color','stop-opacity','id','xmlns','preserveAspectRatio','clip-path','mask']);
-    const allowedStyleProps = new Set(['fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','font-size','font-family','font-weight','text-anchor','dominant-baseline','stop-color','stop-opacity']);
+    const allowedTags = new Set(['svg','g','path','rect','circle','ellipse','line','polyline','polygon','text','tspan','defs','lineargradient','radialgradient','stop','clippath','mask','title','desc','filter','fedropshadow','fegaussianblur','feblend','fecomposite','feoffset','feflood','femerge','femergenode','fecolormatrix','fecomponenttransfer','fefuncr','fefuncg','fefuncb','fefunca','image','use','symbol','pattern']);
+    const allowedAttrs = new Set(['viewBox','width','height','x','y','x1','x2','y1','y2','cx','cy','r','rx','ry','d','points','fill','fill-rule','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','transform','font-size','font-family','font-weight','text-anchor','dominant-baseline','offset','stop-color','stop-opacity','id','xmlns','preserveAspectRatio','clip-path','mask','filter','dx','dy','stdDeviation','flood-color','flood-opacity','result','in','in2','mode','values','type','tableValues','slope','intercept','amplitude','exponent','k1','k2','k3','k4','operator','order','kernelMatrix','divisor','bias','edgeMode','kernelUnitLength','preserveAlpha','x1','y1','x2','y2','gradientUnits','gradientTransform','patternUnits','patternTransform','patternContentUnits','href','xlink:href','spacing','startOffset','method','side','lengthAdjust','textLength','rotate','visibility','display','overflow','color-interpolation-filters','color-rendering','image-rendering','shape-rendering','text-rendering']);
+    const allowedStyleProps = new Set(['fill','fill-opacity','fill-rule','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','color','font-size','font-family','font-weight','text-anchor','dominant-baseline','stop-color','stop-opacity','filter','overflow','visibility','display','color-interpolation-filters']);
     const clean = (node) => {
         if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.nodeValue);
         if (node.nodeType !== Node.ELEMENT_NODE || !allowedTags.has(node.localName.toLowerCase())) return document.createDocumentFragment();
@@ -5862,14 +5862,16 @@ function sanitizeCellSvg(svgText, scalePercent = null) {
                     if (colon < 0) return '';
                     const name = rule.slice(0, colon).trim().toLowerCase();
                     const value = rule.slice(colon + 1).trim();
-                    if (!allowedStyleProps.has(name) || /url\s*\(|expression\s*\(|javascript:/i.test(value)) return '';
+                    if (!allowedStyleProps.has(name) || /url\s*\(\s*(?!#)/i.test(value) || /expression\s*\(|javascript:/i.test(value)) return '';
                     return `${name}:${value}`;
                 }).filter(Boolean).join(';');
                 if (safeStyles) out.setAttribute('style', safeStyles);
                 continue;
             }
             const attrName = attr.name.toLowerCase() === 'viewbox' ? 'viewBox' : attr.name;
-            if (!allowedAttrs.has(attrName) || /url\s*\(/i.test(attr.value) && attrName !== 'clip-path' && attrName !== 'mask') continue;
+            // Block external url() references (only allow internal #id references)
+            const hasExternalUrl = /url\s*\(\s*(?!#)/i.test(attr.value);
+            if (!allowedAttrs.has(attrName) || hasExternalUrl) continue;
             if (['clip-path','mask'].includes(attrName) && !/^url\(#[\w-]+\)$/.test(attr.value)) continue;
             out.setAttribute(attrName, attr.value);
         }
