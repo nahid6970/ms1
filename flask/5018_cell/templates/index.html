@@ -641,8 +641,7 @@
 
                 <div class="settings-section settings-page" data-settings-page="markdown">
                     <h3 class="settings-section-title">Custom Color Syntax</h3>
-                    <p class="settings-description" style="margin-bottom: 15px;">Add custom color highlight syntaxes.
-                        Use any characters (e.g., ++, $$, %%, etc.) with custom colors.</p>
+                    <p class="settings-description" style="margin-bottom: 15px;">Add custom color markers or paired prefix/suffix syntaxes for highlighting cell text.</p>
 
                     <div id="customColorSyntaxList" class="custom-syntax-list">
                         <!-- Custom syntaxes will be rendered here -->
@@ -650,7 +649,11 @@
 
                     <button class="btn btn-secondary btn-full-width" onclick="addCustomColorSyntax()"
                         style="margin-top: 10px;">
-                        ➕ Add Custom Syntax
+                        ➕ Add Color Marker Syntax
+                    </button>
+                    <button class="btn btn-secondary btn-full-width" onclick="addCustomPrefixSuffixSyntax()"
+                        style="margin-top: 8px;">
+                        ➕ Add Prefix / Suffix Syntax
                     </button>
                 </div>
                 <div id="settingsSearchEmpty" class="settings-empty" style="display:none;">No matching settings found.</div>

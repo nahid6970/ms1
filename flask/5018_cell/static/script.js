@@ -430,11 +430,11 @@ function getMarkdownMarkerLengthAt(raw, index) {
     if (rest.startsWith('ŝŝ')) return 2;
 
     if (typeof customColorSyntaxes !== 'undefined' && Array.isArray(customColorSyntaxes)) {
-        const customMarker = customColorSyntaxes
-            .map(syntax => syntax && syntax.marker)
+        const customDelimiter = customColorSyntaxes
+            .flatMap(syntax => Object.values(getCustomSyntaxParts(syntax)))
             .filter(Boolean)
-            .find(marker => rest.startsWith(marker));
-        if (customMarker) return customMarker.length;
+            .find(delimiter => rest.startsWith(delimiter));
+        if (customDelimiter) return customDelimiter.length;
     }
 
     return 0;
@@ -3505,8 +3505,31 @@ function checkHasMarkdown(value) {
         str.includes('_.') || // Wavy underline
         str.match(/^Timeline(?:C)?(?:-[A-Z]+)?\*/m) || // Timeline syntax
         str.match(/\[\d+(?:-[A-Z]+)?\]\S+/) || // Word connector syntax
-        customColorSyntaxes.some(syntax => str.includes(syntax.marker)) // Check custom syntaxes
+        customColorSyntaxes.some(syntax => {
+            const { prefix, suffix } = getCustomSyntaxParts(syntax);
+            return prefix && suffix && str.includes(prefix) && str.includes(suffix);
+        }) // Check custom syntaxes
     );
+}
+
+function getCustomSyntaxParts(syntax) {
+    const prefix = syntax?.type === 'prefixSuffix' ? (syntax.prefix || '') : (syntax?.marker || '');
+    const suffix = syntax?.type === 'prefixSuffix' ? (syntax.suffix || '') : (syntax?.marker || '');
+    return { prefix, suffix };
+}
+
+function getCustomSyntaxRegex(syntax, contentPattern = '(.+?)', htmlEscaped = false) {
+    const parts = getCustomSyntaxParts(syntax);
+    const prefix = htmlEscaped ? escapeHtml(parts.prefix) : parts.prefix;
+    const suffix = htmlEscaped ? escapeHtml(parts.suffix) : parts.suffix;
+    if (!prefix || !suffix) return null;
+    const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(escapeRegex(prefix) + contentPattern + escapeRegex(suffix), 'g');
+}
+
+function getCustomSyntaxTemplate(syntax) {
+    const { prefix, suffix } = getCustomSyntaxParts(syntax);
+    return `${prefix}text${suffix}`;
 }
 
 
@@ -3565,12 +3588,8 @@ function calculateVisibleToRawMap(rawInput) {
 
     if (typeof customColorSyntaxes !== 'undefined') {
         customColorSyntaxes.forEach(syntax => {
-            if (!syntax.marker) return;
-            const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            patterns.push({
-                regex: new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g'),
-                keepGroup: 1
-            });
+            const regex = getCustomSyntaxRegex(syntax);
+            if (regex) patterns.push({ regex, keepGroup: 1 });
         });
     }
 
@@ -3887,7 +3906,7 @@ function highlightSyntax(text) {
     if (typeof customColorSyntaxesCache !== 'undefined' && customColorSyntaxesCache.length > 0) {
         customColorSyntaxesCache.forEach(syntax => {
             formatted = formatted.replace(syntax.regex, `<span style="${syntax.style}">` +
-                `<span class="syn-marker">${syntax.marker}</span>$1<span class="syn-marker">${syntax.marker}</span></span>`);
+                `<span class="syn-marker">${syntax.prefix}</span>$1<span class="syn-marker">${syntax.suffix}</span></span>`);
         });
     }
 
@@ -5014,9 +5033,10 @@ function parseGridTable(lines) {
         // Add custom color syntax markers
         if (typeof customColorSyntaxes !== 'undefined') {
             customColorSyntaxes.forEach(syntax => {
-                if (syntax.marker && !delimiters.includes(syntax.marker)) {
-                    delimiters.push(syntax.marker);
-                }
+                const { prefix, suffix } = getCustomSyntaxParts(syntax);
+                [prefix, suffix].filter(Boolean).forEach(delimiter => {
+                    if (!delimiters.includes(delimiter)) delimiters.push(delimiter);
+                });
             });
         }
         
@@ -11870,10 +11890,8 @@ function stripMarkdown(text, preserveLinks = false) {
 
     // Remove custom color syntax markers
     customColorSyntaxes.forEach(syntax => {
-        if (!syntax.marker) return;
-        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
-        stripped = stripped.replace(regex, '$1');
+        const regex = getCustomSyntaxRegex(syntax);
+        if (regex) stripped = stripped.replace(regex, '$1');
     });
 
     return stripped;
@@ -17234,10 +17252,9 @@ async function loadCustomColorSyntaxes() {
 
             // Pre-compile and cache regexes for performance
             customColorSyntaxesCache = customColorSyntaxes.map(syntax => {
-                if (!syntax.marker) return null;
-                const escapedMarker = escapeHtml(syntax.marker);
-                const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
+                const parts = getCustomSyntaxParts(syntax);
+                const regex = getCustomSyntaxRegex(syntax, '(.*?)', true);
+                if (!regex) return null;
 
                 let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
                 if (syntax.isBold) style += ' font-weight: bold;';
@@ -17245,7 +17262,7 @@ async function loadCustomColorSyntaxes() {
                 if (syntax.isUnderline) style += ' text-decoration: underline;';
                 if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
 
-                return { regex, style, marker: escapedMarker };
+                return { regex, style, prefix: escapeHtml(parts.prefix), suffix: escapeHtml(parts.suffix) };
             }).filter(s => s !== null);
 
             renderCustomSyntaxButtons(); // Render buttons after loading
@@ -17267,18 +17284,19 @@ function renderCustomSyntaxButtons() {
 
     // Insert custom syntax buttons before the color picker button
     customColorSyntaxes.forEach((syntax) => {
-        if (!syntax.marker) return;
+        const { prefix, suffix } = getCustomSyntaxParts(syntax);
+        if (!prefix || !suffix) return;
 
         const button = document.createElement('button');
         button.className = 'format-btn custom-syntax-btn';
-        button.onclick = (event) => applyQuickFormat(syntax.marker, syntax.marker, event);
-        button.oncontextmenu = (event) => toggleFormatSelection(syntax.marker, syntax.marker, event);
-        button.title = `${syntax.marker}text${syntax.marker} (Right-click to select)`;
+        button.onclick = (event) => applyQuickFormat(prefix, suffix, event);
+        button.oncontextmenu = (event) => toggleFormatSelection(prefix, suffix, event);
+        button.title = `${getCustomSyntaxTemplate(syntax)} (Right-click to select)`;
         button.style.background = syntax.bgColor;
         button.style.color = syntax.fgColor;
         button.style.fontSize = '12px';
         button.style.fontWeight = '600';
-        button.textContent = syntax.marker;
+        button.textContent = syntax.type === 'prefixSuffix' ? `${prefix}…${suffix}` : syntax.marker;
 
         // Insert before the color picker button
         colorPickerBtn.parentNode.insertBefore(button, colorPickerBtn);
@@ -17287,16 +17305,15 @@ function renderCustomSyntaxButtons() {
 
 function rebuildCustomSyntaxCache() {
     customColorSyntaxesCache = customColorSyntaxes.map(syntax => {
-        if (!syntax.marker) return null;
-        const escapedMarker = escapeHtml(syntax.marker);
-        const markerRegex = escapedMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(markerRegex + '(.*?)' + markerRegex, 'g');
+        const parts = getCustomSyntaxParts(syntax);
+        const regex = getCustomSyntaxRegex(syntax, '(.*?)', true);
+        if (!regex) return null;
         let style = `background: ${syntax.bgColor || 'transparent'}; color: ${syntax.fgColor || 'inherit'};`;
         if (syntax.isBold) style += ' font-weight: bold;';
         if (syntax.isItalic) style += ' font-style: italic;';
         if (syntax.isUnderline) style += ' text-decoration: underline;';
         if (syntax.fontSize) style += ` font-size: ${syntax.fontSize}em;`;
-        return { regex, style, marker: escapedMarker };
+        return { regex, style, prefix: escapeHtml(parts.prefix), suffix: escapeHtml(parts.suffix) };
     }).filter(s => s !== null);
 }
 
@@ -17319,7 +17336,7 @@ function renderCustomColorSyntaxList() {
     list.innerHTML = '';
 
     if (customColorSyntaxes.length === 0) {
-        list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">No custom syntaxes added yet. Click "Add Custom Syntax" to create one.</p>';
+        list.innerHTML = '<p style="color: #6c757d; font-size: 13px; text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">No custom syntaxes added yet. Use one of the buttons below to create one.</p>';
         renderCustomSyntaxButtons();
         return;
     }
@@ -17328,7 +17345,7 @@ function renderCustomColorSyntaxList() {
     const header = document.createElement('div');
     header.className = 'custom-syntax-header';
     header.innerHTML = `
-        <div style="flex: 0 0 80px;">Marker</div>
+        <div style="flex: 0 0 170px;">Marker / Prefix + Suffix</div>
         <div style="flex: 0 0 100px;">Colors</div>
         <div style="flex: 0 0 170px;">Format</div>
         <div style="flex: 1;">Preview</div>
@@ -17340,13 +17357,19 @@ function renderCustomColorSyntaxList() {
         const item = document.createElement('div');
         item.className = 'custom-syntax-item';
 
+        const isPrefixSuffix = syntax.type === 'prefixSuffix';
+        const syntaxInput = isPrefixSuffix
+            ? `<div class="cs-col-marker paired">
+                <input type="text" value="${escapeHtml(syntax.prefix || '')}" onchange="updateCustomSyntax(${index}, 'prefix', this.value)" placeholder="Prefix" title="Opening syntax">
+                <input type="text" value="${escapeHtml(syntax.suffix || '')}" onchange="updateCustomSyntax(${index}, 'suffix', this.value)" placeholder="Suffix" title="Closing syntax">
+               </div>`
+            : `<div class="cs-col-marker">
+                <input type="text" value="${escapeHtml(syntax.marker || '')}" onchange="updateCustomSyntax(${index}, 'marker', this.value)" placeholder="++" maxlength="24" title="Enter marker characters (e.g. ++, %%)">
+               </div>`;
+        const { prefix, suffix } = getCustomSyntaxParts(syntax);
+
         item.innerHTML = `
-            <div class="cs-col-marker">
-                <input type="text" value="${syntax.marker}" 
-                    onchange="updateCustomSyntax(${index}, 'marker', this.value)" 
-                    placeholder="++"
-                    maxlength="4" title="Enter marker characters (e.g. ++, %%)">
-            </div>
+            ${syntaxInput}
             
             <div class="cs-col-colors">
                 <div class="color-dot" onclick="showCustomSyntaxColorPicker(${index}, 'bgColor', event)" 
@@ -17376,7 +17399,7 @@ function renderCustomColorSyntaxList() {
 
             <div class="cs-col-preview">
                 <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''} ${syntax.fontSize ? 'font-size:' + syntax.fontSize + 'em;' : ''}">
-                    ${syntax.marker || '..'}sample${syntax.marker || '..'}
+                    ${escapeHtml(prefix || '..')}sample${escapeHtml(suffix || '..')}
                 </div>
             </div>
             
@@ -17407,6 +17430,24 @@ function addCustomColorSyntax() {
     saveCustomColorSyntaxes();
     renderCustomColorSyntaxList();
     renderTable(); // Re-render to apply new syntax
+}
+
+function addCustomPrefixSuffixSyntax() {
+    customColorSyntaxes.push({
+        type: 'prefixSuffix',
+        prefix: '[',
+        suffix: ']',
+        bgColor: '#fff2cc',
+        fgColor: '#333333',
+        isBold: false,
+        isItalic: false,
+        isUnderline: false,
+        fontSize: ''
+    });
+    rebuildCustomSyntaxCache();
+    saveCustomColorSyntaxes();
+    renderCustomColorSyntaxList();
+    renderTable();
 }
 
 function updateCustomSyntax(index, field, value) {
@@ -17487,7 +17528,7 @@ function showCustomSyntaxColorPicker(index, field, event) {
     previewContainer.style.fontWeight = 'bold';
     previewContainer.style.textAlign = 'center';
     previewContainer.style.fontFamily = 'monospace';
-    previewContainer.textContent = `${customColorSyntaxes[index].marker}text${customColorSyntaxes[index].marker}`;
+    previewContainer.textContent = getCustomSyntaxTemplate(customColorSyntaxes[index]);
     previewContainer.id = 'syntaxColorPreviewArea';
     popup.appendChild(previewContainer);
 
@@ -17773,11 +17814,8 @@ function applyCustomColorSyntaxes(text) {
     let formatted = text;
 
     customColorSyntaxes.forEach(syntax => {
-        if (!syntax.marker) return;
-
-        // Escape special regex characters
-        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
+        const regex = getCustomSyntaxRegex(syntax, '(.+?)', true);
+        if (!regex) return;
 
         formatted = formatted.replace(regex, (match, content) => {
             let style = `background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;`;
@@ -17799,10 +17837,8 @@ function applyCustomColorSyntaxesRaw(text) {
     let formatted = text;
 
     customColorSyntaxes.forEach(syntax => {
-        if (!syntax.marker) return;
-
-        const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`${escapedMarker}(.+?)${escapedMarker}`, 'g');
+        const regex = getCustomSyntaxRegex(syntax, '(.+?)', true);
+        if (!regex) return;
 
         formatted = formatted.replace(regex, (match, content) => {
             let style = `background: ${syntax.bgColor}; color: ${syntax.fgColor}; padding: 1px 4px; border-radius: 3px; display: inline; vertical-align: baseline; line-height: 1.3; box-decoration-break: clone; -webkit-box-decoration-break: clone;`;
@@ -19377,15 +19413,16 @@ function showSyntaxReplacer(event) {
     
     if (typeof customColorSyntaxes !== 'undefined' && customColorSyntaxes.length > 0) {
         customColorSyntaxes.forEach(syntax => {
-            if (!syntax.marker) return;
+            const { prefix, suffix } = getCustomSyntaxParts(syntax);
+            if (!prefix || !suffix) return;
             const button = document.createElement('button');
             button.className = 'custom-syntax-replace-btn';
-            button.onclick = () => setReplaceSyntax(`${syntax.marker}text${syntax.marker}`);
+            button.onclick = () => setReplaceSyntax(getCustomSyntaxTemplate(syntax));
             button.style.cssText = `padding: 4px 12px; background: ${syntax.bgColor}; color: ${syntax.fgColor}; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;`;
             if (syntax.isBold) button.style.fontWeight = 'bold';
             if (syntax.isItalic) button.style.fontStyle = 'italic';
             if (syntax.isUnderline) button.style.textDecoration = 'underline';
-            button.textContent = syntax.marker;
+            button.textContent = syntax.type === 'prefixSuffix' ? `${prefix}…${suffix}` : syntax.marker;
             buttonContainer.appendChild(button);
         });
     }
@@ -19625,23 +19662,23 @@ function findAllSyntaxesInCell(cellContent) {
     // Handle custom syntaxes
     if (typeof customColorSyntaxes !== 'undefined' && customColorSyntaxes.length > 0) {
         customColorSyntaxes.forEach(syntax => {
-            if (!syntax.marker) return;
+            const { prefix, suffix } = getCustomSyntaxParts(syntax);
+            if (!prefix || !suffix) return;
             try {
-                const escapedMarker = syntax.marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(escapedMarker + '(.+?)' + escapedMarker, 'g');
+                const regex = getCustomSyntaxRegex(syntax);
                 const matches = [...cellContent.matchAll(regex)];
                 if (matches.length > 0) {
                     const firstMatch = matches[0][0];
                     const example = firstMatch.length > 30 ? firstMatch.substring(0, 30) + '...' : firstMatch;
                     results.push({
-                        name: `Custom: ${syntax.marker}`,
-                        pattern: `${syntax.marker}text${syntax.marker}`,
+                        name: `Custom: ${syntax.type === 'prefixSuffix' ? `${prefix}…${suffix}` : syntax.marker}`,
+                        pattern: getCustomSyntaxTemplate(syntax),
                         count: matches.length,
                         example: example
                     });
                 }
             } catch (e) {
-                console.log('Error processing custom syntax:', syntax.marker, e);
+                console.log('Error processing custom syntax:', getCustomSyntaxTemplate(syntax), e);
             }
         });
     }

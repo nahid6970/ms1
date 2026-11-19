@@ -567,9 +567,9 @@ body {
 
 .btn-clear-search,
 .btn-move-matches {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    flex: 0 0 auto;
+    transform: none;
     background: none;
     border: none;
     font-size: 18px;
@@ -586,10 +586,10 @@ body {
 
 
 .btn-voice-search {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    order: 3;
+    flex: 0 0 20px;
+    transform: none;
     background: none;
     border: none;
     width: 20px;
@@ -618,12 +618,11 @@ body {
     50% { opacity: 0.5; }
 }
 .btn-move-matches {
-    right: 62px;
     font-size: 14px;
 }
 
 .btn-clear-search {
-    right: 35px;
+    order: 2;
 }
 
 .btn-clear-search:hover,
@@ -643,6 +642,8 @@ body {
     padding: 6px 8px;
     font-size: 14px;
     width: 200px;
+    min-width: 0;
+    flex: 1 1 200px;
     background: transparent;
 }
 
@@ -5662,6 +5663,18 @@ td.has-cell-ai-rank > .markdown-preview {
 /* Columns */
 .cs-col-marker {
     flex: 0 0 80px;
+}
+
+.cs-col-marker.paired {
+    flex: 0 0 170px;
+    display: flex;
+    gap: 5px;
+}
+
+.cs-col-marker.paired input {
+    width: 78px;
+    min-width: 0;
+    padding: 6px 5px;
 }
 
 .cs-col-colors {
