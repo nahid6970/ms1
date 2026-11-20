@@ -4049,20 +4049,26 @@ function highlightSyntax(text) {
     return formatted;
 }
 
+function hasFollowingContentNode(node) {
+    let sibling = node.nextSibling;
+    while (sibling) {
+        if (sibling.nodeType === Node.TEXT_NODE && !sibling.textContent.replace(/\u200B/g, '')) {
+            sibling = sibling.nextSibling;
+            continue;
+        }
+        if (sibling.nodeName === 'BR') {
+            // Keep looking: when text follows, the BR represents an empty source
+            // line and the block still needs its structural separator.
+            sibling = sibling.nextSibling;
+            continue;
+        }
+        return true;
+    }
+    return false;
+}
+
 function extractRawText(element) {
     let text = '';
-    const hasFollowingContent = (node) => {
-        let sibling = node.nextSibling;
-        while (sibling) {
-            if (sibling.nodeType === Node.TEXT_NODE && !sibling.textContent.replace(/\u200B/g, '')) {
-                sibling = sibling.nextSibling;
-                continue;
-            }
-            // A BR already contributes the line break itself.
-            return sibling.nodeName !== 'BR';
-        }
-        return false;
-    };
 
     const walk = (node) => {
         if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
@@ -4086,7 +4092,7 @@ function extractRawText(element) {
             node.childNodes.forEach(walk);
             // Add a structural separator only when more content follows this block.
             // A final block's trailing newline is layout, not cell text.
-            if (node.childNodes.length > 0 && hasFollowingContent(node) && !text.endsWith('\n')) {
+            if (node.childNodes.length > 0 && hasFollowingContentNode(node) && !text.endsWith('\n')) {
                 text += '\n';
             }
         } else {
@@ -4250,6 +4256,7 @@ function extractRawTextBeforeCaret(element, range) {
                     walk(child);
                     if (stopped) return;
                 }
+                if (hasFollowingContentNode(node) && !text.endsWith('\n')) text += '\n';
             } else {
                 for (let child of node.childNodes) {
                     walk(child);
@@ -4369,6 +4376,16 @@ function setCaretPosition(element, offset) {
             for (const child of node.childNodes) {
                 walk(child);
                 if (found) break;
+            }
+            if (!found && hasFollowingContentNode(node) && !lastCharWasNewline) {
+                if (currentOffset === offset) {
+                    range.setStartAfter(node);
+                    range.collapse(true);
+                    found = true;
+                    return;
+                }
+                currentOffset += 1;
+                lastCharWasNewline = true;
             }
         } else {
             for (const child of node.childNodes) {
