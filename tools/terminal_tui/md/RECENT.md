@@ -7,6 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.
 - Added a Sync all header action that runs configured projects sequentially and reports overall project progress, aggregate bytes transferred, and average throughput.
+- Kept other project sync buttons available during a run so additional projects can be queued with a click; queued and active rows show their current state.
 - Added a compact progress bar, transfer rate, file action and notice list, and completion/dry-run/error states; repeated idle stats display as "Scanning files…".
 - Added cumulative transferred bytes and average throughput to the sync progress summary.
 - Kept timestamped raw output available in a collapsed details section.
