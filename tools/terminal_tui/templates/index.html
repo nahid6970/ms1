@@ -4778,7 +4778,20 @@ kiro-cli whoami --format json</code></pre>
                     <button type="button" onclick="closeGitHubProjectsModal()" aria-label="Close" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
                 </div>
             </div>
-            <div id="github-projects-list" style="overflow:auto; padding:10px 14px; display:flex; flex-direction:column; gap:8px; min-height:120px;"></div>
+            <div id="github-projects-list" style="overflow:auto; padding:10px 14px; display:flex; flex-direction:column; gap:8px; min-height:120px; flex:1;"></div>
+            <div id="github-project-commit-panel" style="display:none;flex:none;padding:10px 16px;border-top:1px solid var(--border-color);background:var(--bg-sidebar);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+                    <strong id="github-project-commit-title" style="min-width:0;flex:1;font-size:.75rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Commit changes</strong>
+                    <button id="git-ai-suggest-btn" type="button" onclick="suggestGitHubProjectCommit()" aria-label="Suggest commit message with AI" title="Suggest commit message with AI" style="width:28px;height:26px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(168,85,247,.4);border-radius:5px;background:rgba(168,85,247,.1);color:#c084fc;cursor:pointer;"><span id="github-project-ai-suggest-icon" aria-hidden="true">✨</span></button>
+                    <button type="button" onclick="closeGitHubProjectCommitPanel()" aria-label="Close commit panel" title="Close" style="width:26px;height:26px;border:1px solid var(--border-color);border-radius:5px;background:transparent;color:var(--text-secondary);font-size:1rem;cursor:pointer;">×</button>
+                </div>
+                <textarea id="github-project-commit-message" rows="2" placeholder="AI suggested commit message…" style="width:100%;box-sizing:border-box;resize:vertical;background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;padding:7px 9px;color:var(--text-primary);font: .75rem 'Fira Code',monospace;outline:none;"></textarea>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:7px;">
+                    <span id="github-project-commit-status" role="status" style="min-width:0;flex:1;font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                    <label style="display:inline-flex;align-items:center;gap:5px;font-size:.68rem;color:var(--text-secondary);white-space:nowrap;cursor:pointer;"><input id="github-project-commit-push" type="checkbox" checked style="margin:0;accent-color:#22c55e;">Push after commit</label>
+                    <button id="github-project-commit-btn" type="button" onclick="commitGitHubProjectDraft()" disabled style="padding:5px 11px;border:1px solid rgba(34,197,94,.5);border-radius:6px;background:rgba(34,197,94,.1);color:#4ade80;font-size:.7rem;font-weight:600;cursor:pointer;opacity:.55;">Commit</button>
+                </div>
+            </div>
             <div id="github-projects-message" role="status" style="display:none; padding:8px 18px; border-top:1px solid var(--border-color); font-size:.75rem; color:var(--text-secondary);"></div>
         </div>
     </div>
@@ -4896,7 +4909,7 @@ kiro-cli whoami --format json</code></pre>
                     <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); flex-shrink:0;">Commit Message</label>
                     <div style="display:flex; align-items:center; gap:5px; margin-left:auto;">
                         <select id="git-ai-model-select" title="Gemini model for AI commit suggestion" style="background:var(--bg-main); border:1px solid rgba(168,85,247,0.35); border-radius:5px; color:var(--text-primary); font-size:0.72rem; padding:3px 6px; outline:none; cursor:pointer; max-width:180px; height:26px;"></select>
-                        <button id="git-ai-suggest-btn" onclick="suggestGitCommitMessage()" title="AI suggest commit message" style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.35); color: #a855f7; cursor: pointer; font-size: 1rem; padding: 0 7px; border-radius: 5px; transition: all 0.2s; display:flex; align-items:center; justify-content:center; line-height:1; height:26px; width:28px;" onmouseenter="this.style.backgroundColor='rgba(168,85,247,0.22)'; this.style.borderColor='rgba(168,85,247,0.6)'" onmouseleave="this.style.backgroundColor='rgba(168,85,247,0.1)'; this.style.borderColor='rgba(168,85,247,0.35)'">
+                        <button id="git-modal-ai-suggest-btn" onclick="suggestGitCommitMessage()" title="AI suggest commit message" style="background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.35); color: #a855f7; cursor: pointer; font-size: 1rem; padding: 0 7px; border-radius: 5px; transition: all 0.2s; display:flex; align-items:center; justify-content:center; line-height:1; height:26px; width:28px;" onmouseenter="this.style.backgroundColor='rgba(168,85,247,0.22)'; this.style.borderColor='rgba(168,85,247,0.6)'" onmouseleave="this.style.backgroundColor='rgba(168,85,247,0.1)'; this.style.borderColor='rgba(168,85,247,0.35)'">
                             <span id="git-ai-suggest-icon">✨</span>
                         </button>
                     </div>
@@ -10611,6 +10624,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         const githubProjectStatusByName = new Map();
+        let githubProjectCommitContext = null;
         let githubProjectCheckRunning = false;
         let projectAutoCheckCountdownTimer = null;
         let projectAutoCheckStatusPollTimer = null;
@@ -10953,6 +10967,7 @@ kiro-cli whoami --format json</code></pre>
                     <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${safeRemote}</div><div style="font-size:.64rem;color:${exists ? '#94a3b8' : '#fbbf24'};margin-top:3px;">${exists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}${exists && empty ? ' · empty folder' : ''}</div>${status ? `<div style="font-size:.7rem;font-weight:500;color:${status.error ? '#f87171' : status.hasChanges ? '#94a3b8' : '#34d399'};margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span>${escapeHtml(status.filesText || status.text)}</span>${status.insertions ? `<span style="color:#22c55e;">+${status.insertions}</span>` : ''}${status.deletions ? `<span style="color:#ef4444;">-${status.deletions}</span>` : ''}${status.remoteText ? `<span style="color:${status.ahead ? '#fbbf24' : '#94a3b8'};">${escapeHtml(status.remoteText)}</span>` : ''}</div>` : ''}</div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
                         <button type="button" class="github-project-select" data-project="${escapeHtml(project.name)}" aria-label="Switch terminal to this project" title="Switch terminal to this project" style="${githubProjectActionStyle('#c4b5fd')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v17l4-4 3 5 3-1-3-5h6L5 3z"/></svg></button>
+                        ${exists ? `<button type="button" class="github-project-suggest" data-project="${escapeHtml(project.name)}" aria-label="AI suggest commit message" title="AI suggest a commit message for this project" style="${githubProjectActionStyle('#c084fc')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14z"/></svg></button>` : ''}
                         ${exists && Number(status?.ahead) > 0 && !status?.error ? `<button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="push" aria-label="Push ${Number(status.ahead)} local commit${Number(status.ahead) === 1 ? '' : 's'} to GitHub" title="Push ${Number(status.ahead)} local commit${Number(status.ahead) === 1 ? '' : 's'} to GitHub" style="${githubProjectActionStyle('#22c55e')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m-5 5 5-5 5 5"/><path d="M5 14v5h14v-5"/></svg></button>` : ''}
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="pull" ${exists ? '' : 'disabled'} aria-label="Pull using fast-forward only" title="Pull using fast-forward only" style="${githubProjectActionStyle('#34d399')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v12m-5-5 5 5 5-5"/><path d="M5 16v4h14v-4"/></svg></button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="fetch" ${exists ? '' : 'disabled'} aria-label="Fetch remote refs without changing files" title="Fetch remote refs without changing files" style="${githubProjectActionStyle('#60a5fa')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 16.2A4.8 4.8 0 0 0 18 7h-1.2A6 6 0 1 0 5 16.3"/><path d="M12 12v9m-3-3 3 3 3-3"/></svg></button>
@@ -10976,11 +10991,144 @@ kiro-cli whoami --format json</code></pre>
             }
             list.querySelectorAll('.github-project-action').forEach(button => button.addEventListener('click', () => runGitHubProjectAction(button)));
             list.querySelectorAll('.github-project-select').forEach(button => button.addEventListener('click', () => selectGitHubProjectInTerminal(button.dataset.project)));
+            list.querySelectorAll('.github-project-suggest').forEach(button => button.addEventListener('click', () => openGitHubProjectCommitPanel(button.dataset.project, true, button)));
         }
 
         function selectGitHubProjectInTerminal(projectName) {
             closeGitHubProjectsModal();
             selectProject(projectName);
+        }
+
+        function closeGitHubProjectCommitPanel() {
+            githubProjectCommitContext = null;
+            document.getElementById('github-project-commit-panel').style.display = 'none';
+        }
+
+        async function openGitHubProjectCommitPanel(projectName, generateSuggestion = false, sourceButton = null) {
+            const panel = document.getElementById('github-project-commit-panel');
+            const title = document.getElementById('github-project-commit-title');
+            const textarea = document.getElementById('github-project-commit-message');
+            const status = document.getElementById('github-project-commit-status');
+            const commitButton = document.getElementById('github-project-commit-btn');
+            const message = document.getElementById('github-projects-message');
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            const project = (projects || []).find(item => item.name === projectName);
+            if (!project || !project.pathExists) return;
+            githubProjectCommitContext = {projectName, files:[]};
+            panel.style.display = 'block';
+            title.textContent = `Commit changes · ${projectName}`;
+            textarea.value = '';
+            textarea.disabled = false;
+            commitButton.disabled = true;
+            commitButton.style.opacity = '.55';
+            status.style.color = 'var(--text-muted)';
+            status.textContent = 'Loading changed files…';
+            panel.scrollIntoView({block:'nearest'});
+            if (sourceButton) sourceButton.disabled = true;
+            try {
+                const filesResponse = await fetch(`/api/project/${encodeURIComponent(projectName)}/git/files`);
+                const filesData = await filesResponse.json();
+                if (!filesResponse.ok) throw new Error(filesData.error || 'Could not load changed files.');
+                const files = (filesData.files || []).map(file => file.path).filter(Boolean);
+                githubProjectCommitContext = {projectName, files};
+                textarea.oninput = () => {
+                    commitButton.disabled = !textarea.value.trim() || !githubProjectCommitContext?.files?.length;
+                    commitButton.style.opacity = commitButton.disabled ? '.55' : '1';
+                };
+                if (!files.length) throw new Error('No changed files to commit.');
+                if (generateSuggestion) {
+                    if (!apiKey) throw new Error('No Gemini API key found. Add one in AI Copilot settings.');
+                    status.textContent = 'Generating a commit message…';
+                    const model = localStorage.getItem('git-ai-commit-model') || localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+                    const suggestionResponse = await fetch(`/api/project/${encodeURIComponent(projectName)}/git/suggest-commit`, {
+                        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({api_key:apiKey, model, files})
+                    });
+                    const suggestionData = await suggestionResponse.json();
+                    if (!suggestionResponse.ok || suggestionData.error) throw new Error(suggestionData.error || 'AI suggestion failed.');
+                    textarea.value = suggestionData.suggestion || '';
+                    status.style.color = '#34d399';
+                    status.textContent = 'AI commit message ready. Review it, then commit below.';
+                } else {
+                    status.textContent = `${files.length} changed file${files.length === 1 ? '' : 's'} loaded.`;
+                }
+                commitButton.disabled = !textarea.value.trim();
+                commitButton.style.opacity = commitButton.disabled ? '.55' : '1';
+                textarea.focus();
+                if (message) message.style.display = 'none';
+            } catch (error) {
+                status.style.color = '#f87171';
+                status.textContent = error?.message || 'Could not prepare commit.';
+            } finally {
+                if (sourceButton?.isConnected) sourceButton.disabled = false;
+            }
+        }
+
+        async function suggestGitHubProjectCommit() {
+            if (!githubProjectCommitContext?.projectName) return;
+            const button = document.getElementById('git-ai-suggest-btn');
+            const icon = document.getElementById('github-project-ai-suggest-icon');
+            if (button) button.disabled = true;
+            if (icon) icon.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>';
+            try { await openGitHubProjectCommitPanel(githubProjectCommitContext.projectName, true); }
+            finally {
+                if (button) button.disabled = false;
+                if (icon) icon.textContent = '✨';
+            }
+        }
+
+        async function commitGitHubProjectDraft() {
+            const context = githubProjectCommitContext;
+            const textarea = document.getElementById('github-project-commit-message');
+            const status = document.getElementById('github-project-commit-status');
+            const button = document.getElementById('github-project-commit-btn');
+            const message = textarea.value.trim();
+            if (!context?.projectName || !context.files?.length || !message) return;
+            button.disabled = true;
+            button.style.opacity = '.55';
+            button.textContent = 'Committing…';
+            status.style.color = 'var(--text-muted)';
+            status.textContent = document.getElementById('github-project-commit-push').checked ? 'Committing and pushing…' : 'Committing…';
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(context.projectName)}/git/commit`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({message, add_all:true, push:document.getElementById('github-project-commit-push').checked, files:context.files})
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Commit failed.');
+                let resultText = data.push_error
+                    ? `Committed; push failed: ${data.push_error}`
+                    : data.pushed ? 'Committed and pushed ✓' : 'Committed ✓';
+                status.style.color = data.push_error ? '#fbbf24' : '#34d399';
+                status.textContent = resultText;
+                const projectName = context.projectName;
+                try {
+                    const statusResponse = await fetch(`/api/project/${encodeURIComponent(projectName)}/git/sync-remote`, {
+                        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'status'})
+                    });
+                    const statusData = await statusResponse.json();
+                    if (statusResponse.ok) {
+                        const filesText = statusData.dirtyCount ? `${statusData.dirtyCount} file${statusData.dirtyCount === 1 ? '' : 's'} changed` : 'Working tree clean';
+                        const remoteParts = [];
+                        if (statusData.ahead) remoteParts.push(`${statusData.ahead} to push`);
+                        if (statusData.behind) remoteParts.push(`${statusData.behind} to pull`);
+                        const remoteText = !statusData.remoteBranchExists ? `${statusData.ahead} commit${statusData.ahead === 1 ? '' : 's'} to push · remote branch missing` : remoteParts.join(' · ');
+                        githubProjectStatusByName.set(projectName, {...statusData, filesText, remoteText, checkedAt:Date.now(), hasChanges:!!(statusData.dirtyCount || statusData.ahead || statusData.behind || !statusData.remoteBranchExists), text:`${filesText}${remoteText ? ` · ${remoteText}` : ''}`});
+                    } else githubProjectStatusByName.delete(projectName);
+                } catch (_) { githubProjectStatusByName.delete(projectName); }
+                try {
+                    projects = await (await fetch('/api/projects')).json();
+                    handleSearch();
+                } catch (_) { /* The commit succeeded; keep the current project list visible. */ }
+                renderGitHubProjectsModal();
+                updateProjectChangeBadges();
+            } catch (error) {
+                status.style.color = '#f87171';
+                status.textContent = error?.message || 'Commit failed.';
+                button.disabled = !textarea.value.trim();
+                button.style.opacity = button.disabled ? '.55' : '1';
+            } finally {
+                button.textContent = 'Commit';
+            }
         }
 
         function githubProjectActionStyle(color) {
@@ -21935,7 +22083,7 @@ Always wrap your **entire response** in a single markdown code block.`;
         }
 
         async function suggestGitCommitMessage() {
-            const btn = document.getElementById('git-ai-suggest-btn');
+            const btn = document.getElementById('git-modal-ai-suggest-btn');
             const iconEl = document.getElementById('git-ai-suggest-icon');
             const statusEl = document.getElementById('git-status-msg');
             const textarea = document.getElementById('git-commit-msg');

@@ -7,6 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Added a per-project Push button in `#github-projects-modal` when the checked status reports one or more commits ahead of the remote.
 - Changed Select, Push, Pull, Fetch, and Clone controls to aligned icon-only SVG buttons with accessible labels and hover titles; action icons remain visible while operations run.
+- Added a per-project AI commit-message action; its suggestion opens in a sticky commit panel at the bottom of the modal with an editable message, optional push-after-commit, and a direct Commit button.
 - Push uses the existing project Git push endpoint, then refreshes that project's ahead/behind and working-tree status so the Push action disappears when the remote is up to date.
 - Shows a clear note if the push succeeds but the follow-up status refresh fails.
 
