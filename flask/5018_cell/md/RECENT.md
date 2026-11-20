@@ -1,5 +1,22 @@
 # Recent Development Log
 
+## [2026-11-20 13:00] - Fix Cell Enter and Trailing Blank Line Behavior
+
+**What We Accomplished:**
+- Fixed Enter handling for cell editors: textareas keep native multiline behavior, and a plain text input becomes a textarea when Enter inserts a newline.
+- Kept cells containing newline characters in textarea mode after rerendering, preserving multiline content.
+- Fixed Markdown edit extraction adding a synthetic newline after a final block element. Structural separators are now added only when later content follows, while explicit trailing `<br>` line breaks remain content.
+
+**Files Modified:**
+- `static/script.js` — cell Enter handling, multiline cell rendering, and trailing newline extraction
+- `md/PROBLEMS_AND_FIXES.md` — documented the cell editing and trailing-line fixes
+- `md/RECENT.md` — recorded this session
+
+**Current Status:**
+- The code changes are in place; browser verification has not been performed in this session.
+
+---
+
 ## [2026-10-23] - Reuse and Pin Cell AI Prompts
 
 **What We Accomplished:**

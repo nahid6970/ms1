@@ -1,5 +1,24 @@
 # Problems & Fixes Log
 
+## [2026-11-20 13:00] - Cell Enter Handling and Trailing Blank Line
+
+**Problem:** Pressing Enter in a cell could fail to create a line break or disrupt further typing. Markdown edited cells could also gain an unwanted blank line at the end.
+
+**Root Cause:** Single-line `<input>` elements cannot store newlines, while custom Enter handling in textareas moved focus into the Markdown preview and risked disrupting the caret. Separately, `extractRawText()` added a structural newline after every nonempty block, including the final block; its cleanup intentionally kept one trailing newline, allowing that layout separator to be saved as cell content.
+
+**Solution:**
+1. Let textareas use native Enter behavior and keep focus in the textarea.
+2. Convert a plain text cell input to a textarea when Enter is pressed, insert the newline at the current selection, and save the value.
+3. Render values containing newlines as textareas even when wrapping is disabled.
+4. Add a structural newline after a block only when later content follows it. Explicit trailing `<br>` elements continue to represent user-entered line breaks.
+
+**Files Modified:**
+- `static/script.js` — cell Enter handling, multiline cell rendering, and `extractRawText()` block separators
+
+**Related Issues:** The trailing-line behavior is related to the earlier [Trailing Newlines Accumulation and List Inline Display](#2026-03-02-1854---trailing-newlines-accumulation-and-list-inline-display) fix, which capped repeated trailing newlines but still retained a single structural newline at the end.
+
+---
+
 ## [2026-08-23 12:14] - F3 Outside-Edit Shortcut and F10 Conflict
 
 **Problem:** F3 opened the Quick Formatter while editing a cell, but outside edit mode users had to use F10 to mark rendered text before returning to F3. Replacing F10 directly with F3 would make it difficult to open the formatter outside edit mode.
