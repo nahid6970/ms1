@@ -4051,6 +4051,19 @@ function highlightSyntax(text) {
 
 function extractRawText(element) {
     let text = '';
+    const hasFollowingContent = (node) => {
+        let sibling = node.nextSibling;
+        while (sibling) {
+            if (sibling.nodeType === Node.TEXT_NODE && !sibling.textContent.replace(/\u200B/g, '')) {
+                sibling = sibling.nextSibling;
+                continue;
+            }
+            // A BR already contributes the line break itself.
+            return sibling.nodeName !== 'BR';
+        }
+        return false;
+    };
+
     const walk = (node) => {
         if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('rendered-math-only')) {
             return; // Skip rendered math nodes
@@ -4071,9 +4084,9 @@ function extractRawText(element) {
                 text += '\n';
             }
             node.childNodes.forEach(walk);
-            // Add newline after DIV/P/TR unless it's empty or already ends with newline
-            // This ensures table lines and other block elements are properly separated
-            if (node.childNodes.length > 0 && !text.endsWith('\n')) {
+            // Add a structural separator only when more content follows this block.
+            // A final block's trailing newline is layout, not cell text.
+            if (node.childNodes.length > 0 && hasFollowingContent(node) && !text.endsWith('\n')) {
                 text += '\n';
             }
         } else {
