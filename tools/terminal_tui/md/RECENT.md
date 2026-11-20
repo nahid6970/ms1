@@ -10,7 +10,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Kept other project sync buttons available during a run so additional projects can be queued with a click; queued and active rows show their current state.
 - Moved each project's progress, recent file events, and expandable raw output into its card. Removed the entire bottom sync panel; overall progress and aggregate stats now appear in the modal header subtitle.
 - Clear stale difference-check details for a project as soon as it is queued, and keep older background-check results from restoring them after sync.
-- Standardized the project action buttons with matching dimensions and SVG icons; NOTICE and WARNING lines appear in recent file events and counts, not Raw output.
+- Standardized project actions as aligned, icon-only SVG buttons with accessible labels; the sync control uses a circular sync icon. NOTICE and WARNING lines appear in recent file events and counts, not Raw output.
 - Added a compact progress bar, transfer rate, file action and notice list, and completion/dry-run/error states; repeated idle stats display as "Scanning files…".
 - Added cumulative transferred bytes and average throughput to the sync progress summary.
 - Kept timestamped raw output available in a collapsed details section.
