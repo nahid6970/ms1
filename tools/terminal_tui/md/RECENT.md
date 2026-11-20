@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-21] - Push GitHub Projects from the Projects Modal
+
+- Added a per-project Push button in `#github-projects-modal` when the checked status reports one or more commits ahead of the remote.
+- Push uses the existing project Git push endpoint, then refreshes that project's ahead/behind and working-tree status so the Push action disappears when the remote is up to date.
+- Shows a clear note if the push succeeds but the follow-up status refresh fails.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.

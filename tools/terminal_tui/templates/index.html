@@ -10953,6 +10953,7 @@ kiro-cli whoami --format json</code></pre>
                     <div style="min-width:0;flex:1;"><div style="font-size:.83rem;font-weight:600;color:var(--text-primary);">${escapeHtml(project.name)}</div><div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${safeRemote}</div><div style="font-size:.64rem;color:${exists ? '#94a3b8' : '#fbbf24'};margin-top:3px;">${exists ? `Folder: ${escapeHtml(project.path || '')}` : 'Workspace folder missing'}${exists && empty ? ' · empty folder' : ''}</div>${status ? `<div style="font-size:.7rem;font-weight:500;color:${status.error ? '#f87171' : status.hasChanges ? '#94a3b8' : '#34d399'};margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><span>${escapeHtml(status.filesText || status.text)}</span>${status.insertions ? `<span style="color:#22c55e;">+${status.insertions}</span>` : ''}${status.deletions ? `<span style="color:#ef4444;">-${status.deletions}</span>` : ''}${status.remoteText ? `<span style="color:${status.ahead ? '#fbbf24' : '#94a3b8'};">${escapeHtml(status.remoteText)}</span>` : ''}</div>` : ''}</div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
                         <button type="button" class="github-project-select" data-project="${escapeHtml(project.name)}" title="Switch terminal to this project" style="${githubProjectActionStyle('#c4b5fd')}">Select</button>
+                        ${exists && Number(status?.ahead) > 0 && !status?.error ? `<button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="push" title="Push ${Number(status.ahead)} local commit${Number(status.ahead) === 1 ? '' : 's'} to GitHub" style="${githubProjectActionStyle('#22c55e')}">Push</button>` : ''}
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="pull" ${exists ? '' : 'disabled'} title="Pull using fast-forward only" style="${githubProjectActionStyle('#34d399')}">Pull</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="fetch" ${exists ? '' : 'disabled'} title="Fetch remote refs without changing files" style="${githubProjectActionStyle('#60a5fa')}">Fetch</button>
                         <button type="button" class="github-project-action" data-project="${escapeHtml(project.name)}" data-action="clone" ${exists && !empty ? 'disabled' : ''} title="Clone into the configured workspace path or its existing empty folder" style="${githubProjectActionStyle('#fbbf24')}">Clone</button>
@@ -11067,24 +11068,53 @@ kiro-cli whoami --format json</code></pre>
             const row = button.closest('div[style*="border:1px solid"]');
             const buttons = row ? row.querySelectorAll('button') : [button];
             buttons.forEach(item => { item.disabled = true; });
-            button.textContent = action === 'clone' ? 'Cloning…' : action === 'fetch' ? 'Fetching…' : 'Pulling…';
+            button.textContent = action === 'clone' ? 'Cloning…' : action === 'fetch' ? 'Fetching…' : action === 'push' ? 'Pushing…' : 'Pulling…';
             message.style.display = 'block';
             message.style.color = 'var(--text-secondary)';
             message.textContent = `${action[0].toUpperCase()}${action.slice(1)} ${name}…`;
             try {
-                const response = await fetch(`/api/project/${encodeURIComponent(name)}/git/sync-remote`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action })
-                });
+                const response = action === 'push'
+                    ? await fetch(`/api/project/${encodeURIComponent(name)}/git/push`, {method:'POST', headers:{'Content-Type':'application/json'}})
+                    : await fetch(`/api/project/${encodeURIComponent(name)}/git/sync-remote`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action })
+                    });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Git operation failed.');
                 projects = await (await fetch('/api/projects')).json();
                 handleSearch();
-                githubProjectStatusByName.delete(name);
+                let pushStatusRefreshFailed = false;
+                if (action === 'push') {
+                    const statusResponse = await fetch(`/api/project/${encodeURIComponent(name)}/git/sync-remote`, {
+                        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'status'})
+                    });
+                    const statusData = await statusResponse.json();
+                    if (!statusResponse.ok) {
+                        githubProjectStatusByName.delete(name);
+                        pushStatusRefreshFailed = true;
+                    } else {
+                        const filesText = statusData.dirtyCount
+                            ? `${statusData.dirtyCount} file${statusData.dirtyCount === 1 ? '' : 's'} changed`
+                            : 'Working tree clean';
+                        const remoteParts = [];
+                        if (statusData.ahead) remoteParts.push(`${statusData.ahead} to push`);
+                        if (statusData.behind) remoteParts.push(`${statusData.behind} to pull`);
+                        const remoteText = !statusData.remoteBranchExists
+                            ? `${statusData.ahead} commit${statusData.ahead === 1 ? '' : 's'} to push · remote branch missing`
+                            : remoteParts.join(' · ');
+                        githubProjectStatusByName.set(name, {
+                            ...statusData, filesText, remoteText, checkedAt:Date.now(),
+                            hasChanges:!!(statusData.dirtyCount || statusData.ahead || statusData.behind || !statusData.remoteBranchExists),
+                            text:`${filesText}${remoteText ? ` · ${remoteText}` : ''}`
+                        });
+                    }
+                } else githubProjectStatusByName.delete(name);
                 renderGitHubProjectsModal();
                 updateProjectChangeBadges();
                 message.style.display = 'block';
-                message.style.color = '#34d399';
-                message.textContent = `${action[0].toUpperCase()}${action.slice(1)} completed for ${name}.`;
+                message.style.color = pushStatusRefreshFailed ? '#fbbf24' : '#34d399';
+                message.textContent = pushStatusRefreshFailed
+                    ? `Push completed for ${name}, but its status could not be refreshed. Run Check all to update it.`
+                    : `${action[0].toUpperCase()}${action.slice(1)} completed for ${name}.`;
             } catch (err) {
                 message.style.display = 'block';
                 message.style.color = '#f87171';
