@@ -6,6 +6,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.
+- Added a Sync all header action that runs configured projects sequentially and reports overall project progress, aggregate bytes transferred, and average throughput.
 - Added a compact progress bar, transfer rate, file action and notice list, and completion/dry-run/error states; repeated idle stats display as "Scanning files…".
 - Added cumulative transferred bytes and average throughput to the sync progress summary.
 - Kept timestamped raw output available in a collapsed details section.
