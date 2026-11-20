@@ -4806,18 +4806,10 @@ kiro-cli whoami --format json</code></pre>
                     <span id="rclone-projects-sync-progress-label">Preparing sync…</span>
                     <span id="rclone-projects-sync-progress-rate"></span>
                 </div>
-                <div style="height:5px;overflow:hidden;border-radius:8px;background:rgba(148,163,184,.18);margin-bottom:8px;">
-                    <div id="rclone-projects-sync-progress-bar" style="height:100%;width:0;background:linear-gradient(90deg,#22c55e,#86efac);transition:width .25s ease;"></div>
-                </div>
                 <div style="display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 7px;font-size:.62rem;color:var(--text-muted);">
                     <span id="rclone-projects-sync-total">Transferred 0 B</span>
                     <span id="rclone-projects-sync-average">Average speed —</span>
                 </div>
-                <div id="rclone-projects-sync-activity" style="max-height:106px;overflow:auto;display:flex;flex-direction:column;gap:3px;"></div>
-                <details style="margin-top:6px;">
-                    <summary id="rclone-projects-sync-raw-toggle" style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:4px 8px;border:1px solid rgba(251,146,60,.38);border-radius:6px;background:rgba(251,146,60,.09);color:#fb923c;font-size:.62rem;font-weight:600;transition:background .15s,border-color .15s;" onmouseenter="this.style.background='rgba(251,146,60,.16)';this.style.borderColor='rgba(251,146,60,.65)'" onmouseleave="this.style.background='rgba(251,146,60,.09)';this.style.borderColor='rgba(251,146,60,.38)'">Raw output</summary>
-                    <pre id="rclone-projects-sync-log" style="box-sizing:border-box;max-height:120px;overflow:auto;margin:5px 0 0;padding:7px 9px;border-radius:6px;background:rgba(0,0,0,.28);color:#94a3b8;font:.6rem/1.45 'Fira Code',monospace;white-space:pre-wrap;word-break:break-word;"></pre>
-                </details>
             </section>
             <div id="rclone-projects-message" role="status" style="display:none;padding:8px 18px;border-top:1px solid var(--border-color);font-size:.75rem;color:var(--text-secondary);"></div>
         </div>
@@ -10193,6 +10185,14 @@ kiro-cli whoami --format json</code></pre>
         }
 
         const rcloneProjectStatusByName = new Map();
+        const rcloneModalSyncStatusByName = new Map();
+        function syncStatusSummaryBytes(bytes) {
+            const value = Number(bytes) || 0;
+            if (value < 1024) return `${Math.round(value)} B`;
+            const units = ['KiB','MiB','GiB','TiB'];
+            const unitIndex = Math.min(Math.floor(Math.log(value) / Math.log(1024)) - 1, units.length - 1);
+            return `${(value / Math.pow(1024, unitIndex + 1)).toFixed(2)} ${units[unitIndex]}`;
+        }
         function openRcloneProjectsModal() {
             renderRcloneProjectsModal();
             document.getElementById('rclone-projects-modal').classList.add('show');
@@ -10287,6 +10287,24 @@ kiro-cli whoami --format json</code></pre>
                 const checkedLabel = status?.checkedAt
                     ? `<span style="font-size:.6rem;color:var(--text-muted);margin-left:4px;">· ${new Intl.DateTimeFormat(undefined,{timeStyle:'short'}).format(status.checkedAt)}</span>`
                     : '';
+                const syncStatus = rcloneModalSyncStatusByName.get(project.name);
+                let syncStatusHtml = '';
+                if (syncStatus?.state === 'queued') {
+                    syncStatusHtml = '<div style="margin-top:5px;font-size:.66rem;color:#fbbf24;">◷ Queued for sync</div>';
+                } else if (syncStatus?.state === 'syncing') {
+                    syncStatusHtml = `<div style="margin-top:6px;display:flex;align-items:center;gap:6px;font-size:.66rem;color:#60a5fa;"><span style="width:7px;height:7px;border-radius:50%;background:#60a5fa;animation:pulse 1.2s infinite;"></span>Syncing · ${Math.floor(syncStatus.progress || 0)}%</div><div style="height:3px;margin-top:4px;overflow:hidden;border-radius:5px;background:rgba(148,163,184,.16);"><div style="height:100%;width:${Math.max(0,Math.min(100,Number(syncStatus.progress)||0))}%;background:#60a5fa;transition:width .3s;"></div></div>`;
+                } else if (syncStatus?.state === 'synced') {
+                    const syncSummary = [`${Number(syncStatus.copied || 0)} copied`, `${Number(syncStatus.removed || 0)} removed`, `${Number(syncStatus.notices || 0)} notices`].join(' · ');
+                    syncStatusHtml = `<div style="margin-top:5px;font-size:.66rem;color:#34d399;">✓ Synced · ${escapeHtml(syncStatusSummaryBytes(syncStatus.bytes))} · ${escapeHtml(syncSummary)}</div>`;
+                } else if (syncStatus?.state === 'failed') {
+                    syncStatusHtml = `<div style="margin-top:5px;font-size:.66rem;color:#f87171;">Sync failed · ${escapeHtml(syncStatus.error || 'Rclone sync failed.')}</div>`;
+                }
+                const syncFileEventsHtml = syncStatus?.fileEvents?.length
+                    ? `<div style="display:flex;flex-direction:column;gap:2px;margin-top:5px;max-height:76px;overflow:auto;">${syncStatus.fileEvents.slice(-8).map(item => `<div style="display:flex;align-items:flex-start;gap:6px;padding:2px 5px;border-radius:4px;background:rgba(148,163,184,.05);font-size:.61rem;line-height:1.4;"><span style="flex-shrink:0;color:${item.color};font-weight:700;">${escapeHtml(item.kind)}</span><code title="${escapeHtml(item.text)}" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;font:inherit;">${escapeHtml(item.text)}</code></div>`).join('')}</div>`
+                    : '';
+                const syncRawOutputHtml = syncStatus?.rawOutput?.length
+                    ? `<details class="rclone-project-sync-raw" data-project="${escapeHtml(project.name)}" ${syncStatus.rawOpen ? 'open' : ''} style="margin-top:5px;"><summary style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 7px;border:1px solid rgba(251,146,60,.35);border-radius:5px;background:rgba(251,146,60,.07);color:#fb923c;font-size:.59rem;font-weight:600;">Raw output · ${syncStatus.rawOutput.length} lines</summary><pre style="box-sizing:border-box;max-height:110px;overflow:auto;margin:4px 0 0;padding:6px 8px;border-radius:5px;background:rgba(0,0,0,.22);color:#94a3b8;font:.58rem/1.45 'Fira Code',monospace;white-space:pre-wrap;word-break:break-word;">${escapeHtml(syncStatus.rawOutput.join('\n'))}</pre></details>`
+                    : '';
                 const isInSyncBatch = !!(rcloneModalSyncRunning && rcloneModalSyncQueue?.some(item => item.name === project.name));
                 const syncButtonLabel = isInSyncBatch
                     ? (rcloneModalSyncCurrentProject === project.name ? 'Syncing…' : rcloneModalSyncCompletedProjects.has(project.name) ? 'Done' : 'Queued')
@@ -10300,6 +10318,9 @@ kiro-cli whoami --format json</code></pre>
                         <div style="font-size:.66rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;">${escapeHtml(project.rcloneDestination || 'Configured Rclone remote')}</div>
                         <div style="font-size:.64rem;color:${project.pathExists ? '#94a3b8' : '#f87171'};margin-top:2px;">${project.pathExists ? escapeHtml(project.path || '') : 'Workspace folder missing'}</div>
                         ${statusHtml}
+                        ${syncStatusHtml}
+                        ${syncFileEventsHtml}
+                        ${syncRawOutputHtml}
                     </div>
                     <div style="display:flex;gap:5px;flex-shrink:0;">
                         <button type="button" class="rclone-project-select" data-project="${escapeHtml(project.name)}" style="padding:6px 9px;border:1px solid rgba(196,181,253,.45);border-radius:6px;background:rgba(196,181,253,.08);color:#c4b5fd;font-size:.68rem;font-weight:600;cursor:pointer;">Select</button>
@@ -10317,6 +10338,10 @@ kiro-cli whoami --format json</code></pre>
                 }
                 button.addEventListener('click', () => syncRcloneProjectToDestination(projectName, button));
             });
+            list.querySelectorAll('.rclone-project-sync-raw').forEach(details => details.addEventListener('toggle', () => {
+                const syncStatus = rcloneModalSyncStatusByName.get(details.dataset.project);
+                if (syncStatus) syncStatus.rawOpen = details.open;
+            }));
             const rcloneMessage = document.getElementById('rclone-projects-message');
             if (rcloneMessage && !rcloneProjectCheckRunning) {
                 const checkedRclone = linked.filter(p => rcloneProjectStatusByName.has(p.name) && rcloneProjectStatusByName.get(p.name).checkedAt);
@@ -10343,20 +10368,26 @@ kiro-cli whoami --format json</code></pre>
         let rcloneModalSyncQueue = null;
         let rcloneModalSyncCurrentProject = '';
         let rcloneModalSyncCompletedProjects = new Set();
+        let rcloneSyncCardRenderPending = false;
+        function scheduleRcloneSyncCardRender() {
+            if (rcloneSyncCardRenderPending) return;
+            rcloneSyncCardRenderPending = true;
+            requestAnimationFrame(() => {
+                rcloneSyncCardRenderPending = false;
+                if (rcloneModalSyncRunning && document.getElementById('rclone-projects-modal')?.classList.contains('show')) renderRcloneProjectsModal();
+            });
+        }
         async function syncRcloneProjectToDestination(projectName, button, direction = 'src_to_dst') {
             const project = (projects || []).find(item => item.name === projectName && item.pathExists && item.hasRcloneDestination);
             if (!project) return;
             if (rcloneModalSyncRunning) {
                 if (!rcloneModalSyncQueue || rcloneModalSyncQueue.some(item => item.name === project.name)) return;
-                const oldLength = rcloneModalSyncQueue.length;
-                const progressBar = document.getElementById('rclone-projects-sync-progress-bar');
-                const oldProgress = Number.parseFloat(progressBar?.style.width) || 0;
                 rcloneModalSyncQueue.push(project);
-                if (progressBar) progressBar.style.width = `${oldProgress * oldLength / rcloneModalSyncQueue.length}%`;
                 const title = document.getElementById('rclone-projects-sync-title');
                 if (title && rcloneModalSyncQueue.length > 1) title.textContent = `${rcloneModalSyncQueue.length} projects · SRC → DST`;
                 const progressLabel = document.getElementById('rclone-projects-sync-progress-label');
                 if (progressLabel) progressLabel.textContent = `Added ${project.name} · ${Math.max(0, rcloneModalSyncQueue.length - rcloneModalSyncCompletedProjects.size - 1)} queued`;
+                rcloneModalSyncStatusByName.set(project.name, {state:'queued', fileEvents:[], rawOutput:[]});
                 renderRcloneProjectsModal();
                 return;
             }
@@ -10372,17 +10403,14 @@ kiro-cli whoami --format json</code></pre>
             rcloneModalSyncQueue = syncProjects;
             rcloneModalSyncCurrentProject = '';
             rcloneModalSyncCompletedProjects = new Set();
+            syncProjects.forEach(project => rcloneModalSyncStatusByName.set(project.name, {state:'queued', fileEvents:[], rawOutput:[]}));
             const output = document.getElementById('rclone-projects-sync-output');
-            const log = document.getElementById('rclone-projects-sync-log');
-            const activity = document.getElementById('rclone-projects-sync-activity');
             const title = document.getElementById('rclone-projects-sync-title');
             const state = document.getElementById('rclone-projects-sync-state');
             const progressLabel = document.getElementById('rclone-projects-sync-progress-label');
             const progressRate = document.getElementById('rclone-projects-sync-progress-rate');
-            const progressBar = document.getElementById('rclone-projects-sync-progress-bar');
             const transferredTotal = document.getElementById('rclone-projects-sync-total');
             const averageSpeed = document.getElementById('rclone-projects-sync-average');
-            const rawToggle = document.getElementById('rclone-projects-sync-raw-toggle');
             const closeOutput = document.getElementById('rclone-projects-sync-close');
             const syncAllButton = document.getElementById('rclone-projects-sync-all');
             if (syncAllButton) syncAllButton.disabled = true;
@@ -10392,13 +10420,12 @@ kiro-cli whoami --format json</code></pre>
             title.textContent = syncProjects.length === 1 ? `${syncProjects[0].name} · ${directionLabel}` : `${syncProjects.length} projects · ${directionLabel}`;
             state.textContent = 'Starting…'; state.style.color = 'var(--text-secondary)';
             progressLabel.textContent = syncProjects.length === 1 ? 'Preparing sync…' : `Preparing ${syncProjects.length} projects…`;
-            progressRate.textContent = ''; progressBar.style.width = '0%';
+            progressRate.textContent = '';
             transferredTotal.textContent = 'Transferred 0 B'; averageSpeed.textContent = 'Average speed —';
-            log.textContent = ''; activity.replaceChildren();
-            rawToggle.textContent = 'Raw output'; rawToggle.parentElement.open = false;
             const actionCounts = {copied:0, removed:0, warning:0, errors:0};
             let syncStartedAt = performance.now(), completedBytes = 0, currentProjectBytes = 0, activeProjectName = '', activeProjectIndex = 0;
             let completedProjects = 0, failedProjects = 0, dryRunProjects = 0;
+            let currentProjectCounts = {copied:0, removed:0, notices:0};
             const parseBytes = value => {
                 const match = String(value).trim().match(/^([\d.]+)\s*(B|KiB|MiB|GiB|TiB|PiB|KB|MB|GB|TB)$/i);
                 if (!match) return 0;
@@ -10418,16 +10445,20 @@ kiro-cli whoami --format json</code></pre>
                 transferredTotal.textContent = `Transferred ${formatBytes(transferredBytes)}`;
                 averageSpeed.textContent = `Average speed ${formatBytes(transferredBytes / elapsedSeconds)}/s`;
             };
-            const addActivity = (kind, text, color) => {
-                const row = document.createElement('div');
-                row.style.cssText = 'display:flex;align-items:flex-start;gap:7px;padding:3px 6px;border-radius:4px;background:rgba(148,163,184,.055);font-size:.63rem;line-height:1.4;';
-                const badge = document.createElement('span'); badge.textContent = kind;
-                badge.style.cssText = `flex-shrink:0;font-size:.57rem;font-weight:700;color:${color};`;
-                const detail = document.createElement('span'); detail.textContent = `${activeProjectName}: ${text}`;
-                detail.style.cssText = 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;';
-                detail.title = text; row.append(badge, detail); activity.appendChild(row);
-                while (activity.children.length > 40) activity.firstElementChild.remove();
-                activity.scrollTop = activity.scrollHeight;
+            const addProjectFileEvent = (kind, text, color) => {
+                const previous = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                const fileEvents = [...(previous.fileEvents || []), {kind, text, color}].slice(-8);
+                rcloneModalSyncStatusByName.set(activeProjectName, {
+                    ...previous, state:'syncing', bytes:currentProjectBytes,
+                    ...currentProjectCounts, fileEvents
+                });
+                scheduleRcloneSyncCardRender();
+            };
+            const appendProjectRawOutput = line => {
+                const previous = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                const rawOutput = [...(previous.rawOutput || []), line].slice(-500);
+                rcloneModalSyncStatusByName.set(activeProjectName, {...previous, rawOutput});
+                scheduleRcloneSyncCardRender();
             };
             const consumeRcloneOutput = line => {
                 const levelMatch = line.match(/\b(INFO|NOTICE|WARNING|ERROR)\s*:\s*/i);
@@ -10441,24 +10472,22 @@ kiro-cli whoami --format json</code></pre>
                     const isScanning = stat[1].trim() === '0 B' && stat[2].trim() === '0 B';
                     const projectProgress = Number.isFinite(percent) ? Math.max(0, Math.min(100, percent)) : 0;
                     const overallProgress = ((activeProjectIndex + projectProgress / 100) / syncProjects.length) * 100;
-                    progressBar.style.width = `${overallProgress}%`;
+                    const previousSyncStatus = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                    rcloneModalSyncStatusByName.set(activeProjectName, { ...previousSyncStatus, state:'syncing', progress:projectProgress, bytes:currentProjectBytes, ...currentProjectCounts });
+                    renderRcloneProjectsModal();
                     progressLabel.textContent = syncProjects.length > 1
                         ? `Project ${activeProjectIndex + 1}/${syncProjects.length} · ${Math.floor(overallProgress)}% overall${isScanning ? ' · Scanning files…' : stat[7] ? ` · ${stat[6]}/${stat[7]} transfers` : ''}`
                         : isScanning ? 'Scanning files…' : stat[7] ? `${stat[6]} of ${stat[7]} transfers · ${stat[1]} of ${stat[2]}` : `${stat[1]} of ${stat[2]}`;
                     progressRate.textContent = isScanning ? '' : `${stat[4].trim()} · ETA ${stat[5]}`;
                     return;
                 }
-                // Keep per-file events in Raw output; the repetitive transfer
-                // statistics above are already represented by the progress UI.
-                log.textContent += `${syncProjects.length > 1 ? `${activeProjectName}: ` : ''}${line}\n`;
-                const rawLines = log.textContent.split('\n');
-                if (rawLines.length > 501) log.textContent = rawLines.slice(-501).join('\n');
-                rawToggle.textContent = `Raw output · ${Math.min(500, rawLines.length - 1)} lines`;
+                // Keep file and notice lines in the matching project card's raw output.
+                appendProjectRawOutput(line);
                 if (/^Set directory modification time/i.test(message)) return;
-                if (/^Copied(?: \(|$)/i.test(message)) { actionCounts.copied++; addActivity('COPIED', message, '#4ade80'); }
-                else if (/^(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; addActivity('REMOVED', message, '#fb923c'); }
-                else if (level === 'ERROR') { actionCounts.errors++; addActivity('ERROR', message, '#f87171'); }
-                else if (level === 'WARNING' || level === 'NOTICE') { actionCounts.warning++; addActivity('NOTICE', message, '#fbbf24'); }
+                if (/^Copied(?: \(|$)/i.test(message)) { actionCounts.copied++; currentProjectCounts.copied++; addProjectFileEvent('COPIED', message, '#4ade80'); }
+                else if (/^(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; currentProjectCounts.removed++; addProjectFileEvent('REMOVED', message, '#fb923c'); }
+                else if (level === 'ERROR') { actionCounts.errors++; addProjectFileEvent('ERROR', message, '#f87171'); }
+                else if (level === 'WARNING' || level === 'NOTICE') { actionCounts.warning++; currentProjectCounts.notices++; addProjectFileEvent('NOTICE', message, '#fbbf24'); }
             };
             output.scrollIntoView({behavior:'smooth', block:'nearest'});
             try {
@@ -10467,6 +10496,8 @@ kiro-cli whoami --format json</code></pre>
                     activeProjectName = syncProjects[projectIndex].name;
                     rcloneModalSyncCurrentProject = activeProjectName;
                     currentProjectBytes = 0;
+                    currentProjectCounts = {copied:0, removed:0, notices:0};
+                    rcloneModalSyncStatusByName.set(activeProjectName, {state:'syncing', progress:0, bytes:0, ...currentProjectCounts, fileEvents:[], rawOutput:[]});
                     renderRcloneProjectsModal();
                     title.textContent = syncProjects.length === 1 ? `${activeProjectName} · ${directionLabel}` : `${syncProjects.length} projects · ${directionLabel}`;
                     state.textContent = syncProjects.length > 1 ? `Project ${projectIndex + 1}/${syncProjects.length}` : 'Connecting…';
@@ -10502,18 +10533,21 @@ kiro-cli whoami --format json</code></pre>
                         if (pending.trim()) consumeRcloneOutput(pending);
                         if (returnCode !== 0) throw new Error(`Rclone exited with code ${returnCode ?? 'unknown'}.`);
                         completedBytes += currentProjectBytes;
+                        const previousSyncStatus = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                        rcloneModalSyncStatusByName.set(activeProjectName, { ...previousSyncStatus, state:'synced', progress:100, bytes:currentProjectBytes, ...currentProjectCounts });
                         currentProjectBytes = 0;
                         completedProjects++;
                     } catch (error) {
                         actionCounts.errors++;
-                        addActivity('ERROR', error?.message || 'Rclone sync failed.', '#f87171');
-                        log.textContent += `${activeProjectName}: ERROR: ${error?.message || 'Rclone sync failed.'}\n`;
+                        addProjectFileEvent('ERROR', error?.message || 'Rclone sync failed.', '#f87171');
+                        appendProjectRawOutput(`ERROR: ${error?.message || 'Rclone sync failed.'}`);
                         failedProjects++;
+                        const previousSyncStatus = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                        rcloneModalSyncStatusByName.set(activeProjectName, { ...previousSyncStatus, state:'failed', error:error?.message || 'Rclone sync failed.', bytes:currentProjectBytes, ...currentProjectCounts });
                         completedBytes += currentProjectBytes;
                         currentProjectBytes = 0;
                     }
                     const overallProgress = ((projectIndex + 1) / syncProjects.length) * 100;
-                    progressBar.style.width = `${overallProgress}%`;
                     rcloneModalSyncCompletedProjects.add(activeProjectName);
                     rcloneModalSyncCurrentProject = '';
                     renderRcloneProjectsModal();
@@ -10523,7 +10557,6 @@ kiro-cli whoami --format json</code></pre>
                     }
                     updateTransferTotals();
                 }
-                progressBar.style.width = '100%';
                 progressLabel.textContent = `${completedProjects}/${syncProjects.length} projects · ${actionCounts.copied} copied · ${actionCounts.removed} removed · ${actionCounts.warning} notices`;
                 progressRate.textContent = '';
                 if (failedProjects) {
