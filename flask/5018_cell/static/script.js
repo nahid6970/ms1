@@ -6151,7 +6151,8 @@ function parseMarkdownCore(text, cellStyle = {}) {
             isGrid: b.grid
         }));
 
-        // Join blocks with a newline only if needed (block-aware)
+        // Join blocks without adding whitespace for ordinary adjacency, while
+        // retaining a full blank line when one was present in the source.
         return processedBlocks.reduce((acc, item, i) => {
             if (i === 0) return item.content;
 
@@ -6161,10 +6162,14 @@ function parseMarkdownCore(text, cellStyle = {}) {
                 return t.endsWith('</div>') || t.endsWith('</span>') && t.includes('display: inline-block');
             };
 
-            // If either block is a block element, skip redundant newline
+            // Block layout supplies the line boundary when blocks are adjacent.
+            // Before a grid table, one extra separator is needed because the
+            // existing trailing newline otherwise gets absorbed by block layout.
+            // After a table, the following content's leading newline is sufficient.
             if ((prev.isGrid || item.isGrid || isBlock(prev.content) || isBlock(item.content)) && 
                 item.content.trim() !== '' && prev.content.trim() !== '') {
-                return acc + item.content;
+                const needsExtraGapBeforeGrid = item.isGrid && prev.content.endsWith('\n');
+                return acc + (needsExtraGapBeforeGrid ? '\n' : '') + item.content;
             }
 
             return acc + '\n' + item.content;
