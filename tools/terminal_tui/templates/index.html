@@ -10625,6 +10625,7 @@ kiro-cli whoami --format json</code></pre>
 
         const githubProjectStatusByName = new Map();
         let githubProjectCommitContext = null;
+        let githubProjectCommitCloseTimer = null;
         let githubProjectCheckRunning = false;
         let projectAutoCheckCountdownTimer = null;
         let projectAutoCheckStatusPollTimer = null;
@@ -11000,6 +11001,8 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function closeGitHubProjectCommitPanel() {
+            clearTimeout(githubProjectCommitCloseTimer);
+            githubProjectCommitCloseTimer = null;
             githubProjectCommitContext = null;
             document.getElementById('github-project-commit-panel').style.display = 'none';
         }
@@ -11014,6 +11017,8 @@ kiro-cli whoami --format json</code></pre>
             const apiKey = localStorage.getItem('gemini-api-key') || '';
             const project = (projects || []).find(item => item.name === projectName);
             if (!project || !project.pathExists) return;
+            clearTimeout(githubProjectCommitCloseTimer);
+            githubProjectCommitCloseTimer = null;
             githubProjectCommitContext = {projectName, files:[]};
             panel.style.display = 'block';
             title.textContent = `Commit changes · ${projectName}`;
@@ -11121,6 +11126,9 @@ kiro-cli whoami --format json</code></pre>
                 } catch (_) { /* The commit succeeded; keep the current project list visible. */ }
                 renderGitHubProjectsModal();
                 updateProjectChangeBadges();
+                githubProjectCommitCloseTimer = setTimeout(() => {
+                    if (githubProjectCommitContext?.projectName === projectName) closeGitHubProjectCommitPanel();
+                }, 3500);
             } catch (error) {
                 status.style.color = '#f87171';
                 status.textContent = error?.message || 'Commit failed.';
