@@ -10291,10 +10291,10 @@ kiro-cli whoami --format json</code></pre>
                 } else if (syncStatus?.state === 'failed') {
                     syncStatusHtml = `<div style="margin-top:5px;font-size:.66rem;color:#f87171;">Sync failed · ${escapeHtml(syncStatus.error || 'Rclone sync failed.')}</div>`;
                 }
-                const syncFileEventsHtml = syncStatus?.fileEvents?.length
+                const syncFileEventsHtml = !syncStatus?.nothingToTransfer && syncStatus?.fileEvents?.length
                     ? `<div style="display:flex;flex-direction:column;gap:2px;margin-top:5px;max-height:76px;overflow:auto;">${syncStatus.fileEvents.slice(-8).map(item => `<div style="display:flex;align-items:flex-start;gap:6px;padding:2px 5px;border-radius:4px;background:rgba(148,163,184,.05);font-size:.61rem;line-height:1.4;"><span style="flex-shrink:0;color:${item.color};font-weight:700;">${escapeHtml(item.kind)}</span><code title="${escapeHtml(item.text)}" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cbd5e1;font:inherit;">${escapeHtml(item.text)}</code></div>`).join('')}</div>`
                     : '';
-                const syncRawOutputHtml = syncStatus?.rawOutput?.length
+                const syncRawOutputHtml = !syncStatus?.nothingToTransfer && syncStatus?.rawOutput?.length
                     ? `<details class="rclone-project-sync-raw" data-project="${escapeHtml(project.name)}" ${syncStatus.rawOpen ? 'open' : ''} style="margin-top:5px;"><summary style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:3px 7px;border:1px solid rgba(251,146,60,.35);border-radius:5px;background:rgba(251,146,60,.07);color:#fb923c;font-size:.59rem;font-weight:600;">Raw output · ${syncStatus.rawOutput.length} lines</summary><pre style="box-sizing:border-box;max-height:110px;overflow:auto;margin:4px 0 0;padding:6px 8px;border-radius:5px;background:rgba(0,0,0,.22);color:#94a3b8;font:.58rem/1.45 'Fira Code',monospace;white-space:pre-wrap;word-break:break-word;">${escapeHtml(syncStatus.rawOutput.join('\n'))}</pre></details>`
                     : '';
                 const syncButtonLabel = isInSyncBatch
@@ -10444,6 +10444,13 @@ kiro-cli whoami --format json</code></pre>
                 const levelMatch = line.match(/\b(INFO|NOTICE|WARNING|ERROR)\s*:\s*/i);
                 const level = levelMatch?.[1]?.toUpperCase() || '';
                 const message = levelMatch ? line.slice(levelMatch.index + levelMatch[0].length).trim() : line.trim();
+                const previousSyncStatus = rcloneModalSyncStatusByName.get(activeProjectName) || {};
+                if (/^There was nothing to transfer\.?$/i.test(message)) {
+                    rcloneModalSyncStatusByName.set(activeProjectName, {...previousSyncStatus, nothingToTransfer:true, fileEvents:[], rawOutput:[]});
+                    scheduleRcloneSyncCardRender();
+                    return;
+                }
+                if (previousSyncStatus.nothingToTransfer) return;
                 const stat = line.match(/([\d.]+\s*[KMGTPE]?i?B)\s*\/\s*([\d.]+\s*[KMGTPE]?i?B),\s*([\d-]+)%?,\s*([^,]+),\s*ETA\s*([^\s(]+)(?:\s+\(xfr#(\d+)\/(\d+)\))?/i);
                 if (stat) {
                     const percent = Number.parseInt(stat[3], 10);

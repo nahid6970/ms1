@@ -12,6 +12,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Clear stale difference-check details for a project as soon as it is queued, and keep older background-check results from restoring them after sync.
 - Standardized project actions as aligned, icon-only SVG buttons with accessible labels; the sync control uses a circular sync icon. NOTICE and WARNING lines appear in recent file events and counts, not Raw output.
 - Added a compact progress bar, transfer rate, file action and notice list, and completion/dry-run/error states; repeated idle stats display as "Scanning files…".
+- When Rclone reports there was nothing to transfer, hide the empty raw output and recent event list while retaining the concise synced summary and counts.
 - Added cumulative transferred bytes and average throughput to the sync progress summary.
 - Kept timestamped raw output available in a collapsed details section.
 - Added `POST /api/project/<project>/rclone/sync-stream`, which uses the project's saved destination, flags, transfer count, and exclude patterns and streams newline-delimited JSON.
