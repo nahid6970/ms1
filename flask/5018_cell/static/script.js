@@ -1189,6 +1189,23 @@ function moveF10SelectionVertical(direction, extend = false) {
 
 function handleF10ActiveKey(e) {
     if (!f10FormatterAnchor) return false;
+
+    // F10/F3 outside-edit selection is only meaningful while editing is inactive.
+    // If the user enters a cell while that selection is still armed, the global
+    // capture-phase handler must not consume Enter or ordinary typing in the cell.
+    const activeElement = document.activeElement;
+    const eventTarget = e.target;
+    const isCellEditor = (element) => element && (
+        (element.isContentEditable && element.classList.contains('markdown-preview')) ||
+        ((element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') &&
+            element.closest('td:not(.row-number)'))
+    );
+    const editingCell = isCellEditor(activeElement) || isCellEditor(eventTarget);
+    if (editingCell) {
+        clearF10SelectionMode();
+        return false;
+    }
+
     const input = getF10CurrentInput();
     if (!input) {
         clearF10SelectionMode();
@@ -2050,12 +2067,64 @@ function handleKeyboardShortcuts(e) {
         const textarea = document.activeElement;
         // Check if it's not a merged cell textarea (those already handle Enter properly)
         if (!textarea.closest('td.merged-cell')) {
-            // Allow Enter to create new line in wrapped cells
-            // The default behavior is what we want, so we don't prevent it
-            // Just trigger auto-resize after a short delay
+            // Textareas already insert a newline natively. Keep focus and selection
+            // in this editor; moving to the markdown preview here can lose keystrokes.
             setTimeout(() => {
-                autoResizeTextarea(textarea);
+                if (textarea.isConnected) autoResizeTextarea(textarea);
             }, 10);
+        }
+    }
+
+    // A single-line input cannot represent a newline. Switch text cells to a
+    // textarea on Enter, preserving the value and caret, then save the new value.
+    if (e.key === 'Enter' && document.activeElement.tagName === 'INPUT' &&
+        document.activeElement.type === 'text') {
+        const input = document.activeElement;
+        const cell = input.closest('td:not(.row-number)');
+        if (cell && !cell.classList.contains('merged-cell')) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const start = input.selectionStart ?? input.value.length;
+            const end = input.selectionEnd ?? start;
+            const nextValue = input.value.slice(0, start) + '\n' + input.value.slice(end);
+            const textarea = document.createElement('textarea');
+            textarea.rows = 1;
+            textarea.value = nextValue;
+            textarea.className = input.className;
+            textarea.style.cssText = input.style.cssText;
+            textarea.style.whiteSpace = 'pre-wrap';
+            textarea.style.wordWrap = 'break-word';
+
+            const rowIndex = Number(cell.dataset.row);
+            const colIndex = Number(cell.dataset.col);
+            textarea.onchange = () => updateCell(rowIndex, colIndex, textarea.value, textarea);
+            textarea.oninput = () => {
+                autoResizeTextarea(textarea);
+                updateCell(rowIndex, colIndex, textarea.value, textarea);
+                keepCursorCentered(textarea);
+            };
+            textarea.onfocus = () => {
+                lastFocusedCell = { row: rowIndex, col: colIndex };
+            };
+            textarea.oncontextmenu = (event) => showCellContextMenu(event, rowIndex, colIndex, textarea, cell);
+            textarea.onmousedown = (event) => {
+                if (event.shiftKey) {
+                    event.preventDefault();
+                    startCellSelection(rowIndex, colIndex, cell);
+                }
+            };
+            textarea.onmouseenter = () => {
+                if (isSelecting) addToSelection(rowIndex, colIndex, cell);
+            };
+
+            cell.classList.add('has-textarea');
+            input.replaceWith(textarea);
+            updateCell(rowIndex, colIndex, nextValue, textarea);
+            textarea.focus({ preventScroll: true });
+            textarea.setSelectionRange(start + 1, start + 1);
+            autoResizeTextarea(textarea);
         }
     }
 }
@@ -4598,6 +4667,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
 
             if (e.key === 'Enter') {
                 e.preventDefault();
+                e.stopPropagation();
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
@@ -4620,6 +4690,9 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                     // Update the underlying input value WITHOUT triggering full re-render
                     inputElement.value = extractRawText(preview);
 
+                    // Update line count so the input handler doesn't think a change occurred
+                    preview._previousLineCount = (inputElement.value.match(/\n/g) || []).length;
+
                     // Save data
                     const sheet = tableData.sheets[currentSheet];
                     sheet.rows[rowIndex][colIndex] = inputElement.value;
@@ -4641,6 +4714,7 @@ function applyMarkdownFormatting(rowIndex, colIndex, value, inputElement = null)
                         if (br && br.scrollIntoView) {
                             br.scrollIntoView({ block: 'nearest', behavior: 'instant' });
                         }
+
                     });
                 }
             }
@@ -11506,7 +11580,7 @@ function renderTable(preserveScroll = true) {
             const hasMarkdown = checkHasMarkdown(cellValue);
             let input;
 
-            if ((wrapEnabled || hasMarkdown) && isTextType) {
+            if ((wrapEnabled || hasMarkdown || cellValue.includes('\n')) && isTextType) {
                 input = document.createElement('textarea');
                 input.rows = 1;
                 // Preserve newlines in the value
