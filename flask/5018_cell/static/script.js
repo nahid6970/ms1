@@ -15847,27 +15847,147 @@ function showCategoryColorPicker(categoryName) {
     const fgColor = style.fgColor || '#e0e0e0';
     const bgColor = style.bgColor || '#0d0d0d';
 
-    let newBg = prompt('Enter background color for category (hex, e.g., #ff0000) or leave empty to reset:', bgColor);
-    if (newBg === null) return; // Cancelled
-    if (newBg && !newBg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newBg)) newBg = '#' + newBg;
+    document.getElementById('categoryColorPickerOverlay')?.remove();
 
-    let newFg = prompt('Enter text color for category (hex, e.g., #ffffff) or leave empty to reset:', fgColor);
-    if (newFg === null) return; // Cancelled
-    if (newFg && !newFg.startsWith('#') && /^[0-9A-Fa-f]{3,6}$/.test(newFg)) newFg = '#' + newFg;
+    const overlay = document.createElement('div');
+    overlay.id = 'categoryColorPickerOverlay';
+    overlay.className = 'category-color-picker-overlay';
+    const handlePickerEscape = (event) => {
+        if (event.key !== 'Escape') return;
+        closePicker();
+    };
+    const closePicker = () => {
+        overlay.remove();
+        document.removeEventListener('keydown', handlePickerEscape, true);
+    };
 
-    if (!newBg && !newFg) {
+    const dialog = document.createElement('div');
+    dialog.className = 'category-color-picker';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-label', `Choose colors for ${categoryName}`);
+
+    const title = document.createElement('h3');
+    title.textContent = `Category colors: ${categoryName}`;
+    dialog.appendChild(title);
+
+    const preview = document.createElement('div');
+    preview.className = 'category-color-preview';
+    preview.textContent = categoryName;
+    dialog.appendChild(preview);
+
+    const backgroundInput = document.createElement('input');
+    backgroundInput.type = 'color';
+    backgroundInput.value = bgColor;
+    backgroundInput.setAttribute('aria-label', 'Category background color');
+
+    const foregroundInput = document.createElement('input');
+    foregroundInput.type = 'color';
+    foregroundInput.value = fgColor;
+    foregroundInput.setAttribute('aria-label', 'Category text color');
+
+    const updatePreview = () => {
+        preview.style.backgroundColor = backgroundInput.value;
+        preview.style.color = foregroundInput.value;
+        preview.style.borderColor = foregroundInput.value;
+    };
+
+    const palettes = [
+        {
+            label: 'Background',
+            input: backgroundInput,
+            colors: ['#0d0d0d', '#0a1f15', '#123524', '#102a43', '#172554', '#3b1d5a', '#4c1d1d', '#713f12', '#134e4a', '#334155', '#f8fafc', '#ffffff']
+        },
+        {
+            label: 'Text',
+            input: foregroundInput,
+            colors: ['#e0e0e0', '#ffffff', '#000000', '#00ff9d', '#00f3ff', '#facc15', '#fb7185', '#c084fc', '#f97316', '#86efac', '#93c5fd', '#f8fafc']
+        }
+    ];
+
+    palettes.forEach(({ label, input, colors }) => {
+        const section = document.createElement('section');
+        section.className = 'category-color-section';
+
+        const header = document.createElement('div');
+        header.className = 'category-color-section-header';
+        const heading = document.createElement('strong');
+        heading.textContent = label;
+        const pickerLabel = document.createElement('label');
+        pickerLabel.className = 'category-color-custom';
+        pickerLabel.append(input, document.createTextNode('Custom'));
+        header.append(heading, pickerLabel);
+        section.appendChild(header);
+
+        const swatches = document.createElement('div');
+        swatches.className = 'category-color-swatches';
+        colors.forEach(color => {
+            const swatch = document.createElement('button');
+            swatch.type = 'button';
+            swatch.className = 'category-color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            swatch.setAttribute('aria-label', `${label} ${color}`);
+            swatch.setAttribute('aria-pressed', String(input.value.toLowerCase() === color.toLowerCase()));
+            swatch.addEventListener('click', () => {
+                input.value = color;
+                swatches.querySelectorAll('.category-color-swatch').forEach(button => {
+                    button.setAttribute('aria-pressed', String(button === swatch));
+                });
+                updatePreview();
+            });
+            swatches.appendChild(swatch);
+        });
+        input.addEventListener('input', updatePreview);
+        section.appendChild(swatches);
+        dialog.appendChild(section);
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'category-color-actions';
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', closePicker);
+
+    const resetButton = document.createElement('button');
+    resetButton.type = 'button';
+    resetButton.textContent = 'Reset';
+    resetButton.addEventListener('click', () => {
         delete tableData.categoryStyles[categoryName];
-    } else {
-        tableData.categoryStyles[categoryName] = {
-            bgColor: newBg || undefined,
-            fgColor: newFg || undefined
-        };
-    }
+        saveData();
+        populateF1Categories();
+        renderSidebar();
+        closePicker();
+        showToast(`Colors reset for category "${categoryName}"`, 'success');
+    });
 
-    saveData();
-    populateF1Categories();
-    renderSidebar();
-    showToast(`Colors updated for category "${categoryName}"`, 'success');
+    const applyButton = document.createElement('button');
+    applyButton.type = 'button';
+    applyButton.className = 'primary';
+    applyButton.textContent = 'Apply';
+    applyButton.addEventListener('click', () => {
+        tableData.categoryStyles[categoryName] = {
+            bgColor: backgroundInput.value,
+            fgColor: foregroundInput.value
+        };
+        saveData();
+        populateF1Categories();
+        renderSidebar();
+        closePicker();
+        showToast(`Colors updated for category "${categoryName}"`, 'success');
+    });
+
+    actions.append(cancelButton, resetButton, applyButton);
+    dialog.appendChild(actions);
+    overlay.appendChild(dialog);
+    overlay.addEventListener('click', event => {
+        if (event.target === overlay) closePicker();
+    });
+    document.addEventListener('keydown', handlePickerEscape, true);
+    document.body.appendChild(overlay);
+    updatePreview();
+    cancelButton.focus();
 }
 
 async function addF1Sheet() {

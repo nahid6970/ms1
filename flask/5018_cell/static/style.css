@@ -3920,6 +3920,131 @@ tr {
     display: none;
 }
 
+.category-color-picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.category-color-picker {
+    width: min(440px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 18px;
+    color: #e0e0e0;
+    background: #111;
+    border: 1px solid #00ff9d;
+    box-shadow: 0 0 24px rgba(0, 255, 157, 0.18);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.category-color-picker h3 {
+    margin: 0 0 12px;
+    color: #00ff9d;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+.category-color-preview {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 7px 10px;
+    border: 1px solid;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.category-color-section {
+    margin: 12px 0 16px;
+}
+
+.category-color-section-header,
+.category-color-custom {
+    display: flex;
+    align-items: center;
+}
+
+.category-color-section-header {
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.category-color-custom {
+    gap: 7px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.category-color-custom input {
+    width: 34px;
+    height: 28px;
+    padding: 2px;
+    border: 1px solid #444;
+    background: #222;
+    cursor: pointer;
+}
+
+.category-color-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.category-color-swatch {
+    width: 100%;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #666;
+    cursor: pointer;
+}
+
+.category-color-swatch:hover,
+.category-color-swatch[aria-pressed="true"] {
+    outline: 2px solid #00ff9d;
+    outline-offset: 1px;
+}
+
+.category-color-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #333;
+}
+
+.category-color-actions button {
+    padding: 7px 12px;
+    color: #ddd;
+    background: #222;
+    border: 1px solid #555;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+
+.category-color-actions button:hover {
+    border-color: #00ff9d;
+    color: #00ff9d;
+}
+
+.category-color-actions button.primary {
+    color: #00150c;
+    background: #00ff9d;
+    border-color: #00ff9d;
+    font-weight: 700;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
     .f1-popup {
