@@ -3458,7 +3458,6 @@ function showCellAiProposal(proposal) {
         diff.hidden = showPreview;
         modal.querySelector('.cell-ai-proposal-modal')?.classList.toggle('is-previewing', showPreview);
         diffToggle.setAttribute('aria-pressed', String(!showPreview));
-        diffToggle.textContent = showPreview ? 'View diff' : 'View preview';
         sourceToggle.hidden = !showPreview;
         setCellAiProposalToggleIcon(diffToggle, showPreview ? 'diff' : 'preview');
         if (!showPreview) {
