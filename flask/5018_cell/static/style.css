@@ -1815,6 +1815,10 @@ td:hover .cell-ai-instruction-btn,
     overflow: hidden;
 }
 
+.cell-ai-proposal-columns[hidden] {
+    display: none;
+}
+
 .cell-ai-proposal-columns h3 {
     margin: 0 0 7px;
     font-size: 14px;
