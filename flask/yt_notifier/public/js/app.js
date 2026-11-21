@@ -516,7 +516,7 @@ function ensurePopup() {
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </header>
-      <div id="popupBody" class="flex-1 overflow-y-auto p-5"></div>
+      <div id="popupBody" class="popup-scrollbar flex-1 overflow-y-auto p-5"></div>
     </section>`;
   document.body.appendChild(popup);
   return popup;

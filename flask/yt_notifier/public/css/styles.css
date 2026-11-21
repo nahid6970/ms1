@@ -139,6 +139,31 @@ body {
   scrollbar-width: none;
 }
 
+.popup-scrollbar {
+  scrollbar-color: #475569 #0f172a;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+.popup-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.popup-scrollbar::-webkit-scrollbar-track {
+  background: #0f172a;
+  border-left: 1px solid rgba(51, 65, 85, 0.55);
+}
+
+.popup-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569;
+  border: 2px solid #0f172a;
+  border-radius: 9999px;
+}
+
+.popup-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 
 
 .page-shell {
