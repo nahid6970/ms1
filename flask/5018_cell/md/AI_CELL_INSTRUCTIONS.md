@@ -30,6 +30,8 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 
 The proposal does not change the cell until you approve it. Approval checks that the cell still matches the value the agent originally read. If the cell changed meanwhile, the app refuses the stale proposal. Pending proposals are kept in memory and are cleared when Flask restarts. The direct `POST /ai/cell/<id>/<row>/<col>` API still applies changes immediately, so CLI agents should use the proposal endpoint.
 
+Custom markers can contain Unicode characters that look alike. The syntax endpoint returns literal examples and Unicode code points; agents should copy the exact marker and must not normalize or substitute visually similar characters.
+
 ## Recent prompts and pinned prompts
 
 - After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.

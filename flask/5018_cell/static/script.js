@@ -3389,7 +3389,7 @@ async function copyCellAiCliTask(rowIndex, colIndex) {
         `Sheet: ${JSON.stringify(sheetName)}`,
         `Sheet ID (stable customIndex preferred): ${stableSheetId}`,
         `Cell: row ${rowIndex}, column ${colIndex} (both are zero-based; column name: ${JSON.stringify(columnName)})`,
-        `Before suggesting any edit, read the live syntax reference with GET ${baseUrl}/ai/syntaxes. It contains built-in syntax guidance and this app's currently configured custom markers. Inspect static/script.js parser code if a syntax detail is unclear. Do not invent or substitute syntax markers.`,
+        `Before suggesting any edit, read the live syntax reference with GET ${baseUrl}/ai/syntaxes. It contains built-in syntax guidance plus the active custom markers, literal examples, and exact Unicode code points. Preserve the exact marker characters/code points; visually similar Unicode markers are different syntax. Inspect static/script.js parser code if a syntax detail is unclear. Do not invent, normalize, or substitute markers.`,
         `First, read this cell using the app API: ${readCommand}`,
         `Briefly tell me what cell content you found so I can confirm it is the right cell, then ask what I want changed. Stop and wait for my answer. Do not edit or POST anything yet.`,
         ``,

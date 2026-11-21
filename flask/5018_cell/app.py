@@ -418,12 +418,38 @@ def ai_get_syntax_reference():
         except (OSError, json.JSONDecodeError):
             custom_syntaxes = []
 
-    return jsonify({
+    custom_syntax_examples = []
+    for syntax in custom_syntaxes if isinstance(custom_syntaxes, list) else []:
+        if not isinstance(syntax, dict):
+            continue
+        if syntax.get('type') == 'prefixSuffix':
+            prefix = str(syntax.get('prefix') or '')
+            suffix = str(syntax.get('suffix') or '')
+        else:
+            prefix = suffix = str(syntax.get('marker') or '')
+        if not prefix or not suffix:
+            continue
+        custom_syntax_examples.append({
+            'example': f'{prefix}text{suffix}',
+            'prefix': prefix,
+            'suffix': suffix,
+            'prefixCodePoints': [f'U+{ord(character):04X}' for character in prefix],
+            'suffixCodePoints': [f'U+{ord(character):04X}' for character in suffix],
+        })
+
+    response_data = {
         'builtInSyntaxGuide': read_reference(os.path.join('md', 'MARKDOWN_SPECIAL.md')),
         'aiCellSyntaxGuidance': read_reference(os.path.join('md', 'AI_CELL_INSTRUCTIONS.md')),
         'customSyntaxes': custom_syntaxes,
+        'customSyntaxExamples': custom_syntax_examples,
         'parserSource': ['static/script.js'],
-    })
+    }
+    # Preserve literal Unicode markers in the response while also publishing their code points.
+    return app.response_class(
+        response=json.dumps(response_data, ensure_ascii=False),
+        status=200,
+        mimetype='application/json',
+    )
 
 def resolve_sheet(data, sheet_id):
     """Return (sheet_obj, array_index) or (None, None) if not found."""

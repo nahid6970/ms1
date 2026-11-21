@@ -16,8 +16,11 @@ Returns the built-in syntax guides, the AI cell syntax guidance, and the custom 
 Response fields:
 - `builtInSyntaxGuide` — contents of `md/MARKDOWN_SPECIAL.md`
 - `aiCellSyntaxGuidance` — contents of `md/AI_CELL_INSTRUCTIONS.md`
-- `customSyntaxes` — active custom markers and their colors/styles
+- `customSyntaxes` — active custom markers and their colors/styles, emitted as literal UTF-8 characters
+- `customSyntaxExamples` — paired syntax examples and exact Unicode code points for prefixes and suffixes
 - `parserSource` — source files to inspect for actual parsing behavior
+
+Custom markers may use visually similar Unicode characters. Preserve the literal marker and its listed code points exactly; do not normalize or replace it with a lookalike.
 
 ---
 

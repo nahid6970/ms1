@@ -5,6 +5,7 @@
 **What We Accomplished:**
 - Added a **Copy CLI task** action to a cell's AI instruction editor. The task gives the agent a stable sheet/cell reference, asks it to fetch and identify the cell, and wait for the user's requested change before proposing an edit.
 - Added `GET /ai/syntaxes` to return the built-in syntax references and the app's live custom syntax settings to agents.
+- Preserved literal Unicode custom markers in the syntax API and added exact code points and examples so agents can distinguish visually similar markers.
 - Added proposal submission, listing, approval, and rejection API routes. CLI proposals appear in the app's review dialog and only update the cell after approval; approval rejects stale proposals if the cell changed after the agent read it.
 - Added a rendered preview and source diff toggle to the review dialog, along with responsive sizing and a compact preview-mode height.
 - Documented the CLI workflow and API endpoints.
