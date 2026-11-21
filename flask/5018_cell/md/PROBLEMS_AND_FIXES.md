@@ -1,5 +1,22 @@
 # Problems & Fixes Log
 
+## [2026-11-21 21:12] - Proposal Review Preview Dialog Shrinks
+
+**Problem:** Switching the cell proposal review dialog to rendered preview made the window shorter, leaving unused space even when the viewport had room. The Reject and Approve change buttons also lacked icons.
+
+**Root Cause:** Preview mode overrode the dialog's fixed available height with `height: auto`, while the preview panes used intrinsic sizing and a `45vh` maximum height. This let the dialog shrink around its content instead of filling its available space.
+
+**Solution:** Kept the dialog's available height in preview mode, made the body and preview columns flex to fill it, and allowed rendered/source panes to grow within their sections. Added SVG icons to both footer actions and removed text replacement that could overwrite the preview toggle's SVG.
+
+**Files Modified:**
+- `static/style.css` — preview-mode flex sizing and action icon styles
+- `static/script.js` — preserved the toggle SVG when changing modes
+- `templates/index.html` — added footer action SVGs
+
+**Related Issues:** The review dialog's preview and approval workflow is documented in [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md).
+
+---
+
 ## [2026-11-20 13:00] - Cell Enter Handling and Trailing Blank Line
 
 **Problem:** Pressing Enter in a cell could fail to create a line break or disrupt further typing. Markdown edited cells could also gain an unwanted blank line at the end.

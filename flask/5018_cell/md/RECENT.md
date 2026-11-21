@@ -1,5 +1,24 @@
 # Recent Development Log
 
+## [2026-11-21 21:12] - Proposal Review Preview Height and Action Icons
+
+**What We Accomplished:**
+- Fixed rendered preview mode shrinking the proposal review dialog to its content height. The dialog retains its available height, and the current/proposed panes expand to use the body space.
+- Added SVG icons to the Reject and Approve change buttons.
+- Kept the preview/diff control icon-only when switching modes.
+
+**Files Modified:**
+- `static/style.css` — preview dialog and pane flex sizing; action button icon styling
+- `static/script.js` — removed toggle text replacement that conflicted with its SVG icon
+- `templates/index.html` — added SVG icons to proposal actions
+- `md/PROBLEMS_AND_FIXES.md` — documented the preview sizing issue and fix
+- `md/RECENT.md` — recorded this session
+
+**Current Status:**
+- The dialog sizing and icon changes are in place. `git diff --check` passed; browser verification was not performed.
+
+---
+
 ## [2026-11-21 19:38] - CLI Cell Proposals and Syntax Guidance
 
 **What We Accomplished:**
