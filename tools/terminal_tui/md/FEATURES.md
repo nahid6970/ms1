@@ -159,6 +159,13 @@ Always state one clear outcome at the end of the response. Do not say “restart
 ---
 
 ## Git Integration
+
+### Git Project Rescue
+**Status:** ✅ Complete
+**Description:** The Git modal has a Rescue action for repository health inspection and narrowly scoped Git metadata recovery. Health checks report branch/HEAD, index signature, lock files, interrupted operations, working-tree status, and `git fsck` output. A corrupt index can be rebuilt from `HEAD` after confirmation and is backed up first; stale lock files can be moved into `.git/git-ref-rescue-backups` after confirmation and only when no `git.exe` process is running. Interrupted merge/rebase/cherry-pick operations are reported for manual resolution.
+**Implementation:** `app.py` (`GET/POST /api/project/<project>/git/rescue`), `templates/index.html` (Git modal Rescue panel)
+**Usage:** Open the Git status modal, select **Rescue**, then run **Check health** or choose a repair action. Rebuilding the index preserves working files but may lose staged changes that existed only in the damaged index.
+
 **Status:** ✅ Complete
 **Description:** Full git workflow from the status bar — view changes, stage, commit, push, checkout, branch management, diff viewer, AI-suggested commit messages.
 **Implementation:** Backend runs git CLI commands via `subprocess`. Frontend renders in modals.

@@ -4876,6 +4876,102 @@ def api_git_changed_files(project):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/project/<project>/git/rescue', methods=['GET', 'POST'])
+def api_git_rescue(project):
+    """Inspect and perform narrowly scoped Git metadata repairs for a workspace."""
+    projects_list = scan_projects()
+    proj = next((p for p in projects_list if p["name"].lower() == project.lower()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+    cf = 0x08000000 if sys.platform == "win32" else 0
+    try:
+        root_result = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=proj["path"], capture_output=True, text=True, creationflags=cf, timeout=5)
+        if root_result.returncode:
+            return jsonify({"error": (root_result.stderr or "Not a Git repository").strip()}), 400
+        repo = os.path.normpath(root_result.stdout.strip())
+        gd_result = subprocess.run(["git", "rev-parse", "--absolute-git-dir"], cwd=repo, capture_output=True, text=True, creationflags=cf, timeout=5)
+        if gd_result.returncode:
+            return jsonify({"error": (gd_result.stderr or "Could not locate Git metadata").strip()}), 400
+        git_dir = os.path.normpath(gd_result.stdout.strip())
+        index_path = os.path.join(git_dir, "index")
+        action = (request.get_json(silent=True) or {}).get("action") if request.method == "POST" else "inspect"
+
+        def git(*args, timeout=15):
+            return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True, creationflags=cf, timeout=timeout)
+
+        def active_git_process():
+            if sys.platform == "win32":
+                result = subprocess.run(["tasklist", "/FI", "IMAGENAME eq git.exe", "/NH"], capture_output=True, text=True, creationflags=cf, timeout=5)
+                return any(line.lower().startswith("git.exe") for line in result.stdout.splitlines())
+            result = subprocess.run(["pgrep", "-x", "git"], capture_output=True, text=True, timeout=5)
+            return result.returncode == 0
+
+        def interrupted():
+            markers = ("MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "AUTO_MERGE", "rebase-merge", "rebase-apply", "sequencer")
+            return [name for name in markers if os.path.exists(os.path.join(git_dir, name))]
+
+        if action == "inspect":
+            try:
+                header = open(index_path, "rb").read(4)
+                index_state = "valid" if header == b"DIRC" else "corrupt or missing"
+            except OSError:
+                index_state = "corrupt or missing"
+            locks = [os.path.relpath(os.path.join(base, name), git_dir) for base, dirs, files in os.walk(git_dir) if not os.path.relpath(base, git_dir).startswith("git-ref-rescue-backups") for name in files if name.endswith(".lock")]
+            status = git("status", "--short", timeout=30)
+            fsck = git("fsck", "--full", "--no-progress", timeout=60)
+            branch = git("branch", "--show-current")
+            head = git("rev-parse", "--short", "HEAD")
+            return jsonify({"repo": repo, "branch": branch.stdout.strip() or "(detached/unresolved)", "head": head.stdout.strip() or "(unresolved)", "index": index_state,
+                "locks": locks, "interrupted": interrupted(), "status": status.stdout.strip(),
+                "fsck": (fsck.stdout + fsck.stderr).strip(), "fsck_ok": fsck.returncode == 0})
+
+        stamp = time.strftime("%Y%m%d-%H%M%S") + f"-{time.time_ns() % 1_000_000:06d}"
+        backup_root = os.path.join(git_dir, "git-ref-rescue-backups", stamp)
+        if action == "rebuild-index":
+            if not (request.get_json(silent=True) or {}).get("confirm"):
+                return jsonify({"error": "Confirmation required"}), 400
+            try:
+                with open(index_path, "rb") as handle:
+                    if handle.read(4) == b"DIRC":
+                        return jsonify({"error": "Index has a valid DIRC signature; no repair was made."}), 409
+            except OSError:
+                pass
+            if active_git_process():
+                return jsonify({"error": "A Git process is running. Close it and retry; the index was not changed."}), 409
+            if interrupted():
+                return jsonify({"error": "An interrupted Git operation is present. Resolve it first; the index was not changed."}), 409
+            os.makedirs(backup_root, exist_ok=True)
+            backup = None
+            if os.path.exists(index_path):
+                backup = os.path.join(backup_root, "index")
+                shutil.copy2(index_path, backup)
+            result = git("read-tree", "HEAD", timeout=30)
+            if result.returncode:
+                if backup and os.path.exists(backup):
+                    shutil.copy2(backup, index_path)
+                return jsonify({"error": (result.stderr or result.stdout or "git read-tree HEAD failed").strip()}), 500
+            invalidate_git_status_cache(repo)
+            return jsonify({"message": "Index rebuilt from HEAD. Working files were preserved; re-stage intended changes.", "backup": backup})
+        if action == "move-locks":
+            if not (request.get_json(silent=True) or {}).get("confirm"):
+                return jsonify({"error": "Confirmation required"}), 400
+            if active_git_process():
+                return jsonify({"error": "A Git process is running. Close it and retry; lock files were not changed."}), 409
+            locks = [os.path.join(base, name) for base, dirs, files in os.walk(git_dir) if not os.path.relpath(base, git_dir).startswith("git-ref-rescue-backups") for name in files if name.endswith(".lock")]
+            moved = []
+            for source in locks:
+                destination = os.path.join(backup_root, "locks", os.path.relpath(source, git_dir))
+                os.makedirs(os.path.dirname(destination), exist_ok=True)
+                shutil.move(source, destination)
+                moved.append(os.path.relpath(source, git_dir))
+            invalidate_git_status_cache(repo)
+            return jsonify({"message": f"Moved {len(moved)} lock file(s) into a recoverable backup.", "locks": moved, "backup": backup_root if moved else None})
+        return jsonify({"error": "Unknown rescue action"}), 400
+    except subprocess.TimeoutExpired:
+        return jsonify({"error": "Git rescue inspection timed out."}), 504
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
 @app.route('/api/project/<project>/git/commit', methods=['POST'])
 def api_git_commit(project):
     data = request.get_json() or {}

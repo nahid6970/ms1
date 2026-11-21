@@ -3,6 +3,16 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-21] - Add Git Project Rescue to the Git Modal
+
+- Added a Rescue panel to the Git modal with repository health inspection, corrupt-index rebuild, and stale-lock backup actions.
+- Health reports branch and HEAD, index signature, lock files, interrupted operations, working-tree status, and `git fsck` details.
+- Index rebuild requires confirmation, backs up the damaged index, refuses to run during active Git processes or interrupted operations, and preserves working files.
+- Lock cleanup requires confirmation and refuses to run while `git.exe` is active; moved lock files are retained under `.git/git-ref-rescue-backups`.
+- Added `GET/POST /api/project/<project>/git/rescue`.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-21] - Push GitHub Projects from the Projects Modal
 
 - Added a per-project Push button in `#github-projects-modal` when the checked status reports one or more commits ahead of the remote.

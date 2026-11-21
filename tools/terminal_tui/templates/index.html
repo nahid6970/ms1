@@ -4880,7 +4880,21 @@ kiro-cli whoami --format json</code></pre>
                     </h2>
                     <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;" id="git-modal-subtitle">Loading changes...</div>
                 </div>
-                <button onclick="closeGitModal()" style="background:none; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer; line-height:1; padding: 2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button id="git-rescue-toggle" onclick="toggleGitRescue()" title="Inspect and repair Git metadata problems" style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.35);color:#fbbf24;border-radius:6px;padding:5px 9px;cursor:pointer;font-family:inherit;font-size:0.72rem;font-weight:600;">⚒ Rescue</button>
+                    <button onclick="closeGitModal()" style="background:none; border:none; font-size:1.4rem; color:var(--text-secondary); cursor:pointer; line-height:1; padding: 2px 6px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+                </div>
+            </div>
+
+            <div id="git-rescue-panel" style="display:none;margin:-4px 0 14px;padding:12px;background:var(--bg-sidebar);border:1px solid rgba(251,191,36,0.28);border-radius:8px;">
+                <div style="font-size:0.78rem;font-weight:600;color:#fbbf24;margin-bottom:4px;">Git project rescue</div>
+                <div style="font-size:0.72rem;color:var(--text-secondary);margin-bottom:9px;">Check repository health, then choose a metadata repair if needed. Working files are preserved.</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button onclick="runGitRescue('inspect')" style="padding:5px 9px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-card);color:var(--text-primary);cursor:pointer;font:inherit;font-size:0.72rem;">Check health</button>
+                    <button onclick="runGitRescue('rebuild-index')" style="padding:5px 9px;border:1px solid rgba(251,191,36,0.35);border-radius:5px;background:rgba(251,191,36,0.08);color:#fbbf24;cursor:pointer;font:inherit;font-size:0.72rem;">Rebuild corrupt index</button>
+                    <button onclick="runGitRescue('move-locks')" style="padding:5px 9px;border:1px solid rgba(251,191,36,0.35);border-radius:5px;background:rgba(251,191,36,0.08);color:#fbbf24;cursor:pointer;font:inherit;font-size:0.72rem;">Move stale locks</button>
+                </div>
+                <pre id="git-rescue-output" style="display:none;white-space:pre-wrap;max-height:210px;overflow:auto;margin:9px 0 0;padding:9px;background:var(--bg-main);border-radius:5px;color:var(--text-secondary);font:0.69rem/1.5 'Fira Code',monospace;"></pre>
             </div>
 
             <!-- Case-rename warning banner -->
@@ -15290,6 +15304,53 @@ kiro-cli whoami --format json</code></pre>
         }
 
         // ─── Git Commit & Push Modal ───────────────────────────────────────────────
+
+        function toggleGitRescue() {
+            const panel = document.getElementById('git-rescue-panel');
+            if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function runGitRescue(action) {
+            if (!activeProject) return;
+            const output = document.getElementById('git-rescue-output');
+            if (output) {
+                output.style.display = 'block';
+                output.textContent = action === 'inspect' ? 'Checking repository health…' : 'Preparing rescue action…';
+            }
+            let confirmAction = false;
+            if (action === 'rebuild-index') {
+                confirmAction = confirm('Rebuild the corrupt Git index from HEAD? The damaged index will be backed up and working files will stay untouched. Staged changes recorded only in that index may be lost.');
+                if (!confirmAction) return;
+            } else if (action === 'move-locks') {
+                confirmAction = confirm('Move Git .lock files into a recoverable backup folder? This only proceeds when no git.exe process is running.');
+                if (!confirmAction) return;
+            }
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/git/rescue`, {
+                    method: action === 'inspect' ? 'GET' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: action === 'inspect' ? undefined : JSON.stringify({ action, confirm: confirmAction })
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Git rescue failed.');
+                if (action === 'inspect') {
+                    const lines = [
+                        `Repository: ${data.repo}`, `Branch: ${data.branch}`, `HEAD: ${data.head}`, `Index: ${data.index}`,
+                        `Lock files: ${data.locks.length ? data.locks.join(', ') : 'none'}`,
+                        `Interrupted operations: ${data.interrupted.length ? data.interrupted.join(', ') : 'none'}`,
+                        `Working tree: ${data.status || 'clean'}`,
+                        `Object database: ${data.fsck_ok ? 'healthy' : 'issues found'}`,
+                        data.fsck ? `fsck details:\n${data.fsck}` : ''
+                    ].filter(Boolean);
+                    output.textContent = lines.join('\n');
+                } else {
+                    output.textContent = `${data.message}${data.backup ? `\nBackup: ${data.backup}` : ''}${data.locks?.length ? `\nMoved: ${data.locks.join(', ')}` : ''}`;
+                    await openGitCommitModal();
+                }
+            } catch (error) {
+                if (output) output.textContent = `Rescue failed: ${error.message}`;
+            }
+        }
 
         async function openGitCommitModal() {
             if (!activeProject) return;
