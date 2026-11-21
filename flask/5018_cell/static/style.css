@@ -1770,7 +1770,7 @@ td:hover .cell-ai-instruction-btn,
     gap: 14px;
     flex: 1 1 auto;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .cell-ai-proposal-columns h3 {
