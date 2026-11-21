@@ -3444,6 +3444,7 @@ function showCellAiProposal(proposal) {
     preview.hidden = true;
     diffToggle.setAttribute('aria-pressed', 'true');
     diffToggle.textContent = 'View preview';
+    modal.querySelector('.cell-ai-proposal-modal')?.classList.remove('is-previewing');
     ['Current', 'Proposed'].forEach(side => {
         document.getElementById(`cellAiProposal${side}Rendered`).hidden = false;
         document.getElementById(`cellAiProposal${side}Source`).hidden = true;
@@ -3452,6 +3453,7 @@ function showCellAiProposal(proposal) {
         const showPreview = preview.hidden;
         preview.hidden = !showPreview;
         diff.hidden = showPreview;
+        modal.querySelector('.cell-ai-proposal-modal')?.classList.toggle('is-previewing', showPreview);
         diffToggle.setAttribute('aria-pressed', String(!showPreview));
         diffToggle.textContent = showPreview ? 'View diff' : 'View preview';
         sourceToggle.hidden = !showPreview;

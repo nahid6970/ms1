@@ -1740,6 +1740,15 @@ td:hover .cell-ai-instruction-btn,
     margin: auto;
 }
 
+.cell-ai-proposal-modal.is-previewing {
+    height: auto;
+}
+
+.cell-ai-proposal-modal.is-previewing .cell-ai-proposal-body,
+.cell-ai-proposal-modal.is-previewing .cell-ai-proposal-columns {
+    flex: 0 1 auto;
+}
+
 .cell-ai-proposal-location {
     margin-top: 5px;
     color: #666;
