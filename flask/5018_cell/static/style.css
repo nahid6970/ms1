@@ -2100,6 +2100,19 @@ td input::-moz-selection {
     flex-direction: column;
 }
 
+/* Keep the review dialog wider than the generic 500px modal default. */
+#cellAiProposalReviewModal > .cell-ai-proposal-modal {
+    box-sizing: border-box;
+    width: min(1760px, calc(100vw - 48px));
+    max-width: 1760px;
+}
+
+@media (max-width: 640px) {
+    #cellAiProposalReviewModal > .cell-ai-proposal-modal {
+        width: calc(100vw - 20px);
+    }
+}
+
 /* Syntax replacer: keep large pattern collections from pushing its preview off-screen. */
 #syntaxReplacerModal .syntax-replacer-content {
     width: min(920px, calc(100vw - 32px));
