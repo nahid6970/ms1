@@ -3433,18 +3433,20 @@ function showCellAiProposal(proposal) {
     setCellAiProposalPreview('Proposed', proposal.proposedValue, cellStyle);
     const diff = document.getElementById('cellAiProposalDiff');
     diff.innerHTML = buildCellAiProposalDiff(proposal.originalValue, proposal.proposedValue);
-    document.getElementById('cellAiProposalReviewStatus').textContent = '';
+    const status = document.getElementById('cellAiProposalReviewStatus');
+    status.textContent = '';
+    status.hidden = true;
 
     const preview = document.getElementById('cellAiProposalPreview');
     const diffToggle = document.getElementById('cellAiProposalDiffToggle');
     const sourceToggle = document.getElementById('cellAiProposalSourceToggle');
     sourceToggle.setAttribute('aria-pressed', 'false');
-    sourceToggle.textContent = 'View source';
+    setCellAiProposalToggleIcon(sourceToggle, 'source');
     sourceToggle.hidden = true;
     diff.hidden = false;
     preview.hidden = true;
     diffToggle.setAttribute('aria-pressed', 'true');
-    diffToggle.textContent = 'View preview';
+    setCellAiProposalToggleIcon(diffToggle, 'preview');
     modal.querySelector('.cell-ai-proposal-modal')?.classList.remove('is-previewing');
     ['Current', 'Proposed'].forEach(side => {
         document.getElementById(`cellAiProposal${side}Rendered`).hidden = false;
@@ -3458,9 +3460,10 @@ function showCellAiProposal(proposal) {
         diffToggle.setAttribute('aria-pressed', String(!showPreview));
         diffToggle.textContent = showPreview ? 'View diff' : 'View preview';
         sourceToggle.hidden = !showPreview;
+        setCellAiProposalToggleIcon(diffToggle, showPreview ? 'diff' : 'preview');
         if (!showPreview) {
             sourceToggle.setAttribute('aria-pressed', 'false');
-            sourceToggle.textContent = 'View source';
+            setCellAiProposalToggleIcon(sourceToggle, 'source');
             ['Current', 'Proposed'].forEach(side => {
                 document.getElementById(`cellAiProposal${side}Rendered`).hidden = false;
                 document.getElementById(`cellAiProposal${side}Source`).hidden = true;
@@ -3470,7 +3473,7 @@ function showCellAiProposal(proposal) {
     sourceToggle.onclick = () => {
         const showSource = sourceToggle.getAttribute('aria-pressed') !== 'true';
         sourceToggle.setAttribute('aria-pressed', String(showSource));
-        sourceToggle.textContent = showSource ? 'View rendered' : 'View source';
+        setCellAiProposalToggleIcon(sourceToggle, showSource ? 'rendered' : 'source');
         ['Current', 'Proposed'].forEach(side => {
             document.getElementById(`cellAiProposal${side}Rendered`).hidden = showSource;
             document.getElementById(`cellAiProposal${side}Source`).hidden = !showSource;
@@ -3529,6 +3532,24 @@ function buildCellAiProposalDiff(originalValue, proposedValue) {
     }).join('');
 }
 
+function setCellAiProposalToggleIcon(button, mode) {
+    const icons = {
+        preview: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+        diff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h12M8 12h12M8 19h12M3 5h.01M3 12h.01M3 19h.01"></path><path d="M2 9h4m-2-2v4m-2 8h4"></path></svg>',
+        source: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4m-2-11-4 14"></path></svg>',
+        rendered: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+    };
+    const labels = {
+        preview: 'View rendered preview',
+        diff: 'View source diff',
+        source: 'View raw syntax source',
+        rendered: 'View rendered content'
+    };
+    button.innerHTML = icons[mode];
+    button.title = labels[mode];
+    button.setAttribute('aria-label', labels[mode]);
+}
+
 function setCellAiProposalPreview(side, value, cellStyle) {
     const rawValue = String(value ?? '');
     const rendered = document.getElementById(`cellAiProposal${side}Rendered`);
@@ -3549,6 +3570,7 @@ async function handleCellAiProposal(approve) {
     const status = document.getElementById('cellAiProposalReviewStatus');
     approveButton.disabled = true;
     rejectButton.disabled = true;
+    status.hidden = false;
     status.textContent = approve ? 'Applying approved change…' : 'Rejecting proposal…';
 
     try {

@@ -696,13 +696,18 @@
                 <div>
                     <h2 id="cellAiProposalReviewTitle">Review cell change</h2>
                     <div id="cellAiProposalReviewLocation" class="cell-ai-proposal-location"></div>
+                    <p id="cellAiProposalReviewStatus" class="cell-ai-proposal-status" role="status" aria-live="polite" hidden></p>
+                </div>
+                <div class="cell-ai-proposal-header-controls" aria-label="Cell content view controls">
+                    <button id="cellAiProposalDiffToggle" type="button" class="cell-ai-proposal-icon-button" title="View rendered preview" aria-label="View rendered preview">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                    <button id="cellAiProposalSourceToggle" type="button" class="cell-ai-proposal-icon-button" title="View syntax source" aria-label="View syntax source" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4m-2-11-4 14"></path></svg>
+                    </button>
                 </div>
             </div>
             <div class="cell-ai-proposal-body">
-                <div class="cell-ai-proposal-source-toggle-row">
-                    <button id="cellAiProposalDiffToggle" type="button" class="btn btn-secondary" aria-pressed="true">View preview</button>
-                    <button id="cellAiProposalSourceToggle" type="button" class="btn btn-secondary" aria-pressed="false" hidden>View source</button>
-                </div>
                 <pre id="cellAiProposalDiff" class="cell-ai-proposal-value cell-ai-proposal-diff" aria-label="Cell change diff"></pre>
                 <div id="cellAiProposalPreview" class="cell-ai-proposal-columns" hidden>
                     <section>
@@ -716,7 +721,6 @@
                         <pre id="cellAiProposalProposedSource" class="cell-ai-proposal-value cell-ai-proposal-source" hidden></pre>
                     </section>
                 </div>
-                <p id="cellAiProposalReviewStatus" class="cell-ai-proposal-status" role="status" aria-live="polite"></p>
             </div>
             <div class="cell-ai-proposal-actions">
                 <button id="cellAiProposalReject" type="button" class="btn btn-secondary">Reject</button>
