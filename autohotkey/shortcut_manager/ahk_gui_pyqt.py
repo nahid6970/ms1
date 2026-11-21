@@ -1223,6 +1223,10 @@ class AddEditShortcutDialog(QDialog):
         if self.shortcut_type == "launcher":
             self.hide_terminal_checkbox = QCheckBox("Hide Terminal Window")
             self.hide_terminal_checkbox.setChecked(True)
+            self.hide_terminal_checkbox.setToolTip(
+                "Hide console windows for scripts and command-line launchers. "
+                "Direct GUI applications are always shown."
+            )
             self.hide_terminal_checkbox.setStyleSheet(f"""
                 QCheckBox {{
                     font-family: 'Consolas', 'Segoe UI', sans-serif;
@@ -1318,7 +1322,7 @@ class AddEditShortcutDialog(QDialog):
                 <p style="font-family: 'Consolas'; color: {CP_TEXT};"><b>How it works:</b></p>
                 <ul style="font-family: 'Consolas'; color: {CP_TEXT};">
                     <li><b>Target Path</b>: Select or type the absolute path of the file or application you want to run. You can also append arguments.</li>
-                    <li><b>Hide Terminal</b>: If checked, it will execute in the background. For Python scripts (`.py`), this automatically uses <code>pythonw.exe</code>. For console apps/scripts, it runs them hidden.</li>
+                    <li><b>Hide Terminal</b>: Hides console windows for scripts and command-line launchers. Python scripts use <code>pythonw.exe</code>. Direct GUI applications are always shown.</li>
                 </ul>
             """)
             info_browser.setMinimumHeight(300)
@@ -4286,7 +4290,23 @@ class AHKShortcutEditor(QMainWindow):
 
     def generate_ahk_script(self):
         try:
-            output_lines = ["#Requires AutoHotkey v2.0", "#SingleInstance", "Persistent", ""]
+            run_without_console_lines = [
+                "RunWithoutConsole(commandLine, workingDir := \"\") {",
+                "    si := Buffer(A_PtrSize = 8 ? 104 : 68, 0)",
+                "    NumPut(\"UInt\", si.Size, si, 0)",
+                "    pi := Buffer(A_PtrSize * 2 + 8, 0)",
+                "    cmd := Buffer(StrPut(commandLine, \"UTF-16\") * 2, 0)",
+                "    StrPut(commandLine, cmd, \"UTF-16\")",
+                "    if !DllCall(\"CreateProcessW\", \"Ptr\", 0, \"Ptr\", cmd, \"Ptr\", 0, \"Ptr\", 0, \"Int\", 0, \"UInt\", 0x08000000, \"Ptr\", 0, \"Ptr\", workingDir ? StrPtr(workingDir) : 0, \"Ptr\", si, \"Ptr\", pi, \"Int\")",
+                "        throw OSError()",
+                "    DllCall(\"CloseHandle\", \"Ptr\", NumGet(pi, 0, \"Ptr\"))",
+                "    DllCall(\"CloseHandle\", \"Ptr\", NumGet(pi, A_PtrSize, \"Ptr\"))",
+                "}", ""
+            ]
+            output_lines = [
+                "#Requires AutoHotkey v2.0", "#SingleInstance", "Persistent", "",
+                *run_without_console_lines
+            ]
 
             # Sanitization helpers for AHK syntax compatibility
             def escape_hotkey(hotkey: str) -> str:
@@ -5616,9 +5636,14 @@ class AHKShortcutEditor(QMainWindow):
                         cmd_str = f'{py_exe} "{script_path}"'
                         if args_part:
                             cmd_str += f' {args_part}'
-                    elif exe_path.lower().endswith('.ps1'):
-                        ps_options = "-WindowStyle Hidden -File" if hide_terminal else "-NoExit -File"
-                        cmd_str = f'powershell.exe {ps_options} "{exe_path}"'
+                    elif exe_path.lower().endswith(('.ps1', '.bat', '.cmd')):
+                        if exe_path.lower().endswith('.ps1'):
+                            ps_options = "-WindowStyle Hidden -File" if hide_terminal else "-NoExit -File"
+                            cmd_str = f'powershell.exe {ps_options} "{exe_path}"'
+                        else:
+                            cmd_str = f'cmd.exe /c "{exe_path}"'
+                            if not hide_terminal:
+                                cmd_str = f'cmd.exe /k "{exe_path}"'
                         if args_part:
                             cmd_str += f' {args_part}'
                     else:
@@ -5633,12 +5658,17 @@ class AHKShortcutEditor(QMainWindow):
                     # If it is Python and hide_terminal is True, we run the script with pythonw.exe
                     # which naturally suppresses the console window. We omit the "Hide" parameter 
                     # from AHK's Run command so any GUI windows created by the script can be seen.
-                    if is_python and hide_terminal:
+                    is_shell_script = exe_path.lower().endswith(('.ps1', '.bat', '.cmd'))
+                    hide_console_for_exe = hide_terminal and exe_path.lower().endswith('.exe') and not is_python
+                    if (is_python and hide_terminal) or not hide_terminal or not is_shell_script:
                         hide_opt = ''
                     else:
-                        hide_opt = '"Hide"' if hide_terminal else ''
+                        hide_opt = '"Hide"'
 
-                    if safe_working_dir:
+                    if hide_console_for_exe:
+                        safe_working_dir_arg = f"'{safe_working_dir}'" if safe_working_dir else '""'
+                        action = f"RunWithoutConsole('{safe_cmd_str}', {safe_working_dir_arg})"
+                    elif safe_working_dir:
                         if hide_opt:
                             action = f"Run('{safe_cmd_str}', '{safe_working_dir}', {hide_opt})"
                         else:
@@ -6123,6 +6153,7 @@ class AHKShortcutEditor(QMainWindow):
                     f"; Red tray icon to distinguish the elevated admin instance",
                     f'TraySetIcon("{admin_ico}")',
                     "",
+                    *run_without_console_lines,
                     ";! === ADMIN SHORTCUTS (elevated) ===",
                     "",
                 ]

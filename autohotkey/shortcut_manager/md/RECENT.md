@@ -1,5 +1,12 @@
 # Recent Development Log
 
+## 2026-11-21 - Keep GUI Launcher Windows Visible
+
+- Fixed launcher generation so `Hide Terminal Window` no longer passes AutoHotkey's `Hide` option to direct executables. That option hid GUI applications such as Game Speed Control along with any console window.
+- Inspected `tempo-speed-control.exe`: it is a 64-bit console-subsystem executable that also creates its Tauri GUI. Launchers with hiding enabled now use `CreateProcessW` with `CREATE_NO_WINDOW` for `.exe` targets, suppressing the console without hiding the app window.
+- Python and PowerShell script handling remains specialized, and `.bat`/`.cmd` launch through `cmd.exe` with the toggle controlling the console window.
+- Updated the launcher checkbox guidance and `FEATURES.md` to describe the behavior.
+
 All sessions are recorded here. Do not archive old entries.
 
 # Recent Development Log

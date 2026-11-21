@@ -80,11 +80,12 @@
 - Stored in `launcher_shortcuts`
 - Target path input with file browse dialog
 - Supports optional command line arguments
-- "Hide Terminal Window" toggle (boolean, `hide_terminal`)
+- "Hide Terminal Window" toggle (boolean, `hide_terminal`); applies to script/console launchers, while direct GUI executables stay visible
 - Generates `Run()` statements:
   - `.py`/`.pyw` files execute via `pythonw.exe` (hidden) or `python.exe` (shown)
   - `.ps1` files execute via `powershell.exe -WindowStyle Hidden` (hidden) or `powershell.exe -NoExit` (shown)
-  - Other executables/files run directly, using `"Hide"` window option if hidden
+  - `.bat`/`.cmd` files run through `cmd.exe`; the console window is hidden or kept open according to the toggle
+  - Direct executables and files run without hiding their main window, so GUI apps remain visible. When hiding is enabled for an `.exe`, it is started without creating a console window.
 
 **Usage:**
 

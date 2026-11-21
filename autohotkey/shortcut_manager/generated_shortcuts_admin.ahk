@@ -11,6 +11,18 @@ if !A_IsAdmin {
 ; Red tray icon to distinguish the elevated admin instance
 TraySetIcon("C:\@delta\ms1\autohotkey\shortcut_manager\ahk_admin.ico")
 
+RunWithoutConsole(commandLine, workingDir := "") {
+    si := Buffer(A_PtrSize = 8 ? 104 : 68, 0)
+    NumPut("UInt", si.Size, si, 0)
+    pi := Buffer(A_PtrSize * 2 + 8, 0)
+    cmd := Buffer(StrPut(commandLine, "UTF-16") * 2, 0)
+    StrPut(commandLine, cmd, "UTF-16")
+    if !DllCall("CreateProcessW", "Ptr", 0, "Ptr", cmd, "Ptr", 0, "Ptr", 0, "Int", 0, "UInt", 0x08000000, "Ptr", 0, "Ptr", workingDir ? StrPtr(workingDir) : 0, "Ptr", si, "Ptr", pi, "Int")
+        throw OSError()
+    DllCall("CloseHandle", "Ptr", NumGet(pi, 0, "Ptr"))
+    DllCall("CloseHandle", "Ptr", NumGet(pi, A_PtrSize, "Ptr"))
+}
+
 ;! === ADMIN SHORTCUTS (elevated) ===
 
 ;! Center Apps Window
@@ -49,4 +61,4 @@ LAlt & c:: {
 }
 
 ;! Game Speed Control
-!g::Run('"D:\speed\src-tauri\target\release\tempo-speed-control.exe"', 'D:\speed\src-tauri\target\release', "Hide")
+!g::RunWithoutConsole('"D:\speed\src-tauri\target\release\tempo-speed-control.exe"', 'D:\speed\src-tauri\target\release')
