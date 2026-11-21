@@ -397,6 +397,34 @@ def open_file():
 # Sheets can be addressed by arrayIndex (int) or customIndex (14-digit string)
 # ─────────────────────────────────────────────
 
+@app.route('/ai/syntaxes', methods=['GET'])
+def ai_get_syntax_reference():
+    """Return built-in syntax guidance and the currently configured custom markers."""
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+
+    def read_reference(relative_path):
+        path = os.path.join(project_dir, relative_path)
+        try:
+            with open(path, 'r', encoding='utf-8') as reference_file:
+                return reference_file.read()
+        except OSError:
+            return ''
+
+    custom_syntaxes = []
+    if os.path.exists(CUSTOM_SYNTAXES_FILE):
+        try:
+            with open(CUSTOM_SYNTAXES_FILE, 'r', encoding='utf-8') as syntax_file:
+                custom_syntaxes = json.load(syntax_file)
+        except (OSError, json.JSONDecodeError):
+            custom_syntaxes = []
+
+    return jsonify({
+        'builtInSyntaxGuide': read_reference(os.path.join('md', 'MARKDOWN_SPECIAL.md')),
+        'aiCellSyntaxGuidance': read_reference(os.path.join('md', 'AI_CELL_INSTRUCTIONS.md')),
+        'customSyntaxes': custom_syntaxes,
+        'parserSource': ['static/script.js'],
+    })
+
 def resolve_sheet(data, sheet_id):
     """Return (sheet_obj, array_index) or (None, None) if not found."""
     sheets = data.get('sheets', [])
