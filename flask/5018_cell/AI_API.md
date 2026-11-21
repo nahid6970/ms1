@@ -5,6 +5,20 @@ Base URL: `http://localhost:5018`
 Sheets can be identified by **arrayIndex** (e.g. `3`) or **customIndex** (14-digit timestamp, e.g. `20260519230334`).  
 Use customIndex whenever possible — it never changes even if sheets are reordered.
 
+## Syntax reference
+
+```
+GET /ai/syntaxes
+```
+
+Returns the built-in syntax guides, the AI cell syntax guidance, and the custom syntax markers currently configured in this app. CLI agents should read this before proposing cell content changes and should inspect `static/script.js` when parser behavior is unclear.
+
+Response fields:
+- `builtInSyntaxGuide` — contents of `md/MARKDOWN_SPECIAL.md`
+- `aiCellSyntaxGuidance` — contents of `md/AI_CELL_INSTRUCTIONS.md`
+- `customSyntaxes` — active custom markers and their colors/styles
+- `parserSource` — source files to inspect for actual parsing behavior
+
 ---
 
 ## Step 1 — Get the full schema (always start here)
@@ -120,6 +134,8 @@ Content-Type: application/json
 { "value": "new content here" }
 ```
 
+For CLI-driven edits, prefer submitting a proposal for in-app review (Step 4c) instead of writing directly. The direct update endpoint above applies the change immediately and bypasses the review dialog.
+
 Example — update row 1, col 1 of sheet with customIndex `20260519230334`:
 
 ```
@@ -134,7 +150,20 @@ Response:
 
 ---
 
-## Step 4c — Batch update multiple cells
+## Step 4c — Submit a cell update proposal for review
+
+```
+POST /ai/cell/<id>/<row>/<col>/proposal
+Content-Type: application/json
+
+{ "value": "complete proposed replacement content" }
+```
+
+Returns HTTP 202 with a `proposalId`. The open app displays the current and proposed content for approval. A proposal does not change the cell until approved in the app.
+
+The app polls `GET /ai/proposals` for pending proposals. The UI approves with `POST /ai/proposals/<proposalId>/approve` or rejects with `DELETE /ai/proposals/<proposalId>`. Approval returns HTTP 409 if the cell changed after the proposal was created; reread the cell and submit a new proposal. Pending proposals are held in memory and are cleared if Flask restarts.
+
+## Step 4d — Batch update multiple cells
 
 ```
 POST /ai/cells

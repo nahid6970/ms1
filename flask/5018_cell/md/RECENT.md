@@ -1,5 +1,31 @@
 # Recent Development Log
 
+## [2026-11-21 19:38] - CLI Cell Proposals and Syntax Guidance
+
+**What We Accomplished:**
+- Added a **Copy CLI task** action to a cell's AI instruction editor. The task gives the agent a stable sheet/cell reference, asks it to fetch and identify the cell, and wait for the user's requested change before proposing an edit.
+- Added `GET /ai/syntaxes` to return the built-in syntax references and the app's live custom syntax settings to agents.
+- Added proposal submission, listing, approval, and rejection API routes. CLI proposals appear in the app's review dialog and only update the cell after approval; approval rejects stale proposals if the cell changed after the agent read it.
+- Added a rendered preview and source diff toggle to the review dialog, along with responsive sizing and a compact preview-mode height.
+- Documented the CLI workflow and API endpoints.
+
+**Files Modified:**
+- `app.py` — syntax reference and review proposal API endpoints
+- `static/script.js` — copied CLI task and proposal polling/review interactions
+- `static/style.css` — review dialog preview, diff, and responsive sizing
+- `templates/index.html` — proposal review dialog
+- `AI_API.md` — syntax and proposal API reference
+- `md/AI_CELL_INSTRUCTIONS.md` — CLI review workflow
+- `md/CELL_FEATURES.md` — CLI review feature summary
+- `md/RECENT.md` — recorded this session
+
+**Current Status:**
+- CLI cell edits require approval when the agent uses the copied task's proposal endpoint. The legacy direct cell update endpoint still applies changes immediately.
+- Pending proposals are held in memory and are cleared when Flask restarts.
+- JavaScript and Python syntax checks and `git diff --check` passed; browser verification was not performed.
+
+---
+
 ## [2026-11-20 13:00] - Fix Cell Enter and Trailing Blank Line Behavior
 
 **What We Accomplished:**

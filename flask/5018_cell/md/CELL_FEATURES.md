@@ -7,6 +7,9 @@ Successful instructions are saved as recent prompts in this browser. Select one 
 
 See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md) for setup, behavior, search limitations, and restart requirements.
 
+### CLI Agent Review
+The cell AI editor's **Copy CLI task** button copies a stable cell reference and instructions for a CLI agent. The agent reads the cell and the app's live syntax guidance, asks what should change, then submits a proposal. The app shows a rendered preview and source diff; changes are saved only after approval. See [AI Cell Instructions](AI_CELL_INSTRUCTIONS.md) and the [AI API reference](../AI_API.md).
+
 ## Cell Complete Checkmark
 **Access:** Right-click context menu → "Mark Complete"
 **Visual:** 

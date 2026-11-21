@@ -21,6 +21,15 @@ The model tester sends its prompt to each listed model and may use Gemini API qu
 2. Enter the change you want in the instruction box, choose a previous prompt from **Recent prompts**, or click the microphone button to dictate it in the voice language selected for the app. The browser may request microphone access. The box grows automatically for multiline instructions. If the cell begins with an `Instruction: ...` line, that instruction is prefilled.
 3. Click **Update**. Gemini uses the instruction and the cell's current content, then replaces the content in the same cell.
 
+## Updating a cell with a CLI agent
+
+1. Open the cell's **✨** instruction editor and click **Copy CLI task**.
+2. Paste the task into a CLI agent. It includes a stable sheet and cell reference and tells the agent to read the cell through the API, show what it found, and ask what you want changed before editing.
+3. The task directs the agent to read `GET /ai/syntaxes` before proposing content. This endpoint returns the built-in syntax guides and the app's currently configured custom markers. The agent should inspect `static/script.js` if it needs to verify parser behavior.
+4. After you give the agent an instruction, it submits a proposal through `POST /ai/cell/<id>/<row>/<col>/proposal`. The app shows a rendered preview and source diff. Use **View preview** and **View source** to review, then choose **Approve change** or **Reject**.
+
+The proposal does not change the cell until you approve it. Approval checks that the cell still matches the value the agent originally read. If the cell changed meanwhile, the app refuses the stale proposal. Pending proposals are kept in memory and are cleared when Flask restarts. The direct `POST /ai/cell/<id>/<row>/<col>` API still applies changes immediately, so CLI agents should use the proposal endpoint.
+
 ## Recent prompts and pinned prompts
 
 - After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.
