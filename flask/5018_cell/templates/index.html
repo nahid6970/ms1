@@ -689,6 +689,42 @@
         </div>
     </div>
 
+    <!-- Review CLI-proposed cell changes before applying them -->
+    <div id="cellAiProposalReviewModal" class="modal" style="z-index:7000;" role="dialog" aria-modal="true" aria-labelledby="cellAiProposalReviewTitle">
+        <div class="modal-content cell-ai-proposal-modal">
+            <div class="modal-header">
+                <div>
+                    <h2 id="cellAiProposalReviewTitle">Review cell change</h2>
+                    <div id="cellAiProposalReviewLocation" class="cell-ai-proposal-location"></div>
+                </div>
+            </div>
+            <div class="cell-ai-proposal-body">
+                <div class="cell-ai-proposal-source-toggle-row">
+                    <button id="cellAiProposalDiffToggle" type="button" class="btn btn-secondary" aria-pressed="true">View preview</button>
+                    <button id="cellAiProposalSourceToggle" type="button" class="btn btn-secondary" aria-pressed="false" hidden>View source</button>
+                </div>
+                <pre id="cellAiProposalDiff" class="cell-ai-proposal-value cell-ai-proposal-diff" aria-label="Cell change diff"></pre>
+                <div id="cellAiProposalPreview" class="cell-ai-proposal-columns" hidden>
+                    <section>
+                        <h3>Current content</h3>
+                        <div id="cellAiProposalCurrentRendered" class="cell-ai-proposal-value cell-ai-proposal-rendered"></div>
+                        <pre id="cellAiProposalCurrentSource" class="cell-ai-proposal-value cell-ai-proposal-source" hidden></pre>
+                    </section>
+                    <section>
+                        <h3>Proposed content</h3>
+                        <div id="cellAiProposalProposedRendered" class="cell-ai-proposal-value cell-ai-proposal-rendered"></div>
+                        <pre id="cellAiProposalProposedSource" class="cell-ai-proposal-value cell-ai-proposal-source" hidden></pre>
+                    </section>
+                </div>
+                <p id="cellAiProposalReviewStatus" class="cell-ai-proposal-status" role="status" aria-live="polite"></p>
+            </div>
+            <div class="cell-ai-proposal-actions">
+                <button id="cellAiProposalReject" type="button" class="btn btn-secondary">Reject</button>
+                <button id="cellAiProposalApprove" type="button" class="btn btn-primary">Approve change</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Markdown Guide Modal -->
     <div id="markdownGuideModal" class="modal">
         <div class="modal-content" style="max-width: 700px;">

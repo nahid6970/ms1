@@ -2,6 +2,7 @@
 from flask import Flask, render_template, request, jsonify
 import json
 import os
+import uuid
 
 app = Flask(__name__)
 
@@ -36,6 +37,9 @@ CUSTOM_SYNTAXES_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\custom_syn
 QUICK_TEXTS_FILE = normalize_path(r'C:\@delta\ms1\flask\5018_cell\quick_texts.json')
 SYNTAX_REPLACE_PINS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'syntax_replace_pins.json')
 SETTINGS_FILE = normalize_path(r'C:\@delta\db\5018_cell\setting.json')
+
+# Pending CLI edits stay in memory until a user approves or rejects them.
+AI_CELL_PROPOSALS = {}
 
 def load_data():
     data = {
@@ -477,6 +481,70 @@ def ai_set_cell(sheet_id, row, col):
     rows[row][col] = value
     save_data(data)
     return jsonify({'success': True, 'row': row, 'col': col, 'value': value})
+
+@app.route('/ai/cell/<sheet_id>/<int:row>/<int:col>/proposal', methods=['POST'])
+def ai_propose_cell_update(sheet_id, row, col):
+    """Queue a cell update for in-app review instead of applying it immediately."""
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict) or 'value' not in payload:
+        return jsonify({'error': 'Expected JSON with a value field'}), 400
+
+    data = load_data()
+    sheet, sheet_index = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    rows = sheet.get('rows', [])
+    if row >= len(rows) or col >= len(rows[row]):
+        return jsonify({'error': 'Cell out of range'}), 404
+
+    columns = sheet.get('columns') or []
+    column_name = columns[col].get('name', f'Column {col + 1}') if col < len(columns) else f'Column {col + 1}'
+    proposal_id = str(uuid.uuid4())
+    proposal = {
+        'id': proposal_id,
+        'sheetId': str(sheet.get('customIndex') or sheet_index),
+        'sheetIndex': sheet_index,
+        'sheetName': sheet.get('name', ''),
+        'row': row,
+        'col': col,
+        'columnName': column_name,
+        'originalValue': rows[row][col],
+        'proposedValue': payload['value'],
+    }
+    AI_CELL_PROPOSALS[proposal_id] = proposal
+    return jsonify({'success': True, 'proposalId': proposal_id, 'status': 'pending_review'}), 202
+
+@app.route('/ai/proposals', methods=['GET'])
+def ai_get_cell_proposals():
+    return jsonify({'proposals': list(AI_CELL_PROPOSALS.values())})
+
+@app.route('/ai/proposals/<proposal_id>/approve', methods=['POST'])
+def ai_approve_cell_proposal(proposal_id):
+    proposal = AI_CELL_PROPOSALS.get(proposal_id)
+    if proposal is None:
+        return jsonify({'error': 'Proposal not found or already handled'}), 404
+
+    data = load_data()
+    sheet, _ = resolve_sheet(data, proposal['sheetId'])
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    rows = sheet.get('rows', [])
+    row, col = proposal['row'], proposal['col']
+    if row >= len(rows) or col >= len(rows[row]):
+        return jsonify({'error': 'Cell out of range'}), 404
+    if rows[row][col] != proposal['originalValue']:
+        return jsonify({'error': 'Cell changed after this proposal was created; review the latest value before applying.'}), 409
+
+    rows[row][col] = proposal['proposedValue']
+    save_data(data)
+    AI_CELL_PROPOSALS.pop(proposal_id, None)
+    return jsonify({'success': True, 'proposal': proposal})
+
+@app.route('/ai/proposals/<proposal_id>', methods=['DELETE'])
+def ai_reject_cell_proposal(proposal_id):
+    if AI_CELL_PROPOSALS.pop(proposal_id, None) is None:
+        return jsonify({'error': 'Proposal not found or already handled'}), 404
+    return jsonify({'success': True})
 
 @app.route('/ai/cells', methods=['POST'])
 def ai_set_cells():

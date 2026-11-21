@@ -1731,6 +1731,162 @@ td:hover .cell-ai-instruction-btn,
     color: white;
 }
 
+.cell-ai-proposal-modal {
+    box-sizing: border-box;
+    width: min(1760px, calc(100vw - 48px));
+    max-width: 1760px;
+    height: min(88vh, 1000px);
+    max-height: calc(100vh - 32px);
+    margin: auto;
+}
+
+.cell-ai-proposal-location {
+    margin-top: 5px;
+    color: #666;
+    font-size: 13px;
+}
+
+.cell-ai-proposal-body {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 18px 22px;
+    overflow: hidden;
+}
+
+.cell-ai-proposal-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+.cell-ai-proposal-columns h3 {
+    margin: 0 0 7px;
+    font-size: 14px;
+}
+
+.cell-ai-proposal-source-toggle-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0 0 10px;
+}
+
+.cell-ai-proposal-source-toggle-row [hidden] {
+    display: none;
+}
+
+.cell-ai-proposal-value {
+    box-sizing: border-box;
+    min-height: 120px;
+    max-height: 45vh;
+    margin: 0;
+    padding: 10px;
+    overflow: auto;
+    border: 1px solid #d7dce1;
+    border-radius: 5px;
+    background: #f8f9fa;
+    color: #222;
+    font: 13px/1.5 Consolas, monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.cell-ai-proposal-rendered {
+    font: inherit;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.cell-ai-proposal-rendered[hidden],
+.cell-ai-proposal-source[hidden] {
+    display: none;
+}
+
+.cell-ai-proposal-diff {
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    flex: 1 1 auto;
+    padding: 0;
+    background: #fff;
+    white-space: pre;
+    overflow-wrap: normal;
+    tab-size: 4;
+}
+
+.cell-ai-proposal-diff[hidden] {
+    display: none;
+}
+
+.cell-ai-proposal-diff-line {
+    display: block;
+    min-height: 1.5em;
+    padding: 0 10px;
+}
+
+.cell-ai-proposal-diff-line.is-added {
+    background: #e6ffec;
+    color: #116329;
+}
+
+.cell-ai-proposal-diff-line.is-removed {
+    background: #ffebe9;
+    color: #82071e;
+}
+
+.cell-ai-proposal-diff-line.is-unchanged {
+    color: #57606a;
+}
+
+.cell-ai-proposal-diff-prefix {
+    display: inline-block;
+    width: 1.5em;
+    color: #6e7781;
+    user-select: none;
+}
+
+.cell-ai-proposal-rendered .md-grid,
+.cell-ai-proposal-rendered table {
+    max-width: 100%;
+}
+
+.cell-ai-proposal-status {
+    min-height: 1.4em;
+    margin: 12px 0 0;
+    color: #a12622;
+    font-size: 13px;
+}
+
+.cell-ai-proposal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 22px;
+    border-top: 1px solid #e9ecef;
+}
+
+@media (max-width: 640px) {
+    .cell-ai-proposal-modal {
+        width: calc(100vw - 20px);
+        height: 92vh;
+        max-height: 92vh;
+    }
+
+    .cell-ai-proposal-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .cell-ai-proposal-value {
+        min-height: 90px;
+        max-height: 28vh;
+    }
+}
+
 /* Cell complete checkmark */
 td.cell-complete::before {
     content: "✓";
