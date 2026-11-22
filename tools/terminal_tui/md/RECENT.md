@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-22] - Search Full Rclone Check File Lists
+
+- Made the `+N more` indicators in Rclone project check results clickable.
+- Added a searchable popup with all changed, missing, symlink, and other check entries.
+- Removed API response caps so the popup can show the complete check result.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-22] - Show Git Commit Size Estimates in Changed Files
 
 - Changed the selection header to show `selected / total` and the combined estimated size of checked files.

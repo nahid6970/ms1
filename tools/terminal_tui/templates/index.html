@@ -4811,6 +4811,19 @@ kiro-cli whoami --format json</code></pre>
         </div>
     </div>
 
+    <div id="rclone-files-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="rclone-files-title" onclick="if(event.target===this)closeRcloneFilesModal()" style="z-index:1300;">
+        <div class="modal-content" style="width:720px;max-width:96vw;max-height:82vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border-color);">
+                <div style="min-width:0;"><h2 id="rclone-files-title" style="margin:0;font-size:.95rem;">Rclone check files</h2><div id="rclone-files-subtitle" style="margin-top:3px;font-size:.68rem;color:var(--text-muted);"></div></div>
+                <button id="rclone-files-close" type="button" onclick="closeRcloneFilesModal()" aria-label="Close file list" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
+            </div>
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);">
+                <input id="rclone-files-search" type="search" placeholder="Search paths or check messages…" autocomplete="off" oninput="renderRcloneFilesPopup()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border-color);border-radius:7px;background:var(--bg-main);color:var(--text-primary);font: .78rem 'Fira Code',monospace;outline:none;">
+            </div>
+            <div id="rclone-files-list" style="overflow:auto;padding:10px 14px;min-height:150px;max-height:calc(82vh - 130px);"></div>
+        </div>
+    </div>
+
     <!-- Git Init Modal (standalone, shown for non-git projects) -->
     <div class="modal-overlay" id="git-init-modal">
         <div class="modal-content" style="width:480px; max-width:96%; padding:28px 28px 24px;">
@@ -10196,6 +10209,42 @@ kiro-cli whoami --format json</code></pre>
 
         const rcloneProjectStatusByName = new Map();
         const rcloneModalSyncStatusByName = new Map();
+        let rcloneFileListProject = '';
+        function openRcloneFilesPopup(projectName) {
+            rcloneFileListProject = projectName;
+            const modal = document.getElementById('rclone-files-modal');
+            const search = document.getElementById('rclone-files-search');
+            if (search) search.value = '';
+            if (modal) modal.classList.add('show');
+            renderRcloneFilesPopup();
+            requestAnimationFrame(() => search?.focus());
+        }
+        function closeRcloneFilesModal() {
+            document.getElementById('rclone-files-modal')?.classList.remove('show');
+        }
+        function renderRcloneFilesPopup() {
+            const list = document.getElementById('rclone-files-list');
+            const status = rcloneProjectStatusByName.get(rcloneFileListProject);
+            if (!list) return;
+            if (!status) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);">No check result is available.</div>'; return; }
+            const groups = [
+                ['Changed', status.changedFiles || [], '#fbbf24'],
+                ['Missing', status.missingFiles || [], '#fb923c'],
+                ['Symlinks', status.symlinkFiles || [], '#a78bfa'],
+                ['Other check messages', status.otherLines || [], '#f87171']
+            ];
+            const query = (document.getElementById('rclone-files-search')?.value || '').trim().toLocaleLowerCase();
+            const filtered = groups.map(([label, items, color]) => [label, items.filter(item => String(item).toLocaleLowerCase().includes(query)), color]).filter(([, items]) => items.length);
+            const total = groups.reduce((sum, [, items]) => sum + items.length, 0);
+            const shown = filtered.reduce((sum, [, items]) => sum + items.length, 0);
+            document.getElementById('rclone-files-title').textContent = `${rcloneFileListProject} · check files`;
+            document.getElementById('rclone-files-subtitle').textContent = `${shown.toLocaleString()} of ${total.toLocaleString()} entries${query ? ' match your search' : ''}`;
+            list.innerHTML = filtered.length ? filtered.map(([label, items, color]) => `
+                <section data-testid="rclone-file-group" style="margin-bottom:14px;">
+                    <h3 style="margin:0 0 6px;font-size:.72rem;color:${color};font-weight:700;">${escapeHtml(label)} · ${items.length.toLocaleString()}</h3>
+                    <div style="border:1px solid var(--border-color);border-radius:7px;overflow:hidden;">${items.map((item, index) => `<div data-testid="rclone-file-entry" style="padding:6px 9px;border-bottom:1px solid var(--border-color);font:.68rem/1.45 'Fira Code',monospace;color:var(--text-primary);white-space:pre-wrap;overflow-wrap:anywhere;${index === items.length - 1 ? 'border-bottom:0;' : ''}">${escapeHtml(String(item))}</div>`).join('')}</div>
+                </section>`).join('') : `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.78rem;">${query ? 'No files match this search.' : 'No file details were returned for this check.'}</div>`;
+        }
         function syncStatusSummaryBytes(bytes) {
             const value = Number(bytes) || 0;
             if (value < 1024) return `${Math.round(value)} B`;
@@ -10266,12 +10315,12 @@ kiro-cli whoami --format json</code></pre>
                     ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:${bg};border:1px solid ${color}66;color:${color};font-size:.62rem;font-weight:700;">${label} <span>${count}</span></span>`
                     : '';
 
-                const fileList = (files, color) => files.length
+                const fileList = (files, color, category) => files.length
                     ? `<div style="margin-top:5px;display:flex;flex-direction:column;gap:1px;">${files.slice(0,8).map(f =>
                         `<div style="display:flex;align-items:center;gap:5px;padding:2px 0;">
                             <span style="color:${color};font-size:.6rem;flex-shrink:0;">●</span>
                             <code style="font-size:.64rem;color:#cbd5e1;font-family:'Fira Code',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml(f)}</code>
-                        </div>`).join('')}${files.length > 8 ? `<div style="font-size:.6rem;color:var(--text-muted);padding:2px 0 0 14px;">+${files.length - 8} more</div>` : ''}</div>`
+                        </div>`).join('')}${files.length > 8 ? `<button type="button" class="rclone-file-more" data-project="${escapeHtml(project.name)}" data-category="${category}" style="margin:2px 0 0 14px;padding:0;border:0;background:none;color:#60a5fa;font:.62rem 'Fira Code',monospace;text-align:left;cursor:pointer;">+${files.length - 8} more · view all</button>` : ''}</div>`
                     : '';
 
                 let statusHtml = '';
@@ -10291,9 +10340,9 @@ kiro-cli whoami --format json</code></pre>
                             ${pill('symlinks', symlinkFiles.length, '#a78bfa', 'rgba(167,139,250,.1)')}
                             ${status.matching != null ? `<span style="font-size:.62rem;color:#34d399;padding:2px 0;">✓ ${Number(status.matching).toLocaleString()} matching</span>` : ''}
                         </div>
-                        ${fileList(changedFiles, '#fbbf24')}
-                        ${fileList(missingFiles, '#fb923c')}
-                        ${fileList(symlinkFiles, '#a78bfa')}
+                        ${fileList(changedFiles, '#fbbf24', 'changed')}
+                        ${fileList(missingFiles, '#fb923c', 'missing')}
+                        ${fileList(symlinkFiles, '#a78bfa', 'symlinks')}
                         ${otherLines.length && !changedFiles.length && !missingFiles.length ? `<details style="margin-top:5px;"><summary style="cursor:pointer;color:var(--text-muted);font-size:.65rem;">Show raw output</summary><pre style="white-space:pre-wrap;word-break:break-word;max-height:120px;overflow:auto;margin:4px 0 0;color:#94a3b8;font-size:.62rem;">${escapeHtml(otherLines.join('\n'))}</pre></details>` : ''}`;
                     } else if (status.matching != null) {
                         statusHtml = `<div style="font-size:.7rem;color:#34d399;margin-top:5px;display:flex;align-items:center;gap:4px;">
@@ -10348,6 +10397,7 @@ kiro-cli whoami --format json</code></pre>
                 </div>`;
             }).join('');
             list.querySelectorAll('.rclone-project-check').forEach(button => button.addEventListener('click', () => checkRcloneProject(button.dataset.project, button)));
+            list.querySelectorAll('.rclone-file-more').forEach(button => button.addEventListener('click', () => openRcloneFilesPopup(button.dataset.project)));
             list.querySelectorAll('.rclone-project-select').forEach(button => button.addEventListener('click', () => selectRcloneProjectInTerminal(button.dataset.project)));
             list.querySelectorAll('.rclone-project-sync').forEach(button => {
                 const projectName = button.dataset.project;

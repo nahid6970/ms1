@@ -8392,9 +8392,9 @@ def _api_rclone_check(project):
             other_lines.append(line)
 
     return jsonify({'ok': result.returncode == 0, 'differences': differences, 'errors': errors,
-                    'matching': matching, 'missing': missing, 'details': detail_lines[:80],
-                    'changedFiles': changed_files[:60], 'missingFiles': missing_files[:60],
-                    'symlinkFiles': symlink_files[:30], 'otherLines': other_lines[:20],
+                    'matching': matching, 'missing': missing, 'details': detail_lines,
+                    'changedFiles': changed_files, 'missingFiles': missing_files,
+                    'symlinkFiles': symlink_files, 'otherLines': other_lines,
                     'summary': 'No differences found' if differences == 0 and errors == 0 else f'{differences} differences found · {errors} errors',
                     'exitCode': result.returncode})
 
