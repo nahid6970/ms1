@@ -6180,9 +6180,24 @@ td.has-cell-ai-rank > .markdown-preview {
     flex: 1 1 220px;
 }
 
-.custom-syntax-migration .btn {
-    padding: 5px 9px;
-    font-size: 11px;
+.custom-syntax-migration .cs-migration-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    padding: 5px;
+    flex: 0 0 32px;
+}
+
+.custom-syntax-migration .cs-migration-action svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 /* Columns */

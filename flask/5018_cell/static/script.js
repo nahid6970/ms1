@@ -17979,16 +17979,20 @@ function renderCustomColorSyntaxList() {
                 if (matches) {
                     const applyButton = document.createElement('button');
                     applyButton.type = 'button';
-                    applyButton.className = 'btn btn-primary';
-                    applyButton.textContent = 'Apply to cells';
+                    applyButton.className = 'btn btn-primary cs-migration-action';
+                    applyButton.setAttribute('aria-label', 'Apply syntax change to cells');
+                    applyButton.title = 'Apply syntax change to all matching cells';
+                    applyButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12 4 4L19 6"></path></svg>';
                     applyButton.onclick = () => applyCustomSyntaxMigration(index);
                     migrationPanel.appendChild(applyButton);
                 }
 
                 const dismissButton = document.createElement('button');
                 dismissButton.type = 'button';
-                dismissButton.className = 'btn btn-secondary';
-                dismissButton.textContent = 'Keep existing cell text';
+                dismissButton.className = 'btn btn-secondary cs-migration-action';
+                dismissButton.setAttribute('aria-label', 'Keep existing cell text');
+                dismissButton.title = 'Keep existing cell text and dismiss this migration';
+                dismissButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"></path></svg>';
                 dismissButton.onclick = () => dismissCustomSyntaxMigration(index);
                 migrationPanel.appendChild(dismissButton);
                 list.appendChild(migrationPanel);
