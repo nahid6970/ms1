@@ -17951,7 +17951,7 @@ function renderCustomColorSyntaxList() {
 
             <div class="cs-col-preview">
                 <div class="preview-box" style="background: ${syntax.bgColor}; color: ${syntax.fgColor}; ${syntax.isBold ? 'font-weight: bold;' : ''} ${syntax.isItalic ? 'font-style: italic;' : ''} ${syntax.isUnderline ? 'text-decoration: underline;' : ''} ${syntax.fontSize ? 'font-size:' + syntax.fontSize + 'em;' : ''}">
-                    ${escapeHtml(prefix || '..')}sample${escapeHtml(suffix || '..')}
+                    ${escapeHtml(prefix || '..')}${escapeHtml(suffix || '..')}
                 </div>
             </div>
             
