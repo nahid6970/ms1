@@ -4808,6 +4808,7 @@ kiro-cli whoami --format json</code></pre>
             </div>
             <div id="rclone-projects-list" style="overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:120px;"></div>
             <div id="rclone-projects-message" role="status" style="display:none;padding:8px 18px;border-top:1px solid var(--border-color);font-size:.75rem;color:var(--text-secondary);"></div>
+            <div id="rclone-projects-progress" role="status" style="display:none;padding:9px 18px;border-top:1px solid var(--border-color);background:var(--bg-sidebar);font-size:.72rem;color:var(--text-secondary);"></div>
         </div>
     </div>
 
@@ -10287,7 +10288,11 @@ kiro-cli whoami --format json</code></pre>
         const rcloneProjectsDefaultSubtitle = 'Compare each workspace with its saved remote and review file differences.';
         function closeRcloneProjectsModal() {
             document.getElementById('rclone-projects-modal').classList.remove('show');
-            if (!rcloneModalSyncRunning) document.getElementById('rclone-projects-subtitle').textContent = rcloneProjectsDefaultSubtitle;
+            if (!rcloneModalSyncRunning) {
+                document.getElementById('rclone-projects-subtitle').textContent = rcloneProjectsDefaultSubtitle;
+                const progress = document.getElementById('rclone-projects-progress');
+                if (progress) progress.style.display = 'none';
+            }
         }
         function renderRcloneProjectsModal() {
             const list = document.getElementById('rclone-projects-list');
@@ -10502,12 +10507,15 @@ kiro-cli whoami --format json</code></pre>
             });
             updateProjectChangeBadges();
             const subtitle = document.getElementById('rclone-projects-subtitle');
+            const progress = document.getElementById('rclone-projects-progress');
             const syncAllButton = document.getElementById('rclone-projects-sync-all');
             const checkAllButton = document.getElementById('rclone-projects-check-all');
             if (syncAllButton) syncAllButton.disabled = true;
             if (checkAllButton) checkAllButton.disabled = true;
             const directionLabel = direction === 'src_to_dst' ? 'SRC → DST' : 'DST → SRC';
-            subtitle.textContent = syncProjects.length === 1 ? `Preparing ${syncProjects[0].name} · ${directionLabel}` : `Preparing ${syncProjects.length} projects · ${directionLabel}`;
+            subtitle.textContent = rcloneProjectsDefaultSubtitle;
+            progress.style.display = 'block';
+            progress.textContent = syncProjects.length === 1 ? `Preparing ${syncProjects[0].name} · ${directionLabel}` : `Preparing ${syncProjects.length} projects · ${directionLabel}`;
             const actionCounts = {copied:0, removed:0, warning:0, errors:0};
             let syncStartedAt = performance.now(), completedBytes = 0, currentProjectBytes = 0, activeProjectName = '', activeProjectIndex = 0;
             let completedProjects = 0, failedProjects = 0, dryRunProjects = 0;
@@ -10568,7 +10576,7 @@ kiro-cli whoami --format json</code></pre>
                     rcloneModalSyncStatusByName.set(activeProjectName, { ...previousSyncStatus, state:'syncing', progress:projectProgress, bytes:currentProjectBytes, ...currentProjectCounts });
                     renderRcloneProjectsModal();
                     const transferProgress = isScanning ? 'Scanning files…' : stat[7] ? `${stat[6]}/${stat[7]} transfers` : `${stat[1]} of ${stat[2]}`;
-                    subtitle.textContent = `${syncProjects.length > 1 ? `Project ${activeProjectIndex + 1}/${syncProjects.length} · ${Math.floor(overallProgress)}% overall · ` : ''}${activeProjectName} · ${transferProgress} · ${totals.transferred} transferred · avg ${totals.average}/s${isScanning ? '' : ` · ${stat[4].trim()} · ETA ${stat[5]}`}`;
+                    progress.textContent = `${syncProjects.length > 1 ? `Project ${activeProjectIndex + 1}/${syncProjects.length} · ${Math.floor(overallProgress)}% overall · ` : ''}${activeProjectName} · ${transferProgress} · ${totals.transferred} transferred · avg ${totals.average}/s${isScanning ? '' : ` · ${stat[4].trim()} · ETA ${stat[5]}`}`;
                     return;
                 }
                 // Show notices in recent activity; keep them out of the raw log.
@@ -10590,7 +10598,7 @@ kiro-cli whoami --format json</code></pre>
                     rcloneModalSyncStatusByName.set(activeProjectName, {state:'syncing', progress:0, bytes:0, ...currentProjectCounts, fileEvents:[], rawOutput:[]});
                     rcloneProjectStatusByName.delete(activeProjectName);
                     renderRcloneProjectsModal();
-                    subtitle.textContent = `${syncProjects.length > 1 ? `Project ${projectIndex + 1}/${syncProjects.length} · ` : ''}Connecting to ${activeProjectName} · ${directionLabel}`;
+                    progress.textContent = `${syncProjects.length > 1 ? `Project ${projectIndex + 1}/${syncProjects.length} · ` : ''}Connecting to ${activeProjectName} · ${directionLabel}`;
                     try {
                         const response = await fetch(`/api/project/${encodeURIComponent(activeProjectName)}/rclone/sync-stream`, {
                             method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({direction})
@@ -10639,13 +10647,13 @@ kiro-cli whoami --format json</code></pre>
                     rcloneModalSyncCurrentProject = '';
                     renderRcloneProjectsModal();
                     const totals = updateTransferTotals();
-                    subtitle.textContent = `${projectIndex + 1}/${syncProjects.length} projects processed · ${Math.floor(overallProgress)}% overall · ${totals.transferred} transferred · avg ${totals.average}/s`;
+                    progress.textContent = `${projectIndex + 1}/${syncProjects.length} projects processed · ${Math.floor(overallProgress)}% overall · ${totals.transferred} transferred · avg ${totals.average}/s`;
                 }
                 const totals = updateTransferTotals();
                 if (failedProjects) {
-                    subtitle.textContent = `Sync finished · ${completedProjects} complete · ${failedProjects} failed · ${totals.transferred} transferred · avg ${totals.average}/s`;
+                    progress.textContent = `Sync finished · ${completedProjects} complete · ${failedProjects} failed · ${totals.transferred} transferred · avg ${totals.average}/s`;
                 } else {
-                    subtitle.textContent = `${dryRunProjects ? 'Dry run complete' : 'Sync complete'} · ${completedProjects}/${syncProjects.length} projects · ${totals.transferred} transferred · avg ${totals.average}/s`;
+                    progress.textContent = `${dryRunProjects ? 'Dry run complete' : 'Sync complete'} · ${completedProjects}/${syncProjects.length} projects · ${totals.transferred} transferred · avg ${totals.average}/s`;
                 }
             } finally {
                 rcloneModalSyncRunning = false;
