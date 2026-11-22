@@ -4817,12 +4817,10 @@ kiro-cli whoami --format json</code></pre>
                 <div style="min-width:0;"><h2 id="rclone-files-title" style="margin:0;font-size:.95rem;">Rclone check files</h2><div id="rclone-files-subtitle" style="margin-top:3px;font-size:.68rem;color:var(--text-muted);"></div></div>
                 <button id="rclone-files-close" type="button" onclick="closeRcloneFilesModal()" aria-label="Close file list" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
             </div>
-            <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);">
-                <input id="rclone-files-search" type="search" placeholder="Search paths or check messages…" autocomplete="off" oninput="renderRcloneFilesPopup()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border-color);border-radius:7px;background:var(--bg-main);color:var(--text-primary);font: .78rem 'Fira Code',monospace;outline:none;">
-            </div>
-            <div style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-bottom:1px solid var(--border-color);">
+            <div style="display:flex;align-items:center;gap:9px;padding:10px 14px;border-bottom:1px solid var(--border-color);">
+                <input id="rclone-files-search" type="search" placeholder="Search paths or check messages…" autocomplete="off" oninput="renderRcloneFilesPopup()" style="flex:1;min-width:0;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border-color);border-radius:7px;background:var(--bg-main);color:var(--text-primary);font: .78rem 'Fira Code',monospace;outline:none;">
                 <label for="rclone-files-sort" style="font-size:.7rem;color:var(--text-muted);">Sort by</label>
-                <select id="rclone-files-sort" onchange="renderRcloneFilesPopup()" style="padding:5px 7px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-main);color:var(--text-primary);font-size:.72rem;">
+                <select id="rclone-files-sort" onchange="renderRcloneFilesPopup()" style="max-width:190px;padding:5px 7px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-main);color:var(--text-primary);font-size:.72rem;">
                     <option value="name-asc">Name · A to Z</option><option value="name-desc">Name · Z to A</option>
                     <option value="size-asc">Size · smallest first</option><option value="size-desc">Size · largest first</option>
                     <option value="modified-asc">Modified · oldest first</option><option value="modified-desc">Modified · newest first</option>
