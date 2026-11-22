@@ -10213,7 +10213,18 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('theme-modal').classList.remove('show');
         }
 
-        const rcloneProjectStatusByName = new Map();
+        function loadSavedProjectCheckResults(key) {
+            try {
+                const saved = JSON.parse(localStorage.getItem(key) || '{}');
+                const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                return new Map(Object.entries(saved).filter(([, status]) => status?.checkedAt >= cutoff));
+            } catch (_) { return new Map(); }
+        }
+        function saveProjectCheckResults(key, map) {
+            try { localStorage.setItem(key, JSON.stringify(Object.fromEntries([...map].filter(([, status]) => status?.checkedAt)))); }
+            catch (error) { console.warn('Could not save project check results:', error); }
+        }
+        const rcloneProjectStatusByName = loadSavedProjectCheckResults('rclone-project-check-results-v1');
         const rcloneModalSyncStatusByName = new Map();
         let rcloneFileListProject = '';
         function openRcloneFilesPopup(projectName) {
@@ -10658,6 +10669,7 @@ kiro-cli whoami --format json</code></pre>
                 if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
                 rcloneProjectStatusByName.set(name, {...data, checkedAt: Date.now()});
             } catch (error) { rcloneProjectStatusByName.set(name, {error:error.message || 'Rclone check failed.', checkedAt: Date.now()}); }
+            saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
             renderRcloneProjectsModal(); updateProjectChangeBadges();
         }
         let rcloneProjectCheckRunning = false;
@@ -10689,6 +10701,7 @@ kiro-cli whoami --format json</code></pre>
                     } catch (error) {
                         failed.push(project.name); rcloneProjectStatusByName.set(project.name,{error:error?.message || 'Rclone check failed.', checkedAt: Date.now()});
                     }
+                    saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
                     completed++; renderRcloneProjectsModal(); message.style.display='block'; message.style.color='var(--text-secondary)'; updateProjectChangeBadges();
                     message.textContent = `Checked ${completed} of ${linked.length} Rclone projects…`;
                 }
@@ -10704,7 +10717,7 @@ kiro-cli whoami --format json</code></pre>
             message.innerHTML=failed.length ? `Checked ${linked.length-failed.length} of ${linked.length}; failed: ${failed.join(', ')}.${rcloneChangeSuffix}` : `Checked all ${linked.length} Rclone project${linked.length===1?'':'s'}${rcloneChangeSuffix}.`;
         }
 
-        const githubProjectStatusByName = new Map();
+        const githubProjectStatusByName = loadSavedProjectCheckResults('github-project-check-results-v1');
         let githubProjectCommitContext = null;
         let githubProjectCommitCloseTimer = null;
         let githubProjectCheckRunning = false;
@@ -11275,6 +11288,7 @@ kiro-cli whoami --format json</code></pre>
                         githubProjectStatusByName.set(project.name, { text: errorText, filesText: errorText, error: true, hasChanges: true, checkedAt: Date.now() });
                         failed.push(project.name);
                     }
+                    saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
                     completed++; renderGitHubProjectsModal(); message.style.display = 'block'; message.style.color = 'var(--text-secondary)'; updateProjectChangeBadges();
                     message.textContent = `Checked ${completed} of ${linked.length} GitHub projects…`;
                 }

@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-22] - Persist Manual Project Check Results
+
+- Saved manual GitHub and Rclone check results in localStorage and restore recent results after page refresh.
+- Expire saved results after seven days.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-22] - Search Full Rclone Check File Lists
 
 - Made the `+N more` indicators in Rclone project check results clickable.
