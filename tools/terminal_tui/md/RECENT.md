@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-22] - Show Per-Project Rclone Transfer Metrics
+
+- Added compact percentage, bytes, transfer speed, and ETA tags to each syncing project card.
+- Styled each card's progress bar with a clearer gradient while retaining the overall summary below the project list.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-22] - Persist Manual Project Check Results
 
 - Saved manual GitHub and Rclone check results in localStorage and restore recent results after page refresh.
