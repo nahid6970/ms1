@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-22] - Stabilize Rclone Progress Tags
+
+- Reserved fixed grid slots for the per-project sync metrics so tags do not shift as values arrive.
+- Normalized Rclone's speed suffix to avoid duplicate `/s` units.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-22] - Show Per-Project Rclone Transfer Metrics
 
 - Added compact percentage, bytes, transfer speed, and ETA tags to each syncing project card.
