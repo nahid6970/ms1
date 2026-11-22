@@ -168,7 +168,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ### Git Commit Size Indicators
 **Status:** ✅ Complete
-**Description:** The changed-files list shows selected/total counts, a combined approximate size for selected files, and per-file size badges. Large files use warmer colors; detected binary files are marked explicitly. The selection header stays pinned while the file list scrolls.
+**Description:** The changed-files list shows selected/total counts, a combined approximate size for selected files, and per-file size badges. Large files use warmer colors; detected binary files are marked on the row and trigger a warning tag in the pinned selection header. The selection header stays pinned while the file list scrolls.
 **Implementation:** `app.py` adds current working-copy size and a NUL-byte binary hint to `GET /api/project/<project>/git/files`; `templates/index.html` renders and updates the selected total as checkboxes change.
 **Note:** Sizes approximate the current working copies, not the compressed Git pack or exact commit transfer size. Deleted files contribute 0 B.
 

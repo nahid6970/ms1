@@ -8,6 +8,7 @@ Read this file only when relevant to the current task. When reading, reference t
 - Changed the selection header to show `selected / total` and the combined estimated size of checked files.
 - Added color-coded size badges and binary hints beside each changed file.
 - Kept the selection count and size summary pinned at the top while scrolling through changed files.
+- Added a persistent header warning tag whenever the changed-file list contains a detected binary.
 - The API estimates size from current working copies; deleted files show 0 B, and actual compressed Git transfer size may differ.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
