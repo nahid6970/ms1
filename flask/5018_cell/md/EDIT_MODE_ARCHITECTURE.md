@@ -95,29 +95,17 @@ When user clicks away:
 3. Re-render as full preview
 4. Save to backend
 
-### 4. Input Event: Live Re-highlighting
+### 4. Input Event: Sync and Conditional Structural Re-highlighting
 
 ```javascript
 editor.addEventListener('input', () => {
-    if (editor.classList.contains('editing')) {
-        // Save cursor position
-        const offset = getCaretCharacterOffset(editor);
-        
-        // Extract raw text and re-highlight
-        editor._rawContent = extractRawText(editor);
-        editor.innerHTML = highlightSyntax(editor._rawContent);
-        
-        // Restore cursor position
-        setCaretPosition(editor, offset);
-    }
+    editor._rawContent = extractRawText(editor);
+    // Ordinary input stays native to preserve the caret. Structural formatting
+    // may be re-highlighted when line structure changes.
 });
 ```
 
-On every keystroke:
-1. Save cursor position (character offset)
-2. Extract raw markdown from current HTML
-3. Re-apply syntax highlighting
-4. Restore cursor to same position
+Input syncs the raw markdown to the cell data while the browser edits the existing DOM. The editor does not replace its HTML on every keystroke. When line structure changes, lists and tables may receive a targeted re-highlight; this structural pass is skipped at 20,000 characters or more to avoid an expensive DOM replacement. The initial edit-mode `highlightSyntax()` pass has no length cutoff and also runs for SVG-containing cells.
 
 ---
 

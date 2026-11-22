@@ -20,6 +20,8 @@ The system uses a single `div` with `contenteditable="true"` (the `.markdown-pre
     *   **Clean Mode:** Markers remain completely hidden (True WYSIWYG).
 *   **Purpose:** Intuitive editing while maintaining visual context.
 
+**Large cells:** Edit-mode highlighting has no content-length cutoff. Cells over 20,000 characters, including cells containing SVG markup, still pass through `highlightSyntax()`. Large content may therefore take longer to render or respond while editing.
+
 ### 3. Sticky Edit Mode (Optional)
 *   **Trigger:** Enabled via the 📌 toggle in the toolbar.
 *   **Behavior:** When active, the cell will **not** exit edit mode (re-render as clean preview) on `blur`. This allows the user to switch windows, copy text from other applications, or use the F3 Find & Replace modal without losing the interactive editing state.
@@ -51,7 +53,7 @@ Because the editor works with HTML but the data is stored as raw markdown, sever
 5.  **Backend:** `saveData()` is called with a 1-second debounce.
 6.  **Blur:** User clicks away. `parseMarkdown(text)` renders the clean preview.
 
-**Important:** We do NOT re-render on every keystroke to avoid cursor jumping. The browser handles DOM updates naturally.
+**Important:** We do NOT replace the editor DOM on every keystroke to avoid cursor jumping. The browser handles DOM updates naturally. Some structural formatting (such as lists and tables) is re-highlighted when line structure changes; that extra structural pass is skipped for content of 20,000 characters or more.
 
 ### Zero-Width Spaces (ZWS)
 Empty lines (consecutive `<br>` tags) are not clickable by default. We insert zero-width spaces (`\u200B`) after `<br>` tags to provide cursor anchor points.
