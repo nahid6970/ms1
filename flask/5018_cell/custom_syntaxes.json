@@ -21,7 +21,7 @@
     "isBold": true,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "¿¿"
+    "marker": "∆∆"
   },
   {
     "bgColor": "#80E5FF",
@@ -61,7 +61,7 @@
     "isBold": true,
     "isItalic": true,
     "isUnderline": false,
-    "marker": "✔️✔️"
+    "marker": "◊◊"
   },
   {
     "bgColor": "#212529",
@@ -69,7 +69,7 @@
     "isBold": true,
     "isItalic": false,
     "isUnderline": false,
-    "marker": "ᴃᴃ"
+    "marker": "██"
   },
   {
     "bgColor": "transparent",

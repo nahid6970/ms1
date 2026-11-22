@@ -454,6 +454,11 @@
             "kind": "Exe",
             "id": "tailscale-ipn.exe",
             "matching_strategy": "Legacy"
+        },
+        {
+            "kind": "Title",
+            "id": "Microsoft Store",
+            "matching_strategy": "Legacy"
         }
     ],
     "tray_and_multi_window_applications": [
