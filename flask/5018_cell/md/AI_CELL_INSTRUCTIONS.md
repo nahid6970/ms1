@@ -41,6 +41,8 @@ Custom markers can contain Unicode characters that look alike. The syntax endpoi
 
 Batch proposals are limited to 200 distinct cells in one sheet. Approval applies all edits together only when every targeted cell still matches the value captured by the proposal. If a cell changed in the meantime, the app refuses the stale batch so the agent can reread the sheet and prepare a fresh proposal. Agents should use `POST /ai/sheet/<id>/proposal`, not the immediate-write `/ai/cells` endpoint.
 
+The API uses zero-based row indexes while the sheet's visible row labels start at 1. For example, API row index 29 is visible as row 30. Agent task instructions now ask agents to describe locations using the visible label and use zero-based indexes only in API requests.
+
 ## Recent prompts and pinned prompts
 
 - After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.

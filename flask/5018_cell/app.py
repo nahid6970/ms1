@@ -502,6 +502,7 @@ def ai_get_sheet(sheet_id):
         'name': sheet.get('name', ''),
         'columns': [c.get('name') for c in sheet.get('columns', [])],
         'rows': sheet.get('rows', []),
+        'rowNumbering': {'apiRowIndexBase': 0, 'visibleRowLabelBase': 1},
         'cellStyles': sheet.get('cellStyles', {}),
     })
 

@@ -73,11 +73,12 @@ Returns all rows (2D array), column names, and cellStyles.
     ["run", "ran", "run"],
     ["go",  "went", "gone"]
   ],
+  "rowNumbering": { "apiRowIndexBase": 0, "visibleRowLabelBase": 1 },
   "cellStyles": {}
 }
 ```
 
-Row and column are **0-indexed**. Row 0 = first data row, Col 0 = column A.
+API row and column indexes are **0-indexed**. `rows[0]` is the first data row and Col 0 is column A. The visible row label is API row index + 1, so visible row 30 is `row: 29` in API requests. Agents should use visible row labels when describing locations to the user and zero-based indexes only in API requests.
 
 ---
 
