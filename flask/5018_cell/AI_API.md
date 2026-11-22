@@ -183,7 +183,7 @@ Content-Type: application/json
 }
 ```
 
-Rows and columns are zero-based. A proposal can contain up to 200 distinct cells from one sheet. The app displays every proposed cell change together. Approval applies the entire batch only if every cell still matches the value captured when the proposal was submitted; if any cell changed, the batch is rejected as stale and must be regenerated. Rejection discards the whole batch. Proposals are held in memory and cleared if Flask restarts.
+Rows and columns are zero-based. A proposal can contain up to 200 distinct cells from one sheet. Cells whose proposed text already matches their current displayed value are omitted; a request with no visible changes is rejected. The app displays every remaining proposed cell change together. Approval applies the entire batch only if every cell still matches the value captured when the proposal was submitted; if any cell changed, the batch is rejected as stale and must be regenerated. Rejection discards the whole batch. Proposals are held in memory and cleared if Flask restarts.
 
 ## Step 4e — Directly batch update multiple cells
 

@@ -41,6 +41,12 @@ SETTINGS_FILE = normalize_path(r'C:\@delta\db\5018_cell\setting.json')
 # Pending CLI edits stay in memory until a user approves or rejects them.
 AI_CELL_PROPOSALS = {}
 
+def ai_cell_values_match(existing, proposed):
+    """Compare cell values as displayed, treating null as an empty cell."""
+    existing_text = '' if existing is None else str(existing)
+    proposed_text = '' if proposed is None else str(proposed)
+    return existing_text == proposed_text
+
 def load_data():
     data = {
         'sheets': [
@@ -551,6 +557,8 @@ def ai_propose_cell_update(sheet_id, row, col):
     rows = sheet.get('rows', [])
     if row >= len(rows) or col >= len(rows[row]):
         return jsonify({'error': 'Cell out of range'}), 404
+    if ai_cell_values_match(rows[row][col], payload['value']):
+        return jsonify({'error': 'No change proposed; the value matches the current cell.'}), 400
 
     columns = sheet.get('columns') or []
     column_name = columns[col].get('name', f'Column {col + 1}') if col < len(columns) else f'Column {col + 1}'
@@ -600,6 +608,8 @@ def ai_propose_sheet_update(sheet_id):
         if 'value' not in edit or not isinstance(edit['value'], str):
             return jsonify({'error': 'Each edit needs a string value'}), 400
         seen_cells.add((row, col))
+        if ai_cell_values_match(rows[row][col], edit['value']):
+            continue
         normalized_edits.append({
             'row': row,
             'col': col,
@@ -607,6 +617,9 @@ def ai_propose_sheet_update(sheet_id):
             'originalValue': rows[row][col],
             'proposedValue': edit['value'],
         })
+
+    if not normalized_edits:
+        return jsonify({'error': 'No visible changes proposed; all edited cells already contain those values.'}), 400
 
     proposal_id = str(uuid.uuid4())
     proposal = {
