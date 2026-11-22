@@ -4871,7 +4871,19 @@ def api_git_changed_files(project):
                     label, color = "modified+staged", "#f59e0b"
             else:
                 label, color = "modified", "#94a3b8"
-            files.append({"path": fname, "label": label, "color": color})
+            # Approximate the current commit payload from each file's working-tree
+            # contents. Deleted files have no current payload; Git metadata is excluded.
+            file_path = os.path.normpath(os.path.join(git_root, fname.replace('/', os.sep)))
+            size = 0
+            binary = False
+            try:
+                if os.path.commonpath([git_root, file_path]) == git_root and os.path.isfile(file_path):
+                    size = os.path.getsize(file_path)
+                    with open(file_path, 'rb') as changed_file:
+                        binary = b'\0' in changed_file.read(8192)
+            except (OSError, ValueError):
+                pass
+            files.append({"path": fname, "label": label, "color": color, "size": size, "binary": binary})
         return jsonify({"files": files})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

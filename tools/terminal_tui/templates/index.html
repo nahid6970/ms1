@@ -15458,21 +15458,23 @@ kiro-cli whoami --format json</code></pre>
 
                         const allCheckId = 'git-files-check-all';
                         filesEl.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:10px; padding:5px 14px; border-bottom:1px solid var(--border-color); background:var(--bg-sidebar);">
+                            <div id="git-file-selection-header" data-testid="git-file-selection-header" style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:5px 14px;border-bottom:1px solid var(--border-color);background:var(--bg-sidebar);">
                                 <input type="checkbox" id="${allCheckId}" ${_checkedCount === files.length ? 'checked' : ''} title="Select / deselect all"
                                     style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
                                     onchange="gitToggleAllFiles(this.checked)">
-                                <span style="font-size:0.72rem;color:var(--text-muted);user-select:none;">
-                                    <span id="git-files-checked-count">${_checkedCount}</span> / ${files.length} selected
+                                <span id="git-files-selection-summary" style="font-size:0.72rem;color:var(--text-muted);user-select:none;display:flex;align-items:center;gap:8px;">
+                                    <span id="git-files-checked-count" style="color:var(--text-primary);font-weight:700;">${_checkedCount} / ${files.length}</span><span>selected</span>
+                                    <span id="git-files-selected-size" style="padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);color:#4ade80;font-weight:600;">${gitFormatBytes(files.filter(f => window._gitCheckedFiles.has(f.path)).reduce((sum, f) => sum + (f.size || 0), 0))}</span>
                                 </span>
                             </div>
                             ${files.map(f => `
-                            <div style="display:flex; align-items:center; gap:10px; padding: 6px 14px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.78rem;">
+                            <div class="git-file-row" data-testid="git-file-row" data-size="${f.size || 0}" data-binary="${f.binary ? 'true' : 'false'}" style="display:flex; align-items:center; gap:10px; padding: 6px 14px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.78rem;">
                                 <input type="checkbox" class="git-file-check" data-path="${f.path.replace(/"/g,'&quot;')}" ${window._gitCheckedFiles.has(f.path) ? 'checked' : ''}
                                     style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;"
                                     onchange="gitFileCheckChanged()">
                                 <span style="color:${f.color}; font-weight:600; min-width:90px; font-size:0.7rem; text-transform:uppercase;">${f.label}</span>
-                                <span style="color: var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${f.path}</span>
+                                <span style="color: var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${escapeHtml(f.path)}</span>
+                                <span class="git-file-size" title="${f.binary ? 'Binary file detected; size is based on current working copy' : 'Approximate current file size; Git compression and deltas can change actual transfer size'}" style="flex-shrink:0;padding:2px 6px;border-radius:9px;font-size:.66rem;font-family:inherit;${gitSizeBadgeStyle(f.size || 0, !!f.binary)}">${f.binary ? 'BINARY · ' : ''}${gitFormatBytes(f.size || 0)}</span>
                             </div>
                             `).join('')}
                         `;
@@ -15812,6 +15814,22 @@ kiro-cli whoami --format json</code></pre>
             }
         });
 
+        function gitFormatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+            const amount = bytes / (1024 ** index);
+            return `${amount >= 10 || index === 0 ? Math.round(amount) : amount.toFixed(1)} ${units[index]}`;
+        }
+
+        function gitSizeBadgeStyle(bytes, binary) {
+            const color = binary || bytes >= 10 * 1024 * 1024 ? ['#f87171', 'rgba(239,68,68,.14)']
+                : bytes >= 1024 * 1024 ? ['#fb923c', 'rgba(249,115,22,.14)']
+                : bytes >= 100 * 1024 ? ['#fbbf24', 'rgba(245,158,11,.13)']
+                : ['#4ade80', 'rgba(34,197,94,.12)'];
+            return `color:${color[0]};background:${color[1]};`;
+        }
+
         function gitToggleAllFiles(checked) {
             document.querySelectorAll('.git-file-check').forEach(cb => {
                 cb.checked = checked;
@@ -15825,7 +15843,10 @@ kiro-cli whoami --format json</code></pre>
             window._gitCheckedFiles = new Set(checked.map(cb => cb.dataset.path));
             // Update counter
             const counter = document.getElementById('git-files-checked-count');
-            if (counter) counter.textContent = checked.length;
+            if (counter) counter.textContent = `${checked.length} / ${all.length}`;
+            const selectedBytes = checked.reduce((sum, cb) => sum + (Number(cb.closest('.git-file-row')?.dataset.size) || 0), 0);
+            const sizeEl = document.getElementById('git-files-selected-size');
+            if (sizeEl) sizeEl.textContent = gitFormatBytes(selectedBytes);
             // Update select-all checkbox state
             const allCb = document.getElementById('git-files-check-all');
             if (allCb) {
@@ -22385,17 +22406,18 @@ Always wrap your **entire response** in a single markdown code block.`;
                 subtitleEl.innerText = `${files.length} file${files.length !== 1 ? 's' : ''} changed`;
                 const selected = window._gitCheckedFiles;
                 filesEl.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:10px; padding:5px 14px; border-bottom:1px solid var(--border-color); background:var(--bg-sidebar);">
+                    <div id="git-file-selection-header" data-testid="git-file-selection-header" style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:5px 14px;border-bottom:1px solid var(--border-color);background:var(--bg-sidebar);">
                         <input type="checkbox" id="git-files-check-all" ${selected.size === files.length ? 'checked' : ''} title="Select / deselect all"
                             style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;" onchange="gitToggleAllFiles(this.checked)">
-                        <span style="font-size:0.72rem;color:var(--text-muted);user-select:none;"><span id="git-files-checked-count">${selected.size}</span> / ${files.length} selected</span>
+                        <span id="git-files-selection-summary" style="font-size:0.72rem;color:var(--text-muted);user-select:none;display:flex;align-items:center;gap:8px;"><span id="git-files-checked-count" style="color:var(--text-primary);font-weight:700;">${selected.size} / ${files.length}</span><span>selected</span><span id="git-files-selected-size" style="padding:2px 7px;border-radius:10px;background:rgba(34,197,94,.12);color:#4ade80;font-weight:600;">${gitFormatBytes(files.filter(f => selected.has(f.path)).reduce((sum, f) => sum + (f.size || 0), 0))}</span></span>
                     </div>
                     ${files.map(file => `
-                    <div style="display:flex; align-items:center; gap:10px; padding:6px 14px; border-bottom:1px solid var(--border-color); font-family:'Fira Code',monospace; font-size:0.78rem;">
+                    <div class="git-file-row" data-testid="git-file-row" data-size="${file.size || 0}" data-binary="${file.binary ? 'true' : 'false'}" style="display:flex; align-items:center; gap:10px; padding:6px 14px; border-bottom:1px solid var(--border-color); font-family:'Fira Code',monospace; font-size:0.78rem;">
                         <input type="checkbox" class="git-file-check" data-path="${escapeHtml(file.path)}" ${selected.has(file.path) ? 'checked' : ''}
                             style="width:13px;height:13px;accent-color:var(--accent-color);cursor:pointer;flex-shrink:0;" onchange="gitFileCheckChanged()">
                         <span style="color:${escapeHtml(file.color)};font-weight:600;min-width:90px;font-size:0.7rem;text-transform:uppercase;">${escapeHtml(file.label)}</span>
-                        <span style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(file.path)}</span>
+                        <span style="color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml(file.path)}</span>
+                        <span class="git-file-size" title="${file.binary ? 'Binary file detected; size is based on current working copy' : 'Approximate current file size; Git compression and deltas can change actual transfer size'}" style="flex-shrink:0;padding:2px 6px;border-radius:9px;font-size:.66rem;font-family:inherit;${gitSizeBadgeStyle(file.size || 0, !!file.binary)}">${file.binary ? 'BINARY · ' : ''}${gitFormatBytes(file.size || 0)}</span>
                     </div>`).join('')}`;
                 const allCheckbox = document.getElementById('git-files-check-all');
                 if (allCheckbox && selected.size > 0 && selected.size < files.length) allCheckbox.indeterminate = true;

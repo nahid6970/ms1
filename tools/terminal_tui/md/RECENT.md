@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-22] - Show Git Commit Size Estimates in Changed Files
+
+- Changed the selection header to show `selected / total` and the combined estimated size of checked files.
+- Added color-coded size badges and binary hints beside each changed file.
+- Kept the selection count and size summary pinned at the top while scrolling through changed files.
+- The API estimates size from current working copies; deleted files show 0 B, and actual compressed Git transfer size may differ.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-21] - Add Git Project Rescue to the Git Modal
 
 - Added a Rescue panel to the Git modal with repository health inspection, corrupt-index rebuild, and stale-lock backup actions.

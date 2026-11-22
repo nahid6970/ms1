@@ -166,6 +166,12 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Implementation:** `app.py` (`GET/POST /api/project/<project>/git/rescue`), `templates/index.html` (Git modal Rescue panel)
 **Usage:** Open the Git status modal, select **Rescue**, then run **Check health** or choose a repair action. Rebuilding the index preserves working files but may lose staged changes that existed only in the damaged index.
 
+### Git Commit Size Indicators
+**Status:** ✅ Complete
+**Description:** The changed-files list shows selected/total counts, a combined approximate size for selected files, and per-file size badges. Large files use warmer colors; detected binary files are marked explicitly. The selection header stays pinned while the file list scrolls.
+**Implementation:** `app.py` adds current working-copy size and a NUL-byte binary hint to `GET /api/project/<project>/git/files`; `templates/index.html` renders and updates the selected total as checkboxes change.
+**Note:** Sizes approximate the current working copies, not the compressed Git pack or exact commit transfer size. Deleted files contribute 0 B.
+
 **Status:** ✅ Complete
 **Description:** Full git workflow from the status bar — view changes, stage, commit, push, checkout, branch management, diff viewer, AI-suggested commit messages.
 **Implementation:** Backend runs git CLI commands via `subprocess`. Frontend renders in modals.

@@ -95,6 +95,7 @@ Click git info badge in status bar to open Git modal:
 
 **Main Features:**
 - View changed files (staged/unstaged/untracked)
+- Show per-file working-copy sizes and binary hints, plus the selected-file size total in the changed-files header
 - Stage all changes: `git add -A` (includes moved files)
 - Commit with message
 - Auto-push after commit option
