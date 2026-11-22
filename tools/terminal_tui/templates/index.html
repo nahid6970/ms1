@@ -4820,6 +4820,14 @@ kiro-cli whoami --format json</code></pre>
             <div style="padding:10px 14px;border-bottom:1px solid var(--border-color);">
                 <input id="rclone-files-search" type="search" placeholder="Search paths or check messages…" autocomplete="off" oninput="renderRcloneFilesPopup()" style="width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--border-color);border-radius:7px;background:var(--bg-main);color:var(--text-primary);font: .78rem 'Fira Code',monospace;outline:none;">
             </div>
+            <div style="display:flex;align-items:center;gap:7px;padding:8px 14px;border-bottom:1px solid var(--border-color);">
+                <label for="rclone-files-sort" style="font-size:.7rem;color:var(--text-muted);">Sort by</label>
+                <select id="rclone-files-sort" onchange="renderRcloneFilesPopup()" style="padding:5px 7px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-main);color:var(--text-primary);font-size:.72rem;">
+                    <option value="name-asc">Name · A to Z</option><option value="name-desc">Name · Z to A</option>
+                    <option value="size-asc">Size · smallest first</option><option value="size-desc">Size · largest first</option>
+                    <option value="modified-asc">Modified · oldest first</option><option value="modified-desc">Modified · newest first</option>
+                </select>
+            </div>
             <div id="rclone-files-list" style="overflow:auto;padding:10px 14px;min-height:150px;max-height:calc(82vh - 130px);"></div>
         </div>
     </div>
@@ -10234,7 +10242,18 @@ kiro-cli whoami --format json</code></pre>
                 ['Other check messages', status.otherLines || [], '#f87171']
             ];
             const query = (document.getElementById('rclone-files-search')?.value || '').trim().toLocaleLowerCase();
+            const sortKey = document.getElementById('rclone-files-sort')?.value || 'name-asc';
+            const [sortField, sortDirection] = sortKey.split('-');
+            const fileInfo = status.fileInfo || {};
             const filtered = groups.map(([label, items, color]) => [label, items.filter(item => String(item).toLocaleLowerCase().includes(query)), color]).filter(([, items]) => items.length);
+            for (const group of filtered) group[1].sort((a, b) => {
+                const aInfo = fileInfo[a] || {}, bInfo = fileInfo[b] || {};
+                let comparison = sortField === 'size' ? (aInfo.size ?? -1) - (bInfo.size ?? -1)
+                    : sortField === 'modified' ? (aInfo.modified ?? -1) - (bInfo.modified ?? -1)
+                    : String(a).localeCompare(String(b), undefined, {sensitivity:'base', numeric:true});
+                if (sortDirection === 'desc') comparison *= -1;
+                return comparison || String(a).localeCompare(String(b), undefined, {sensitivity:'base', numeric:true});
+            });
             const total = groups.reduce((sum, [, items]) => sum + items.length, 0);
             const shown = filtered.reduce((sum, [, items]) => sum + items.length, 0);
             document.getElementById('rclone-files-title').textContent = `${rcloneFileListProject} · check files`;
@@ -10242,7 +10261,7 @@ kiro-cli whoami --format json</code></pre>
             list.innerHTML = filtered.length ? filtered.map(([label, items, color]) => `
                 <section data-testid="rclone-file-group" style="margin-bottom:14px;">
                     <h3 style="margin:0 0 6px;font-size:.72rem;color:${color};font-weight:700;">${escapeHtml(label)} · ${items.length.toLocaleString()}</h3>
-                    <div style="border:1px solid var(--border-color);border-radius:7px;overflow:hidden;">${items.map((item, index) => `<div data-testid="rclone-file-entry" style="padding:6px 9px;border-bottom:1px solid var(--border-color);font:.68rem/1.45 'Fira Code',monospace;color:var(--text-primary);white-space:pre-wrap;overflow-wrap:anywhere;${index === items.length - 1 ? 'border-bottom:0;' : ''}">${escapeHtml(String(item))}</div>`).join('')}</div>
+                    <div style="border:1px solid var(--border-color);border-radius:7px;overflow:hidden;">${items.map((item, index) => { const info = fileInfo[item] || {}; const size = info.size == null ? '—' : syncStatusSummaryBytes(info.size); const modified = info.modified == null ? '—' : new Date(info.modified * 1000).toLocaleString(); return `<div data-testid="rclone-file-entry" style="display:flex;align-items:center;gap:12px;padding:6px 9px;border-bottom:1px solid var(--border-color);font-size:.68rem;${index === items.length - 1 ? 'border-bottom:0;' : ''}"><code style="flex:1;min-width:0;font:inherit;font-family:'Fira Code',monospace;color:var(--text-primary);white-space:pre-wrap;overflow-wrap:anywhere;">${escapeHtml(String(item))}</code><span title="File size" style="flex-shrink:0;color:var(--text-muted);white-space:nowrap;">${size}</span><span title="Last modified" style="flex-shrink:0;width:138px;text-align:right;color:var(--text-muted);white-space:nowrap;">${escapeHtml(modified)}</span></div>`; }).join('')}</div>
                 </section>`).join('') : `<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.78rem;">${query ? 'No files match this search.' : 'No file details were returned for this check.'}</div>`;
         }
         function syncStatusSummaryBytes(bytes) {

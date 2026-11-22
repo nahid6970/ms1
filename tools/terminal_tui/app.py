@@ -8391,10 +8391,20 @@ def _api_rclone_check(project):
         elif 'union root' not in line.lower():
             other_lines.append(line)
 
+    file_info = {}
+    for relative_path in dict.fromkeys(changed_files + missing_files + symlink_files):
+        local_path = os.path.abspath(os.path.join(source, relative_path.replace('/', os.sep)))
+        try:
+            if os.path.commonpath([source, local_path]) == source and os.path.isfile(local_path):
+                stat = os.stat(local_path)
+                file_info[relative_path] = {'size': stat.st_size, 'modified': stat.st_mtime}
+        except (OSError, ValueError):
+            pass
+
     return jsonify({'ok': result.returncode == 0, 'differences': differences, 'errors': errors,
                     'matching': matching, 'missing': missing, 'details': detail_lines,
                     'changedFiles': changed_files, 'missingFiles': missing_files,
-                    'symlinkFiles': symlink_files, 'otherLines': other_lines,
+                    'symlinkFiles': symlink_files, 'otherLines': other_lines, 'fileInfo': file_info,
                     'summary': 'No differences found' if differences == 0 and errors == 0 else f'{differences} differences found · {errors} errors',
                     'exitCode': result.returncode})
 
