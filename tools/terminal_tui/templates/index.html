@@ -10401,7 +10401,7 @@ kiro-cli whoami --format json</code></pre>
                 } else if (syncStatus?.state === 'failed') {
                     syncStatusHtml = `<div style="margin-top:5px;font-size:.66rem;color:#f87171;">Sync failed · ${escapeHtml(syncStatus.error || 'Rclone sync failed.')}</div>`;
                 }
-                const syncFileEventsHtml = !syncStatus?.nothingToTransfer && syncStatus?.fileEvents?.length
+                const syncFileEventsHtml = syncStatus?.fileEvents?.length
                     ? `<div aria-label="Sync file activity · ${syncStatus.fileEvents.length} files" style="display:flex;flex-direction:column;gap:2px;margin-top:5px;max-height:190px;overflow:auto;overscroll-behavior:contain;">${[...syncStatus.fileEvents].reverse().map(item => `<div data-testid="rclone-sync-file-event" style="display:flex;align-items:flex-start;gap:6px;padding:3px 6px;border-radius:4px;background:rgba(148,163,184,.05);font-size:.63rem;line-height:1.4;"><span style="flex-shrink:0;color:${item.color};font-weight:700;">${escapeHtml(item.kind)}</span><code title="${escapeHtml(item.text)}" style="min-width:0;overflow-wrap:anywhere;color:#cbd5e1;font:inherit;">${escapeHtml(item.text)}</code></div>`).join('')}</div>`
                     : '';
                 const syncButtonLabel = isInSyncBatch
@@ -10554,11 +10554,10 @@ kiro-cli whoami --format json</code></pre>
                 const message = levelMatch ? line.slice(levelMatch.index + levelMatch[0].length).trim() : line.trim();
                 const previousSyncStatus = rcloneModalSyncStatusByName.get(activeProjectName) || {};
                 if (/^There was nothing to transfer\.?$/i.test(message)) {
-                    rcloneModalSyncStatusByName.set(activeProjectName, {...previousSyncStatus, nothingToTransfer:true, fileEvents:[], rawOutput:[]});
+                    rcloneModalSyncStatusByName.set(activeProjectName, {...previousSyncStatus, nothingToTransfer:true});
                     scheduleRcloneSyncCardRender();
                     return;
                 }
-                if (previousSyncStatus.nothingToTransfer) return;
                 const isRemovalMessage = /\b(?:Removing|Removed|Deleting|Deleted)\b/i.test(message);
                 const stat = line.match(/([\d.]+\s*[KMGTPE]?i?B)\s*\/\s*([\d.]+\s*[KMGTPE]?i?B),\s*([\d-]+)%?,\s*([^,]+),\s*ETA\s*([^\s(]+)(?:\s+\(xfr#(\d+)\/(\d+)\))?/i);
                 if (stat) {
