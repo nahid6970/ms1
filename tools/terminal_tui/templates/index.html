@@ -10581,8 +10581,8 @@ kiro-cli whoami --format json</code></pre>
                 const isNotice = level === 'WARNING' || level === 'NOTICE';
                 if (!isNotice) appendProjectRawOutput(line);
                 if (/^Set directory modification time/i.test(message)) return;
-                if (/^Copied(?: \(|$)/i.test(message)) { actionCounts.copied++; currentProjectCounts.copied++; addProjectFileEvent('COPIED', message, '#4ade80'); }
-                else if (/^(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; currentProjectCounts.removed++; addProjectFileEvent('REMOVED', message, '#fb923c'); }
+                if (/(?:^|:\s*)Copied(?:\s+\(|$)/i.test(message)) { actionCounts.copied++; currentProjectCounts.copied++; addProjectFileEvent('COPIED', message, '#4ade80'); }
+                else if (/(?:^|:\s*)(?:Removing|Removed|Deleting|Deleted)(?: directory)?\b/i.test(message)) { actionCounts.removed++; currentProjectCounts.removed++; addProjectFileEvent('REMOVED', message, '#fb923c'); }
                 else if (level === 'ERROR') { actionCounts.errors++; addProjectFileEvent('ERROR', message, '#f87171'); }
                 else if (isNotice) { actionCounts.warning++; currentProjectCounts.notices++; addProjectFileEvent('NOTICE', message, '#fbbf24'); }
             };

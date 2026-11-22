@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-23] - Count Rclone Copied and Removed Files
+
+- Updated activity parsing to recognize Rclone's `filename: Copied (new)` and filename-prefixed removal messages.
+- Per-project completed sync cards now show the accurate copied and removed counts from those events.
+
+**Files Modified:** `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-22] - Stabilize Rclone Progress Tags
 
 - Reserved fixed grid slots for the per-project sync metrics so tags do not shift as values arrive.
