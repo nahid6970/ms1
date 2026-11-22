@@ -4161,12 +4161,6 @@ function highlightSyntax(text) {
 
     const isCleanMode = document.getElementById('dataTable')?.classList.contains('clean-markdown-mode');
 
-    // Large raw SVG blocks are expensive to syntax-highlight and are treated as opaque content.
-    // Keep ordinary long text eligible for live syntax preview in edit mode.
-    if (text.length > 20000 && text.includes('<svg')) {
-        return escapeHtml(text);
-    }
-
     let formatted = escapeHtml(text);
 
     // Rule: Math \(...\)
