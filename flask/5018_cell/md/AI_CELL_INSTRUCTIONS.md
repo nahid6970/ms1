@@ -32,6 +32,15 @@ The proposal does not change the cell until you approve it. Approval checks that
 
 Custom markers can contain Unicode characters that look alike. The syntax endpoint returns literal examples and Unicode code points; agents should copy the exact marker and must not normalize or substitute visually similar characters.
 
+## Editing a whole sheet with an AI agent
+
+1. Click the **✦** button beside the active sheet name to copy a whole-sheet agent task.
+2. Paste it into a CLI agent. The task includes the active sheet's stable ID, a full-sheet read endpoint, the live syntax guidance endpoint, and the reviewed batch proposal endpoint.
+3. Tell the agent what task to perform. It reads the sheet, prepares only the necessary cell replacements, and submits them as one proposal.
+4. Review the proposed diff for every cell in the app, then approve or reject the entire batch.
+
+Batch proposals are limited to 200 distinct cells in one sheet. Approval applies all edits together only when every targeted cell still matches the value captured by the proposal. If a cell changed in the meantime, the app refuses the stale batch so the agent can reread the sheet and prepare a fresh proposal. Agents should use `POST /ai/sheet/<id>/proposal`, not the immediate-write `/ai/cells` endpoint.
+
 ## Recent prompts and pinned prompts
 
 - After a successful cell update, the instruction is saved in this browser and appears in the editor's **Recent prompts** list.

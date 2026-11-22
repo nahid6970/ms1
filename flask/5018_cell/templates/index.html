@@ -116,6 +116,7 @@
                 <div class="current-sheet-actions">
                     <button id="btnSubSheetDropdown" class="sheet-action-btn" onclick="toggleSubSheetDropdown(event)" title="Click to see all sub-sheets">⋮</button>
                     <button class="sheet-action-btn" onclick="addSubSheetFromHeader(event)" title="Add Sub-sheet">+</button>
+                    <button id="btnSheetAiTask" class="sheet-action-btn" onclick="copySheetAiTask()" title="Copy an AI task for this whole sheet">✦</button>
                     <button class="sheet-action-btn" onclick="setAndCopySheetIndex()" title="Set &amp; copy sheet index">#</button>
                 </div>
                 <div id="subSheetDropdown" class="subsheet-dropdown-menu" style="display: none;"></div>
@@ -708,7 +709,7 @@
                 </div>
             </div>
             <div class="cell-ai-proposal-body">
-                <pre id="cellAiProposalDiff" class="cell-ai-proposal-value cell-ai-proposal-diff" aria-label="Cell change diff"></pre>
+                <div id="cellAiProposalDiff" class="cell-ai-proposal-value cell-ai-proposal-diff" aria-label="Cell change diff"></div>
                 <div id="cellAiProposalPreview" class="cell-ai-proposal-columns" hidden>
                     <section>
                         <h3>Current content</h3>

@@ -1874,6 +1874,36 @@ td:hover .cell-ai-instruction-btn,
     tab-size: 4;
 }
 
+#cellAiProposalDiff.is-batch {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    height: auto;
+    white-space: normal;
+}
+
+.cell-ai-batch-item + .cell-ai-batch-item {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #d7dce1;
+}
+
+.cell-ai-batch-item h3 {
+    margin: 0 0 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.cell-ai-batch-item .cell-ai-proposal-diff {
+    max-height: 30vh;
+    min-height: 0;
+    border: 1px solid #e1e5e9;
+    background: #f8f9fa;
+}
+
 .cell-ai-proposal-diff[hidden] {
     display: none;
 }

@@ -166,7 +166,25 @@ Returns HTTP 202 with a `proposalId`. The open app displays the current and prop
 
 The app polls `GET /ai/proposals` for pending proposals. The UI approves with `POST /ai/proposals/<proposalId>/approve` or rejects with `DELETE /ai/proposals/<proposalId>`. Approval returns HTTP 409 if the cell changed after the proposal was created; reread the cell and submit a new proposal. Pending proposals are held in memory and are cleared if Flask restarts.
 
-## Step 4d — Batch update multiple cells
+## Step 4d — Submit a whole-sheet batch proposal for review
+
+Use the sheet-level task button to copy instructions for an AI agent. The agent can read the full sheet with `GET /ai/sheet/<id>`, then submit a batch for in-app review:
+
+```
+POST /ai/sheet/<id>/proposal
+Content-Type: application/json
+
+{
+  "edits": [
+    { "row": 0, "col": 1, "value": "complete proposed replacement" },
+    { "row": 3, "col": 2, "value": "another replacement" }
+  ]
+}
+```
+
+Rows and columns are zero-based. A proposal can contain up to 200 distinct cells from one sheet. The app displays every proposed cell change together. Approval applies the entire batch only if every cell still matches the value captured when the proposal was submitted; if any cell changed, the batch is rejected as stale and must be regenerated. Rejection discards the whole batch. Proposals are held in memory and cleared if Flask restarts.
+
+## Step 4e — Directly batch update multiple cells
 
 ```
 POST /ai/cells

@@ -568,6 +568,57 @@ def ai_propose_cell_update(sheet_id, row, col):
     AI_CELL_PROPOSALS[proposal_id] = proposal
     return jsonify({'success': True, 'proposalId': proposal_id, 'status': 'pending_review'}), 202
 
+@app.route('/ai/sheet/<sheet_id>/proposal', methods=['POST'])
+def ai_propose_sheet_update(sheet_id):
+    """Queue a reviewed batch of edits to one sheet."""
+    payload = request.get_json(silent=True)
+    edits = payload.get('edits') if isinstance(payload, dict) else None
+    if not isinstance(edits, list) or not edits:
+        return jsonify({'error': 'Expected JSON with a non-empty edits list'}), 400
+    if len(edits) > 200:
+        return jsonify({'error': 'A sheet proposal can contain at most 200 cell edits'}), 400
+
+    data = load_data()
+    sheet, sheet_index = resolve_sheet(data, sheet_id)
+    if sheet is None:
+        return jsonify({'error': 'Sheet not found'}), 404
+    rows = sheet.get('rows', [])
+    columns = sheet.get('columns') or []
+    normalized_edits = []
+    seen_cells = set()
+    for edit in edits:
+        if not isinstance(edit, dict):
+            return jsonify({'error': 'Each edit must be an object'}), 400
+        row, col = edit.get('row'), edit.get('col')
+        if type(row) is not int or type(col) is not int or row < 0 or col < 0:
+            return jsonify({'error': 'Each edit needs non-negative integer row and col indexes'}), 400
+        if row >= len(rows) or col >= len(rows[row]):
+            return jsonify({'error': f'Cell out of range at row {row}, column {col}'}), 400
+        if (row, col) in seen_cells:
+            return jsonify({'error': f'Duplicate edit for row {row}, column {col}'}), 400
+        if 'value' not in edit or not isinstance(edit['value'], str):
+            return jsonify({'error': 'Each edit needs a string value'}), 400
+        seen_cells.add((row, col))
+        normalized_edits.append({
+            'row': row,
+            'col': col,
+            'columnName': columns[col].get('name', f'Column {col + 1}') if col < len(columns) else f'Column {col + 1}',
+            'originalValue': rows[row][col],
+            'proposedValue': edit['value'],
+        })
+
+    proposal_id = str(uuid.uuid4())
+    proposal = {
+        'id': proposal_id,
+        'type': 'sheet_batch',
+        'sheetId': str(sheet.get('customIndex') or sheet_index),
+        'sheetIndex': sheet_index,
+        'sheetName': sheet.get('name', ''),
+        'edits': normalized_edits,
+    }
+    AI_CELL_PROPOSALS[proposal_id] = proposal
+    return jsonify({'success': True, 'proposalId': proposal_id, 'status': 'pending_review', 'editCount': len(normalized_edits)}), 202
+
 @app.route('/ai/proposals', methods=['GET'])
 def ai_get_cell_proposals():
     return jsonify({'proposals': list(AI_CELL_PROPOSALS.values())})
@@ -583,6 +634,19 @@ def ai_approve_cell_proposal(proposal_id):
     if sheet is None:
         return jsonify({'error': 'Sheet not found'}), 404
     rows = sheet.get('rows', [])
+    if proposal.get('type') == 'sheet_batch':
+        for edit in proposal['edits']:
+            row, col = edit['row'], edit['col']
+            if row >= len(rows) or col >= len(rows[row]):
+                return jsonify({'error': f"Cell at row {row}, column {col} is out of range"}), 409
+            if rows[row][col] != edit['originalValue']:
+                return jsonify({'error': f"Cell at row {row + 1}, column {col + 1} changed after this proposal was created. Review the latest sheet and submit a new proposal."}), 409
+        for edit in proposal['edits']:
+            rows[edit['row']][edit['col']] = edit['proposedValue']
+        save_data(data)
+        AI_CELL_PROPOSALS.pop(proposal_id, None)
+        return jsonify({'success': True, 'proposal': proposal})
+
     row, col = proposal['row'], proposal['col']
     if row >= len(rows) or col >= len(rows[row]):
         return jsonify({'error': 'Cell out of range'}), 404
