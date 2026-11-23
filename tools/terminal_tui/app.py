@@ -7842,14 +7842,31 @@ def api_project_init_official_framework(project):
     if output and os.path.exists(target): return jsonify({'error':f'Output folder already exists: {output}'}), 409
     destination = output or '.'
     if framework == 'astro': command = ['npm','create','astro@latest',destination,'--','--yes','--no-install']
-    elif framework == 'nuxt': command = ['npm','create','nuxt@latest',destination,'--','--no-install','--no-modules','--packageManager=npm']
+    elif framework == 'nuxt':
+        command = ['npm','create','nuxt@latest',destination,'--','--template=minimal','--no-gitInit','--no-install','--packageManager=npm']
+        if not output:
+            try:
+                if next(os.scandir(target), None) is not None:
+                    return jsonify({'error':'Nuxt needs an empty destination to scaffold safely. Choose a new Output folder; existing workspace files were left untouched.'}), 409
+            except OSError as exc:
+                return jsonify({'error':f'Could not inspect the workspace destination: {exc}'}), 500
+            # create-nuxt refuses any existing directory unless --force is
+            # explicit, even when that directory is empty.
+            command.append('--force')
     else: command = ['npx','--yes','create-react-router@latest',destination,'--yes']
     try:
         # npm/npx are .cmd shims on Windows; CreateProcess cannot launch those
         # directly, so let cmd.exe resolve the script (output is allowlisted above).
         result = subprocess.run(command,cwd=base,capture_output=True,stdin=subprocess.DEVNULL,text=True,encoding='utf-8',errors='replace',timeout=900,creationflags=0x08000000 if os.name == 'nt' else 0,shell=(os.name == 'nt'))
         if result.returncode:
-            error_text = (result.stderr or result.stdout or 'Framework scaffolder failed.').strip()
+            # npm may write a short execution notice to stderr and the useful
+            # scaffolder diagnostic to stdout. Keep both so the UI never hides
+            # the actual failure behind an npm notice.
+            output_parts = []
+            if (result.stdout or '').strip(): output_parts.append((result.stdout or '').strip())
+            if (result.stderr or '').strip(): output_parts.append((result.stderr or '').strip())
+            error_text = '\n'.join(output_parts) or 'Framework scaffolder failed.'
+            error_text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', error_text)
             if 'EBADF' in error_text or 'bad file descriptor' in error_text.lower():
                 error_text += '\nThe scaffolder tried to read interactive input. This setup runs non-interactively; use its documented --yes/default options.'
             return jsonify({'error':error_text[-5000:]}), 500
