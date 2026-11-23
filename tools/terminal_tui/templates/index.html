@@ -3289,8 +3289,8 @@
                     <label style="grid-column:1/-1;font-size:.68rem;color:var(--text-secondary);">Output folder (optional)<input id="android-project-output" value="./my-app" placeholder="Leave empty to use the active workspace root" style="display:block;width:100%;box-sizing:border-box;margin-top:4px;padding:7px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-main);color:var(--text-primary);"></label>
                 </div>
                 <div id="android-project-command" style="margin-top:8px;padding:7px;background:var(--bg-main);border-radius:5px;color:var(--text-muted);font: .65rem 'Fira Code',monospace;overflow-wrap:anywhere;"></div>
+                <div id="android-project-status" role="status" aria-live="polite" style="display:none;margin-top:10px;padding:9px 11px;border:1px solid rgba(52,211,153,.35);border-radius:7px;background:rgba(16,185,129,.1);font-size:.78rem;font-weight:600;color:#34d399;"></div>
                 <div style="display:flex;justify-content:flex-end;gap:7px;margin-top:9px;"><button id="android-project-cancel" type="button" onclick="hideAndroidProjectForm()" class="btn btn-secondary" style="padding:6px 10px;font-size:.72rem;">Cancel</button><button id="android-project-create" type="button" onclick="createAndroidProject()" style="padding:6px 11px;border:1px solid rgba(61,220,132,.5);border-radius:6px;background:rgba(61,220,132,.12);color:#3ddc84;font-weight:600;cursor:pointer;">Create project</button></div>
-                <div id="android-project-status" role="status" style="margin-top:7px;font-size:.7rem;color:var(--text-secondary);"></div>
               </div>
             </div>
             
@@ -9460,6 +9460,8 @@ kiro-cli whoami --format json</code></pre>
         function showAndroidProjectForm() {
             const form = document.getElementById('framework-android-form');
             form.classList.add('show');
+            const status = document.getElementById('android-project-status');
+            status.style.display = 'none'; status.textContent = '';
             ['android-project-name','android-project-app-id','android-project-namespace','android-project-min-sdk','android-project-output'].forEach(id => document.getElementById(id).oninput = updateAndroidProjectCommand);
             updateAndroidProjectCommand();
         }
@@ -9473,14 +9475,14 @@ kiro-cli whoami --format json</code></pre>
             const status = document.getElementById('android-project-status');
             const button = document.getElementById('android-project-create');
             const payload = {name:document.getElementById('android-project-name').value.trim(), applicationId:document.getElementById('android-project-app-id').value.trim(), namespace:document.getElementById('android-project-namespace').value.trim(), minSdk:document.getElementById('android-project-min-sdk').value.trim(), output:document.getElementById('android-project-output').value.trim()};
-            button.disabled = true; status.textContent = 'Generating Android project…';
+            button.disabled = true; status.style.display = 'block'; status.style.color = '#93c5fd'; status.style.borderColor = 'rgba(96,165,250,.35)'; status.style.background = 'rgba(96,165,250,.1)'; status.textContent = '⏳ Generating Android project…';
             try {
                 const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/init-android`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error || 'Could not create Android project.');
-                status.textContent = `Created ${data.output}`;
+                status.style.color = '#34d399'; status.style.borderColor = 'rgba(52,211,153,.35)'; status.style.background = 'rgba(16,185,129,.1)'; status.textContent = `✓ Android project created successfully in ${data.output === '.' ? 'the active workspace root' : data.output}`;
                 if (typeof loadExplorerRoot === 'function') loadExplorerRoot();
-            } catch (error) { status.textContent = error.message; }
+            } catch (error) { status.style.display = 'block'; status.style.color = '#f87171'; status.style.borderColor = 'rgba(248,113,113,.4)'; status.style.background = 'rgba(239,68,68,.1)'; status.textContent = `⚠ ${error.message}`; }
             finally { button.disabled = false; }
         }
 

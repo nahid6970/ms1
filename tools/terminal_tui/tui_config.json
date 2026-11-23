@@ -232,6 +232,14 @@
           "windowTitle": "",
           "displayOrder": 7,
           "color": ""
+        },
+        {
+          "command": ".\\gradlew.bat :app:assembleDebug",
+          "global": true,
+          "name": ".\\gradlew.bat",
+          "windowTitle": "",
+          "displayOrder": 5,
+          "color": ""
         }
       ],
       "category": "Tool",
