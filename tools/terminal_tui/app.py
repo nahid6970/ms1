@@ -7804,23 +7804,25 @@ def api_project_init_android(project):
         return jsonify({'error': 'Minimum SDK must be a number.'}), 400
     if not name or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+', app_id) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+', namespace):
         return jsonify({'error': 'Enter an app name and valid dotted application ID and namespace.'}), 400
-    if min_sdk < 21 or min_sdk > 100 or not output or os.path.isabs(output):
-        return jsonify({'error': 'Use a relative output folder and a minimum SDK between 21 and 100.'}), 400
+    if min_sdk < 21 or min_sdk > 100 or (output and os.path.isabs(output)):
+        return jsonify({'error': 'Use a relative output folder (or leave it blank for the workspace root) and a minimum SDK between 21 and 100.'}), 400
     base = os.path.abspath(proj['path'])
-    target = os.path.abspath(os.path.join(base, output))
+    target = os.path.abspath(os.path.join(base, output or '.'))
     if os.path.commonpath([base, target]) != base:
         return jsonify({'error': 'Output folder must stay inside the active workspace.'}), 400
-    if os.path.exists(target):
+    if output and os.path.exists(target):
         return jsonify({'error': f'Output folder already exists: {output}'}), 409
     android = shutil.which('android')
     if not android:
         return jsonify({'error': 'The Android CLI was not found on the server PATH.'}), 500
-    command = [android, 'create', 'empty-activity', f'--name={name}', f'--application-id={app_id}', f'--namespace={namespace}', f'--min-sdk={min_sdk}', f'--output={output}']
+    command = [android, 'create', 'empty-activity', f'--name={name}', f'--application-id={app_id}', f'--namespace={namespace}', f'--min-sdk={min_sdk}']
+    if output:
+        command.append(f'--output={output}')
     try:
         result = subprocess.run(command, cwd=base, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=300, creationflags=0x08000000 if os.name == 'nt' else 0)
         if result.returncode:
             return jsonify({'error': (result.stderr or result.stdout or 'Android project creation failed.').strip()}), 500
-        return jsonify({'status':'success','output':output,'message':(result.stdout or '').strip()})
+        return jsonify({'status':'success','output':output or '.','message':(result.stdout or '').strip()})
     except subprocess.TimeoutExpired:
         return jsonify({'error':'Android project creation timed out.'}), 504
     except OSError as exc:
