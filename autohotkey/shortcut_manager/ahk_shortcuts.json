@@ -42,7 +42,10 @@
             "category": "Script",
             "description": "Toggles always on top for active window",
             "hotkey": "#t",
-            "name": "Always On Top Toggle"
+            "name": "Always On Top Toggle",
+            "run_as_admin": true,
+            "enabled": true,
+            "favourite": false
         },
         {
             "action": "KillForeground() {\n    MouseGetPos(, , &WinID)\n    ProcessID := WinGetPID(\"ahk_id \" WinID)\n    Run(\"taskkill /f /pid \" ProcessID, , \"Hide\")\n}",

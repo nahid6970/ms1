@@ -25,6 +25,21 @@ RunWithoutConsole(commandLine, workingDir := "") {
 
 ;! === ADMIN SHORTCUTS (elevated) ===
 
+;! Always On Top Toggle
+;! Toggles always on top for active window
+#t:: {
+    Always_on_Top()
+    Always_on_Top(){
+        static alwaysOnTop := false
+        if (alwaysOnTop) {
+            WinSetAlwaysOnTop(false, "A")
+        } else {
+            WinSetAlwaysOnTop(true, "A")
+        }
+        alwaysOnTop := !alwaysOnTop
+    }
+}
+
 ;! Center Apps Window
 LAlt & c:: {
     Center_Focused_Window()
