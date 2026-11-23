@@ -11,6 +11,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
 
+## [2026-11-23] - Remove Superseded Framework Starter Templates
+
+- Removed the embedded starter-file definitions for React, Vue, Svelte, Next.js, Angular, SolidJS, and Preact now that their cards use official scaffolding commands.
+- Kept local templates only for Alpine.js, AngularJS, Tailwind HTML, and the Convex starter examples.
+- Restricted the legacy template endpoint to those remaining template-based choices.
+
+**Files Modified:** `app.py`, `md/RECENT.md`
+
 ## [2026-11-23] - Launch Windows npm and npx Shims Correctly
 
 - Routed framework scaffolder commands through the Windows command shell because npm/npx are `.cmd` shims.
