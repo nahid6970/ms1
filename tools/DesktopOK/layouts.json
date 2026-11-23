@@ -236,5 +236,287 @@
                 "h": 1080
             }
         ]
+    },
+    "Layout_2026-11-23_09-22-18": {
+        "icons": {
+            "nahid": {
+                "x": 14,
+                "y": 41
+            },
+            "This PC": {
+                "x": 14,
+                "y": 139
+            },
+            "Control Panel": {
+                "x": 14,
+                "y": 237
+            },
+            "Recycle Bin": {
+                "x": 14,
+                "y": 335
+            },
+            "clipboard_20261011_143611_790663 - Copy.png": {
+                "x": 14,
+                "y": 433
+            },
+            "Google Chrome": {
+                "x": 14,
+                "y": 531
+            },
+            "UniGetUI": {
+                "x": 14,
+                "y": 629
+            },
+            "Google AI Studio": {
+                "x": 14,
+                "y": 727
+            },
+            "GitHub Desktop": {
+                "x": 14,
+                "y": 825
+            },
+            "Workspaces": {
+                "x": 14,
+                "y": 923
+            },
+            "OBS Studio": {
+                "x": 90,
+                "y": 41
+            },
+            "Sonarr": {
+                "x": 90,
+                "y": 139
+            },
+            "Radarr": {
+                "x": 90,
+                "y": 237
+            },
+            "Excel-like Data Table": {
+                "x": 90,
+                "y": 335
+            },
+            "Google": {
+                "x": 90,
+                "y": 433
+            },
+            "Antigravity": {
+                "x": 90,
+                "y": 531
+            },
+            "Prowlarr": {
+                "x": 90,
+                "y": 629
+            },
+            "Orca": {
+                "x": 90,
+                "y": 727
+            },
+            "BCUninstaller": {
+                "x": 90,
+                "y": 825
+            },
+            "My TV Shows": {
+                "x": 90,
+                "y": 923
+            },
+            "ArtCraft Launcher": {
+                "x": 166,
+                "y": 41
+            },
+            "PdfCraft": {
+                "x": 166,
+                "y": 139
+            },
+            "Far Cry 4": {
+                "x": 166,
+                "y": 237
+            },
+            "Far Cry": {
+                "x": 166,
+                "y": 335
+            },
+            "Roblox Studio": {
+                "x": 166,
+                "y": 433
+            },
+            "delta": {
+                "x": 1838,
+                "y": 923
+            },
+            "clipboard_20261011_143611_790663 - Copy (6).png": {
+                "x": 242,
+                "y": 139
+            },
+            "T3 Code (Nightly)": {
+                "x": 166,
+                "y": 629
+            },
+            "Untitled document.docx": {
+                "x": 166,
+                "y": 727
+            },
+            "MEmu": {
+                "x": 166,
+                "y": 825
+            },
+            "3d-snake-game - Copy.html": {
+                "x": 318,
+                "y": 41
+            },
+            "3d-snake-game.html": {
+                "x": 318,
+                "y": 139
+            },
+            "Character_Map_Glyph_Catalog.txt": {
+                "x": 318,
+                "y": 531
+            },
+            "index.html": {
+                "x": 318,
+                "y": 629
+            },
+            "Project_module.txt": {
+                "x": 318,
+                "y": 727
+            },
+            "snake-game.html": {
+                "x": 318,
+                "y": 825
+            },
+            "Tack": {
+                "x": 394,
+                "y": 335
+            },
+            "zombie-game.html": {
+                "x": 394,
+                "y": 531
+            },
+            "ShareFolder": {
+                "x": 1458,
+                "y": 923
+            },
+            "SyncFolders": {
+                "x": 1534,
+                "y": 923
+            },
+            "odoo documentation": {
+                "x": 1686,
+                "y": 825
+            },
+            "ldplayer": {
+                "x": 1610,
+                "y": 923
+            },
+            "Job_Application_Profile.md": {
+                "x": 1762,
+                "y": 825
+            },
+            "db": {
+                "x": 1686,
+                "y": 923
+            },
+            "clipboard_20261011_143611_790663.png": {
+                "x": 1838,
+                "y": 629
+            },
+            "ffff.txt": {
+                "x": 1838,
+                "y": 727
+            },
+            "playlist.dpl": {
+                "x": 1838,
+                "y": 825
+            },
+            "ms1": {
+                "x": 1762,
+                "y": 923
+            },
+            "Roblox Player": {
+                "x": 166,
+                "y": 531
+            }
+        },
+        "windows": [
+            {
+                "title": "CYBER_DESKTOP_OK v1.0",
+                "class": "Qt6112QWindowIcon",
+                "x": 702,
+                "y": 205,
+                "w": 516,
+                "h": 639
+            },
+            {
+                "title": "Workspaces",
+                "class": "Chrome_WidgetWin_1",
+                "x": 421,
+                "y": 143,
+                "w": 1133,
+                "h": 804
+            },
+            {
+                "title": "\u09a2\u09be\u0995\u09be \u09ac\u09bf\u09b6\u09cd\u09ac\u09ac\u09bf\u09a6\u09cd\u09af\u09be\u09b2\u09af\u09bc \u09a8\u09bf\u09af\u09bc\u09cb\u0997 \u09ac\u09bf\u099c\u09cd\u099e\u09aa\u09cd\u09a4\u09bf \u09e8\u09e6\u09e8\u09ec Dhaka University Job Circular 2026 | BD Govt Job - Google Chrome",
+                "class": "Chrome_WidgetWin_1",
+                "x": -1,
+                "y": 45,
+                "w": 1922,
+                "h": 988
+            },
+            {
+                "title": "komoborder-TtuZKKfMv5alz-502MRo_",
+                "class": "komoborder-TtuZKKfMv5alz-502MRo_",
+                "x": 5,
+                "y": 44,
+                "w": 1910,
+                "h": 983
+            },
+            {
+                "title": "job-search / Table",
+                "class": "Chrome_WidgetWin_1",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "PowerShell",
+                "class": "CASCADIA_HOSTING_WINDOW_CLASS",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "pythonw",
+                "class": "Qt6112QWindowToolSaveBits",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 39
+            },
+            {
+                "title": "Windows Input Experience",
+                "class": "Windows.UI.Core.CoreWindow",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            },
+            {
+                "title": "Google app",
+                "class": "WGAWebviewWindowClass_Main",
+                "x": -32000,
+                "y": -32000,
+                "w": 160,
+                "h": 28
+            },
+            {
+                "title": "Program Manager",
+                "class": "Progman",
+                "x": 0,
+                "y": 0,
+                "w": 1920,
+                "h": 1080
+            }
+        ]
     }
 }
