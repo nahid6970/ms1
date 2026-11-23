@@ -6893,6 +6893,8 @@ def api_project_init_framework(project):
     framework = request.json.get("framework", "").strip().lower()
     if not framework:
         return jsonify({"error": "No framework selected"}), 400
+    if framework not in {'alpinejs', 'angularjs', 'tailwind_html', 'vercel_convex', 'cloudflare_convex'}:
+        return jsonify({"error": "This framework uses its official scaffolding command."}), 400
 
     templates = {}
     
@@ -7834,26 +7836,37 @@ def api_project_init_official_framework(project):
     if not proj: return jsonify({'error':'Project not found'}), 404
     data = request.get_json(silent=True) or {}
     framework, output = str(data.get('framework') or ''), str(data.get('output') or '').strip()
-    if framework not in {'astro','nuxt','react-router'}: return jsonify({'error':'Unknown framework'}), 400
+    official_frameworks = {'astro','nuxt','react-router','react','vue','svelte','nextjs','angular','solidjs','preact'}
+    if framework not in official_frameworks: return jsonify({'error':'Unknown framework'}), 400
     if output and (os.path.isabs(output) or output in {'.','..'} or '..' in output.replace('\\','/').split('/') or not re.fullmatch(r'[A-Za-z0-9._/\\ -]+', output)):
         return jsonify({'error':'Output must be a relative folder inside the workspace.'}), 400
     base = os.path.abspath(proj['path']); target = os.path.abspath(os.path.join(base, output or '.'))
     if os.path.commonpath([base,target]) != base: return jsonify({'error':'Output must stay inside the workspace.'}), 400
     if output and os.path.exists(target): return jsonify({'error':f'Output folder already exists: {output}'}), 409
+    if not output:
+        try:
+            with os.scandir(target) as entries:
+                if next(entries, None) is not None:
+                    return jsonify({'error':'This framework needs an empty destination to scaffold safely. Choose a new Output folder; existing workspace files were left untouched.'}), 409
+        except OSError as exc:
+            return jsonify({'error':f'Could not inspect the workspace destination: {exc}'}), 500
     destination = output or '.'
     if framework == 'astro': command = ['npm','create','astro@latest',destination,'--','--yes','--no-install']
     elif framework == 'nuxt':
         command = ['npm','create','nuxt@latest',destination,'--','--template=minimal','--no-gitInit','--no-install','--packageManager=npm']
         if not output:
-            try:
-                if next(os.scandir(target), None) is not None:
-                    return jsonify({'error':'Nuxt needs an empty destination to scaffold safely. Choose a new Output folder; existing workspace files were left untouched.'}), 409
-            except OSError as exc:
-                return jsonify({'error':f'Could not inspect the workspace destination: {exc}'}), 500
             # create-nuxt refuses any existing directory unless --force is
             # explicit, even when that directory is empty.
             command.append('--force')
-    else: command = ['npx','--yes','create-react-router@latest',destination,'--yes']
+    elif framework == 'react-router': command = ['npx','--yes','create-react-router@latest',destination,'--yes']
+    elif framework in {'react','vue','svelte','solidjs','preact'}:
+        vite_template = {'react':'react','vue':'vue','svelte':'svelte','solidjs':'solid','preact':'preact'}[framework]
+        command = ['npm','create','vite@latest',destination,'--','--template',vite_template,'--no-interactive']
+    elif framework == 'nextjs':
+        command = ['npx','--yes','create-next-app@latest',destination,'--js','--skip-install','--disable-git','--yes']
+    elif framework == 'angular':
+        workspace_name = re.sub(r'[^a-z0-9-]+', '-', str(proj['name']).lower()).strip('-') or 'angular-app'
+        command = ['npx','--yes','@angular/cli@latest','new',workspace_name,'--directory',destination,'--defaults','--skip-install','--skip-git','--interactive=false']
     try:
         # npm/npx are .cmd shims on Windows; CreateProcess cannot launch those
         # directly, so let cmd.exe resolve the script (output is allowlisted above).

@@ -3197,49 +3197,49 @@
                 <div id="framework-nuxt-card" class="split-card" onclick="showOfficialFrameworkForm('nuxt')" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.backgroundColor='var(--bg-sidebar)'"><span style="font-size:1.5rem;color:#00dc82;">◉</span><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">Nuxt</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Full-stack Vue framework</span></div>
                 <div id="framework-react-router-card" class="split-card" onclick="showOfficialFrameworkForm('react-router')" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;" onmouseenter="this.style.borderColor='var(--accent-color)';this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.backgroundColor='var(--bg-sidebar)'"><span style="font-size:1.5rem;color:#f44250;">↗</span><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">React Router Framework</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Full-stack React starter</span></div>
                 <!-- React Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('react')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-react-card" class="split-card" onclick="showOfficialFrameworkForm('react')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">⚛️</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">React</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">React + Vite starter template</span>
                 </div>
                 
                 <!-- Vue Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('vue')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-vue-card" class="split-card" onclick="showOfficialFrameworkForm('vue')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🟢</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Vue 3</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Vue 3 + Vite SFC starter</span>
                 </div>
 
                 <!-- Svelte Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('svelte')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-svelte-card" class="split-card" onclick="showOfficialFrameworkForm('svelte')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🔥</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Svelte</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Svelte + Vite starter template</span>
                 </div>
 
                 <!-- Next.js Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('nextjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-nextjs-card" class="split-card" onclick="showOfficialFrameworkForm('nextjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">▲</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Next.js</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Next.js App Router basic structure</span>
                 </div>
 
                 <!-- Angular Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('angular')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-angular-card" class="split-card" onclick="showOfficialFrameworkForm('angular')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">🅰️</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Angular 17+</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Modern standalone Angular app setup</span>
                 </div>
 
                 <!-- SolidJS Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('solidjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-solidjs-card" class="split-card" onclick="showOfficialFrameworkForm('solidjs')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">💙</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">SolidJS</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">SolidJS + Vite starter template</span>
                 </div>
 
                 <!-- Preact Card -->
-                <div class="split-card" onclick="confirmFrameworkInit('preact')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <div id="framework-preact-card" class="split-card" onclick="showOfficialFrameworkForm('preact')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">⚛️</span>
                     <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Preact</span>
                     <span style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">Preact + Vite lightweight app template</span>
@@ -9485,7 +9485,8 @@ kiro-cli whoami --format json</code></pre>
         let officialFrameworkChoice = '';
         function showOfficialFrameworkForm(framework) {
             officialFrameworkChoice = framework;
-            document.getElementById('official-framework-title').textContent = `Create ${framework === 'react-router' ? 'React Router Framework' : framework[0].toUpperCase() + framework.slice(1)} project`;
+            const frameworkNames = {astro:'Astro',nuxt:'Nuxt','react-router':'React Router Framework',react:'React + Vite',vue:'Vue 3 + Vite',svelte:'Svelte + Vite',nextjs:'Next.js',angular:'Angular',solidjs:'SolidJS + Vite',preact:'Preact + Vite'};
+            document.getElementById('official-framework-title').textContent = `Create ${frameworkNames[framework] || framework} project`;
             document.getElementById('official-framework-output').value = '';
             document.getElementById('official-framework-status').style.display = 'none';
             updateOfficialFrameworkCommand();
@@ -9514,7 +9515,20 @@ kiro-cli whoami --format json</code></pre>
         }
         function updateOfficialFrameworkCommand() {
             const output = document.getElementById('official-framework-output')?.value.trim() || '.';
-            const commands = {astro:`npm create astro@latest ${output} -- --yes --no-install`,nuxt:`npm create nuxt@latest ${output} -- --template=minimal --no-gitInit --no-install --packageManager=npm${output ? '' : ' --force'}`,'react-router':`npx --yes create-react-router@latest ${output} --yes`};
+            const viteTemplates = {react:'react',vue:'vue',svelte:'svelte',solidjs:'solid',preact:'preact'};
+            const angularName = (activeProject || 'angular-app').toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'') || 'angular-app';
+            const commands = {
+                astro:`npm create astro@latest ${output} -- --yes --no-install`,
+                nuxt:`npm create nuxt@latest ${output} -- --template=minimal --no-gitInit --no-install --packageManager=npm${output === '.' ? ' --force' : ''}`,
+                'react-router':`npx --yes create-react-router@latest ${output} --yes`,
+                react:`npm create vite@latest ${output} -- --template ${viteTemplates.react} --no-interactive`,
+                vue:`npm create vite@latest ${output} -- --template ${viteTemplates.vue} --no-interactive`,
+                svelte:`npm create vite@latest ${output} -- --template ${viteTemplates.svelte} --no-interactive`,
+                solidjs:`npm create vite@latest ${output} -- --template ${viteTemplates.solidjs} --no-interactive`,
+                preact:`npm create vite@latest ${output} -- --template ${viteTemplates.preact} --no-interactive`,
+                nextjs:`npx --yes create-next-app@latest ${output} --js --skip-install --disable-git --yes`,
+                angular:`npx --yes @angular/cli@latest new ${angularName} --directory ${output} --defaults --skip-install --skip-git --interactive=false`
+            };
             const preview = document.getElementById('official-framework-command');
             if (preview && commands[officialFrameworkChoice]) preview.textContent = commands[officialFrameworkChoice];
         }
@@ -9524,10 +9538,13 @@ kiro-cli whoami --format json</code></pre>
             try {
                 const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/init-official-framework`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({framework:officialFrameworkChoice,output:document.getElementById('official-framework-output').value.trim()})});
                 const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Scaffolder failed.');
-                status.style.color = '#34d399'; status.textContent = `✓ Created in ${data.output}. Install dependencies in that folder to start.`;
+                status.style.color = '#34d399'; status.textContent = `✓ ${frameworkNamesForStatus(officialFrameworkChoice)} scaffolded in ${data.output}. Install dependencies in that folder to start.`;
                 if (typeof loadExplorerRoot === 'function') loadExplorerRoot();
             } catch(error) { status.style.color = '#f87171'; status.textContent = `⚠ ${error.message}`; }
             finally { button.disabled = false; }
+        }
+        function frameworkNamesForStatus(framework) {
+            return ({astro:'Astro',nuxt:'Nuxt','react-router':'React Router',react:'React + Vite',vue:'Vue + Vite',svelte:'Svelte + Vite',nextjs:'Next.js',angular:'Angular',solidjs:'SolidJS + Vite',preact:'Preact + Vite'})[framework] || 'Project';
         }
         function updateAndroidProjectCommand() {
             const value = id => document.getElementById(id).value.trim();

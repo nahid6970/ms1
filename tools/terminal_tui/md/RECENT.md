@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-23] - Use Official Scaffolding Commands for Maintained Frameworks
+
+- Routed React, Vue, Svelte, Next.js, Angular, SolidJS, and Preact through their framework or Vite project generators, alongside Astro, Nuxt, and React Router.
+- Kept Alpine.js, AngularJS, Tailwind HTML, and the account-linked Convex samples as local templates.
+- Added workspace-empty guards for CLI generators that cannot safely scaffold into a populated root and command/status previews for each framework.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-23] - Launch Windows npm and npx Shims Correctly
 
 - Routed framework scaffolder commands through the Windows command shell because npm/npx are `.cmd` shims.
