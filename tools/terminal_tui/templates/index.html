@@ -7317,14 +7317,8 @@ kiro-cli whoami --format json</code></pre>
                     const accountLabel = account.id === '' ? 'Default' : account.name;
                     const nameEl = document.createElement('div');
                     nameEl.style.cssText = 'font-weight:600;color:var(--text-primary);';
-                    nameEl.textContent = accountLabel;
+                    nameEl.textContent = email ? `${accountLabel} · ${email}` : accountLabel;
                     accountCell.appendChild(nameEl);
-                    if (email) {
-                        const emailEl = document.createElement('div');
-                        emailEl.style.cssText = 'font-size:.68rem;color:var(--text-muted);margin-top:2px;';
-                        emailEl.textContent = email;
-                        accountCell.appendChild(emailEl);
-                    }
                     if (error) {
                         accountCell.title = error;
                         renderQuotaCell(quotaCell, [], 'Unavailable', account);
