@@ -3193,6 +3193,9 @@
                 <div id="framework-android-card" class="split-card" onclick="showAndroidProjectForm()" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .2s;" onmouseenter="this.style.borderColor='#3ddc84';this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)';this.style.backgroundColor='var(--bg-sidebar)'">
                     <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="color:#3ddc84;"><path fill="currentColor" d="M7.1 2.7a.65.65 0 0 0-1.12.66l1.05 1.82A7.45 7.45 0 0 0 4.3 11h15.4a7.45 7.45 0 0 0-2.73-5.82l1.05-1.82a.65.65 0 1 0-1.12-.66l-1.04 1.8a8.9 8.9 0 0 0-7.72 0L7.1 2.7ZM8 8.3a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6Zm8 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6ZM4.3 12.3h15.4v6.1a1.3 1.3 0 0 1-1.3 1.3h-1.1v1.5a1.5 1.5 0 0 1-3 0v-1.5h-4.6v1.5a1.5 1.5 0 0 1-3 0v-1.5H5.6a1.3 1.3 0 0 1-1.3-1.3v-6.1Z"/></svg><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">Android</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Generate a native Android starter project</span>
                 </div>
+                <div id="framework-astro-card" class="split-card" onclick="showOfficialFrameworkForm('astro')" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-size:1.5rem;color:#ff5d01;">✦</span><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">Astro</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Content-focused sites with islands</span></div>
+                <div id="framework-nuxt-card" class="split-card" onclick="showOfficialFrameworkForm('nuxt')" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-size:1.5rem;color:#00dc82;">◉</span><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">Nuxt</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Full-stack Vue framework</span></div>
+                <div id="framework-react-router-card" class="split-card" onclick="showOfficialFrameworkForm('react-router')" style="padding:14px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-sidebar);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;"><span style="font-size:1.5rem;color:#f44250;">↗</span><span style="font-size:.82rem;font-weight:600;color:var(--text-primary);">React Router Framework</span><span style="font-size:.7rem;color:var(--text-secondary);text-align:center;">Full-stack React starter</span></div>
                 <!-- React Card -->
                 <div class="split-card" onclick="confirmFrameworkInit('react')" style="padding: 14px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--bg-sidebar); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.borderColor='var(--accent-color)'; this.style.backgroundColor='var(--bg-card-hover)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <span style="font-size: 1.5rem;">⚛️</span>
@@ -4847,6 +4850,16 @@ kiro-cli whoami --format json</code></pre>
             </div>
             <div id="rclone-files-list" style="overflow:auto;padding:10px 14px;min-height:150px;max-height:calc(82vh - 130px);"></div>
         </div>
+    </div>
+
+    <div id="official-framework-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="official-framework-title" style="z-index:1410;">
+      <div style="width:500px;max-width:94vw;padding:18px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-card);">
+        <h2 id="official-framework-title" style="margin:0 0 12px;font-size:.95rem;">Framework setup</h2>
+        <label style="font-size:.7rem;color:var(--text-secondary);">Output folder (optional)<input id="official-framework-output" placeholder="Leave empty for workspace root" oninput="updateOfficialFrameworkCommand()" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:8px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-main);color:var(--text-primary);"></label>
+        <div id="official-framework-command" style="margin-top:9px;padding:8px;background:var(--bg-main);border-radius:6px;color:var(--text-muted);font:.65rem 'Fira Code',monospace;overflow-wrap:anywhere;"></div>
+        <div id="official-framework-status" role="status" aria-live="polite" style="display:none;margin-top:9px;padding:8px;border-radius:6px;font-size:.75rem;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:7px;margin-top:12px;"><button type="button" onclick="document.getElementById('official-framework-modal').classList.remove('show')" class="btn btn-secondary" style="padding:6px 10px;font-size:.72rem;">Cancel</button><button id="official-framework-create" type="button" onclick="createOfficialFrameworkProject()" style="padding:6px 11px;border:1px solid rgba(96,165,250,.5);border-radius:6px;background:rgba(96,165,250,.12);color:#93c5fd;font-weight:600;cursor:pointer;">Create project</button></div>
+      </div>
     </div>
 
     <!-- Git Init Modal (standalone, shown for non-git projects) -->
@@ -9466,6 +9479,32 @@ kiro-cli whoami --format json</code></pre>
             updateAndroidProjectCommand();
         }
         function hideAndroidProjectForm() { document.getElementById('framework-android-form').classList.remove('show'); }
+        let officialFrameworkChoice = '';
+        function showOfficialFrameworkForm(framework) {
+            officialFrameworkChoice = framework;
+            document.getElementById('official-framework-title').textContent = `Create ${framework === 'react-router' ? 'React Router Framework' : framework[0].toUpperCase() + framework.slice(1)} project`;
+            document.getElementById('official-framework-output').value = '';
+            document.getElementById('official-framework-status').style.display = 'none';
+            updateOfficialFrameworkCommand();
+            document.getElementById('official-framework-modal').classList.add('show');
+        }
+        function updateOfficialFrameworkCommand() {
+            const output = document.getElementById('official-framework-output')?.value.trim() || '.';
+            const commands = {astro:`npm create astro@latest ${output} -- --yes --no-install`,nuxt:`npm create nuxt@latest ${output} --no-install --no-modules --packageManager=npm`,'react-router':`npx --yes create-react-router@latest ${output} --yes`};
+            const preview = document.getElementById('official-framework-command');
+            if (preview && commands[officialFrameworkChoice]) preview.textContent = commands[officialFrameworkChoice];
+        }
+        async function createOfficialFrameworkProject() {
+            const status = document.getElementById('official-framework-status'), button = document.getElementById('official-framework-create');
+            button.disabled = true; status.style.display = 'block'; status.style.color = '#93c5fd'; status.textContent = '⏳ Running official scaffolder…';
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(activeProject)}/init-official-framework`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({framework:officialFrameworkChoice,output:document.getElementById('official-framework-output').value.trim()})});
+                const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Scaffolder failed.');
+                status.style.color = '#34d399'; status.textContent = `✓ Created in ${data.output}. Install dependencies in that folder to start.`;
+                if (typeof loadExplorerRoot === 'function') loadExplorerRoot();
+            } catch(error) { status.style.color = '#f87171'; status.textContent = `⚠ ${error.message}`; }
+            finally { button.disabled = false; }
+        }
         function updateAndroidProjectCommand() {
             const value = id => document.getElementById(id).value.trim();
             const output = value('android-project-output');

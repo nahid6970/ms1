@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-23] - Add Official Astro, Nuxt, and React Router Scaffolding
+
+- Added Astro, Nuxt, and React Router Framework Mode cards to the framework selector.
+- Added a setup popup with an optional output folder and command preview.
+- Added a backend endpoint that validates workspace paths and invokes the selected official CLI without overwriting an existing output folder.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-23] - Add Android Empty Activity Generator
 
 - Added an Android project card and editable configuration form to the framework selector.

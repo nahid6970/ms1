@@ -7828,6 +7828,29 @@ def api_project_init_android(project):
     except OSError as exc:
         return jsonify({'error':str(exc)}), 500
 
+@app.route('/api/project/<project>/init-official-framework', methods=['POST'])
+def api_project_init_official_framework(project):
+    proj = next((p for p in scan_projects() if p['name'].lower() == project.lower()), None)
+    if not proj: return jsonify({'error':'Project not found'}), 404
+    data = request.get_json(silent=True) or {}
+    framework, output = str(data.get('framework') or ''), str(data.get('output') or '').strip()
+    if framework not in {'astro','nuxt','react-router'}: return jsonify({'error':'Unknown framework'}), 400
+    if output and (os.path.isabs(output) or output in {'.','..'} or '..' in output.replace('\\','/').split('/')):
+        return jsonify({'error':'Output must be a relative folder inside the workspace.'}), 400
+    base = os.path.abspath(proj['path']); target = os.path.abspath(os.path.join(base, output or '.'))
+    if os.path.commonpath([base,target]) != base: return jsonify({'error':'Output must stay inside the workspace.'}), 400
+    if output and os.path.exists(target): return jsonify({'error':f'Output folder already exists: {output}'}), 409
+    destination = output or '.'
+    if framework == 'astro': command = ['npm','create','astro@latest',destination,'--','--yes','--no-install']
+    elif framework == 'nuxt': command = ['npm','create','nuxt@latest',destination,'--no-install','--no-modules','--packageManager=npm']
+    else: command = ['npx','--yes','create-react-router@latest',destination,'--yes']
+    try:
+        result = subprocess.run(command,cwd=base,capture_output=True,text=True,encoding='utf-8',errors='replace',timeout=900,creationflags=0x08000000 if os.name == 'nt' else 0)
+        if result.returncode: return jsonify({'error':(result.stderr or result.stdout or 'Framework scaffolder failed.').strip()}), 500
+        return jsonify({'status':'success','output':output or '.', 'message':(result.stdout or '').strip()})
+    except subprocess.TimeoutExpired: return jsonify({'error':'Framework scaffolder timed out.'}), 504
+    except OSError as exc: return jsonify({'error':str(exc)}), 500
+
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
     if 'image' not in request.files:
