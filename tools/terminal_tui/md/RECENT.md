@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-23] - Offer Missing Framework and Android Tool Installs
+
+- Added prerequisite detection to framework and Android setup dialogs.
+- When npm is missing, users can install Node.js LTS with winget; when Android CLI is missing, users can install `Google.AndroidCLI` with winget.
+- Added allowlisted backend install actions and restart guidance for PATH updates.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-23] - Add Official Astro, Nuxt, and React Router Scaffolding
 
 - Added Astro, Nuxt, and React Router Framework Mode cards to the framework selector.

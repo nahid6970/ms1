@@ -7851,6 +7851,25 @@ def api_project_init_official_framework(project):
     except subprocess.TimeoutExpired: return jsonify({'error':'Framework scaffolder timed out.'}), 504
     except OSError as exc: return jsonify({'error':str(exc)}), 500
 
+@app.route('/api/project-tools/status', methods=['GET'])
+def api_project_tools_status():
+    return jsonify({'node':bool(shutil.which('npm') and shutil.which('node')), 'android':bool(shutil.which('android')), 'winget':bool(shutil.which('winget'))})
+
+@app.route('/api/project-tools/install', methods=['POST'])
+def api_project_tools_install():
+    if os.name != 'nt': return jsonify({'error':'winget installation is available only on Windows.'}), 400
+    tool = (request.get_json(silent=True) or {}).get('tool')
+    package_id = {'android':'Google.AndroidCLI', 'node':'OpenJS.NodeJS.LTS'}.get(tool)
+    if not package_id: return jsonify({'error':'Unknown tool.'}), 400
+    winget = shutil.which('winget')
+    if not winget: return jsonify({'error':'winget was not found. Install the required tool manually, then restart this app.'}), 500
+    try:
+        result = subprocess.run([winget, 'install', '-e', '--id', package_id], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=900, creationflags=0x08000000)
+        if result.returncode: return jsonify({'error':(result.stderr or result.stdout or 'winget installation failed.').strip()}), 500
+        return jsonify({'status':'success','message':f'{package_id} installed. Restart the terminal app so its PATH refreshes, then try again.'})
+    except subprocess.TimeoutExpired: return jsonify({'error':'winget installation timed out.'}), 504
+    except OSError as exc: return jsonify({'error':str(exc)}), 500
+
 @app.route('/api/images/temp', methods=['POST'])
 def api_temp_image():
     if 'image' not in request.files:

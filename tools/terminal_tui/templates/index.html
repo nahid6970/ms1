@@ -3292,6 +3292,7 @@
                     <label style="grid-column:1/-1;font-size:.68rem;color:var(--text-secondary);">Output folder (optional)<input id="android-project-output" value="./my-app" placeholder="Leave empty to use the active workspace root" style="display:block;width:100%;box-sizing:border-box;margin-top:4px;padding:7px;border:1px solid var(--border-color);border-radius:5px;background:var(--bg-main);color:var(--text-primary);"></label>
                 </div>
                 <div id="android-project-command" style="margin-top:8px;padding:7px;background:var(--bg-main);border-radius:5px;color:var(--text-muted);font: .65rem 'Fira Code',monospace;overflow-wrap:anywhere;"></div>
+                <div id="android-cli-install-panel" style="display:none;margin-top:8px;padding:9px;border:1px solid rgba(251,191,36,.35);border-radius:7px;background:rgba(245,158,11,.08);font-size:.72rem;color:#fbbf24;">Android CLI is not installed. <button type="button" onclick="installProjectTool('android')" style="margin-left:6px;padding:4px 8px;border:1px solid rgba(251,191,36,.45);border-radius:5px;background:rgba(245,158,11,.12);color:#fbbf24;cursor:pointer;">Install with winget</button></div>
                 <div id="android-project-status" role="status" aria-live="polite" style="display:none;margin-top:10px;padding:9px 11px;border:1px solid rgba(52,211,153,.35);border-radius:7px;background:rgba(16,185,129,.1);font-size:.78rem;font-weight:600;color:#34d399;"></div>
                 <div style="display:flex;justify-content:flex-end;gap:7px;margin-top:9px;"><button id="android-project-cancel" type="button" onclick="hideAndroidProjectForm()" class="btn btn-secondary" style="padding:6px 10px;font-size:.72rem;">Cancel</button><button id="android-project-create" type="button" onclick="createAndroidProject()" style="padding:6px 11px;border:1px solid rgba(61,220,132,.5);border-radius:6px;background:rgba(61,220,132,.12);color:#3ddc84;font-weight:600;cursor:pointer;">Create project</button></div>
               </div>
@@ -4857,6 +4858,7 @@ kiro-cli whoami --format json</code></pre>
         <h2 id="official-framework-title" style="margin:0 0 12px;font-size:.95rem;">Framework setup</h2>
         <label style="font-size:.7rem;color:var(--text-secondary);">Output folder (optional)<input id="official-framework-output" placeholder="Leave empty for workspace root" oninput="updateOfficialFrameworkCommand()" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:8px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-main);color:var(--text-primary);"></label>
         <div id="official-framework-command" style="margin-top:9px;padding:8px;background:var(--bg-main);border-radius:6px;color:var(--text-muted);font:.65rem 'Fira Code',monospace;overflow-wrap:anywhere;"></div>
+        <div id="framework-cli-install-panel" style="display:none;margin-top:8px;padding:9px;border:1px solid rgba(251,191,36,.35);border-radius:7px;background:rgba(245,158,11,.08);font-size:.72rem;color:#fbbf24;">Node.js/npm is not installed. <button type="button" onclick="installProjectTool('node')" style="margin-left:6px;padding:4px 8px;border:1px solid rgba(251,191,36,.45);border-radius:5px;background:rgba(245,158,11,.12);color:#fbbf24;cursor:pointer;">Install Node.js with winget</button></div>
         <div id="official-framework-status" role="status" aria-live="polite" style="display:none;margin-top:9px;padding:8px;border-radius:6px;font-size:.75rem;"></div>
         <div style="display:flex;justify-content:flex-end;gap:7px;margin-top:12px;"><button type="button" onclick="document.getElementById('official-framework-modal').classList.remove('show')" class="btn btn-secondary" style="padding:6px 10px;font-size:.72rem;">Cancel</button><button id="official-framework-create" type="button" onclick="createOfficialFrameworkProject()" style="padding:6px 11px;border:1px solid rgba(96,165,250,.5);border-radius:6px;background:rgba(96,165,250,.12);color:#93c5fd;font-weight:600;cursor:pointer;">Create project</button></div>
       </div>
@@ -9477,6 +9479,7 @@ kiro-cli whoami --format json</code></pre>
             status.style.display = 'none'; status.textContent = '';
             ['android-project-name','android-project-app-id','android-project-namespace','android-project-min-sdk','android-project-output'].forEach(id => document.getElementById(id).oninput = updateAndroidProjectCommand);
             updateAndroidProjectCommand();
+            refreshProjectToolStatus();
         }
         function hideAndroidProjectForm() { document.getElementById('framework-android-form').classList.remove('show'); }
         let officialFrameworkChoice = '';
@@ -9487,6 +9490,24 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('official-framework-status').style.display = 'none';
             updateOfficialFrameworkCommand();
             document.getElementById('official-framework-modal').classList.add('show');
+            refreshProjectToolStatus();
+        }
+        async function refreshProjectToolStatus() {
+            try {
+                const response = await fetch('/api/project-tools/status'); const data = await response.json();
+                const nodePanel = document.getElementById('framework-cli-install-panel'); if (nodePanel) nodePanel.style.display = data.node ? 'none' : 'block';
+                const androidPanel = document.getElementById('android-cli-install-panel'); if (androidPanel) androidPanel.style.display = data.android ? 'none' : 'block';
+            } catch (_) {}
+        }
+        async function installProjectTool(tool) {
+            const status = document.getElementById(tool === 'android' ? 'android-project-status' : 'official-framework-status');
+            status.style.display = 'block'; status.style.color = '#93c5fd'; status.textContent = '⏳ Starting winget install…';
+            try {
+                const response = await fetch('/api/project-tools/install', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool})});
+                const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Installation failed.');
+                status.style.color = '#34d399'; status.textContent = `✓ ${data.message}`;
+                await refreshProjectToolStatus();
+            } catch(error) { status.style.color = '#f87171'; status.textContent = `⚠ ${error.message}`; }
         }
         function updateOfficialFrameworkCommand() {
             const output = document.getElementById('official-framework-output')?.value.trim() || '.';
