@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-23] - Launch Windows npm and npx Shims Correctly
+
+- Routed framework scaffolder commands through the Windows command shell because npm/npx are `.cmd` shims.
+- Restricted output-folder characters before shell execution and expose the Node install option if command startup still reports a missing executable.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/RECENT.md`
+
 ## [2026-11-23] - Offer Missing Framework and Android Tool Installs
 
 - Added prerequisite detection to framework and Android setup dialogs.

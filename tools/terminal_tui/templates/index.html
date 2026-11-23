@@ -9507,11 +9507,14 @@ kiro-cli whoami --format json</code></pre>
                 const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Installation failed.');
                 status.style.color = '#34d399'; status.textContent = `✓ ${data.message}`;
                 await refreshProjectToolStatus();
-            } catch(error) { status.style.color = '#f87171'; status.textContent = `⚠ ${error.message}`; }
+            } catch(error) {
+                status.style.color = '#f87171'; status.textContent = `⚠ ${error.message}`;
+                if (/WinError 2|cannot find the file|not recognized/i.test(error.message)) document.getElementById('framework-cli-install-panel').style.display = 'block';
+            }
         }
         function updateOfficialFrameworkCommand() {
             const output = document.getElementById('official-framework-output')?.value.trim() || '.';
-            const commands = {astro:`npm create astro@latest ${output} -- --yes --no-install`,nuxt:`npm create nuxt@latest ${output} --no-install --no-modules --packageManager=npm`,'react-router':`npx --yes create-react-router@latest ${output} --yes`};
+            const commands = {astro:`npm create astro@latest ${output} -- --yes --no-install`,nuxt:`npm create nuxt@latest ${output} -- --no-install --no-modules --packageManager=npm`,'react-router':`npx --yes create-react-router@latest ${output} --yes`};
             const preview = document.getElementById('official-framework-command');
             if (preview && commands[officialFrameworkChoice]) preview.textContent = commands[officialFrameworkChoice];
         }
