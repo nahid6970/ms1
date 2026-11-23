@@ -2002,6 +2002,16 @@
     },
     "Shortcut Manager": {
       "codex:01a1a787-ee6c-7ab0-8413-b07c9c4ed479": "Fix Favorites Star and Rename App Reference"
+    },
+    "Script Loader": {
+      "codex:01a20210-1f17-74a2-975c-0eb65e98c986": "Add Status Manager and Fix Row Icons"
+    },
+    "job-search": {
+      "codex:01a2021f-ff50-76c2-a7e3-a21d7ca06d4d": "Matching Job Circulars to User Profile",
+      "codex:01a20259-deb9-79f1-a06d-ad354891edf0": "Update Job Trackers To Keep Five Latest Posts",
+      "codex:01a1dfff-5830-76f1-8156-592aa265e8ad": "Automated daily job listing tracker scan",
+      "codex:01a1f3e8-6e6c-7f63-91d1-4a5fa879c83f": "DBBL Exam Preparation and Past Questions",
+      "codex:01a1c567-082c-7853-99b0-3206fc693f71": "Update job search project location and scheduler"
     }
   },
   "terminal_tabs": {
