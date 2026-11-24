@@ -2360,5 +2360,9 @@
     "workspace-duplicate-btn",
     "workspace-add-btn",
     "workspace-delete-btn"
+  ],
+  "hidden_project_specific_actions": [
+    "project-action-export-log-btn",
+    "project-action-split-btn"
   ]
 }

@@ -8298,6 +8298,27 @@ def api_post_workspace_header_action_order():
     set_config_val("workspace_header_action_order", order)
     return jsonify({"status": "success"})
 
+PROJECT_SPECIFIC_ACTION_IDS = [
+    "bookmark-dropdown-container", "project-action-framework-btn",
+    "project-action-export-log-btn", "project-action-split-btn",
+    "scratchpad-toggle-btn", "project-action-ports-btn",
+]
+
+@app.route('/api/project-specific-action-visibility', methods=['GET', 'POST'])
+def api_project_specific_action_visibility():
+    hidden = get_config_val("hidden_project_specific_actions", list)
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or {}
+        hidden = data.get("hidden", [])
+        if (not isinstance(hidden, list) or not all(isinstance(item, str) for item in hidden)
+                or len(hidden) != len(set(hidden)) or not set(hidden).issubset(PROJECT_SPECIFIC_ACTION_IDS)):
+            return jsonify({"error": "Invalid project action visibility settings"}), 400
+        set_config_val("hidden_project_specific_actions", hidden)
+    if (not isinstance(hidden, list) or not all(isinstance(item, str) for item in hidden)
+            or not set(hidden).issubset(PROJECT_SPECIFIC_ACTION_IDS)):
+        hidden = []
+    return jsonify({"hidden": hidden})
+
 @app.route('/api/fonts')
 def list_system_fonts():
     fonts = set()

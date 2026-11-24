@@ -789,6 +789,10 @@
             margin-right: 12px;
         }
 
+        #project-specific-actions [data-user-hidden="true"] {
+            display: none !important;
+        }
+
         #workspace-header-reorderable-actions {
             display: flex;
             align-items: center;
@@ -2369,20 +2373,20 @@
                             </div>
                         </div>
                     </div>
-                    <button class="action-btn" onclick="openFrameworkSelectModal()" title="Initialize Frontend Framework" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
+                    <button class="action-btn" id="project-action-framework-btn" onclick="openFrameworkSelectModal()" title="Initialize Frontend Framework" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: background-color 0.2s;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
                     </button>
-                    <button class="action-btn" onclick="exportActiveTerminalLog()" title="Download Terminal Logs" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                    <button class="action-btn" id="project-action-export-log-btn" onclick="exportActiveTerminalLog()" title="Download Terminal Logs" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="7 10 12 15 17 10"/>
                             <line x1="12" y1="15" x2="12" y2="3"/>
                         </svg>
                     </button>
-                    <button class="action-btn" onclick="openSplitSelectModal()" title="Split terminal" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
+                    <button class="action-btn" id="project-action-split-btn" onclick="openSplitSelectModal()" title="Split terminal" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="12" y1="3" x2="12" y2="21"></line>
@@ -2396,7 +2400,7 @@
                         </svg>
                         <span id="scratchpad-badge" style="display: none; position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; border-radius: 50%; background-color: var(--green-active);"></span>
                     </button>
-                    <button class="action-btn" onclick="openPortsMonitorModal()" title="Active Ports & Services Monitor" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                    <button class="action-btn" id="project-action-ports-btn" onclick="openPortsMonitorModal()" title="Active Ports & Services Monitor" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
                             <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
@@ -4056,6 +4060,18 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="settings-show-workspace-bar" checked style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-color); margin: 0; flex-shrink: 0;">
                             <label for="settings-show-workspace-bar" style="font-size: 0.78rem; font-weight: 500; cursor: pointer; user-select: none; color: var(--text-primary); margin: 0; white-space: nowrap;">Show Workspace Bar</label>
+                        </div>
+                    </div>
+                    <div id="settings-project-specific-actions" style="margin-top:14px;padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <div style="font-size:.72rem;font-weight:600;color:var(--text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">Project Toolbar Buttons</div>
+                        <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:9px;">Choose which buttons appear beside the active workspace.</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;">
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-bookmarks" checked style="accent-color:var(--accent-color);"> Bookmarked Commands</label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-framework" checked style="accent-color:var(--accent-color);"> Initialize Framework</label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-log" checked style="accent-color:var(--accent-color);"> Download Terminal Logs</label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-split" checked style="accent-color:var(--accent-color);"> Split Terminal</label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-scratchpad" checked style="accent-color:var(--accent-color);"> Workspace Notes</label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-show-project-action-ports" checked style="accent-color:var(--accent-color);"> Active Ports Monitor</label>
                         </div>
                     </div>
                 </div>
@@ -14097,6 +14113,9 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function openSettingsModal() {
+            loadProjectSpecificActionVisibilitySettings().catch(error => {
+                console.warn('Could not refresh project toolbar visibility settings:', error);
+            });
             loadCodexUsageAccounts().catch(() => {});
             loadAIResetWarmupSettings();
             loadDefaultCliAccountSettings();
@@ -14417,6 +14436,17 @@ kiro-cli whoami --format json</code></pre>
             const checkSettingsData = await checkSettingsResponse.json();
             projectAutoCheckServerState = checkSettingsData.state || projectAutoCheckServerState;
             configureProjectAutoChecks();
+            const projectActionVisibilityResponse = await fetch('/api/project-specific-action-visibility', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({hidden: getHiddenProjectSpecificActionIds()})
+            });
+            if (!projectActionVisibilityResponse.ok) {
+                alert('Could not save project toolbar visibility settings to tui_config.json.');
+                return;
+            }
+            const projectActionVisibilityData = await projectActionVisibilityResponse.json();
+            applyProjectSpecificActionVisibility(projectActionVisibilityData.hidden || []);
             const selectedFont = selectedFontValue || "'Fira Code', Consolas, monospace";
             localStorage.setItem('terminal-font-family', selectedFont);
             
@@ -24273,6 +24303,41 @@ Always wrap your **entire response** in a single markdown code block.`;
             'workspace-duplicate-btn', 'workspace-add-btn', 'explorer-toggle-btn',
             'active-project-path-btn'
         ];
+        const PROJECT_SPECIFIC_ACTION_SETTING_MAP = [
+            {actionId: 'bookmark-dropdown-container', checkboxId: 'settings-show-project-action-bookmarks'},
+            {actionId: 'project-action-framework-btn', checkboxId: 'settings-show-project-action-framework'},
+            {actionId: 'project-action-export-log-btn', checkboxId: 'settings-show-project-action-log'},
+            {actionId: 'project-action-split-btn', checkboxId: 'settings-show-project-action-split'},
+            {actionId: 'scratchpad-toggle-btn', checkboxId: 'settings-show-project-action-scratchpad'},
+            {actionId: 'project-action-ports-btn', checkboxId: 'settings-show-project-action-ports'}
+        ];
+
+        function applyProjectSpecificActionVisibility(hiddenIds) {
+            const hidden = new Set(Array.isArray(hiddenIds) ? hiddenIds : []);
+            PROJECT_SPECIFIC_ACTION_SETTING_MAP.forEach(({actionId}) => {
+                const action = document.getElementById(actionId);
+                if (action) action.dataset.userHidden = String(hidden.has(actionId));
+            });
+        }
+
+        async function loadProjectSpecificActionVisibilitySettings() {
+            const response = await fetch('/api/project-specific-action-visibility');
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Could not load project toolbar settings.');
+            const hidden = Array.isArray(data.hidden) ? data.hidden : [];
+            applyProjectSpecificActionVisibility(hidden);
+            const hiddenSet = new Set(hidden);
+            PROJECT_SPECIFIC_ACTION_SETTING_MAP.forEach(({actionId, checkboxId}) => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) checkbox.checked = !hiddenSet.has(actionId);
+            });
+        }
+
+        function getHiddenProjectSpecificActionIds() {
+            return PROJECT_SPECIFIC_ACTION_SETTING_MAP
+                .filter(({checkboxId}) => !document.getElementById(checkboxId)?.checked)
+                .map(({actionId}) => actionId);
+        }
 
         let workspaceHeaderOrderSaveQueue = Promise.resolve();
         function saveWorkspaceHeaderActionOrder() {
@@ -24363,6 +24428,9 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.onload = async () => {
             await loadWorkspaceHeaderActionOrder();
+            await loadProjectSpecificActionVisibilitySettings().catch(error => {
+                console.warn('Could not load project toolbar visibility settings:', error);
+            });
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
             document.body.classList.toggle('hide-git-commit-hash', localStorage.getItem('show-git-commit-hash') === 'false');
