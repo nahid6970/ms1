@@ -1,6 +1,104 @@
 {
   "projects": [
     {
+      "name": "Terminal TUI",
+      "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "scrollbarColor": "#ffffff",
+        "borderColor": "#525252",
+        "cursor": "#3b82f6",
+        "scrollbarIdleColor": "#ffffff",
+        "foreground": "#d1d5db"
+      },
+      "cardTheme": {
+        "accentColor": "#ffe600",
+        "pathColor": "#ff0055",
+        "bgColor": "#000610",
+        "textColor": "#00ffcc"
+      },
+      "bookmarks": [
+        {
+          "command": "python C:\\@delta\\ms1\\TOOLS\\Gemini_CLI\\gemini_cli.py --password 182358 --max-output-tokens 65536",
+          "global": true,
+          "name": " myGG",
+          "windowTitle": "",
+          "displayOrder": 0,
+          "color": "#3be365"
+        },
+        {
+          "command": "agy --dangerously-skip-permissions -c",
+          "global": true,
+          "name": " Antigravity",
+          "windowTitle": "",
+          "displayOrder": 3,
+          "color": "#f7fb32"
+        },
+        {
+          "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
+          "global": true,
+          "name": " Codex",
+          "windowTitle": "",
+          "displayOrder": 1,
+          "color": "#85c4ff"
+        },
+        {
+          "command": "kiro-cli chat --trust-all-tools --resume",
+          "global": true,
+          "name": " Kiro-Cli",
+          "windowTitle": "",
+          "displayOrder": 2,
+          "color": "#b576d6"
+        },
+        {
+          "command": "npx -y convex@latest dev",
+          "global": true,
+          "name": " convex",
+          "windowTitle": "",
+          "displayOrder": 4,
+          "color": "#ee342f"
+        },
+        {
+          "command": "net stop winnat",
+          "global": true,
+          "name": "󰖩 net stop winnat",
+          "windowTitle": "",
+          "displayOrder": 6,
+          "color": ""
+        },
+        {
+          "command": "explorer .",
+          "global": true,
+          "name": " Explorer",
+          "windowTitle": "",
+          "displayOrder": 7,
+          "color": ""
+        },
+        {
+          "command": ".\\gradlew.bat :app:assembleDebug",
+          "global": true,
+          "name": ".\\gradlew.bat",
+          "windowTitle": "",
+          "displayOrder": 5,
+          "color": ""
+        }
+      ],
+      "category": "Tool",
+      "rclone": {
+        "dest": "",
+        "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      }
+    },
+    {
       "name": "Delta-Main",
       "path": "C:\\Users\\nahid\\delta",
       "category": "",
@@ -159,102 +257,26 @@
       "gitRemote": ""
     },
     {
-      "name": "Terminal TUI",
-      "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
+      "name": "md files",
+      "path": "C:\\Users\\nahid\\delta\\md",
+      "category": "",
       "pinned": false,
       "theme": {
         "background": "#000000",
-        "scrollbarColor": "#ffffff",
-        "borderColor": "#525252",
+        "foreground": "#d1d5db",
         "cursor": "#3b82f6",
-        "scrollbarIdleColor": "#ffffff",
-        "foreground": "#d1d5db"
+        "borderColor": "#232c3d",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
       },
       "cardTheme": {
-        "accentColor": "#ffe600",
-        "pathColor": "#ff0055",
-        "bgColor": "#000610",
-        "textColor": "#00ffcc"
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
       },
-      "bookmarks": [
-        {
-          "command": "python C:\\@delta\\ms1\\TOOLS\\Gemini_CLI\\gemini_cli.py --password 182358 --max-output-tokens 65536",
-          "global": true,
-          "name": " myGG",
-          "windowTitle": "",
-          "displayOrder": 0,
-          "color": "#3be365"
-        },
-        {
-          "command": "agy --dangerously-skip-permissions -c",
-          "global": true,
-          "name": " Antigravity",
-          "windowTitle": "",
-          "displayOrder": 3,
-          "color": "#f7fb32"
-        },
-        {
-          "command": "codex --dangerously-bypass-approvals-and-sandbox resume",
-          "global": true,
-          "name": " Codex",
-          "windowTitle": "",
-          "displayOrder": 1,
-          "color": "#85c4ff"
-        },
-        {
-          "command": "kiro-cli chat --trust-all-tools --resume",
-          "global": true,
-          "name": " Kiro-Cli",
-          "windowTitle": "",
-          "displayOrder": 2,
-          "color": "#b576d6"
-        },
-        {
-          "command": "npx -y convex@latest dev",
-          "global": true,
-          "name": " convex",
-          "windowTitle": "",
-          "displayOrder": 4,
-          "color": "#ee342f"
-        },
-        {
-          "command": "net stop winnat",
-          "global": true,
-          "name": "󰖩 net stop winnat",
-          "windowTitle": "",
-          "displayOrder": 6,
-          "color": ""
-        },
-        {
-          "command": "explorer .",
-          "global": true,
-          "name": " Explorer",
-          "windowTitle": "",
-          "displayOrder": 7,
-          "color": ""
-        },
-        {
-          "command": ".\\gradlew.bat :app:assembleDebug",
-          "global": true,
-          "name": ".\\gradlew.bat",
-          "windowTitle": "",
-          "displayOrder": 5,
-          "color": ""
-        }
-      ],
-      "category": "Tool",
-      "rclone": {
-        "dest": "",
-        "ignorelist": "C:\\@delta\\ms1\\scripts\\rclone\\rclone_status\\ignorelist.txt",
-        "flags": {
-          "--fast-list": true,
-          "-P": true,
-          "--size-only": true,
-          "--track-renames": false,
-          "--dry-run": false
-        },
-        "transfers": "10"
-      }
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/md-files.git"
     },
     {
       "name": "WizTree",
@@ -277,28 +299,6 @@
       },
       "bookmarks": [],
       "gitRemote": "https://github.com/nahid6970/mywiztree-directory-scanner.git"
-    },
-    {
-      "name": "md files",
-      "path": "C:\\Users\\nahid\\delta\\md",
-      "category": "",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "gitRemote": "https://github.com/nahid6970/md-files.git"
     },
     {
       "name": "Gemini CLI",

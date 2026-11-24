@@ -812,6 +812,22 @@
         #workspace-selector-options-list > .workspace-selector-project-option.dragging {
             opacity: .45;
         }
+        .workspace-project-group-separator {
+            margin: 6px 10px 3px;
+            padding: 7px 2px 2px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: .62rem;
+            font-weight: 650;
+            letter-spacing: .09em;
+            line-height: 1.2;
+            text-transform: uppercase;
+            user-select: none;
+        }
+        #workspace-selector-options-list .workspace-project-group-separator {
+            margin: 4px 8px 2px;
+            padding: 6px 4px 2px;
+        }
 
         .workspace-title-info h2 {
             font-family: 'Fira Code', monospace;
@@ -5659,6 +5675,16 @@ kiro-cli whoami --format json</code></pre>
             updateEmptyStatePlaceholder();
         }
 
+        function createInactiveWorkspacesSeparator(id) {
+            const separator = document.createElement('div');
+            separator.id = id;
+            separator.className = 'workspace-project-group-separator';
+            separator.setAttribute('role', 'separator');
+            separator.setAttribute('aria-label', 'Inactive workspaces');
+            separator.textContent = 'Not running';
+            return separator;
+        }
+
         // Render sidebar list
         function renderSidebar(searchQuery = '') {
             const container = document.getElementById('project-list-container');
@@ -5728,7 +5754,10 @@ kiro-cli whoami --format json</code></pre>
                 return;
             }
 
-            filtered.forEach(proj => {
+            filtered.forEach((proj, index) => {
+                if (index > 0 && filtered[index - 1].is_active && !proj.is_active) {
+                    container.appendChild(createInactiveWorkspacesSeparator('workspace-sidebar-inactive-workspaces-separator'));
+                }
                 const card = document.createElement('div');
                 card.className = `project-card ${activeProject === proj.name ? 'active' : ''} ${proj.is_active ? 'running' : ''}`;
                 
@@ -5742,9 +5771,10 @@ kiro-cli whoami --format json</code></pre>
                     e.dataTransfer.effectAllowed = 'move';
                 };
                 
-                card.ondragend = () => {
+                card.ondragend = async () => {
                     card.classList.remove('dragging');
-                    saveProjectsOrder();
+                    await saveProjectsOrder();
+                    renderSidebar(document.getElementById('search-input')?.value.toLowerCase().trim() || '');
                 };
                 
                 // Apply card customization style
@@ -12525,7 +12555,10 @@ kiro-cli whoami --format json</code></pre>
                 return;
             }
             
-            filtered.forEach(proj => {
+            filtered.forEach((proj, index) => {
+                if (index > 0 && filtered[index - 1].is_active && !proj.is_active) {
+                    listEl.appendChild(createInactiveWorkspacesSeparator('workspace-dropdown-inactive-workspaces-separator'));
+                }
                 const isCurrent = proj.name === activeProject;
                 const ct = proj.cardTheme;
 
