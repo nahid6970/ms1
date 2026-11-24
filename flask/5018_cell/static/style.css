@@ -2234,6 +2234,7 @@ td input::-moz-selection {
     line-height: 1.5;
 }
 
+#cellFontPickerSearch,
 #cellFontPickerSelect {
     min-height: 42px;
     margin: 0 !important;
@@ -2242,6 +2243,17 @@ td input::-moz-selection {
     background: #fff;
     color: #172033;
     font-size: 14px;
+}
+
+#cellFontPickerSearch {
+    width: 100%;
+    padding: 0 12px;
+}
+
+#cellFontPickerSearch:focus,
+#cellFontPickerSelect:focus {
+    border-color: #647cf4;
+    outline: 3px solid rgba(100, 124, 244, 0.15);
 }
 
 #loadSystemFontsButton {

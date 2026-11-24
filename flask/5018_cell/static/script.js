@@ -12,6 +12,7 @@ if (!Array.isArray(lastEditedCells)) {
 }
 let contextMenuCell = null;
 let cellFontPickerTargets = [];
+let cellFontPickerFonts = [];
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
 let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
@@ -8572,21 +8573,23 @@ function getInstalledFontCandidates() {
 function populateCellFontPicker(fonts, selectedFamily = '') {
     const select = document.getElementById('cellFontPickerSelect');
     if (!select) return;
+    cellFontPickerFonts = [...new Set(fonts)].filter(font => font && font !== '(Column / default)');
+    const query = (document.getElementById('cellFontPickerSearch')?.value || '').trim().toLocaleLowerCase();
+    const previousSelection = selectedFamily || select.value;
     select.replaceChildren();
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = '(Column / default)';
-    select.appendChild(defaultOption);
-    [...new Set(fonts)].filter(Boolean).sort((a, b) => a.localeCompare(b)).forEach(font => {
-        if (font === '(Column / default)') return;
+    if (!query || '(column / default)'.includes(query)) select.appendChild(defaultOption);
+    cellFontPickerFonts.filter(font => font.toLocaleLowerCase().includes(query)).sort((a, b) => a.localeCompare(b)).forEach(font => {
         const option = document.createElement('option');
         option.value = font;
         option.textContent = font;
         option.style.fontFamily = `"${font}", sans-serif`;
         select.appendChild(option);
     });
-    select.value = selectedFamily;
-    if (select.value !== selectedFamily) select.value = '';
+    select.value = previousSelection;
+    if (select.value !== previousSelection) select.value = '';
 }
 
 function showCellFontPicker() {
@@ -8597,6 +8600,8 @@ function showCellFontPicker() {
         : [{ row: rowIndex, col: colIndex }];
     cellFontPickerTargets = chosenCells;
     const style = getCellStyle(rowIndex, colIndex);
+    document.getElementById('cellFontPickerSearch').value = '';
+    document.getElementById('cellFontPickerSearch').oninput = () => populateCellFontPicker(cellFontPickerFonts, document.getElementById('cellFontPickerSelect').value);
     populateCellFontPicker(getInstalledFontCandidates(), style.fontFamily || '');
     const overlay = document.getElementById('cellFontPickerOverlay');
     overlay.style.display = 'flex';
