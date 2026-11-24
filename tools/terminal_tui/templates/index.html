@@ -789,6 +789,23 @@
             margin-right: 12px;
         }
 
+        #workspace-header-reorderable-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: none;
+        }
+        #workspace-header-reorderable-actions > .workspace-header-reorderable-action {
+            touch-action: none;
+        }
+        #workspace-header-reorderable-actions > .workspace-header-reorderable-action.is-dragging {
+            opacity: .45;
+        }
+        #workspace-header-reorderable-actions > .workspace-header-reorderable-action.is-drop-target {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
         .workspace-title-info h2 {
             font-family: 'Fira Code', monospace;
             font-size: 0.82rem;
@@ -2242,11 +2259,6 @@
                 <button class="action-btn" id="home-btn" onclick="goHome()" title="Home — back to workspace list" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #94a3b8; transition: all 0.2s;" onmouseenter="this.style.color='var(--text-primary)'; this.style.borderColor='var(--accent-color)'" onmouseleave="this.style.color='#94a3b8'; this.style.borderColor='var(--border-color)'">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </button>
-                <button class="action-btn" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer" style="height: 34px; width: 34px; padding: 0; display: flex; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f59e0b; transition: all 0.2s;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                </button>
                 <div class="custom-dropdown" id="workspace-selector-dropdown-container" style="position: relative; display: none;">
                     <button class="action-btn" id="workspace-selector-btn" onclick="toggleWorkspaceSelectorDropdown(event)" title="Select Workspace" style="height: 34px; min-width: 34px; max-width: 220px; padding: 0 10px; display: flex; align-items: center; gap: 6px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 0px; cursor: pointer; color: var(--text-primary); font-size: 0.82rem; font-weight: 600; font-family: inherit; transition: all 0.2s; overflow: hidden;">
                         <svg id="workspace-selector-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
@@ -2270,31 +2282,31 @@
                     </div>
                 </div>
                 <button class="action-btn agent-session-picker-trigger" id="agent-session-picker-btn" onclick="openAgentSessionPicker()" title="Browse saved chats or start a new agent session" aria-label="Browse saved agent chats" aria-haspopup="dialog" aria-expanded="false"><span id="agent-session-picker-label" class="agent-session-picker-label">AGENTS</span></button>
-                <button class="action-btn" id="rclone-btn" onclick="toggleRclonePopover(event)" title="Rclone — sync workspace to/from remote" aria-label="Rclone sync" style="height:34px; width:34px; padding:0; display:flex; align-items:center; justify-content:center; background-color:var(--bg-sidebar); border:1px solid rgba(148,163,184,0.35); border-radius:8px; cursor:pointer; color:#94a3b8; transition:all 0.2s;">
+                <div id="workspace-header-reorderable-actions" role="group" aria-label="Draggable workspace actions" title="Drag buttons to change their order"><button class="action-btn workspace-header-reorderable-action" draggable="true" id="rclone-btn" onclick="toggleRclonePopover(event)" title="Rclone — sync workspace to/from remote" aria-label="Rclone sync" style="height:34px; width:34px; padding:0; display:flex; align-items:center; justify-content:center; background-color:var(--bg-sidebar); border:1px solid rgba(148,163,184,0.35); border-radius:8px; cursor:pointer; color:#94a3b8; transition:all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
                 </button>
-                <button class="action-btn" id="workspace-delete-btn" onclick="deleteActiveWorkspace()" title="Delete workspace &amp; its storage" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f87171; transition: all 0.2s;" onmouseenter="this.style.borderColor='#ef4444'; this.style.backgroundColor='rgba(239,68,68,0.1)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="workspace-delete-btn" onclick="deleteActiveWorkspace()" title="Delete workspace &amp; its storage" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: #f87171; transition: all 0.2s;" onmouseenter="this.style.borderColor='#ef4444'; this.style.backgroundColor='rgba(239,68,68,0.1)'" onmouseleave="this.style.borderColor='var(--border-color)'; this.style.backgroundColor='var(--bg-sidebar)'">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
-                <button class="action-btn" id="workspace-quick-theme-btn" onclick="openActiveProjectTheme(event)" title="Workspace settings & theme" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="workspace-quick-theme-btn" onclick="openActiveProjectTheme(event)" title="Workspace settings & theme" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
-                <button class="action-btn" id="workspace-duplicate-btn" onclick="duplicateActiveProject()" title="Duplicate active workspace" aria-label="Duplicate active workspace" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="workspace-duplicate-btn" onclick="duplicateActiveProject()" title="Duplicate active workspace" aria-label="Duplicate active workspace" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); transition: all 0.2s;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="8" y="8" width="13" height="13" rx="2"></rect>
                         <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"></path>
                     </svg>
                 </button>
-                <button class="action-btn" id="workspace-add-btn" onclick="openAddModal()" title="Add workspace folder" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="workspace-add-btn" onclick="openAddModal()" title="Add workspace folder" style="height: 34px; width: 34px; padding: 0; display: none; align-items: center; justify-content: center; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; color: var(--text-primary); font-size: 0.95rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                 </button>
-                <div class="branch-badge" id="active-project-branch" style="display: none;">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="explorer-toggle-btn" onclick="toggleExplorer(event)" title="Workspace File Explorer — drag to reposition" aria-label="Workspace File Explorer" style="height:34px;width:34px;padding:0;display:flex;align-items:center;justify-content:center;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;color:#f59e0b;transition:all .2s;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></button></div><div class="branch-badge" id="active-project-branch" style="display: none;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="18" cy="18" r="3"/>
                         <circle cx="6" cy="6" r="3"/>
@@ -24256,7 +24268,100 @@ Always wrap your **entire response** in a single markdown code block.`;
         }
 
 
+        const WORKSPACE_HEADER_ACTION_IDS = [
+            'rclone-btn', 'workspace-delete-btn', 'workspace-quick-theme-btn',
+            'workspace-duplicate-btn', 'workspace-add-btn', 'explorer-toggle-btn'
+        ];
+
+        let workspaceHeaderOrderSaveQueue = Promise.resolve();
+        function saveWorkspaceHeaderActionOrder() {
+            const order = Array.from(document.querySelectorAll('#workspace-header-reorderable-actions > .workspace-header-reorderable-action'))
+                .map(button => button.id);
+            workspaceHeaderOrderSaveQueue = workspaceHeaderOrderSaveQueue.catch(() => {}).then(async () => {
+                try {
+                    const response = await fetch('/api/workspace-header-action-order', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({order})
+                    });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                } catch (error) {
+                    console.error('Could not save workspace header button order:', error);
+                }
+            });
+            return workspaceHeaderOrderSaveQueue;
+        }
+
+        async function loadWorkspaceHeaderActionOrder() {
+            const container = document.getElementById('workspace-header-reorderable-actions');
+            if (!container) return;
+            let order = WORKSPACE_HEADER_ACTION_IDS;
+            try {
+                const response = await fetch('/api/workspace-header-action-order');
+                const data = await response.json();
+                if (response.ok && Array.isArray(data.order)
+                    && data.order.length === WORKSPACE_HEADER_ACTION_IDS.length
+                    && new Set(data.order).size === WORKSPACE_HEADER_ACTION_IDS.length
+                    && data.order.every(id => WORKSPACE_HEADER_ACTION_IDS.includes(id))) {
+                    order = data.order;
+                }
+            } catch (error) {
+                console.warn('Could not load workspace header button order:', error);
+            }
+            order.forEach(id => {
+                const button = document.getElementById(id);
+                if (button) {
+                    button.title = (button.title || button.getAttribute('aria-label') || id) + ' — drag to reposition';
+                    container.appendChild(button);
+                }
+            });
+
+            let draggedButton = null;
+            let suppressClickUntil = 0;
+            container.addEventListener('dragstart', event => {
+                const button = event.target.closest('.workspace-header-reorderable-action');
+                if (!button) return;
+                draggedButton = button;
+                button.classList.add('is-dragging');
+                button.setAttribute('aria-grabbed', 'true');
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', button.id);
+            });
+            container.addEventListener('dragover', event => {
+                if (!draggedButton) return;
+                event.preventDefault();
+                const target = event.target.closest('.workspace-header-reorderable-action');
+                if (!target || target === draggedButton) return;
+                const bounds = target.getBoundingClientRect();
+                const insertAfter = event.clientX > bounds.left + bounds.width / 2;
+                container.insertBefore(draggedButton, insertAfter ? target.nextSibling : target);
+                container.querySelectorAll('.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
+                target.classList.add('is-drop-target');
+            });
+            container.addEventListener('drop', event => {
+                if (!draggedButton) return;
+                event.preventDefault();
+                suppressClickUntil = Date.now() + 800;
+                saveWorkspaceHeaderActionOrder();
+            });
+            container.addEventListener('dragend', () => {
+                if (draggedButton) {
+                    draggedButton.classList.remove('is-dragging');
+                    draggedButton.removeAttribute('aria-grabbed');
+                }
+                draggedButton = null;
+                container.querySelectorAll('.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
+            });
+            document.addEventListener('click', event => {
+                if (Date.now() < suppressClickUntil && event.target.closest('#workspace-header-reorderable-actions .workspace-header-reorderable-action')) {
+                    event.preventDefault();
+                    event.stopImmediatePropagation();
+                }
+            }, true);
+        }
+
         window.onload = async () => {
+            await loadWorkspaceHeaderActionOrder();
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             document.body.style.fontFamily = savedFont;
             document.body.classList.toggle('hide-git-commit-hash', localStorage.getItem('show-git-commit-hash') === 'false');

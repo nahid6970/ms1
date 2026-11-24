@@ -2351,5 +2351,13 @@
       "notificationsEnabled": true,
       "trayNotificationsEnabled": false
     }
-  }
+  },
+  "workspace_header_action_order": [
+    "explorer-toggle-btn",
+    "rclone-btn",
+    "workspace-quick-theme-btn",
+    "workspace-duplicate-btn",
+    "workspace-add-btn",
+    "workspace-delete-btn"
+  ]
 }

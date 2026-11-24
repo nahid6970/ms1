@@ -8265,6 +8265,31 @@ def api_post_git_exclude_patterns():
             pass
     return jsonify({"status": "success"})
 
+WORKSPACE_HEADER_ACTION_ORDER = [
+    "rclone-btn", "workspace-delete-btn", "workspace-quick-theme-btn",
+    "workspace-duplicate-btn", "workspace-add-btn", "explorer-toggle-btn",
+]
+
+@app.route('/api/workspace-header-action-order', methods=['GET'])
+def api_get_workspace_header_action_order():
+    order = get_config_val("workspace_header_action_order", lambda: WORKSPACE_HEADER_ACTION_ORDER)
+    if (not isinstance(order, list) or len(order) != len(WORKSPACE_HEADER_ACTION_ORDER)
+            or not all(isinstance(item, str) for item in order)
+            or set(order) != set(WORKSPACE_HEADER_ACTION_ORDER)):
+        order = WORKSPACE_HEADER_ACTION_ORDER
+    return jsonify({"order": order})
+
+@app.route('/api/workspace-header-action-order', methods=['POST'])
+def api_post_workspace_header_action_order():
+    data = request.get_json(silent=True) or {}
+    order = data.get("order")
+    if (not isinstance(order, list) or len(order) != len(WORKSPACE_HEADER_ACTION_ORDER)
+            or not all(isinstance(item, str) for item in order)
+            or set(order) != set(WORKSPACE_HEADER_ACTION_ORDER)):
+        return jsonify({"error": "Expected an order containing each workspace header action exactly once"}), 400
+    set_config_val("workspace_header_action_order", order)
+    return jsonify({"status": "success"})
+
 @app.route('/api/fonts')
 def list_system_fonts():
     fonts = set()
