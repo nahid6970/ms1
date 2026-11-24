@@ -29,7 +29,9 @@ The cell AI editor's **Copy CLI task** button copies a stable cell reference and
 
 ## Cell Font Family
 **Access:** Right-click a cell → **Font Family**.
-**Behavior:** Search the available font list, then choose a font for one cell or the current multi-cell selection. The choice is stored in that sheet's `cellStyles` entry and saved with the sheet data. **Use column/default font** removes the cell override.
+**Column default:** The **Font** setting in the Column Form applies to every cell in that column unless a cell has its own font override.
+**Cell override:** Search the available font list, then choose a font for one cell or the current multi-cell selection. A cell font override takes priority over its column's font and is stored in that sheet's `cellStyles` entry with the rest of the cell formatting.
+**Reset:** **Use column/default font** removes the cell override, so that cell uses its column's font again (or the app's default if the column font is unset).
 **Installed fonts:** Use **Load installed system fonts** when the browser supports the Local Font Access API and grants access. Otherwise the picker offers common fonts detected by the browser; this fallback cannot enumerate every installed font.
 **Rendering:** Applies to regular and merged cell editors. Markdown previews inherit the editor's font. Existing column fonts and the Vrinda/JetBrains fallback stack remain in use when the cell override is cleared.
 
