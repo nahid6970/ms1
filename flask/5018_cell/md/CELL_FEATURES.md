@@ -27,6 +27,12 @@ The cell AI editor's **Copy CLI task** button copies a stable cell reference and
 **Batch Support:** Works with multiple selected cells.
 **Function:** `setCellRank()`.
 
+## Cell Font Family
+**Access:** Right-click a cell → **Font Family**.
+**Behavior:** Choose a font for one cell or the current multi-cell selection. The choice is stored in that sheet's `cellStyles` entry and saved with the sheet data. **Use column/default font** removes the cell override.
+**Installed fonts:** Use **Load installed system fonts** when the browser supports the Local Font Access API and grants access. Otherwise the picker offers common fonts detected by the browser; this fallback cannot enumerate every installed font.
+**Rendering:** Applies to regular and merged cell editors. Markdown previews inherit the editor's font. Existing column fonts and the Vrinda/JetBrains fallback stack remain in use when the cell override is cleared.
+
 ## Cell Color History
 **Access:** Unified Color Picker (🎨) → Right sidebar panel.
 **Tracking:** Top 10 frequently used color combinations are stored in `localStorage`.

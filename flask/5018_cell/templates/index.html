@@ -69,6 +69,10 @@
             <span>📏</span>
             <span>Font Size</span>
         </div>
+        <div class="context-menu-item" id="ctxFontFamily" onclick="showCellFontPicker()">
+            <span>🔤</span>
+            <span>Font Family</span>
+        </div>
         <div class="context-menu-item" onclick="setCellRank()">
             <span>🏆</span>
             <span>Set Sort Rank</span>
@@ -102,6 +106,20 @@
         <div class="context-menu-item" onclick="copySheetIndex()">
             <span>📋</span>
             <span>Copy Sheet Index</span>
+        </div>
+    </div>
+
+    <div id="cellFontPickerOverlay" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="cellFontPickerTitle">
+        <div class="modal-content" style="max-width:420px;">
+            <h3 id="cellFontPickerTitle">Cell Font Family</h3>
+            <p id="cellFontPickerHelp">Choose an installed font for the selected cell.</p>
+            <select id="cellFontPickerSelect" aria-label="Font family" style="width:100%;padding:9px;margin:8px 0;"></select>
+            <button id="loadSystemFontsButton" type="button" class="btn btn-secondary" onclick="loadSystemFontsForCellPicker()">Load installed system fonts</button>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+                <button id="resetCellFontButton" type="button" class="btn btn-secondary" onclick="applyCellFontFamily('')">Use column/default font</button>
+                <button id="applyCellFontButton" type="button" class="btn btn-primary" onclick="applyCellFontFamilyFromPicker()">Apply</button>
+                <button id="cancelCellFontButton" type="button" class="btn btn-secondary" onclick="closeCellFontPicker()">Cancel</button>
+            </div>
         </div>
     </div>
 

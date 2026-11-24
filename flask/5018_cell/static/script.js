@@ -11,6 +11,7 @@ if (!Array.isArray(lastEditedCells)) {
     }));
 }
 let contextMenuCell = null;
+let cellFontPickerTargets = [];
 let selectedCells = []; // Array of {row, col, td} objects for multi-cell operations
 let isSelecting = false;
 let sheetHistory = []; // Track recently visited sheets for Alt+M toggle
@@ -8548,6 +8549,105 @@ function setCellFontSize() {
     }
 }
 
+const COMMON_SYSTEM_FONTS = [
+    'Arial', 'Arial Black', 'Calibri', 'Cambria', 'Candara', 'Comic Sans MS', 'Consolas',
+    'Courier New', 'Georgia', 'Segoe UI', 'Tahoma', 'Times New Roman', 'Trebuchet MS',
+    'Verdana', 'Vrinda', 'Nirmala UI', 'Aptos', 'JetBrains Mono'
+];
+
+function getInstalledFontCandidates() {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const sample = 'mmmmmmmmmmlliWW日বাংলা';
+    const installed = COMMON_SYSTEM_FONTS.filter(font => {
+        context.font = `32px "${font}", monospace`;
+        const monospaceWidth = context.measureText(sample).width;
+        context.font = `32px "${font}", sans-serif`;
+        const sansWidth = context.measureText(sample).width;
+        return Math.abs(monospaceWidth - sansWidth) > 0.1;
+    });
+    return [...new Set(['(Column / default)', ...installed])];
+}
+
+function populateCellFontPicker(fonts, selectedFamily = '') {
+    const select = document.getElementById('cellFontPickerSelect');
+    if (!select) return;
+    select.replaceChildren();
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = '(Column / default)';
+    select.appendChild(defaultOption);
+    [...new Set(fonts)].filter(Boolean).sort((a, b) => a.localeCompare(b)).forEach(font => {
+        if (font === '(Column / default)') return;
+        const option = document.createElement('option');
+        option.value = font;
+        option.textContent = font;
+        option.style.fontFamily = `"${font}", sans-serif`;
+        select.appendChild(option);
+    });
+    select.value = selectedFamily;
+    if (select.value !== selectedFamily) select.value = '';
+}
+
+function showCellFontPicker() {
+    if (!contextMenuCell) return;
+    const { rowIndex, colIndex } = contextMenuCell;
+    const chosenCells = selectedCells.length > 0
+        ? selectedCells.map(cell => ({ row: cell.row, col: cell.col }))
+        : [{ row: rowIndex, col: colIndex }];
+    cellFontPickerTargets = chosenCells;
+    const style = getCellStyle(rowIndex, colIndex);
+    populateCellFontPicker(getInstalledFontCandidates(), style.fontFamily || '');
+    const overlay = document.getElementById('cellFontPickerOverlay');
+    overlay.style.display = 'flex';
+    document.getElementById('cellFontPickerHelp').textContent =
+        chosenCells.length > 1 ? `Choose a font for ${chosenCells.length} selected cells.` : 'Choose an installed font for the selected cell.';
+    document.getElementById('cellContextMenu').classList.remove('show');
+    document.removeEventListener('click', closeCellContextMenuOnClickOutside);
+}
+
+async function loadSystemFontsForCellPicker() {
+    const button = document.getElementById('loadSystemFontsButton');
+    const help = document.getElementById('cellFontPickerHelp');
+    if (typeof window.queryLocalFonts !== 'function') {
+        help.textContent = 'This browser does not provide installed-font access. The list contains common fonts detected on this system.';
+        return;
+    }
+    button.disabled = true;
+    try {
+        const localFonts = await window.queryLocalFonts();
+        const families = [...new Set(localFonts.map(font => font.family).filter(Boolean))];
+        const current = document.getElementById('cellFontPickerSelect').value;
+        populateCellFontPicker(families, current);
+        help.textContent = `${families.length} installed fonts loaded. Font access is provided by your browser.`;
+    } catch (error) {
+        console.warn('Could not read installed system fonts:', error);
+        help.textContent = 'Could not access installed fonts. Choose from the detected common fonts, or check your browser permission.';
+    } finally {
+        button.disabled = false;
+    }
+}
+
+function closeCellFontPicker() {
+    document.getElementById('cellFontPickerOverlay').style.display = 'none';
+    cellFontPickerTargets = [];
+    contextMenuCell = null;
+}
+
+function applyCellFontFamilyFromPicker() {
+    const family = document.getElementById('cellFontPickerSelect').value;
+    applyCellFontFamily(family);
+}
+
+function applyCellFontFamily(family) {
+    if (!cellFontPickerTargets.length) return;
+    cellFontPickerTargets.forEach(({ row, col }) => setCellStyle(row, col, 'fontFamily', family || ''));
+    saveData();
+    closeCellFontPicker();
+    renderTable();
+    showToast(family ? `Font changed to ${family}` : 'Cell font reset to column/default', 'success');
+}
+
 function clearCellFormatting() {
     if (!contextMenuCell) return;
 
@@ -11881,6 +11981,9 @@ function renderTable(preserveScroll = true) {
                 if (cellStyle.fontSize) {
                     textarea.style.fontSize = cellStyle.fontSize;
                 }
+                if (cellStyle.fontFamily) {
+                    textarea.style.fontFamily = `"${cellStyle.fontFamily.replace(/"/g, '\\"')}", 'JetBrains Mono', 'JetBrainsMono Nerd Font', Vrinda, monospace`;
+                }
 
                 // Add rank badge if cell has a rank
                 if (cellStyle.rank !== undefined) {
@@ -12043,6 +12146,9 @@ function renderTable(preserveScroll = true) {
             }
             if (cellStyle.fontSize) {
                 input.style.fontSize = cellStyle.fontSize;
+            }
+            if (cellStyle.fontFamily) {
+                input.style.fontFamily = `"${cellStyle.fontFamily.replace(/"/g, '\\"')}", 'JetBrains Mono', 'JetBrainsMono Nerd Font', Vrinda, monospace`;
             }
 
             // Add rank badge if cell has a rank
