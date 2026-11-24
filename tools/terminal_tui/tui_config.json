@@ -1,6 +1,41 @@
 {
   "projects": [
     {
+      "name": "Delta-Main",
+      "path": "C:\\Users\\nahid\\delta",
+      "category": "",
+      "pinned": true,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "rclone": {
+        "dest": "gu:/delta_main/",
+        "ignorelist": "C:/Users/nahid/delta/ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      },
+      "gitRemote": "",
+      "hideGitInit": true
+    },
+    {
       "name": "Terminal TUI",
       "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
       "pinned": false,
@@ -97,41 +132,6 @@
         },
         "transfers": "10"
       }
-    },
-    {
-      "name": "Delta-Main",
-      "path": "C:\\Users\\nahid\\delta",
-      "category": "",
-      "pinned": true,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "rclone": {
-        "dest": "gu:/delta_main/",
-        "ignorelist": "C:/Users/nahid/delta/ignorelist.txt",
-        "flags": {
-          "--fast-list": true,
-          "-P": true,
-          "--size-only": true,
-          "--track-renames": false,
-          "--dry-run": false
-        },
-        "transfers": "10"
-      },
-      "gitRemote": "",
-      "hideGitInit": true
     },
     {
       "name": "Default",
