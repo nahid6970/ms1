@@ -813,20 +813,52 @@
             opacity: .45;
         }
         .workspace-project-group-separator {
-            margin: 6px 10px 3px;
-            padding: 7px 2px 2px;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-muted);
-            font-size: .62rem;
-            font-weight: 650;
-            letter-spacing: .09em;
-            line-height: 1.2;
-            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 9px 9px 6px;
             user-select: none;
         }
+        .workspace-project-group-separator::before,
+        .workspace-project-group-separator::after {
+            content: '';
+            height: 1px;
+            flex: 1;
+            background: linear-gradient(90deg, transparent, rgba(148,163,184,.28));
+        }
+        .workspace-project-group-separator::after {
+            background: linear-gradient(90deg, rgba(148,163,184,.28), transparent);
+        }
+        .workspace-project-group-separator-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 9px;
+            border: 1px solid rgba(148,163,184,.18);
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(30,41,59,.78), rgba(15,23,42,.82));
+            color: #9aa9bd;
+            font-size: .59rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            line-height: 1.2;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .workspace-project-group-separator-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #64748b;
+            box-shadow: 0 0 6px rgba(100,116,139,.3);
+        }
         #workspace-selector-options-list .workspace-project-group-separator {
-            margin: 4px 8px 2px;
-            padding: 6px 4px 2px;
+            gap: 6px;
+            margin: 5px 8px 3px;
+        }
+        #workspace-selector-options-list .workspace-project-group-separator-label {
+            padding: 3px 7px;
+            font-size: .56rem;
         }
 
         .workspace-title-info h2 {
@@ -5681,7 +5713,15 @@ kiro-cli whoami --format json</code></pre>
             separator.className = 'workspace-project-group-separator';
             separator.setAttribute('role', 'separator');
             separator.setAttribute('aria-label', 'Inactive workspaces');
-            separator.textContent = 'Not running';
+            separator.title = 'Projects without a running session';
+            const label = document.createElement('span');
+            label.className = 'workspace-project-group-separator-label';
+            const dot = document.createElement('span');
+            dot.id = id + '-dot';
+            dot.className = 'workspace-project-group-separator-dot';
+            dot.setAttribute('aria-hidden', 'true');
+            label.append(dot, document.createTextNode('Not running'));
+            separator.appendChild(label);
             return separator;
         }
 
