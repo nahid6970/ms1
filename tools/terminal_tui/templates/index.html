@@ -809,6 +809,9 @@
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
         }
+        #workspace-selector-options-list > .workspace-selector-project-option.dragging {
+            opacity: .45;
+        }
 
         .workspace-title-info h2 {
             font-family: 'Fira Code', monospace;
@@ -11817,7 +11820,7 @@ kiro-cli whoami --format json</code></pre>
 
         // Determine drop insertion position relative to sibling elements
         function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
+            const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging), [data-project-drag-row="true"]:not(.dragging)')];
             
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
@@ -11834,9 +11837,17 @@ kiro-cli whoami --format json</code></pre>
         async function saveProjectsOrder(sourceContainerId = 'project-list-container') {
             const container = document.getElementById(sourceContainerId);
             if (!container) return;
-            const cards = [...container.querySelectorAll('.project-card')];
-            const newNames = cards.map(c => c.getAttribute('data-name'));
-            if (newNames.length === 0) return;
+            const rows = sourceContainerId === 'workspace-selector-options-list'
+                ? [...container.querySelectorAll('[data-project-drag-row="true"]')]
+                : [...container.querySelectorAll('.project-card')];
+            const visibleNames = rows.map(row => row.dataset.name || row.dataset.projectName).filter(Boolean);
+            if (visibleNames.length === 0) return;
+
+            const visibleNameSet = new Set(visibleNames);
+            const visibleOrder = [...visibleNames];
+            const newNames = projects.map(project =>
+                visibleNameSet.has(project.name) ? visibleOrder.shift() : project.name
+            );
             
             // Sync local projects array sorting
             const reordered = [];
@@ -12437,10 +12448,39 @@ kiro-cli whoami --format json</code></pre>
             updateWorkspaceSelectorDropdown(query);
         }
 
+        let workspaceSelectorReorderSuppressClickUntil = 0;
+
         function updateWorkspaceSelectorDropdown(filterText = "") {
             const listEl = document.getElementById('workspace-selector-options-list');
             if (!listEl) return;
             listEl.innerHTML = '';
+
+            if (!listEl.dataset.dragBound) {
+                listEl.dataset.dragBound = 'true';
+                listEl.addEventListener('dragover', event => {
+                    const draggingRow = listEl.querySelector('.workspace-selector-project-option.dragging');
+                    if (!draggingRow) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    const afterElement = getDragAfterElement(listEl, event.clientY);
+                    const firstNormalRow = [...listEl.querySelectorAll('[data-project-drag-row="true"]')]
+                        .find(row => row !== draggingRow && row.dataset.pinned === 'false');
+                    if (draggingRow.dataset.pinned === 'true') {
+                        if (afterElement && afterElement.dataset.pinned === 'true') listEl.insertBefore(draggingRow, afterElement);
+                        else if (firstNormalRow) listEl.insertBefore(draggingRow, firstNormalRow);
+                        else listEl.appendChild(draggingRow);
+                    } else if (afterElement && afterElement.dataset.pinned === 'false') {
+                        listEl.insertBefore(draggingRow, afterElement);
+                    } else if (firstNormalRow) {
+                        listEl.insertBefore(draggingRow, firstNormalRow);
+                    } else {
+                        listEl.appendChild(draggingRow);
+                    }
+                });
+                listEl.addEventListener('drop', event => {
+                    if (listEl.querySelector('.workspace-selector-project-option.dragging')) event.preventDefault();
+                });
+            }
             
             const savedDropdownHeight = parseInt(localStorage.getItem('workspace-dropdown-height')) || 240;
             listEl.style.maxHeight = `${savedDropdownHeight}px`;
@@ -12501,10 +12541,36 @@ kiro-cli whoami --format json</code></pre>
                     ${isCurrent ? `font-weight: 600; box-shadow: inset 3px 0 10px ${ct ? ct.accentColor + '55' : 'rgba(99,102,241,0.25)'};` : ''}
                 `;
 
+                opt.className = 'workspace-selector-project-option';
+                opt.dataset.testid = 'workspace-selector-project';
+                opt.dataset.projectName = proj.name;
+                opt.dataset.name = proj.name;
+                opt.dataset.pinned = proj.pinned ? 'true' : 'false';
+                opt.dataset.projectDragRow = 'true';
+                opt.draggable = true;
+                opt.title = 'Drag to reorder · click to switch workspace';
+                opt.ondragstart = event => {
+                    event.stopPropagation();
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', proj.name);
+                    setTimeout(() => opt.classList.add('dragging'), 0);
+                };
+                opt.ondragend = async () => {
+                    opt.classList.remove('dragging');
+                    workspaceSelectorReorderSuppressClickUntil = Date.now() + 500;
+                    await saveProjectsOrder('workspace-selector-options-list');
+                    const sidebarSearch = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
+                    renderSidebar(sidebarSearch);
+                    updateWorkspaceSelectorDropdown(document.getElementById('workspace-dropdown-search')?.value.toLowerCase().trim() || '');
+                };
                 opt.onmouseenter = () => opt.style.filter = 'brightness(1.3)';
                 opt.onmouseleave = () => opt.style.filter = '';
 
-                opt.onclick = () => {
+                opt.onclick = event => {
+                    if (Date.now() < workspaceSelectorReorderSuppressClickUntil) {
+                        event.preventDefault();
+                        return;
+                    }
                     selectProject(proj.name);
                     if (dropdownContent) dropdownContent.style.display = 'none';
                 };
