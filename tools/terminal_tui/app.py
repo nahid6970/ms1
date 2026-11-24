@@ -8742,15 +8742,30 @@ def api_save_snippets():
 
 @app.route('/api/system/ports', methods=['GET'])
 def api_get_system_ports():
-    """Get active listening ports and their associated processes on Windows"""
+    """Get active TCP listeners and UDP endpoints with their associated processes."""
     cf = 0x08000000 if sys.platform == "win32" else 0
     try:
-        # Get active TCP listening connections
+        # Get active TCP listeners and UDP endpoints.
         res_netstat = subprocess.run(
-            ["netstat", "-ano", "-p", "tcp"],
+            ["netstat", "-ano"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
             text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
         )
+
+        udp_endpoint_data = None
+        if sys.platform == "win32":
+            try:
+                res_udp = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command",
+                     "Get-NetUDPEndpoint | Select-Object LocalAddress,LocalPort,OwningProcess | ConvertTo-Json -Compress"],
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    text=True, encoding='utf-8', errors='replace', creationflags=cf, timeout=5
+                )
+                if res_udp.returncode == 0:
+                    udp_endpoint_data = json.loads(res_udp.stdout or "[]")
+            except Exception:
+                # Netstat UDP rows remain a fallback on systems without NetTCPIP cmdlets.
+                pass
         
         # Get mapping of PID -> Process Name using tasklist
         res_tasklist = subprocess.run(
@@ -8774,53 +8789,64 @@ def api_get_system_ports():
         ports_list = []
         seen = set() # Avoid duplicate entries
         
-        for line in (res_netstat.stdout or "").strip().split("\n"):
-            line = line.strip()
-            # We look for lines containing "LISTENING"
-            if "LISTENING" not in line:
+        for line in (res_netstat.stdout or "").splitlines():
+            parts = re.split(r'\s+', line.strip())
+            if len(parts) < 4:
                 continue
-            
-            # e.g. TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1044
-            parts = re.split(r'\s+', line)
-            if len(parts) >= 5:
-                proto = parts[0]
-                local_addr = parts[1]
-                state = parts[3]
-                pid = parts[4]
-                
-                # Extract port from local address (handle IPv6 bracket notation [::]:port vs 0.0.0.0:port)
-                port = ""
-                if local_addr.startswith("["):
-                    # IPv6
-                    r_idx = local_addr.rfind(":")
-                    if r_idx != -1:
-                        port = local_addr[r_idx+1:]
-                else:
-                    # IPv4
-                    r_idx = local_addr.rfind(":")
-                    if r_idx != -1:
-                        port = local_addr[r_idx+1:]
-                
-                if not port:
+            proto = parts[0].upper()
+            if proto == "TCP":
+                if len(parts) < 5 or parts[3].upper() != "LISTENING":
                     continue
-                
-                key = (port, pid)
+                local_addr, state, pid = parts[1], parts[3], parts[4]
+            elif proto == "UDP":
+                local_addr, state, pid = parts[1], "BOUND", parts[-1]
+            else:
+                continue
+
+            port_match = re.search(r':(\d+)$', local_addr)
+            if not port_match:
+                continue
+            port = port_match.group(1)
+
+            key = (proto, port, pid)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            ports_list.append({
+                "protocol": proto,
+                "localAddress": local_addr,
+                "port": int(port),
+                "pid": pid,
+                "processName": pid_to_name.get(pid, "Unknown"),
+                "state": state
+            })
+
+        if udp_endpoint_data is not None:
+            udp_endpoints = udp_endpoint_data if isinstance(udp_endpoint_data, list) else [udp_endpoint_data]
+            for endpoint in udp_endpoints:
+                if not isinstance(endpoint, dict):
+                    continue
+                port = str(endpoint.get("LocalPort") or "")
+                pid = str(endpoint.get("OwningProcess") or "")
+                local_addr = str(endpoint.get("LocalAddress") or "")
+                if not port.isdigit() or not pid.isdigit():
+                    continue
+                key = ("UDP", port, pid)
                 if key in seen:
                     continue
                 seen.add(key)
-                
-                proc_name = pid_to_name.get(pid, "Unknown")
                 ports_list.append({
-                    "protocol": proto,
-                    "localAddress": local_addr,
+                    "protocol": "UDP",
+                    "localAddress": f"{local_addr}:{port}",
                     "port": int(port),
                     "pid": pid,
-                    "processName": proc_name,
-                    "state": state
+                    "processName": pid_to_name.get(pid, "Unknown"),
+                    "state": "BOUND"
                 })
                 
         # Sort ports by port number
-        ports_list.sort(key=lambda x: x["port"])
+        ports_list.sort(key=lambda x: (x["port"], x["protocol"]))
         return jsonify({"ports": ports_list, "starred": load_starred_ports()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
