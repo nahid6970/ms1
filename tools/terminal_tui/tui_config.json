@@ -2341,15 +2341,15 @@
       "intervalMinutes": 60,
       "concurrency": 1,
       "manualCheckAll": true,
-      "notificationsEnabled": true,
-      "trayNotificationsEnabled": false
+      "notificationsEnabled": false,
+      "trayNotificationsEnabled": true
     },
     "rclone": {
       "enabled": true,
       "intervalMinutes": 120,
       "concurrency": 0,
-      "notificationsEnabled": true,
-      "trayNotificationsEnabled": false
+      "notificationsEnabled": false,
+      "trayNotificationsEnabled": true
     }
   },
   "workspace_header_action_order": [
