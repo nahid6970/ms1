@@ -2354,6 +2354,7 @@
   },
   "workspace_header_action_order": [
     "explorer-toggle-btn",
+    "active-project-path-btn",
     "rclone-btn",
     "workspace-quick-theme-btn",
     "workspace-duplicate-btn",

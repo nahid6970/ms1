@@ -8265,14 +8265,22 @@ def api_post_git_exclude_patterns():
             pass
     return jsonify({"status": "success"})
 
-WORKSPACE_HEADER_ACTION_ORDER = [
+LEGACY_WORKSPACE_HEADER_ACTION_ORDER = [
     "rclone-btn", "workspace-delete-btn", "workspace-quick-theme-btn",
     "workspace-duplicate-btn", "workspace-add-btn", "explorer-toggle-btn",
+]
+WORKSPACE_HEADER_ACTION_ORDER = [
+    *LEGACY_WORKSPACE_HEADER_ACTION_ORDER, "active-project-path-btn",
 ]
 
 @app.route('/api/workspace-header-action-order', methods=['GET'])
 def api_get_workspace_header_action_order():
     order = get_config_val("workspace_header_action_order", lambda: WORKSPACE_HEADER_ACTION_ORDER)
+    if (isinstance(order, list) and len(order) == len(LEGACY_WORKSPACE_HEADER_ACTION_ORDER)
+            and all(isinstance(item, str) for item in order)
+            and set(order) == set(LEGACY_WORKSPACE_HEADER_ACTION_ORDER)):
+        order = [*order, "active-project-path-btn"]
+        set_config_val("workspace_header_action_order", order)
     if (not isinstance(order, list) or len(order) != len(WORKSPACE_HEADER_ACTION_ORDER)
             or not all(isinstance(item, str) for item in order)
             or set(order) != set(WORKSPACE_HEADER_ACTION_ORDER)):

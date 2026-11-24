@@ -2315,7 +2315,7 @@
                     </svg>
                     <span id="active-project-branch-text">main</span>
                 </div>
-                <button class="action-btn" id="active-project-path-btn" title="Open in Explorer" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="openProjectInExplorer()">
+                <button class="action-btn workspace-header-reorderable-action" draggable="true" id="active-project-path-btn" title="Open in Explorer" style="display: none; align-items: center; justify-content: center; width: 34px; height: 34px; background-color: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-primary); transition: all 0.2s; padding: 0;" onclick="openProjectInExplorer()">
                     📂
                 </button>
                 <!-- Quick Path Bar -->
@@ -24270,7 +24270,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         const WORKSPACE_HEADER_ACTION_IDS = [
             'rclone-btn', 'workspace-delete-btn', 'workspace-quick-theme-btn',
-            'workspace-duplicate-btn', 'workspace-add-btn', 'explorer-toggle-btn'
+            'workspace-duplicate-btn', 'workspace-add-btn', 'explorer-toggle-btn',
+            'active-project-path-btn'
         ];
 
         let workspaceHeaderOrderSaveQueue = Promise.resolve();
