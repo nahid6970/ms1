@@ -2319,7 +2319,7 @@
   "project_auto_checks": {
     "github": {
       "enabled": true,
-      "intervalMinutes": 1,
+      "intervalMinutes": 60,
       "concurrency": 1,
       "manualCheckAll": true,
       "notificationsEnabled": false,
@@ -2327,7 +2327,7 @@
     },
     "rclone": {
       "enabled": true,
-      "intervalMinutes": 1,
+      "intervalMinutes": 60,
       "concurrency": 0,
       "notificationsEnabled": false,
       "trayNotificationsEnabled": true
