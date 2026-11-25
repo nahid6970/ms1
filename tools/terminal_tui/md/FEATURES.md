@@ -337,6 +337,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Chat history with re-prompt
 - Tool use: shell commands, file read/write, directory listing
 - Multiple API accounts per provider with label selector
+- **Encrypted API account backup:** Import `.enc` or `.json` backups through the browser file picker, including on Android/Termux. AES-GCM decryption and merge remain client-side; the accounts modal scrolls on small screens.
 - **Model Batch Tester** — sends a test prompt to every model of a provider sequentially:
   - Auto-hides failed models (adds to hidden list)
   - Auto-classifies speed from elapsed time (< 3 s Fast, 3–8 s Medium, ≥ 8 s Slow)

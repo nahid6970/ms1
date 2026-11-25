@@ -3952,7 +3952,7 @@
 
     <!-- AI Accounts Manager Modal -->
     <div id="ai-accounts-modal" class="modal-overlay" style="z-index:3000;">
-        <div class="modal-content" style="width: 480px; max-width: 90vw; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; max-height: 85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="modal-content" style="width: 480px; max-width: 95vw; max-height: 85vh; max-height: 85dvh; box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--bg-sidebar); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div class="modal-header" style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
                 <h3 style="margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">API Accounts Manager</h3>
                 <button type="button" class="btn btn-secondary" onclick="closeAIAccountsManager()" style="padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; cursor: pointer; height: 28px; line-height: 1; border: 1px solid var(--border-color); background: none; color: var(--text-secondary);">✕</button>
@@ -20717,26 +20717,14 @@ Always wrap your **entire response** in a single markdown code block.`;
         }
 
         async function triggerImportAIAccounts() {
-            try {
-                const response = await fetch('/api/select-ai-accounts-backup', {
-                    method: 'POST',
-                });
-                const responseText = await response.text();
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (_) {
-                    throw new Error('The app server does not have the backup picker endpoint loaded. Restart the app, refresh this page, and try again.');
-                }
-                if (!response.ok) throw new Error(result.error || 'Could not open the backup file picker.');
-                if (result.cancelled) return;
-                const binary = atob(result.contents);
-                const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-                await importAIAccountsText(new TextDecoder().decode(bytes));
-            } catch (err) {
-                console.error('Could not import AI accounts backup:', err);
-                alert('Could not open or read the backup file: ' + err.message);
+            const fileInput = document.getElementById('ai-acc-import-file');
+            if (!fileInput) {
+                alert('The backup file input is unavailable. Refresh the page and try again.');
+                return;
             }
+            // Use the browser's file picker so import works on Android/Termux
+            // as well as desktop browsers without a server-side native dialog.
+            fileInput.click();
         }
 
         async function importAIAccounts(e) {
@@ -20747,6 +20735,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             reader.onload = async function(evt) {
                 await importAIAccountsText(evt.target.result);
             };
+            reader.onerror = () => alert('Could not read the selected backup file.');
             reader.readAsText(file);
             e.target.value = '';
         }

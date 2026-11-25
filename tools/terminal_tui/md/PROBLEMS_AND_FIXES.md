@@ -2,6 +2,12 @@
 
 ---
 
+## [2026-11-26] - API Account Backup Import Failed on Android
+**Problem:** Importing an encrypted API accounts backup in Chrome on Android returned an error saying the backup picker endpoint was unavailable.
+**Root Cause:** The import button called a server-side Tkinter file picker, which is only available on the desktop host and cannot open Android's local file picker.
+**Solution:** Open the hidden browser file input directly from the Import button and read the selected `.enc` or `.json` file with `FileReader`. Keep decryption and account merging in the browser. Constrain the accounts modal to the mobile viewport and allow it to scroll.
+**Files Modified:** `templates/index.html`
+
 ## [2026-11-25] - Termux Terminal Failed to Start with an Unbound `shutil`
 **Problem:** Selecting a workspace in Termux returned HTTP 500 and did not activate the terminal.
 **Root Cause:** `TerminalSession.__init__` conditionally imported `shutil` inside a backup-migration branch. Python treated `shutil` as a local throughout the function, so the Termux shell lookup with `shutil.which()` failed when the migration branch had not run.

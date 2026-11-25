@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-26] - Fix Mobile API Account Backup Import
+
+- Use the browser file picker to import encrypted API account backups on Android and desktop instead of requiring a server-side native file picker.
+- Make the API Accounts Manager scroll within small mobile viewports.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
+
 ## [2026-11-25] - Repair Termux Workspace Settings and Terminal Startup
 
 - Resolve relative Android workspace paths from Termux `$HOME`, preserve saved Rclone Android source values in the settings form, and reload `tui_config.json` when it changes outside the running process.
