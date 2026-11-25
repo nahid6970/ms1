@@ -1929,6 +1929,13 @@
         .rclone-flag-chk:has(input:focus-visible) { outline: 2px solid #fb923c; outline-offset: 2px; }
         .rclone-flag-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:10px; }
         @media (max-width: 480px) { .rclone-flag-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        .rclone-transfers-control { display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:240px; padding:7px 9px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-main); }
+        .rclone-transfers-label { color:var(--text-secondary); font-size:0.74rem; font-family:'Fira Code',monospace; }
+        .rclone-transfers-stepper { display:flex; align-items:center; gap:5px; }
+        .rclone-transfers-stepper button { width:30px; height:30px; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-sidebar); color:var(--text-primary); font-size:1rem; cursor:pointer; touch-action:manipulation; }
+        .rclone-transfers-stepper button:hover { border-color:#fb923c; color:#fb923c; }
+        .rclone-transfers-stepper input { width:48px; height:30px; box-sizing:border-box; border:1px solid var(--border-color); border-radius:5px; background:var(--bg-main); color:var(--text-primary); font-size:0.82rem; font-family:'Fira Code',monospace; text-align:center; outline:none; }
+        .rclone-transfers-stepper input:focus { border-color:#fb923c; }
         .rclone-action-btn {
             display: flex;
             align-items: center;
@@ -2921,11 +2928,14 @@
                     <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-dry-run" value="--dry-run" onchange="rcloneSaveSettings()"> <span>Dry Run</span></label>
                     <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-drive-acknowledge-abuse" value="--drive-acknowledge-abuse" onchange="rcloneSaveSettings()"> <span>Acknowledge Abuse</span></label>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:0.78rem; color:var(--text-secondary);">--transfers</span>
-                    <input id="rcflag-transfers" type="number" min="1" max="64" value="10"
-                        style="width:60px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); padding:4px 8px; font-size:0.78rem; font-family:'Fira Code',monospace; outline:none; transition:border-color 0.2s; text-align:center;"
-                        onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'; rcloneSaveSettings()">
+                <div class="rclone-transfers-control">
+                    <span class="rclone-transfers-label">Transfers</span>
+                    <div class="rclone-transfers-stepper">
+                        <button type="button" aria-label="Decrease transfers" onclick="rcloneAdjustTransfers(-1)">−</button>
+                        <input id="rcflag-transfers" type="number" min="1" max="64" value="10" aria-label="Number of transfers"
+                            onchange="rcloneSaveSettings()" onblur="rcloneSaveSettings()">
+                        <button type="button" aria-label="Increase transfers" onclick="rcloneAdjustTransfers(1)">+</button>
+                    </div>
                 </div>
             </div>
 
@@ -16933,6 +16943,13 @@ kiro-cli whoami --format json</code></pre>
 
         // ── Save settings to backend (debounced) ──────────────────────────────
         let _rcloneSaveTimer = null;
+        function rcloneAdjustTransfers(delta) {
+            const input = document.getElementById('rcflag-transfers');
+            const current = parseInt(input.value, 10);
+            input.value = Math.min(64, Math.max(1, (Number.isFinite(current) ? current : 10) + delta));
+            rcloneSaveSettings();
+        }
+
         function rcloneSaveSettings() {
             clearTimeout(_rcloneSaveTimer);
             _rcloneSaveTimer = setTimeout(async () => {
