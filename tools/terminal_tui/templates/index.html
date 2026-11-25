@@ -2828,6 +2828,7 @@
         </div>
 
         <div class="sbpop-body" style="display:flex; flex:1 1 auto; flex-direction:column; gap:12px; padding:14px 16px; min-height:0; max-height:calc(88vh - 150px); max-height:calc(88dvh - 150px); overflow-y:auto; overflow-x:hidden; overscroll-behavior:contain; -webkit-overflow-scrolling:touch;">
+            <div id="rclone-settings-status" role="status" style="display:none; padding:8px 10px; border:1px solid rgba(251,191,36,.35); border-radius:7px; background:rgba(251,191,36,.08); color:#fbbf24; font-size:.75rem;"></div>
 
             <!-- Source -->
             <div>
@@ -16797,26 +16798,53 @@ kiro-cli whoami --format json</code></pre>
         // ── Load settings from backend ────────────────────────────────────────
         async function rcloneLoadSettings() {
             const project = activeProject;
-            if (!project) return;
+            const statusEl = document.getElementById('rclone-settings-status');
+            const projectLabel = document.getElementById('rclone-project-label');
+            const srcEl = document.getElementById('rclone-src');
+            const androidSrcEl = document.getElementById('rclone-android-src');
+            const dstEl = document.getElementById('rclone-dst');
+            const clearSettings = () => {
+                srcEl.value = '';
+                androidSrcEl.value = '';
+                dstEl.value = '';
+                document.getElementById('rclone-ignorelist').value = '';
+                document.getElementById('rcflag-fast-list').checked = false;
+                document.getElementById('rcflag-progress').checked = false;
+                document.getElementById('rcflag-size-only').checked = false;
+                document.getElementById('rcflag-track-renames').checked = false;
+                document.getElementById('rcflag-dry-run').checked = false;
+                document.getElementById('rcflag-transfers').value = '10';
+                rcloneSetPullOnlyEnabled(false);
+                rcloneApplyDirectionMode();
+                rcloneUpdateButtonState();
+            };
+
+            if (!project) {
+                clearSettings();
+                projectLabel.textContent = 'No active workspace';
+                statusEl.textContent = 'Select a workspace to load its Rclone settings.';
+                statusEl.style.display = 'block';
+                return;
+            }
 
             // Fill source from current workspace path
             const proj = projects ? projects.find(p => p.name === project) : null;
-            const srcEl = document.getElementById('rclone-src');
             if (proj && proj.path) srcEl.value = proj.path;
             else srcEl.value = '';
 
-            document.getElementById('rclone-project-label').textContent = project;
+            projectLabel.textContent = project;
+            statusEl.style.display = 'none';
 
             try {
                 const res = await fetch(`/api/project/${encodeURIComponent(project)}/rclone/settings`);
-                if (!res.ok) return;
+                if (!res.ok) throw new Error(`Could not load settings for ${project}.`);
                 const s = await res.json();
                 if (activeProject !== project) return;
 
-                document.getElementById('rclone-android-src').value = s.androidSource || proj?.androidPath || (proj?.runtimePlatform !== 'windows' ? proj?.path : '') || '';
+                androidSrcEl.value = s.androidSource || proj?.androidPath || (proj?.runtimePlatform !== 'windows' ? proj?.path : '') || '';
                 rcloneSetPullOnlyEnabled(!!s.androidPullOnly);
                 rcloneApplyDirectionMode();
-                document.getElementById('rclone-dst').value = s.dest || '';
+                dstEl.value = s.dest || '';
                 rcloneUpdateButtonState();
                 document.getElementById('rclone-ignorelist').value = s.ignorelist || '';
 
@@ -16827,7 +16855,12 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('rcflag-track-renames').checked = !!flags['--track-renames'];
                 document.getElementById('rcflag-dry-run').checked       = !!flags['--dry-run'];
                 document.getElementById('rcflag-transfers').value       = s.transfers || '10';
-            } catch (_) {}
+            } catch (error) {
+                if (activeProject !== project) return;
+                clearSettings();
+                statusEl.textContent = error.message || `Could not load settings for ${project}.`;
+                statusEl.style.display = 'block';
+            }
         }
 
         async function rcloneRefreshDestinationState(project = activeProject) {
