@@ -7869,9 +7869,10 @@ def api_rclone_get_settings(project):
     if proj is None:
         return jsonify({'error': 'Project not found'}), 404
     rclone = proj.get('rclone', {})
-    android_source = rclone.get('androidSource', proj.get('androidPath', ''))
-    if os.name != 'nt' and not os.path.isdir(os.path.expanduser(str(android_source or ''))):
-        android_source = project_path_for_runtime(proj)
+    # Return the saved value to the settings form even when it is not a valid
+    # directory on this device. The sync path resolver independently falls
+    # back to the workspace path when the configured Android source is absent.
+    android_source = rclone.get('androidSource') or proj.get('androidPath', '')
     result = {
         'dest': rclone.get('dest', ''),
         'androidSource': android_source,
