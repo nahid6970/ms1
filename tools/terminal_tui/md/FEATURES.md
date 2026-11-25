@@ -75,8 +75,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Workspace Management
 **Status:** ✅ Complete
-**Description:** Multi-workspace terminal sessions. Each workspace = project folder + persistent PowerShell session with custom profile.
-**Implementation:** `projects.json` stores all workspace metadata. `Project_data/<name>/profile.ps1` is auto-generated per workspace.
+**Description:** Multi-workspace terminal sessions. Each workspace has a persistent terminal session: PowerShell on Windows and a bash/sh PTY on Termux. Workspace paths can have separate Windows and Android values.
+**Implementation:** `tui_config.json` stores workspace metadata. On Termux, relative Android paths resolve from `$HOME`, while the Windows path remains saved separately. `Project_data/<name>/profile.ps1` is generated for Windows PowerShell sessions.
 **Files Involved:** `app.py` (routes: `/api/projects/*`), `templates/index.html` (sidebar UI)
 **Usage:** Click `+` in sidebar → enter name + folder path → click workspace card to spawn terminal.
 
@@ -86,12 +86,14 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 **Closing the last terminal tab:** Closing the last pane stops that workspace session, clears its saved tab layout, and returns to Home. Home selection is persisted so a page refresh does not reopen the previously active workspace.
 
+**Termux compatibility:** Termux workspaces use their configured `androidPath` (or Android Rclone source fallback) while retaining their Windows path for PC use. The Rclone dialog saves an Android source and a per-workspace pull-only toggle; when enabled, Termux rejects source-to-destination syncs. Saved Android source paths remain visible even when invalid so they can be corrected. The app reloads `tui_config.json` after an external file change.
+
 ### Workspace List Filters
 **Status:** ✅ Complete
 **Description:** A synchronized connected three-option icon control filters projects in both the sidebar and workspace dropdown. The provided All layers, GitHub, and Rclone SVGs are embedded inline; each icon can be selected directly and includes an accessible name and tooltip.
 **Implementation:** `templates/index.html` stores the selected filter in `localStorage` and applies it to both project renderers. `app.py` includes a `hasRcloneDestination` flag in the projects response; successful Rclone destination saves update the current client-side project data immediately.
 
-**Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
+**Per-workspace Git remote recovery:** Save a Git remote URL under Customize Workspace. The missing-folder dialog can clone that remote into the saved workspace path, including an existing empty folder. The same settings action runs `git fetch --prune origin` when the folder already contains a Git repository; this updates remote refs without changing the checked-out files. The URL is stored in the workspace record in `tui_config.json`.
 **Git initialization remote:** When Git initialization is given a GitHub username and repository name, the generated URL is saved as the workspace's `gitRemote`, so Customize Workspace and the GitHub Projects manager reflect it immediately.
 
 ### GitHub Projects Manager
@@ -117,6 +119,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Implementation:** `templates/index.html` builds `rclone check` or directional `rclone sync` commands; `app.py` provides workspace scanning, Gemini ignore suggestions, a structured Rclone check route, and a newline-delimited JSON sync stream for the projects modal. The subprocess monitor includes a separate Rclone Projects modal with per-project Select, Check, and SRC → DST actions plus a header Check difference action for all configured workspaces. Results include difference, error, matching, and missing counts with expandable file-level details.
 **Usage:** Open the Rclone button in the workspace header (before Delete), set Destination and optional ignorelist, then use Check, SRC → DST, or DST → SRC. Press Tab in Destination to browse local folders and configured Rclone remotes; the browser starts at the entered path or lists available drives/remotes when empty. Configure button colors in Global Settings → General. Ignorelist patterns are read from the configured file and passed as individual `--exclude` flags.
 **AI ignore suggestions:** The ✨ action scans folder names at all depths and immediate file/subfolder counts, plus up to 40 top-level filenames, up to 200 extensions, and up to 12,000 characters of `.gitignore`. Known heavy and hidden folders are reported as pruned and not recursively scanned. The AI receives at most 500 directory records (favoring folders with more immediate files), never individual file paths. Suggestions appear in the preview before the user saves them. The modal expands to fit the preview when possible; on smaller screens, its content scrolls while the action buttons stay visible. The Gemini model is selectable and remembered locally. An absolute ignorelist path outside the workspace falls back to `<workspace>/ignorelist.txt` and updates the field.
+**Termux settings:** Android source paths and pull-only mode are stored per workspace. The backend uses a valid configured Android source for Rclone and falls back to the workspace's Android path if that source is unavailable. Pull-only mode blocks source-to-destination syncs on POSIX/Termux.
 **Files Involved:** `app.py` (`/api/project/<project>/rclone/check`, `/api/project/<project>/rclone/sync-stream`, `/api/project/<project>/rclone/scan`, `/api/project/<project>/rclone/suggest-ignore`, `/api/rclone/destination-directories`, `/api/local/directories`, `/api/local/directories/create`), `templates/index.html` (Rclone project manager, sync modal, color settings, and local folder pickers)
 
 ---

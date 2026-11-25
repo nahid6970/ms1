@@ -11,15 +11,15 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 **Stack:**
 - **Backend**: Python Flask + Flask-SocketIO
 - **Frontend**: Vanilla JavaScript + Xterm.js
-- **Terminal**: WinPTY for Windows PowerShell spawning
+- **Terminal**: WinPTY for Windows PowerShell spawning; `ptyprocess`-backed PTYs with bash/sh on Termux
 - **Real-time**: Socket.IO for bidirectional terminal I/O
-- **Storage**: JSON file-based config + localStorage for UI state
+- **Storage**: JSON file-based config + localStorage for UI state; config cache reloads when the file changes on disk
 
 **Core Components:**
 1. `app.py` - Flask server with REST API and WebSocket handlers
 2. `templates/index.html` - Single-page app with terminal UI
-3. WinPTY - Creates persistent PowerShell sessions per workspace
-4. Custom PowerShell profiles per workspace (stored in `Project_data/`)
+3. WinPTY on Windows or the POSIX PTY adapter on Termux - Creates persistent shell sessions per workspace
+4. Custom PowerShell profiles per workspace on Windows (stored in `Project_data/`)
 
 ---
 
@@ -34,6 +34,7 @@ A web-based terminal dashboard application that provides multiple persistent Pow
   - Project-specific aliases and environment variables
   - Per-project command history
 - **Categories**: Group workspaces by category
+- **Platform-specific paths**: A workspace can store a Windows path and an Android path. Termux resolves relative Android paths from `$HOME`, uses the Android path at runtime, and preserves the Windows path in the shared config.
 - **Pin/unpin**: Keep important workspaces at the top
 - **Drag-to-reorder**: Custom ordering persists in `projects.json`
 - **Workspace filters**: A synchronized connected three-icon control filters the sidebar and workspace dropdown; the All layers, GitHub, and Rclone SVG icons are directly clickable. GitHub uses saved `gitRemote` URLs containing `github.com`, and Rclone uses a saved destination.
@@ -43,10 +44,11 @@ A web-based terminal dashboard application that provides multiple persistent Pow
 ### 1.1 Rclone Workspace Sync
 - Frontend builds `rclone check` and directional `rclone sync` commands for the active workspace and starts them in a new terminal tab.
 - The subprocess monitor includes a separate Rclone Projects modal listing workspaces with saved destinations. Its header Check difference action checks all eligible workspaces, and Sync all runs their SRC → DST syncs sequentially with overall project, byte, and average-speed progress. Clicking another row's SRC → DST while a sync runs appends that project to the same queue. Project cards show each sync's queued, active, completed, or failed state, its individual progress bar, and recent file events. Each row can also be checked individually or selected into the terminal. `POST /api/project/<project>/rclone/check` runs `rclone check --fast-list --size-only -v` with the saved exclude list and returns complete categorized file details; a searchable popup in the modal displays the full result when the card preview is truncated. `POST /api/project/<project>/rclone/sync-stream` runs the saved directional sync and streams newline-delimited JSON output, including one-second stats, to the modal.
-- The centered Rclone modal sizes to its contents, grows when the ignore suggestion preview appears, and keeps the action footer visible while the content area scrolls.
+- The centered Rclone modal sizes to its contents, grows when the ignore suggestion preview appears, and keeps the action footer visible while the content area scrolls. On small Android viewports, its fields scroll within the modal; when no workspace is active or settings fail to load, it clears stale values and displays a status message.
 - The header button reflects the active workspace's saved destination. Its configured foreground and background colors support presets and custom colors stored in browser local storage.
 - Pressing Tab in the destination field opens a combined local/Rclone folder browser. Local browsing uses the filesystem; remote browsing lists only configured Rclone remotes through `GET /api/rclone/destination-directories`.
 - Project-specific destination, flags, transfer count, and ignorelist path are stored with workspace settings.
+- Per-workspace `androidSource` and `androidPullOnly` values are stored with Rclone settings. Termux returns the configured Android source to the form even when the path is invalid; actual sync resolves to that source only when it exists, otherwise it falls back to the workspace Android path. Pull-only mode blocks source-to-destination sync on POSIX.
 - The AI ignore suggester calls `GET /api/project/<project>/rclone/scan` to collect a bounded directory inventory and then `POST /api/project/<project>/rclone/suggest-ignore` to call Gemini with the selected model.
 - The Git modal's AI `.gitignore` suggester scans all workspace paths locally (skipping `.git` internals and not following symlinks), sends a bounded inventory plus any existing root `.gitignore` to Gemini, and opens an editable proposal. The prompt requires concise, evidence-based rules rather than generic ecosystem templates. `POST /api/project/<project>/git/suggest-ignore` generates it; `POST /api/project/<project>/git/gitignore` saves the reviewed file atomically at the workspace root and invalidates cached Git status.
 - The Git modal Rescue panel uses `GET/POST /api/project/<project>/git/rescue` to inspect repository health and perform confirmed index/lock-file repairs. Index rebuild backs up the damaged index and refuses to run during active Git processes or interrupted operations; lock files are moved into `.git/git-ref-rescue-backups` only when no Git process is active. Neither repair rewrites working files.

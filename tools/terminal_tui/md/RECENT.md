@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-25] - Repair Termux Workspace Settings and Terminal Startup
+
+- Resolve relative Android workspace paths from Termux `$HOME`, preserve saved Rclone Android source values in the settings form, and reload `tui_config.json` when it changes outside the running process.
+- Add Termux Rclone pull-only enforcement and make the mobile Rclone and workspace dialogs scroll within the available viewport. Empty workspace folders can be restored by cloning their configured Git remote.
+- Report workspace activation and Git restore failures in the UI; return the terminal startup exception from the session API. Remove a conditional local `shutil` import that broke POSIX shell startup with `UnboundLocalError`.
+
+**Files Modified:** `app.py`, `templates/index.html`, `termux/os.sh`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
+
 ## [2026-11-25] - Open Project Check Tray Clicks in the App Window
 
 - Focus an existing Workspaces Chrome window on tray clicks, launching the shortcut only if no app window is open.

@@ -2,6 +2,24 @@
 
 ---
 
+## [2026-11-25] - Termux Terminal Failed to Start with an Unbound `shutil`
+**Problem:** Selecting a workspace in Termux returned HTTP 500 and did not activate the terminal.
+**Root Cause:** `TerminalSession.__init__` conditionally imported `shutil` inside a backup-migration branch. Python treated `shutil` as a local throughout the function, so the Termux shell lookup with `shutil.which()` failed when the migration branch had not run.
+**Solution:** Use the existing module-level `shutil` import. The session API now returns the startup exception as JSON and prints the traceback; the browser displays the server error when terminal startup fails.
+**Files Modified:** `app.py`, `templates/index.html`
+
+## [2026-11-25] - Termux Did Not Show Synced Rclone Settings
+**Problem:** The PC showed an Android source and pull-only mode, while Termux showed an empty source and an off toggle after config sync.
+**Root Cause:** The server cached `tui_config.json` for its lifetime, so external file updates were invisible until restart. The settings endpoint also replaced a saved Android source with a runtime fallback when that path did not exist, hiding the configured value.
+**Solution:** Compare the config file signature before reads and reload the in-memory cache when the file changes. Return the saved Android source to the settings form even when invalid; Rclone runtime resolution still falls back to the workspace Android path when needed. Relative Android workspace paths resolve from Termux `$HOME`.
+**Files Modified:** `app.py`
+
+## [2026-11-25] - Restoring a Recreated Empty Workspace Failed
+**Problem:** Git remote restore failed after a missing workspace folder had been recreated as an empty directory. Activation and restore errors were difficult to see on mobile.
+**Root Cause:** The default Git restore action cloned when the path was missing but treated an existing empty folder as a non-repository. The missing-folder restore UI suppressed errors, and terminal startup failures only reached the browser console or a generic HTTP status.
+**Solution:** Allow the default restore action to clone into an empty folder, show restore errors in the dialog, and display workspace activation/session startup errors in the UI. Rclone settings now clear stale values and show a status when no workspace is active or loading fails.
+**Files Modified:** `app.py`, `templates/index.html`
+
 ## [2026-11-25] - Project Check Tray Click Opened the Wrong Window
 **Problem:** Clicking a GitHub or Rclone tray icon opened the default browser at the app home page instead of the installed standalone web app and the relevant project-check window.
 **Root Cause:** The tray handler used `webbrowser.open()` with the generic app URL and did not identify which manager should open.
