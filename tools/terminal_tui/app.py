@@ -1377,7 +1377,11 @@ def _api_project_git_sync_remote(project):
                 creationflags=cf, timeout=600
             )
             action = "cloned"
-        elif not os.path.exists(path):
+        elif not os.path.exists(path) or (
+            requested_action not in ("fetch", "pull", "status")
+            and os.path.isdir(path)
+            and is_empty_directory(path)
+        ):
             if requested_action in ("fetch", "pull", "status"):
                 return jsonify({"error": "The workspace folder is missing. Use Clone to restore it."}), 400
             os.makedirs(os.path.dirname(path), exist_ok=True)

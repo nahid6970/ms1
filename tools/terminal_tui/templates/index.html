@@ -6125,6 +6125,7 @@ kiro-cli whoami --format json</code></pre>
                         handleSearch();
                     }
                     console.error("Error setting up session:", err);
+                    alert(err.message || `Could not activate workspace ${projectName}.`);
                     return false;
                 }
             } finally {
@@ -9779,6 +9780,7 @@ kiro-cli whoami --format json</code></pre>
                                         font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #f87171;
                                         word-break: break-all; border: 1px solid var(--border-color);">${missingPath}</div>
                         </div>
+                        <div id="missing-path-dialog-error" role="alert" style="display:none;padding:8px 10px;border:1px solid rgba(248,113,113,.35);border-radius:7px;background:rgba(248,113,113,.08);color:#fca5a5;font-size:.75rem;line-height:1.45;word-break:break-word;"></div>
                         <div id="missing-path-dialog-actions" style="display: flex; gap: 10px; margin-top: 4px; justify-content:flex-end;">
                             <button id="mpd-restore" type="button" class="git-remote-btn" aria-label="Restore workspace folder from Git" title="Restore the workspace folder from its Git remote" style="flex: 0 0 42px; width:42px; height:42px; padding:0;">
                                 <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4m-3 6v3h14v-3"/></svg>
@@ -9821,7 +9823,15 @@ kiro-cli whoami --format json</code></pre>
                     btn.title = 'Restoring workspace from Git…';
                     btn.setAttribute('aria-label', 'Restoring workspace from Git');
                     btn.disabled = true;
-                    const restored = await syncWorkspaceGitRemote(projectName, btn, { quiet: true, iconOnly: true });
+                    const restored = await syncWorkspaceGitRemote(projectName, btn, {
+                        quiet: true,
+                        iconOnly: true,
+                        onError: (message) => {
+                            const error = document.getElementById('missing-path-dialog-error');
+                            error.textContent = message;
+                            error.style.display = 'block';
+                        }
+                    });
                     if (restored) close('recreated');
                     else {
                         btn.innerHTML = originalMarkup;
@@ -11706,7 +11716,8 @@ kiro-cli whoami --format json</code></pre>
                 if (!options.quiet) alert(data.status === 'cloned' ? `Workspace restored at ${data.path}` : `Fetched remote changes for ${projectName}.`);
                 return true;
             } catch (err) {
-                if (!options.quiet) alert(err.message || 'Could not fetch or restore this workspace.');
+                if (typeof options.onError === 'function') options.onError(err.message || 'Could not fetch or restore this workspace.');
+                else if (!options.quiet) alert(err.message || 'Could not fetch or restore this workspace.');
                 return false;
             } finally {
                 if (button && button.isConnected) { button.disabled = false; button.innerHTML = originalMarkup; }
