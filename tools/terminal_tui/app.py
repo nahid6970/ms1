@@ -760,10 +760,12 @@ def load_projects_config():
         # All workspace handlers use `path` as the active local path. On
         # Termux, expose the Android location there while retaining the saved
         # Windows path privately so existing handlers continue to work.
-        if os.name != "nt" and p.get("androidPath"):
-            p["androidPath"] = os.path.abspath(os.path.expanduser(str(p["androidPath"])))
-            p["_configuredWindowsPath"] = p.get("path") or ""
-            p["path"] = p["androidPath"]
+        if os.name != "nt":
+            configured_android_path = p.get("androidPath") or (p.get("rclone") or {}).get("androidSource")
+            if configured_android_path:
+                p["androidPath"] = os.path.abspath(os.path.expanduser(str(configured_android_path)))
+                p["_configuredWindowsPath"] = p.get("path") or ""
+                p["path"] = p["androidPath"]
     return projs
 
 def save_projects_config(projects):
@@ -779,7 +781,8 @@ def project_path_for_runtime(project):
     """Choose the workspace location for the OS running this app instance."""
     if os.name == "nt":
         return str(project.get("path") or "")
-    return str(project.get("androidPath") or project.get("path") or "")
+    rclone = project.get("rclone") or {}
+    return str(project.get("androidPath") or rclone.get("androidSource") or project.get("path") or "")
 
 def is_empty_directory(path):
     try:
@@ -7849,6 +7852,15 @@ def api_select_ai_accounts_backup():
 
 DEFAULT_IGNORELIST = r"C:\@delta\ms1\scripts\rclone\rclone_status\ignorelist.txt"
 
+def _rclone_source_for_runtime(project):
+    """Resolve this workspace's usable Rclone source on the current device."""
+    settings = project.get('rclone') or {}
+    if os.name != 'nt':
+        android_source = str(settings.get('androidSource') or '').strip()
+        if android_source and os.path.isdir(os.path.expanduser(android_source)):
+            return android_source
+    return project_path_for_runtime(project)
+
 @app.route('/api/project/<project>/rclone/settings', methods=['GET'])
 def api_rclone_get_settings(project):
     """Return saved rclone settings for this project (destination, flags, ignorelist)."""
@@ -7857,9 +7869,12 @@ def api_rclone_get_settings(project):
     if proj is None:
         return jsonify({'error': 'Project not found'}), 404
     rclone = proj.get('rclone', {})
+    android_source = rclone.get('androidSource', proj.get('androidPath', ''))
+    if os.name != 'nt' and not os.path.isdir(os.path.expanduser(str(android_source or ''))):
+        android_source = project_path_for_runtime(proj)
     result = {
         'dest': rclone.get('dest', ''),
-        'androidSource': rclone.get('androidSource', proj.get('androidPath', '')),
+        'androidSource': android_source,
         'androidPullOnly': bool(rclone.get('androidPullOnly', False)),
         'ignorelist': rclone.get('ignorelist', DEFAULT_IGNORELIST),
         'flags': rclone.get('flags', {
@@ -7920,7 +7935,7 @@ def api_rclone_sync_stream(project):
     settings = proj.get('rclone') or {}
     if os.name != 'nt' and settings.get('androidPullOnly') and direction == 'src_to_dst':
         return jsonify({'error': 'Termux pull-only mode is enabled; only destination-to-source sync is allowed.'}), 403
-    raw_source = str((settings.get('androidSource') if os.name != 'nt' else '') or proj.get('path') or '').strip()
+    raw_source = str(_rclone_source_for_runtime(proj) or '').strip()
     if not raw_source:
         return jsonify({'error': 'Workspace folder is not configured.'}), 400
     source = os.path.abspath(os.path.expanduser(raw_source))
@@ -7997,7 +8012,7 @@ def _api_rclone_check(project):
     if proj is None:
         return jsonify({'error': 'Project not found'}), 404
     settings = proj.get('rclone') or {}
-    raw_source = str((settings.get('androidSource') if os.name != 'nt' else '') or proj.get('path') or '').strip()
+    raw_source = str(_rclone_source_for_runtime(proj) or '').strip()
     source = os.path.abspath(os.path.expanduser(raw_source))
     destination = str(settings.get('dest') or '').strip()
     if not source or not os.path.isdir(source):
