@@ -24,16 +24,15 @@ import subprocess
 import sys
 
 
-DEPENDENCIES = (
+COMMON_DEPENDENCIES = (
     ("flask", "Flask"),
     ("flask_socketio", "Flask-SocketIO"),
-    ("pyaudio", "PyAudio"),
-    ("psutil", "psutil"),
     ("requests", "requests"),
-    ("speech_recognition", "SpeechRecognition"),
-    ("winotify", "winotify"),
-    ("win32com", "pywin32"),
-    ("winpty", "pywinpty"),
+)
+DEPENDENCIES = COMMON_DEPENDENCIES + (
+    (("pyaudio", "PyAudio"), ("psutil", "psutil"), ("speech_recognition", "SpeechRecognition"),
+     ("winotify", "winotify"), ("win32com", "pywin32"), ("winpty", "pywinpty"))
+    if os.name == "nt" else (("ptyprocess", "ptyprocess"),)
 )
 
 
@@ -100,7 +99,58 @@ import uuid
 import platform
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from flask_socketio import SocketIO, emit, disconnect
-from winpty import Backend, PTY
+if os.name == "nt":
+    from winpty import Backend, PTY
+else:
+    from ptyprocess import PtyProcess
+
+    class PTY:
+        """Small winpty-compatible adapter for POSIX PTYs (including Termux)."""
+        def __init__(self, cols, rows, backend=None):
+            self.cols, self.rows = cols, rows
+            self.process = None
+
+        @property
+        def pid(self):
+            return self.process.pid if self.process else None
+
+        @property
+        def fd(self):
+            return self.process.fd if self.process else -1
+
+        def spawn(self, executable, cmdline="", cwd=None):
+            import shlex
+            import select
+            self.process = PtyProcess.spawn(
+                [executable, *shlex.split(cmdline)],
+                cwd=cwd if cwd and os.path.isdir(cwd) else os.path.expanduser("~"),
+                dimensions=(self.rows, self.cols),
+            )
+
+        def isalive(self):
+            return bool(self.process and self.process.isalive())
+
+        def read(self, blocking=False):
+            import select
+            if not self.process:
+                return ""
+            ready, _, _ = select.select([self.process.fd], [], [], None if blocking else 0)
+            if not ready:
+                return ""
+            try:
+                return os.read(self.process.fd, 4096).decode("utf-8", errors="replace")
+            except OSError:
+                return ""
+
+        def write(self, data):
+            if self.process:
+                self.process.write(data.encode("utf-8") if isinstance(data, str) else data)
+
+        def set_size(self, cols, rows):
+            if self.process:
+                self.process.setwinsize(rows, cols)
+
+    Backend = None
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -576,8 +626,13 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
         # then the workspace profile (history path, custom cd, prompt) runs on top.
         cmdline = f'-NoExit -EncodedCommand {encoded}'
 
-        # Spawn PowerShell Core (pwsh)
-        self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
+        # Spawn the workspace shell. Termux uses its own bash/sh instead of
+        # PowerShell, while Windows retains the configured PowerShell profile.
+        if os.name == "nt":
+            self.pty.spawn("pwsh.exe", cmdline=cmdline, cwd=path)
+        else:
+            shell = shutil.which("bash") or shutil.which("sh") or "/system/bin/sh"
+            self.pty.spawn(shell, cmdline="-i", cwd=path)
         
         self.connected_sids = set()
         self.sids_lock = threading.Lock()
@@ -657,16 +712,20 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
             self._killed = True
             if hasattr(self, 'pty') and self.pty.pid:
                 try:
-                    # Forcefully terminate this pane's shell and its child process tree.
-                    cf = 0x08000000 if sys.platform == "win32" else 0
-                    subprocess.run(
-                        ["taskkill", "/F", "/T", "/PID", str(self.pty.pid)],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                        creationflags=cf,
-                        timeout=5,
-                        check=False,
-                    )
+                    if os.name != "nt":
+                        import signal
+                        os.kill(self.pty.pid, signal.SIGTERM)
+                    else:
+                        # Forcefully terminate this pane's shell and its child process tree.
+                        cf = 0x08000000 if sys.platform == "win32" else 0
+                        subprocess.run(
+                            ["taskkill", "/F", "/T", "/PID", str(self.pty.pid)],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            creationflags=cf,
+                            timeout=5,
+                            check=False,
+                        )
                 except subprocess.TimeoutExpired:
                     print(f"Timed out terminating terminal process tree for PID {self.pty.pid}")
                 except Exception as e:
