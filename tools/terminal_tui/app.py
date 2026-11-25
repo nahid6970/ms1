@@ -502,7 +502,6 @@ class TerminalSession:
         backup_data_dir = os.path.join(r"C:\@delta\msBackups\DataBase\Terminal_Tui_workspace\Project_data", safe_path)
         if not os.path.exists(project_data_dir) and os.path.exists(backup_data_dir):
             try:
-                import shutil
                 shutil.copytree(backup_data_dir, project_data_dir)
                 print(f"Migrated Project_data for {safe_path} from backup database folder.")
             except Exception as e:
