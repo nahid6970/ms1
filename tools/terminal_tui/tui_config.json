@@ -154,7 +154,8 @@
         "androidPullOnly": true
       },
       "gitRemote": "",
-      "hideGitInit": true
+      "hideGitInit": true,
+      "androidPath": "/storage/emulated/0/delta"
     },
     {
       "name": "Default",
@@ -212,7 +213,7 @@
         "androidSource": "/ms1",
         "androidPullOnly": false
       },
-      "androidPath": "/storage/emulated/0/ms1",
+      "androidPath": "ms1",
       "hideGitInit": false
     },
     {
@@ -286,7 +287,7 @@
         "androidPullOnly": true
       },
       "gitRemote": "",
-      "androidPath": "",
+      "androidPath": "/storage/emulated/0/msBackups",
       "hideGitInit": true
     },
     {
@@ -1490,7 +1491,8 @@
         "androidPullOnly": true
       },
       "gitRemote": "",
-      "hideGitInit": true
+      "hideGitInit": true,
+      "androidPath": "/storage/emulated/0/song"
     },
     {
       "name": "Desktop",
@@ -1527,7 +1529,8 @@
         "transfers": "10",
         "androidSource": "/storage/emulated/0/Desktop",
         "androidPullOnly": true
-      }
+      },
+      "androidPath": "/storage/emulated/0/Desktop"
     }
   ],
   "extension_icons": {
@@ -2352,8 +2355,8 @@
   "workspace_header_action_order": [
     "explorer-toggle-btn",
     "active-project-path-btn",
-    "rclone-btn",
     "workspace-quick-theme-btn",
+    "rclone-btn",
     "workspace-duplicate-btn",
     "workspace-add-btn",
     "workspace-delete-btn"
