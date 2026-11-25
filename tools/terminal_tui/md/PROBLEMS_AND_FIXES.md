@@ -5,7 +5,7 @@
 ## [2026-11-25] - Project Check Tray Click Opened the Wrong Window
 **Problem:** Clicking a GitHub or Rclone tray icon opened the default browser at the app home page instead of the installed standalone web app and the relevant project-check window.
 **Root Cause:** The tray handler used `webbrowser.open()` with the generic app URL and did not identify which manager should open.
-**Solution:** Find and activate the existing Workspaces Chrome window before launching anything; use the installed app-ID shortcut only when no app window exists. Send the manager choice over `/pty`, and let only the foreground app window handle it. Right-click dismisses the tray icon without opening a browser.
+**Solution:** Find and activate the existing Workspaces Chrome window before launching anything; use the installed app-ID shortcut only when no app window exists. Send the manager choice over a global app-level Socket.IO connection so it works with no active workspace, and let only the foreground app window handle it. Right-click dismisses the tray icon without opening a browser.
 **Files Modified:** `app.py`, `templates/index.html`
 
 ---

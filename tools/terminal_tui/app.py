@@ -9843,7 +9843,7 @@ def _send_project_check_tray(manager, results):
                             try:
                                 socketio.emit('project-check-open', {
                                     'manager': manager, 'eventId': event_id,
-                                }, namespace='/pty')
+                                })
                             except Exception:
                                 pass
                             if attempt < 8:

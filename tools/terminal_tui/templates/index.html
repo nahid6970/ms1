@@ -5522,6 +5522,18 @@ kiro-cli whoami --format json</code></pre>
         let term = null;
         let fitAddon = null;
         let socket = null;
+        // App-level connection receives project-check tray requests even when
+        // no workspace terminal (and therefore no /pty socket) is active.
+        const projectCheckOpenSocket = io();
+        projectCheckOpenSocket.on('project-check-open', payload => {
+            const manager = payload?.manager;
+            if (manager !== 'rclone' && manager !== 'github') return;
+            if (!document.hasFocus()) return;
+            window._handledProjectCheckTrayEvents ||= new Set();
+            if (payload.eventId && window._handledProjectCheckTrayEvents.has(payload.eventId)) return;
+            if (payload.eventId) window._handledProjectCheckTrayEvents.add(payload.eventId);
+            requestAnimationFrame(() => openProjectCheckManager(manager));
+        });
         let terminalPanes = [];
         let splitPaneCounter = 1;
         let terminalTabRestoreDepth = 0;
@@ -6484,15 +6496,6 @@ kiro-cli whoami --format json</code></pre>
             }
 
             const paneSocket = io('/pty');
-            paneSocket.on('project-check-open', payload => {
-                const manager = payload?.manager;
-                if (manager !== 'rclone' && manager !== 'github') return;
-                if (!document.hasFocus()) return;
-                window._handledProjectCheckTrayEvents ||= new Set();
-                if (payload.eventId && window._handledProjectCheckTrayEvents.has(payload.eventId)) return;
-                if (payload.eventId) window._handledProjectCheckTrayEvents.add(payload.eventId);
-                requestAnimationFrame(() => openProjectCheckManager(manager));
-            });
             const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;

@@ -6,7 +6,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-11-25] - Open Project Check Tray Clicks in the App Window
 
 - Focus an existing Workspaces Chrome window on tray clicks, launching the shortcut only if no app window is open.
-- Route the GitHub or Rclone manager request only to the foreground app window; right-click only dismisses the tray icon.
+- Route the GitHub or Rclone manager request over an app-level socket even with no active workspace, and show it only in the foreground window; right-click only dismisses the tray icon.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
 
