@@ -206,7 +206,9 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/storage/emulated/0/ms1",
+        "androidPullOnly": true
       },
       "androidPath": "/storage/emulated/0/ms1",
       "hideGitInit": false
