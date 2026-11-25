@@ -757,10 +757,29 @@ def load_projects_config():
                         "color": bm.get("color", "")
                     })
             p["bookmarks"] = sanitized
+        # All workspace handlers use `path` as the active local path. On
+        # Termux, expose the Android location there while retaining the saved
+        # Windows path privately so existing handlers continue to work.
+        if os.name != "nt" and p.get("androidPath"):
+            p["androidPath"] = os.path.abspath(os.path.expanduser(str(p["androidPath"])))
+            p["_configuredWindowsPath"] = p.get("path") or ""
+            p["path"] = p["androidPath"]
     return projs
 
 def save_projects_config(projects):
+    if os.name != "nt":
+        for project in projects:
+            configured_windows_path = project.pop("_configuredWindowsPath", None)
+            if configured_windows_path is not None:
+                project["androidPath"] = project.get("path") or project.get("androidPath") or ""
+                project["path"] = configured_windows_path
     set_config_val("projects", projects)
+
+def project_path_for_runtime(project):
+    """Choose the workspace location for the OS running this app instance."""
+    if os.name == "nt":
+        return str(project.get("path") or "")
+    return str(project.get("androidPath") or project.get("path") or "")
 
 def is_empty_directory(path):
     try:
@@ -774,7 +793,7 @@ def scan_projects():
     projects = []
     for p in config_projects:
         name = p["name"]
-        path = p["path"]
+        path = project_path_for_runtime(p)
         pinned = p.get("pinned", False)
         default_theme = {
             "background": "#000000",
@@ -808,11 +827,14 @@ def scan_projects():
         bookmarks = p.get("bookmarks", [])
         layout = p.get("layout", {})
         category = p.get("category", "")
-        project_path = os.path.expanduser(str(p.get("path") or ""))
+        project_path = os.path.expanduser(path)
         path_exists = os.path.exists(project_path)
         projects.append({
             "name": name,
             "path": path.replace("\\", "/"),
+            "androidPath": str(p.get("androidPath") or ""),
+            "windowsPath": str(p.get("_configuredWindowsPath", p.get("path")) or ""),
+            "runtimePlatform": "windows" if os.name == "nt" else "posix",
             "category": category,
             "is_active": is_active,
             "pinned": pinned,
@@ -1065,24 +1087,29 @@ def api_rclone_destination_directories():
 
 @app.route('/api/projects', methods=['POST'])
 def api_projects_post():
-    data = request.json
-    name = data.get("name", "").strip()
-    path = data.get("path", "").strip()
-    if not name or not path:
-        return jsonify({"error": "Project Name and Path are required"}), 400
+    data = request.get_json(silent=True) or {}
+    name = str(data.get("name") or "").strip()
+    path = str(data.get("path") or "").strip()
+    android_path = str(data.get("androidPath") or "").strip()
+    active_path = path if os.name == "nt" else android_path
+    if not name or not active_path:
+        required_location = "Android/Termux path" if os.name != "nt" else "Windows/local path"
+        return jsonify({"error": f"Workspace name and {required_location} are required on this device."}), 400
         
     # Check if folder exists
-    if not os.path.exists(path) or not os.path.isdir(path):
-        return jsonify({"error": f"The directory path '{path}' does not exist."}), 400
+    active_path = os.path.expanduser(active_path)
+    if not os.path.exists(active_path) or not os.path.isdir(active_path):
+        active_field = "androidPath" if os.name != "nt" else "path"
+        return jsonify({"error": f"The directory path '{active_path}' does not exist.", "pathField": active_field}), 400
         
     projects = load_projects_config()
 
     # A folder should only be registered as one workspace, even when the
     # existing entry uses a different path casing or separator style.
-    normalized_path = os.path.normcase(os.path.realpath(os.path.abspath(path)))
+    normalized_path = os.path.normcase(os.path.realpath(os.path.abspath(active_path)))
     duplicate = next((
         p for p in projects
-        if p.get("path") and os.path.normcase(os.path.realpath(os.path.abspath(p["path"]))) == normalized_path
+        if project_path_for_runtime(p) and os.path.normcase(os.path.realpath(os.path.abspath(project_path_for_runtime(p)))) == normalized_path
     ), None)
     if duplicate:
         return jsonify({"error": f"This project path is already added as '{duplicate['name']}'."}), 400
@@ -1095,7 +1122,8 @@ def api_projects_post():
     # Add project
     projects.append({
         "name": name,
-        "path": os.path.abspath(path),
+        "path": os.path.abspath(os.path.expanduser(path)) if path and os.name == "nt" else path,
+        "androidPath": os.path.abspath(active_path) if os.name != "nt" and android_path else android_path,
         "category": category,
         "pinned": False,
         "theme": {
@@ -1580,8 +1608,14 @@ def api_projects_customize():
     if not proj:
         return jsonify({"error": "Project not found"}), 404
         
-    new_name = data.get("name", "").strip()
-    new_path = data.get("path", "").strip()
+    new_name = str(data.get("name") or "").strip()
+    new_path = str(data.get("path") or "").strip()
+    android_path_supplied = "androidPath" in data
+    new_android_path = str(data.get("androidPath") or "").strip()
+    active_new_path = new_path if os.name == "nt" else new_android_path
+    if not new_name or not active_new_path:
+        active_location = "Windows/local path" if os.name == "nt" else "Android/Termux path"
+        return jsonify({"error": f"Workspace name and {active_location} are required on this device."}), 400
     
     # If name is changing, check duplicate name
     name_changed = new_name and new_name.lower() != original_name.lower()
@@ -1590,12 +1624,14 @@ def api_projects_customize():
             return jsonify({"error": f"A workspace named '{new_name}' already exists."}), 400
             
     # If path is changing, check if folder exists (normalized comparison)
-    norm_existing_path = os.path.normpath(os.path.abspath(proj["path"])).lower()
-    norm_new_path = os.path.normpath(os.path.abspath(new_path)).lower() if new_path else ""
+    existing_active_path = project_path_for_runtime(proj)
+    active_new_path = os.path.abspath(os.path.expanduser(active_new_path))
+    norm_existing_path = os.path.normcase(os.path.realpath(os.path.abspath(os.path.expanduser(existing_active_path)))) if existing_active_path else ""
+    norm_new_path = os.path.normcase(os.path.realpath(active_new_path))
     path_changed = bool(norm_new_path and norm_new_path != norm_existing_path)
     if path_changed:
-        if not os.path.exists(new_path) or not os.path.isdir(new_path):
-            return jsonify({"error": f"The directory path '{new_path}' does not exist."}), 400
+        if not os.path.exists(active_new_path) or not os.path.isdir(active_new_path):
+            return jsonify({"error": f"The directory path '{active_new_path}' does not exist."}), 400
             
     # Terminate active session if name or path changed, so it starts fresh!
     if name_changed or path_changed:
@@ -1604,8 +1640,14 @@ def api_projects_customize():
     # Update properties
     if new_name:
         proj["name"] = new_name
-    if new_path:
-        proj["path"] = os.path.abspath(new_path)
+    if os.name == "nt":
+        proj["path"] = active_new_path
+        if android_path_supplied:
+            proj["androidPath"] = new_android_path
+    else:
+        proj["path"] = active_new_path
+        proj["androidPath"] = active_new_path
+        proj["_configuredWindowsPath"] = new_path
     if "pinned" in data:
         proj["pinned"] = bool(data["pinned"])
         if proj["pinned"]:

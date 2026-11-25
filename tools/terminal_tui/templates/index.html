@@ -3140,10 +3140,16 @@
                     <input type="text" id="proj-name" class="form-input" placeholder="e.g. Capture" required autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label for="proj-path">Local Directory Path</label>
+                    <label for="proj-path">Windows / desktop folder path</label>
                     <div style="display:flex; gap:8px;">
-                        <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" required autocomplete="off" style="flex:1; min-width:0;" title="Press Tab to choose a local folder" onkeydown="if(event.key==='Tab'){event.preventDefault();openLocalDirectoryPicker();}">
+                        <input type="text" id="proj-path" class="form-input" placeholder="e.g. C:\@delta\ms1\TOOLS\Capture" autocomplete="off" style="flex:1; min-width:0;" title="Press Tab to choose a local folder" onkeydown="if(event.key==='Tab'){event.preventDefault();openLocalDirectoryPicker();}">
                     </div>
+                    <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px;">Used when Terminal TUI runs on Windows. Leave blank when adding an Android-only workspace from Termux.</div>
+                </div>
+                <div class="form-group">
+                    <label for="proj-android-path">Android / Termux folder path</label>
+                    <input type="text" id="proj-android-path" class="form-input" placeholder="e.g. /data/data/com.termux/files/home/my-project" autocomplete="off">
+                    <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px;">Used when Terminal TUI runs in Termux. Enter the full Android path; use both fields to share a workspace config across Windows and Android.</div>
                 </div>
                 <div class="form-group">
                     <label for="proj-category">Category</label>
@@ -3400,8 +3406,12 @@
                         <input type="text" id="theme-proj-name" class="form-input" required autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
                     </div>
                     <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
-                        <label for="theme-proj-path" style="font-size: 0.8rem; font-weight: 500; width: 60px; flex: 0 0 60px;">Path</label>
-                        <input type="text" id="theme-proj-path" class="form-input" required autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
+                        <label for="theme-proj-path" style="font-size: 0.8rem; font-weight: 500; width: 100px; flex: 0 0 100px;">Windows path</label>
+                        <input type="text" id="theme-proj-path" class="form-input" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
+                    </div>
+                    <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
+                        <label for="theme-proj-android-path" style="font-size: 0.8rem; font-weight: 500; width: 100px; flex: 0 0 100px;">Android path</label>
+                        <input type="text" id="theme-proj-android-path" class="form-input" placeholder="e.g. /data/data/com.termux/files/home/project" autocomplete="off" style="flex: 1; height: 28px; padding: 4px 8px; font-size: 0.8rem;">
                     </div>
                     <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 0; gap: 12px;">
                         <label for="theme-proj-category" style="font-size: 0.8rem; font-weight: 500; width: 60px; flex: 0 0 60px;">Category</label>
@@ -10014,12 +10024,15 @@ kiro-cli whoami --format json</code></pre>
         }
 
         // Add Workspace Modal Dialog Controls
+        let createFolderPathField = 'proj-path';
         function openAddModal() {
             document.getElementById('proj-name').value = '';
             document.getElementById('proj-path').value = '';
+            document.getElementById('proj-android-path').value = '';
             document.getElementById('proj-category').value = '';
             document.getElementById('modal-error-msg').style.display = 'none';
             document.getElementById('create-folder-hint').style.display = 'none';
+            createFolderPathField = 'proj-path';
             document.getElementById('add-modal').classList.add('show');
             document.getElementById('proj-name').focus();
         }
@@ -10250,13 +10263,14 @@ kiro-cli whoami --format json</code></pre>
 
             const name = document.getElementById('proj-name').value;
             const path = document.getElementById('proj-path').value;
+            const androidPath = document.getElementById('proj-android-path').value;
             const category = document.getElementById('proj-category').value;
 
             try {
                 const response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: name, path: path, category: category })
+                    body: JSON.stringify({ name: name, path: path, androidPath: androidPath, category: category })
                 });
 
                 const data = await response.json();
@@ -10267,6 +10281,7 @@ kiro-cli whoami --format json</code></pre>
                     // Show "Create Folder" button only when the path doesn't exist
                     if (data.error && data.error.includes('does not exist')) {
                         document.getElementById('create-folder-hint').style.display = 'block';
+                        createFolderPathField = data.pathField === 'androidPath' ? 'proj-android-path' : 'proj-path';
                     }
                     return;
                 }
@@ -10283,7 +10298,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         async function createFolderAndSubmit() {
-            const path = document.getElementById('proj-path').value.trim();
+            const path = document.getElementById(createFolderPathField).value.trim();
             const btn = document.getElementById('create-folder-btn');
             const errorMsg = document.getElementById('modal-error-msg');
             if (!path) return;
@@ -10392,7 +10407,8 @@ kiro-cli whoami --format json</code></pre>
             
             // Populate workspace name and path inputs
             document.getElementById('theme-proj-name').value = contextProject.name;
-            document.getElementById('theme-proj-path').value = contextProject.path;
+            document.getElementById('theme-proj-path').value = contextProject.windowsPath || (contextProject.runtimePlatform === 'windows' ? contextProject.path : '') || '';
+            document.getElementById('theme-proj-android-path').value = contextProject.androidPath || '';
             document.getElementById('theme-proj-category').value = contextProject.category || '';
             document.getElementById('theme-proj-git-remote').value = contextProject.gitRemote || '';
             document.getElementById('theme-proj-hide-git-init').checked = !!contextProject.hideGitInit;
@@ -11673,9 +11689,10 @@ kiro-cli whoami --format json</code></pre>
 
             const newName = document.getElementById('theme-proj-name').value.trim();
             const newPath = document.getElementById('theme-proj-path').value.trim();
+            const newAndroidPath = document.getElementById('theme-proj-android-path').value.trim();
             
-            if (!newName || !newPath) {
-                alert("Workspace Name and Path are required");
+            if (!newName || (!newPath && !newAndroidPath)) {
+                alert("Workspace name and at least one folder path are required");
                 return;
             }
 
@@ -11717,6 +11734,7 @@ kiro-cli whoami --format json</code></pre>
                         originalName: contextProject.name,
                         name: newName,
                         path: newPath,
+                        androidPath: newAndroidPath,
                         category: newCategory,
                         gitRemote: document.getElementById('theme-proj-git-remote').value.trim(),
                         hideGitInit: document.getElementById('theme-proj-hide-git-init').checked,
