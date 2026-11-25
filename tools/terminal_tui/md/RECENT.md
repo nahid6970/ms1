@@ -7,6 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Resolve relative Android workspace paths from Termux `$HOME`, preserve saved Rclone Android source values in the settings form, and reload `tui_config.json` when it changes outside the running process.
 - Add Termux Rclone pull-only enforcement and make the mobile Rclone and workspace dialogs scroll within the available viewport. Empty workspace folders can be restored by cloning their configured Git remote.
+- In the Rclone Projects list, use the existing sync control in orange for destination-to-source sync on Termux workspaces with pull-only enabled.
 - Report workspace activation and Git restore failures in the UI; return the terminal startup exception from the session API. Remove a conditional local `shutil` import that broke POSIX shell startup with `UnboundLocalError`.
 
 **Files Modified:** `app.py`, `templates/index.html`, `termux/os.sh`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
