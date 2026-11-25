@@ -2837,6 +2837,16 @@
                     placeholder="(workspace path auto-filled)" title="Current workspace path">
             </div>
 
+            <div>
+                <label for="rclone-android-src" style="display:block; font-size:0.78rem; font-weight:500; color:var(--text-secondary); margin-bottom:6px;">Android source <span style="font-size:0.7rem; color:var(--text-muted); font-weight:400;">(used in Termux)</span></label>
+                <input id="rclone-android-src" type="text"
+                    style="width:100%; box-sizing:border-box; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:9px 12px; color:var(--text-primary); font-family:'Fira Code',monospace; font-size:0.82rem; outline:none; transition:border-color 0.2s;"
+                    placeholder="e.g. /data/data/com.termux/files/home/project"
+                    title="Android source folder used when Rclone runs in Termux"
+                    onfocus="this.style.borderColor='#fb923c'" onblur="this.style.borderColor='var(--border-color)'; rcloneSaveSettings()">
+                <div style="font-size:.67rem;color:var(--text-muted);margin-top:4px;">Leave blank to use the workspace’s Android path.</div>
+            </div>
+
             <!-- Destination -->
             <div>
                 <label style="display:block; font-size:0.78rem; font-weight:500; color:var(--text-secondary); margin-bottom:6px;">Destination</label>
@@ -16749,6 +16759,7 @@ kiro-cli whoami --format json</code></pre>
                 const s = await res.json();
                 if (activeProject !== project) return;
 
+                document.getElementById('rclone-android-src').value = s.androidSource || proj?.androidPath || (proj?.runtimePlatform !== 'windows' ? proj?.path : '') || '';
                 document.getElementById('rclone-dst').value = s.dest || '';
                 rcloneUpdateButtonState();
                 document.getElementById('rclone-ignorelist').value = s.ignorelist || '';
@@ -16798,6 +16809,7 @@ kiro-cli whoami --format json</code></pre>
                 if (!project) return;
                 const payload = {
                     dest:       document.getElementById('rclone-dst').value.trim(),
+                    androidSource: document.getElementById('rclone-android-src').value.trim(),
                     ignorelist: document.getElementById('rclone-ignorelist').value.trim(),
                     transfers:  document.getElementById('rcflag-transfers').value.trim(),
                     flags: {
@@ -16832,6 +16844,7 @@ kiro-cli whoami --format json</code></pre>
 
         // Auto-save when dst or ignorelist changes
         document.getElementById('rclone-dst').addEventListener('change', rcloneSaveSettings);
+        document.getElementById('rclone-android-src').addEventListener('input', rcloneSaveSettings);
         document.getElementById('rclone-ignorelist').addEventListener('change', rcloneSaveSettings);
 
         // ── Ignorelist view toggle ────────────────────────────────────────────
@@ -17022,7 +17035,10 @@ kiro-cli whoami --format json</code></pre>
             const project = activeProject;
             if (!project) { alert('No active workspace selected.'); return; }
 
-            const src = document.getElementById('rclone-src').value.trim();
+            const workspaceSrc = document.getElementById('rclone-src').value.trim();
+            const projectInfo = projects ? projects.find(item => item.name === project) : null;
+            const androidSrc = document.getElementById('rclone-android-src').value.trim();
+            const src = projectInfo?.runtimePlatform !== 'windows' ? (androidSrc || workspaceSrc) : workspaceSrc;
             const dst = document.getElementById('rclone-dst').value.trim();
             if (!src) { alert('Source path is empty. Open a workspace first.'); return; }
             if (!dst) { alert('Destination is empty. Enter a destination path or remote.'); document.getElementById('rclone-dst').focus(); return; }

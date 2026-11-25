@@ -7858,6 +7858,7 @@ def api_rclone_get_settings(project):
     rclone = proj.get('rclone', {})
     result = {
         'dest': rclone.get('dest', ''),
+        'androidSource': rclone.get('androidSource', proj.get('androidPath', '')),
         'ignorelist': rclone.get('ignorelist', DEFAULT_IGNORELIST),
         'flags': rclone.get('flags', {
             '--fast-list': True,
@@ -7883,6 +7884,8 @@ def api_rclone_save_settings(project):
         proj['rclone'] = {}
     if 'dest' in data:
         proj['rclone']['dest'] = data['dest']
+    if 'androidSource' in data:
+        proj['rclone']['androidSource'] = str(data.get('androidSource') or '').strip()
     if 'ignorelist' in data:
         proj['rclone']['ignorelist'] = data['ignorelist']
     if 'flags' in data:
@@ -7910,11 +7913,11 @@ def api_rclone_sync_stream(project):
     proj = next((p for p in projects if p.get('name') == project), None)
     if proj is None:
         return jsonify({'error': 'Project not found.'}), 404
-    raw_source = str(proj.get('path') or '').strip()
+    settings = proj.get('rclone') or {}
+    raw_source = str((settings.get('androidSource') if os.name != 'nt' else '') or proj.get('path') or '').strip()
     if not raw_source:
         return jsonify({'error': 'Workspace folder is not configured.'}), 400
     source = os.path.abspath(os.path.expanduser(raw_source))
-    settings = proj.get('rclone') or {}
     destination = str(settings.get('dest') or '').strip()
     if not os.path.isdir(source):
         return jsonify({'error': 'Workspace folder is missing or unavailable.'}), 400
@@ -7987,8 +7990,9 @@ def _api_rclone_check(project):
     proj = next((p for p in projects if p.get('name') == project), None)
     if proj is None:
         return jsonify({'error': 'Project not found'}), 404
-    source = os.path.abspath(os.path.expanduser(str(proj.get('path') or '').strip()))
     settings = proj.get('rclone') or {}
+    raw_source = str((settings.get('androidSource') if os.name != 'nt' else '') or proj.get('path') or '').strip()
+    source = os.path.abspath(os.path.expanduser(raw_source))
     destination = str(settings.get('dest') or '').strip()
     if not source or not os.path.isdir(source):
         return jsonify({'error': 'Workspace folder is missing or unavailable.'}), 400
