@@ -42,6 +42,7 @@ menu_items=(
     "SSH for Android              : start_ssh_server                        :$GREEN"
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
     "Terminal TUI [5577]          : start_terminal_tui                      :$GREEN"
+    "Restart Terminal TUI         : restart_terminal_tui                     :$YELLOW"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Pkg Search & Install        : pkg_search_install                      :$CYAN"
@@ -85,6 +86,8 @@ start_terminal_tui() {
     local log_file="$state_dir/terminal-tui.log"
     local url="http://127.0.0.1:5577/"
     local python_bin
+    local restart_requested=false
+    [ "${1:-}" = "--restart" ] && restart_requested=true
 
     # Also work when this checkout is not located at $HOME/ms1.
     if [ ! -f "$app_file" ]; then
@@ -110,8 +113,23 @@ start_terminal_tui() {
     python_bin="$venv_dir/bin/python"
 
     if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
-        echo -e "${YELLOW}Terminal TUI is already running (PID $(cat "$pid_file")).${NC}"
-    else
+        local running_pid
+        running_pid="$(cat "$pid_file")"
+        if [ "$restart_requested" = true ]; then
+            echo -e "${YELLOW}Restarting Terminal TUI to reload its code and config...${NC}"
+            kill "$running_pid" 2>/dev/null || true
+            for _ in {1..10}; do
+                kill -0 "$running_pid" 2>/dev/null || break
+                sleep 1
+            done
+            kill -0 "$running_pid" 2>/dev/null && kill -9 "$running_pid" 2>/dev/null || true
+            rm -f "$pid_file"
+        else
+            echo -e "${YELLOW}Terminal TUI is already running (PID $running_pid).${NC}"
+        fi
+    fi
+
+    if [ ! -f "$pid_file" ] || ! kill -0 "$(cat "$pid_file")" 2>/dev/null; then
         rm -f "$pid_file"
         echo -e "${CYAN}Starting Terminal TUI...${NC}"
         nohup "$python_bin" "$app_file" >>"$log_file" 2>&1 </dev/null &
@@ -145,6 +163,10 @@ start_terminal_tui() {
     else
         echo -e "${YELLOW}Open the URL above in your Android browser.${NC}"
     fi
+}
+
+restart_terminal_tui() {
+    start_terminal_tui --restart
 }
 
 upload_latest_database(){
@@ -519,7 +541,7 @@ update_ms1_repo() {
     if [ "$local_commit" = "$base_commit" ]; then
         # Normal fast-forward
         echo -e "${CYAN}Fast-forwarding...${NC}"
-        git pull --ff-only
+        git pull --ff-only || { echo -e "${RED}Pull failed.${NC}"; return 1; }
     else
         # Local has diverged (reverted commits, amended, etc.)
         echo -e "${YELLOW}Local branch has diverged from remote.${NC}"
@@ -551,6 +573,16 @@ update_ms1_repo() {
                 echo -e "${YELLOW}Cancelled.${NC}"
                 ;;
         esac
+    fi
+
+    local updated_commit changed_files
+    updated_commit="$(git rev-parse HEAD)"
+    if [ "$updated_commit" != "$local_commit" ]; then
+        changed_files="$(git diff --name-only "$local_commit" "$updated_commit")"
+        if printf '%s\n' "$changed_files" | grep -Eq '^tools/terminal_tui/(app\.py|templates/index\.html|tui_config\.json)$'; then
+            echo -e "${CYAN}Terminal TUI files changed; restarting it to load the updated config/code.${NC}"
+            start_terminal_tui --restart
+        fi
     fi
 }
 
