@@ -2319,7 +2319,7 @@
   "project_auto_checks": {
     "github": {
       "enabled": true,
-      "intervalMinutes": 60,
+      "intervalMinutes": 1,
       "concurrency": 1,
       "manualCheckAll": true,
       "notificationsEnabled": false,

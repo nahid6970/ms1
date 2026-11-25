@@ -6484,6 +6484,15 @@ kiro-cli whoami --format json</code></pre>
             }
 
             const paneSocket = io('/pty');
+            paneSocket.on('project-check-open', payload => {
+                const manager = payload?.manager;
+                if (manager !== 'rclone' && manager !== 'github') return;
+                if (!document.hasFocus()) return;
+                window._handledProjectCheckTrayEvents ||= new Set();
+                if (payload.eventId && window._handledProjectCheckTrayEvents.has(payload.eventId)) return;
+                if (payload.eventId) window._handledProjectCheckTrayEvents.add(payload.eventId);
+                requestAnimationFrame(() => openProjectCheckManager(manager));
+            });
             const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;
@@ -11280,6 +11289,11 @@ kiro-cli whoami --format json</code></pre>
         function openGitHubProjectsModal() {
             renderGitHubProjectsModal();
             document.getElementById('github-projects-modal').classList.add('show');
+        }
+
+        function openProjectCheckManager(manager) {
+            if (manager === 'rclone') openRcloneProjectsModal();
+            else if (manager === 'github') openGitHubProjectsModal();
         }
 
         function closeGitHubProjectsModal() {
@@ -24694,10 +24708,7 @@ Always wrap your **entire response** in a single markdown code block.`;
             const openManager = new URLSearchParams(window.location.search).get('openManager');
             if (openManager === 'rclone' || openManager === 'github') {
                 history.replaceState(null, '', window.location.pathname + window.location.hash);
-                requestAnimationFrame(() => {
-                    if (openManager === 'rclone') openRcloneProjectsModal();
-                    else openGitHubProjectsModal();
-                });
+                requestAnimationFrame(() => openProjectCheckManager(openManager));
             }
             
             const savedActiveProject = localStorage.getItem('active-project');

@@ -5,8 +5,8 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-25] - Open Project Check Tray Clicks in the App Window
 
-- Launch tray clicks in a standalone Chrome app window at `localhost:5577` with a GitHub or Rclone manager deep link.
-- Open the corresponding project-check manager after the SPA restores its workspace and project settings; right-click only dismisses the tray icon.
+- Focus an existing Workspaces Chrome window on tray clicks, launching the shortcut only if no app window is open.
+- Route the GitHub or Rclone manager request only to the foreground app window; right-click only dismisses the tray icon.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
 

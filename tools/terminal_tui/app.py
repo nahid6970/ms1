@@ -9755,10 +9755,7 @@ def _send_project_check_tray(manager, results):
         port = int(os.environ.get('TERMINAL_TUI_PORT', 5577))
     except (ValueError, TypeError):
         port = 5577
-    # Use localhost because this is the origin the user installs as a Chrome
-    # web app. The query is consumed by the SPA after startup to open the
-    # relevant project-check window.
-    app_url = f"http://localhost:{port}/?openManager={manager}"
+    app_url = f"http://localhost:{port}/"
 
     WM_TRAY_MSG = win32con.WM_USER + 20
     NIM_ADD     = 0x00000000
@@ -9793,21 +9790,70 @@ def _send_project_check_tray(manager, results):
             try:
                 if lparam in (win32con.WM_LBUTTONUP, win32con.WM_LBUTTONDBLCLK):
                     import subprocess
-                    chrome_candidates = [
-                        os.path.join(os.environ.get('PROGRAMFILES', r'C:\Program Files'), 'Google', 'Chrome', 'Application', 'chrome.exe'),
-                        os.path.join(os.environ.get('PROGRAMFILES(X86)', r'C:\Program Files (x86)'), 'Google', 'Chrome', 'Application', 'chrome.exe'),
-                        os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+                    # Read the installed Chrome app shortcut so it can be
+                    # launched only when no matching window is already open.
+                    import win32com.client
+                    shortcut_candidates = [
+                        os.path.join(os.environ.get('APPDATA', ''), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Chrome Apps', 'Workspaces.lnk'),
+                        os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop', 'Workspaces.lnk'),
+                        os.path.join(os.environ.get('APPDATA', ''), 'Microsoft', 'Internet Explorer', 'Quick Launch', 'User Pinned', 'TaskBar', 'Workspaces.lnk'),
                     ]
-                    chrome = next((path for path in chrome_candidates if path and os.path.isfile(path)), None)
-                    if chrome:
+                    launch = None
+                    shell = win32com.client.Dispatch('WScript.Shell')
+                    for shortcut_path in shortcut_candidates:
+                        if not os.path.isfile(shortcut_path):
+                            continue
+                        shortcut = shell.CreateShortcut(shortcut_path)
+                        if '--app-id=' in (shortcut.Arguments or '') and os.path.isfile(shortcut.TargetPath):
+                            launch = [shortcut.TargetPath] + shortcut.Arguments.split()
+                            break
+
+                    # A Chrome app shortcut can create a second window even
+                    # when the app is already running. Find and activate an
+                    # existing Workspaces app window first.
+                    existing_app_windows = []
+                    def collect_workspaces_window(window_hwnd, _):
+                        try:
+                            if (win32gui.IsWindowVisible(window_hwnd)
+                                    and win32gui.GetClassName(window_hwnd) == 'Chrome_WidgetWin_1'
+                                    and win32gui.GetWindowText(window_hwnd).strip().casefold() == 'workspaces'):
+                                existing_app_windows.append(window_hwnd)
+                        except Exception:
+                            pass
+                    win32gui.EnumWindows(collect_workspaces_window, None)
+
+                    if existing_app_windows:
+                        app_hwnd = existing_app_windows[0]
+                        win32gui.ShowWindow(app_hwnd, win32con.SW_RESTORE)
+                        win32gui.SetForegroundWindow(app_hwnd)
+                    elif launch:
                         subprocess.Popen(
-                            [chrome, f'--app={app_url}'],
+                            launch,
                             close_fds=True,
                             creationflags=getattr(subprocess, 'DETACHED_PROCESS', 0) | getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0),
                         )
+                    if existing_app_windows or launch:
+                        # The app may need to start its Socket.IO connections
+                        # before it can receive the manager request. Retry
+                        # briefly; only the foreground window handles it and
+                        # the frontend deduplicates repeated events.
+                        import uuid
+                        event_id = uuid.uuid4().hex
+                        def notify_app(attempt=0):
+                            try:
+                                socketio.emit('project-check-open', {
+                                    'manager': manager, 'eventId': event_id,
+                                }, namespace='/pty')
+                            except Exception:
+                                pass
+                            if attempt < 8:
+                                timer = threading.Timer(0.65, notify_app, args=(attempt + 1,))
+                                timer.daemon = True
+                                timer.start()
+                        threading.Timer(0.65, notify_app).start()
                     else:
                         import webbrowser
-                        webbrowser.open(app_url)
+                        webbrowser.open(f'{app_url}?openManager={manager}')
             except Exception:
                 pass
             # Schedule removal via a posted quit so we're not inside the callback
