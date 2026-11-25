@@ -146,78 +146,132 @@
     },
     "buttons_left": [
         {
-            "id": "OS_LB",
-            "text": "OS",
-            "fg": "#59e3a7",
+            "id": "Folder_bt",
+            "text": "FD",
+            "fg": "#FFFF7F",
             "font": [
-                "0xProto Nerd Font",
-                16,
-                "bold"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c start windows.py"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c start C:\\@delta\\ms1\\init\\windows.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\init\\windows.py"
-                }
-            },
-            "bg": "",
-            "padx_left": 5,
-            "padx_right": 5,
-            "svg_content": "<svg fill=\"#00AAFF\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\" enable-background=\"new 0 0 512 512\" xml:space=\"preserve\" stroke=\"#00AAFF\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <g id=\"3e91140ac1bfb9903b91c1b0ca089917\"> <path display=\"inline\" d=\"M106.667,52.438c0,0,102.125-55.527,189.487,11.393l-48.892,167.992c0,0-54.755-37.668-95.359-33.601 c-40.604,4.08-94.132,23.508-94.132,23.508L106.667,52.438z M0.5,420.565c22.539-11.652,56.373-17.558,95.347-20.821 c39.015-3.257,93.912,32.466,93.912,32.466l49.403-169.776c-7.818-5.614-44.168-30.092-89.67-33.348 c-45.516-3.252-100.354,22.244-100.354,22.244L0.5,420.565z M216.104,447.163c8.928,3.527,38.221,31.381,86.971,33.855 c48.764,2.42,102.541-22.743,102.541-22.743s47.895-167.605,48.863-168.254c0.332-0.175-0.604,0.482-0.969,0.648 c-45.595,17.849-68.87,20.506-102.496,21.309c-34.142,0.823-86.269-33.094-86.269-33.094L216.104,447.163z M322.004,81.575 l-48.987,167.019c0,0,39.802,38.999,95.866,35.771c56.095-3.269,86.531-20.95,93.975-23.45L511.5,92.416 c0,0-64.607,26.985-106.85,22.09C362.384,109.612,336.093,91.659,322.004,81.575z\"> </path> </g> </g></svg>",
-            "svg_hover_map": {
-                "#00AAFF": "#00FF7F"
-            },
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "center",
-            "pady_top": 0,
-            "pady_bottom": 0,
-            "margin_top": 0,
-            "margin_bottom": 0
-        },
-        {
-            "id": "Tools_bt",
-            "text": "st",
-            "fg": "#ffffff",
-            "font": [
-                "Arial",
+                "Consolas",
                 15,
                 "bold"
             ],
             "widget_type": "CTkLabel",
             "bindings": {
                 "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "folder_list",
+                    "row_limit": 1,
+                    "bg_color": "#000000",
+                    "transparent_bg": false,
+                    "border_color": "#FFFF7F",
+                    "border_px": 2
+                }
+            },
+            "svg_content": "<svg viewBox=\"0 0 1024 1024\" class=\"icon\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools --><path d=\"M887.3 981.3H136.7C61.3 981.3 0 920 0 844.6V179.4C0 104 61.3 42.7 136.7 42.7h184.6c25.5 0 49.4 11.2 65.7 30.8l81 97.2h427.1c71.1 0 128.9 57.8 128.9 128.9v545.1c0 75.3-61.3 136.6-136.7 136.6zM136.7 128c-28.3 0-51.4 23-51.4 51.4v665.2c0 28.3 23 51.4 51.4 51.4h750.6c28.3 0 51.4-23 51.4-51.4V299.5c0-24-19.5-43.5-43.6-43.5h-427c-25.5 0-49.4-11.2-65.7-30.8l-81-97.2H136.7z\" fill=\"#55AAFF\"></path><path d=\"M970.7 458.7H448c-23.6 0-42.7-19.1-42.7-42.7s19.1-42.7 42.7-42.7h522.7c23.6 0 42.7 19.1 42.7 42.7s-19.2 42.7-42.7 42.7z\" fill=\"#FFFFFF\"></path></g></svg>",
+            "svg_hover_map": {
+                "#FFFFFF": "#55557F"
+            },
+            "bg": "",
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 1,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 25,
+            "icon_height": 25,
+            "icon_gap": 4,
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
+        },
+        {
+            "text": "web",
+            "fg": "#ffffff",
+            "bg": "#050505",
+            "id": "btn_1777614207",
+            "bindings": {
+                "Button-1": {
+                    "type": "popup",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "fav_apps",
+                    "row_limit": 10,
+                    "bg_color": "",
+                    "transparent_bg": false,
+                    "border_color": "yellow",
+                    "border_px": 2
+                }
+            },
+            "font": [
+                "Arial",
+                16,
+                "normal"
+            ],
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 5,
+            "padx_right": 1,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 25,
+            "icon_height": 25,
+            "icon_gap": 4,
+            "icon_position": "left",
+            "svg_content": "<svg fill=\"#55AAFF\" viewBox=\"0 0 512 512\" id=\"_x30_1\" version=\"1.1\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path d=\"M256,0C114.615,0,0,114.615,0,256s114.615,256,256,256s256-114.615,256-256S397.385,0,256,0z M418.275,146h-46.667 c-5.365-22.513-12.324-43.213-20.587-61.514c15.786,8.776,30.449,19.797,43.572,32.921C403.463,126.277,411.367,135.854,418.275,146 z M452,256c0,17.108-2.191,33.877-6.414,50h-64.034c1.601-16.172,2.448-32.887,2.448-50s-0.847-33.828-2.448-50h64.034 C449.809,222.123,452,238.892,452,256z M256,452c-5.2,0-21.048-10.221-36.844-41.813c-6.543-13.087-12.158-27.994-16.752-44.187 h107.191c-4.594,16.192-10.208,31.1-16.752,44.187C277.048,441.779,261.2,452,256,452z M190.813,306 c-1.847-16.247-2.813-33.029-2.813-50s0.966-33.753,2.813-50h130.374c1.847,16.247,2.813,33.029,2.813,50s-0.966,33.753-2.813,50 H190.813z M60,256c0-17.108,2.191-33.877,6.414-50h64.034c-1.601,16.172-2.448,32.887-2.448,50s0.847,33.828,2.448,50H66.414 C62.191,289.877,60,273.108,60,256z M256,60c5.2,0,21.048,10.221,36.844,41.813c6.543,13.087,12.158,27.994,16.752,44.187H202.404 c4.594-16.192,10.208-31.1,16.752-44.187C234.952,70.221,250.8,60,256,60z M160.979,84.486c-8.264,18.301-15.222,39-20.587,61.514 H93.725c6.909-10.146,14.812-19.723,23.682-28.593C130.531,104.283,145.193,93.262,160.979,84.486z M93.725,366h46.667 c5.365,22.513,12.324,43.213,20.587,61.514c-15.786-8.776-30.449-19.797-43.572-32.921C108.537,385.723,100.633,376.146,93.725,366z M351.021,427.514c8.264-18.301,15.222-39,20.587-61.514h46.667c-6.909,10.146-14.812,19.723-23.682,28.593 C381.469,407.717,366.807,418.738,351.021,427.514z\"></path></g></svg>",
+            "svg_hover_map": {},
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
+        },
+        {
+            "id": "AHKPY_BT",
+            "text": "AHK",
+            "fg": "#84ff8e",
+            "font": [
+                "Consolas",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "python",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\autohotkey\\shortcut_manager\\ahk_gui_pyqt.py"
+                },
+                "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "C:\\Users\\nahid\\delta\\Script Manager\\script_manager_gui_qt.py"
+                    "cmd": "explorer \"{dir}\""
                 },
-                "Control-Button-1": {
+                "Button-3": {
+                    "type": "python",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\autohotkey\\Button_Generator\\AHK_Button.py"
+                },
+                "Control-Button-3": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
@@ -230,10 +284,8 @@
             "padx_right": 5,
             "border": 0,
             "border_color": "",
-            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M3.46447 3.46447C2 4.92893 2 7.28595 2 12C2 16.714 2 19.0711 3.46447 20.5355C4.92893 22 7.28595 22 12 22C16.714 22 19.0711 22 20.5355 20.5355C22 19.0711 22 16.714 22 12C22 7.28595 22 4.92893 20.5355 3.46447C19.0711 2 16.714 2 12 2C7.28595 2 4.92893 2 3.46447 3.46447ZM13.4881 6.44591C13.8882 6.55311 14.1256 6.96437 14.0184 7.36447L11.4302 17.0237C11.323 17.4238 10.9117 17.6613 10.5116 17.5541C10.1115 17.4468 9.8741 17.0356 9.98131 16.6355L12.5695 6.97624C12.6767 6.57614 13.088 6.3387 13.4881 6.44591ZM14.9697 8.46967C15.2626 8.17678 15.7374 8.17678 16.0303 8.46967L16.2387 8.67801C16.874 9.3133 17.4038 9.84308 17.7678 10.3202C18.1521 10.8238 18.4216 11.3559 18.4216 12C18.4216 12.6441 18.1521 13.1762 17.7678 13.6798C17.4038 14.1569 16.874 14.6867 16.2387 15.322L16.0303 15.5303C15.7374 15.8232 15.2626 15.8232 14.9697 15.5303C14.6768 15.2374 14.6768 14.7626 14.9697 14.4697L15.1412 14.2981C15.8229 13.6164 16.2797 13.1574 16.5753 12.7699C16.8577 12.3998 16.9216 12.1843 16.9216 12C16.9216 11.8157 16.8577 11.6002 16.5753 11.2301C16.2797 10.8426 15.8229 10.3836 15.1412 9.70191L14.9697 9.53033C14.6768 9.23744 14.6768 8.76257 14.9697 8.46967ZM7.96986 8.46967C8.26275 8.17678 8.73762 8.17678 9.03052 8.46967C9.32341 8.76257 9.32341 9.23744 9.03052 9.53033L8.85894 9.70191C8.17729 10.3836 7.72052 10.8426 7.42488 11.2301C7.14245 11.6002 7.07861 11.8157 7.07861 12C7.07861 12.1843 7.14245 12.3998 7.42488 12.7699C7.72052 13.1574 8.17729 13.6164 8.85894 14.2981L9.03052 14.4697C9.32341 14.7626 9.32341 15.2374 9.03052 15.5303C8.73762 15.8232 8.26275 15.8232 7.96986 15.5303L7.76151 15.322C7.12617 14.6867 6.59638 14.1569 6.23235 13.6798C5.84811 13.1762 5.57861 12.6441 5.57861 12C5.57861 11.3559 5.84811 10.8238 6.23235 10.3202C6.59638 9.84308 7.12617 9.31331 7.76151 8.67801L7.96986 8.46967Z\" fill=\"#FFFFFF\"></path> </g></svg>",
-            "svg_hover_map": {
-                "#FFFFFF": "#00FFFF"
-            },
+            "svg_content": "<svg viewBox=\"0 0 32 32\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><defs><linearGradient id=\"a\" x1=\"54.604\" y1=\"168.388\" x2=\"54.604\" y2=\"194.885\" gradientTransform=\"translate(-38.604 -165.636)\" gradientUnits=\"userSpaceOnUse\"><stop offset=\"0\" stop-color=\"#55FF7F\"></stop><stop offset=\"1\" stop-color=\"#55FF7F\"></stop></linearGradient><linearGradient id=\"b\" x1=\"68.756\" y1=\"209.152\" x2=\"91.638\" y2=\"209.152\" gradientTransform=\"translate(-50.601 -159.449) scale(0.832 0.837)\" gradientUnits=\"userSpaceOnUse\"><stop offset=\"0\" stop-color=\"#55FF7F\"></stop><stop offset=\"0.5\" stop-color=\"#55FF7F\"></stop><stop offset=\"1\" stop-color=\"#55FF7F\"></stop></linearGradient></defs><title>file_type_autohotkey</title><rect x=\"2\" y=\"2.824\" width=\"28\" height=\"26.353\" rx=\"3.088\" ry=\"3.088\" style=\"fill:url(#a)\"></rect><path d=\"M26.856,29.181H5.144A3.148,3.148,0,0,1,2,26.037V5.963A3.148,3.148,0,0,1,5.144,2.819H26.856A3.148,3.148,0,0,1,30,5.963V26.037A3.148,3.148,0,0,1,26.856,29.181ZM5.144,2.963a3,3,0,0,0-3,3h0V26.037a3,3,0,0,0,3,3H26.856a3,3,0,0,0,3-3V5.963a3,3,0,0,0-3-3Z\" style=\"fill:#55FF7F\"></path><rect x=\"4.313\" y=\"4.641\" width=\"23.169\" height=\"21.94\" rx=\"2.571\" ry=\"2.571\" style=\"fill:url(#b)\"></rect><path d=\"M24.911,26.641H6.884A2.634,2.634,0,0,1,4.253,24.01V7.212A2.634,2.634,0,0,1,6.884,4.581H24.911a2.634,2.634,0,0,1,2.631,2.631v16.8A2.634,2.634,0,0,1,24.911,26.641ZM6.884,4.7A2.514,2.514,0,0,0,4.373,7.212v16.8a2.514,2.514,0,0,0,2.511,2.511H24.911a2.514,2.514,0,0,0,2.511-2.511V7.212A2.514,2.514,0,0,0,24.911,4.7Z\" style=\"fill:#55FF7F\"></path><path d=\"M6.145,23.9l2.343-6.1h.87l2.5,6.1h-.92l-.712-1.848H7.673L7,23.9ZM7.9,21.4H9.974l-.637-1.7q-.291-.77-.433-1.265A7.776,7.776,0,0,1,8.576,19.6Z\"></path><path d=\"M13.607,23.9V17.8h.807v2.5h3.171V17.8h.807v6.1h-.807V21.021h-3.17V23.9Z\"></path><path d=\"M20.478,23.9V17.8h.807v3.025l3.03-3.025h1.094L22.85,20.267,25.522,23.9H24.456l-2.172-3.088-1,.974V23.9Z\"></path></g></svg>",
+            "svg_hover_map": {},
             "border_radius": 0,
             "width": 0,
             "height": 0,
@@ -244,7 +296,7 @@
             "icon_width": 0,
             "icon_height": 0,
             "icon_gap": 4,
-            "icon_position": "center",
+            "icon_position": "left",
             "pady_top": 0,
             "pady_bottom": 0,
             "margin_top": 0,
@@ -300,12 +352,67 @@
             "margin_bottom": 0
         },
         {
-            "id": "AppManagement_bt",
-            "text": "",
-            "fg": "#26b2f3",
+            "id": "KomoBT",
+            "text": "ko",
+            "fg": "#8319f5",
             "font": [
-                "JetBrainsMono NFP",
+                "Consolas",
                 16,
+                "normal"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\asset\\komorebi\\komorebi_gui_custom.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "code komorebi_gui_custom.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "taskmgr"
+                }
+            },
+            "bg": "",
+            "padx_left": 3,
+            "padx_right": 3,
+            "border": 0,
+            "border_color": "",
+            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M12 7.9502H12.01M15 7.9502H15.01M18 7.9502H18.01M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z\" stroke=\"#AAAAFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+            "svg_hover_map": {},
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "left",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
+        },
+        {
+            "id": "Tools_bt",
+            "text": "st",
+            "fg": "#ffffff",
+            "font": [
+                "Arial",
+                15,
                 "bold"
             ],
             "widget_type": "CTkLabel",
@@ -313,25 +420,11 @@
                 "Button-1": {
                     "type": "subprocess",
                     "hide": false,
-                    "admin": true,
-                    "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\init\\application_install\\applist.py"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": true,
-                    "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
                     "admin": false,
                     "new_terminal": false,
-                    "cmd": "explorer \"{dir}\""
+                    "cmd": "C:\\Users\\nahid\\delta\\Script Manager\\script_manager_gui_qt.py"
                 },
-                "Control-Button-3": {
+                "Control-Button-1": {
                     "type": "subprocess",
                     "hide": false,
                     "admin": false,
@@ -344,9 +437,9 @@
             "padx_right": 5,
             "border": 0,
             "border_color": "",
-            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path opacity=\"0.1\" d=\"M14 17.5C14 16.0955 14 15.3933 14.3371 14.8889C14.483 14.6705 14.6705 14.483 14.8889 14.3371C15.3933 14 16.0955 14 17.5 14V14V14C18.9045 14 19.6067 14 20.1111 14.3371C20.3295 14.483 20.517 14.6705 20.6629 14.8889C21 15.3933 21 16.0955 21 17.5V17.5V17.5C21 18.9045 21 19.6067 20.6629 20.1111C20.517 20.3295 20.3295 20.517 20.1111 20.6629C19.6067 21 18.9045 21 17.5 21V21V21C16.0955 21 15.3933 21 14.8889 20.6629C14.6705 20.517 14.483 20.3295 14.3371 20.1111C14 19.6067 14 18.9045 14 17.5V17.5V17.5Z\" fill=\"#06BDFF\"></path> <path opacity=\"0.1\" d=\"M3 17.5C3 16.0955 3 15.3933 3.33706 14.8889C3.48298 14.6705 3.67048 14.483 3.88886 14.3371C4.39331 14 5.09554 14 6.5 14V14V14C7.90446 14 8.60669 14 9.11114 14.3371C9.32952 14.483 9.51702 14.6705 9.66294 14.8889C10 15.3933 10 16.0955 10 17.5V17.5V17.5C10 18.9045 10 19.6067 9.66294 20.1111C9.51702 20.3295 9.32952 20.517 9.11114 20.6629C8.60669 21 7.90446 21 6.5 21V21V21C5.09554 21 4.39331 21 3.88886 20.6629C3.67048 20.517 3.48298 20.3295 3.33706 20.1111C3 19.6067 3 18.9045 3 17.5V17.5V17.5Z\" fill=\"#06BDFF\"></path> <path opacity=\"0.1\" d=\"M3 6.5C3 5.09554 3 4.39331 3.33706 3.88886C3.48298 3.67048 3.67048 3.48298 3.88886 3.33706C4.39331 3 5.09554 3 6.5 3V3V3C7.90446 3 8.60669 3 9.11114 3.33706C9.32952 3.48298 9.51702 3.67048 9.66294 3.88886C10 4.39331 10 5.09554 10 6.5V6.5V6.5C10 7.90446 10 8.60669 9.66294 9.11114C9.51702 9.32952 9.32952 9.51702 9.11114 9.66294C8.60669 10 7.90446 10 6.5 10V10V10C5.09554 10 4.39331 10 3.88886 9.66294C3.67048 9.51702 3.48298 9.32952 3.33706 9.11114C3 8.60669 3 7.90446 3 6.5V6.5V6.5Z\" fill=\"#06BDFF\"></path> <path d=\"M14 17.5C14 16.0955 14 15.3933 14.3371 14.8889C14.483 14.6705 14.6705 14.483 14.8889 14.3371C15.3933 14 16.0955 14 17.5 14V14V14C18.9045 14 19.6067 14 20.1111 14.3371C20.3295 14.483 20.517 14.6705 20.6629 14.8889C21 15.3933 21 16.0955 21 17.5V17.5V17.5C21 18.9045 21 19.6067 20.6629 20.1111C20.517 20.3295 20.3295 20.517 20.1111 20.6629C19.6067 21 18.9045 21 17.5 21V21V21C16.0955 21 15.3933 21 14.8889 20.6629C14.6705 20.517 14.483 20.3295 14.3371 20.1111C14 19.6067 14 18.9045 14 17.5V17.5V17.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M3 17.5C3 16.0955 3 15.3933 3.33706 14.8889C3.48298 14.6705 3.67048 14.483 3.88886 14.3371C4.39331 14 5.09554 14 6.5 14V14V14C7.90446 14 8.60669 14 9.11114 14.3371C9.32952 14.483 9.51702 14.6705 9.66294 14.8889C10 15.3933 10 16.0955 10 17.5V17.5V17.5C10 18.9045 10 19.6067 9.66294 20.1111C9.51702 20.3295 9.32952 20.517 9.11114 20.6629C8.60669 21 7.90446 21 6.5 21V21V21C5.09554 21 4.39331 21 3.88886 20.6629C3.67048 20.517 3.48298 20.3295 3.33706 20.1111C3 19.6067 3 18.9045 3 17.5V17.5V17.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M3 6.5C3 5.09554 3 4.39331 3.33706 3.88886C3.48298 3.67048 3.67048 3.48298 3.88886 3.33706C4.39331 3 5.09554 3 6.5 3V3V3C7.90446 3 8.60669 3 9.11114 3.33706C9.32952 3.48298 9.51702 3.67048 9.66294 3.88886C10 4.39331 10 5.09554 10 6.5V6.5V6.5C10 7.90446 10 8.60669 9.66294 9.11114C9.51702 9.32952 9.32952 9.51702 9.11114 9.66294C8.60669 10 7.90446 10 6.5 10V10V10C5.09554 10 4.39331 10 3.88886 9.66294C3.67048 9.51702 3.48298 9.32952 3.33706 9.11114C3 8.60669 3 7.90446 3 6.5V6.5V6.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M14 6.5H21\" stroke=\"#06BDFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M17.5 3V10\" stroke=\"#06BDFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M3.46447 3.46447C2 4.92893 2 7.28595 2 12C2 16.714 2 19.0711 3.46447 20.5355C4.92893 22 7.28595 22 12 22C16.714 22 19.0711 22 20.5355 20.5355C22 19.0711 22 16.714 22 12C22 7.28595 22 4.92893 20.5355 3.46447C19.0711 2 16.714 2 12 2C7.28595 2 4.92893 2 3.46447 3.46447ZM13.4881 6.44591C13.8882 6.55311 14.1256 6.96437 14.0184 7.36447L11.4302 17.0237C11.323 17.4238 10.9117 17.6613 10.5116 17.5541C10.1115 17.4468 9.8741 17.0356 9.98131 16.6355L12.5695 6.97624C12.6767 6.57614 13.088 6.3387 13.4881 6.44591ZM14.9697 8.46967C15.2626 8.17678 15.7374 8.17678 16.0303 8.46967L16.2387 8.67801C16.874 9.3133 17.4038 9.84308 17.7678 10.3202C18.1521 10.8238 18.4216 11.3559 18.4216 12C18.4216 12.6441 18.1521 13.1762 17.7678 13.6798C17.4038 14.1569 16.874 14.6867 16.2387 15.322L16.0303 15.5303C15.7374 15.8232 15.2626 15.8232 14.9697 15.5303C14.6768 15.2374 14.6768 14.7626 14.9697 14.4697L15.1412 14.2981C15.8229 13.6164 16.2797 13.1574 16.5753 12.7699C16.8577 12.3998 16.9216 12.1843 16.9216 12C16.9216 11.8157 16.8577 11.6002 16.5753 11.2301C16.2797 10.8426 15.8229 10.3836 15.1412 9.70191L14.9697 9.53033C14.6768 9.23744 14.6768 8.76257 14.9697 8.46967ZM7.96986 8.46967C8.26275 8.17678 8.73762 8.17678 9.03052 8.46967C9.32341 8.76257 9.32341 9.23744 9.03052 9.53033L8.85894 9.70191C8.17729 10.3836 7.72052 10.8426 7.42488 11.2301C7.14245 11.6002 7.07861 11.8157 7.07861 12C7.07861 12.1843 7.14245 12.3998 7.42488 12.7699C7.72052 13.1574 8.17729 13.6164 8.85894 14.2981L9.03052 14.4697C9.32341 14.7626 9.32341 15.2374 9.03052 15.5303C8.73762 15.8232 8.26275 15.8232 7.96986 15.5303L7.76151 15.322C7.12617 14.6867 6.59638 14.1569 6.23235 13.6798C5.84811 13.1762 5.57861 12.6441 5.57861 12C5.57861 11.3559 5.84811 10.8238 6.23235 10.3202C6.59638 9.84308 7.12617 9.31331 7.76151 8.67801L7.96986 8.46967Z\" fill=\"#FFFFFF\"></path> </g></svg>",
             "svg_hover_map": {
-                "#06BDFF": "#69FF05"
+                "#FFFFFF": "#00FFFF"
             },
             "border_radius": 0,
             "width": 0,
@@ -414,6 +507,119 @@
             "border_radius": 0,
             "width": 0,
             "height": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
+        },
+        {
+            "id": "AppManagement_bt",
+            "text": "",
+            "fg": "#26b2f3",
+            "font": [
+                "JetBrainsMono NFP",
+                16,
+                "bold"
+            ],
+            "widget_type": "CTkLabel",
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": true,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\init\\application_install\\applist.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": true,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\scripts\\mypygui_import\\app_store.py"
+                },
+                "Control-Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
+                }
+            },
+            "bg": "",
+            "padx_left": 5,
+            "padx_right": 5,
+            "border": 0,
+            "border_color": "",
+            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path opacity=\"0.1\" d=\"M14 17.5C14 16.0955 14 15.3933 14.3371 14.8889C14.483 14.6705 14.6705 14.483 14.8889 14.3371C15.3933 14 16.0955 14 17.5 14V14V14C18.9045 14 19.6067 14 20.1111 14.3371C20.3295 14.483 20.517 14.6705 20.6629 14.8889C21 15.3933 21 16.0955 21 17.5V17.5V17.5C21 18.9045 21 19.6067 20.6629 20.1111C20.517 20.3295 20.3295 20.517 20.1111 20.6629C19.6067 21 18.9045 21 17.5 21V21V21C16.0955 21 15.3933 21 14.8889 20.6629C14.6705 20.517 14.483 20.3295 14.3371 20.1111C14 19.6067 14 18.9045 14 17.5V17.5V17.5Z\" fill=\"#06BDFF\"></path> <path opacity=\"0.1\" d=\"M3 17.5C3 16.0955 3 15.3933 3.33706 14.8889C3.48298 14.6705 3.67048 14.483 3.88886 14.3371C4.39331 14 5.09554 14 6.5 14V14V14C7.90446 14 8.60669 14 9.11114 14.3371C9.32952 14.483 9.51702 14.6705 9.66294 14.8889C10 15.3933 10 16.0955 10 17.5V17.5V17.5C10 18.9045 10 19.6067 9.66294 20.1111C9.51702 20.3295 9.32952 20.517 9.11114 20.6629C8.60669 21 7.90446 21 6.5 21V21V21C5.09554 21 4.39331 21 3.88886 20.6629C3.67048 20.517 3.48298 20.3295 3.33706 20.1111C3 19.6067 3 18.9045 3 17.5V17.5V17.5Z\" fill=\"#06BDFF\"></path> <path opacity=\"0.1\" d=\"M3 6.5C3 5.09554 3 4.39331 3.33706 3.88886C3.48298 3.67048 3.67048 3.48298 3.88886 3.33706C4.39331 3 5.09554 3 6.5 3V3V3C7.90446 3 8.60669 3 9.11114 3.33706C9.32952 3.48298 9.51702 3.67048 9.66294 3.88886C10 4.39331 10 5.09554 10 6.5V6.5V6.5C10 7.90446 10 8.60669 9.66294 9.11114C9.51702 9.32952 9.32952 9.51702 9.11114 9.66294C8.60669 10 7.90446 10 6.5 10V10V10C5.09554 10 4.39331 10 3.88886 9.66294C3.67048 9.51702 3.48298 9.32952 3.33706 9.11114C3 8.60669 3 7.90446 3 6.5V6.5V6.5Z\" fill=\"#06BDFF\"></path> <path d=\"M14 17.5C14 16.0955 14 15.3933 14.3371 14.8889C14.483 14.6705 14.6705 14.483 14.8889 14.3371C15.3933 14 16.0955 14 17.5 14V14V14C18.9045 14 19.6067 14 20.1111 14.3371C20.3295 14.483 20.517 14.6705 20.6629 14.8889C21 15.3933 21 16.0955 21 17.5V17.5V17.5C21 18.9045 21 19.6067 20.6629 20.1111C20.517 20.3295 20.3295 20.517 20.1111 20.6629C19.6067 21 18.9045 21 17.5 21V21V21C16.0955 21 15.3933 21 14.8889 20.6629C14.6705 20.517 14.483 20.3295 14.3371 20.1111C14 19.6067 14 18.9045 14 17.5V17.5V17.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M3 17.5C3 16.0955 3 15.3933 3.33706 14.8889C3.48298 14.6705 3.67048 14.483 3.88886 14.3371C4.39331 14 5.09554 14 6.5 14V14V14C7.90446 14 8.60669 14 9.11114 14.3371C9.32952 14.483 9.51702 14.6705 9.66294 14.8889C10 15.3933 10 16.0955 10 17.5V17.5V17.5C10 18.9045 10 19.6067 9.66294 20.1111C9.51702 20.3295 9.32952 20.517 9.11114 20.6629C8.60669 21 7.90446 21 6.5 21V21V21C5.09554 21 4.39331 21 3.88886 20.6629C3.67048 20.517 3.48298 20.3295 3.33706 20.1111C3 19.6067 3 18.9045 3 17.5V17.5V17.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M3 6.5C3 5.09554 3 4.39331 3.33706 3.88886C3.48298 3.67048 3.67048 3.48298 3.88886 3.33706C4.39331 3 5.09554 3 6.5 3V3V3C7.90446 3 8.60669 3 9.11114 3.33706C9.32952 3.48298 9.51702 3.67048 9.66294 3.88886C10 4.39331 10 5.09554 10 6.5V6.5V6.5C10 7.90446 10 8.60669 9.66294 9.11114C9.51702 9.32952 9.32952 9.51702 9.11114 9.66294C8.60669 10 7.90446 10 6.5 10V10V10C5.09554 10 4.39331 10 3.88886 9.66294C3.67048 9.51702 3.48298 9.32952 3.33706 9.11114C3 8.60669 3 7.90446 3 6.5V6.5V6.5Z\" stroke=\"#06BDFF\" stroke-width=\"2\"></path> <path d=\"M14 6.5H21\" stroke=\"#06BDFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> <path d=\"M17.5 3V10\" stroke=\"#06BDFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
+            "svg_hover_map": {
+                "#06BDFF": "#69FF05"
+            },
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
+        },
+        {
+            "id": "Info_lb",
+            "text": "if",
+            "fg": "#ffffff",
+            "font": [
+                "JetBrainsMono NFP",
+                20,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "C:\\@delta\\ms1\\scripts\\info.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "explorer \"{dir}\""
+                }
+            },
+            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path d=\"M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-.696-3.534c.63 0 1.332-.288 2.196-1.458l.911-1.22a.334.334 0 0 0-.074-.472.38.38 0 0 0-.505.06l-1.475 1.679a.241.241 0 0 1-.279.061.211.211 0 0 1-.12-.244l1.858-7.446a.499.499 0 0 0-.575-.613l-3.35.613a.35.35 0 0 0-.276.258l-.086.334a.25.25 0 0 0 .243.312h1.73l-1.476 5.922c-.054.234-.144.63-.144.918 0 .666.396 1.296 1.422 1.296zm1.83-10.536c.702 0 1.242-.414 1.386-1.044.036-.144.054-.306.054-.414 0-.504-.396-.972-1.134-.972-.702 0-1.242.414-1.386 1.044a1.868 1.868 0 0 0-.054.414c0 .504.396.972 1.134.972z\" fill=\"#ffffff\"></path></g></svg>",
+            "svg_hover_map": {},
+            "bg": "",
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "padx_left": 5,
+            "padx_right": 5,
             "margin_left": 0,
             "margin_right": 0,
             "icon_path": "",
@@ -544,54 +750,6 @@
             "margin_bottom": 0
         },
         {
-            "id": "Info_lb",
-            "text": "if",
-            "fg": "#ffffff",
-            "font": [
-                "JetBrainsMono NFP",
-                20,
-                "bold"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\scripts\\info.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "explorer \"{dir}\""
-                }
-            },
-            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path d=\"M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-.696-3.534c.63 0 1.332-.288 2.196-1.458l.911-1.22a.334.334 0 0 0-.074-.472.38.38 0 0 0-.505.06l-1.475 1.679a.241.241 0 0 1-.279.061.211.211 0 0 1-.12-.244l1.858-7.446a.499.499 0 0 0-.575-.613l-3.35.613a.35.35 0 0 0-.276.258l-.086.334a.25.25 0 0 0 .243.312h1.73l-1.476 5.922c-.054.234-.144.63-.144.918 0 .666.396 1.296 1.422 1.296zm1.83-10.536c.702 0 1.242-.414 1.386-1.044.036-.144.054-.306.054-.414 0-.504-.396-.972-1.134-.972-.702 0-1.242.414-1.386 1.044a1.868 1.868 0 0 0-.054.414c0 .504.396.972 1.134.972z\" fill=\"#ffffff\"></path></g></svg>",
-            "svg_hover_map": {},
-            "bg": "",
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "padx_left": 5,
-            "padx_right": 5,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "center",
-            "pady_top": 0,
-            "pady_bottom": 0,
-            "margin_top": 0,
-            "margin_bottom": 0
-        },
-        {
             "id": "VirtualMonitor_lb",
             "text": "mn",
             "fg": "#8ab9ff",
@@ -632,177 +790,6 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "center"
-        },
-        {
-            "id": "KomoBT",
-            "text": "ko",
-            "fg": "#8319f5",
-            "font": [
-                "Consolas",
-                16,
-                "normal"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "C:\\@delta\\ms1\\asset\\komorebi\\komorebi_gui_custom.py"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "taskmgr"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "code komorebi_gui_custom.py"
-                }
-            },
-            "bg": "",
-            "padx_left": 3,
-            "padx_right": 3,
-            "border": 0,
-            "border_color": "",
-            "svg_content": "<svg viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M12 7.9502H12.01M15 7.9502H15.01M18 7.9502H18.01M6.2 19H17.8C18.9201 19 19.4802 19 19.908 18.782C20.2843 18.5903 20.5903 18.2843 20.782 17.908C21 17.4802 21 16.9201 21 15.8V8.2C21 7.0799 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V15.8C3 16.9201 3 17.4802 3.21799 17.908C3.40973 18.2843 3.71569 18.5903 4.09202 18.782C4.51984 19 5.07989 19 6.2 19Z\" stroke=\"#AAAAFF\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path> </g></svg>",
-            "svg_hover_map": {},
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "left"
-        },
-        {
-            "id": "AHKPY_BT",
-            "text": "AHK",
-            "fg": "#84ff8e",
-            "font": [
-                "Consolas",
-                16,
-                "bold"
-            ],
-            "bindings": {
-                "Button-1": {
-                    "type": "python",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\autohotkey\\shortcut_manager\\ahk_gui_pyqt.py"
-                },
-                "Button-3": {
-                    "type": "python",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "C:\\@delta\\ms1\\autohotkey\\Button_Generator\\AHK_Button.py"
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "explorer \"{dir}\""
-                },
-                "Control-Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "explorer \"{dir}\""
-                }
-            },
-            "bg": "",
-            "padx_left": 5,
-            "padx_right": 5,
-            "border": 0,
-            "border_color": "",
-            "svg_content": "<svg viewBox=\"0 0 32 32\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" fill=\"#000000\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><defs><linearGradient id=\"a\" x1=\"54.604\" y1=\"168.388\" x2=\"54.604\" y2=\"194.885\" gradientTransform=\"translate(-38.604 -165.636)\" gradientUnits=\"userSpaceOnUse\"><stop offset=\"0\" stop-color=\"#55FF7F\"></stop><stop offset=\"1\" stop-color=\"#55FF7F\"></stop></linearGradient><linearGradient id=\"b\" x1=\"68.756\" y1=\"209.152\" x2=\"91.638\" y2=\"209.152\" gradientTransform=\"translate(-50.601 -159.449) scale(0.832 0.837)\" gradientUnits=\"userSpaceOnUse\"><stop offset=\"0\" stop-color=\"#55FF7F\"></stop><stop offset=\"0.5\" stop-color=\"#55FF7F\"></stop><stop offset=\"1\" stop-color=\"#55FF7F\"></stop></linearGradient></defs><title>file_type_autohotkey</title><rect x=\"2\" y=\"2.824\" width=\"28\" height=\"26.353\" rx=\"3.088\" ry=\"3.088\" style=\"fill:url(#a)\"></rect><path d=\"M26.856,29.181H5.144A3.148,3.148,0,0,1,2,26.037V5.963A3.148,3.148,0,0,1,5.144,2.819H26.856A3.148,3.148,0,0,1,30,5.963V26.037A3.148,3.148,0,0,1,26.856,29.181ZM5.144,2.963a3,3,0,0,0-3,3h0V26.037a3,3,0,0,0,3,3H26.856a3,3,0,0,0,3-3V5.963a3,3,0,0,0-3-3Z\" style=\"fill:#55FF7F\"></path><rect x=\"4.313\" y=\"4.641\" width=\"23.169\" height=\"21.94\" rx=\"2.571\" ry=\"2.571\" style=\"fill:url(#b)\"></rect><path d=\"M24.911,26.641H6.884A2.634,2.634,0,0,1,4.253,24.01V7.212A2.634,2.634,0,0,1,6.884,4.581H24.911a2.634,2.634,0,0,1,2.631,2.631v16.8A2.634,2.634,0,0,1,24.911,26.641ZM6.884,4.7A2.514,2.514,0,0,0,4.373,7.212v16.8a2.514,2.514,0,0,0,2.511,2.511H24.911a2.514,2.514,0,0,0,2.511-2.511V7.212A2.514,2.514,0,0,0,24.911,4.7Z\" style=\"fill:#55FF7F\"></path><path d=\"M6.145,23.9l2.343-6.1h.87l2.5,6.1h-.92l-.712-1.848H7.673L7,23.9ZM7.9,21.4H9.974l-.637-1.7q-.291-.77-.433-1.265A7.776,7.776,0,0,1,8.576,19.6Z\"></path><path d=\"M13.607,23.9V17.8h.807v2.5h3.171V17.8h.807v6.1h-.807V21.021h-3.17V23.9Z\"></path><path d=\"M20.478,23.9V17.8h.807v3.025l3.03-3.025h1.094L22.85,20.267,25.522,23.9H24.456l-2.172-3.088-1,.974V23.9Z\"></path></g></svg>",
-            "svg_hover_map": {},
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "left",
-            "pady_top": 0,
-            "pady_bottom": 0,
-            "margin_top": 0,
-            "margin_bottom": 0
-        },
-        {
-            "id": "Folder_bt",
-            "text": "FD",
-            "fg": "#FFFF7F",
-            "font": [
-                "Consolas",
-                15,
-                "bold"
-            ],
-            "widget_type": "CTkLabel",
-            "bindings": {
-                "Button-1": {
-                    "type": "popup",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "folder_list",
-                    "row_limit": 1,
-                    "bg_color": "#000000",
-                    "transparent_bg": false,
-                    "border_color": "#FFFF7F",
-                    "border_px": 2
-                },
-                "Control-Button-1": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "cmd /c code C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
-                },
-                "Button-3": {
-                    "type": "subprocess",
-                    "hide": false,
-                    "admin": false,
-                    "new_terminal": false,
-                    "cmd": "cmd /c C:\\@delta\\ms1\\scripts\\mypygui_import\\folder.py"
-                }
-            },
-            "svg_content": "<svg viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <path d=\"M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z\" fill=\"#FFFF00\"></path> </g></svg>",
-            "svg_hover_map": {},
-            "bg": "",
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "padx_left": 1,
-            "padx_right": 1,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 0,
-            "icon_height": 0,
-            "icon_gap": 4,
-            "icon_position": "right",
-            "pady_top": 0,
-            "pady_bottom": 0,
-            "margin_top": 0,
-            "margin_bottom": 0
         },
         {
             "id": "Sonarr_bt",
@@ -894,51 +881,6 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "left"
-        },
-        {
-            "text": "web",
-            "fg": "#ffffff",
-            "bg": "#050505",
-            "id": "btn_1777614207",
-            "bindings": {
-                "Button-1": {
-                    "type": "popup",
-                    "hide": false,
-                    "admin": false,
-                    "cmd": "fav_apps",
-                    "row_limit": 10,
-                    "bg_color": "",
-                    "transparent_bg": false,
-                    "border_color": "yellow",
-                    "border_px": 2
-                }
-            },
-            "font": [
-                "0xProto Nerd Font",
-                16,
-                "normal"
-            ],
-            "border": 0,
-            "border_color": "",
-            "border_radius": 0,
-            "width": 0,
-            "height": 0,
-            "padx_left": 5,
-            "padx_right": 1,
-            "margin_left": 0,
-            "margin_right": 0,
-            "icon_path": "",
-            "nf_char": "",
-            "icon_width": 25,
-            "icon_height": 25,
-            "icon_gap": 4,
-            "icon_position": "left",
-            "svg_content": "<svg fill=\"#55AAFF\" viewBox=\"0 0 512 512\" id=\"_x30_1\" version=\"1.1\" xml:space=\"preserve\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><path d=\"M256,0C114.615,0,0,114.615,0,256s114.615,256,256,256s256-114.615,256-256S397.385,0,256,0z M418.275,146h-46.667 c-5.365-22.513-12.324-43.213-20.587-61.514c15.786,8.776,30.449,19.797,43.572,32.921C403.463,126.277,411.367,135.854,418.275,146 z M452,256c0,17.108-2.191,33.877-6.414,50h-64.034c1.601-16.172,2.448-32.887,2.448-50s-0.847-33.828-2.448-50h64.034 C449.809,222.123,452,238.892,452,256z M256,452c-5.2,0-21.048-10.221-36.844-41.813c-6.543-13.087-12.158-27.994-16.752-44.187 h107.191c-4.594,16.192-10.208,31.1-16.752,44.187C277.048,441.779,261.2,452,256,452z M190.813,306 c-1.847-16.247-2.813-33.029-2.813-50s0.966-33.753,2.813-50h130.374c1.847,16.247,2.813,33.029,2.813,50s-0.966,33.753-2.813,50 H190.813z M60,256c0-17.108,2.191-33.877,6.414-50h64.034c-1.601,16.172-2.448,32.887-2.448,50s0.847,33.828,2.448,50H66.414 C62.191,289.877,60,273.108,60,256z M256,60c5.2,0,21.048,10.221,36.844,41.813c6.543,13.087,12.158,27.994,16.752,44.187H202.404 c4.594-16.192,10.208-31.1,16.752-44.187C234.952,70.221,250.8,60,256,60z M160.979,84.486c-8.264,18.301-15.222,39-20.587,61.514 H93.725c6.909-10.146,14.812-19.723,23.682-28.593C130.531,104.283,145.193,93.262,160.979,84.486z M93.725,366h46.667 c5.365,22.513,12.324,43.213,20.587,61.514c-15.786-8.776-30.449-19.797-43.572-32.921C108.537,385.723,100.633,376.146,93.725,366z M351.021,427.514c8.264-18.301,15.222-39,20.587-61.514h46.667c-6.909,10.146-14.812,19.723-23.682,28.593 C381.469,407.717,366.807,418.738,351.021,427.514z\"></path></g></svg>",
-            "svg_hover_map": {},
-            "pady_top": 0,
-            "pady_bottom": 0,
-            "margin_top": 0,
-            "margin_bottom": 0
         },
         {
             "text": "Voice",
@@ -1093,6 +1035,63 @@
             "icon_height": 0,
             "icon_gap": 4,
             "icon_position": "left"
+        },
+        {
+            "id": "OS_LB",
+            "text": "OS",
+            "fg": "#59e3a7",
+            "font": [
+                "Arial",
+                16,
+                "bold"
+            ],
+            "bindings": {
+                "Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "cmd /c start windows.py"
+                },
+                "Control-Button-1": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "cmd /c code C:\\@delta\\ms1\\init\\windows.py"
+                },
+                "Button-3": {
+                    "type": "subprocess",
+                    "hide": false,
+                    "admin": false,
+                    "new_terminal": false,
+                    "cmd": "cmd /c start C:\\@delta\\ms1\\init\\windows.py"
+                }
+            },
+            "bg": "",
+            "padx_left": 5,
+            "padx_right": 5,
+            "svg_content": "<svg fill=\"#00AAFF\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 512 512\" enable-background=\"new 0 0 512 512\" xml:space=\"preserve\" stroke=\"#00AAFF\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"> <g id=\"3e91140ac1bfb9903b91c1b0ca089917\"> <path display=\"inline\" d=\"M106.667,52.438c0,0,102.125-55.527,189.487,11.393l-48.892,167.992c0,0-54.755-37.668-95.359-33.601 c-40.604,4.08-94.132,23.508-94.132,23.508L106.667,52.438z M0.5,420.565c22.539-11.652,56.373-17.558,95.347-20.821 c39.015-3.257,93.912,32.466,93.912,32.466l49.403-169.776c-7.818-5.614-44.168-30.092-89.67-33.348 c-45.516-3.252-100.354,22.244-100.354,22.244L0.5,420.565z M216.104,447.163c8.928,3.527,38.221,31.381,86.971,33.855 c48.764,2.42,102.541-22.743,102.541-22.743s47.895-167.605,48.863-168.254c0.332-0.175-0.604,0.482-0.969,0.648 c-45.595,17.849-68.87,20.506-102.496,21.309c-34.142,0.823-86.269-33.094-86.269-33.094L216.104,447.163z M322.004,81.575 l-48.987,167.019c0,0,39.802,38.999,95.866,35.771c56.095-3.269,86.531-20.95,93.975-23.45L511.5,92.416 c0,0-64.607,26.985-106.85,22.09C362.384,109.612,336.093,91.659,322.004,81.575z\"> </path> </g> </g></svg>",
+            "svg_hover_map": {
+                "#00AAFF": "#00FF7F"
+            },
+            "border": 0,
+            "border_color": "",
+            "border_radius": 0,
+            "width": 0,
+            "height": 0,
+            "margin_left": 0,
+            "margin_right": 0,
+            "icon_path": "",
+            "nf_char": "",
+            "icon_width": 0,
+            "icon_height": 0,
+            "icon_gap": 4,
+            "icon_position": "center",
+            "pady_top": 0,
+            "pady_bottom": 0,
+            "margin_top": 0,
+            "margin_bottom": 0
         }
     ],
     "buttons_right": [
