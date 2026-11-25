@@ -17235,6 +17235,8 @@ kiro-cli whoami --format json</code></pre>
             } else {
                 const [from, to] = operation === 'src_to_dst' ? [src, dst] : [dst, src];
                 cmd = `rclone sync "${from}" "${to}"`;
+                const androidSharedPath = path => /^(\/storage\/emulated\/|\/storage\/self\/primary\/|\/sdcard(?:\/|$)|\/mnt\/media_rw\/|\/data\/data\/com\.termux\/files\/home\/storage\/shared(?:\/|$))/.test(path);
+                if (projectInfo?.runtimePlatform !== 'windows' && (androidSharedPath(from) || androidSharedPath(to))) cmd += ' --local-encoding "Slash,LtGt,DoubleQuote,Colon,Question,Asterisk,Pipe,BackSlash,Ctl,RightSpace,RightPeriod,InvalidUtf8,Dot"';
                 if (fastList) cmd += ' --fast-list';
                 if (progress) cmd += ' -P';
                 if (sizeOnly) cmd += ' --size-only';

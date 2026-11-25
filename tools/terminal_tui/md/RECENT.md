@@ -3,6 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-26] - Handle Rclone Filenames on Android Shared Storage
+
+- Use Rclone's local filename encoding for Termux syncs that read from or write to Android shared storage, mapping Android-incompatible characters such as `:` and `|`.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-26] - Add Google Drive Abuse Acknowledgement Flag
 
 - Add a per-workspace `--drive-acknowledge-abuse` option to Rclone settings and include it in sync commands when enabled.

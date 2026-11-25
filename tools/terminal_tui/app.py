@@ -7975,6 +7975,17 @@ def api_rclone_sync_stream(project):
     flags = settings.get('flags') if isinstance(settings.get('flags'), dict) else {}
     from_path, to_path = (source, destination) if direction == 'src_to_dst' else (destination, source)
     command = [rclone_bin, 'sync', from_path, to_path, '-v', '--stats', '1s', '--stats-one-line']
+    # Android shared storage emulates FAT-compatible filename restrictions.
+    # Encode Windows-reserved characters (notably ':' and '|') for either
+    # direction whenever a local sync path uses shared storage.
+    if os.name != 'nt':
+        shared_storage_roots = ('/storage/emulated/', '/storage/self/primary/', '/sdcard/', '/mnt/media_rw/')
+        termux_shared_root = os.path.realpath(os.path.expanduser('~/storage/shared'))
+        def is_android_shared_path(path):
+            resolved = os.path.realpath(os.path.expanduser(path))
+            return resolved.startswith(shared_storage_roots) or resolved == termux_shared_root or resolved.startswith(termux_shared_root + os.sep)
+        if is_android_shared_path(from_path) or is_android_shared_path(to_path):
+            command.extend(['--local-encoding', 'Slash,LtGt,DoubleQuote,Colon,Question,Asterisk,Pipe,BackSlash,Ctl,RightSpace,RightPeriod,InvalidUtf8,Dot'])
     if flags.get('--fast-list', True):
         command.append('--fast-list')
     if flags.get('--size-only', True):
