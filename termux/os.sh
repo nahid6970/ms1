@@ -41,6 +41,7 @@ menu_items=(
     "About                       : about_device                            :$BLUE"
     "SSH for Android              : start_ssh_server                        :$GREEN"
     "SSH for PC                   : show_ssh_connection_info                :$GREEN"
+    "Terminal TUI [5577]          : start_terminal_tui                      :$GREEN"
     "Select Best Mirror           : select_best_mirror                      :$CYAN"
     "Pkg Update & Upgrade        : pkg_update_upgrade                      :$CYAN"
     "Pkg Search & Install        : pkg_search_install                      :$CYAN"
@@ -70,6 +71,80 @@ start_python_flask_CoC(){
     sleep 2
     # Open Chrome with the server URL
     am start -a android.intent.action.VIEW -d "http://127.0.0.1:5010" com.android.chrome
+}
+
+# Start the Terminal TUI web app from this Termux menu.
+start_terminal_tui() {
+    clear
+
+    local app_dir="$REPO_DIR/tools/terminal_tui"
+    local app_file="$app_dir/app.py"
+    local state_dir="$HOME/.local/state"
+    local venv_dir="$HOME/.local/share/terminal-tui-venv"
+    local pid_file="$state_dir/terminal-tui.pid"
+    local log_file="$state_dir/terminal-tui.log"
+    local url="http://127.0.0.1:5577/"
+    local python_bin
+
+    # Also work when this checkout is not located at $HOME/ms1.
+    if [ ! -f "$app_file" ]; then
+        local script_dir
+        script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+        app_dir="$(cd -- "$script_dir/../tools/terminal_tui" 2>/dev/null && pwd)"
+        app_file="$app_dir/app.py"
+    fi
+    if [ ! -f "$app_file" ]; then
+        echo -e "${RED}Terminal TUI app.py was not found. Expected it under $REPO_DIR/tools/terminal_tui.${NC}"
+        return 1
+    fi
+
+    mkdir -p "$state_dir"
+    if [ ! -x "$venv_dir/bin/python" ]; then
+        echo -e "${CYAN}Preparing an isolated Python environment for Terminal TUI...${NC}"
+        mkdir -p "$(dirname "$venv_dir")"
+        if ! python -m venv "$venv_dir"; then
+            echo -e "${RED}Could not create the Python environment. Try: pkg install python${NC}"
+            return 1
+        fi
+    fi
+    python_bin="$venv_dir/bin/python"
+
+    if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+        echo -e "${YELLOW}Terminal TUI is already running (PID $(cat "$pid_file")).${NC}"
+    else
+        rm -f "$pid_file"
+        echo -e "${CYAN}Starting Terminal TUI...${NC}"
+        nohup "$python_bin" "$app_file" >>"$log_file" 2>&1 </dev/null &
+        echo "$!" > "$pid_file"
+        local ready=0
+        for _ in {1..45}; do
+            if ( : >/dev/tcp/127.0.0.1/5577 ) 2>/dev/null; then
+                ready=1
+                break
+            fi
+            if ! kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+                break
+            fi
+            sleep 1
+        done
+        if ! kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+            rm -f "$pid_file"
+            echo -e "${RED}Terminal TUI did not start. Recent log output:${NC}"
+            tail -n 30 "$log_file" 2>/dev/null || true
+            return 1
+        fi
+        if [ "$ready" -eq 0 ]; then
+            echo -e "${YELLOW}The server is still starting; check $log_file if it does not load.${NC}"
+        fi
+    fi
+
+    echo -e "${GREEN}Terminal TUI: $url${NC}"
+    echo -e "${CYAN}Server log: $log_file${NC}"
+    if command -v termux-open-url >/dev/null 2>&1; then
+        termux-open-url "$url"
+    else
+        echo -e "${YELLOW}Open the URL above in your Android browser.${NC}"
+    fi
 }
 
 upload_latest_database(){
