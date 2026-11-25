@@ -7906,6 +7906,7 @@ def api_rclone_get_settings(project):
             '--size-only': True,
             '--track-renames': False,
             '--dry-run': False,
+            '--drive-acknowledge-abuse': False,
         }),
         'transfers': rclone.get('transfers', '10'),
     }
@@ -7982,6 +7983,8 @@ def api_rclone_sync_stream(project):
         command.append('--track-renames')
     if flags.get('--dry-run', False):
         command.append('--dry-run')
+    if flags.get('--drive-acknowledge-abuse', False):
+        command.append('--drive-acknowledge-abuse')
     try:
         transfers = int(settings.get('transfers', 10))
         if 1 <= transfers <= 64:

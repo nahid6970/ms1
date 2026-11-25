@@ -2901,6 +2901,7 @@
                     <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-size-only" value="--size-only" onchange="rcloneSaveSettings()"> <span>--size-only</span></label>
                     <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-track-renames" value="--track-renames" onchange="rcloneSaveSettings()"> <span>--track-renames</span></label>
                     <label class="rclone-flag-chk rclone-flag-danger"><input type="checkbox" id="rcflag-dry-run" value="--dry-run" onchange="rcloneSaveSettings()"> <span>--dry-run</span></label>
+                    <label class="rclone-flag-chk"><input type="checkbox" id="rcflag-drive-acknowledge-abuse" value="--drive-acknowledge-abuse" onchange="rcloneSaveSettings()"> <span>--drive-acknowledge-abuse</span></label>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:0.78rem; color:var(--text-secondary);">--transfers</span>
@@ -16834,6 +16835,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('rcflag-size-only').checked = false;
                 document.getElementById('rcflag-track-renames').checked = false;
                 document.getElementById('rcflag-dry-run').checked = false;
+                document.getElementById('rcflag-drive-acknowledge-abuse').checked = false;
                 document.getElementById('rcflag-transfers').value = '10';
                 rcloneSetPullOnlyEnabled(false);
                 rcloneApplyDirectionMode();
@@ -16875,6 +16877,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('rcflag-size-only').checked     = !!flags['--size-only'];
                 document.getElementById('rcflag-track-renames').checked = !!flags['--track-renames'];
                 document.getElementById('rcflag-dry-run').checked       = !!flags['--dry-run'];
+                document.getElementById('rcflag-drive-acknowledge-abuse').checked = !!flags['--drive-acknowledge-abuse'];
                 document.getElementById('rcflag-transfers').value       = s.transfers || '10';
             } catch (error) {
                 if (activeProject !== project) return;
@@ -16929,6 +16932,7 @@ kiro-cli whoami --format json</code></pre>
                         '--size-only':     document.getElementById('rcflag-size-only').checked,
                         '--track-renames': document.getElementById('rcflag-track-renames').checked,
                         '--dry-run':       document.getElementById('rcflag-dry-run').checked,
+                        '--drive-acknowledge-abuse': document.getElementById('rcflag-drive-acknowledge-abuse').checked,
                     }
                 };
                 try {
@@ -17166,6 +17170,7 @@ kiro-cli whoami --format json</code></pre>
             const progress   = document.getElementById('rcflag-progress').checked;
             const sizeOnly   = document.getElementById('rcflag-size-only').checked;
             const trackRen   = document.getElementById('rcflag-track-renames').checked;
+            const driveAcknowledgeAbuse = document.getElementById('rcflag-drive-acknowledge-abuse').checked;
             const transfers  = document.getElementById('rcflag-transfers').value.trim();
             const ignorelist = document.getElementById('rclone-ignorelist').value.trim();
 
@@ -17199,6 +17204,7 @@ kiro-cli whoami --format json</code></pre>
                 if (progress) cmd += ' -P';
                 if (sizeOnly) cmd += ' --size-only';
                 if (trackRen) cmd += ' --track-renames';
+                if (driveAcknowledgeAbuse) cmd += ' --drive-acknowledge-abuse';
                 if (isDryRun) cmd += ' --dry-run';
                 const t = parseInt(transfers);
                 if (t > 0)    cmd += ` --transfers ${t}`;

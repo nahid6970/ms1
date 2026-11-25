@@ -3,6 +3,12 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-26] - Add Google Drive Abuse Acknowledgement Flag
+
+- Add a per-workspace `--drive-acknowledge-abuse` option to Rclone settings and include it in sync commands when enabled.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-26] - Fix Mobile API Account Backup Import
 
 - Use the browser file picker to import encrypted API account backups on Android and desktop instead of requiring a server-side native file picker.
