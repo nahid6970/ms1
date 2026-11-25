@@ -847,7 +847,8 @@ def scan_projects():
             "pathExists": path_exists,
             "pathIsEmpty": os.path.isdir(project_path) and is_empty_directory(project_path),
             "hasRcloneDestination": bool(str((p.get("rclone") or {}).get("dest") or "").strip()),
-            "rcloneDestination": str((p.get("rclone") or {}).get("dest") or "")
+            "rcloneDestination": str((p.get("rclone") or {}).get("dest") or ""),
+            "androidPullOnly": bool((p.get("rclone") or {}).get("androidPullOnly", False))
         })
     return projects
 
@@ -7859,6 +7860,7 @@ def api_rclone_get_settings(project):
     result = {
         'dest': rclone.get('dest', ''),
         'androidSource': rclone.get('androidSource', proj.get('androidPath', '')),
+        'androidPullOnly': bool(rclone.get('androidPullOnly', False)),
         'ignorelist': rclone.get('ignorelist', DEFAULT_IGNORELIST),
         'flags': rclone.get('flags', {
             '--fast-list': True,
@@ -7886,6 +7888,8 @@ def api_rclone_save_settings(project):
         proj['rclone']['dest'] = data['dest']
     if 'androidSource' in data:
         proj['rclone']['androidSource'] = str(data.get('androidSource') or '').strip()
+    if 'androidPullOnly' in data:
+        proj['rclone']['androidPullOnly'] = bool(data.get('androidPullOnly'))
     if 'ignorelist' in data:
         proj['rclone']['ignorelist'] = data['ignorelist']
     if 'flags' in data:
@@ -7914,6 +7918,8 @@ def api_rclone_sync_stream(project):
     if proj is None:
         return jsonify({'error': 'Project not found.'}), 404
     settings = proj.get('rclone') or {}
+    if os.name != 'nt' and settings.get('androidPullOnly') and direction == 'src_to_dst':
+        return jsonify({'error': 'Termux pull-only mode is enabled; only destination-to-source sync is allowed.'}), 403
     raw_source = str((settings.get('androidSource') if os.name != 'nt' else '') or proj.get('path') or '').strip()
     if not raw_source:
         return jsonify({'error': 'Workspace folder is not configured.'}), 400

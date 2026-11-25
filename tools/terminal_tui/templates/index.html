@@ -2847,6 +2847,13 @@
                 <div style="font-size:.67rem;color:var(--text-muted);margin-top:4px;">Leave blank to use the workspace’s Android path.</div>
             </div>
 
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid rgba(251,146,60,.3);border-radius:8px;background:rgba(251,146,60,.06);">
+                <span style="font-size:.76rem;color:var(--text-primary);font-weight:500;">Termux pull-only mode <span style="display:block;font-size:.67rem;color:var(--text-muted);font-weight:400;margin-top:2px;">When running in Termux, allow destination → source sync only.</span></span>
+                <button id="rclone-android-pull-only" type="button" role="switch" aria-checked="false" aria-label="Termux pull-only mode" title="Allow only destination-to-source sync in Termux" onclick="rcloneTogglePullOnly()" style="position:relative;flex:0 0 40px;width:40px;height:22px;padding:0;border:1px solid #64748b;border-radius:999px;background:#334155;cursor:pointer;transition:background .15s,border-color .15s;">
+                    <span id="rclone-android-pull-only-knob" style="position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;"></span>
+                </button>
+            </div>
+
             <!-- Destination -->
             <div>
                 <label style="display:block; font-size:0.78rem; font-weight:500; color:var(--text-secondary); margin-bottom:6px;">Destination</label>
@@ -10763,6 +10770,10 @@ kiro-cli whoami --format json</code></pre>
         async function syncRcloneProjectToDestination(projectName, button, direction = 'src_to_dst') {
             const project = (projects || []).find(item => item.name === projectName && item.pathExists && item.hasRcloneDestination);
             if (!project) return;
+            if (direction === 'src_to_dst' && project.runtimePlatform !== 'windows' && project.androidPullOnly) {
+                alert('Termux pull-only mode is enabled for this workspace. Use destination → source sync.');
+                return;
+            }
             if (rcloneModalSyncRunning) {
                 if (!rcloneModalSyncQueue || rcloneModalSyncQueue.some(item => item.name === project.name)) return;
                 rcloneModalSyncQueue.push(project);
@@ -10782,6 +10793,14 @@ kiro-cli whoami --format json</code></pre>
         }
         async function syncRcloneProjectsBatch(syncProjects, button, direction = 'src_to_dst') {
             if (rcloneModalSyncRunning || !syncProjects.length) return;
+            if (direction === 'src_to_dst') {
+                const blocked = syncProjects.filter(project => project.runtimePlatform !== 'windows' && project.androidPullOnly);
+                if (blocked.length) {
+                    alert(`Skipped ${blocked.length} Termux workspace${blocked.length === 1 ? '' : 's'} with pull-only mode enabled.`);
+                    syncProjects = syncProjects.filter(project => !blocked.includes(project));
+                    if (!syncProjects.length) return;
+                }
+            }
             rcloneModalSyncRunning = true;
             rcloneModalSyncQueue = syncProjects;
             rcloneModalSyncCurrentProject = '';
@@ -16698,6 +16717,41 @@ kiro-cli whoami --format json</code></pre>
                 : 'Rclone — add a destination to enable sync';
         }
 
+        function rcloneIsPullOnlyEnabled() {
+            return document.getElementById('rclone-android-pull-only')?.getAttribute('aria-checked') === 'true';
+        }
+
+        function rcloneSetPullOnlyEnabled(enabled) {
+            const toggle = document.getElementById('rclone-android-pull-only');
+            const knob = document.getElementById('rclone-android-pull-only-knob');
+            if (!toggle || !knob) return;
+            toggle.setAttribute('aria-checked', enabled ? 'true' : 'false');
+            toggle.style.background = enabled ? '#f97316' : '#334155';
+            toggle.style.borderColor = enabled ? '#fb923c' : '#64748b';
+            knob.style.transform = enabled ? 'translateX(18px)' : 'translateX(0)';
+        }
+
+        function rcloneTogglePullOnly() {
+            rcloneSetPullOnlyEnabled(!rcloneIsPullOnlyEnabled());
+            rcloneApplyDirectionMode();
+            rcloneSaveSettings();
+        }
+
+        function rcloneApplyDirectionMode() {
+            const projectInfo = (projects || []).find(item => item.name === activeProject);
+            const enabled = rcloneIsPullOnlyEnabled();
+            const termuxRuntime = !!projectInfo && projectInfo.runtimePlatform !== 'windows';
+            const blockUpload = enabled && termuxRuntime;
+            const uploadButton = document.getElementById('rclone-s2d-btn');
+            if (!uploadButton) return;
+            uploadButton.disabled = blockUpload;
+            uploadButton.style.opacity = blockUpload ? '0.4' : '';
+            uploadButton.style.cursor = blockUpload ? 'not-allowed' : '';
+            uploadButton.title = blockUpload
+                ? 'Disabled by Termux pull-only mode; use destination → source sync.'
+                : 'Sync source → destination';
+        }
+
         const rcloneButtonColorPresets = {
             blue:   { fg: '#60a5fa', bg: '#1e3a5f' },
             purple: { fg: '#c084fc', bg: '#3b1d5a' },
@@ -16760,6 +16814,8 @@ kiro-cli whoami --format json</code></pre>
                 if (activeProject !== project) return;
 
                 document.getElementById('rclone-android-src').value = s.androidSource || proj?.androidPath || (proj?.runtimePlatform !== 'windows' ? proj?.path : '') || '';
+                rcloneSetPullOnlyEnabled(!!s.androidPullOnly);
+                rcloneApplyDirectionMode();
                 document.getElementById('rclone-dst').value = s.dest || '';
                 rcloneUpdateButtonState();
                 document.getElementById('rclone-ignorelist').value = s.ignorelist || '';
@@ -16810,6 +16866,7 @@ kiro-cli whoami --format json</code></pre>
                 const payload = {
                     dest:       document.getElementById('rclone-dst').value.trim(),
                     androidSource: document.getElementById('rclone-android-src').value.trim(),
+                    androidPullOnly: rcloneIsPullOnlyEnabled(),
                     ignorelist: document.getElementById('rclone-ignorelist').value.trim(),
                     transfers:  document.getElementById('rcflag-transfers').value.trim(),
                     flags: {
@@ -16828,6 +16885,7 @@ kiro-cli whoami --format json</code></pre>
                     });
                     if (response.ok) {
                         const projectInfo = projects.find(item => item.name === project);
+                        if (projectInfo) projectInfo.androidPullOnly = payload.androidPullOnly;
                         const hasDestination = !!payload.dest;
                         if (projectInfo && projectInfo.hasRcloneDestination !== hasDestination) {
                             projectInfo.hasRcloneDestination = hasDestination;
@@ -17034,9 +17092,15 @@ kiro-cli whoami --format json</code></pre>
         async function rcloneRun(operation) {
             const project = activeProject;
             if (!project) { alert('No active workspace selected.'); return; }
+            const projectInfo = projects ? projects.find(item => item.name === project) : null;
+            if (operation === 'src_to_dst' && projectInfo
+                && projectInfo?.runtimePlatform !== 'windows'
+                && rcloneIsPullOnlyEnabled()) {
+                alert('Termux pull-only mode is enabled. Use destination → source sync.');
+                return;
+            }
 
             const workspaceSrc = document.getElementById('rclone-src').value.trim();
-            const projectInfo = projects ? projects.find(item => item.name === project) : null;
             const androidSrc = document.getElementById('rclone-android-src').value.trim();
             const src = projectInfo?.runtimePlatform !== 'windows' ? (androidSrc || workspaceSrc) : workspaceSrc;
             const dst = document.getElementById('rclone-dst').value.trim();
