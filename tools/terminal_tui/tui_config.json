@@ -1485,7 +1485,9 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/storage/emulated/0/song",
+        "androidPullOnly": true
       },
       "gitRemote": "",
       "hideGitInit": true
@@ -1522,7 +1524,9 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/storage/emulated/0/Desktop",
+        "androidPullOnly": true
       }
     }
   ],
