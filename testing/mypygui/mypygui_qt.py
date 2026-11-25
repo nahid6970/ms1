@@ -1169,6 +1169,7 @@ def open_edit_gui(item_cfg, category, index=None):
     # Dedicated POPUP SETTINGS section
     grp_pop = QGroupBox("POPUP SETTINGS"); pop_lay = QVBoxLayout(); pop_lay.setSpacing(8); grp_pop.setLayout(pop_lay)
     row_limit_le = QLineEdit(str(first_bcfg.get("row_limit", 10))); row_limit_le.setFixedWidth(40)
+    item_spacing_le = QLineEdit(str(first_bcfg.get("item_spacing", 4))); item_spacing_le.setFixedWidth(40)
 
     pop_bg_btn = QPushButton("BG"); pop_bg_btn.setFixedWidth(60); _set_color_btn(pop_bg_btn, _temp_colors["pop_bg"])
     pop_bg_btn.clicked.connect(lambda: _pick_color(pop_bg_btn, "pop_bg"))
@@ -1181,6 +1182,7 @@ def open_edit_gui(item_cfg, category, index=None):
 
     row_pop = QWidget(); lay_p = QHBoxLayout(row_pop); lay_p.setContentsMargins(0,0,0,0); lay_p.setSpacing(10)
     lay_p.addWidget(QLabel("LIMIT")); lay_p.addWidget(row_limit_le)
+    lay_p.addWidget(QLabel("GAP")); lay_p.addWidget(item_spacing_le)
     lay_p.addWidget(pop_bg_btn); lay_p.addWidget(pop_border_btn)
     lay_p.addWidget(QLabel("PX")); lay_p.addWidget(pop_border_px_le)
     lay_p.addWidget(pop_trans_chk); lay_p.addStretch()
@@ -1269,6 +1271,8 @@ def open_edit_gui(item_cfg, category, index=None):
             if b_type == "popup":
                 try: new_bindings[bkey]["row_limit"] = int(row_limit_le.text())
                 except: new_bindings[bkey]["row_limit"] = 10
+                try: new_bindings[bkey]["item_spacing"] = max(0, int(item_spacing_le.text()))
+                except: new_bindings[bkey]["item_spacing"] = 4
                 new_bindings[bkey]["bg_color"] = _temp_colors["pop_bg"]
                 new_bindings[bkey]["transparent_bg"] = pop_trans_chk.isChecked()
                 new_bindings[bkey]["border_color"] = _temp_colors["pop_border"]
@@ -1401,7 +1405,7 @@ class AppEventFilter(QObject):
         return False
 
 class GenericPopup(QFrame):
-    def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
+    def __init__(self, parent, category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False, item_spacing=4):
         super().__init__(parent, Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
@@ -1416,7 +1420,8 @@ class GenericPopup(QFrame):
         self.setStyleSheet(f"QFrame {{ background: {bg}; border: {bpx}px solid {bc}; }} QLabel {{ border: none; background: transparent; }}")
         self.layout = QGridLayout(self)
         self.layout.setContentsMargins(4, 2, 4, 2)
-        self.layout.setSpacing(4)
+        self.layout.setHorizontalSpacing(max(0, int(item_spacing)))
+        self.layout.setVerticalSpacing(max(0, int(item_spacing)))
         _active_popups.append(self)
         self.render_items()
 
@@ -1457,7 +1462,7 @@ class GenericPopup(QFrame):
         self.layout.addWidget(add_bt, row, col)
         self.adjustSize()
 
-def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False):
+def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, border_px=1, bg_color=None, transparent_bg=False, item_spacing=4):
     # Identify which popup this button belongs to
     parent_popup = None
     curr = anchor_widget.parent()
@@ -1489,7 +1494,7 @@ def open_popup_bar(category, anchor_widget, row_limit=10, border_color=None, bor
 
     config = load_config()
     offset = int(config.get("popup_y_offset", 2))
-    popup = GenericPopup(_main_window, category, anchor_widget, row_limit, border_color, border_px, bg_color, transparent_bg)
+    popup = GenericPopup(_main_window, category, anchor_widget, row_limit, border_color, border_px, bg_color, transparent_bg, item_spacing)
     gpos = anchor_widget.mapToGlobal(anchor_widget.rect().topLeft())
     cx = gpos.x() + anchor_widget.width() // 2 - popup.width() // 2
     
@@ -1545,7 +1550,7 @@ def create_dynamic_button(parent_layout, btn_cfg, category, index=None):
         elif btn == Qt.MouseButton.RightButton: bkey = "Control-Button-3" if mods & Qt.KeyboardModifier.ControlModifier else "Button-3"
         if bkey and bkey in _bindings:
             action = _bindings[bkey]
-            if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1), action.get("bg_color"), action.get("transparent_bg", False))
+            if action.get("type") == "popup": open_popup_bar(action.get("cmd", "popup_bar"), _lbl, action.get("row_limit", 10), action.get("border_color"), action.get("border_px", 1), action.get("bg_color"), action.get("transparent_bg", False), action.get("item_spacing", 4))
             else: handle_action(action, _cfg, bkey)
     
     lbl.mousePressEvent = mousePressEvent

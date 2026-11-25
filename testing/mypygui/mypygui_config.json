@@ -163,6 +163,7 @@
                     "new_terminal": false,
                     "cmd": "folder_list",
                     "row_limit": 1,
+                    "item_spacing": 100,
                     "bg_color": "#000000",
                     "transparent_bg": false,
                     "border_color": "#FFFF7F",
