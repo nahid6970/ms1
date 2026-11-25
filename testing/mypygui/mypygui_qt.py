@@ -354,14 +354,28 @@ class SvgInputDialog(QDialog):
         """)
         layout = QVBoxLayout(self)
         
-        # Live Preview section at top
-        layout.addWidget(QLabel("LIVE PREVIEW:"))
+        # Base and hover previews side by side
+        preview_row = QHBoxLayout()
+        preview_row.addStretch()
         self.preview_label = QLabel()
         self.preview_label.setFixedSize(64, 64)
         self.preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.preview_label.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
-        p_box = QHBoxLayout(); p_box.addStretch(); p_box.addWidget(self.preview_label); p_box.addStretch()
-        layout.addLayout(p_box)
+        self.hover_preview_label = QLabel()
+        self.hover_preview_label.setFixedSize(64, 64)
+        self.hover_preview_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.hover_preview_label.setStyleSheet(f"border: 1px solid {CP_DIM}; background: {CP_PANEL};")
+        base_preview_box = QVBoxLayout()
+        base_preview_box.addWidget(QLabel("LIVE PREVIEW:"), alignment=Qt.AlignmentFlag.AlignCenter)
+        base_preview_box.addWidget(self.preview_label)
+        hover_preview_box = QVBoxLayout()
+        hover_preview_box.addWidget(QLabel("HOVER PREVIEW:"), alignment=Qt.AlignmentFlag.AlignCenter)
+        hover_preview_box.addWidget(self.hover_preview_label)
+        preview_row.addLayout(base_preview_box)
+        preview_row.addSpacing(24)
+        preview_row.addLayout(hover_preview_box)
+        preview_row.addStretch()
+        layout.addLayout(preview_row)
 
         layout.addWidget(QLabel("SVG CODE:"))
         self.txt_input = QPlainTextEdit()
@@ -395,16 +409,26 @@ class SvgInputDialog(QDialog):
         code = self.txt_input.toPlainText().strip()
         if not code:
             self.preview_label.clear()
+            self.hover_preview_label.clear()
             return
         try:
-            pix = QPixmap(64, 64)
-            pix.fill(Qt.GlobalColor.transparent)
-            p = QPainter(pix)
-            renderer = QSvgRenderer(QByteArray(code.encode('utf-8')))
-            if renderer.isValid():
-                renderer.render(p)
-            p.end()
-            self.preview_label.setPixmap(pix)
+            hover_map = {str(base).upper(): str(hover) for base, hover in self.hover_map.items()}
+            hover_code = re.sub(
+                r'#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}',
+                lambda match: hover_map.get(match.group(0).upper(), match.group(0)),
+                code,
+            )
+            for label, svg_code in ((self.preview_label, code), (self.hover_preview_label, hover_code)):
+                pix = QPixmap(64, 64)
+                pix.fill(Qt.GlobalColor.transparent)
+                p = QPainter(pix)
+                renderer = QSvgRenderer(QByteArray(svg_code.encode('utf-8')))
+                if renderer.isValid():
+                    renderer.render(p)
+                    label.setPixmap(pix)
+                else:
+                    label.clear()
+                p.end()
         except Exception as e:
             print(f"SVG preview error: {e}")
             self.preview_label.setText("ERR")
@@ -450,6 +474,7 @@ class SvgInputDialog(QDialog):
             if c.isValid():
                 self.hover_map[base_color] = c.name().upper()
                 self.update_color_panel()
+                self.update_preview()
         except Exception as e:
             print(f"Hover color picker error: {e}")
 
