@@ -2344,6 +2344,7 @@
   ],
   "hidden_project_specific_actions": [
     "project-action-export-log-btn",
-    "project-action-split-btn"
+    "project-action-split-btn",
+    "project-action-ports-btn"
   ]
 }
