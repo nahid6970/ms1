@@ -763,7 +763,10 @@ def load_projects_config():
         if os.name != "nt":
             configured_android_path = p.get("androidPath") or (p.get("rclone") or {}).get("androidSource")
             if configured_android_path:
-                p["androidPath"] = os.path.abspath(os.path.expanduser(str(configured_android_path)))
+                android_path = os.path.expanduser(str(configured_android_path))
+                if not os.path.isabs(android_path):
+                    android_path = os.path.join(os.path.expanduser("~"), android_path)
+                p["androidPath"] = os.path.abspath(android_path)
                 p["_configuredWindowsPath"] = p.get("path") or ""
                 p["path"] = p["androidPath"]
     return projs
