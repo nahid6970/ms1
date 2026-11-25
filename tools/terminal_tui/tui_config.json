@@ -207,7 +207,9 @@
           "--dry-run": false
         },
         "transfers": "10"
-      }
+      },
+      "androidPath": "/storage/emulated/0/ms1",
+      "hideGitInit": false
     },
     {
       "name": "db",
