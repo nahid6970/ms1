@@ -149,7 +149,9 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/storage/emulated/0/delta",
+        "androidPullOnly": true
       },
       "gitRemote": "",
       "hideGitInit": true
@@ -207,7 +209,7 @@
           "--dry-run": false
         },
         "transfers": "10",
-        "androidSource": "/storage/emulated/0/ms1",
+        "androidSource": "/ms1",
         "androidPullOnly": true
       },
       "androidPath": "/storage/emulated/0/ms1",
@@ -243,7 +245,9 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/db",
+        "androidPullOnly": true
       },
       "gitRemote": "https://github.com/nahid6970/db.git"
     },
@@ -277,9 +281,13 @@
           "--track-renames": false,
           "--dry-run": false
         },
-        "transfers": "10"
+        "transfers": "10",
+        "androidSource": "/storage/emulated/0/msBackups",
+        "androidPullOnly": true
       },
-      "gitRemote": ""
+      "gitRemote": "",
+      "androidPath": "",
+      "hideGitInit": true
     },
     {
       "name": "md files",
