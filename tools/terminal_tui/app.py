@@ -186,7 +186,15 @@ def _project_check_lock(manager, project_name):
         return _PROJECT_CHECK_LOCKS.setdefault(key, threading.RLock())
 
 _CONFIG_CACHE = None
+_CONFIG_CACHE_FILE_SIGNATURE = None
 _CONFIG_LOCK = threading.Lock()
+
+def _config_file_signature():
+    try:
+        stat = os.stat(CONFIG_FILE)
+        return stat.st_mtime_ns, stat.st_size
+    except OSError:
+        return None
 
 def _load_raw_config():
     if not os.path.exists(CONFIG_FILE):
@@ -207,10 +215,12 @@ def _save_raw_config(config_data):
         print(f"Error saving unified config: {e}")
 
 def get_config_val(key, default_factory=dict):
-    global _CONFIG_CACHE
+    global _CONFIG_CACHE, _CONFIG_CACHE_FILE_SIGNATURE
     with _CONFIG_LOCK:
-        if _CONFIG_CACHE is None:
+        file_signature = _config_file_signature()
+        if _CONFIG_CACHE is None or file_signature != _CONFIG_CACHE_FILE_SIGNATURE:
             _CONFIG_CACHE = _load_raw_config()
+            _CONFIG_CACHE_FILE_SIGNATURE = file_signature
         val = _CONFIG_CACHE.get(key)
         if val is None:
             val = default_factory()
@@ -219,7 +229,7 @@ def get_config_val(key, default_factory=dict):
         return copy.deepcopy(val)
 
 def set_config_val(key, val):
-    global _CONFIG_CACHE
+    global _CONFIG_CACHE, _CONFIG_CACHE_FILE_SIGNATURE
     with _CONFIG_LOCK:
         if _CONFIG_CACHE is None:
             _CONFIG_CACHE = _load_raw_config()
@@ -228,6 +238,7 @@ def set_config_val(key, val):
         import copy
         _CONFIG_CACHE[key] = copy.deepcopy(val)
         _save_raw_config(_CONFIG_CACHE)
+        _CONFIG_CACHE_FILE_SIGNATURE = _config_file_signature()
 
 def migrate_existing_configs():
     if not os.path.exists(CONFIG_FILE):
