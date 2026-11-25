@@ -14909,9 +14909,11 @@ kiro-cli whoami --format json</code></pre>
                             body: JSON.stringify({ paneId, useRealDirName: useRealDir, codexAccountId: getSelectedCodexUsageAccount(), kiroAccountId: getSelectedKiroUsageAccount() })
                         });
                         if (restoreGeneration !== workspaceRestoreGeneration) return;
-                        if (response.ok) {
-                            createTerminalPane(projectName, paneId, currentProjDetails.theme);
+                        if (!response.ok) {
+                            const error = await response.json().catch(() => ({}));
+                            throw new Error(error.error || `Failed to open terminal (HTTP ${response.status}).`);
                         }
+                        createTerminalPane(projectName, paneId, currentProjDetails.theme);
                     }
                 } finally {
                     terminalTabRestoreDepth = Math.max(0, terminalTabRestoreDepth - 1);
@@ -14925,7 +14927,8 @@ kiro-cli whoami --format json</code></pre>
                     });
                     if (restoreGeneration !== workspaceRestoreGeneration) return;
                     if (!fallbackResponse.ok) {
-                        throw new Error(`Failed to open workspace terminal (HTTP ${fallbackResponse.status})`);
+                        const error = await fallbackResponse.json().catch(() => ({}));
+                        throw new Error(error.error || `Failed to open workspace terminal (HTTP ${fallbackResponse.status}).`);
                     }
                     createTerminalPane(projectName, 'main', currentProjDetails.theme);
                 }

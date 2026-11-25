@@ -4871,7 +4871,12 @@ def api_session(project):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
+            try:
+                active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
+            except Exception as exc:
+                import traceback
+                traceback.print_exc()
+                return jsonify({"error": f"Could not start terminal for {project}: {exc}"}), 500
             
     return jsonify({
         "status": "connected",
