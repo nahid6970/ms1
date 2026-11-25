@@ -210,7 +210,7 @@
         },
         "transfers": "10",
         "androidSource": "/ms1",
-        "androidPullOnly": true
+        "androidPullOnly": false
       },
       "androidPath": "/storage/emulated/0/ms1",
       "hideGitInit": false
