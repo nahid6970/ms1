@@ -9755,7 +9755,10 @@ def _send_project_check_tray(manager, results):
         port = int(os.environ.get('TERMINAL_TUI_PORT', 5577))
     except (ValueError, TypeError):
         port = 5577
-    app_url = f"http://127.0.0.1:{port}/"
+    # Use localhost because this is the origin the user installs as a Chrome
+    # web app. The query is consumed by the SPA after startup to open the
+    # relevant project-check window.
+    app_url = f"http://localhost:{port}/?openManager={manager}"
 
     WM_TRAY_MSG = win32con.WM_USER + 20
     NIM_ADD     = 0x00000000
@@ -9781,14 +9784,30 @@ def _send_project_check_tray(manager, results):
     hwnd_box = [None]  # mutable container so the wndproc closure can reference it
 
     def wndproc(hwnd, msg, wparam, lparam):
-        # Left-click (up) or double-click on the tray icon → open app and remove icon
+        # Left-click the icon → open its project manager in the standalone app.
+        # Right-click only dismisses the tray icon.
         if msg == WM_TRAY_MSG and lparam in (
             win32con.WM_LBUTTONUP, win32con.WM_LBUTTONDBLCLK,
-            win32con.WM_RBUTTONUP,  # right-click also dismisses
+            win32con.WM_RBUTTONUP,
         ):
             try:
-                import webbrowser
-                webbrowser.open(app_url)
+                if lparam in (win32con.WM_LBUTTONUP, win32con.WM_LBUTTONDBLCLK):
+                    import subprocess
+                    chrome_candidates = [
+                        os.path.join(os.environ.get('PROGRAMFILES', r'C:\Program Files'), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+                        os.path.join(os.environ.get('PROGRAMFILES(X86)', r'C:\Program Files (x86)'), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+                        os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Google', 'Chrome', 'Application', 'chrome.exe'),
+                    ]
+                    chrome = next((path for path in chrome_candidates if path and os.path.isfile(path)), None)
+                    if chrome:
+                        subprocess.Popen(
+                            [chrome, f'--app={app_url}'],
+                            close_fds=True,
+                            creationflags=getattr(subprocess, 'DETACHED_PROCESS', 0) | getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0),
+                        )
+                    else:
+                        import webbrowser
+                        webbrowser.open(app_url)
             except Exception:
                 pass
             # Schedule removal via a posted quit so we're not inside the callback

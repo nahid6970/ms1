@@ -24688,6 +24688,17 @@ Always wrap your **entire response** in a single markdown code block.`;
             applySidebarWorkspacesVisibility();
             updateProjectChangeBadges();
             configureProjectAutoChecks();
+
+            // Tray notification launches include a manager deep link so the
+            // standalone Chrome app opens the relevant project-check window.
+            const openManager = new URLSearchParams(window.location.search).get('openManager');
+            if (openManager === 'rclone' || openManager === 'github') {
+                history.replaceState(null, '', window.location.pathname + window.location.hash);
+                requestAnimationFrame(() => {
+                    if (openManager === 'rclone') openRcloneProjectsModal();
+                    else openGitHubProjectsModal();
+                });
+            }
             
             const savedActiveProject = localStorage.getItem('active-project');
             if (savedActiveProject) {

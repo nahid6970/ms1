@@ -1,41 +1,6 @@
 {
   "projects": [
     {
-      "name": "Delta-Main",
-      "path": "C:\\Users\\nahid\\delta",
-      "category": "",
-      "pinned": true,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#161c26",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "rclone": {
-        "dest": "gu:/delta_main/",
-        "ignorelist": "C:/Users/nahid/delta/ignorelist.txt",
-        "flags": {
-          "--fast-list": true,
-          "-P": true,
-          "--size-only": true,
-          "--track-renames": false,
-          "--dry-run": false
-        },
-        "transfers": "10"
-      },
-      "gitRemote": "",
-      "hideGitInit": true
-    },
-    {
       "name": "Terminal TUI",
       "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
       "pinned": false,
@@ -132,6 +97,62 @@
         },
         "transfers": "10"
       }
+    },
+    {
+      "name": "mycell - 5018",
+      "path": "C:\\@delta\\ms1\\flask\\5018_cell",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "borderColor": "#232c3d",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#4478c9",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "category": "Flask"
+    },
+    {
+      "name": "Delta",
+      "path": "C:\\Users\\nahid\\delta",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#0b140f",
+        "foreground": "#c8d5ce",
+        "cursor": "#ea3a1f",
+        "borderColor": "#ffffff",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#ffffff",
+        "textColor": "#000000",
+        "pathColor": "#163055",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "rclone": {
+        "dest": "gu:/delta_main/",
+        "ignorelist": "C:/Users/nahid/delta/ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": false,
+          "--dry-run": false
+        },
+        "transfers": "10"
+      },
+      "gitRemote": "",
+      "hideGitInit": true
     },
     {
       "name": "Default",
@@ -475,27 +496,6 @@
         "accentColor": "#2563eb"
       },
       "bookmarks": []
-    },
-    {
-      "name": "mycell - 5018",
-      "path": "C:\\@delta\\ms1\\flask\\5018_cell",
-      "pinned": false,
-      "theme": {
-        "background": "#000000",
-        "foreground": "#d1d5db",
-        "cursor": "#3b82f6",
-        "borderColor": "#232c3d",
-        "scrollbarColor": "#475569",
-        "scrollbarIdleColor": "#2d3748"
-      },
-      "cardTheme": {
-        "bgColor": "#4478c9",
-        "textColor": "#f1f5f9",
-        "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
-      },
-      "bookmarks": [],
-      "category": "Flask"
     },
     {
       "name": "TV Show - 5011",
@@ -1791,35 +1791,6 @@
   ],
   "agent_handoff_conversations": [
     {
-      "id": "2feda58d-e78f-4928-8913-222e7a1c8cf6",
-      "project": "Terminal TUI",
-      "originAgent": "codex",
-      "originSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
-      "sessions": [
-        {
-          "agent": "codex",
-          "sessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279"
-        }
-      ],
-      "handoffs": [
-        {
-          "id": "f936feaa-1eff-4581-aec0-40eb1417bf2e",
-          "token": "981a7dfa48154759a440e8634dc79442",
-          "sourceAgent": "codex",
-          "sourceSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
-          "targetAgent": "pi",
-          "targetSessionId": "01a1929f-7cd5-70b4-8902-b3d718447d39",
-          "status": "active",
-          "createdAt": 1793461283.2775137
-        }
-      ],
-      "activeHandoffId": "f936feaa-1eff-4581-aec0-40eb1417bf2e",
-      "activeAgent": "codex",
-      "activeSessionId": "01a14e2d-6359-7a72-bedc-72c82c82b279",
-      "status": "active",
-      "updatedAt": 1793461283.2775137
-    },
-    {
       "id": "271117ed-8fc9-4870-b1b5-c962acdd7c68",
       "project": "MS1",
       "originAgent": "codex",
@@ -1988,7 +1959,17 @@
       "codex:01a1958a-84f6-78a2-a90a-f2d971f489ad": "Auto-apply selected account to new terminal sessions",
       "kiro:d108a669-5e6d-445a-bcc2-b977fac98c44": "Multiple Short Essays and Movie Recommendations",
       "codex:01a19f7d-0436-7200-a6a8-04e88d26542c": "Fixing Google ACP Sign In and Sign Out UI",
-      "codex:01a1a540-fb17-7ff1-bc67-25714cb6df48": "Fix Kiro CLI v3 Session List"
+      "codex:01a1a540-fb17-7ff1-bc67-25714cb6df48": "Fix Kiro CLI v3 Session List",
+      "codex:01a2085c-59ba-7a20-86b2-b099d3e26e2b": "Workspace Divider And Restart Progress Card",
+      "codex:01a20268-b7c3-7b91-80bd-da7891bf9147": "Update Frameworks to Use Official Scaffolding",
+      "codex:01a1fd4d-5d0b-7ac0-934b-37a2fc480901": "Add Git Project Rescue to UI",
+      "codex:01a1e27e-34ea-7642-aa14-01b5300fc516": "Add Push Buttons and AI Commit to Git Modal",
+      "codex:01a1df83-6f27-74b3-aff4-128877ac2727": "Add Gitignore AI Button to Git Init Modal",
+      "codex:01a1c4b6-e5e1-7b01-82e4-6c1d65197c5e": "Fixing Windows App Icons and Notifications",
+      "codex:01a1cb6a-5df4-77a3-a115-95969a588455": "Fixing terminal popups and adding CLI toggles",
+      "codex:01a1c09b-664c-7a53-a0f4-f287ebd6a4ae": "Fix Antigravity and Codex usage modal alignment",
+      "codex:01a1b45b-58bc-7b81-b411-13b5ad87a6cd": "Fix Git remote sync and workspace transitions",
+      "codex:01a1aa61-1b71-7fe1-ad58-abfdff094354": "Remove arrow from push button in git modal"
     },
     "Screenshot Region": {
       "kiro:23400fc8-b02d-4fe8-ac1e-c0bc9d6db9e5": "Fixing Snipping Tool Image Loading Issue",

@@ -2,6 +2,14 @@
 
 ---
 
+## [2026-11-25] - Project Check Tray Click Opened the Wrong Window
+**Problem:** Clicking a GitHub or Rclone tray icon opened the default browser at the app home page instead of the installed standalone web app and the relevant project-check window.
+**Root Cause:** The tray handler used `webbrowser.open()` with the generic app URL and did not identify which manager should open.
+**Solution:** Launch the app URL in Chrome app mode with a manager deep link. The SPA consumes that link after workspace and project-check settings load, then opens the matching GitHub or Rclone manager. Right-click now dismisses the tray icon without opening a browser.
+**Files Modified:** `app.py`, `templates/index.html`
+
+---
+
 ## [2026-10-12] - Bangla Text Broken/Unreadable in Terminal
 **Problem:** Bangla text in the terminal appeared with broken spacing — each character isolated in its own cell, matras and hasants not combining, text completely unreadable.
 **Root Cause:** xterm.js uses a fixed-width cell grid. Bangla Unicode shaping requires combining multiple codepoints into single glyphs that can reorder visually. This is fundamentally incompatible with the cell model, regardless of font choice. Previous attempts (Vrinda/Nirmala UI font stack, Unicode 11 width handling) confirmed this — fonts supply glyphs but cannot change the cell model.
