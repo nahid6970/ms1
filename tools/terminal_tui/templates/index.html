@@ -5912,6 +5912,13 @@ kiro-cli whoami --format json</code></pre>
             separator.title = 'Projects without a running session';
             const label = document.createElement('span');
             label.className = 'workspace-project-group-separator-label';
+            if (id === 'workspace-dropdown-inactive-workspaces-separator' || id === 'workspace-sidebar-inactive-workspaces-separator') {
+                label.setAttribute('aria-hidden', 'true');
+                label.style.cssText = 'width:22px;height:22px;justify-content:center;padding:0;letter-spacing:0;';
+                label.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+                separator.appendChild(label);
+                return separator;
+            }
             const dot = document.createElement('span');
             dot.id = id + '-dot';
             dot.className = 'workspace-project-group-separator-dot';
