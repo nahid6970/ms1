@@ -16,8 +16,10 @@ import {
 export interface RefreshChannelResult {
   channelId: string;
   channelName: string | null;
+  thumbnail?: string;
   newVideos: number;
   durationsUpdated: number;
+  newVideoDetails: { videoId: string; title: string; link: string; published: string }[];
 }
 
 export interface FetchMoreResult {
@@ -63,6 +65,7 @@ export const refreshChannel = action({
 
     let playlistNewVideos = 0;
     let playlistDurationsUpdated = 0;
+    let newVideoDetails: RefreshChannelResult["newVideoDetails"] = [];
 
     for (const plId of playlistIds) {
       try {
@@ -94,6 +97,7 @@ export const refreshChannel = action({
           }
           playlistNewVideos += plResult.newVideos;
           playlistDurationsUpdated += plResult.durationsUpdated;
+          newVideoDetails.push(...plResult.newVideoDetails);
         }
       } catch (err) {
         console.error(`Failed to fetch playlist ${plId}:`, err);
@@ -102,16 +106,18 @@ export const refreshChannel = action({
 
     if (entries.length === 0 && playlistIds.length > 0) {
       // Only playlist rules — no regular channel feed needed
-      return { channelId, channelName: channel?.channelName ?? null, newVideos: playlistNewVideos, durationsUpdated: playlistDurationsUpdated };
+      return { channelId, channelName: channel?.channelName ?? null, newVideos: playlistNewVideos, durationsUpdated: playlistDurationsUpdated, newVideoDetails };
     }
 
     if (entries.length === 0) {
-      return { channelId, channelName: channel?.channelName ?? null, newVideos: 0, durationsUpdated: 0 };
+      return { channelId, channelName: channel?.channelName ?? null, newVideos: 0, durationsUpdated: 0, newVideoDetails };
     }
 
-    if (channel && !channel.thumbnail) {
+    let channelThumbnail = channel?.thumbnail;
+    if (channel && !channelThumbnail) {
       const info = await resolveChannelInfoWithApiKey(channel.url, apiKey);
       if (info.thumbnail) {
+        channelThumbnail = info.thumbnail;
         await ctx.runMutation(internal.channels.updateRow, {
           channelId,
           thumbnail: info.thumbnail,
@@ -138,25 +144,28 @@ export const refreshChannel = action({
       channelName: channelTitle,
       newVideos: result.newVideos + playlistNewVideos,
       durationsUpdated: result.durationsUpdated + playlistDurationsUpdated,
+      thumbnail: channelThumbnail,
+      newVideoDetails: [...newVideoDetails, ...result.newVideoDetails],
     };
   },
 });
 
 export const refreshAll = action({
   args: {},
-  handler: async (ctx): Promise<{ totalNew: number; durationsUpdated: number }> => {
+  handler: async (ctx): Promise<{ totalNew: number; durationsUpdated: number; channels: RefreshChannelResult[] }> => {
     const channels = await ctx.runQuery(internal.channels.listRows);
     let totalNew = 0;
     let durationsUpdated = 0;
     const results = await Promise.all(
-      channels.map(async (channel: { channelId: string }) => {
+      channels.map(async (channel) => {
         try {
-          return await ctx.runAction(api.refresh.refreshChannel, {
+          const result = await ctx.runAction(api.refresh.refreshChannel, {
             channelId: channel.channelId,
           });
+          return { ...result, thumbnail: result.thumbnail ?? channel.thumbnail };
         } catch (err) {
           console.error(`Failed to refresh channel ${channel.channelId}:`, err);
-          return { channelId: channel.channelId, channelName: null, newVideos: 0, durationsUpdated: 0 };
+          return { channelId: channel.channelId, channelName: null, thumbnail: channel.thumbnail, newVideos: 0, durationsUpdated: 0, newVideoDetails: [] };
         }
       }),
     );
@@ -164,7 +173,7 @@ export const refreshAll = action({
       totalNew += result.newVideos;
       durationsUpdated += result.durationsUpdated;
     }
-    return { totalNew, durationsUpdated };
+    return { totalNew, durationsUpdated, channels: results };
   },
 });
 

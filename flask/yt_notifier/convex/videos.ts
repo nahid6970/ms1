@@ -587,6 +587,7 @@ export const addFromFeed = internalMutation({
     const titleFilters = channel?.titleFilters ?? [];
     let newVideos = 0;
     let durationsUpdated = 0;
+    const newVideoDetails: { videoId: string; title: string; link: string; published: string }[] = [];
     for (const entry of entries) {
       if (!entry.videoId) continue;
       if (!skipTitleFilter && !titleMatchesRules(entry.title, channel?.rulesText, titleFilters)) continue;
@@ -607,6 +608,7 @@ export const addFromFeed = internalMutation({
           sourcePlaylistTitle: sourcePlaylistTitle || undefined,
         });
         newVideos += 1;
+        newVideoDetails.push({ videoId: entry.videoId, title: entry.title, link: entry.link, published: entry.published });
       } else {
         const patch: { title?: string; link?: string; published?: string; duration?: string; sourcePlaylistId?: string; sourcePlaylistTitle?: string } = {};
         if (existing.title !== entry.title) patch.title = entry.title;
@@ -621,7 +623,7 @@ export const addFromFeed = internalMutation({
         }
       }
     }
-    return { newVideos, durationsUpdated };
+    return { newVideos, durationsUpdated, newVideoDetails };
   },
 });
 
