@@ -17,32 +17,51 @@ if (-not (Test-Path -LiteralPath $ffmpegPath)) {
     }
 }
 
-# Accept an optional starting folder, like trim.ps1 accepts an optional file.
-$folder = if ($args.Count -gt 0) { $args[0] } else { "" }
-$folder = $folder.Replace('"', '').Trim()
+# Accept an optional starting folder or comma-separated video paths.
+$inputSpec = if ($args.Count -gt 0) { $args -join "," } else { "" }
+$inputSpec = $inputSpec.Replace('"', '').Trim()
 
 do {
-    if (-not $folder) {
-        Write-GreenText "Enter the folder containing the MP4 videos to merge"
-        $folder = (Read-Host).Replace('"', '').Trim()
+    if (-not $inputSpec) {
+        Write-GreenText "Enter a folder containing MP4 videos, or video file paths separated by commas (in merge order)"
+        $inputSpec = (Read-Host).Replace('"', '').Trim()
     }
 
-    if (-not (Test-Path -LiteralPath $folder -PathType Container)) {
-        Write-Host "Folder not found: $folder" -ForegroundColor Red
-    }
-    else {
+    $videoFiles = @()
+    $outputDirectory = $null
+    $inputIsValid = $true
+
+    if (Test-Path -LiteralPath $inputSpec -PathType Container) {
+        $outputDirectory = (Resolve-Path -LiteralPath $inputSpec).Path
         # Exclude the previous output so rerunning the script won't merge it again.
         $videoFiles = @(
-            Get-ChildItem -LiteralPath $folder -File -Filter *.mp4 |
+            Get-ChildItem -LiteralPath $outputDirectory -File -Filter *.mp4 |
                 Where-Object { $_.Name -ne "merged.mp4" } |
                 Sort-Object Name
         )
-
-        if ($videoFiles.Count -lt 2) {
-            Write-Host "Please provide at least two MP4 files in the folder." -ForegroundColor Yellow
+    }
+    else {
+        # Explicit file lists preserve the order entered by the user.
+        $filePaths = @($inputSpec -split ',' | ForEach-Object { $_.Trim().Trim('"') } | Where-Object { $_ })
+        $missingFiles = @($filePaths | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
+        if ($missingFiles.Count -gt 0) {
+            Write-Host "File not found: $($missingFiles -join ', ')" -ForegroundColor Red
+            $inputIsValid = $false
         }
         else {
-            $outputPath = Join-Path $folder "merged.mp4"
+            $videoFiles = @($filePaths | ForEach-Object { Get-Item -LiteralPath $_ })
+            if ($videoFiles.Count -gt 0) {
+                $outputDirectory = $videoFiles[0].DirectoryName
+            }
+        }
+    }
+
+    if ($inputIsValid) {
+        if ($videoFiles.Count -lt 2) {
+            Write-Host "Please provide at least two MP4 files." -ForegroundColor Yellow
+        }
+        else {
+            $outputPath = Join-Path $outputDirectory "merged.mp4"
             $ffmpegArgs = @("-y")
             foreach ($file in $videoFiles) {
                 $ffmpegArgs += @("-i", $file.FullName)
@@ -69,7 +88,7 @@ do {
             $ffmpegArgs += $videoEncoderArgs
             $ffmpegArgs += @("-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", $outputPath)
 
-            Write-Host "Merging $($videoFiles.Count) videos from '$folder' with corrected timestamps..."
+            Write-Host "Merging $($videoFiles.Count) videos with corrected timestamps..."
             & $ffmpegPath @ffmpegArgs
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "Videos merged successfully. Output file: $outputPath" -ForegroundColor Green
@@ -80,8 +99,8 @@ do {
         }
     }
 
-    Write-GreenText "Enter another folder to merge, or press Enter to finish"
-    $folder = (Read-Host).Replace('"', '').Trim()
-} while ($folder)
+    Write-GreenText "Enter another folder or comma-separated video list, or press Enter to finish"
+    $inputSpec = (Read-Host).Replace('"', '').Trim()
+} while ($inputSpec)
 
 Pause
