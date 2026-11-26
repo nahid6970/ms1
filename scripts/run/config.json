@@ -4,7 +4,8 @@
     "C:\\@delta\\db": true,
     "C:\\@delta\\msBackups": true,
     "C:\\Users\\nahid\\Pictures": false,
-    "D:\\": true
+    "D:\\": false,
+    "C:\\Users\\nahid\\delta": true
   },
   "visibility": {
     ".git": false,
