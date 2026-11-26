@@ -2332,7 +2332,8 @@ def rename_bookmark(file_path):
     with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
-def show_git_ages(file_paths):
+def show_git_ages(file_paths, display_paths=None):
+    display_paths = display_paths or {}
     config = load_config()
     if not config.get("git_age_enabled", True):
         print("\033[93mGit modification ages are turned off in F7 configuration.\033[0m")
@@ -2363,7 +2364,7 @@ def show_git_ages(file_paths):
                     f"{hours}h" if hours or days else "",
                     f"{minutes}m"
                 ) if part)
-                print(f"{file_path}  \033[92m{age_text}\033[0m")
+                print(f"{display_paths.get(file_path, file_path)}  \033[92m{age_text}\033[0m")
                 shown_count += 1
             except Exception as error:
                 continue
@@ -2394,14 +2395,18 @@ def show_git_ages_for_query(query, feeder_path):
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         terms = [term.casefold() for term in query.split()]
         matching_paths = []
+        display_paths = {}
         for line in result.stdout.splitlines():
             fields = line.split('\t', 1)
             if len(fields) != 2:
                 continue
-            display = ansi_escape.sub('', fields[0]).casefold()
+            clean_display = ansi_escape.sub('', fields[0])
+            clean_display = re.sub(r'[│├└─]+', '', clean_display).strip()
+            display = clean_display.casefold()
             if all(term in display for term in terms) and os.path.isfile(fields[1]):
                 matching_paths.append(fields[1])
-        show_git_ages(matching_paths)
+                display_paths[fields[1]] = clean_display
+        show_git_ages(matching_paths, display_paths)
     except Exception as error:
         print(f"Could not find matching files: {error}")
         try:
