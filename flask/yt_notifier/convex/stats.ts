@@ -148,8 +148,18 @@ export const heatmap = query({
     const estimatedDbMb = Math.round((estimatedDbBytes / (1024 * 1024)) * 100) / 100;
 
     const todayStr = new Date().toISOString().slice(0, 10);
-    const allQuotaRows = await ctx.db.query("apiQuota").collect();
-    const todayQuotaRows = allQuotaRows.filter((row) => row.day === todayStr);
+    // apiQuota currently stores one document per API request. Keep the
+    // historical scan bounded so Stats remains below Convex's per-execution
+    // document-read limit as that table grows.
+    const allQuotaRows = await ctx.db
+      .query("apiQuota")
+      .withIndex("by_day")
+      .order("desc")
+      .take(10_000);
+    const todayQuotaRows = await ctx.db
+      .query("apiQuota")
+      .withIndex("by_day", (q) => q.eq("day", todayStr))
+      .collect();
 
     const totalQuotaUnits = allQuotaRows.reduce((acc, row) => acc + (row.units ?? 0), 0);
     const totalQuotaRequests = allQuotaRows.reduce((acc, row) => acc + (row.requests ?? 0), 0);
