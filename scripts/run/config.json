@@ -99,7 +99,7 @@
   "show_extension_dots": true,
   "show_extension_commas": true,
   "git_age_enabled": true,
-  "git_age_max_files": 100000,
+  "git_age_max_files": 25,
   "bookmarked_config_setting": {
     "type": "theme_color",
     "key": "icon_colors",

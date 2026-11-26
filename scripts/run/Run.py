@@ -1480,7 +1480,7 @@ def search_directories_and_files():
 │                            SHORTCUTS MENU                                 │
 ├───────────────────────────────────────────────────────────────────────────┤
 │  F2: Img Mode   F3: View Mode  F4: Refresh    F5: Bookmark   F6: Rename   │
-│  F7: Configure  Alt-R: Ref/Top Ctrl-H: Configure                          │
+│  F7: Configure  Ctrl-G: Git ages  Alt-R: Ref/Top Ctrl-H: Configure        │
 │                                                                           │
 │  Ctrl-C: Copy   Ctrl-E: Toggle Collapse       Alt-E: Expand All           │
 │  Ctrl-N: Editor Ctrl-O: Folder Ctrl-P: Preview Ctrl-R: Run                 │
@@ -2238,7 +2238,7 @@ for root_dir in directories:
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
             f"--bind=ctrl-o:execute-silent(python \"{script_path}\" --open-item {{2}})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
-            f"--bind=ctrl-g:select-all+execute(python \"{script_path}\" --show-git-ages {{+2}})",
+            f"--bind=ctrl-g:execute(python \"{script_path}\" --show-git-ages-query \"{feeder_script_file}\" {{q}})",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
@@ -2359,7 +2359,11 @@ def show_git_ages(file_paths):
                     days, seconds = divmod(seconds, 86400)
                     hours, seconds = divmod(seconds, 3600)
                     minutes = seconds // 60
-                    age_text = (f"{days}d" if days else "") + (f"{hours}h" if hours or days else "") + f"{minutes}m ago"
+                    age_text = " ".join(part for part in (
+                        f"{days}d" if days else "",
+                        f"{hours}h" if hours or days else "",
+                        f"{minutes}m"
+                    ) if part)
                 print(f"{file_path}  \033[92m{age_text}\033[0m")
             except Exception as error:
                 print(f"{file_path}  (could not read Git history: {error})")
@@ -2369,6 +2373,41 @@ def show_git_ages(file_paths):
             con.readline()
     except Exception:
         pass
+
+def show_git_ages_for_query(query, feeder_path):
+    if not query.strip():
+        print("\033[93mType a search query first, then press Ctrl+G.\033[0m")
+        try:
+            with open('CON' if os.name == 'nt' else '/dev/tty', 'r', encoding='utf-8') as con:
+                print("\nPress Enter to return to search...", end='', flush=True)
+                con.readline()
+        except Exception:
+            pass
+        return
+    try:
+        result = subprocess.run([sys.executable, feeder_path], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "Could not read the searchable file list")
+        import re
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        terms = [term.casefold() for term in query.split()]
+        matching_paths = []
+        for line in result.stdout.splitlines():
+            fields = line.split('\t', 1)
+            if len(fields) != 2:
+                continue
+            display = ansi_escape.sub('', fields[0]).casefold()
+            if all(term in display for term in terms) and os.path.isfile(fields[1]):
+                matching_paths.append(fields[1])
+        show_git_ages(matching_paths)
+    except Exception as error:
+        print(f"Could not find matching files: {error}")
+        try:
+            with open('CON' if os.name == 'nt' else '/dev/tty', 'r', encoding='utf-8') as con:
+                print("\nPress Enter to return to search...", end='', flush=True)
+                con.readline()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -2386,6 +2425,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--show-git-ages":
             show_git_ages(sys.argv[2:])
+            sys.exit(0)
+        elif sys.argv[1] == "--show-git-ages-query" and len(sys.argv) > 2:
+            show_git_ages_for_query(sys.argv[3] if len(sys.argv) > 3 else "", sys.argv[2])
             sys.exit(0)
         elif sys.argv[1] == "--list-roots":
             list_roots()
