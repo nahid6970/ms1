@@ -1558,6 +1558,28 @@
         "androidPullOnly": true
       },
       "androidPath": "/storage/emulated/0/Desktop"
+    },
+    {
+      "name": "Runner",
+      "path": "C:\\Users\\nahid\\delta\\Runner",
+      "androidPath": "",
+      "category": "",
+      "pinned": false,
+      "theme": {
+        "background": "#000000",
+        "foreground": "#d1d5db",
+        "cursor": "#3b82f6",
+        "scrollbarColor": "#475569",
+        "scrollbarIdleColor": "#2d3748"
+      },
+      "cardTheme": {
+        "bgColor": "#161c26",
+        "textColor": "#f1f5f9",
+        "pathColor": "#94a3b8",
+        "accentColor": "#2563eb"
+      },
+      "bookmarks": [],
+      "gitRemote": "https://github.com/nahid6970/runner.git"
     }
   ],
   "extension_icons": {
