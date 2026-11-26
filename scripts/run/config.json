@@ -104,5 +104,6 @@
     "type": "theme_color",
     "key": "icon_colors",
     "label": "Configure Icon Colors"
-  }
+  },
+  "view_mode": "name"
 }

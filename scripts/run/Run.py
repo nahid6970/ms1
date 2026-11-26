@@ -2341,32 +2341,34 @@ def show_git_ages(file_paths):
     else:
         import time
         print("\033[96mGit modification age\033[0m\n")
+        shown_count = 0
         for file_path in file_paths:
             if not os.path.isfile(file_path):
                 continue
             try:
                 repo = subprocess.run(["git", "-C", os.path.dirname(file_path), "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=3)
                 if repo.returncode != 0:
-                    print(f"\033[90m{file_path}  (not in a Git repository)\033[0m")
                     continue
                 repo_root = os.path.normpath(repo.stdout.strip())
                 relative = os.path.relpath(file_path, repo_root)
                 result = subprocess.run(["git", "-C", repo_root, "log", "-1", "--format=%ct", "--", relative], capture_output=True, text=True, timeout=5)
                 if result.returncode != 0 or not result.stdout.strip():
-                    age_text = "no Git commit found"
-                else:
-                    seconds = max(0, int(time.time()) - int(result.stdout.strip()))
-                    days, seconds = divmod(seconds, 86400)
-                    hours, seconds = divmod(seconds, 3600)
-                    minutes = seconds // 60
-                    age_text = " ".join(part for part in (
-                        f"{days}d" if days else "",
-                        f"{hours}h" if hours or days else "",
-                        f"{minutes}m"
-                    ) if part)
+                    continue
+                seconds = max(0, int(time.time()) - int(result.stdout.strip()))
+                days, seconds = divmod(seconds, 86400)
+                hours, seconds = divmod(seconds, 3600)
+                minutes = seconds // 60
+                age_text = " ".join(part for part in (
+                    f"{days}d" if days else "",
+                    f"{hours}h" if hours or days else "",
+                    f"{minutes}m"
+                ) if part)
                 print(f"{file_path}  \033[92m{age_text}\033[0m")
+                shown_count += 1
             except Exception as error:
-                print(f"{file_path}  (could not read Git history: {error})")
+                continue
+        if shown_count == 0:
+            print("No matching Git-tracked files.")
     try:
         with open('CON' if os.name == 'nt' else '/dev/tty', 'r', encoding='utf-8') as con:
             print("\nPress Enter to return to search...", end='', flush=True)
