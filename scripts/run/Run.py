@@ -1956,6 +1956,23 @@ if os.path.exists(collapsed_file):
     except:
         pass
 
+# Use terminal cell width (rather than character count) to keep icon columns aligned.
+def terminal_width(value):
+    try:
+        from wcwidth import wcswidth
+        measured = wcswidth(value)
+        if measured >= 0:
+            return measured
+    except ImportError:
+        pass
+    import unicodedata
+    width = 0
+    for char in value:
+        if unicodedata.combining(char) or char in ('\u200d', '\ufe0f'):
+            continue
+        width += 2 if unicodedata.east_asian_width(char) in ('W', 'F') or 0x1F300 <= ord(char) <= 0x1FAFF else 1
+    return width
+
 # Helper function to format display
 def format_display(full_path, is_bookmarked, tree_prefix=""):
     is_dir = os.path.isdir(full_path)
@@ -1986,7 +2003,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             icon_color = line_color
             
         if folder_icon:
-            icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in folder_icon)
+            icon_width = terminal_width(folder_icon)
             padding = " " * max(1, 3 - icon_width)
             icon = f"\033[38;5;{{icon_color}}m{{folder_icon}}\033[38;5;{{line_color}}m{{padding}}"
     else:
@@ -2019,7 +2036,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
             icon_color = line_color
             
         if file_icon:
-            icon_width = sum(2 if ord(c) > 0x2000 or 0x1f300 <= ord(c) <= 0x1f9ff else 1 for c in file_icon)
+            icon_width = terminal_width(file_icon)
             padding = " " * max(1, 3 - icon_width)
             icon = f"\033[38;5;{{icon_color}}m{{file_icon}}\033[38;5;{{line_color}}m{{padding}}"
         
