@@ -5553,6 +5553,7 @@ kiro-cli whoami --format json</code></pre>
         let editingBookmarkIndex = null;
         let extensionIconsMap = {};
         let bookmarkSubcmdsMap = {};
+        let orphanedBookmarks = [];
 
         async function loadExtensionIconsMap() {
             try {
@@ -5573,6 +5574,15 @@ kiro-cli whoami --format json</code></pre>
                 }
             } catch (err) {
                 console.error("Error loading subcommands map:", err);
+            }
+        }
+
+        async function loadOrphanedBookmarks() {
+            try {
+                const res = await fetch('/api/bookmarks/orphaned');
+                if (res.ok) orphanedBookmarks = await res.json();
+            } catch (err) {
+                console.error('Error loading unassigned bookmarks:', err);
             }
         }
 
@@ -13282,7 +13292,7 @@ kiro-cli whoami --format json</code></pre>
                 return 0;
             });
             
-            if (uniqueList.length === 0) {
+            if (uniqueList.length === 0 && orphanedBookmarks.length === 0) {
                 listEl.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 12px 10px;">No bookmarked commands.</div>';
             } else {
                 uniqueList.forEach((bm, idx) => {
@@ -13407,6 +13417,93 @@ kiro-cli whoami --format json</code></pre>
 
                     listEl.appendChild(row);
                 });
+            }
+
+            orphanedBookmarks.forEach((bookmark, index) => {
+                const row = document.createElement('div');
+                row.className = 'bookmark-item';
+                row.title = 'This global bookmark has no workspace. Click to assign it.';
+                row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:9px 12px; border-top:1px solid var(--border-color); cursor:pointer; color:var(--text-muted); opacity:0.72;';
+                row.onmouseenter = () => { row.style.opacity = '1'; row.style.backgroundColor = 'var(--bg-card-hover)'; };
+                row.onmouseleave = () => { row.style.opacity = '0.72'; row.style.backgroundColor = 'transparent'; };
+                row.onclick = () => openAssignOrphanedBookmark(index);
+
+                const label = document.createElement('span');
+                label.style.cssText = 'flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.85rem;';
+                label.textContent = bookmark.name || bookmark.command || '(empty command)';
+                const command = document.createElement('span');
+                command.style.cssText = 'font-family:monospace; font-size:0.72rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;';
+                command.textContent = bookmark.command || '';
+                const assign = document.createElement('button');
+                assign.type = 'button';
+                assign.textContent = 'Assign';
+                assign.title = 'Assign this bookmark to a workspace';
+                assign.style.cssText = 'padding:4px 9px; border:1px solid var(--border-color); border-radius:5px; color:var(--text-secondary); background:transparent; cursor:pointer;';
+                assign.onclick = (event) => { event.stopPropagation(); openAssignOrphanedBookmark(index); };
+                row.append(label, command, assign);
+                listEl.appendChild(row);
+            });
+        }
+
+        function openAssignOrphanedBookmark(index) {
+            const bookmark = orphanedBookmarks[index];
+            if (!bookmark) return;
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.62); padding:16px;';
+            const panel = document.createElement('div');
+            panel.style.cssText = 'width:min(420px,100%); padding:18px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-sidebar); color:var(--text-primary); box-shadow:0 16px 40px rgba(0,0,0,0.45);';
+            const title = document.createElement('div');
+            title.textContent = `Assign “${bookmark.name || bookmark.command}”`;
+            title.style.cssText = 'font-size:1rem; font-weight:600; margin-bottom:6px;';
+            const detail = document.createElement('div');
+            detail.textContent = bookmark.command || '';
+            detail.style.cssText = 'font:0.75rem monospace; color:var(--text-secondary); overflow-wrap:anywhere; margin-bottom:14px;';
+            const select = document.createElement('select');
+            select.style.cssText = 'width:100%; padding:9px; margin-bottom:16px; border-radius:6px; border:1px solid #475569; background-color:#111827; color:#f1f5f9; color-scheme:dark;';
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.name;
+                option.textContent = project.name;
+                option.style.cssText = 'background-color:#111827; color:#f1f5f9;';
+                select.appendChild(option);
+            });
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex; justify-content:flex-end; gap:8px;';
+            const cancel = document.createElement('button');
+            cancel.type = 'button';
+            cancel.textContent = 'Cancel';
+            cancel.style.cssText = 'padding:7px 12px; border:1px solid var(--border-color); border-radius:6px; background:transparent; color:var(--text-primary); cursor:pointer;';
+            cancel.onclick = () => overlay.remove();
+            const confirm = document.createElement('button');
+            confirm.type = 'button';
+            confirm.textContent = 'Assign';
+            confirm.disabled = projects.length === 0;
+            confirm.style.cssText = 'padding:7px 12px; border:0; border-radius:6px; background:var(--accent-color); color:white; cursor:pointer;';
+            confirm.onclick = async () => {
+                if (select.value) await assignOrphanedBookmark(index, select.value, overlay);
+            };
+            actions.append(cancel, confirm);
+            panel.append(title, detail, select, actions);
+            overlay.appendChild(panel);
+            overlay.addEventListener('click', event => { if (event.target === overlay) overlay.remove(); });
+            document.body.appendChild(overlay);
+        }
+
+        async function assignOrphanedBookmark(index, projectName, overlay) {
+            try {
+                const response = await fetch(`/api/bookmarks/orphaned/${index}/assign`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project: projectName })
+                });
+                const data = await response.json();
+                if (!response.ok) { alert(data.error || 'Could not assign bookmark.'); return; }
+                projects = data.projects || projects;
+                orphanedBookmarks = data.orphanedBookmarks || [];
+                overlay.remove();
+                updateBookmarksDropdown();
+            } catch (err) {
+                console.error('Error assigning unassigned bookmark:', err);
             }
         }
 
@@ -24873,6 +24970,8 @@ Always wrap your **entire response** in a single markdown code block.`;
             await loadExtensionIconsMap();
             await loadSubcmdsMap();
             await fetchProjects();
+            await loadOrphanedBookmarks();
+            updateBookmarksDropdown();
             try {
                 await loadProjectCheckSettings();
             } catch (error) {

@@ -206,6 +206,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Usage:** Click 🔖 dropdown → select command → auto-executes. Click ⭐ to bookmark current command.
 **Sub-features:**
 - Global bookmarks (appear in all workspaces)
+- Deleting a workspace preserves its global bookmarks as dimmed, unassigned entries in the bookmark dropdown; click one to assign it to a workspace.
+- On first load after this update, orphaned bookmark command roots with saved subcommands are recovered as unassigned entries.
 - Edit command, name, window title
 - Reorder by drag or position select
 

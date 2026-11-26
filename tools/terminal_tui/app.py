@@ -790,6 +790,34 @@ def save_projects_config(projects):
                 project["path"] = configured_windows_path
     set_config_val("projects", projects)
 
+def load_orphaned_bookmarks():
+    return get_config_val("orphaned_bookmarks", list)
+
+def save_orphaned_bookmarks(bookmarks):
+    set_config_val("orphaned_bookmarks", bookmarks)
+
+def preserve_global_bookmarks_as_orphans(project):
+    """Keep global commands available when their owning workspace is removed."""
+    existing = load_orphaned_bookmarks()
+    existing_commands = {
+        str(bookmark.get("command", "")).strip().casefold()
+        for bookmark in existing if isinstance(bookmark, dict)
+    }
+    for bookmark in project.get("bookmarks", []):
+        if not isinstance(bookmark, dict) or not bookmark.get("global"):
+            continue
+        command = str(bookmark.get("command", "")).strip()
+        if not command or command.casefold() in existing_commands:
+            continue
+        existing.append({
+            "command": command,
+            "name": str(bookmark.get("name", "")),
+            "windowTitle": str(bookmark.get("windowTitle", "")),
+            "color": str(bookmark.get("color", "")),
+        })
+        existing_commands.add(command.casefold())
+    save_orphaned_bookmarks(existing)
+
 def project_path_for_runtime(project):
     """Choose the workspace location for the OS running this app instance."""
     if os.name == "nt":
@@ -1243,6 +1271,9 @@ def api_projects_duplicate(project):
 @app.route('/api/projects/<project>', methods=['DELETE'])
 def api_projects_delete(project):
     projects = load_projects_config()
+    removed_project = next((p for p in projects if p["name"].lower() == project.lower()), None)
+    if removed_project:
+        preserve_global_bookmarks_as_orphans(removed_project)
     
     # Filter out project
     filtered_projects = [p for p in projects if p["name"].lower() != project.lower()]
@@ -1282,6 +1313,7 @@ def api_project_delete_full(project):
 
     # Remove from config
     if delete_entry:
+        preserve_global_bookmarks_as_orphans(proj)
         filtered = [p for p in projects_cfg if p["name"].lower() != project.lower()]
         save_projects_config(filtered)
 
@@ -1612,6 +1644,91 @@ def api_reorder_bookmarks_display():
 
     save_projects_config(projects)
     return jsonify(scan_projects())
+
+def ensure_legacy_orphaned_bookmarks():
+    """Recover command roots whose bookmark owner was deleted before this feature."""
+    config = get_config_val("orphaned_bookmarks_migrated", bool)
+    subcommands = load_subcommands()
+    parent_commands_by_child = {}
+    for parent, children in subcommands.items():
+        if not isinstance(children, list):
+            continue
+        for child in children:
+            if isinstance(child, dict) and str(child.get("cmd", "")).strip():
+                parent_commands_by_child.setdefault(str(child["cmd"]).strip().casefold(), set()).add(str(parent).strip().casefold())
+    orphaned = load_orphaned_bookmarks()
+    projects = load_projects_config()
+    active_commands = {
+        str(bookmark.get("command", "")).strip().casefold()
+        for project in projects
+        for bookmark in project.get("bookmarks", [])
+        if isinstance(bookmark, dict)
+    }
+    assigned_or_orphaned_commands = active_commands | {
+        str(bookmark.get("command", "")).strip().casefold()
+        for bookmark in orphaned if isinstance(bookmark, dict)
+    }
+    # A command that appears as another command's subcommand belongs to that
+    # assigned or unassigned root's inline action group; don't also list it as
+    # a second orphan while that root is visible.
+    filtered_orphaned = [
+        bookmark for bookmark in orphaned
+        if not isinstance(bookmark, dict)
+        or not any(parent in assigned_or_orphaned_commands for parent in parent_commands_by_child.get(str(bookmark.get("command", "")).strip().casefold(), set()))
+    ]
+    if len(filtered_orphaned) != len(orphaned):
+        orphaned = filtered_orphaned
+        save_orphaned_bookmarks(orphaned)
+
+    if config:
+        return
+
+    known_commands = {
+        str(bookmark.get("command", "")).strip().casefold()
+        for bookmark in orphaned if isinstance(bookmark, dict)
+    }
+    for command, children in subcommands.items():
+        normalized = str(command).strip()
+        key = normalized.casefold()
+        if normalized and children and key not in parent_commands_by_child and key not in active_commands and key not in known_commands:
+            orphaned.append({"command": normalized, "name": normalized, "windowTitle": "", "color": ""})
+            known_commands.add(key)
+    save_orphaned_bookmarks(orphaned)
+    set_config_val("orphaned_bookmarks_migrated", True)
+
+@app.route('/api/bookmarks/orphaned', methods=['GET'])
+def api_get_orphaned_bookmarks():
+    ensure_legacy_orphaned_bookmarks()
+    return jsonify(load_orphaned_bookmarks())
+
+@app.route('/api/bookmarks/orphaned/<int:index>/assign', methods=['POST'])
+def api_assign_orphaned_bookmark(index):
+    data = request.json or {}
+    target_name = str(data.get("project", "")).strip()
+    projects = load_projects_config()
+    target = next((p for p in projects if p["name"].casefold() == target_name.casefold()), None)
+    orphaned = load_orphaned_bookmarks()
+    if not target:
+        return jsonify({"error": "Project not found"}), 404
+    if not 0 <= index < len(orphaned):
+        return jsonify({"error": "Unassigned bookmark not found"}), 404
+
+    bookmark = orphaned[index]
+    command = str(bookmark.get("command", "")).strip()
+    if not command:
+        return jsonify({"error": "Bookmark command is empty"}), 400
+    if not any(str(item.get("command", "")).strip().casefold() == command.casefold() for item in target.get("bookmarks", []) if isinstance(item, dict)):
+        target.setdefault("bookmarks", []).append({
+            "command": command,
+            "global": True,
+            "name": bookmark.get("name", ""),
+            "windowTitle": bookmark.get("windowTitle", ""),
+            "color": bookmark.get("color", ""),
+        })
+    orphaned.pop(index)
+    save_projects_config(projects)
+    save_orphaned_bookmarks(orphaned)
+    return jsonify({"projects": scan_projects(), "orphanedBookmarks": orphaned})
 
 @app.route('/api/projects/customize', methods=['POST'])
 def api_projects_customize():

@@ -64,7 +64,7 @@
           "global": true,
           "name": "󰖩 net stop winnat",
           "windowTitle": "",
-          "displayOrder": 6,
+          "displayOrder": 7,
           "color": ""
         },
         {
@@ -72,7 +72,7 @@
           "global": true,
           "name": " Explorer",
           "windowTitle": "",
-          "displayOrder": 7,
+          "displayOrder": 8,
           "color": ""
         },
         {
@@ -1432,7 +1432,16 @@
         "pathColor": "#94a3b8",
         "accentColor": "#2563eb"
       },
-      "bookmarks": [],
+      "bookmarks": [
+        {
+          "command": "npm run deploy:pages",
+          "global": true,
+          "name": "Cloudflare Deploys",
+          "windowTitle": "",
+          "displayOrder": 6,
+          "color": ""
+        }
+      ],
       "gitRemote": "https://github.com/nahid6970/myhome_convex.git"
     },
     {
@@ -1546,48 +1555,43 @@
     ".log": "<svg fill=\"#ffffff\" viewBox=\"0 0 32 32\" id=\"icon\" xmlns=\"http://www.w3.org/2000/svg\" stroke=\"#ffffff\"><g id=\"SVGRepo_bgCarrier\" stroke-width=\"0\"></g><g id=\"SVGRepo_tracerCarrier\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></g><g id=\"SVGRepo_iconCarrier\"><defs><style>.cls-1{fill:none;}</style></defs><title>TXT</title><polygon points=\"21 11 24 11 24 23 26 23 26 11 29 11 29 9 21 9 21 11\"></polygon><polygon points=\"20 9 18 9 16 15 14 9 12 9 14.75 16 12 23 14 23 16 17 18 23 20 23 17.25 16 20 9\"></polygon><polygon points=\"3 11 6 11 6 23 8 23 8 11 11 11 11 9 3 9 3 11\"></polygon><rect id=\"_Transparent_Rectangle_\" data-name=\"&lt;Transparent Rectangle&gt;\" class=\"cls-1\" width=\"32\" height=\"32\"></rect></g></svg>"
   },
   "subcommands": {
-    "Cloudflare Deploys": [
-      {
-        "cmd": "npm run deploy:pages",
-        "label": "npm run deploy:pages"
-      }
-    ],
+    "Cloudflare Deploys": [],
     "codex --dangerously-bypass-approvals-and-sandbox resume": [
       {
-        "cmd": "codex --dangerously-bypass-approvals-and-sandbox",
-        "label": "N",
         "bg": "#ffffff",
-        "fg": "#000000",
         "borderColor": "#334155",
-        "borderRadius": 0
+        "borderRadius": 0,
+        "cmd": "codex --dangerously-bypass-approvals-and-sandbox",
+        "fg": "#000000",
+        "label": "N"
       }
     ],
     "kiro-cli chat --trust-all-tools --resume": [
       {
-        "cmd": "kiro-cli chat --trust-all-tools",
-        "label": "N",
         "bg": "#ffffff",
-        "fg": "#000000",
         "borderColor": "#334155",
-        "borderRadius": 0
+        "borderRadius": 0,
+        "cmd": "kiro-cli chat --trust-all-tools",
+        "fg": "#000000",
+        "label": "N"
       },
       {
-        "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
-        "label": "whoami & logout & login",
         "bg": "#dbf038",
-        "fg": "#000000",
         "borderColor": "#334155",
-        "borderRadius": 0
+        "borderRadius": 0,
+        "cmd": "kiro-cli whoami ; kiro-cli logout ; kiro-cli login",
+        "fg": "#000000",
+        "label": "whoami & logout & login"
       }
     ],
     "npm run deploy:pages": [
       {
-        "cmd": "npm run dev:pages",
-        "label": "dev",
         "bg": "#000000",
-        "fg": "#ffffff",
         "borderColor": "#ffffff",
-        "borderRadius": 0
+        "borderRadius": 0,
+        "cmd": "npm run dev:pages",
+        "fg": "#ffffff",
+        "label": "dev"
       }
     ]
   },
@@ -2365,5 +2369,7 @@
     "project-action-export-log-btn",
     "project-action-split-btn",
     "project-action-ports-btn"
-  ]
+  ],
+  "orphaned_bookmarks_migrated": true,
+  "orphaned_bookmarks": []
 }

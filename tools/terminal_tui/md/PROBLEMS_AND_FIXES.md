@@ -2,6 +2,12 @@
 
 ---
 
+## [2026-11-26] - Global Bookmark Disappears When Its Workspace Is Deleted
+**Problem:** A global bookmark was stored on its original workspace and disappeared from every workspace when that workspace entry was deleted.
+**Root Cause:** Global visibility was implemented by sharing the owner's bookmark across workspaces, while deletion removed the owner and its bookmark together.
+**Solution:** Preserve global bookmarks in a top-level unassigned list when deleting a workspace. Show them dimmed in the bookmark dropdown and allow assigning them to a workspace. Recover orphaned command roots with saved subcommands once on startup so existing unowned commands can be assigned.
+**Files Modified:** `app.py`, `templates/index.html`
+
 ## [2026-11-26] - API Account Backup Import Failed on Android
 **Problem:** Importing an encrypted API accounts backup in Chrome on Android returned an error saying the backup picker endpoint was unavailable.
 **Root Cause:** The import button called a server-side Tkinter file picker, which is only available on the desktop host and cannot open Android's local file picker.

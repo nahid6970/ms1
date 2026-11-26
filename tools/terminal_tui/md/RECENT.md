@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-26] - Preserve Global Bookmarks When Their Workspace Is Deleted
+
+- Move a deleted workspace's global bookmarks into a top-level unassigned bookmark list.
+- Show unassigned bookmarks dimmed in the bookmark dropdown and let the user assign one to a workspace.
+- Recover previously orphaned command roots that still have saved subcommands, including Cloudflare Deploys.
+- Added API routes for listing, assigning, and deleting unassigned bookmarks.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-26] - Remove Rclone Projects Subtitle
 
 - Remove the Rclone Projects subtitle and its queue-status updates from the modal header.

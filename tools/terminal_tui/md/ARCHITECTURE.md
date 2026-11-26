@@ -244,6 +244,10 @@ function prompt { ... }
 - `DELETE /api/projects/<project>/bookmarks/<index>` - Delete bookmark
 - `POST /api/projects/<project>/bookmarks/<index>/global` - Toggle global
 - `POST /api/projects/<project>/bookmarks/<index>/edit` - Edit bookmark
+- `GET /api/bookmarks/orphaned` - List unassigned global bookmarks
+- `POST /api/bookmarks/orphaned/<index>/assign` - Assign an unowned bookmark to a workspace
+
+Global bookmarks remain owned by a workspace until that workspace entry is deleted. Deleting the owner moves its global bookmarks into the top-level `orphaned_bookmarks` config list. The bookmark dropdown shows these entries dimmed and lets the user assign one to a workspace; assignment creates a global bookmark there. A one-time migration also recovers command roots with saved subcommands when no workspace still owns the root bookmark.
 
 ### Sessions
 - `POST /api/session/<project>` - Start/connect terminal session
