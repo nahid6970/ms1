@@ -196,7 +196,7 @@ function flashRefreshResults(results, durationsUpdated) {
           <div class="mt-1 text-xs text-slate-400">${esc(results.totalNew ?? 0)} new videos · ${esc(durationsUpdated)} durations updated</div>
         </div>
       </div>
-      <button type="button" class="flex-shrink-0 rounded-none p-1 text-slate-400 transition hover:bg-slate-800 hover:text-white" onclick="dismissToast(this.closest('.toast-enter, .toast-exit'))" aria-label="Close status">
+      <button type="button" class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-none p-0 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white" onclick="dismissToast(this.closest('.toast-enter, .toast-exit'))" aria-label="Close status">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
