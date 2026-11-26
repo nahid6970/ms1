@@ -3618,38 +3618,97 @@
     </div>
 
     <!-- Bookmark Edit Modal Dialog -->
+    <style>
+        .bookmark-editor-modal { width: min(820px, 94vw); max-height: 90vh; max-height: 90dvh; overflow-y: auto; padding: 24px; border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,.52); }
+        .bookmark-editor-grid { display:grid; grid-template-columns:minmax(0, 1.15fr) minmax(250px, .85fr); gap:18px; align-items:stretch; }
+        .bookmark-editor-fields { min-width:0; }
+        .bookmark-subcmd-panel { min-width:0; display:flex; flex-direction:column; padding:16px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-main); }
+        .bookmark-color-card { padding:10px 11px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-main); }
+        .bookmark-color-inline { display:flex; align-items:center; gap:8px; min-width:0; }
+        .bookmark-color-label { flex:0 0 auto; font-size:.74rem; font-weight:550; color:var(--text-primary); white-space:nowrap; cursor:pointer; }
+        .bookmark-color-toggle { position:relative; display:inline-flex; width:38px; height:22px; flex-shrink:0; cursor:pointer; }
+        .bookmark-color-toggle input { position:absolute; width:1px; height:1px; opacity:0; }
+        .bookmark-color-switch { width:38px; height:22px; border-radius:999px; background:#475569; transition:background .15s; }
+        .bookmark-color-switch::after { content:''; display:block; width:16px; height:16px; margin:3px; border-radius:50%; background:#fff; transition:transform .15s; }
+        .bookmark-color-toggle input:checked + .bookmark-color-switch { background:var(--accent-color); }
+        .bookmark-color-toggle input:checked + .bookmark-color-switch::after { transform:translateX(16px); }
+        .bookmark-color-toggle input:focus-visible + .bookmark-color-switch { outline:2px solid var(--accent-color); outline-offset:2px; }
+        .bookmark-color-controls { display:flex; flex:1 1 0; flex-wrap:nowrap; gap:8px; align-items:center; min-width:0; }
+        .bookmark-color-controls input[type=color] { width:36px; height:36px; flex:0 0 36px; padding:3px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-sidebar); cursor:pointer; }
+        .bookmark-color-controls input[type=text] { flex:1 1 auto; min-width:0; }
+        .bookmark-color-controls output { flex:0 0 auto; white-space:nowrap; font-size:.62rem; }
+        .subcmd-parent-icon { display:grid; place-items:center; width:32px; height:32px; flex:0 0 32px; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-main); color:var(--text-secondary); cursor:pointer; transition:border-color .15s, color .15s, background .15s; }
+        .subcmd-parent-icon:hover { border-color:var(--accent-color); background:var(--bg-sidebar); color:var(--accent-color); }
+        .subcmd-parent-icon:focus-visible { outline:2px solid var(--accent-color); outline-offset:2px; }
+        .bookmark-subcmd-row { display:flex; align-items:center; gap:10px; width:100%; padding:10px; color:var(--text-primary); text-align:left; border:1px solid var(--border-color); border-radius:9px; background:var(--bg-sidebar); cursor:pointer; transition:border-color .15s, background .15s, transform .15s; }
+        .bookmark-subcmd-row:hover { border-color:var(--accent-color); background:var(--bg-card-hover); transform:translateY(-1px); }
+        .bookmark-subcmd-row:focus-visible, .bookmark-subcmd-add:focus-visible { outline:2px solid var(--accent-color); outline-offset:2px; }
+        .bookmark-subcmd-add { width:100%; padding:10px; color:var(--accent-color); border:1px dashed var(--border-color); border-radius:9px; background:transparent; cursor:pointer; font-weight:600; }
+        .bookmark-subcmd-add:hover { border-color:var(--accent-color); background:rgba(59,130,246,.08); }
+        @media (max-width: 680px) {
+            .bookmark-editor-modal { width:min(540px, 94vw); padding:18px; }
+            .bookmark-editor-grid { grid-template-columns:minmax(0, 1fr); }
+            .bookmark-color-label { font-size:.68rem; }
+            .bookmark-color-controls output { display:none; }
+        }
+
+    </style>
     <div class="modal-overlay" id="bookmark-modal">
-        <div class="modal-content" style="max-width: 420px; padding: 24px;">
-            <div class="modal-header" style="margin-bottom: 16px;">
-                <h2 id="bookmark-modal-title">Edit Bookmark</h2>
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;" id="bookmark-modal-subtitle"></div>
+        <div class="modal-content bookmark-editor-modal">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;">
+                <div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+                        <span style="width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:rgba(59,130,246,.14);font-size:17px;">🔖</span>
+                        <h2 id="bookmark-modal-title" style="margin:0;font-size:1.12rem;font-weight:650;color:var(--text-primary);">Edit Command</h2>
+                    </div>
+                    <div id="bookmark-modal-subtitle" style="font-size:.78rem;color:var(--text-secondary);padding-left:46px;"></div>
+                </div>
+                <button type="button" onclick="closeBookmarkModal()" aria-label="Close command editor" style="width:32px;height:32px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);color:var(--text-secondary);font-size:19px;line-height:1;cursor:pointer;">×</button>
             </div>
             <form id="bookmark-edit-form" onsubmit="handleSaveBookmark(event)">
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="edit-bookmark-name" style="font-size: 0.8rem; font-weight: 500;">Display Name (Alias)</label>
-                    <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Build Project" autocomplete="off" style="padding: 8px 12px; font-size: 0.9rem;">
-                </div>
-                <div class="form-group" style="margin-bottom: 14px;">
-                    <label for="edit-bookmark-cmd" style="font-size: 0.8rem; font-weight: 500;">Command (supports multi-line macros)</label>
-                    <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="4" style="padding: 8px 12px; font-size: 0.82rem; font-family: 'Fira Code', monospace; resize: vertical; min-height: 80px; width: 100%; box-sizing: border-box; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none;"></textarea>
-                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">💡 Write multiple commands sequentially. Use <code>#wait 2</code> to insert a delay (e.g. wait 2 seconds). Supports decimals like <code>#wait 1.5</code>.</div>
-                </div>
-                <div class="form-group bookmark-color-row" style="margin-bottom: 14px;">
-                    <input type="checkbox" id="edit-bookmark-color-enabled" style="accent-color: var(--accent-color); cursor: pointer; flex-shrink: 0;">
-                    <label for="edit-bookmark-color-text" style="font-size: 0.8rem; font-weight: 500;">Custom command color</label>
-                    <input type="color" id="edit-bookmark-color" value="#d1d5db" title="Choose command color" oninput="document.getElementById('edit-bookmark-color-text').value = this.value" style="width: 34px; height: 26px; padding: 1px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 5px; cursor: pointer; flex-shrink: 0;">
-                    <input type="text" id="edit-bookmark-color-text" value="#d1d5db" placeholder="#ff55ff" pattern="^#[0-9a-fA-F]{6}$" maxlength="7" title="Enter a hex color such as #ff55ff" oninput="if (/^#[0-9a-fA-F]{6}$/.test(this.value)) document.getElementById('edit-bookmark-color').value = this.value" style="width: 82px; padding: 5px 7px; font-family: 'Fira Code', monospace; font-size: 0.75rem; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 5px; outline: none;">
-                </div>
-
-                <div id="bookmark-position-row" class="form-group" style="margin-bottom: 20px;">
-                    <label for="edit-bookmark-index" style="font-size: 0.8rem; font-weight: 500;">Position / Order</label>
-                    <select id="edit-bookmark-index" class="form-input" style="padding: 8px 12px; font-size: 0.9rem; background-color: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 8px; outline: none; cursor: pointer;">
-                        <!-- Options populated dynamically -->
-                    </select>
-                </div>
-                <div class="form-actions" style="margin-top: 10px; border-top: 1px solid var(--border-color); padding-top: 14px; gap: 8px; display: flex; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeBookmarkModal()" style="padding: 6px 14px; font-size: 0.8rem;">Cancel</button>
-                    <button type="submit" id="bookmark-modal-save-btn" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">Save Changes</button>
+                <div id="bookmark-editor-main-view">
+                    <div class="bookmark-editor-grid">
+                        <div class="bookmark-editor-fields">
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label for="edit-bookmark-name" style="display:block;font-size:.75rem;font-weight:650;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:7px;">DISPLAY NAME <span style="font-weight:400;letter-spacing:0;color:var(--text-muted);">· optional</span></label>
+                                <input type="text" id="edit-bookmark-name" class="form-input" placeholder="e.g. Start development server" autocomplete="off" style="width:100%;box-sizing:border-box;padding:11px 12px;font-size:.9rem;background:var(--bg-main);border:1px solid var(--border-color);border-radius:9px;color:var(--text-primary);outline:none;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label for="edit-bookmark-cmd" style="display:block;font-size:.75rem;font-weight:650;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:7px;">COMMAND</label>
+                                <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="5" placeholder="Enter a command or multi-line macro…" style="padding:11px 12px;font-size:.83rem;font-family:'Fira Code',monospace;resize:vertical;min-height:124px;width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);color:var(--text-primary);border-radius:9px;outline:none;"></textarea>
+                                <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too.</div>
+                            </div>
+                            <div class="bookmark-color-card">
+                                <div class="bookmark-color-inline">
+                                    <label class="bookmark-color-toggle" for="edit-bookmark-color-enabled" title="Enable a custom label color">
+                                        <input type="checkbox" id="edit-bookmark-color-enabled" onchange="syncBookmarkColorControls()" aria-label="Enable custom label color">
+                                        <span class="bookmark-color-switch" aria-hidden="true"></span>
+                                    </label>
+                                    <label class="bookmark-color-label" for="edit-bookmark-color-enabled">Custom label color</label>
+                                    <div id="bookmark-color-controls" class="bookmark-color-controls">
+                                        <input type="color" id="edit-bookmark-color" value="#d1d5db" title="Pick a label color" oninput="syncBookmarkColorFromPicker()" aria-label="Pick label color">
+                                        <input type="text" id="edit-bookmark-color-text" value="#D1D5DB" placeholder="#D1D5DB" title="Enter HEX or rgb(r, g, b)" autocomplete="off" spellcheck="false" oninput="syncBookmarkColorFromText()" aria-describedby="edit-bookmark-rgb" style="box-sizing:border-box;padding:7px 8px;font-family:'Fira Code',monospace;font-size:.72rem;background:var(--bg-sidebar);border:1px solid var(--border-color);color:var(--text-primary);border-radius:7px;outline:none;">
+                                        <output id="edit-bookmark-rgb" title="RGB color values" aria-label="RGB color values" style="font-family:'Fira Code',monospace;color:var(--text-muted);">RGB 209, 213, 219</output>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <section class="bookmark-subcmd-panel" aria-labelledby="bookmark-subcmd-heading">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span aria-hidden="true" style="width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:rgba(16,185,129,.12);color:#34d399;font-size:15px;">↳</span>
+                                    <h3 id="bookmark-subcmd-heading" style="margin:0;font-size:.9rem;font-weight:650;color:var(--text-primary);">Quick actions</h3>
+                                </div>
+                                <span id="bookmark-subcmd-count" style="min-width:24px;padding:3px 7px;border:1px solid var(--border-color);border-radius:999px;color:var(--text-secondary);font-size:.7rem;text-align:center;">0</span>
+                            </div>
+                            <div id="bookmark-subcmd-list" style="display:flex;flex-direction:column;gap:7px;flex:1;min-height:90px;margin:12px 0;"></div>
+                            <button type="button" id="bookmark-subcmd-add" class="bookmark-subcmd-add" onclick="openSubcmdEditModal(_bookmarkModalCommandKey,null)">＋ Add quick action</button>
+                        </section>
+                    </div>
+                    <div style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:15px;display:flex;justify-content:flex-end;gap:9px;">
+                        <button type="button" onclick="closeBookmarkModal()" style="padding:8px 14px;font-size:.82rem;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+                        <button type="submit" id="bookmark-modal-save-btn" style="padding:8px 17px;font-size:.82rem;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:8px;color:#fff;font-weight:600;cursor:pointer;">Save Changes</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -3657,55 +3716,59 @@
 
     <!-- Subcommand Edit Modal -->
     <div class="modal-overlay" id="subcmd-add-modal">
-        <div class="modal-content" style="width: 420px; max-width: 95%; padding: 24px;">
-            <div class="modal-header" style="margin-bottom: 16px;">
-                <h2 id="subcmd-modal-title" style="font-size: 1rem; font-weight: 600; color: var(--text-primary); margin: 0;">Add Sub-command</h2>
-                <button onclick="closeSubcmdAddModal()" style="background:none; border:none; font-size:1.3rem; color:var(--text-secondary); cursor:pointer; position: absolute; top: 18px; right: 18px;" onmouseenter="this.style.color='var(--text-primary)'" onmouseleave="this.style.color='var(--text-secondary)'">&times;</button>
+        <div class="modal-content" style="width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;padding:22px;border:1px solid var(--border-color);border-radius:14px;box-shadow:0 22px 70px rgba(0,0,0,0.48);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                    <button type="button" class="subcmd-parent-icon" onclick="returnToParentBookmarkFromSubcmd()" title="Back to main command" aria-label="Back to main command">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+                    </button>
+                    <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                        <span style="width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border-radius:9px;background:rgba(59,130,246,0.14);font-size:15px;">⌘</span>
+                        <h2 id="subcmd-modal-title" style="font-size:1.05rem;font-weight:650;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Add Sub-command</h2>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSubcmdAddModal()" aria-label="Close sub-command editor" style="width:30px;height:30px;flex:0 0 30px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-main);color:var(--text-secondary);font-size:18px;line-height:1;cursor:pointer;">×</button>
             </div>
             <!-- Label -->
-            <div style="margin-bottom: 12px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Display Label <span style="color:var(--text-muted); font-weight:400;">(optional)</span></label>
-                <input id="subcmd-add-label" type="text" placeholder="e.g. Run Tests" autocomplete="off" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+            <div style="margin-bottom:16px;">
+                <label for="subcmd-add-label" style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:7px;">BUTTON LABEL <span style="font-weight:400;color:var(--text-muted);">· optional</span></label>
+                <input id="subcmd-add-label" type="text" placeholder="e.g. Run Tests" autocomplete="off" style="width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);border-radius:9px;padding:10px 12px;color:var(--text-primary);font-size:0.88rem;outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
             </div>
             <!-- Command -->
-            <div style="margin-bottom: 12px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Command</label>
-                <textarea id="subcmd-add-cmd" rows="3" required autocomplete="off" style="width: 100%; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-primary); font-family: 'Fira Code', monospace; font-size: 0.82rem; resize: vertical; min-height: 60px; outline: none; box-sizing: border-box;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
+            <div style="margin-bottom:18px;">
+                <label for="subcmd-add-cmd" style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:7px;">COMMAND</label>
+                <textarea id="subcmd-add-cmd" rows="3" required autocomplete="off" placeholder="Enter the command this button runs…" style="width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);border-radius:9px;padding:10px 12px;color:var(--text-primary);font-family:'Fira Code',monospace;font-size:0.82rem;resize:vertical;min-height:82px;outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
             </div>
-            <!-- Colors -->
-            <div style="margin-bottom: 12px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Colors</label>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-bg-color').click()">
-                        <input id="subcmd-bg-color" type="color" value="#1e293b" title="Background color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
-                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Background</span>
+            <details style="margin-bottom:20px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
+                <summary style="padding:10px 12px;color:var(--text-secondary);font-size:0.78rem;font-weight:600;cursor:pointer;user-select:none;">Button appearance</summary>
+                <div style="padding:0 12px 12px;">
+                <div style="margin-bottom:12px;">
+                    <div style="display:flex;gap:8px;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;height:36px;padding:0 9px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;" onclick="document.getElementById('subcmd-bg-color').click()">
+                        <input id="subcmd-bg-color" type="color" value="#1e293b" title="Button background" style="width:22px;height:22px;border:none;padding:0;background:none;cursor:pointer;flex-shrink:0;">
+                        <span style="font-size:0.76rem;color:var(--text-secondary);user-select:none;">Background</span>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-fg-color').click()">
-                        <input id="subcmd-fg-color" type="color" value="#e2e8f0" title="Text color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
-                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Text</span>
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;height:36px;padding:0 9px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;cursor:pointer;" onclick="document.getElementById('subcmd-fg-color').click()">
+                        <input id="subcmd-fg-color" type="color" value="#e2e8f0" title="Button text" style="width:22px;height:22px;border:none;padding:0;background:none;cursor:pointer;flex-shrink:0;">
+                        <span style="font-size:0.76rem;color:var(--text-secondary);user-select:none;">Text</span>
                     </div>
-                    <button type="button" onclick="resetSubcmdColors()" title="Reset to default colors" style="height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-secondary); cursor:pointer; font-size:0.75rem; white-space:nowrap; flex-shrink:0;">Reset</button>
+                    <button type="button" onclick="resetSubcmdColors()" title="Reset appearance" style="height:36px;padding:0 10px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;font-size:0.74rem;">Reset</button>
+                    </div>
                 </div>
-            </div>
-            <!-- Border -->
-            <div style="margin-bottom: 16px;">
-                <label style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); display: block; margin-bottom: 6px;">Border</label>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; height:34px; padding:0 10px; background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; cursor:pointer;" onclick="document.getElementById('subcmd-border-color').click()">
-                        <input id="subcmd-border-color" type="color" value="#334155" title="Border color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer; flex-shrink:0;">
-                        <span style="font-size:0.78rem; color:var(--text-secondary); user-select:none;">Color</span>
-                    </div>
-                    <input id="subcmd-border-width" type="number" min="0" max="8" placeholder="px" title="Border thickness (px)" style="width:58px; height:34px; padding:0 8px; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:0.82rem; outline:none; text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <input id="subcmd-border-radius" type="number" min="0" max="999" placeholder="r px" title="Border radius (px)" style="width:62px; height:34px; padding:0 8px; background-color:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; color:var(--text-primary); font-size:0.82rem; outline:none; text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
-                    <span style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap;">radius</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:0.76rem;color:var(--text-secondary);flex:1;">Border</span>
+                    <input id="subcmd-border-color" type="color" value="#334155" title="Border color" style="width:34px;height:32px;padding:2px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;cursor:pointer;">
+                    <input id="subcmd-border-width" type="number" min="0" max="8" placeholder="Width" title="Border thickness in pixels" style="width:72px;height:34px;padding:0 8px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);font-size:0.76rem;outline:none;text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
+                    <input id="subcmd-border-radius" type="number" min="0" max="999" placeholder="Radius" title="Border radius in pixels" style="width:78px;height:34px;padding:0 8px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);font-size:0.76rem;outline:none;text-align:center;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'">
                 </div>
-            </div>
+                </div>
+            </details>
             <!-- Actions -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 14px;">
-                <button id="subcmd-modal-delete" type="button" onclick="deleteSubcmdFromModal()" style="padding: 7px 16px; font-size: 0.85rem; background: #ef4444; border: 1px solid #ef4444; border-radius: 8px; color: white; cursor: pointer; display: none;">Delete</button>
-                <div style="display: flex; gap: 10px; margin-left: auto;">
-                    <button type="button" onclick="closeSubcmdAddModal()" style="padding: 7px 16px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer;">Cancel</button>
-                    <button id="subcmd-modal-save" type="button" onclick="handleSaveSubcmd()" style="padding: 7px 20px; font-size: 0.85rem; background: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 8px; color: white; cursor: pointer;">Add</button>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-color);padding-top:15px;">
+                <button id="subcmd-modal-delete" type="button" onclick="deleteSubcmdFromModal()" style="padding:8px 13px;font-size:0.82rem;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.4);border-radius:8px;color:#f87171;cursor:pointer;display:none;">Delete</button>
+                <div style="display:flex;gap:9px;margin-left:auto;">
+                    <button type="button" onclick="closeSubcmdAddModal()" style="padding:8px 14px;font-size:0.82rem;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+                    <button id="subcmd-modal-save" type="button" onclick="handleSaveSubcmd()" style="padding:8px 16px;font-size:0.82rem;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:8px;color:#fff;font-weight:600;cursor:pointer;">Add</button>
                 </div>
             </div>
         </div>
@@ -13508,12 +13571,124 @@ kiro-cli whoami --format json</code></pre>
         }
 
         let _bookmarkModalIsNew = false;
+        let _bookmarkModalCommandKey = null;
 
+        function parseBookmarkColor(value) {
+            const input = (value || '').trim();
+            if (/^#[0-9a-fA-F]{6}$/.test(input)) return input.toLowerCase();
+            const rgb = input.match(/^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+            if (!rgb) return '';
+            const channels = rgb.slice(1).map(Number);
+            if (channels.some(channel => channel < 0 || channel > 255)) return '';
+            return '#' + channels.map(channel => channel.toString(16).padStart(2, '0')).join('');
+        }
+
+        function syncBookmarkColorOutput(hex) {
+            const rgbEl = document.getElementById('edit-bookmark-rgb');
+            if (!rgbEl) return;
+            const value = hex.replace('#', '');
+            const channels = [0, 2, 4].map(offset => parseInt(value.slice(offset, offset + 2), 16));
+            rgbEl.textContent = `RGB ${channels.join(', ')}`;
+        }
+
+        function syncBookmarkColorFromText() {
+            const textEl = document.getElementById('edit-bookmark-color-text');
+            const pickerEl = document.getElementById('edit-bookmark-color');
+            if (!textEl || !pickerEl) return;
+            const hex = parseBookmarkColor(textEl.value);
+            textEl.style.borderColor = hex ? 'var(--border-color)' : '#ef4444';
+            if (hex) {
+                pickerEl.value = hex;
+                syncBookmarkColorOutput(hex);
+            }
+        }
+
+        function syncBookmarkColorFromPicker() {
+            const pickerEl = document.getElementById('edit-bookmark-color');
+            const textEl = document.getElementById('edit-bookmark-color-text');
+            if (!pickerEl || !textEl) return;
+            const hex = pickerEl.value.toLowerCase();
+            textEl.value = hex.toUpperCase();
+            textEl.style.borderColor = 'var(--border-color)';
+            syncBookmarkColorOutput(hex);
+        }
+
+        function syncBookmarkColorControls() {
+            const enabledEl = document.getElementById('edit-bookmark-color-enabled');
+            const colorPicker = document.getElementById('edit-bookmark-color');
+            const colorText = document.getElementById('edit-bookmark-color-text');
+            if (!enabledEl || !colorPicker || !colorText) return;
+            const enabled = enabledEl.checked;
+            colorPicker.disabled = false;
+            colorText.disabled = false;
+            if (enabled) syncBookmarkColorFromText();
+        }
+
+        function renderBookmarkSubcommandManager() {
+            const listEl = document.getElementById('bookmark-subcmd-list');
+            const countEl = document.getElementById('bookmark-subcmd-count');
+            const addBtn = document.getElementById('bookmark-subcmd-add');
+            if (!listEl || !countEl || !addBtn) return;
+
+            const canManage = !_bookmarkModalIsNew && !!_bookmarkModalCommandKey;
+            const subcommands = canManage ? loadSubcmds(_bookmarkModalCommandKey) : [];
+            countEl.textContent = String(subcommands.length);
+            listEl.replaceChildren();
+            addBtn.disabled = !canManage;
+            addBtn.style.opacity = canManage ? '1' : '.55';
+            addBtn.style.cursor = canManage ? 'pointer' : 'not-allowed';
+            addBtn.title = canManage ? 'Add a quick action' : 'Save this command first to add quick actions';
+
+            if (!canManage || !subcommands.length) {
+                const empty = document.createElement('div');
+                empty.style.cssText = 'display:grid;place-items:center;flex:1;min-height:90px;padding:12px;text-align:center;color:var(--text-muted);font-size:.76rem;line-height:1.5;';
+                const icon = document.createElement('span');
+                icon.style.cssText = 'font-size:1.4rem;margin-bottom:5px;opacity:.65;';
+                icon.textContent = '⌘';
+                const message = document.createElement('span');
+                message.textContent = canManage ? 'No quick actions yet' : 'Save this command to add quick actions';
+                empty.append(icon, message);
+                listEl.appendChild(empty);
+                return;
+            }
+
+            subcommands.forEach((subcommand, index) => {
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.className = 'bookmark-subcmd-row';
+                row.setAttribute('aria-label', `Edit quick action ${subcommand.label || subcommand.cmd || index + 1}`);
+                row.onclick = () => openSubcmdEditModal(_bookmarkModalCommandKey, index);
+                const icon = document.createElement('span');
+                icon.setAttribute('aria-hidden', 'true');
+                icon.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;flex-shrink:0;border-radius:8px;background:rgba(16,185,129,.12);color:#34d399;font-size:.8rem;';
+                icon.textContent = '⌘';
+                const copy = document.createElement('span');
+                copy.style.cssText = 'display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;';
+                const label = document.createElement('span');
+                label.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.76rem;font-weight:600;';
+                label.textContent = subcommand.label || subcommand.cmd || 'Unnamed action';
+                const command = document.createElement('span');
+                command.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;font-size:.66rem;color:var(--text-muted);';
+                command.textContent = subcommand.cmd || '';
+                const arrow = document.createElement('span');
+                arrow.setAttribute('aria-hidden', 'true');
+                arrow.style.cssText = 'flex-shrink:0;color:var(--text-muted);font-size:.95rem;';
+                arrow.textContent = '›';
+                copy.append(label, command);
+                row.append(icon, copy, arrow);
+                listEl.appendChild(row);
+            });
+        }
+        function showBookmarkEditorMainView() {
+            const mainView = document.getElementById('bookmark-editor-main-view');
+            if (mainView) mainView.style.display = 'block';
+        }
         function openNewBookmarkModal() {
             if (!activeProject) return;
             _bookmarkModalIsNew = true;
             editingBookmarkProj = activeProject;
             editingBookmarkIndex = null;
+            _bookmarkModalCommandKey = null;
 
             document.getElementById('bookmark-modal-title').innerText = 'Add Command';
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${activeProject}`;
@@ -13521,9 +13696,11 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-name').value = '';
             document.getElementById('edit-bookmark-color-enabled').checked = false;
             document.getElementById('edit-bookmark-color').value = '#d1d5db';
-            document.getElementById('edit-bookmark-color-text').value = '#d1d5db';
+            document.getElementById('edit-bookmark-color-text').value = '#D1D5DB';
+            syncBookmarkColorControls();
             document.getElementById('bookmark-modal-save-btn').innerText = 'Add';
-            document.getElementById('bookmark-position-row').style.display = 'none';
+            renderBookmarkSubcommandManager();
+            showBookmarkEditorMainView();
             document.getElementById('bookmark-modal').classList.add('show');
             document.getElementById('edit-bookmark-name').focus();
         }
@@ -13532,34 +13709,19 @@ kiro-cli whoami --format json</code></pre>
             _bookmarkModalIsNew = false;
             editingBookmarkProj = projName;
             editingBookmarkIndex = index;
+            _bookmarkModalCommandKey = currentCmd;
 
-            document.getElementById('bookmark-modal-title').innerText = 'Edit Bookmark';
+            document.getElementById('bookmark-modal-title').innerText = 'Edit Command';
             document.getElementById('bookmark-modal-save-btn').innerText = 'Save Changes';
-            document.getElementById('bookmark-position-row').style.display = '';
-            document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName} (Current Position: ${index + 1})`;
+            document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName}`;
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
             document.getElementById('edit-bookmark-color-enabled').checked = !!currentColor;
             document.getElementById('edit-bookmark-color').value = currentColor || '#d1d5db';
-            document.getElementById('edit-bookmark-color-text').value = currentColor || '#d1d5db';
-            
-            // Find the project's bookmarks to populate select dropdown
-            const proj = projects.find(p => p.name.toLowerCase() == projName.toLowerCase());
-            const select = document.getElementById('edit-bookmark-index');
-            select.innerHTML = '';
-            
-            if (proj && proj.bookmarks) {
-                proj.bookmarks.forEach((bm, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.innerText = `Position ${i + 1}${i === index ? ' (Current)' : ''}`;
-                    if (i === index) {
-                        opt.selected = true;
-                    }
-                    select.appendChild(opt);
-                });
-            }
-            
+            document.getElementById('edit-bookmark-color-text').value = (currentColor || '#d1d5db').toUpperCase();
+            syncBookmarkColorControls();
+            renderBookmarkSubcommandManager();
+            showBookmarkEditorMainView();
             document.getElementById('bookmark-modal').classList.add('show');
             document.getElementById('edit-bookmark-name').focus();
         }
@@ -13662,6 +13824,8 @@ kiro-cli whoami --format json</code></pre>
 
         function closeBookmarkModal() {
             document.getElementById('bookmark-modal').classList.remove('show');
+            showBookmarkEditorMainView();
+            _bookmarkModalCommandKey = null;
             editingBookmarkProj = null;
             editingBookmarkIndex = null;
         }
@@ -13672,12 +13836,13 @@ kiro-cli whoami --format json</code></pre>
 
             const cmd = document.getElementById('edit-bookmark-cmd').value.trim();
             const alias = document.getElementById('edit-bookmark-name').value.trim();
-            const color = document.getElementById('edit-bookmark-color-enabled').checked
-                ? document.getElementById('edit-bookmark-color-text').value.trim()
-                : '';
+            const colorEnabled = document.getElementById('edit-bookmark-color-enabled').checked;
+            const colorInput = document.getElementById('edit-bookmark-color-text').value.trim();
+            const color = colorEnabled ? parseBookmarkColor(colorInput) : '';
 
-            if (color && !/^#[0-9a-fA-F]{6}$/.test(color)) {
-                alert('Use a six-digit hex color such as #ff55ff.');
+            if (colorEnabled && !color) {
+                alert('Enter a color as #RRGGBB or rgb(255, 85, 255).');
+                document.getElementById('edit-bookmark-color-text').focus();
                 return;
             }
 
@@ -13709,8 +13874,6 @@ kiro-cli whoami --format json</code></pre>
             }
 
             if (editingBookmarkIndex === null) return;
-            const newIndex = parseInt(document.getElementById('edit-bookmark-index').value);
-
             try {
                 const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks/${editingBookmarkIndex}/edit`, {
                     method: 'POST',
@@ -13719,13 +13882,19 @@ kiro-cli whoami --format json</code></pre>
                         command: cmd,
                         name: alias,
                         windowTitle: "",
-                        color,
-                        newIndex: newIndex
+                        color
                     })
                 });
 
                 if (response.ok) {
                     projects = await response.json();
+                    if (_bookmarkModalCommandKey && _bookmarkModalCommandKey !== cmd) {
+                        const existingSubcommands = loadSubcmds(_bookmarkModalCommandKey);
+                        if (existingSubcommands.length && !loadSubcmds(cmd).length) {
+                            bookmarkSubcmdsMap[cmd] = existingSubcommands.slice();
+                            await saveSubcmds(cmd, bookmarkSubcmdsMap[cmd]);
+                        }
+                    }
                     closeBookmarkModal();
                     updateBookmarksDropdown();
                 } else {
@@ -13948,8 +14117,11 @@ kiro-cli whoami --format json</code></pre>
         // ── Subcommand helpers ──────────────────────────────────────────────
 
         function _refreshSubcmdsStrip(bmCmd) {
-            // Re-render all bookmark rows that belong to this command
+            // Re-render the bookmark menu and its open quick-action editor.
             updateBookmarksDropdown();
+            if (_bookmarkModalCommandKey === bmCmd && document.getElementById('bookmark-modal')?.classList.contains('show')) {
+                renderBookmarkSubcommandManager();
+            }
         }
 
         // ── Subcommand edit modal ───────────────────────────────────────────
@@ -13996,6 +14168,35 @@ kiro-cli whoami --format json</code></pre>
         // Keep old name as alias so any lingering references still work
         function openSubcmdAddModal(bmCmd) { openSubcmdEditModal(bmCmd, null); }
 
+        function returnToParentBookmarkFromSubcmd() {
+            const parentCommand = _subcmdAddModalCmd;
+            if (!parentCommand) return;
+
+            const parentEditor = document.getElementById('bookmark-modal');
+            if (parentEditor && parentEditor.classList.contains('show') && _bookmarkModalCommandKey === parentCommand) {
+                closeSubcmdAddModal();
+                showBookmarkEditorMainView();
+                document.getElementById('edit-bookmark-cmd')?.focus();
+                return;
+            }
+
+            closeSubcmdAddModal();
+            for (const project of projects || []) {
+                const bookmarks = project.bookmarks || [];
+                const index = bookmarks.findIndex(bookmark => (typeof bookmark === 'string' ? bookmark : bookmark?.command) === parentCommand);
+                if (index < 0) continue;
+                const bookmark = bookmarks[index];
+                openBookmarkModal(
+                    project.name,
+                    index,
+                    parentCommand,
+                    bookmark && typeof bookmark === 'object' ? bookmark.name : '',
+                    bookmark && typeof bookmark === 'object' ? bookmark.windowTitle : '',
+                    bookmark && typeof bookmark === 'object' ? bookmark.color : ''
+                );
+                return;
+            }
+        }
         function closeSubcmdAddModal() {
             document.getElementById('subcmd-add-modal').classList.remove('show');
             _subcmdAddModalCmd = null;
