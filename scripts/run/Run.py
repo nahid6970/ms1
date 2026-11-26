@@ -2396,6 +2396,40 @@ def show_git_ages_for_query(query, feeder_path):
         terms = [term.casefold() for term in query.split()]
         matching_paths = []
         display_paths = {}
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as config_stream:
+                display_config = json.load(config_stream)
+                view_mode = display_config.get('view_mode', 'full')
+                extension_icons = display_config.get('extension_icons', {})
+        except Exception:
+            view_mode = 'full'
+            extension_icons = {}
+
+        def icon_for_path(path):
+            ext = os.path.splitext(path)[1].lower()
+            for key, entry in extension_icons.items():
+                if key == 'folder':
+                    continue
+                if ext in [part.strip().lower() for part in key.replace(',', ' ').split()]:
+                    return entry.get('icon', '📄') if isinstance(entry, dict) else entry
+            return '📄'
+
+        def display_width(value):
+            try:
+                from wcwidth import wcswidth
+                measured = wcswidth(value)
+                if measured >= 0:
+                    return measured
+            except ImportError:
+                pass
+            import unicodedata
+            width = 0
+            for char in value:
+                if unicodedata.combining(char) or char in ('\u200d', '\ufe0f'):
+                    continue
+                width += 2 if unicodedata.east_asian_width(char) in ('W', 'F') or 0x1F300 <= ord(char) <= 0x1FAFF else 1
+            return width
+
         for line in result.stdout.splitlines():
             fields = line.split('\t', 1)
             if len(fields) != 2:
@@ -2405,7 +2439,15 @@ def show_git_ages_for_query(query, feeder_path):
             display = clean_display.casefold()
             if all(term in display for term in terms) and os.path.isfile(fields[1]):
                 matching_paths.append(fields[1])
-                display_paths[fields[1]] = clean_display
+                path = fields[1]
+                icon = icon_for_path(path)
+                icon_padding = ' ' * max(1, 3 - display_width(icon))
+                if view_mode == 'name':
+                    name = os.path.basename(path.rstrip(os.sep))
+                    parent = os.path.basename(os.path.dirname(path.rstrip(os.sep)))
+                    display_paths[path] = f"{icon}{icon_padding}{name} ({parent})"
+                else:
+                    display_paths[path] = f"{icon}{icon_padding}{path}"
         show_git_ages(matching_paths, display_paths)
     except Exception as error:
         print(f"Could not find matching files: {error}")
