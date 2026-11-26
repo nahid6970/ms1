@@ -194,7 +194,8 @@ def load_config():
         ".rs": {"icon": "🦀", "color": 208},
         ".pdf": {"icon": "📕", "color": 196},
         ".zip, .tar, .gz, .7z": {"icon": "📦", "color": 220},
-        "folder": {"icon": "📁", "color": 208}
+        "folder": {"icon": "📁", "color": 208},
+        "__default__": {"icon": "📄", "color": 250}
     }
     config = {
         "search_roots": default_roots,
@@ -242,6 +243,8 @@ def load_config():
         except:
             pass
             
+    config["extension_icons"].setdefault("__default__", {"icon": "📄", "color": 250})
+
     # Save default config if file does not exist, or save populated roots if missing/empty
     if os.path.exists(CONFIG_FILE):
         try:
@@ -668,7 +671,7 @@ def configure_single_icon_menu(ext_key):
             other_options = []
             other_choices_map = {}
             for other_ext, other_entry in sorted(icon_map.items()):
-                if other_ext == ext_key or other_ext == "folder":
+                if other_ext == ext_key or other_ext in ("folder", "__default__"):
                     continue
                 other_icon = ""
                 other_color = 250
@@ -772,6 +775,8 @@ def manage_icon_colors_menu():
         def format_ext_list(ext_key):
             if ext_key == "folder":
                 return "folder"
+            if ext_key == "__default__":
+                return "Uncategorized extensions"
             parts = [x.strip() for x in ext_key.replace(',', ' ').split()]
             cleaned = []
             for p in parts:
@@ -1902,7 +1907,8 @@ config = {{
         ".tar": {{"icon": "📦", "color": 220}},
         ".gz": {{"icon": "📦", "color": 220}},
         ".7z": {{"icon": "📦", "color": 220}},
-        "folder": {{"icon": "📁", "color": 208}}
+        "folder": {{"icon": "📁", "color": 208}},
+        "__default__": {{"icon": "📄", "color": 250}}
     }}
 }}
 if os.path.exists(config_file):
@@ -1917,6 +1923,8 @@ if os.path.exists(config_file):
             if "git_age_enabled" in data: config["git_age_enabled"] = data["git_age_enabled"]
             if "git_age_max_files" in data: config["git_age_max_files"] = data["git_age_max_files"]
     except: pass
+
+config["extension_icons"].setdefault("__default__", {{"icon": "📄", "color": 250}})
 
 view_mode = config["view_mode"]
 
@@ -2030,10 +2038,15 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
                     icon_color = line_color
                 break
                 
-        # If no match, fallback to default file icon "📄"
+        # Use the configurable icon for uncategorized file extensions.
         if not file_icon:
-            file_icon = "📄"
-            icon_color = line_color
+            default_entry = icon_map.get("__default__", {{"icon": "📄", "color": line_color}})
+            if isinstance(default_entry, dict):
+                file_icon = default_entry.get("icon", "📄")
+                icon_color = default_entry.get("color", line_color)
+            else:
+                file_icon = default_entry
+                icon_color = line_color
             
         if file_icon:
             icon_width = terminal_width(file_icon)
