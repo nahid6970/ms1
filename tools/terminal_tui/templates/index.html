@@ -3645,6 +3645,11 @@
         .bookmark-subcmd-row:focus-visible, .bookmark-subcmd-add:focus-visible { outline:2px solid var(--accent-color); outline-offset:2px; }
         .bookmark-subcmd-add { width:100%; padding:10px; color:var(--accent-color); border:1px dashed var(--border-color); border-radius:9px; background:transparent; cursor:pointer; font-weight:600; }
         .bookmark-subcmd-add:hover { border-color:var(--accent-color); background:rgba(59,130,246,.08); }
+        #bookmark-svg-editor-modal .modal-content { scrollbar-width:thin; scrollbar-color:#475569 var(--bg-main); }
+        #bookmark-svg-editor-modal .modal-content::-webkit-scrollbar { width:8px; }
+        #bookmark-svg-editor-modal .modal-content::-webkit-scrollbar-track { background:var(--bg-main); }
+        #bookmark-svg-editor-modal .modal-content::-webkit-scrollbar-thumb { background:#475569; border:2px solid var(--bg-main); border-radius:4px; }
+        #bookmark-svg-editor-modal .modal-content::-webkit-scrollbar-corner { background:var(--bg-main); }
         @media (max-width: 680px) {
             .bookmark-editor-modal { width:min(540px, 94vw); padding:18px; }
             .bookmark-editor-grid { grid-template-columns:minmax(0, 1fr); }
@@ -3791,15 +3796,32 @@
     </div>
 
     <div class="modal-overlay" id="bookmark-svg-editor-modal" style="z-index:1800;" onclick="if(event.target===this)closeBookmarkSvgEditor()">
-        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="bookmark-svg-editor-title" style="width:620px;max-width:94vw;max-height:88vh;max-height:88dvh;box-sizing:border-box;padding:20px;display:flex;flex-direction:column;gap:12px;">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="bookmark-svg-editor-title" style="width:620px;max-width:94vw;max-height:88vh;max-height:88dvh;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;padding:20px;display:flex;flex-direction:column;gap:12px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                 <div>
                     <h2 id="bookmark-svg-editor-title" style="margin:0;font-size:1rem;color:var(--text-primary);">SVG icon code</h2>
-                    <div style="margin-top:4px;font-size:.72rem;color:var(--text-secondary);">Paste inline SVG markup. Basic paths and shapes are supported.</div>
+                    <div style="margin-top:4px;font-size:.72rem;color:var(--text-secondary);">Preview updates as you edit. Replace base colors or set separate hover colors.</div>
                 </div>
                 <button type="button" onclick="closeBookmarkSvgEditor()" aria-label="Close SVG editor" style="width:30px;height:30px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-main);color:var(--text-secondary);font-size:18px;cursor:pointer;">×</button>
             </div>
-            <textarea id="bookmark-svg-editor-input" rows="12" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot;&gt; ... &lt;/svg&gt;" style="width:100%;box-sizing:border-box;resize:none;min-height:180px;padding:11px 12px;font-family:'Fira Code',monospace;font-size:.76rem;line-height:1.5;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);outline:none;"></textarea>
+            <textarea id="bookmark-svg-editor-input" rows="12" spellcheck="false" oninput="refreshBookmarkSvgEditor()" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot;&gt; ... &lt;/svg&gt;" style="width:100%;box-sizing:border-box;resize:none;min-height:180px;padding:11px 12px;font-family:'Fira Code',monospace;font-size:.76rem;line-height:1.5;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);outline:none;"></textarea>
+            <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:start;">
+                <div>
+                    <div style="margin-bottom:6px;font-size:.65rem;font-weight:650;color:var(--text-secondary);">PREVIEW</div>
+                    <div id="bookmark-svg-live-preview" title="Hover to preview hover colors" onmouseenter="renderBookmarkSvgEditorPreview(true)" onmouseleave="renderBookmarkSvgEditorPreview(false)" style="height:76px;display:grid;place-items:center;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);color:var(--text-primary);cursor:default;"></div>
+                    <div style="margin-top:5px;text-align:center;font-size:.6rem;color:var(--text-muted);">Hover to test</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px;min-width:0;">
+                    <div>
+                        <div style="margin-bottom:5px;font-size:.65rem;font-weight:650;color:var(--text-secondary);">BASE COLORS · click to replace</div>
+                        <div id="bookmark-svg-base-colors" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:30px;"></div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom:5px;font-size:.65rem;font-weight:650;color:var(--text-secondary);">HOVER COLORS · click to set overrides</div>
+                        <div id="bookmark-svg-hover-colors" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:30px;"></div>
+                    </div>
+                </div>
+            </div>
             <div style="display:flex;justify-content:flex-end;gap:8px;">
                 <button type="button" onclick="closeBookmarkSvgEditor()" style="padding:8px 13px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
                 <button type="button" onclick="applyBookmarkSvgEditor()" style="padding:8px 14px;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:8px;color:white;font-weight:600;cursor:pointer;">Use SVG</button>
@@ -13358,6 +13380,7 @@ kiro-cli whoami --format json</code></pre>
                             windowTitle: windowTitle,
                             color: bmColor,
                             iconSvg: (typeof bm === 'object') ? (bm.iconSvg || '') : '',
+                            iconHoverMap: (typeof bm === 'object' && bm.iconHoverMap && typeof bm.iconHoverMap === 'object') ? bm.iconHoverMap : {},
                             displayOrder: (typeof bm === 'object' && Number.isFinite(Number(bm.displayOrder))) ? Number(bm.displayOrder) : null,
                             project: p.name,
                             index: idx,
@@ -13420,7 +13443,7 @@ kiro-cli whoami --format json</code></pre>
                     row.oncontextmenu = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle, bm.color, bm.iconSvg);
+                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle, bm.color, bm.iconSvg, bm.iconHoverMap);
                     };
 
                     // Drag-to-reorder is available for local and global bookmarks.
@@ -13514,13 +13537,29 @@ kiro-cli whoami --format json</code></pre>
 
                     listEl.appendChild(row);
                     const bookmarkNameEl = row.querySelector('.bm-command-name');
-                    const bookmarkSvg = createBookmarkSvgIcon(bm.iconSvg, 15);
-                    if (bookmarkNameEl && bookmarkSvg) bookmarkNameEl.insertBefore(bookmarkSvg, bookmarkNameEl.firstChild);
+                    const renderBookmarkRowSvg = (showHover = false) => {
+                        if (!bookmarkNameEl) return;
+                        const existingIcon = bookmarkNameEl.querySelector('svg');
+                        if (existingIcon) existingIcon.remove();
+                        const bookmarkSvg = createBookmarkSvgIcon(bm.iconSvg, 15, showHover ? bm.iconHoverMap : {});
+                        if (bookmarkSvg) bookmarkNameEl.insertBefore(bookmarkSvg, bookmarkNameEl.firstChild);
+                    };
+                    renderBookmarkRowSvg();
+                    row.addEventListener('mouseenter', () => renderBookmarkRowSvg(true));
+                    row.addEventListener('mouseleave', () => renderBookmarkRowSvg(false));
                     row.querySelectorAll('.bm-subcmd-btn').forEach((button, subcmdIndex) => {
                         const iconSlot = button.querySelector('.bm-subcmd-icon-slot');
-                        const subcmdSvg = createBookmarkSvgIcon(subcmds[subcmdIndex]?.iconSvg, 12);
-                        if (iconSlot && subcmdSvg) iconSlot.appendChild(subcmdSvg);
-                        else if (iconSlot) iconSlot.remove();
+                        const subcmd = subcmds[subcmdIndex] || {};
+                        const renderSubcommandSvg = (showHover = false) => {
+                            if (!iconSlot) return;
+                            iconSlot.replaceChildren();
+                            const subcmdSvg = createBookmarkSvgIcon(subcmd.iconSvg, 12, showHover ? subcmd.iconHoverMap : {});
+                            if (subcmdSvg) iconSlot.appendChild(subcmdSvg);
+                            else iconSlot.remove();
+                        };
+                        renderSubcommandSvg();
+                        button.addEventListener('mouseenter', () => renderSubcommandSvg(true));
+                        button.addEventListener('mouseleave', () => renderSubcommandSvg(false));
                     });
                 });
             }
@@ -13618,46 +13657,117 @@ kiro-cli whoami --format json</code></pre>
 
         const BOOKMARK_SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
-        function createBookmarkSvgIcon(svgCode, size = 16) {
-            const source = String(svgCode || '').trim();
+        function createBookmarkSvgIcon(svgCode, size = 16, colorOverrides = {}) {
+            let source = String(svgCode || '').trim();
             if (!source) return null;
 
             try {
+                for (const [baseColor, hoverColor] of Object.entries(colorOverrides || {})) {
+                    if (/^#[0-9a-f]{3,6}$/i.test(baseColor) && /^#[0-9a-f]{6}$/i.test(hoverColor)) {
+                        source = source.replace(new RegExp(baseColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![0-9a-f])', 'gi'), hoverColor);
+                    }
+                }
                 const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
                 const sourceRoot = parsed.documentElement;
                 if (!sourceRoot || sourceRoot.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return null;
 
-                const allowedTags = new Set(['svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse']);
+                const allowedTags = new Set(['svg', 'g', 'defs', 'symbol', 'use', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse', 'lineargradient', 'radialgradient', 'stop', 'clippath', 'mask', 'text', 'tspan', 'title']);
+                const canonicalTags = { lineargradient: 'linearGradient', radialgradient: 'radialGradient', clippath: 'clipPath' };
                 const allowedAttributes = new Set([
                     'viewbox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
                     'fill-rule', 'clip-rule', 'opacity', 'fill-opacity', 'stroke-opacity', 'd', 'points',
-                    'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'width', 'height'
+                    'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'width', 'height',
+                    'id', 'href', 'offset', 'stop-color', 'stop-opacity', 'gradientunits', 'gradienttransform',
+                    'spreadmethod', 'fx', 'fy', 'fr', 'transform', 'clip-path', 'mask', 'preserveaspectratio',
+                    'stroke-dasharray', 'stroke-dashoffset', 'vector-effect', 'xmlns', 'color', 'clippathunits',
+                    'maskunits', 'maskcontentunits', 'display', 'visibility', 'font-family', 'font-size',
+                    'font-weight', 'font-style', 'text-anchor', 'dominant-baseline', 'dx', 'dy', 'textlength', 'lengthadjust'
                 ]);
+                const canonicalAttributes = { viewbox: 'viewBox', gradientunits: 'gradientUnits', gradienttransform: 'gradientTransform', spreadmethod: 'spreadMethod', preserveaspectratio: 'preserveAspectRatio', clippathunits: 'clipPathUnits', maskunits: 'maskUnits', maskcontentunits: 'maskContentUnits' };
                 let shapeCount = 0;
+                const safeRef = /^url\(\s*#[A-Za-z_][\w.:-]*\s*\)$/i;
+                const safeId = /^[A-Za-z_][\w.:-]*$/;
+                const isSafeColor = (value) => /^(?:none|currentColor|#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{1,20})$/i.test(value) || safeRef.test(value);
                 const isSafeAttributeValue = (name, value) => {
-                    if (/[<>"'`]|url\s*\(|javascript:|data:/i.test(value)) return false;
-                    if (name === 'fill' || name === 'stroke') {
-                        return /^(?:none|currentColor|#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{1,20})$/i.test(value);
-                    }
+                    if (/[<>"'`]|javascript:|data:/i.test(value)) return false;
+                    if (name === 'fill' || name === 'stroke' || name === 'stop-color') return isSafeColor(value);
+                    if (name === 'color') return /^(?:currentColor|#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{1,20})$/i.test(value);
+                    if (name === 'href') return /^#[A-Za-z_][\w.:-]*$/.test(value);
+                    if (name === 'id') return safeId.test(value);
+                    if (name === 'clip-path' || name === 'mask') return safeRef.test(value);
                     if (name === 'stroke-linecap' || name === 'stroke-linejoin' || name === 'fill-rule' || name === 'clip-rule') {
                         return /^(?:butt|round|square|miter|bevel|arcs|nonzero|evenodd)$/i.test(value);
                     }
+                    if (name === 'font-family') return /^[A-Za-z0-9 ,_-]{1,80}$/.test(value);
+                    if (name === 'font-size' || name === 'dx' || name === 'dy' || name === 'textlength') return /^[+\-]?(?:\d+\.?\d*|\.\d+)(?:px|em|rem|%)?$/i.test(value);
+                    if (name === 'font-weight') return /^(?:normal|bold|[1-9]00)$/i.test(value);
+                    if (name === 'font-style') return /^(?:normal|italic|oblique)$/i.test(value);
+                    if (name === 'text-anchor') return /^(?:start|middle|end)$/i.test(value);
+                    if (name === 'dominant-baseline') return /^(?:auto|alphabetic|central|middle|hanging|text-before-edge|text-after-edge)$/i.test(value);
+                    if (name === 'lengthadjust') return /^(?:spacing|spacingAndGlyphs)$/i.test(value);
                     if (name === 'viewbox') return /^[+\-\d.eE,\s]+$/.test(value);
                     if (name === 'd' || name === 'points') return /^[a-zA-Z0-9.,+\-\s]*$/.test(value);
-                    if (name === 'opacity' || name === 'fill-opacity' || name === 'stroke-opacity') return /^(?:0|1|0?\.\d+)$/.test(value);
-                    if (name === 'width' || name === 'height' || name === 'cx' || name === 'cy' || name === 'r' || name === 'rx' || name === 'ry' || name === 'x' || name === 'y' || name === 'x1' || name === 'y1' || name === 'x2' || name === 'y2' || name === 'stroke-width') return /^[+\-]?(?:\d+\.?\d*|\.\d+)(?:px|%)?$/.test(value);
+                    if (name === 'opacity' || name === 'fill-opacity' || name === 'stroke-opacity' || name === 'stop-opacity') return /^(?:0|1|0?\.\d+)$/.test(value);
+                    if (name === 'offset') return /^(?:0|1|0?\.\d+|\d+(?:\.\d+)?%)$/.test(value);
+                    if (name === 'gradientunits') return /^(?:userSpaceOnUse|objectBoundingBox)$/i.test(value);
+                    if (name === 'clippathunits' || name === 'maskunits' || name === 'maskcontentunits') return /^(?:userSpaceOnUse|objectBoundingBox)$/i.test(value);
+                    if (name === 'spreadmethod') return /^(?:pad|reflect|repeat)$/i.test(value);
+                    if (name === 'transform' || name === 'gradienttransform') return /^(?:(?:matrix|translate|scale|rotate|skewX|skewY)\(\s*[-+\d.eE,\s]+\)\s*)+$/i.test(value);
+                    if (name === 'preserveaspectratio') return /^(?:(?:none|x(?:Min|Mid|Max)Y(?:Min|Mid|Max))(?:\s+(?:meet|slice))?)$/i.test(value);
+                    if (name === 'vector-effect') return /^non-scaling-stroke$/i.test(value);
+                    if (name === 'display') return /^(?:inline|none)$/i.test(value);
+                    if (name === 'visibility') return /^(?:visible|hidden|collapse)$/i.test(value);
+                    if (name === 'stroke-dasharray' || name === 'stroke-dashoffset') return /^(?:none|[-+\d.eE,%\s]+)$/.test(value);
+                    if (name === 'width' || name === 'height' || name === 'cx' || name === 'cy' || name === 'r' || name === 'rx' || name === 'ry' || name === 'x' || name === 'y' || name === 'x1' || name === 'y1' || name === 'x2' || name === 'y2' || name === 'fx' || name === 'fy' || name === 'fr' || name === 'stroke-width') return /^[+\-]?(?:\d+\.?\d*|\.\d+)(?:px|%)?$/.test(value);
                     return false;
                 };
+                const allowedStyleProperties = new Set(['fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'fill-rule', 'clip-rule', 'opacity', 'fill-opacity', 'stroke-opacity', 'stop-color', 'stop-opacity', 'color', 'stroke-dasharray', 'stroke-dashoffset', 'vector-effect', 'display', 'visibility', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor', 'dominant-baseline', 'transform', 'clip-path', 'mask', 'width', 'height']);
+                const sanitizeStyleDeclarations = (text) => text.split(';').flatMap(declaration => {
+                    const splitAt = declaration.indexOf(':');
+                    if (splitAt < 1) return [];
+                    const property = declaration.slice(0, splitAt).trim().toLowerCase();
+                    const propertyValue = declaration.slice(splitAt + 1).trim();
+                    return allowedStyleProperties.has(property) && isSafeAttributeValue(property, propertyValue) ? [[property, propertyValue]] : [];
+                });
+                const classStyles = new Map();
+                for (const styleElement of Array.from(sourceRoot.querySelectorAll('style'))) {
+                    const css = styleElement.textContent || '';
+                    if (css.length > 10000) continue;
+                    for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+                        const declarations = sanitizeStyleDeclarations(match[2]);
+                        if (!declarations.length) continue;
+                        for (const selector of match[1].split(',')) {
+                            const simpleClass = selector.trim().match(/^\.([A-Za-z_][\w-]*)$/);
+                            if (simpleClass) classStyles.set(simpleClass[1], declarations);
+                        }
+                    }
+                }
                 const copySafeElement = (sourceElement) => {
                     const tagName = sourceElement.localName.toLowerCase();
                     if (!allowedTags.has(tagName)) return null;
-                    const element = document.createElementNS(BOOKMARK_SVG_NAMESPACE, tagName);
-                    if (tagName !== 'svg' && tagName !== 'g') shapeCount++;
+                    const element = document.createElementNS(BOOKMARK_SVG_NAMESPACE, canonicalTags[tagName] || tagName);
+                    if (['path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse', 'use', 'text'].includes(tagName)) shapeCount++;
+                    const styleDeclarations = (sourceElement.getAttribute('class') || '').split(/\s+/).flatMap(className => classStyles.get(className) || []);
                     for (const attribute of Array.from(sourceElement.attributes)) {
-                        const name = attribute.name.toLowerCase();
+                        let name = attribute.name.toLowerCase();
+                        if (name === 'xlink:href') name = 'href';
                         const value = attribute.value.trim();
+                        if (name === 'class') continue;
+                        if (name === 'style') {
+                            styleDeclarations.push(...sanitizeStyleDeclarations(value));
+                            continue;
+                        }
                         if (allowedAttributes.has(name) && isSafeAttributeValue(name, value)) {
-                            element.setAttribute(name, value);
+                            element.setAttribute(canonicalAttributes[name] || name, value);
+                        }
+                    }
+                    if (styleDeclarations.length) {
+                        const mergedStyles = new Map(styleDeclarations);
+                        element.setAttribute('style', [...mergedStyles].map(([property, value]) => `${property}:${value}`).join(';'));
+                    }
+                    if (['text', 'tspan', 'title'].includes(tagName)) {
+                        for (const childNode of Array.from(sourceElement.childNodes)) {
+                            if (childNode.nodeType === Node.TEXT_NODE) element.appendChild(document.createTextNode(childNode.nodeValue || ''));
                         }
                     }
                     for (const child of Array.from(sourceElement.children)) {
@@ -13669,7 +13779,7 @@ kiro-cli whoami --format json</code></pre>
 
                 const svg = copySafeElement(sourceRoot);
                 if (!svg || shapeCount === 0) return null;
-                const viewBox = svg.getAttribute('viewbox');
+                const viewBox = svg.getAttribute('viewBox') || svg.getAttribute('viewbox');
                 if (!viewBox) svg.setAttribute('viewBox', '0 0 24 24');
                 else {
                     svg.setAttribute('viewBox', viewBox);
@@ -13681,7 +13791,12 @@ kiro-cli whoami --format json</code></pre>
                 svg.setAttribute('height', String(size));
                 svg.setAttribute('aria-hidden', 'true');
                 svg.setAttribute('focusable', 'false');
-                svg.style.cssText = `display:block;width:${size}px;height:${size}px;flex:0 0 ${size}px;`;
+                svg.style.display = 'block';
+                svg.style.width = `${size}px`;
+                svg.style.height = `${size}px`;
+                svg.style.flex = `0 0 ${size}px`;
+                const declaredIconColor = svg.style.color || svg.getAttribute('color') || '';
+                if (!declaredIconColor || declaredIconColor.toLowerCase() === 'currentcolor') svg.style.color = 'var(--text-primary)';
                 return svg;
             } catch (error) {
                 console.warn('Could not parse bookmark SVG icon:', error);
@@ -13690,6 +13805,99 @@ kiro-cli whoami --format json</code></pre>
         }
 
         let _bookmarkSvgEditorTargetId = null;
+        let _bookmarkSvgEditorHoverMap = {};
+
+        function getBookmarkSvgHoverMap(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (!field) return {};
+            try {
+                const parsed = JSON.parse(field.dataset.iconHoverMap || '{}');
+                if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+                return Object.fromEntries(Object.entries(parsed).filter(([base, hover]) => /^#[0-9a-f]{3,6}$/i.test(base) && /^#[0-9a-f]{6}$/i.test(hover)));
+            } catch (_) { return {}; }
+        }
+
+        function bookmarkSvgColors(svgCode) {
+            return [...new Set(String(svgCode || '').match(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi) || [])];
+        }
+
+        function expandBookmarkHex(color) {
+            const value = String(color || '').toLowerCase();
+            return /^#[0-9a-f]{3}$/.test(value) ? '#' + [...value.slice(1)].map(char => char + char).join('') : value;
+        }
+
+        function replaceBookmarkSvgColor(oldColor, newColor) {
+            const input = document.getElementById('bookmark-svg-editor-input');
+            const escaped = oldColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            input.value = input.value.replace(new RegExp(escaped + '(?![0-9a-f])', 'gi'), newColor);
+            const oldHoverKey = Object.keys(_bookmarkSvgEditorHoverMap).find(key => key.toLowerCase() === oldColor.toLowerCase());
+            if (oldHoverKey) {
+                _bookmarkSvgEditorHoverMap[newColor.toUpperCase()] = _bookmarkSvgEditorHoverMap[oldHoverKey];
+                delete _bookmarkSvgEditorHoverMap[oldHoverKey];
+            }
+            refreshBookmarkSvgEditor();
+        }
+
+        function createBookmarkSvgColorPicker(container, baseColor, currentColor, title, onChange) {
+            const picker = document.createElement('input');
+            picker.type = 'color';
+            picker.value = expandBookmarkHex(currentColor);
+            picker.title = title;
+            picker.setAttribute('aria-label', title);
+            picker.style.cssText = 'width:30px;height:30px;padding:2px;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-sidebar);cursor:pointer;';
+            picker.addEventListener('change', () => onChange(picker.value.toUpperCase()));
+            container.appendChild(picker);
+        }
+
+        function refreshBookmarkSvgEditor() {
+            const code = document.getElementById('bookmark-svg-editor-input').value;
+            const baseColors = document.getElementById('bookmark-svg-base-colors');
+            const hoverColors = document.getElementById('bookmark-svg-hover-colors');
+            baseColors.replaceChildren();
+            hoverColors.replaceChildren();
+            const colors = bookmarkSvgColors(code);
+            if (!colors.length) {
+                for (const container of [baseColors, hoverColors]) {
+                    const empty = document.createElement('span');
+                    empty.textContent = code.trim() ? 'No hex colors found' : 'Paste SVG code to find colors';
+                    empty.style.cssText = 'font-size:.68rem;color:var(--text-muted);';
+                    container.appendChild(empty);
+                }
+            } else {
+                colors.forEach(color => {
+                    createBookmarkSvgColorPicker(baseColors, color, expandBookmarkHex(color), `Replace ${color} in SVG`, replacement => replaceBookmarkSvgColor(color, replacement));
+                    const hoverKey = Object.keys(_bookmarkSvgEditorHoverMap).find(key => key.toLowerCase() === color.toLowerCase());
+                    createBookmarkSvgColorPicker(hoverColors, color, hoverKey ? _bookmarkSvgEditorHoverMap[hoverKey] : expandBookmarkHex(color), `Set hover color for ${color}`, replacement => {
+                        _bookmarkSvgEditorHoverMap[color.toUpperCase()] = replacement;
+                        renderBookmarkSvgEditorPreview(document.getElementById('bookmark-svg-live-preview').matches(':hover'));
+                    });
+                });
+            }
+            renderBookmarkSvgEditorPreview(document.getElementById('bookmark-svg-live-preview').matches(':hover'));
+        }
+
+        function renderBookmarkSvgEditorPreview(showHover = false) {
+            const preview = document.getElementById('bookmark-svg-live-preview');
+            if (!preview) return;
+            preview.replaceChildren();
+            const code = document.getElementById('bookmark-svg-editor-input').value.trim();
+            if (!code) {
+                preview.textContent = 'SVG preview';
+                preview.style.fontSize = '.68rem';
+                preview.style.color = 'var(--text-muted)';
+                return;
+            }
+            const icon = createBookmarkSvgIcon(code, 44, showHover ? _bookmarkSvgEditorHoverMap : {});
+            if (icon) {
+                preview.style.fontSize = '';
+                preview.style.color = 'var(--text-primary)';
+                preview.appendChild(icon);
+            } else {
+                preview.textContent = 'Preview unavailable for this SVG';
+                preview.style.fontSize = '.65rem';
+                preview.style.color = 'var(--text-muted)';
+            }
+        }
 
         function syncBookmarkSvgTrigger(fieldId) {
             const source = document.getElementById(fieldId);
@@ -13713,6 +13921,8 @@ kiro-cli whoami --format json</code></pre>
             if (!source) return;
             _bookmarkSvgEditorTargetId = fieldId;
             document.getElementById('bookmark-svg-editor-input').value = source.value || '';
+            _bookmarkSvgEditorHoverMap = getBookmarkSvgHoverMap(fieldId);
+            refreshBookmarkSvgEditor();
             document.getElementById('bookmark-svg-editor-modal').classList.add('show');
             requestAnimationFrame(() => document.getElementById('bookmark-svg-editor-input').focus());
         }
@@ -13727,6 +13937,7 @@ kiro-cli whoami --format json</code></pre>
             const source = document.getElementById(_bookmarkSvgEditorTargetId);
             if (!source) return closeBookmarkSvgEditor();
             source.value = document.getElementById('bookmark-svg-editor-input').value;
+            source.dataset.iconHoverMap = JSON.stringify(_bookmarkSvgEditorHoverMap);
             syncBookmarkSvgTrigger(_bookmarkSvgEditorTargetId);
             closeBookmarkSvgEditor();
         }
@@ -13855,6 +14066,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-cmd').value = '';
             document.getElementById('edit-bookmark-name').value = '';
             document.getElementById('edit-bookmark-icon-svg').value = '';
+            document.getElementById('edit-bookmark-icon-svg').dataset.iconHoverMap = '{}';
             syncBookmarkSvgTrigger('edit-bookmark-icon-svg');
             document.getElementById('edit-bookmark-color-enabled').checked = false;
             document.getElementById('edit-bookmark-color').value = '#d1d5db';
@@ -13867,7 +14079,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-name').focus();
         }
 
-        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle, currentColor, currentIconSvg) {
+        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle, currentColor, currentIconSvg, currentIconHoverMap = {}) {
             _bookmarkModalIsNew = false;
             editingBookmarkProj = projName;
             editingBookmarkIndex = index;
@@ -13879,6 +14091,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
             document.getElementById('edit-bookmark-icon-svg').value = currentIconSvg || '';
+            document.getElementById('edit-bookmark-icon-svg').dataset.iconHoverMap = JSON.stringify(currentIconHoverMap || {});
             syncBookmarkSvgTrigger('edit-bookmark-icon-svg');
             document.getElementById('edit-bookmark-color-enabled').checked = !!currentColor;
             document.getElementById('edit-bookmark-color').value = currentColor || '#d1d5db';
@@ -14034,7 +14247,7 @@ kiro-cli whoami --format json</code></pre>
                     const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command: cmd, name: alias, color, iconSvg })
+                        body: JSON.stringify({ command: cmd, name: alias, color, iconSvg, iconHoverMap: getBookmarkSvgHoverMap('edit-bookmark-icon-svg') })
                     });
                     if (response.ok) {
                         projects = await response.json();
@@ -14060,7 +14273,8 @@ kiro-cli whoami --format json</code></pre>
                         name: alias,
                         windowTitle: "",
                         color,
-                        iconSvg
+                        iconSvg,
+                        iconHoverMap: getBookmarkSvgHoverMap('edit-bookmark-icon-svg')
                     })
                 });
 
@@ -14329,6 +14543,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('subcmd-add-label').value = sc.label || '';
                 document.getElementById('subcmd-add-cmd').value   = sc.cmd   || '';
                 document.getElementById('subcmd-add-icon-svg').value = sc.iconSvg || '';
+                document.getElementById('subcmd-add-icon-svg').dataset.iconHoverMap = JSON.stringify(sc.iconHoverMap || {});
                 syncBookmarkSvgTrigger('subcmd-add-icon-svg');
                 document.getElementById('subcmd-bg-color').value           = sc.bg           || '#1e293b';
                 document.getElementById('subcmd-fg-color').value           = sc.fg           || '#e2e8f0';
@@ -14339,6 +14554,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('subcmd-add-label').value = '';
                 document.getElementById('subcmd-add-cmd').value   = '';
                 document.getElementById('subcmd-add-icon-svg').value = '';
+                document.getElementById('subcmd-add-icon-svg').dataset.iconHoverMap = '{}';
                 syncBookmarkSvgTrigger('subcmd-add-icon-svg');
                 resetSubcmdColors();
             }
@@ -14375,7 +14591,8 @@ kiro-cli whoami --format json</code></pre>
                     bookmark && typeof bookmark === 'object' ? bookmark.name : '',
                     bookmark && typeof bookmark === 'object' ? bookmark.windowTitle : '',
                     bookmark && typeof bookmark === 'object' ? bookmark.color : '',
-                    bookmark && typeof bookmark === 'object' ? bookmark.iconSvg : ''
+                    bookmark && typeof bookmark === 'object' ? bookmark.iconSvg : '',
+                    bookmark && typeof bookmark === 'object' ? bookmark.iconHoverMap : {}
                 );
                 return;
             }
@@ -14413,7 +14630,7 @@ kiro-cli whoami --format json</code></pre>
             const borderWidth  = borderWidthV  !== '' ? parseInt(borderWidthV,  10) : null;
             const borderRadius = borderRadiusV !== '' ? parseInt(borderRadiusV, 10) : null;
 
-            const entry = { cmd, label, bg, fg, borderColor, iconSvg };
+            const entry = { cmd, label, bg, fg, borderColor, iconSvg, iconHoverMap: getBookmarkSvgHoverMap('subcmd-add-icon-svg') };
             if (borderWidth  !== null) entry.borderWidth  = borderWidth;
             if (borderRadius !== null) entry.borderRadius = borderRadius;
 

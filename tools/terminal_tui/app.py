@@ -746,6 +746,24 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 except Exception:
                     pass
 
+def sanitize_bookmark_icon_hover_map(value):
+    if not isinstance(value, dict) or len(value) > 64:
+        raise ValueError("SVG hover colors must be an object with at most 64 color pairs")
+    sanitized = {}
+    for base_color, hover_color in value.items():
+        base_color = str(base_color).strip()
+        hover_color = str(hover_color).strip()
+        if not re.fullmatch(r"#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})", base_color) or not re.fullmatch(r"#[0-9a-fA-F]{6}", hover_color):
+            raise ValueError("SVG hover colors must use #RGB or #RRGGBB values")
+        sanitized[base_color.upper()] = hover_color.upper()
+    return sanitized
+
+def load_bookmark_icon_hover_map(value):
+    try:
+        return sanitize_bookmark_icon_hover_map(value if isinstance(value, dict) else {})
+    except ValueError:
+        return {}
+
 def load_projects_config():
     projs = get_config_val("projects", list)
     # Sanitize bookmarks to be dicts
@@ -766,6 +784,7 @@ def load_projects_config():
                         "displayOrder": bm.get("displayOrder"),
                         "color": bm.get("color", ""),
                         "iconSvg": bm.get("iconSvg", ""),
+                        "iconHoverMap": load_bookmark_icon_hover_map(bm.get("iconHoverMap", {})),
                     })
             p["bookmarks"] = sanitized
         # All workspace handlers use `path` as the active local path. On
@@ -816,6 +835,7 @@ def preserve_global_bookmarks_as_orphans(project):
             "windowTitle": str(bookmark.get("windowTitle", "")),
             "color": str(bookmark.get("color", "")),
             "iconSvg": str(bookmark.get("iconSvg", "")),
+            "iconHoverMap": load_bookmark_icon_hover_map(bookmark.get("iconHoverMap", {})),
         })
         existing_commands.add(command.casefold())
     save_orphaned_bookmarks(existing)
@@ -1528,6 +1548,10 @@ def api_add_bookmark(project):
     window_title = data.get("windowTitle", "").strip()
     color = data.get("color", "").strip()
     icon_svg = str(data.get("iconSvg", "")).strip()
+    try:
+        icon_hover_map = sanitize_bookmark_icon_hover_map(data.get("iconHoverMap", {}))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
     if len(icon_svg) > 20000:
         return jsonify({"error": "SVG icon code must be 20,000 characters or less"}), 400
     if color and not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
@@ -1549,7 +1573,7 @@ def api_add_bookmark(project):
             exists = True
             break
     if not exists:
-        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title, "color": color, "iconSvg": icon_svg})
+        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title, "color": color, "iconSvg": icon_svg, "iconHoverMap": icon_hover_map})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
@@ -1591,6 +1615,10 @@ def api_edit_bookmark(project, index):
     window_title = data.get("windowTitle", "").strip()
     color = data.get("color", "").strip()
     icon_svg = str(data.get("iconSvg", "")).strip()
+    try:
+        icon_hover_map = sanitize_bookmark_icon_hover_map(data.get("iconHoverMap", {}))
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
     if len(icon_svg) > 20000:
         return jsonify({"error": "SVG icon code must be 20,000 characters or less"}), 400
     new_index = data.get("newIndex")
@@ -1613,6 +1641,7 @@ def api_edit_bookmark(project, index):
         bm["windowTitle"] = window_title
         bm["color"] = color
         bm["iconSvg"] = icon_svg
+        bm["iconHoverMap"] = icon_hover_map
         
         # If new_index is provided and valid, move the bookmark
         if new_index is not None:
@@ -1734,6 +1763,7 @@ def api_assign_orphaned_bookmark(index):
             "windowTitle": bookmark.get("windowTitle", ""),
             "color": bookmark.get("color", ""),
             "iconSvg": bookmark.get("iconSvg", ""),
+            "iconHoverMap": load_bookmark_icon_hover_map(bookmark.get("iconHoverMap", {})),
         })
     orphaned.pop(index)
     save_projects_config(projects)
