@@ -764,7 +764,8 @@ def load_projects_config():
                         "name": bm.get("name", ""),
                         "windowTitle": bm.get("windowTitle", ""),
                         "displayOrder": bm.get("displayOrder"),
-                        "color": bm.get("color", "")
+                        "color": bm.get("color", ""),
+                        "iconSvg": bm.get("iconSvg", ""),
                     })
             p["bookmarks"] = sanitized
         # All workspace handlers use `path` as the active local path. On
@@ -814,6 +815,7 @@ def preserve_global_bookmarks_as_orphans(project):
             "name": str(bookmark.get("name", "")),
             "windowTitle": str(bookmark.get("windowTitle", "")),
             "color": str(bookmark.get("color", "")),
+            "iconSvg": str(bookmark.get("iconSvg", "")),
         })
         existing_commands.add(command.casefold())
     save_orphaned_bookmarks(existing)
@@ -1525,6 +1527,9 @@ def api_add_bookmark(project):
     name = data.get("name", "").strip()
     window_title = data.get("windowTitle", "").strip()
     color = data.get("color", "").strip()
+    icon_svg = str(data.get("iconSvg", "")).strip()
+    if len(icon_svg) > 20000:
+        return jsonify({"error": "SVG icon code must be 20,000 characters or less"}), 400
     if color and not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
         return jsonify({"error": "Color must be a six-digit hex value"}), 400
     if not command:
@@ -1544,7 +1549,7 @@ def api_add_bookmark(project):
             exists = True
             break
     if not exists:
-        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title, "color": color})
+        proj["bookmarks"].append({"command": command, "global": False, "name": name, "windowTitle": window_title, "color": color, "iconSvg": icon_svg})
         
     save_projects_config(projects)
     return jsonify(scan_projects())
@@ -1585,6 +1590,9 @@ def api_edit_bookmark(project, index):
     name = data.get("name", "").strip()
     window_title = data.get("windowTitle", "").strip()
     color = data.get("color", "").strip()
+    icon_svg = str(data.get("iconSvg", "")).strip()
+    if len(icon_svg) > 20000:
+        return jsonify({"error": "SVG icon code must be 20,000 characters or less"}), 400
     new_index = data.get("newIndex")
     
     if not command:
@@ -1604,6 +1612,7 @@ def api_edit_bookmark(project, index):
         bm["name"] = name
         bm["windowTitle"] = window_title
         bm["color"] = color
+        bm["iconSvg"] = icon_svg
         
         # If new_index is provided and valid, move the bookmark
         if new_index is not None:
@@ -1724,6 +1733,7 @@ def api_assign_orphaned_bookmark(index):
             "name": bookmark.get("name", ""),
             "windowTitle": bookmark.get("windowTitle", ""),
             "color": bookmark.get("color", ""),
+            "iconSvg": bookmark.get("iconSvg", ""),
         })
     orphaned.pop(index)
     save_projects_config(projects)

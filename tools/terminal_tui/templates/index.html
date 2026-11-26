@@ -2063,7 +2063,7 @@
 
         /* Bookmark subcommand inline buttons */
         .bm-subcmd-btn {
-            display: inline-flex; align-items: center; justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
             padding: 2px 8px; border-radius: 5px; font-size: 0.72rem; cursor: pointer;
             border: 1px solid var(--border-color);
             background: var(--bg-sidebar); color: var(--text-primary);
@@ -3678,6 +3678,13 @@
                                 <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="5" placeholder="Enter a command or multi-line macro…" style="padding:11px 12px;font-size:.83rem;font-family:'Fira Code',monospace;resize:vertical;min-height:124px;width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);color:var(--text-primary);border-radius:9px;outline:none;"></textarea>
                                 <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too.</div>
                             </div>
+                            <details style="margin-bottom:16px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
+                                <summary style="padding:10px 12px;color:var(--text-secondary);font-size:.76rem;font-weight:600;cursor:pointer;">SVG icon code <span style="font-weight:400;color:var(--text-muted);">· optional</span></summary>
+                                <div style="padding:0 12px 12px;">
+                                    <textarea id="edit-bookmark-icon-svg" rows="3" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot; ...&gt;" style="width:100%;box-sizing:border-box;resize:vertical;min-height:72px;padding:9px 10px;font-family:'Fira Code',monospace;font-size:.72rem;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);outline:none;"></textarea>
+                                    <div style="margin-top:6px;color:var(--text-muted);font-size:.67rem;">Paste inline SVG markup. Basic paths and shapes are supported.</div>
+                                </div>
+                            </details>
                             <div class="bookmark-color-card">
                                 <div class="bookmark-color-inline">
                                     <label class="bookmark-color-toggle" for="edit-bookmark-color-enabled" title="Enable a custom label color">
@@ -3739,6 +3746,13 @@
                 <label for="subcmd-add-cmd" style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:7px;">COMMAND</label>
                 <textarea id="subcmd-add-cmd" rows="3" required autocomplete="off" placeholder="Enter the command this button runs…" style="width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);border-radius:9px;padding:10px 12px;color:var(--text-primary);font-family:'Fira Code',monospace;font-size:0.82rem;resize:vertical;min-height:82px;outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
             </div>
+            <details style="margin-bottom:16px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
+                <summary style="padding:10px 12px;color:var(--text-secondary);font-size:0.76rem;font-weight:600;cursor:pointer;">SVG icon code <span style="font-weight:400;color:var(--text-muted);">· optional</span></summary>
+                <div style="padding:0 12px 12px;">
+                    <textarea id="subcmd-add-icon-svg" rows="3" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot; ...&gt;" style="width:100%;box-sizing:border-box;resize:vertical;min-height:72px;padding:9px 10px;font-family:'Fira Code',monospace;font-size:0.72rem;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);outline:none;"></textarea>
+                    <div style="margin-top:6px;color:var(--text-muted);font-size:0.67rem;">Paste inline SVG markup. Basic paths and shapes are supported.</div>
+                </div>
+            </details>
             <details style="margin-bottom:20px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
                 <summary style="padding:10px 12px;color:var(--text-secondary);font-size:0.78rem;font-weight:600;cursor:pointer;user-select:none;">Button appearance</summary>
                 <div style="padding:0 12px 12px;">
@@ -13324,6 +13338,7 @@ kiro-cli whoami --format json</code></pre>
                             name: bmName,
                             windowTitle: windowTitle,
                             color: bmColor,
+                            iconSvg: (typeof bm === 'object') ? (bm.iconSvg || '') : '',
                             displayOrder: (typeof bm === 'object' && Number.isFinite(Number(bm.displayOrder))) ? Number(bm.displayOrder) : null,
                             project: p.name,
                             index: idx,
@@ -13386,7 +13401,7 @@ kiro-cli whoami --format json</code></pre>
                     row.oncontextmenu = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle, bm.color);
+                        openBookmarkModal(bm.project, bm.index, bm.command, bm.name, bm.windowTitle, bm.color, bm.iconSvg);
                     };
 
                     // Drag-to-reorder is available for local and global bookmarks.
@@ -13450,14 +13465,14 @@ kiro-cli whoami --format json</code></pre>
                         if (sc.borderWidth != null) btnStyle += `border-width:${sc.borderWidth}px;`;
                         if (sc.borderRadius != null) btnStyle += `border-radius:${sc.borderRadius}px;`;
                         subcmdButtonsHtml += `<div class="bm-subcmd-wrap" style="position:relative;display:inline-flex;">
-                            <button type="button" class="bm-subcmd-btn" title="${scCmdEsc}" style="${btnStyle}" onclick="event.stopPropagation();runSubcmd('${scCmdEsc}')" oncontextmenu="event.stopPropagation();event.preventDefault();openSubcmdEditModal('${bmCmdEsc}',${i})" onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''">${labelEsc}</button>
+                            <button type="button" class="bm-subcmd-btn" title="${scCmdEsc}" style="${btnStyle}" onclick="event.stopPropagation();runSubcmd('${scCmdEsc}')" oncontextmenu="event.stopPropagation();event.preventDefault();openSubcmdEditModal('${bmCmdEsc}',${i})" onmouseenter="this.style.filter='brightness(1.3)'" onmouseleave="this.style.filter=''"><span class="bm-subcmd-icon-slot"></span><span>${labelEsc}</span></button>
                         </div>`;
                     });
                     subcmdButtonsHtml += `<button type="button" class="bm-subcmd-add-btn" onclick="event.stopPropagation();openSubcmdEditModal('${bmCmdEsc}',null)" title="Add sub-command">+</button>`;
 
                     row.innerHTML = `
                         ${dragHandle}
-                        <span style="font-size: 0.85rem; color: ${bm.color || 'var(--text-primary)'}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; max-width: 200px;" title="${bm.command}">${displayName}</span>
+                        <span class="bm-command-name" style="display:inline-flex;align-items:center;gap:5px;font-size:0.85rem;color:${bm.color || 'var(--text-primary)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;max-width:200px;" title="${bm.command}">${displayName}</span>
                         <div class="bm-subcmds-inline" style="display:flex;flex-wrap:nowrap;align-items:center;gap:4px;flex:1;overflow:hidden;padding:0 6px;" onclick="event.stopPropagation()">
                             ${subcmdButtonsHtml}
                         </div>
@@ -13479,6 +13494,15 @@ kiro-cli whoami --format json</code></pre>
                     `;
 
                     listEl.appendChild(row);
+                    const bookmarkNameEl = row.querySelector('.bm-command-name');
+                    const bookmarkSvg = createBookmarkSvgIcon(bm.iconSvg, 15);
+                    if (bookmarkNameEl && bookmarkSvg) bookmarkNameEl.insertBefore(bookmarkSvg, bookmarkNameEl.firstChild);
+                    row.querySelectorAll('.bm-subcmd-btn').forEach((button, subcmdIndex) => {
+                        const iconSlot = button.querySelector('.bm-subcmd-icon-slot');
+                        const subcmdSvg = createBookmarkSvgIcon(subcmds[subcmdIndex]?.iconSvg, 12);
+                        if (iconSlot && subcmdSvg) iconSlot.appendChild(subcmdSvg);
+                        else if (iconSlot) iconSlot.remove();
+                    });
                 });
             }
 
@@ -13573,6 +13597,79 @@ kiro-cli whoami --format json</code></pre>
         let _bookmarkModalIsNew = false;
         let _bookmarkModalCommandKey = null;
 
+        const BOOKMARK_SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+
+        function createBookmarkSvgIcon(svgCode, size = 16) {
+            const source = String(svgCode || '').trim();
+            if (!source) return null;
+
+            try {
+                const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
+                const sourceRoot = parsed.documentElement;
+                if (!sourceRoot || sourceRoot.localName.toLowerCase() !== 'svg' || parsed.querySelector('parsererror')) return null;
+
+                const allowedTags = new Set(['svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse']);
+                const allowedAttributes = new Set([
+                    'viewbox', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+                    'fill-rule', 'clip-rule', 'opacity', 'fill-opacity', 'stroke-opacity', 'd', 'points',
+                    'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'width', 'height'
+                ]);
+                let shapeCount = 0;
+                const isSafeAttributeValue = (name, value) => {
+                    if (/[<>"'`]|url\s*\(|javascript:|data:/i.test(value)) return false;
+                    if (name === 'fill' || name === 'stroke') {
+                        return /^(?:none|currentColor|#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{1,20})$/i.test(value);
+                    }
+                    if (name === 'stroke-linecap' || name === 'stroke-linejoin' || name === 'fill-rule' || name === 'clip-rule') {
+                        return /^(?:butt|round|square|miter|bevel|arcs|nonzero|evenodd)$/i.test(value);
+                    }
+                    if (name === 'viewbox') return /^[+\-\d.eE,\s]+$/.test(value);
+                    if (name === 'd' || name === 'points') return /^[a-zA-Z0-9.,+\-\s]*$/.test(value);
+                    if (name === 'opacity' || name === 'fill-opacity' || name === 'stroke-opacity') return /^(?:0|1|0?\.\d+)$/.test(value);
+                    if (name === 'width' || name === 'height' || name === 'cx' || name === 'cy' || name === 'r' || name === 'rx' || name === 'ry' || name === 'x' || name === 'y' || name === 'x1' || name === 'y1' || name === 'x2' || name === 'y2' || name === 'stroke-width') return /^[+\-]?(?:\d+\.?\d*|\.\d+)(?:px|%)?$/.test(value);
+                    return false;
+                };
+                const copySafeElement = (sourceElement) => {
+                    const tagName = sourceElement.localName.toLowerCase();
+                    if (!allowedTags.has(tagName)) return null;
+                    const element = document.createElementNS(BOOKMARK_SVG_NAMESPACE, tagName);
+                    if (tagName !== 'svg' && tagName !== 'g') shapeCount++;
+                    for (const attribute of Array.from(sourceElement.attributes)) {
+                        const name = attribute.name.toLowerCase();
+                        const value = attribute.value.trim();
+                        if (allowedAttributes.has(name) && isSafeAttributeValue(name, value)) {
+                            element.setAttribute(name, value);
+                        }
+                    }
+                    for (const child of Array.from(sourceElement.children)) {
+                        const safeChild = copySafeElement(child);
+                        if (safeChild) element.appendChild(safeChild);
+                    }
+                    return element;
+                };
+
+                const svg = copySafeElement(sourceRoot);
+                if (!svg || shapeCount === 0) return null;
+                const viewBox = svg.getAttribute('viewbox');
+                if (!viewBox) svg.setAttribute('viewBox', '0 0 24 24');
+                else {
+                    svg.setAttribute('viewBox', viewBox);
+                    svg.removeAttribute('viewbox');
+                }
+                const hasStroke = svg.hasAttribute('stroke') || svg.querySelector('[stroke]');
+                if (!svg.hasAttribute('fill')) svg.setAttribute('fill', hasStroke ? 'none' : 'currentColor');
+                svg.setAttribute('width', String(size));
+                svg.setAttribute('height', String(size));
+                svg.setAttribute('aria-hidden', 'true');
+                svg.setAttribute('focusable', 'false');
+                svg.style.cssText = `display:block;width:${size}px;height:${size}px;flex:0 0 ${size}px;`;
+                return svg;
+            } catch (error) {
+                console.warn('Could not parse bookmark SVG icon:', error);
+                return null;
+            }
+        }
+
         function parseBookmarkColor(value) {
             const input = (value || '').trim();
             if (/^#[0-9a-fA-F]{6}$/.test(input)) return input.toLowerCase();
@@ -13661,7 +13758,9 @@ kiro-cli whoami --format json</code></pre>
                 const icon = document.createElement('span');
                 icon.setAttribute('aria-hidden', 'true');
                 icon.style.cssText = 'width:28px;height:28px;display:grid;place-items:center;flex-shrink:0;border-radius:8px;background:rgba(16,185,129,.12);color:#34d399;font-size:.8rem;';
-                icon.textContent = '⌘';
+                const customIcon = createBookmarkSvgIcon(subcommand.iconSvg, 14);
+                if (customIcon) icon.appendChild(customIcon);
+                else icon.textContent = '⌘';
                 const copy = document.createElement('span');
                 copy.style.cssText = 'display:flex;flex-direction:column;gap:3px;min-width:0;flex:1;';
                 const label = document.createElement('span');
@@ -13694,6 +13793,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${activeProject}`;
             document.getElementById('edit-bookmark-cmd').value = '';
             document.getElementById('edit-bookmark-name').value = '';
+            document.getElementById('edit-bookmark-icon-svg').value = '';
             document.getElementById('edit-bookmark-color-enabled').checked = false;
             document.getElementById('edit-bookmark-color').value = '#d1d5db';
             document.getElementById('edit-bookmark-color-text').value = '#D1D5DB';
@@ -13705,7 +13805,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-name').focus();
         }
 
-        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle, currentColor) {
+        function openBookmarkModal(projName, index, currentCmd, currentName, currentWindowTitle, currentColor, currentIconSvg) {
             _bookmarkModalIsNew = false;
             editingBookmarkProj = projName;
             editingBookmarkIndex = index;
@@ -13716,6 +13816,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('bookmark-modal-subtitle').innerText = `Workspace: ${projName}`;
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
+            document.getElementById('edit-bookmark-icon-svg').value = currentIconSvg || '';
             document.getElementById('edit-bookmark-color-enabled').checked = !!currentColor;
             document.getElementById('edit-bookmark-color').value = currentColor || '#d1d5db';
             document.getElementById('edit-bookmark-color-text').value = (currentColor || '#d1d5db').toUpperCase();
@@ -13846,6 +13947,19 @@ kiro-cli whoami --format json</code></pre>
                 return;
             }
 
+            const iconSvgRaw = document.getElementById('edit-bookmark-icon-svg').value.trim();
+            if (iconSvgRaw.length > 20000) {
+                alert('SVG icon code must be 20,000 characters or less.');
+                document.getElementById('edit-bookmark-icon-svg').focus();
+                return;
+            }
+            const iconSvgNode = iconSvgRaw ? createBookmarkSvgIcon(iconSvgRaw, 16) : null;
+            if (iconSvgRaw && !iconSvgNode) {
+                alert('Enter valid inline SVG markup with at least one supported shape.');
+                document.getElementById('edit-bookmark-icon-svg').focus();
+                return;
+            }
+            const iconSvg = iconSvgNode ? new XMLSerializer().serializeToString(iconSvgNode) : '';
             if (!cmd) {
                 alert("Command is required");
                 return;
@@ -13857,7 +13971,7 @@ kiro-cli whoami --format json</code></pre>
                     const response = await fetch(`/api/projects/${editingBookmarkProj}/bookmarks`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command: cmd, name: alias, color })
+                        body: JSON.stringify({ command: cmd, name: alias, color, iconSvg })
                     });
                     if (response.ok) {
                         projects = await response.json();
@@ -13882,7 +13996,8 @@ kiro-cli whoami --format json</code></pre>
                         command: cmd,
                         name: alias,
                         windowTitle: "",
-                        color
+                        color,
+                        iconSvg
                     })
                 });
 
@@ -14150,6 +14265,7 @@ kiro-cli whoami --format json</code></pre>
                 const sc = (loadSubcmds(bmCmd))[idx] || {};
                 document.getElementById('subcmd-add-label').value = sc.label || '';
                 document.getElementById('subcmd-add-cmd').value   = sc.cmd   || '';
+                document.getElementById('subcmd-add-icon-svg').value = sc.iconSvg || '';
                 document.getElementById('subcmd-bg-color').value           = sc.bg           || '#1e293b';
                 document.getElementById('subcmd-fg-color').value           = sc.fg           || '#e2e8f0';
                 document.getElementById('subcmd-border-color').value       = sc.borderColor  || '#334155';
@@ -14158,6 +14274,7 @@ kiro-cli whoami --format json</code></pre>
             } else {
                 document.getElementById('subcmd-add-label').value = '';
                 document.getElementById('subcmd-add-cmd').value   = '';
+                document.getElementById('subcmd-add-icon-svg').value = '';
                 resetSubcmdColors();
             }
 
@@ -14192,7 +14309,8 @@ kiro-cli whoami --format json</code></pre>
                     parentCommand,
                     bookmark && typeof bookmark === 'object' ? bookmark.name : '',
                     bookmark && typeof bookmark === 'object' ? bookmark.windowTitle : '',
-                    bookmark && typeof bookmark === 'object' ? bookmark.color : ''
+                    bookmark && typeof bookmark === 'object' ? bookmark.color : '',
+                    bookmark && typeof bookmark === 'object' ? bookmark.iconSvg : ''
                 );
                 return;
             }
@@ -14207,6 +14325,19 @@ kiro-cli whoami --format json</code></pre>
             if (!_subcmdAddModalCmd) return;
             const cmd   = document.getElementById('subcmd-add-cmd').value.trim();
             const label = document.getElementById('subcmd-add-label').value.trim();
+            const iconSvgRaw = document.getElementById('subcmd-add-icon-svg').value.trim();
+            if (iconSvgRaw.length > 20000) {
+                alert('SVG icon code must be 20,000 characters or less.');
+                document.getElementById('subcmd-add-icon-svg').focus();
+                return;
+            }
+            const iconSvgNode = iconSvgRaw ? createBookmarkSvgIcon(iconSvgRaw, 13) : null;
+            if (iconSvgRaw && !iconSvgNode) {
+                alert('Enter valid inline SVG markup with at least one supported shape.');
+                document.getElementById('subcmd-add-icon-svg').focus();
+                return;
+            }
+            const iconSvg = iconSvgNode ? new XMLSerializer().serializeToString(iconSvgNode) : '';
             if (!cmd) return;
 
             const bg           = document.getElementById('subcmd-bg-color').value;
@@ -14217,7 +14348,7 @@ kiro-cli whoami --format json</code></pre>
             const borderWidth  = borderWidthV  !== '' ? parseInt(borderWidthV,  10) : null;
             const borderRadius = borderRadiusV !== '' ? parseInt(borderRadiusV, 10) : null;
 
-            const entry = { cmd, label, bg, fg, borderColor };
+            const entry = { cmd, label, bg, fg, borderColor, iconSvg };
             if (borderWidth  !== null) entry.borderWidth  = borderWidth;
             if (borderRadius !== null) entry.borderRadius = borderRadius;
 
