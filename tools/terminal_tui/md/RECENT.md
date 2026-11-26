@@ -3,6 +3,14 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-26] - Preserve Full Bookmark SVG Source
+
+- Keep original SVG markup instead of saving a restricted rebuilt copy, so multi-path icons and other SVG features remain available.
+- Add live SVG preview, base-color replacement swatches, and independent hover-color overrides for bookmark and subcommand icons.
+- Document the recovery step for older saved icons: clear the incomplete code and paste the complete source SVG again.
+
+**Files Modified:** `templates/index.html`, `app.py`, `md/ARCHITECTURE.md`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`, `md/UI_UX.md`
+
 ## [2026-11-26] - Preserve Global Bookmarks When Their Workspace Is Deleted
 
 - Move a deleted workspace's global bookmarks into a top-level unassigned bookmark list.

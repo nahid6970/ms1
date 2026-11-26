@@ -2,6 +2,12 @@
 
 ---
 
+## [2026-11-26] - Saved Bookmark SVG Looked Incomplete
+**Problem:** A pasted SVG icon with multiple paths or other SVG features did not render correctly in the bookmark dropdown.
+**Root Cause:** An earlier save path stored a rebuilt, restricted SVG instead of the original source, which could discard paths, styles, gradients, and other markup.
+**Solution:** Keep the full pasted SVG source and render it as an SVG image. For icons saved by the older implementation, clear the stored code and paste the complete SVG source from the web again. The editor now previews the SVG and offers base-color replacement and hover-color overrides.
+**Files Modified:** `templates/index.html`, `app.py`
+
 ## [2026-11-26] - Global Bookmark Disappears When Its Workspace Is Deleted
 **Problem:** A global bookmark was stored on its original workspace and disappeared from every workspace when that workspace entry was deleted.
 **Root Cause:** Global visibility was implemented by sharing the owner's bookmark across workspaces, while deletion removed the owner and its bookmark together.

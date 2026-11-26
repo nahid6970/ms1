@@ -201,7 +201,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 ## Bookmarks
 **Status:** ✅ Complete
 **Description:** Save frequently used commands per workspace with global option.
-**Implementation:** Stored in `projects.json` per workspace. Dropdown in toolbar.
+**Implementation:** Stored with workspace records in `tui_config.json`. Dropdown in toolbar.
 **Files Involved:** `app.py` (routes: `/api/projects/<project>/bookmarks/*`), `templates/index.html` (bookmark dropdown + edit modal)
 **Usage:** Click 🔖 dropdown → select command → auto-executes. Click ⭐ to bookmark current command.
 **Sub-features:**
@@ -209,7 +209,9 @@ Always state one clear outcome at the end of the response. Do not say “restart
 - Deleting a workspace preserves its global bookmarks as dimmed, unassigned entries in the bookmark dropdown; click one to assign it to a workspace.
 - On first load after this update, orphaned bookmark command roots with saved subcommands are recovered as unassigned entries.
 - Edit command, name, window title
-- Reorder by drag or position select
+- Reorder by dragging bookmark rows.
+- Add optional inline SVG icons to main commands and subcommands. The SVG editor provides a live preview, base-color replacement, and separate hover-color overrides; original SVG markup is kept intact.
+- If an older saved SVG looks incomplete, clear it and paste the complete SVG source again. Earlier saves may have removed unsupported SVG elements or attributes.
 
 ---
 

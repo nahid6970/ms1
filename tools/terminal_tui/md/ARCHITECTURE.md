@@ -201,7 +201,12 @@ Stores all workspace metadata:
         "command": "npm run dev",
         "global": false,
         "name": "Dev Server",
-        "windowTitle": ""
+        "windowTitle": "",
+        "color": "#D1D5DB",
+        "iconSvg": "<svg viewBox=\"0 0 24 24\">…</svg>",
+        "iconHoverMap": {
+          "#3B82F6": "#22C55E"
+        }
       }
     ]
   }

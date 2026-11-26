@@ -151,7 +151,7 @@ Dark-themed, compact, power-user focused. Every pixel serves a purpose. Icons ov
 
 ## Accessibility Notes
 - All interactive elements have `title` attributes for tooltips
-- SVG icons use `stroke="currentColor"` to inherit text color
+- Interface SVG controls use `stroke="currentColor"` where inheriting the surrounding control color is intended. Bookmark and subcommand SVGs retain their own artwork colors and do not inherit the command label color.
 - Focus states via `outline` or `border-color` change
 - High contrast text on dark backgrounds
 - Keyboard shortcuts: F1 (Quick Open), F5 (page refresh), Ctrl+F (terminal search), Ctrl+C/Ctrl+V (terminal copy/paste behavior), Shift+Insert (paste)
