@@ -3678,13 +3678,14 @@
                                 <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="5" placeholder="Enter a command or multi-line macro…" style="padding:11px 12px;font-size:.83rem;font-family:'Fira Code',monospace;resize:vertical;min-height:124px;width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);color:var(--text-primary);border-radius:9px;outline:none;"></textarea>
                                 <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too.</div>
                             </div>
-                            <details style="margin-bottom:16px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
-                                <summary style="padding:10px 12px;color:var(--text-secondary);font-size:.76rem;font-weight:600;cursor:pointer;">SVG icon code <span style="font-weight:400;color:var(--text-muted);">· optional</span></summary>
-                                <div style="padding:0 12px 12px;">
-                                    <textarea id="edit-bookmark-icon-svg" rows="3" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot; ...&gt;" style="width:100%;box-sizing:border-box;resize:vertical;min-height:72px;padding:9px 10px;font-family:'Fira Code',monospace;font-size:.72rem;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);outline:none;"></textarea>
-                                    <div style="margin-top:6px;color:var(--text-muted);font-size:.67rem;">Paste inline SVG markup. Basic paths and shapes are supported.</div>
-                                </div>
-                            </details>
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:600;color:var(--text-secondary);">SVG ICON <span style="font-weight:400;color:var(--text-muted);">· optional</span></label>
+                                <button id="edit-bookmark-icon-svg-trigger" type="button" onclick="openBookmarkSvgEditor('edit-bookmark-icon-svg')" style="display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:8px 10px;text-align:left;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">
+                                    <span class="bookmark-svg-preview" style="width:22px;height:22px;display:grid;place-items:center;flex:0 0 22px;border-radius:6px;background:var(--bg-sidebar);color:var(--text-muted);font-size:15px;">＋</span>
+                                    <span class="bookmark-svg-trigger-label" style="font-size:.75rem;">Click to add SVG code</span>
+                                </button>
+                                <textarea id="edit-bookmark-icon-svg" hidden></textarea>
+                            </div>
                             <div class="bookmark-color-card">
                                 <div class="bookmark-color-inline">
                                     <label class="bookmark-color-toggle" for="edit-bookmark-color-enabled" title="Enable a custom label color">
@@ -3746,13 +3747,14 @@
                 <label for="subcmd-add-cmd" style="font-size:0.76rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:7px;">COMMAND</label>
                 <textarea id="subcmd-add-cmd" rows="3" required autocomplete="off" placeholder="Enter the command this button runs…" style="width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);border-radius:9px;padding:10px 12px;color:var(--text-primary);font-family:'Fira Code',monospace;font-size:0.82rem;resize:vertical;min-height:82px;outline:none;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-color)'"></textarea>
             </div>
-            <details style="margin-bottom:16px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
-                <summary style="padding:10px 12px;color:var(--text-secondary);font-size:0.76rem;font-weight:600;cursor:pointer;">SVG icon code <span style="font-weight:400;color:var(--text-muted);">· optional</span></summary>
-                <div style="padding:0 12px 12px;">
-                    <textarea id="subcmd-add-icon-svg" rows="3" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot; ...&gt;" style="width:100%;box-sizing:border-box;resize:vertical;min-height:72px;padding:9px 10px;font-family:'Fira Code',monospace;font-size:0.72rem;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);outline:none;"></textarea>
-                    <div style="margin-top:6px;color:var(--text-muted);font-size:0.67rem;">Paste inline SVG markup. Basic paths and shapes are supported.</div>
-                </div>
-            </details>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:600;color:var(--text-secondary);">SVG ICON <span style="font-weight:400;color:var(--text-muted);">· optional</span></label>
+                <button id="subcmd-add-icon-svg-trigger" type="button" onclick="openBookmarkSvgEditor('subcmd-add-icon-svg')" style="display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:8px 10px;text-align:left;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">
+                    <span class="bookmark-svg-preview" style="width:22px;height:22px;display:grid;place-items:center;flex:0 0 22px;border-radius:6px;background:var(--bg-sidebar);color:var(--text-muted);font-size:15px;">＋</span>
+                    <span class="bookmark-svg-trigger-label" style="font-size:.75rem;">Click to add SVG code</span>
+                </button>
+                <textarea id="subcmd-add-icon-svg" hidden></textarea>
+            </div>
             <details style="margin-bottom:20px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-main);">
                 <summary style="padding:10px 12px;color:var(--text-secondary);font-size:0.78rem;font-weight:600;cursor:pointer;user-select:none;">Button appearance</summary>
                 <div style="padding:0 12px 12px;">
@@ -3784,6 +3786,23 @@
                     <button type="button" onclick="closeSubcmdAddModal()" style="padding:8px 14px;font-size:0.82rem;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
                     <button id="subcmd-modal-save" type="button" onclick="handleSaveSubcmd()" style="padding:8px 16px;font-size:0.82rem;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:8px;color:#fff;font-weight:600;cursor:pointer;">Add</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bookmark-svg-editor-modal" style="z-index:1800;" onclick="if(event.target===this)closeBookmarkSvgEditor()">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="bookmark-svg-editor-title" style="width:620px;max-width:94vw;max-height:88vh;max-height:88dvh;box-sizing:border-box;padding:20px;display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                <div>
+                    <h2 id="bookmark-svg-editor-title" style="margin:0;font-size:1rem;color:var(--text-primary);">SVG icon code</h2>
+                    <div style="margin-top:4px;font-size:.72rem;color:var(--text-secondary);">Paste inline SVG markup. Basic paths and shapes are supported.</div>
+                </div>
+                <button type="button" onclick="closeBookmarkSvgEditor()" aria-label="Close SVG editor" style="width:30px;height:30px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-main);color:var(--text-secondary);font-size:18px;cursor:pointer;">×</button>
+            </div>
+            <textarea id="bookmark-svg-editor-input" rows="12" spellcheck="false" placeholder="&lt;svg viewBox=&quot;0 0 24 24&quot;&gt; ... &lt;/svg&gt;" style="width:100%;box-sizing:border-box;resize:none;min-height:180px;padding:11px 12px;font-family:'Fira Code',monospace;font-size:.76rem;line-height:1.5;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);outline:none;"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;">
+                <button type="button" onclick="closeBookmarkSvgEditor()" style="padding:8px 13px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+                <button type="button" onclick="applyBookmarkSvgEditor()" style="padding:8px 14px;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:8px;color:white;font-weight:600;cursor:pointer;">Use SVG</button>
             </div>
         </div>
     </div>
@@ -13670,6 +13689,48 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        let _bookmarkSvgEditorTargetId = null;
+
+        function syncBookmarkSvgTrigger(fieldId) {
+            const source = document.getElementById(fieldId);
+            const trigger = document.getElementById(`${fieldId}-trigger`);
+            if (!source || !trigger) return;
+            const preview = trigger.querySelector('.bookmark-svg-preview');
+            const label = trigger.querySelector('.bookmark-svg-trigger-label');
+            const icon = createBookmarkSvgIcon(source.value, 16);
+            preview.replaceChildren();
+            if (icon) {
+                preview.appendChild(icon);
+                label.textContent = 'SVG icon added · click to edit';
+            } else {
+                preview.textContent = '＋';
+                label.textContent = 'Click to add SVG code';
+            }
+        }
+
+        function openBookmarkSvgEditor(fieldId) {
+            const source = document.getElementById(fieldId);
+            if (!source) return;
+            _bookmarkSvgEditorTargetId = fieldId;
+            document.getElementById('bookmark-svg-editor-input').value = source.value || '';
+            document.getElementById('bookmark-svg-editor-modal').classList.add('show');
+            requestAnimationFrame(() => document.getElementById('bookmark-svg-editor-input').focus());
+        }
+
+        function closeBookmarkSvgEditor() {
+            document.getElementById('bookmark-svg-editor-modal').classList.remove('show');
+            _bookmarkSvgEditorTargetId = null;
+        }
+
+        function applyBookmarkSvgEditor() {
+            if (!_bookmarkSvgEditorTargetId) return;
+            const source = document.getElementById(_bookmarkSvgEditorTargetId);
+            if (!source) return closeBookmarkSvgEditor();
+            source.value = document.getElementById('bookmark-svg-editor-input').value;
+            syncBookmarkSvgTrigger(_bookmarkSvgEditorTargetId);
+            closeBookmarkSvgEditor();
+        }
+
         function parseBookmarkColor(value) {
             const input = (value || '').trim();
             if (/^#[0-9a-fA-F]{6}$/.test(input)) return input.toLowerCase();
@@ -13794,6 +13855,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-cmd').value = '';
             document.getElementById('edit-bookmark-name').value = '';
             document.getElementById('edit-bookmark-icon-svg').value = '';
+            syncBookmarkSvgTrigger('edit-bookmark-icon-svg');
             document.getElementById('edit-bookmark-color-enabled').checked = false;
             document.getElementById('edit-bookmark-color').value = '#d1d5db';
             document.getElementById('edit-bookmark-color-text').value = '#D1D5DB';
@@ -13817,6 +13879,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('edit-bookmark-cmd').value = currentCmd;
             document.getElementById('edit-bookmark-name').value = currentName || "";
             document.getElementById('edit-bookmark-icon-svg').value = currentIconSvg || '';
+            syncBookmarkSvgTrigger('edit-bookmark-icon-svg');
             document.getElementById('edit-bookmark-color-enabled').checked = !!currentColor;
             document.getElementById('edit-bookmark-color').value = currentColor || '#d1d5db';
             document.getElementById('edit-bookmark-color-text').value = (currentColor || '#d1d5db').toUpperCase();
@@ -14266,6 +14329,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('subcmd-add-label').value = sc.label || '';
                 document.getElementById('subcmd-add-cmd').value   = sc.cmd   || '';
                 document.getElementById('subcmd-add-icon-svg').value = sc.iconSvg || '';
+                syncBookmarkSvgTrigger('subcmd-add-icon-svg');
                 document.getElementById('subcmd-bg-color').value           = sc.bg           || '#1e293b';
                 document.getElementById('subcmd-fg-color').value           = sc.fg           || '#e2e8f0';
                 document.getElementById('subcmd-border-color').value       = sc.borderColor  || '#334155';
@@ -14275,6 +14339,7 @@ kiro-cli whoami --format json</code></pre>
                 document.getElementById('subcmd-add-label').value = '';
                 document.getElementById('subcmd-add-cmd').value   = '';
                 document.getElementById('subcmd-add-icon-svg').value = '';
+                syncBookmarkSvgTrigger('subcmd-add-icon-svg');
                 resetSubcmdColors();
             }
 
