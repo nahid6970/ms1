@@ -211,7 +211,9 @@ def load_config():
         "show_collapse_indicators": True,
         "extension_icons": default_icons,
         "show_extension_dots": True,
-        "show_extension_commas": True
+        "show_extension_commas": True,
+        "git_age_enabled": True,
+        "git_age_max_files": 100000
     }
     if os.path.exists(CONFIG_FILE):
         try:
@@ -231,6 +233,10 @@ def load_config():
                     config["show_extension_dots"] = data["show_extension_dots"]
                 if "show_extension_commas" in data:
                     config["show_extension_commas"] = data["show_extension_commas"]
+                if "git_age_enabled" in data:
+                    config["git_age_enabled"] = data["git_age_enabled"]
+                if "git_age_max_files" in data:
+                    config["git_age_max_files"] = data["git_age_max_files"]
                 if "bookmarked_config_setting" in data:
                     config["bookmarked_config_setting"] = data["bookmarked_config_setting"]
         except:
@@ -1287,6 +1293,7 @@ def configure_menu():
             "[C]": f"{pad}{esc('#00f0ff')}[C] Configure Theme Colors\x1b[0m",
             "[F]": f"{pad}{esc('#ff934b')}[F] Configure Console Font\x1b[0m",
             "[S]": f"{pad}{esc('#d782ff')}[S] Toggle Folder Signs ([+] / [-])\x1b[0m (Current: {signs_status})",
+            "[G]": f"{pad}{esc('#00f0ff')}[G] Git Modification Age (Current: {'Off' if not config.get('git_age_enabled', True) else 'up to ' + str(config.get('git_age_max_files', 10)) + ' files'})\x1b[0m",
             "[K]": f"{pad}{esc('#ff5757')}[K] View Keyboard Shortcuts\x1b[0m",
             "[O]": f"{pad}{esc('#ffffff')}[O] Open Config JSON in Notepad\x1b[0m",
             "[X]": f"{pad}{esc('#808080')}[X] Exit Configuration\x1b[0m",
@@ -1431,6 +1438,21 @@ def configure_menu():
         elif choice.startswith("[S]"):
             config["show_collapse_indicators"] = not show_signs
             save_config(config)
+
+        elif choice.startswith("[G]"):
+            try:
+                with open('CON' if os.name == 'nt' else '/dev/tty', 'r', encoding='utf-8') as f_in:
+                    current = 'off' if not config.get('git_age_enabled', True) else str(config.get('git_age_max_files', 10))
+                    print(f"\nGit age suffix limit (10, 100, or off; current: {current}): ", end='', flush=True)
+                    value = f_in.readline().strip().lower()
+                if value in ('off', '0', 'no'):
+                    config['git_age_enabled'] = False
+                elif value.isdigit() and int(value) > 0:
+                    config['git_age_enabled'] = True
+                    config['git_age_max_files'] = int(value)
+                save_config(config)
+            except (OSError, ValueError):
+                pass
             
         elif choice.startswith("[K]"):
             view_shortcuts_menu()
@@ -1826,6 +1848,7 @@ python "{menu_script_path}" "!temp_file!" "{editor_chooser_script}"
 import os
 import sys
 import json
+import subprocess
 
 # Fix Unicode encoding for Windows console
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -1851,6 +1874,8 @@ config = {{
     }},
     "view_mode": "full",
     "show_collapse_indicators": True,
+    "git_age_enabled": True,
+    "git_age_max_files": 100000,
     "extension_icons": {{
         ".py": {{"icon": "🐍", "color": 220}},
         ".json": {{"icon": "⚙️", "color": 215}},
@@ -1889,6 +1914,8 @@ if os.path.exists(config_file):
             if "view_mode" in data: config["view_mode"] = data["view_mode"]
             if "show_collapse_indicators" in data: config["show_collapse_indicators"] = data["show_collapse_indicators"]
             if "extension_icons" in data: config["extension_icons"] = data["extension_icons"]
+            if "git_age_enabled" in data: config["git_age_enabled"] = data["git_age_enabled"]
+            if "git_age_max_files" in data: config["git_age_max_files"] = data["git_age_max_files"]
     except: pass
 
 view_mode = config["view_mode"]
@@ -2015,7 +2042,7 @@ def format_display(full_path, is_bookmarked, tree_prefix=""):
         display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{name}} ({{parent}})"
     else:
         display = f"{{marker}}{{tree_prefix}}{{indicator}}{{icon}}{{full_path}}"
-    
+
     display = f"\033[38;5;{{line_color}}m{{display}}\033[0m"
     return display
 
@@ -2167,7 +2194,8 @@ for root_dir in directories:
 │  Alt-R     : Refresh file list (resets to top)                            │
 │  F5        : Toggle bookmark on/off (Prompts for custom name)             │
 │  F6        : Rename bookmark custom name                                  │
-│  F7        : Terminal Configurator (roots/ignores)                         │
+│  F7        : Terminal Configurator (roots/ignores/Git age display)        │
+│  Ctrl-G    : Show Git modification age for current search matches          │
 │                                                                           │
 │  [ CONTROL KEYS ]                                                         │
 │  Ctrl-C    : Copy full file path to clipboard                             │
@@ -2210,6 +2238,7 @@ for root_dir in directories:
             f"--bind=ctrl-n:execute-silent(python \"{editor_chooser_script}\" {{+2}})",
             f"--bind=ctrl-o:execute-silent(python \"{script_path}\" --open-item {{2}})",
             "--bind=ctrl-c:execute-silent(echo {2} | clip)",
+            f"--bind=ctrl-g:select-all+execute(python \"{script_path}\" --show-git-ages {{+2}})",
             "--bind=ctrl-r:execute-silent(powershell -command Start-Process '{2}')",
             f"--bind=f2:execute-silent(powershell -ExecutionPolicy Bypass -File \"{toggle_script_file}\")+refresh-preview",
             f"--bind=f3:reload(python \"{feeder_script_file}\" --toggle)",
@@ -2303,6 +2332,44 @@ def rename_bookmark(file_path):
     with open(BOOKMARKS_FILE, 'w', encoding='utf-8') as f:
         json.dump(bookmarks, f, indent=2, ensure_ascii=False)
 
+def show_git_ages(file_paths):
+    config = load_config()
+    if not config.get("git_age_enabled", True):
+        print("\033[93mGit modification ages are turned off in F7 configuration.\033[0m")
+    elif len(file_paths) > int(config.get("git_age_max_files", 10)):
+        print(f"\033[93m{len(file_paths)} matching files exceed the configured Git age limit of {config.get('git_age_max_files', 10)}.\033[0m")
+    else:
+        import time
+        print("\033[96mGit modification age\033[0m\n")
+        for file_path in file_paths:
+            if not os.path.isfile(file_path):
+                continue
+            try:
+                repo = subprocess.run(["git", "-C", os.path.dirname(file_path), "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=3)
+                if repo.returncode != 0:
+                    print(f"\033[90m{file_path}  (not in a Git repository)\033[0m")
+                    continue
+                repo_root = os.path.normpath(repo.stdout.strip())
+                relative = os.path.relpath(file_path, repo_root)
+                result = subprocess.run(["git", "-C", repo_root, "log", "-1", "--format=%ct", "--", relative], capture_output=True, text=True, timeout=5)
+                if result.returncode != 0 or not result.stdout.strip():
+                    age_text = "no Git commit found"
+                else:
+                    seconds = max(0, int(time.time()) - int(result.stdout.strip()))
+                    days, seconds = divmod(seconds, 86400)
+                    hours, seconds = divmod(seconds, 3600)
+                    minutes = seconds // 60
+                    age_text = (f"{days}d" if days else "") + (f"{hours}h" if hours or days else "") + f"{minutes}m ago"
+                print(f"{file_path}  \033[92m{age_text}\033[0m")
+            except Exception as error:
+                print(f"{file_path}  (could not read Git history: {error})")
+    try:
+        with open('CON' if os.name == 'nt' else '/dev/tty', 'r', encoding='utf-8') as con:
+            print("\nPress Enter to return to search...", end='', flush=True)
+            con.readline()
+    except Exception:
+        pass
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--toggle-bookmark" and len(sys.argv) > 2:
@@ -2316,6 +2383,9 @@ if __name__ == "__main__":
             sys.exit(0)
         elif sys.argv[1] == "--configure":
             configure_menu()
+            sys.exit(0)
+        elif sys.argv[1] == "--show-git-ages":
+            show_git_ages(sys.argv[2:])
             sys.exit(0)
         elif sys.argv[1] == "--list-roots":
             list_roots()
@@ -2354,4 +2424,5 @@ if __name__ == "__main__":
             sys.exit(0)
     
     search_directories_and_files()
+
 
