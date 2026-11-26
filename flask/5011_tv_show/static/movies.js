@@ -45,10 +45,12 @@ function applyMovieFilters(query) {
         const year = (card.dataset.year || '').toLowerCase();
         const matchesSearch = !searchQuery || title.includes(searchQuery) || year.includes(searchQuery);
         const hasDigital = !!card.dataset.digitalRelease;
+        const hasPastDigital = hasDigital && card.dataset.digitalRelease <= today;
         const isFutureTheatrical = !!card.dataset.releaseDate && card.dataset.releaseDate > today;
         const matchesFilters = (!movieFilterState.hideWatched || card.dataset.watched !== 'true')
             && (!movieFilterState.hideArchived || card.dataset.archived !== 'true')
             && (!movieFilterState.onlyDigital || hasDigital)
+            && (!movieFilterState.onlyPastDigital || hasPastDigital)
             && (!movieFilterState.onlyPendingDigital || !hasDigital)
             && (!movieFilterState.hideFutureTheatrical || !isFutureTheatrical)
             && (!movieFilterState.category || (card.dataset.category || '') === movieFilterState.category);
