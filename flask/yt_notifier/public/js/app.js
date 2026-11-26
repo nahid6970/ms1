@@ -175,7 +175,7 @@ function flashRefreshResults(results, durationsUpdated) {
       ? `<img src="${esc(channel.thumbnail)}" class="h-10 w-10 rounded-full object-cover ring-2 ring-slate-700" alt="">`
       : `<div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-sm font-bold text-slate-300 ring-2 ring-slate-600">${esc(name.slice(0, 2).toUpperCase())}</div>`;
     return `
-      <a href="${esc(video.link || `https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`)}" target="_blank" rel="noopener" class="group relative flex min-w-0 items-center gap-3 overflow-hidden rounded-lg border border-slate-700/80 bg-slate-800/90 p-3 shadow-lg shadow-black/20 transition hover:border-red-500/60 hover:bg-slate-800">
+      <a href="${esc(video.link || `https://www.youtube.com/watch?v=${encodeURIComponent(video.videoId)}`)}" target="_blank" rel="noopener" class="group relative flex min-w-0 items-center gap-3 overflow-hidden rounded-none border border-slate-700/80 bg-slate-800/90 p-3 shadow-lg shadow-black/20 transition hover:border-red-500/60 hover:bg-slate-800">
         <span class="absolute inset-y-0 left-0 w-1 bg-red-500/80"></span>
         <span class="ml-1 shrink-0">${icon}</span>
         <span class="min-w-0 flex-1">
@@ -186,7 +186,7 @@ function flashRefreshResults(results, durationsUpdated) {
       </a>`;
   }).join("");
   const el = document.createElement("div");
-  el.className = "toast-enter max-h-[min(70vh,34rem)] overflow-hidden rounded-xl border border-emerald-500/40 bg-slate-900/95 text-emerald-300 shadow-2xl shadow-emerald-950/30 backdrop-blur-md";
+  el.className = "toast-enter max-h-[min(70vh,34rem)] overflow-hidden rounded-none border border-emerald-500/40 bg-slate-900/95 text-emerald-300 shadow-2xl shadow-emerald-950/30 backdrop-blur-md";
   el.innerHTML = `
     <div class="flex items-start justify-between gap-3 px-4 pt-3.5">
       <div class="flex min-w-0 items-start gap-3">
@@ -196,14 +196,14 @@ function flashRefreshResults(results, durationsUpdated) {
           <div class="mt-1 text-xs text-slate-400">${esc(results.totalNew ?? 0)} new videos · ${esc(durationsUpdated)} durations updated</div>
         </div>
       </div>
-      <button type="button" class="flex-shrink-0 rounded-md p-1 text-slate-400 transition hover:bg-slate-800 hover:text-white" onclick="dismissToast(this.closest('.toast-enter, .toast-exit'))" aria-label="Close status">
+      <button type="button" class="flex-shrink-0 rounded-none p-1 text-slate-400 transition hover:bg-slate-800 hover:text-white" onclick="dismissToast(this.closest('.toast-enter, .toast-exit'))" aria-label="Close status">
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
     <div class="max-h-[calc(min(70vh,34rem)-5rem)] overflow-y-auto px-3 pb-3 pt-3">
       ${cards
         ? `<div class="flex flex-col gap-2.5">${cards}</div>`
-        : '<div class="rounded-lg border border-slate-700/70 bg-slate-800/50 px-3 py-3 text-center text-xs text-slate-400">No new videos from any channel this time.</div>'}
+        : '<div class="rounded-none border border-slate-700/70 bg-slate-800/50 px-3 py-3 text-center text-xs text-slate-400">No new videos from any channel this time.</div>'}
     </div>`;
   container.appendChild(el);
 }
