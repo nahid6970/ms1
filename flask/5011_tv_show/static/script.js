@@ -1741,6 +1741,25 @@ window.onclick = function(event) {
     }
 }
 
+function showAppToast(message, type = 'success') {
+    let toast = document.getElementById('appToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'appToast';
+        toast.className = 'app-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+    toast.className = `app-toast ${type}`;
+    toast.innerHTML = `<span class="app-toast-icon" aria-hidden="true">${type === 'success' ? '✓' : '!'}</span><span class="app-toast-copy"><strong>${type === 'success' ? 'Episode library updated' : 'Update failed'}</strong><span class="app-toast-message"></span></span><button type="button" class="app-toast-close" aria-label="Dismiss notification">×</button>`;
+    toast.querySelector('.app-toast-message').textContent = message;
+    toast.querySelector('.app-toast-close').onclick = () => toast.classList.remove('show');
+    requestAnimationFrame(() => toast.classList.add('show'));
+    clearTimeout(toast.dismissTimer);
+    toast.dismissTimer = setTimeout(() => toast.classList.remove('show'), 6000);
+}
+
 async function updateShowEpisodes(event, showId, btn) {
     if (event) {
         event.stopPropagation();
@@ -1755,10 +1774,10 @@ async function updateShowEpisodes(event, showId, btn) {
         if (!response.ok || !data.success) throw new Error(data.message || 'Episode update failed');
         if (data.show) patchShowCard(data.show);
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        alert(data.message);
+        showAppToast(data.message);
     } catch (error) {
         btn.innerHTML = originalHTML;
-        alert(error.message);
+        showAppToast(error.message, 'error');
     } finally {
         btn.disabled = false;
     }
