@@ -200,7 +200,7 @@ function flashRefreshResults(results, durationsUpdated) {
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
-    <div class="max-h-[calc(min(70vh,34rem)-5rem)] overflow-y-auto px-3 pb-3 pt-3">
+    <div class="popup-scrollbar max-h-[calc(min(70vh,34rem)-5rem)] overflow-y-auto px-3 pb-3 pt-3">
       ${cards
         ? `<div class="flex flex-col gap-2.5">${cards}</div>`
         : '<div class="rounded-none border border-slate-700/70 bg-slate-800/50 px-3 py-3 text-center text-xs text-slate-400">No new videos from any channel this time.</div>'}
