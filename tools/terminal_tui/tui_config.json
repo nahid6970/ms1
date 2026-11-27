@@ -1614,7 +1614,22 @@
         }
       ],
       "gitRemote": "https://github.com/nahid6970/my3code.git",
-      "hideGitInit": false
+      "hideGitInit": false,
+      "rclone": {
+        "dest": "gu:/my3code",
+        "androidSource": "",
+        "androidPullOnly": true,
+        "ignorelist": "C:/Users/nahid/t3code/ignorelist.txt",
+        "flags": {
+          "--fast-list": true,
+          "-P": true,
+          "--size-only": true,
+          "--track-renames": true,
+          "--dry-run": false,
+          "--drive-acknowledge-abuse": true
+        },
+        "transfers": "10"
+      }
     }
   ],
   "extension_icons": {
