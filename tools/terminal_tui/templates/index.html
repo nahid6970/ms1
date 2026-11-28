@@ -3666,7 +3666,7 @@
                             <div class="form-group" style="margin-bottom:16px;">
                                 <label for="edit-bookmark-cmd" style="display:block;font-size:.75rem;font-weight:650;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:7px;">COMMAND</label>
                                 <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="5" placeholder="Enter a command or multi-line macro…" style="padding:11px 12px;font-size:.83rem;font-family:'Fira Code',monospace;resize:vertical;min-height:124px;width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);color:var(--text-primary);border-radius:9px;outline:none;"></textarea>
-                                <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too. Add fill-in fields with <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">&#123;&#123;field:Name&#125;&#125;</code>; clicking the bookmark prompts for each value.</div>
+                                <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too. Add fill-in fields with <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">[[Name]]</code>; clicking the bookmark prompts for each value.</div>
                             </div>
                             <div style="margin-bottom:16px;">
                                 <label style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:600;color:var(--text-secondary);">SVG ICON <span style="font-weight:400;color:var(--text-muted);">· optional</span></label>
@@ -14619,7 +14619,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         let pendingParameterizedBookmark = null;
-        const BOOKMARK_FIELD_RE = /\{\{\s*field:([^{}]+?)\s*\}\}/gi;
+        const BOOKMARK_FIELD_RE = /\[\[\s*([^\[\]]+?)\s*\]\]/g;
 
         function getBookmarkParameterNames(command) {
             const names = [];

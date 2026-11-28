@@ -17,8 +17,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Parameterized Bookmark Commands
 **Status:** ✅ Complete
-**Description:** Bookmark command text can include `{{field:Name}}` placeholders. Running that bookmark opens a dialog with one required input per unique placeholder; entered values are substituted before the command or macro is sent to the terminal. Field names are case-insensitive for matching, and repeated uses share one input.
-**Usage:** For example, `{{field:Second}}..1 | ForEach-Object { Write-Host $_; Start-Sleep -Seconds {{field:Duration For Each}} }` asks for “Second” and “Duration For Each” before running.
+**Description:** Bookmark command text can include `[[Name]]` placeholders. Running that bookmark opens a dialog with one required input per unique placeholder; entered values are substituted before the command or macro is sent to the terminal. Field names are case-insensitive for matching, and repeated uses share one input.
+**Usage:** For example, `[[Second]]..1 | ForEach-Object { Write-Host $_; Start-Sleep -Seconds [[Duration For Each]] }` asks for “Second” and “Duration For Each” before running.
 **Implementation:** `templates/index.html` detects placeholders when launching bookmarks from the workspace bookmark menu or command manager, builds the values dialog, and expands the command.
 
 ## Code Merger

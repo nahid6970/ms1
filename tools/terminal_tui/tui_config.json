@@ -101,9 +101,20 @@
         },
         {
           "command": "{{field:Second}}..1 | ForEach-Object { Write-Host $_; Start-Sleep -Seconds {{field:Duration For Each}} }",
-          "global": false,
+          "global": true,
           "name": "Testing",
           "windowTitle": "",
+          "displayOrder": null,
+          "color": "",
+          "iconSvg": "",
+          "iconHoverMap": {}
+        },
+        {
+          "command": "taskkill /F /IM [[App Name]]",
+          "global": true,
+          "name": "Kill App",
+          "windowTitle": "",
+          "displayOrder": null,
           "color": "",
           "iconSvg": "",
           "iconHoverMap": {}

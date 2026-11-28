@@ -5,7 +5,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-28] - Parameterized Bookmark Commands
 
-- Bookmark commands can use `{{field:Name}}` placeholders; running one opens a required-value form and substitutes the values before execution.
+- Bookmark commands can use `[[Name]]` placeholders; running one opens a required-value form and substitutes the values before execution.
 - Supports repeated and case-insensitive placeholder names from the workspace bookmark menu and command manager.
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
