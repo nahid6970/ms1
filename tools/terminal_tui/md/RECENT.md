@@ -181,9 +181,9 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-28] - Simplify GitHub Project Commit Input
 
-- Replaced the expanded commit panel with a compact single-line message input and adjacent Commit button.
-- Kept AI suggestions in the message input and moved commit progress/results to the existing projects status bar.
-- Commit from this panel no longer pushes automatically.
+- Replaced the expanded commit panel with a compact single-line message input, Push checkbox, and adjacent Commit button.
+- Kept AI suggestions in the message input and show generation progress in its placeholder instead of a temporary second row.
+- Commit progress and results use the existing projects status bar; Push remains enabled by default and can be unchecked.
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
