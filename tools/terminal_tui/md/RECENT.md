@@ -3,6 +3,13 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-28] - Terminal Command Notifications
+
+- Added a Terminal Notifications settings section with output and configurable duration rules, optional browser notifications, and a test alert.
+- Command completion notifications appear for the active tab and background tabs; background tabs keep their attention marker.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-26] - Preserve Full Bookmark SVG Source
 
 - Keep original SVG markup instead of saving a restricted rebuilt copy, so multi-path icons and other SVG features remain available.

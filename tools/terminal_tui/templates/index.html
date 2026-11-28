@@ -4155,6 +4155,9 @@
                 <button type="button" class="settings-nav-item" data-label="Project Checks" aria-label="Project Check Settings" id="settings-tab-btn-project-checks" onclick="switchSettingsTab('project-checks')" title="Project Checks" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;transition:all .2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><path d="m8 2 1 2M16 2l-1 2"/></svg>
                 </button>
+                <button type="button" class="settings-nav-item" data-label="Terminal Notifications" aria-label="Terminal Notifications" id="settings-tab-btn-notifications" onclick="switchSettingsTab('notifications')" title="Terminal Notifications" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border-color);border-radius:8px;color:var(--text-secondary);cursor:pointer;transition:all .2s;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                </button>
                 <button type="button" class="settings-nav-item" data-label="Terminal & Editor" aria-label="Terminal & Editor Behavior" id="settings-tab-btn-behavior" onclick="switchSettingsTab('behavior')" title="Terminal & Editor Behavior" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 1.5px solid var(--border-color); border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
                 </button>
@@ -4179,6 +4182,18 @@
             </nav>
             
             <form id="settings-form" onsubmit="handleSaveSettings(event)">
+                <div id="settings-sec-notifications" style="display:none;margin-bottom:16px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
+                    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Terminal Command Notifications</div>
+                    <div style="display:grid;gap:10px;padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notifications-enabled" style="accent-color:var(--accent-color);"> Enable command completion notifications</label>
+                        <div style="font-size:.75rem;color:var(--text-secondary);">Notify when a completed command meets either enabled rule:</div>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notify-output" style="accent-color:var(--accent-color);"> Command produced output</label>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notify-duration" style="accent-color:var(--accent-color);"> Command ran at least <input type="number" id="settings-terminal-notify-seconds" min="1" max="86400" step="1" value="10" style="width:72px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"> seconds</label>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-browser-notifications" style="accent-color:var(--accent-color);"> Also show browser desktop notifications</label>
+                        <button type="button" onclick="testTerminalCommandNotification()" style="justify-self:start;padding:5px 9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
+                        <div style="font-size:.68rem;color:var(--text-muted);">Notifications appear for the active tab and background tabs. Browser notifications require permission; the in-app alert and tab marker work while this page is open.</div>
+                    </div>
+                </div>
                 <div id="settings-sec-project-checks" style="display:none;margin-bottom:16px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
                     <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Project Checks & Notifications</div>
                     <div style="display:grid;gap:12px;">
@@ -6684,7 +6699,7 @@ kiro-cli whoami --format json</code></pre>
             }
 
             const paneSocket = io('/pty');
-            const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false };
+            const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false, commandStartedAt: 0, commandHadOutput: false };
             terminalPanes.push(pane);
             term = paneTerm;
             fitAddon = paneFitAddon;
@@ -6754,6 +6769,8 @@ kiro-cli whoami --format json</code></pre>
 
             paneSocket.on('pty-output', (msg) => {
                 if (msg.data) {
+                    const outputWithoutPromptMarker = msg.data.replace(/\x1b\]9;ttui;prompt\x07/g, '').replace(/[\x00-\x1f\x7f]/g, '').trim();
+                    if (pane.commandStartedAt && outputWithoutPromptMarker) pane.commandHadOutput = true;
                     const displayData = stripTerminalPromptMarkers(pane, msg.data);
                     const buffer = paneTerm.buffer.active;
                     const isAtBottom = (buffer.viewportY >= buffer.baseY - 1);
@@ -6954,6 +6971,10 @@ kiro-cli whoami --format json</code></pre>
             paneTerm.onData(data => {
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) return;
                 if (data.startsWith('\x1b]')) return;
+                if (pane.hasSeenPromptMarker && /[\r\n]/.test(data)) {
+                    pane.commandStartedAt = Date.now();
+                    pane.commandHadOutput = false;
+                }
                 if (paneSocket && paneSocket.connected) {
                     paneSocket.emit('pty-input', { project: projectName, paneId, data: data });
                 }
@@ -7075,15 +7096,13 @@ kiro-cli whoami --format json</code></pre>
                 output += input.slice(offset, markerIndex);
                 offset = markerIndex + marker.length;
                 if (pane.hasSeenPromptMarker) {
-                    if (pane.element && !pane.element.classList.contains('active-pane')) {
-                        if (!pane.needsAttention) {
-                            pane.needsAttention = true;
-                            updateTerminalTabs();
-                            playTerminalNotificationSound();
-                        }
-                    } else {
-                        pane.needsAttention = false;
+                    const startedAt = pane.commandStartedAt;
+                    if (startedAt) {
+                        const durationMs = Math.max(0, Date.now() - startedAt);
+                        notifyTerminalCommandFinished(pane, durationMs, pane.commandHadOutput);
                     }
+                    pane.commandStartedAt = 0;
+                    pane.commandHadOutput = false;
                 } else {
                     pane.hasSeenPromptMarker = true;
                 }
@@ -7101,6 +7120,63 @@ kiro-cli whoami --format json</code></pre>
                 output += remaining;
             }
             return output;
+        }
+
+        function notifyTerminalCommandFinished(pane, durationMs, hadOutput) {
+            if (localStorage.getItem('terminal-command-notifications-enabled') !== 'true') return;
+            const notifyOutput = localStorage.getItem('terminal-notify-on-output') !== 'false';
+            const notifyDuration = localStorage.getItem('terminal-notify-on-duration') !== 'false';
+            const thresholdSeconds = Math.max(1, Number.parseInt(localStorage.getItem('terminal-notify-duration-seconds') || '10', 10) || 10);
+            const matched = (notifyOutput && hadOutput) || (notifyDuration && durationMs >= thresholdSeconds * 1000);
+            if (!matched) return;
+
+            const isBackground = pane.element && !pane.element.classList.contains('active-pane');
+            if (isBackground) {
+                pane.needsAttention = true;
+                updateTerminalTabs();
+            } else {
+                pane.needsAttention = false;
+                updateTerminalTabs();
+            }
+            playTerminalNotificationSound();
+            const seconds = (durationMs / 1000).toFixed(1);
+            const title = `Terminal ${terminalPanes.indexOf(pane) + 1} finished`;
+            const message = `Command completed in ${seconds}s${hadOutput ? ' with output' : ''}.`;
+            showTerminalCommandToast(title, message, pane);
+            if (localStorage.getItem('terminal-browser-notifications') === 'true' && 'Notification' in window && Notification.permission === 'granted') {
+                try {
+                    const notification = new Notification(title, { body: message, tag: `terminal-command-${activeProject}-${pane.paneId}` });
+                    notification.onclick = () => { window.focus(); pane.element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); notification.close(); };
+                } catch (e) {}
+            }
+        }
+
+        function showTerminalCommandToast(title, message, pane) {
+            let toast = document.getElementById('terminal-command-toast');
+            if (!toast) {
+                toast = document.createElement('button');
+                toast.id = 'terminal-command-toast';
+                toast.type = 'button';
+                toast.style.cssText = 'position:fixed;right:18px;bottom:22px;z-index:12000;display:none;max-width:min(360px,calc(100vw - 36px));padding:11px 14px;text-align:left;background:var(--bg-sidebar);border:1px solid var(--accent-color);border-radius:9px;color:var(--text-primary);box-shadow:0 8px 28px rgba(0,0,0,.45);cursor:pointer;';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<strong style="display:block;font-size:.78rem;margin-bottom:3px"></strong><span style="font-size:.72rem;color:var(--text-secondary)"></span>`;
+            toast.querySelector('strong').textContent = title;
+            toast.querySelector('span').textContent = message;
+            toast.onclick = () => {
+                if (pane && !pane.element.classList.contains('active-pane')) pane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                toast.style.display = 'none';
+            };
+            toast.style.display = 'block';
+            clearTimeout(window._terminalCommandToastTimer);
+            window._terminalCommandToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 6000);
+        }
+
+        function testTerminalCommandNotification() {
+            showTerminalCommandToast('Terminal notification test', 'Notifications are ready for this tab.', terminalPanes.find(p => p.element.classList.contains('active-pane')));
+            if (localStorage.getItem('terminal-browser-notifications') === 'true' && 'Notification' in window && Notification.permission === 'granted') {
+                try { new Notification('Terminal notification test', { body: 'Notifications are ready for this tab.' }); } catch (e) {}
+            }
         }
 
         // ── Bangla inline row overlay ─────────────────────────────────────────
@@ -14474,6 +14550,11 @@ kiro-cli whoami --format json</code></pre>
             
             const sendInput = async (dataStr) => {
                 const s = targetSocket || (socket && socket.connected ? socket : null);
+                const targetPane = terminalPanes.find(p => p.paneId === paneId && p.socket === s);
+                if (targetPane) {
+                    targetPane.commandStartedAt = Date.now();
+                    targetPane.commandHadOutput = false;
+                }
                 if (s && s.connected) {
                     s.emit('pty-input', {
                         project: projectName,
@@ -15253,7 +15334,7 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function switchSettingsTab(tabName) {
-            const tabs = ['general', 'layout', 'project-checks', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge', 'icons'];
+            const tabs = ['general', 'layout', 'project-checks', 'notifications', 'behavior', 'voice', 'ai', 'ai-usage', 'code-merger', 'badge', 'icons'];
             tabs.forEach(t => {
                 const el = document.getElementById(`settings-sec-${t}`);
                 if (el) el.style.display = t === tabName ? 'block' : 'none';
@@ -15293,6 +15374,11 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-github-autocheck-interval').value = localStorage.getItem('github-autocheck-interval') || '15';
             document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
             document.getElementById('settings-rclone-autocheck-interval').value = localStorage.getItem('rclone-autocheck-interval') || '30';
+            document.getElementById('settings-terminal-notifications-enabled').checked = localStorage.getItem('terminal-command-notifications-enabled') === 'true';
+            document.getElementById('settings-terminal-notify-output').checked = localStorage.getItem('terminal-notify-on-output') !== 'false';
+            document.getElementById('settings-terminal-notify-duration').checked = localStorage.getItem('terminal-notify-on-duration') !== 'false';
+            document.getElementById('settings-terminal-notify-seconds').value = localStorage.getItem('terminal-notify-duration-seconds') || '10';
+            document.getElementById('settings-terminal-browser-notifications').checked = localStorage.getItem('terminal-browser-notifications') === 'true';
 
             const savedFont = localStorage.getItem('terminal-font-family') || "'Fira Code', Consolas, monospace";
             selectedFontValue = savedFont;
@@ -15552,6 +15638,14 @@ kiro-cli whoami --format json</code></pre>
 
         async function handleSaveSettings(event) {
             event.preventDefault();
+            localStorage.setItem('terminal-command-notifications-enabled', document.getElementById('settings-terminal-notifications-enabled').checked);
+            localStorage.setItem('terminal-notify-on-output', document.getElementById('settings-terminal-notify-output').checked);
+            localStorage.setItem('terminal-notify-on-duration', document.getElementById('settings-terminal-notify-duration').checked);
+            localStorage.setItem('terminal-notify-duration-seconds', String(Math.max(1, Math.min(86400, parseInt(document.getElementById('settings-terminal-notify-seconds').value, 10) || 10))));
+            localStorage.setItem('terminal-browser-notifications', document.getElementById('settings-terminal-browser-notifications').checked);
+            if (document.getElementById('settings-terminal-browser-notifications').checked && 'Notification' in window && Notification.permission === 'default') {
+                try { await Notification.requestPermission(); } catch (e) {}
+            }
             const concurrencyValue = elementId => {
                 const value = Number.parseInt(document.getElementById(elementId).value, 10);
                 return Number.isFinite(value) && value >= 0 ? value : 1;
