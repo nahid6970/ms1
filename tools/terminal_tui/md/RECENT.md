@@ -7,7 +7,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 - Added a master notification enable toggle, separate in-terminal GUI and desktop display toggles, output and configurable duration rules, and a test alert.
 - Command completion notifications appear for the active tab, background tabs, and commands that finish after switching workspaces; background tabs keep their attention marker.
-- Show the command text above elapsed time in both in-app and desktop alerts.
+- Show the project name and elapsed time in both in-app and desktop alerts.
 
 **Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 

@@ -5736,7 +5736,7 @@ kiro-cli whoami --format json</code></pre>
             const pane = activeProject === payload.project
                 ? terminalPanes.find(item => item.paneId === payload.paneId)
                 : null;
-            notifyTerminalCommandFinished(pane, payload.durationMs || 0, !!payload.hadOutput, payload.project, payload.paneId, payload.command || '');
+            notifyTerminalCommandFinished(pane, payload.durationMs || 0, !!payload.hadOutput, payload.project, payload.paneId);
         });
         let terminalPanes = [];
         let splitPaneCounter = 1;
@@ -7114,7 +7114,7 @@ kiro-cli whoami --format json</code></pre>
             return output;
         }
 
-        function notifyTerminalCommandFinished(pane, durationMs, hadOutput, projectName = activeProject, paneId = pane?.paneId, command = '') {
+        function notifyTerminalCommandFinished(pane, durationMs, hadOutput, projectName = activeProject, paneId = pane?.paneId) {
             if (localStorage.getItem('terminal-command-notifications-enabled') !== 'true') return;
             const notifyInApp = localStorage.getItem('terminal-inapp-notifications') !== 'false';
             const notifyDesktop = localStorage.getItem('terminal-browser-notifications') === 'true';
@@ -7134,11 +7134,10 @@ kiro-cli whoami --format json</code></pre>
                 playTerminalNotificationSound();
             }
             const seconds = (durationMs / 1000).toFixed(1);
-            const fullCommand = String(command || '').replace(/[\r\n\t]+/g, ' ').trim() || 'Command completed';
             const title = projectName || 'Terminal';
-            const message = `${fullCommand}\nTook ${seconds}s`;
+            const message = `Took ${seconds}s`;
             const focusCommand = () => focusTerminalCommand(projectName, paneId);
-            if (notifyInApp) showTerminalCommandToast(title, message, pane, focusCommand, fullCommand);
+            if (notifyInApp) showTerminalCommandToast(title, message, pane, focusCommand);
             if (notifyDesktop && 'Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notification = new Notification(title, {
@@ -7153,7 +7152,7 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        function showTerminalCommandToast(title, message, pane, onClick = null, fullCommand = '') {
+        function showTerminalCommandToast(title, message, pane, onClick = null) {
             let toast = document.getElementById('terminal-command-toast');
             if (!toast) {
                 toast = document.createElement('button');
@@ -7165,7 +7164,7 @@ kiro-cli whoami --format json</code></pre>
             toast.innerHTML = `<strong style="display:block;font-size:.78rem;margin-bottom:3px"></strong><span style="display:block;white-space:pre-line;overflow-wrap:anywhere;font-size:.72rem;color:var(--text-secondary)"></span>`;
             toast.querySelector('strong').textContent = title;
             toast.querySelector('span').textContent = message;
-            toast.title = fullCommand || title;
+            toast.title = title;
             toast.onclick = () => {
                 if (onClick) onClick();
                 else if (pane && !pane.element.classList.contains('active-pane')) pane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
