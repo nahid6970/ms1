@@ -3,6 +3,15 @@
 All sessions recorded here — no archiving, full history in one place.
 Read this file only when relevant to the current task. When reading, reference the last 5 sessions max.
 
+## [2026-11-28] - Repair Workspace Pinning and Layout Sizing
+
+- Route pin updates through a dedicated endpoint because workspace customization requires name and path fields; sort pinned workspaces ahead of unpinned ones.
+- Replace the pin emoji with an accessible, theme-colored SVG in the sidebar and workspace selector dropdown.
+- Remove the redundant per-project status label from the GitHub batch commit review rows.
+- Constrain workspace flex sizing so terminal content cannot force the sidebar to shrink; preserve the configured sidebar width and its collapsed state.
+
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
+
 ## [2026-11-28] - Parameterized Bookmark Commands
 
 - Bookmark commands use Jinja-safe `[[Name]]` placeholders; running one opens a required-value form and substitutes the values before execution.

@@ -8,6 +8,12 @@
 **Solution:** Added a dedicated pin endpoint that updates only the pinned field, routed the pin action to it, and made pinned workspaces sort above unpinned workspaces.
 **Files Modified:** `app.py`, `templates/index.html`
 
+## [2026-11-28] - Workspace Width Shifted When Activating a Terminal
+**Problem:** The workspace area could shift horizontally when a terminal project was opened.
+**Root Cause:** The main workspace flex item kept its automatic min-content width. Wide terminal/header content could make it compete with the sidebar for width.
+**Solution:** Set `min-width: 0` on the workspace and give the sidebar a fixed flex basis, including a zero basis when collapsed, so terminal content stays inside the remaining workspace width.
+**Files Modified:** `templates/index.html`
+
 ## [2026-11-28] - Home Page Returned HTTP 500 After Adding Bookmark Placeholder Help
 **Problem:** Opening the app home page returned an Internal Server Error.
 **Root Cause:** The literal `{{field:Name}}` example in `templates/index.html` was parsed as Jinja expression syntax and failed template compilation.
