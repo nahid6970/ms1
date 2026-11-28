@@ -203,6 +203,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
 
+## [2026-11-28] - Batch AI Commit and Push GitHub Projects
+
+- Added an AI Commit action beside Check all in the GitHub Projects modal.
+- The action checks all projects, prepares editable AI commit messages for projects with working-tree changes, then opens a review popup.
+- Added per-project Commit & Push, sequential Commit & Push All, and push retry after a partial failure.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.

@@ -5051,6 +5051,7 @@ kiro-cli whoami --format json</code></pre>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border-color);">
                 <div><h2 id="github-projects-title" style="margin:0; font-size:1rem;">GitHub Projects</h2><div style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Check all projects for file and remote changes, or use Pull, Fetch, and Clone.</div></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                    <button id="github-projects-ai-commit-all" type="button" onclick="startGitHubBatchCommit()" title="Check projects, generate commit messages, then commit and push selected projects" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(168,85,247,.45);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;font-size:.72rem;font-weight:600;cursor:pointer;"><span aria-hidden="true">✨</span>AI Commit</button>
                     <button id="github-projects-check-all" type="button" onclick="checkAllGitHubProjects()" title="Fetch and check every GitHub project" style="padding:6px 11px;border:1px solid rgba(196,181,253,.55);border-radius:6px;background:rgba(196,181,253,.1);color:#c4b5fd;font-size:.72rem;font-weight:600;cursor:pointer;">Check all</button>
                     <button type="button" onclick="closeGitHubProjectsModal()" aria-label="Close" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
                 </div>
@@ -5065,6 +5066,20 @@ kiro-cli whoami --format json</code></pre>
                 </div>
             </div>
             <div id="github-projects-message" role="status" style="display:none; padding:8px 18px; border-top:1px solid var(--border-color); font-size:.75rem; color:var(--text-secondary);"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="github-batch-commit-modal" role="dialog" aria-modal="true" aria-labelledby="github-batch-commit-title" onclick="if(event.target===this)closeGitHubBatchCommitModal()" style="z-index:1300;">
+        <div class="modal-content" style="width:760px;max-width:96vw;max-height:82vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border-color);">
+                <div style="min-width:0;"><h2 id="github-batch-commit-title" style="margin:0;font-size:.95rem;">AI commit changes</h2><div id="github-batch-commit-subtitle" style="font-size:.7rem;color:var(--text-muted);margin-top:3px;">Review each message, then commit and push projects individually or together.</div></div>
+                <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                    <button id="github-batch-commit-all-button" type="button" onclick="commitAllGitHubBatchProjects()" disabled style="padding:6px 10px;border:1px solid rgba(34,197,94,.5);border-radius:6px;background:rgba(34,197,94,.1);color:#4ade80;font-size:.7rem;font-weight:600;cursor:pointer;opacity:.55;">Commit &amp; Push All</button>
+                    <button type="button" onclick="closeGitHubBatchCommitModal()" aria-label="Close" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
+                </div>
+            </div>
+            <div id="github-batch-commit-list" style="overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;min-height:100px;flex:1;"></div>
+            <div id="github-batch-commit-message" role="status" style="display:none;padding:8px 16px;border-top:1px solid var(--border-color);font-size:.72rem;color:var(--text-secondary);"></div>
         </div>
     </div>
 
@@ -11197,6 +11212,8 @@ kiro-cli whoami --format json</code></pre>
         }
 
         const githubProjectStatusByName = loadSavedProjectCheckResults('github-project-check-results-v1');
+        let githubBatchCommitItems = [];
+        let githubBatchCommitRunning = false;
         let githubProjectCommitContext = null;
         let githubProjectCommitCloseTimer = null;
         let githubProjectCheckRunning = false;
@@ -11725,6 +11742,239 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
+        function closeGitHubBatchCommitModal() {
+            document.getElementById('github-batch-commit-modal').classList.remove('show');
+        }
+
+        function setGitHubBatchCommitMessage(text, color = 'var(--text-secondary)') {
+            const message = document.getElementById('github-batch-commit-message');
+            message.style.display = text ? 'block' : 'none';
+            message.style.color = color;
+            message.textContent = text;
+        }
+
+        function updateGitHubBatchCommitAllButton() {
+            const button = document.getElementById('github-batch-commit-all-button');
+            const pending = githubBatchCommitItems.filter(item => ['ready', 'push-failed'].includes(item.state) && item.files?.length && (item.state === 'push-failed' || item.message?.trim())).length;
+            button.disabled = githubBatchCommitRunning || !pending;
+            button.style.opacity = button.disabled ? '.55' : '1';
+            button.textContent = pending > 0 ? `Commit & Push All (${pending})` : 'Commit & Push All';
+        }
+
+        function renderGitHubBatchCommitItems() {
+            const list = document.getElementById('github-batch-commit-list');
+            list.innerHTML = githubBatchCommitItems.map((item, index) => {
+                const locked = githubBatchCommitRunning || ['committing', 'done', 'push-failed'].includes(item.state);
+                const actionLabel = item.state === 'committing' ? 'Working…'
+                    : item.state === 'done' ? 'Pushed ✓'
+                    : item.state === 'push-failed' ? 'Retry Push'
+                    : 'Commit & Push';
+                const actionDisabled = githubBatchCommitRunning || item.state === 'committing' || item.state === 'done' || !item.files?.length || (item.state !== 'push-failed' && !item.message?.trim());
+                const stateColor = item.state === 'done' ? '#34d399' : item.state === 'error' || item.state === 'push-failed' ? '#f87171' : 'var(--text-muted)';
+                const details = item.detail || `${item.files.length} changed file${item.files.length === 1 ? '' : 's'}`;
+                return `<div style="padding:10px 11px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-card);">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;"><strong style="min-width:0;flex:1;font-size:.78rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(item.projectName)}</strong><span style="font-size:.66rem;color:${stateColor};">${escapeHtml(details)}</span></div>
+                    <div style="display:flex;align-items:center;gap:7px;"><input class="github-batch-commit-input" data-index="${index}" type="text" value="${escapeHtml(item.message || '')}" placeholder="Commit message…" aria-label="${escapeHtml(item.projectName)} commit message" ${locked || item.state === 'error' ? 'disabled' : ''} style="flex:1;min-width:0;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;padding:7px 9px;color:var(--text-primary);font:.72rem 'Fira Code',monospace;outline:none;">
+                    <button class="github-batch-commit-action" data-index="${index}" type="button" ${actionDisabled ? 'disabled' : ''} style="padding:6px 10px;border:1px solid rgba(34,197,94,.5);border-radius:6px;background:rgba(34,197,94,.1);color:#4ade80;font-size:.68rem;font-weight:600;white-space:nowrap;cursor:pointer;${actionDisabled ? 'opacity:.55;' : ''}">${actionLabel}</button></div>
+                </div>`;
+            }).join('');
+            list.querySelectorAll('.github-batch-commit-input').forEach(input => input.addEventListener('input', () => {
+                githubBatchCommitItems[Number(input.dataset.index)].message = input.value;
+                updateGitHubBatchCommitAllButton();
+                const action = list.querySelector(`.github-batch-commit-action[data-index="${input.dataset.index}"]`);
+                if (action && !githubBatchCommitRunning) {
+                    action.disabled = !input.value.trim() || !githubBatchCommitItems[Number(input.dataset.index)].files?.length;
+                    action.style.opacity = action.disabled ? '.55' : '1';
+                }
+            }));
+            list.querySelectorAll('.github-batch-commit-action').forEach(button => button.addEventListener('click', () => runGitHubBatchCommitAction(Number(button.dataset.index))));
+            updateGitHubBatchCommitAllButton();
+        }
+
+        async function startGitHubBatchCommit() {
+            if (githubBatchCommitRunning || githubProjectCheckRunning) {
+                const status = document.getElementById('github-projects-message');
+                status.style.display = 'block';
+                status.style.color = '#fbbf24';
+                status.textContent = 'Wait for the current GitHub project check to finish.';
+                return;
+            }
+            const apiKey = localStorage.getItem('gemini-api-key') || '';
+            if (!apiKey) {
+                const message = document.getElementById('github-projects-message');
+                message.style.display = 'block';
+                message.style.color = '#f87171';
+                message.textContent = 'No Gemini API key found. Add one in AI Copilot settings.';
+                return;
+            }
+            const button = document.getElementById('github-projects-ai-commit-all');
+            const setMainProgress = text => {
+                const status = document.getElementById('github-projects-message');
+                status.style.display = 'block';
+                status.style.color = 'var(--text-secondary)';
+                status.textContent = text;
+            };
+            githubBatchCommitRunning = true;
+            button.disabled = true;
+            button.innerHTML = '<span aria-hidden="true">…</span>Checking';
+            try {
+                setMainProgress('Checking all GitHub projects for uncommitted changes…');
+                const checked = await checkAllGitHubProjects();
+                if (!checked) throw new Error('Could not complete the GitHub project check.');
+                const projectsToInspect = (projects || []).filter(project => {
+                    const status = githubProjectStatusByName.get(project.name);
+                    return project.pathExists && /github\.com/i.test(project.gitRemote || '') && (Number(status?.dirtyCount) > 0 || status?.error);
+                });
+                if (!projectsToInspect.length) {
+                    const message = document.getElementById('github-projects-message');
+                    message.style.display = 'block';
+                    message.style.color = '#34d399';
+                    message.textContent = 'All checked GitHub projects have a clean working tree.';
+                    return;
+                }
+                const apiModel = localStorage.getItem('git-ai-commit-model') || localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
+                githubBatchCommitItems = [];
+                const inspectionErrors = [];
+                for (let index = 0; index < projectsToInspect.length; index++) {
+                    const project = projectsToInspect[index];
+                    setMainProgress(`Checking changed files: ${project.name} (${index + 1}/${projectsToInspect.length})…`);
+                    let files = [];
+                    try {
+                        const filesResponse = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/files`);
+                        const filesData = await filesResponse.json();
+                        if (!filesResponse.ok) throw new Error(filesData.error || 'Could not load changed files.');
+                        files = (filesData.files || []).map(file => file.path).filter(Boolean);
+                    } catch (error) {
+                        inspectionErrors.push(`${project.name}: ${error?.message || 'Could not load changed files.'}`);
+                        continue;
+                    }
+                    if (!files.length) continue;
+                    setMainProgress(`Generating commit message: ${project.name} (${index + 1}/${projectsToInspect.length})…`);
+                    const item = {projectName:project.name, files, message:'', state:'ready', detail:`${files.length} changed file${files.length === 1 ? '' : 's'}`};
+                    try {
+                        const suggestionResponse = await fetch(`/api/project/${encodeURIComponent(project.name)}/git/suggest-commit`, {
+                            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({api_key:apiKey, model:apiModel, files:item.files})
+                        });
+                        const suggestionData = await suggestionResponse.json();
+                        if (!suggestionResponse.ok || suggestionData.error) throw new Error(suggestionData.error || 'AI suggestion failed.');
+                        item.message = suggestionData.suggestion || '';
+                    } catch (error) {
+                        item.detail = `${item.detail} · Suggestion failed: ${error?.message || 'AI error'}`;
+                    }
+                    githubBatchCommitItems.push(item);
+                }
+                if (!githubBatchCommitItems.length) {
+                    const message = document.getElementById('github-projects-message');
+                    message.style.display = 'block';
+                    message.style.color = inspectionErrors.length ? '#fbbf24' : '#34d399';
+                    message.textContent = inspectionErrors.length ? `Could not inspect changes: ${inspectionErrors.join('; ')}` : 'All checked GitHub projects have a clean working tree.';
+                    return;
+                }
+                document.getElementById('github-batch-commit-subtitle').textContent = `${githubBatchCommitItems.length} project${githubBatchCommitItems.length === 1 ? '' : 's'} with uncommitted changes. Review the messages, then commit and push individually or together.`;
+                renderGitHubBatchCommitItems();
+                document.getElementById('github-batch-commit-modal').classList.add('show');
+                setGitHubBatchCommitMessage('Review each message before committing and pushing.', 'var(--text-secondary)');
+                setMainProgress(`Prepared ${githubBatchCommitItems.length} changed project${githubBatchCommitItems.length === 1 ? '' : 's'} for review.`);
+            } catch (error) {
+                setMainProgress(error?.message || 'Could not prepare batch commits.');
+                document.getElementById('github-projects-message').style.color = '#f87171';
+            } finally {
+                githubBatchCommitRunning = false;
+                button.disabled = false;
+                button.innerHTML = '<span aria-hidden="true">✨</span>AI Commit';
+                if (document.getElementById('github-batch-commit-modal').classList.contains('show')) renderGitHubBatchCommitItems();
+            }
+        }
+
+        async function refreshGitHubBatchProjectStatus(projectName) {
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(projectName)}/git/sync-remote`, {
+                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'status'})
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not refresh project status.');
+                const filesText = data.dirtyCount ? `${data.dirtyCount} file${data.dirtyCount === 1 ? '' : 's'} changed` : 'Working tree clean';
+                const remoteParts = [];
+                if (data.ahead) remoteParts.push(`${data.ahead} to push`);
+                if (data.behind) remoteParts.push(`${data.behind} to pull`);
+                const remoteText = !data.remoteBranchExists ? `${data.ahead || 0} commit${Number(data.ahead) === 1 ? '' : 's'} to push · remote branch missing` : remoteParts.join(' · ');
+                githubProjectStatusByName.set(projectName, {...data, filesText, remoteText, checkedAt:Date.now(), hasChanges:!!(data.dirtyCount || data.ahead || data.behind || !data.remoteBranchExists), text:`${filesText}${remoteText ? ` · ${remoteText}` : ''}`});
+                saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
+                updateProjectChangeBadges();
+                renderGitHubProjectsModal();
+            } catch (_) { /* The commit result remains visible in the batch popup. */ }
+        }
+
+        async function performGitHubBatchCommitAction(index) {
+            const item = githubBatchCommitItems[index];
+            if (!item) return;
+            const retryingPush = item.state === 'push-failed';
+            try {
+                if (retryingPush) {
+                    item.state = 'committing';
+                    item.detail = 'Retrying push…';
+                    renderGitHubBatchCommitItems();
+                    const response = await fetch(`/api/project/${encodeURIComponent(item.projectName)}/git/push`, {method:'POST', headers:{'Content-Type':'application/json'}});
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Push failed.');
+                    item.state = 'done';
+                    item.detail = 'Committed and pushed ✓';
+                    await refreshGitHubBatchProjectStatus(item.projectName);
+                    return;
+                }
+                const message = item.message.trim();
+                if (!item.files.length || !message) return;
+                item.state = 'committing';
+                item.detail = 'Committing and pushing…';
+                renderGitHubBatchCommitItems();
+                const response = await fetch(`/api/project/${encodeURIComponent(item.projectName)}/git/commit`, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({message, add_all:true, push:true, files:item.files})
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || 'Commit failed.');
+                item.state = data.push_error ? 'push-failed' : 'done';
+                item.detail = data.push_error ? `Committed; push failed: ${data.push_error}` : 'Committed and pushed ✓';
+                await refreshGitHubBatchProjectStatus(item.projectName);
+            } catch (error) {
+                item.state = retryingPush ? 'push-failed' : 'error';
+                item.detail = error?.message || 'Commit or push failed.';
+            }
+            renderGitHubBatchCommitItems();
+        }
+
+        async function runGitHubBatchCommitAction(index) {
+            if (githubBatchCommitRunning || !githubBatchCommitItems[index]) return;
+            githubBatchCommitRunning = true;
+            try {
+                await performGitHubBatchCommitAction(index);
+            } finally {
+                githubBatchCommitRunning = false;
+                renderGitHubBatchCommitItems();
+                const pending = githubBatchCommitItems.filter(project => ['ready', 'push-failed'].includes(project.state) && project.files?.length && (project.state === 'push-failed' || project.message?.trim())).length;
+                setGitHubBatchCommitMessage(pending ? `${pending} project${pending === 1 ? '' : 's'} still ready to commit or push.` : 'Batch actions finished.', pending ? 'var(--text-secondary)' : '#34d399');
+            }
+        }
+
+        async function commitAllGitHubBatchProjects() {
+            if (githubBatchCommitRunning) return;
+            githubBatchCommitRunning = true;
+            renderGitHubBatchCommitItems();
+            try {
+                for (let index = 0; index < githubBatchCommitItems.length; index++) {
+                    const item = githubBatchCommitItems[index];
+                    if (!item.files?.length || (item.state !== 'push-failed' && (!['ready'].includes(item.state) || !item.message?.trim()))) continue;
+                    setGitHubBatchCommitMessage(`Committing and pushing ${item.projectName} (${index + 1}/${githubBatchCommitItems.length})…`);
+                    await performGitHubBatchCommitAction(index);
+                }
+                const pending = githubBatchCommitItems.filter(item => ['ready', 'push-failed'].includes(item.state) && item.files?.length && (item.state === 'push-failed' || item.message?.trim())).length;
+                setGitHubBatchCommitMessage(pending ? `${pending} project${pending === 1 ? '' : 's'} still ready to commit or push.` : 'Batch actions finished.', pending ? 'var(--text-secondary)' : '#34d399');
+            } finally {
+                githubBatchCommitRunning = false;
+                renderGitHubBatchCommitItems();
+            }
+        }
+
         function githubProjectActionStyle(color) {
             return `width:34px;height:29px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid ${color}66;border-radius:6px;background:${color}12;color:${color};cursor:pointer;`;
         }
@@ -11733,7 +11983,7 @@ kiro-cli whoami --format json</code></pre>
             const linked = (projects || []).filter(project => /github\.com/i.test(project.gitRemote || ''));
             const checkButton = document.getElementById('github-projects-check-all');
             const message = document.getElementById('github-projects-message');
-            if (!linked.length || githubProjectCheckRunning) return;
+            if (!linked.length || githubProjectCheckRunning) return false;
             githubProjectCheckRunning = true;
             refreshProjectAutoCheckCountdowns();
             checkButton.disabled = true;
@@ -11802,6 +12052,7 @@ kiro-cli whoami --format json</code></pre>
             message.innerHTML = failed.length
                 ? `Checked ${linked.length - failed.length} of ${linked.length}; failed: ${failed.join(', ')}.${changesSuffix}`
                 : `Checked all ${linked.length} GitHub project${linked.length === 1 ? '' : 's'}${changesSuffix}.`;
+            return true;
         }
 
         async function runGitHubProjectAction(button) {
