@@ -3666,7 +3666,7 @@
                             <div class="form-group" style="margin-bottom:16px;">
                                 <label for="edit-bookmark-cmd" style="display:block;font-size:.75rem;font-weight:650;letter-spacing:.04em;color:var(--text-secondary);margin-bottom:7px;">COMMAND</label>
                                 <textarea id="edit-bookmark-cmd" class="form-input" required autocomplete="off" rows="5" placeholder="Enter a command or multi-line macro…" style="padding:11px 12px;font-size:.83rem;font-family:'Fira Code',monospace;resize:vertical;min-height:124px;width:100%;box-sizing:border-box;background:var(--bg-main);border:1px solid var(--border-color);color:var(--text-primary);border-radius:9px;outline:none;"></textarea>
-                                <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too.</div>
+                                <div style="font-size:.72rem;color:var(--text-muted);margin-top:7px;line-height:1.5;">Run multiple commands in sequence. Use <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">#wait 2</code> to pause; decimal delays work too. Add fill-in fields with <code style="padding:2px 5px;border-radius:5px;background:var(--bg-sidebar);">&#123;&#123;field:Name&#125;&#125;</code>; clicking the bookmark prompts for each value.</div>
                             </div>
                             <div style="margin-bottom:16px;">
                                 <label style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:600;color:var(--text-secondary);">SVG ICON <span style="font-weight:400;color:var(--text-muted);">· optional</span></label>
@@ -3709,6 +3709,20 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bookmark-parameters-modal">
+        <div class="modal-content" style="width:480px;max-width:94vw;max-height:90vh;overflow-y:auto;padding:22px;border:1px solid var(--border-color);border-radius:14px;box-shadow:0 22px 70px rgba(0,0,0,.48);">
+            <div style="margin-bottom:16px;">
+                <h2 id="bookmark-parameters-title" style="margin:0 0 5px;font-size:1rem;color:var(--text-primary);">Fill Command Values</h2>
+                <div style="font-size:.75rem;color:var(--text-secondary);">Enter a value for each placeholder before running this bookmark.</div>
+            </div>
+            <div id="bookmark-parameters-fields" style="display:grid;gap:12px;"></div>
+            <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border-color);">
+                <button type="button" onclick="closeBookmarkParametersModal()" style="padding:8px 13px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;color:var(--text-secondary);cursor:pointer;">Cancel</button>
+                <button type="button" onclick="runParameterizedBookmark()" style="padding:8px 15px;background:var(--accent-color);border:1px solid var(--accent-color);border-radius:7px;color:#fff;font-weight:600;cursor:pointer;">Run</button>
+            </div>
         </div>
     </div>
 
@@ -5821,6 +5835,7 @@ kiro-cli whoami --format json</code></pre>
 
                 else if (id === 'theme-modal') closeThemeModal();
                 else if (id === 'bookmark-modal') closeBookmarkModal();
+                else if (id === 'bookmark-parameters-modal') closeBookmarkParametersModal();
                 else if (id === 'subcmd-add-modal') closeSubcmdAddModal();
                 else if (id === 'ports-modal') closePortsMonitorModal();
                 else if (id === 'settings-modal') closeSettingsModal();
@@ -13809,7 +13824,7 @@ kiro-cli whoami --format json</code></pre>
                     row.onmouseleave = () => {
                         row.style.backgroundColor = 'transparent';
                     };
-                    row.onclick = () => runBookmarkedCommand(bm.command, bm.windowTitle);
+                    row.onclick = () => runBookmarkedCommand(bm.command, bm.windowTitle, bm.name);
                     row.oncontextmenu = (e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -14603,11 +14618,85 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        async function runBookmarkedCommand(cmd, windowTitle = "") {
+        let pendingParameterizedBookmark = null;
+        const BOOKMARK_FIELD_RE = /\{\{\s*field:([^{}]+?)\s*\}\}/gi;
+
+        function getBookmarkParameterNames(command) {
+            const names = [];
+            const seen = new Set();
+            for (const match of String(command || '').matchAll(BOOKMARK_FIELD_RE)) {
+                const name = match[1].trim();
+                const key = name.toLowerCase();
+                if (name && !seen.has(key)) {
+                    seen.add(key);
+                    names.push(name);
+                }
+            }
+            return names;
+        }
+
+        function openBookmarkParametersModal(command, commandName, fieldNames) {
+            pendingParameterizedBookmark = { command, commandName, fieldNames };
+            const title = document.getElementById('bookmark-parameters-title');
+            title.textContent = commandName ? `Fill values · ${commandName}` : 'Fill Command Values';
+            const fields = document.getElementById('bookmark-parameters-fields');
+            fields.innerHTML = '';
+            fieldNames.forEach((name, index) => {
+                const label = document.createElement('label');
+                label.style.cssText = 'display:grid;gap:6px;font-size:.76rem;font-weight:600;color:var(--text-secondary);';
+                label.textContent = name;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.dataset.parameterName = name;
+                input.autocomplete = 'off';
+                input.spellcheck = false;
+                input.placeholder = `Enter ${name}`;
+                input.style.cssText = 'width:100%;box-sizing:border-box;padding:9px 10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;color:var(--text-primary);font:inherit;';
+                label.appendChild(input);
+                fields.appendChild(label);
+                if (index === 0) setTimeout(() => input.focus(), 30);
+            });
+            document.getElementById('bookmark-parameters-modal').classList.add('show');
+        }
+
+        function closeBookmarkParametersModal() {
+            document.getElementById('bookmark-parameters-modal').classList.remove('show');
+            pendingParameterizedBookmark = null;
+        }
+
+        async function runParameterizedBookmark() {
+            if (!pendingParameterizedBookmark) return;
+            const values = new Map();
+            const inputs = [...document.querySelectorAll('#bookmark-parameters-fields input[data-parameter-name]')];
+            for (const input of inputs) {
+                const value = input.value.trim();
+                if (!value) {
+                    input.focus();
+                    input.style.borderColor = '#ef4444';
+                    return;
+                }
+                values.set(input.dataset.parameterName.toLowerCase(), value);
+            }
+            const { command } = pendingParameterizedBookmark;
+            const expandedCommand = String(command).replace(BOOKMARK_FIELD_RE, (_match, name) => values.get(name.trim().toLowerCase()) ?? _match);
+            closeBookmarkParametersModal();
+            if (activeProject) {
+                const activePane = terminalPanes.find(p => p.socket === socket);
+                await executeCommandMacro(activeProject, activePane ? activePane.paneId : 'main', expandedCommand, socket);
+            }
+        }
+
+        async function runBookmarkedCommand(cmd, windowTitle = "", commandName = "") {
             if (!cmd || !activeProject) return;
             
             // Hide dropdown
             document.getElementById('bookmark-dropdown-content').style.display = 'none';
+
+            const parameterNames = getBookmarkParameterNames(cmd);
+            if (parameterNames.length) {
+                openBookmarkParametersModal(cmd, commandName, parameterNames);
+                return;
+            }
             
             const activePane = terminalPanes.find(p => p.socket === socket);
             const paneId = activePane ? activePane.paneId : 'main';
@@ -16511,7 +16600,7 @@ kiro-cli whoami --format json</code></pre>
                 row.appendChild(info);
                 row.onmouseenter = () => { row.style.background = 'var(--bg-card-hover)'; row.style.borderColor = 'var(--border-color)'; };
                 row.onmouseleave = () => { if (!row.classList.contains('keyboard-active')) { row.style.background = 'transparent'; row.style.borderColor = 'transparent'; } };
-                row.onclick = () => { runBookmarkedCommand(item.command, item.windowTitle); closeManagerModal(); };
+                row.onclick = () => { runBookmarkedCommand(item.command, item.windowTitle, item.label); closeManagerModal(); };
                 container.appendChild(row);
             });
         }
@@ -19068,6 +19157,8 @@ Always wrap your **entire response** in a single markdown code block.`;
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                const bookmarkParameters = document.getElementById('bookmark-parameters-modal');
+                if (bookmarkParameters && bookmarkParameters.classList.contains('show')) { closeBookmarkParametersModal(); return; }
                 const aiUsageTimingHelp = document.getElementById('ai-usage-timing-help-modal');
                 if (aiUsageTimingHelp && aiUsageTimingHelp.classList.contains('show')) { closeAIUsageTimingHelp(); return; }
                 const kiroContinueModal = document.getElementById('kiro-account-continue-modal');

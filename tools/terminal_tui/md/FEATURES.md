@@ -15,6 +15,12 @@ Always state one clear outcome at the end of the response. Do not say “restart
 **Description:** Settings → Terminal Notifications has a master command-notifications toggle and separate display toggles for the in-terminal notification GUI and desktop alerts. Once enabled, alerts can match command output and/or a configurable runtime threshold (default 10 seconds). In-app and desktop alerts show the project name and elapsed time. Background tabs also receive the existing attention marker. Desktop notifications require browser permission.
 **Implementation:** `app.py` tracks command completion at the PowerShell prompt marker and broadcasts completion events independently of the active workspace. `templates/index.html` keeps an app-wide listener, evaluates saved localStorage rules, and displays the selected notification channels.
 
+## Parameterized Bookmark Commands
+**Status:** ✅ Complete
+**Description:** Bookmark command text can include `{{field:Name}}` placeholders. Running that bookmark opens a dialog with one required input per unique placeholder; entered values are substituted before the command or macro is sent to the terminal. Field names are case-insensitive for matching, and repeated uses share one input.
+**Usage:** For example, `{{field:Second}}..1 | ForEach-Object { Write-Host $_; Start-Sleep -Seconds {{field:Duration For Each}} }` asks for “Second” and “Duration For Each” before running.
+**Implementation:** `templates/index.html` detects placeholders when launching bookmarks from the workspace bookmark menu or command manager, builds the values dialog, and expands the command.
+
 ## Code Merger
 **Status:** ✅ Complete
 **Description:** Built-in Code Merger panel accessible from the status bar. Packages project files into structured AI prompts (PREP tab) and applies AI responses back to disk (MERGE tab) using the `@@FILE / @@MODE / @@END` format. Completely self-contained inside terminal_tui — no external tools required.
