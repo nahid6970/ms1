@@ -194,6 +194,15 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
+## [2026-11-28] - Keep Rclone Difference Results Fresh After Sync
+
+- Persisted removal of stale difference results when a sync starts, so an old result cannot reappear after browser restart.
+- Run a fresh difference check after successful syncs and persist scheduled Rclone check results.
+- Do not restore transient browser request errors such as `Failed to fetch` as saved project results after restart or app recovery.
+- Keep opening the Rclone Projects modal passive.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/ARCHITECTURE.md`, `md/RECENT.md`
+
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.

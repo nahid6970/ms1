@@ -10662,15 +10662,18 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('theme-modal').classList.remove('show');
         }
 
+        function isTransientProjectCheckError(status) {
+            return typeof status?.error === 'string' && /^(failed to fetch|networkerror|load failed)$/i.test(status.error.trim());
+        }
         function loadSavedProjectCheckResults(key) {
             try {
                 const saved = JSON.parse(localStorage.getItem(key) || '{}');
                 const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                return new Map(Object.entries(saved).filter(([, status]) => status?.checkedAt >= cutoff));
+                return new Map(Object.entries(saved).filter(([, status]) => status?.checkedAt >= cutoff && !isTransientProjectCheckError(status)));
             } catch (_) { return new Map(); }
         }
         function saveProjectCheckResults(key, map) {
-            try { localStorage.setItem(key, JSON.stringify(Object.fromEntries([...map].filter(([, status]) => status?.checkedAt)))); }
+            try { localStorage.setItem(key, JSON.stringify(Object.fromEntries([...map].filter(([, status]) => status?.checkedAt && !isTransientProjectCheckError(status))))); }
             catch (error) { console.warn('Could not save project check results:', error); }
         }
         const rcloneProjectStatusByName = loadSavedProjectCheckResults('rclone-project-check-results-v1');
@@ -10937,6 +10940,7 @@ kiro-cli whoami --format json</code></pre>
                 rcloneModalSyncQueue.push(project);
                 rcloneModalSyncStatusByName.set(project.name, {state:'queued', fileEvents:[], rawOutput:[]});
                 rcloneProjectStatusByName.delete(project.name);
+                saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
                 updateProjectChangeBadges();
                 renderRcloneProjectsModal();
                 return;
@@ -10946,6 +10950,18 @@ kiro-cli whoami --format json</code></pre>
         async function syncAllRcloneProjects(button) {
             const linked = (projects || []).filter(project => project.hasRcloneDestination && project.pathExists);
             if (linked.length) await syncRcloneProjectsBatch(linked, button, 'src_to_dst');
+        }
+        async function refreshRcloneProjectStatus(name) {
+            try {
+                const response = await fetch(`/api/project/${encodeURIComponent(name)}/rclone/check`, {method:'POST'});
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Rclone check failed.');
+                rcloneProjectStatusByName.set(name, {...data, checkedAt:Date.now()});
+            } catch (error) {
+                rcloneProjectStatusByName.set(name, {error:error?.message || 'Rclone check failed.', checkedAt:Date.now()});
+            }
+            saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
+            updateProjectChangeBadges();
         }
         async function syncRcloneProjectsBatch(syncProjects, button, direction = 'src_to_dst') {
             if (rcloneModalSyncRunning || !syncProjects.length) return;
@@ -10965,6 +10981,7 @@ kiro-cli whoami --format json</code></pre>
                 rcloneModalSyncStatusByName.set(project.name, {state:'queued', fileEvents:[], rawOutput:[]});
                 rcloneProjectStatusByName.delete(project.name);
             });
+            saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
             updateProjectChangeBadges();
             const syncAllButton = document.getElementById('rclone-projects-sync-all');
             const checkAllButton = document.getElementById('rclone-projects-check-all');
@@ -11113,6 +11130,10 @@ kiro-cli whoami --format json</code></pre>
                 if (syncAllButton) syncAllButton.disabled = false;
                 if (checkAllButton) checkAllButton.disabled = false;
                 if (button?.isConnected) button.disabled = false;
+                const successfullySynced = syncProjects
+                    .filter(project => rcloneModalSyncStatusByName.get(project.name)?.state === 'synced')
+                    .map(project => project.name);
+                await Promise.all(successfullySynced.map(refreshRcloneProjectStatus));
                 renderRcloneProjectsModal();
             }
         }
@@ -11212,6 +11233,14 @@ kiro-cli whoami --format json</code></pre>
                 const payload = await response.json();
                 const allResults = payload.results || {};
                 let resultsChanged = false;
+                [githubProjectStatusByName, rcloneProjectStatusByName].forEach(statusMap => {
+                    for (const [name, status] of statusMap) {
+                        if (isTransientProjectCheckError(status)) {
+                            statusMap.delete(name);
+                            resultsChanged = true;
+                        }
+                    }
+                });
                 const applyManager = (type, statusMap, isEligible) => {
                     const eligible = new Set((projects || []).filter(isEligible).map(project => project.name));
                     for (const name of statusMap.keys()) {
@@ -11261,7 +11290,10 @@ kiro-cli whoami --format json</code></pre>
                 };
                 applyManager('github', githubProjectStatusByName, project => /github\.com/i.test(project.gitRemote || '') && project.pathExists);
                 applyManager('rclone', rcloneProjectStatusByName, project => project.hasRcloneDestination && project.pathExists);
-                if (resultsChanged) saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
+                if (resultsChanged) {
+                    saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
+                    saveProjectCheckResults('rclone-project-check-results-v1', rcloneProjectStatusByName);
+                }
                 updateProjectChangeBadges();
                 if (resultsChanged && document.getElementById('github-projects-modal')?.classList.contains('show')) renderGitHubProjectsModal();
                 if (resultsChanged && document.getElementById('rclone-projects-modal')?.classList.contains('show')) renderRcloneProjectsModal();
