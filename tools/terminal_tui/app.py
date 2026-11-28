@@ -1901,6 +1901,25 @@ def api_projects_customize():
     
     return jsonify(scan_projects())
 
+@app.route('/api/projects/<project>/pin', methods=['POST'])
+def api_projects_pin(project):
+    """Update only a workspace's pinned state without requiring customize fields."""
+    data = request.get_json(silent=True) or {}
+    if "pinned" not in data:
+        return jsonify({"error": "Pinned state is required"}), 400
+
+    projects = load_projects_config()
+    proj = next((p for p in projects if p["name"].casefold() == project.casefold()), None)
+    if not proj:
+        return jsonify({"error": "Project not found"}), 404
+
+    proj["pinned"] = bool(data["pinned"])
+    if proj["pinned"]:
+        projects.remove(proj)
+        projects.insert(0, proj)
+    save_projects_config(projects)
+    return jsonify(scan_projects())
+
 @app.route('/api/projects/reorder', methods=['POST'])
 def api_projects_reorder():
     data = request.json

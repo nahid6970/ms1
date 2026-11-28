@@ -6028,8 +6028,10 @@ kiro-cli whoami --format json</code></pre>
                 (p.category && p.category.toLowerCase().includes(searchQuery))
             ));
 
-            // Sort so that currently active project is at the top, then active (running) projects
+            // Keep pinned workspaces above unpinned ones, then prioritize the active and running workspace.
             filtered.sort((a, b) => {
+                if (a.pinned && !b.pinned) return -1;
+                if (b.pinned && !a.pinned) return 1;
                 if (a.name === activeProject && b.name !== activeProject) return -1;
                 if (b.name === activeProject && a.name !== activeProject) return 1;
                 if (a.is_active && !b.is_active) return -1;
@@ -6269,18 +6271,18 @@ kiro-cli whoami --format json</code></pre>
 
         async function togglePinProject(project) {
             try {
-                const response = await fetch('/api/projects/customize', {
+                const response = await fetch(`/api/projects/${encodeURIComponent(project.name)}/pin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: project.name,
-                        pinned: !project.pinned
-                    })
+                    body: JSON.stringify({ pinned: !project.pinned })
                 });
 
                 if (response.ok) {
                     projects = await response.json();
                     handleSearch();
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    console.error('Error pinning project:', error.error || response.statusText);
                 }
             } catch (err) {
                 console.error("Error pinning project:", err);

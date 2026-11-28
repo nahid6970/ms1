@@ -3,7 +3,7 @@
     {
       "name": "Terminal TUI",
       "path": "C:\\@delta\\ms1\\tools\\terminal_tui",
-      "pinned": false,
+      "pinned": true,
       "theme": {
         "background": "#000000",
         "scrollbarColor": "#ffffff",
@@ -139,7 +139,7 @@
       "path": "C:\\Users\\nahid\\t3code",
       "androidPath": "",
       "category": "",
-      "pinned": false,
+      "pinned": true,
       "theme": {
         "background": "#000000",
         "foreground": "#d1d5db",
@@ -197,7 +197,7 @@
     {
       "name": "mycell - 5018",
       "path": "C:\\@delta\\ms1\\flask\\5018_cell",
-      "pinned": false,
+      "pinned": true,
       "theme": {
         "background": "#000000",
         "foreground": "#d1d5db",

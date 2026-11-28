@@ -2,6 +2,12 @@
 
 ---
 
+## [2026-11-28] - Pin Workspace Click Did Not Save or Reorder
+**Problem:** Clicking a workspace's pin dot appeared to do nothing.
+**Root Cause:** The pin button posted only `name` and `pinned` to the customize endpoint, which also requires a workspace path and rejected the request before applying the pin state. The sidebar sort also did not prioritize pinned workspaces.
+**Solution:** Added a dedicated pin endpoint that updates only the pinned field, routed the pin action to it, and made pinned workspaces sort above unpinned workspaces.
+**Files Modified:** `app.py`, `templates/index.html`
+
 ## [2026-11-28] - Home Page Returned HTTP 500 After Adding Bookmark Placeholder Help
 **Problem:** Opening the app home page returned an Internal Server Error.
 **Root Cause:** The literal `{{field:Name}}` example in `templates/index.html` was parsed as Jinja expression syntax and failed template compilation.
