@@ -206,7 +206,7 @@ Read this file only when relevant to the current task. When reading, reference t
 ## [2026-11-28] - Batch AI Commit and Push GitHub Projects
 
 - Added an AI Commit action beside Check all in the GitHub Projects modal.
-- Replaced header emoji/text-only cues with matching SVG icons, hover feedback, and animated progress spinners while checking or preparing suggestions.
+- Made both header actions icon-only with accessible labels, hover feedback, and animated progress spinners while checking or preparing suggestions; removed the modal subtitle.
 - The action checks all projects, prepares editable AI commit messages for projects with working-tree changes, then opens a review popup.
 - Added per-project Commit & Push, sequential Commit & Push All, and push retry after a partial failure.
 
