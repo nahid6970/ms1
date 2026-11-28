@@ -210,10 +210,13 @@
         "bgColor": "#4478c9",
         "textColor": "#f1f5f9",
         "pathColor": "#94a3b8",
-        "accentColor": "#2563eb"
+        "accentColor": "#ffffff"
       },
       "bookmarks": [],
-      "category": "Flask"
+      "category": "Flask",
+      "androidPath": "",
+      "gitRemote": "",
+      "hideGitInit": false
     },
     {
       "name": "Delta",
