@@ -4185,13 +4185,14 @@
                 <div id="settings-sec-notifications" style="display:none;margin-bottom:16px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
                     <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Terminal Command Notifications</div>
                     <div style="display:grid;gap:10px;padding:10px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:7px;">
-                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notifications-enabled" style="accent-color:var(--accent-color);"> Enable command completion notifications</label>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notifications-enabled" style="accent-color:var(--accent-color);"> Enable command notifications</label>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-inapp-notifications" style="accent-color:var(--accent-color);"> Show notification GUI inside the terminal app</label>
                         <div style="font-size:.75rem;color:var(--text-secondary);">Notify when a completed command meets either enabled rule:</div>
                         <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notify-output" style="accent-color:var(--accent-color);"> Command produced output</label>
                         <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-notify-duration" style="accent-color:var(--accent-color);"> Command ran at least <input type="number" id="settings-terminal-notify-seconds" min="1" max="86400" step="1" value="10" style="width:72px;padding:4px 6px;background:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:5px;color:var(--text-primary);"> seconds</label>
-                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-browser-notifications" style="accent-color:var(--accent-color);"> Also show browser desktop notifications</label>
+                        <label style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-primary);"><input type="checkbox" id="settings-terminal-browser-notifications" style="accent-color:var(--accent-color);"> Show desktop notifications</label>
                         <button type="button" onclick="testTerminalCommandNotification()" style="justify-self:start;padding:5px 9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.4);border-radius:5px;color:#60a5fa;font-size:.7rem;cursor:pointer;">Test notification</button>
-                        <div style="font-size:.68rem;color:var(--text-muted);">Notifications appear for the active tab and background tabs. Browser notifications require permission; the in-app alert and tab marker work while this page is open.</div>
+                        <div style="font-size:.68rem;color:var(--text-muted);">Enable command notifications first, then choose independently whether to show the in-terminal notification GUI and/or desktop notifications. The GUI includes a toast and background-tab marker. Desktop notifications require browser permission.</div>
                     </div>
                 </div>
                 <div id="settings-sec-project-checks" style="display:none;margin-bottom:16px;padding:12px;background-color:var(--bg-sidebar);border:1px solid var(--border-color);border-radius:8px;">
@@ -7124,6 +7125,9 @@ kiro-cli whoami --format json</code></pre>
 
         function notifyTerminalCommandFinished(pane, durationMs, hadOutput) {
             if (localStorage.getItem('terminal-command-notifications-enabled') !== 'true') return;
+            const notifyInApp = localStorage.getItem('terminal-inapp-notifications') !== 'false';
+            const notifyDesktop = localStorage.getItem('terminal-browser-notifications') === 'true';
+            if (!notifyInApp && !notifyDesktop) return;
             const notifyOutput = localStorage.getItem('terminal-notify-on-output') !== 'false';
             const notifyDuration = localStorage.getItem('terminal-notify-on-duration') !== 'false';
             const thresholdSeconds = Math.max(1, Number.parseInt(localStorage.getItem('terminal-notify-duration-seconds') || '10', 10) || 10);
@@ -7131,19 +7135,17 @@ kiro-cli whoami --format json</code></pre>
             if (!matched) return;
 
             const isBackground = pane.element && !pane.element.classList.contains('active-pane');
-            if (isBackground) {
-                pane.needsAttention = true;
+            if (notifyInApp) {
+                if (isBackground) pane.needsAttention = true;
+                else pane.needsAttention = false;
                 updateTerminalTabs();
-            } else {
-                pane.needsAttention = false;
-                updateTerminalTabs();
+                playTerminalNotificationSound();
             }
-            playTerminalNotificationSound();
             const seconds = (durationMs / 1000).toFixed(1);
             const title = `Terminal ${terminalPanes.indexOf(pane) + 1} finished`;
             const message = `Command completed in ${seconds}s${hadOutput ? ' with output' : ''}.`;
-            showTerminalCommandToast(title, message, pane);
-            if (localStorage.getItem('terminal-browser-notifications') === 'true' && 'Notification' in window && Notification.permission === 'granted') {
+            if (notifyInApp) showTerminalCommandToast(title, message, pane);
+            if (notifyDesktop && 'Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notification = new Notification(title, { body: message, tag: `terminal-command-${activeProject}-${pane.paneId}` });
                     notification.onclick = () => { window.focus(); pane.element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); notification.close(); };
@@ -7173,8 +7175,11 @@ kiro-cli whoami --format json</code></pre>
         }
 
         function testTerminalCommandNotification() {
-            showTerminalCommandToast('Terminal notification test', 'Notifications are ready for this tab.', terminalPanes.find(p => p.element.classList.contains('active-pane')));
-            if (localStorage.getItem('terminal-browser-notifications') === 'true' && 'Notification' in window && Notification.permission === 'granted') {
+            const enabled = document.getElementById('settings-terminal-notifications-enabled').checked;
+            if (enabled && document.getElementById('settings-terminal-inapp-notifications').checked) {
+                showTerminalCommandToast('Terminal notification test', 'In-app notifications are ready.', terminalPanes.find(p => p.element.classList.contains('active-pane')));
+            }
+            if (enabled && document.getElementById('settings-terminal-browser-notifications').checked && 'Notification' in window && Notification.permission === 'granted') {
                 try { new Notification('Terminal notification test', { body: 'Notifications are ready for this tab.' }); } catch (e) {}
             }
         }
@@ -15375,6 +15380,7 @@ kiro-cli whoami --format json</code></pre>
             document.getElementById('settings-rclone-autocheck-enabled').checked = localStorage.getItem('rclone-autocheck-enabled') === 'true';
             document.getElementById('settings-rclone-autocheck-interval').value = localStorage.getItem('rclone-autocheck-interval') || '30';
             document.getElementById('settings-terminal-notifications-enabled').checked = localStorage.getItem('terminal-command-notifications-enabled') === 'true';
+            document.getElementById('settings-terminal-inapp-notifications').checked = localStorage.getItem('terminal-inapp-notifications') !== 'false';
             document.getElementById('settings-terminal-notify-output').checked = localStorage.getItem('terminal-notify-on-output') !== 'false';
             document.getElementById('settings-terminal-notify-duration').checked = localStorage.getItem('terminal-notify-on-duration') !== 'false';
             document.getElementById('settings-terminal-notify-seconds').value = localStorage.getItem('terminal-notify-duration-seconds') || '10';
@@ -15639,6 +15645,7 @@ kiro-cli whoami --format json</code></pre>
         async function handleSaveSettings(event) {
             event.preventDefault();
             localStorage.setItem('terminal-command-notifications-enabled', document.getElementById('settings-terminal-notifications-enabled').checked);
+            localStorage.setItem('terminal-inapp-notifications', document.getElementById('settings-terminal-inapp-notifications').checked);
             localStorage.setItem('terminal-notify-on-output', document.getElementById('settings-terminal-notify-output').checked);
             localStorage.setItem('terminal-notify-on-duration', document.getElementById('settings-terminal-notify-duration').checked);
             localStorage.setItem('terminal-notify-duration-seconds', String(Math.max(1, Math.min(86400, parseInt(document.getElementById('settings-terminal-notify-seconds').value, 10) || 10))));

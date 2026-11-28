@@ -5,7 +5,7 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-28] - Terminal Command Notifications
 
-- Added a Terminal Notifications settings section with output and configurable duration rules, optional browser notifications, and a test alert.
+- Added a master notification enable toggle, separate in-terminal GUI and desktop display toggles, output and configurable duration rules, and a test alert.
 - Command completion notifications appear for the active tab and background tabs; background tabs keep their attention marker.
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`

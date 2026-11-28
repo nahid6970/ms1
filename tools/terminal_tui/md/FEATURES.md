@@ -12,8 +12,8 @@ Always state one clear outcome at the end of the response. Do not say “restart
 
 ## Terminal Command Notifications
 **Status:** ✅ Complete
-**Description:** Settings → Terminal Notifications can enable command completion alerts, notify for commands that produced output and/or ran at least a configurable number of seconds (default 10), and optionally show browser desktop notifications. Matching commands show an in-app toast for both active and background tabs; background tabs also receive the existing attention marker. Browser desktop notifications require browser permission.
-**Implementation:** `templates/index.html` tracks interactive command start on Enter and completion at the existing PowerShell prompt marker, evaluates saved localStorage rules, and displays the in-app/browser notifications. This is client-side only.
+**Description:** Settings → Terminal Notifications has a master command-notifications toggle and separate display toggles for the in-terminal notification GUI and desktop alerts. Once enabled, alerts can match command output and/or a configurable runtime threshold (default 10 seconds). In-terminal alerts show a toast for active and background tabs; background tabs also receive the existing attention marker. Desktop notifications require browser permission.
+**Implementation:** `templates/index.html` tracks interactive command start on Enter and completion at the existing PowerShell prompt marker, evaluates saved localStorage rules, and displays the selected notification channels. This is client-side only.
 
 ## Code Merger
 **Status:** ✅ Complete
