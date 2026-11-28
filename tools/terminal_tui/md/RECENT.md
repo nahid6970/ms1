@@ -179,6 +179,14 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
+## [2026-11-28] - Simplify GitHub Project Commit Input
+
+- Replaced the expanded commit panel with a compact single-line message input and adjacent Commit button.
+- Kept AI suggestions in the message input and moved commit progress/results to the existing projects status bar.
+- Commit from this panel no longer pushes automatically.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.
