@@ -5736,7 +5736,7 @@ kiro-cli whoami --format json</code></pre>
             const pane = activeProject === payload.project
                 ? terminalPanes.find(item => item.paneId === payload.paneId)
                 : null;
-            notifyTerminalCommandFinished(pane, payload.durationMs || 0, !!payload.hadOutput, payload.project, payload.paneId);
+            notifyTerminalCommandFinished(pane, payload.durationMs || 0, !!payload.hadOutput, payload.project, payload.paneId, payload.command || '');
         });
         let terminalPanes = [];
         let splitPaneCounter = 1;
@@ -7114,7 +7114,7 @@ kiro-cli whoami --format json</code></pre>
             return output;
         }
 
-        function notifyTerminalCommandFinished(pane, durationMs, hadOutput, projectName = activeProject, paneId = pane?.paneId) {
+        function notifyTerminalCommandFinished(pane, durationMs, hadOutput, projectName = activeProject, paneId = pane?.paneId, command = '') {
             if (localStorage.getItem('terminal-command-notifications-enabled') !== 'true') return;
             const notifyInApp = localStorage.getItem('terminal-inapp-notifications') !== 'false';
             const notifyDesktop = localStorage.getItem('terminal-browser-notifications') === 'true';
@@ -7134,12 +7134,11 @@ kiro-cli whoami --format json</code></pre>
                 playTerminalNotificationSound();
             }
             const seconds = (durationMs / 1000).toFixed(1);
-            const title = pane
-                ? `Terminal ${terminalPanes.indexOf(pane) + 1} finished`
-                : `Command finished · ${projectName}`;
-            const message = `Command completed in ${seconds}s${hadOutput ? ' with output' : ''}.`;
+            const fullCommand = String(command || '').replace(/[\r\n\t]+/g, ' ').trim() || 'Command completed';
+            const title = projectName || 'Terminal';
+            const message = `${fullCommand}\nTook ${seconds}s`;
             const focusCommand = () => focusTerminalCommand(projectName, paneId);
-            if (notifyInApp) showTerminalCommandToast(title, message, pane, focusCommand);
+            if (notifyInApp) showTerminalCommandToast(title, message, pane, focusCommand, fullCommand);
             if (notifyDesktop && 'Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notification = new Notification(title, {
@@ -7154,7 +7153,7 @@ kiro-cli whoami --format json</code></pre>
             }
         }
 
-        function showTerminalCommandToast(title, message, pane, onClick = null) {
+        function showTerminalCommandToast(title, message, pane, onClick = null, fullCommand = '') {
             let toast = document.getElementById('terminal-command-toast');
             if (!toast) {
                 toast = document.createElement('button');
@@ -7163,9 +7162,10 @@ kiro-cli whoami --format json</code></pre>
                 toast.style.cssText = 'position:fixed;right:18px;bottom:22px;z-index:12000;display:none;max-width:min(360px,calc(100vw - 36px));padding:11px 14px;text-align:left;background:var(--bg-sidebar);border:1px solid var(--accent-color);border-radius:9px;color:var(--text-primary);box-shadow:0 8px 28px rgba(0,0,0,.45);cursor:pointer;';
                 document.body.appendChild(toast);
             }
-            toast.innerHTML = `<strong style="display:block;font-size:.78rem;margin-bottom:3px"></strong><span style="font-size:.72rem;color:var(--text-secondary)"></span>`;
+            toast.innerHTML = `<strong style="display:block;font-size:.78rem;margin-bottom:3px"></strong><span style="display:block;white-space:pre-line;overflow-wrap:anywhere;font-size:.72rem;color:var(--text-secondary)"></span>`;
             toast.querySelector('strong').textContent = title;
             toast.querySelector('span').textContent = message;
+            toast.title = fullCommand || title;
             toast.onclick = () => {
                 if (onClick) onClick();
                 else if (pane && !pane.element.classList.contains('active-pane')) pane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));

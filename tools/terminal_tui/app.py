@@ -485,6 +485,8 @@ class TerminalSession:
         self.command_prompt_seen = False
         self.command_started_at = None
         self.command_had_output = False
+        self.command_input_buffer = ''
+        self.command_text = ''
         self.command_marker_carry = ''
         self.cols = 100
         self.rows = 30
@@ -701,11 +703,26 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
 
     def write(self, data):
         if self.pty.isalive():
-            if '\r' in data or '\n' in data:
-                with self.command_state_lock:
-                    if self.command_prompt_seen:
-                        self.command_started_at = time.time()
-                        self.command_had_output = False
+            with self.command_state_lock:
+                if self.command_prompt_seen:
+                    # Ignore terminal control sequences (cursor movement, bracketed
+                    # paste markers, etc.) while retaining the entered command text.
+                    command_input = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', data).replace('\x1b', '')
+                    for char in command_input:
+                        if char in '\r\n':
+                            if self.command_started_at is None:
+                                self.command_started_at = time.time()
+                                self.command_had_output = False
+                                self.command_text = self.command_input_buffer.strip()
+                            self.command_input_buffer = ''
+                        elif char in ('\x08', '\x7f'):
+                            self.command_input_buffer = self.command_input_buffer[:-1]
+                        elif char == '\x15':
+                            self.command_input_buffer = ''
+                        elif char == '\x17':
+                            self.command_input_buffer = self.command_input_buffer.rstrip().rsplit(' ', 1)[0]
+                        elif char.isprintable() or char == '\t':
+                            self.command_input_buffer += char
             self.pty.write(data)
 
     def _track_command_completion(self, data):
@@ -730,9 +747,11 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                             'paneId': self.pane_id,
                             'durationMs': max(0, int((time.time() - self.command_started_at) * 1000)),
                             'hadOutput': self.command_had_output,
+                            'command': self.command_text,
                         })
                         self.command_started_at = None
                         self.command_had_output = False
+                        self.command_text = ''
                 else:
                     self.command_prompt_seen = True
 
