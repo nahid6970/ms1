@@ -5922,6 +5922,9 @@ class StatusBar(QMainWindow):
         _attach_proc_popup(self.lb_ram, self._ram_popup)
         self.lb_duc = IconLabel("", load_config().get("static_bindings", {}).get("drive_c", {})); _bind_drive(self.lb_duc, "drive_c", 0); rl.addWidget(self.lb_duc)
         self.lb_dud = IconLabel("", load_config().get("static_bindings", {}).get("drive_d", {})); _bind_drive(self.lb_dud, "drive_d", 1); rl.addWidget(self.lb_dud)
+        self.disk_speed_lb = QLabel("")
+        self.disk_speed_lb.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        rl.addWidget(self.disk_speed_lb)
         # ── Disk hover popup (shared by both drive buttons) ────────────────
         self._disk_popup = DiskPopup()
         def _attach_disk_popup(btn):
@@ -6112,8 +6115,7 @@ class StatusBar(QMainWindow):
         num_drives = len(drives)
         
         if num_drives >= 1:
-            speed_text = f"  {disk_write:.1f} MB/s" if self._config.get("show_disk_io_speed", False) else ""
-            self.lb_duc.setText(f"\uf0a0  {dc}%{speed_text}")
+            self.lb_duc.setText(f"\uf0a0  {dc}%")
             self.lb_duc.setToolTip(f"Drive {drives[0]} ({dc}%)")
             self.lb_duc.show()
         else:
@@ -6134,6 +6136,18 @@ class StatusBar(QMainWindow):
         def _ns(v): return f"color: {'black' if v>=0.1 else 'white'}; background: {'#32AB32' if v>=1.0 else ('#67D567' if v>=0.5 else ('#A8E4A8' if v>=0.1 else 'black'))};"
         base = "font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
+        self.disk_speed_lb.setText(f"{disk_write:04.1f} MB/s")
+        if disk_write >= 1.0:
+            disk_speed_style = "color: white; background: #087E9B;"
+        elif disk_write >= 0.5:
+            disk_speed_style = "color: white; background: #07516F;"
+        elif disk_write >= 0.1:
+            disk_speed_style = "color: #70E1FF; background: #10364B;"
+        else:
+            disk_speed_style = f"color: {CP_DIM}; background: {CP_BG};"
+        self.disk_speed_lb.setStyleSheet(disk_speed_style + base + " padding: 0 7px;")
+        self.disk_speed_lb.setToolTip("Disk write speed")
+        self.disk_speed_lb.setVisible(bool(self._config.get("show_disk_io_speed", False)))
 
     def _update_cores(self): self.cpu_core_frame.update_usages(psutil.cpu_percent(percpu=True))
     def _drain_komorebi_queue(self):
