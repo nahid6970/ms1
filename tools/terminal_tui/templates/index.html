@@ -11643,9 +11643,6 @@ kiro-cli whoami --format json</code></pre>
             button.disabled = true;
             button.style.opacity = '.55';
             button.textContent = 'Committing…';
-            status.style.display = 'block';
-            status.style.color = 'var(--text-muted)';
-            status.textContent = document.getElementById('github-project-commit-push').checked ? 'Committing and pushing…' : 'Committing…';
             try {
                 const response = await fetch(`/api/project/${encodeURIComponent(context.projectName)}/git/commit`, {
                     method:'POST', headers:{'Content-Type':'application/json'},
@@ -11656,6 +11653,7 @@ kiro-cli whoami --format json</code></pre>
                 let resultText = data.push_error
                     ? `Committed; push failed: ${data.push_error}`
                     : data.pushed ? 'Committed and pushed ✓' : 'Committed ✓';
+                status.style.display = 'block';
                 status.style.color = data.push_error ? '#fbbf24' : '#34d399';
                 status.textContent = resultText;
                 const projectName = context.projectName;
@@ -11683,6 +11681,7 @@ kiro-cli whoami --format json</code></pre>
                     if (githubProjectCommitContext?.projectName === projectName) closeGitHubProjectCommitPanel();
                 }, 3500);
             } catch (error) {
+                status.style.display = 'block';
                 status.style.color = '#f87171';
                 status.textContent = error?.message || 'Commit failed.';
                 button.disabled = !textarea.value.trim();
