@@ -475,11 +475,17 @@ def restart_current_process(delay_seconds=1.0):
 
 
 class TerminalSession:
-    def __init__(self, name, path, use_real_dir_name=False, codex_home=None, kiro_home=None):
+    def __init__(self, name, path, use_real_dir_name=False, codex_home=None, kiro_home=None, pane_id='main'):
         self._kill_lock = threading.Lock()
         self._killed = False
         self.name = name
         self.path = path
+        self.pane_id = pane_id
+        self.command_state_lock = threading.Lock()
+        self.command_prompt_seen = False
+        self.command_started_at = None
+        self.command_had_output = False
+        self.command_marker_carry = ''
         self.cols = 100
         self.rows = 30
         # Prefer the native pseudo console so PowerShell stays attached to this
@@ -659,6 +665,7 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
                 data = self.pty.read(blocking=False)
                 if data:
                     idle_loops = 0
+                    self._track_command_completion(data)
                     with self.history_lock:
                         self.history += data
                     # Keep enough scrollback to restore long AI/tool transcripts
@@ -694,7 +701,55 @@ Write-Host "$([char]0x1b)[2J$([char]0x1b)[H" -NoNewline
 
     def write(self, data):
         if self.pty.isalive():
+            if '\r' in data or '\n' in data:
+                with self.command_state_lock:
+                    if self.command_prompt_seen:
+                        self.command_started_at = time.time()
+                        self.command_had_output = False
             self.pty.write(data)
+
+    def _track_command_completion(self, data):
+        marker = '\x1b]9;ttui;prompt\x07'
+        completions = []
+        with self.command_state_lock:
+            combined = self.command_marker_carry + data
+            self.command_marker_carry = ''
+            offset = 0
+            while True:
+                marker_index = combined.find(marker, offset)
+                if marker_index < 0:
+                    break
+                segment = combined[offset:marker_index]
+                if self.command_started_at is not None and any(char not in '\x00\x1b\r\n\t ' for char in segment):
+                    self.command_had_output = True
+                offset = marker_index + len(marker)
+                if self.command_prompt_seen:
+                    if self.command_started_at is not None:
+                        completions.append({
+                            'project': self.name,
+                            'paneId': self.pane_id,
+                            'durationMs': max(0, int((time.time() - self.command_started_at) * 1000)),
+                            'hadOutput': self.command_had_output,
+                        })
+                        self.command_started_at = None
+                        self.command_had_output = False
+                else:
+                    self.command_prompt_seen = True
+
+            remaining = combined[offset:]
+            carry_length = min(len(marker) - 1, len(remaining))
+            while carry_length > 0 and not marker.startswith(remaining[-carry_length:]):
+                carry_length -= 1
+            if carry_length:
+                visible = remaining[:-carry_length]
+                self.command_marker_carry = remaining[-carry_length:]
+            else:
+                visible = remaining
+            if self.command_started_at is not None and any(char not in '\x00\x1b\r\n\t ' for char in visible):
+                self.command_had_output = True
+
+        for completion in completions:
+            socketio.emit('terminal-command-complete', completion, namespace='/pty')
 
     def resize(self, cols, rows):
         if self.cols != cols or self.rows != rows:
@@ -5028,7 +5083,7 @@ def api_session(project):
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
             try:
-                active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
+                active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home, pane_id=pane_id)
             except Exception as exc:
                 import traceback
                 traceback.print_exc()
@@ -8506,7 +8561,7 @@ def ws_join_session(data):
     session_key = get_session_key(project, pane_id)
     with sessions_lock:
         if session_key not in active_sessions or not active_sessions[session_key].pty.isalive():
-            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home)
+            active_sessions[session_key] = TerminalSession(project, proj_details["path"], use_real_dir_name=use_real_dir_name, codex_home=codex_home, kiro_home=kiro_home, pane_id=pane_id)
         session = active_sessions[session_key]
         session.add_sid(request.sid)
         

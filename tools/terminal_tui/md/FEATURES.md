@@ -13,7 +13,7 @@ Always state one clear outcome at the end of the response. Do not say “restart
 ## Terminal Command Notifications
 **Status:** ✅ Complete
 **Description:** Settings → Terminal Notifications has a master command-notifications toggle and separate display toggles for the in-terminal notification GUI and desktop alerts. Once enabled, alerts can match command output and/or a configurable runtime threshold (default 10 seconds). In-terminal alerts show a toast for active and background tabs; background tabs also receive the existing attention marker. Desktop notifications require browser permission.
-**Implementation:** `templates/index.html` tracks interactive command start on Enter and completion at the existing PowerShell prompt marker, evaluates saved localStorage rules, and displays the selected notification channels. This is client-side only.
+**Implementation:** `app.py` tracks command input and completion at the PowerShell prompt marker and broadcasts completion events independently of the active workspace. `templates/index.html` keeps an app-wide listener, evaluates saved localStorage rules, and displays the selected notification channels.
 
 ## Code Merger
 **Status:** ✅ Complete

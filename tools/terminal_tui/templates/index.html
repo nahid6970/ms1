@@ -5730,6 +5730,14 @@ kiro-cli whoami --format json</code></pre>
             if (payload.eventId) window._handledProjectCheckTrayEvents.add(payload.eventId);
             requestAnimationFrame(() => openProjectCheckManager(manager));
         });
+        const terminalCommandNotificationSocket = io('/pty');
+        terminalCommandNotificationSocket.on('terminal-command-complete', payload => {
+            if (!payload || !payload.project) return;
+            const pane = activeProject === payload.project
+                ? terminalPanes.find(item => item.paneId === payload.paneId)
+                : null;
+            notifyTerminalCommandFinished(pane, payload.durationMs || 0, !!payload.hadOutput, payload.project, payload.paneId);
+        });
         let terminalPanes = [];
         let splitPaneCounter = 1;
         let terminalTabRestoreDepth = 0;
@@ -6700,7 +6708,7 @@ kiro-cli whoami --format json</code></pre>
             }
 
             const paneSocket = io('/pty');
-            const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, hasSeenPromptMarker: false, promptMarkerCarry: '', needsAttention: false, commandStartedAt: 0, commandHadOutput: false };
+            const pane = { paneId, codexAccountId: paneCodexAccountId, kiroAccountId: paneKiroAccountId, term: paneTerm, fitAddon: paneFitAddon, socket: paneSocket, element: paneDiv, resizeObserver: null, promptMarkerCarry: '', needsAttention: false };
             terminalPanes.push(pane);
             term = paneTerm;
             fitAddon = paneFitAddon;
@@ -6770,8 +6778,6 @@ kiro-cli whoami --format json</code></pre>
 
             paneSocket.on('pty-output', (msg) => {
                 if (msg.data) {
-                    const outputWithoutPromptMarker = msg.data.replace(/\x1b\]9;ttui;prompt\x07/g, '').replace(/[\x00-\x1f\x7f]/g, '').trim();
-                    if (pane.commandStartedAt && outputWithoutPromptMarker) pane.commandHadOutput = true;
                     const displayData = stripTerminalPromptMarkers(pane, msg.data);
                     const buffer = paneTerm.buffer.active;
                     const isAtBottom = (buffer.viewportY >= buffer.baseY - 1);
@@ -6972,10 +6978,6 @@ kiro-cli whoami --format json</code></pre>
             paneTerm.onData(data => {
                 if (data.startsWith('\x1b[?') && data.endsWith('c')) return;
                 if (data.startsWith('\x1b]')) return;
-                if (pane.hasSeenPromptMarker && /[\r\n]/.test(data)) {
-                    pane.commandStartedAt = Date.now();
-                    pane.commandHadOutput = false;
-                }
                 if (paneSocket && paneSocket.connected) {
                     paneSocket.emit('pty-input', { project: projectName, paneId, data: data });
                 }
@@ -7096,17 +7098,6 @@ kiro-cli whoami --format json</code></pre>
             while ((markerIndex = input.indexOf(marker, offset)) !== -1) {
                 output += input.slice(offset, markerIndex);
                 offset = markerIndex + marker.length;
-                if (pane.hasSeenPromptMarker) {
-                    const startedAt = pane.commandStartedAt;
-                    if (startedAt) {
-                        const durationMs = Math.max(0, Date.now() - startedAt);
-                        notifyTerminalCommandFinished(pane, durationMs, pane.commandHadOutput);
-                    }
-                    pane.commandStartedAt = 0;
-                    pane.commandHadOutput = false;
-                } else {
-                    pane.hasSeenPromptMarker = true;
-                }
             }
 
             const remaining = input.slice(offset);
@@ -7123,7 +7114,7 @@ kiro-cli whoami --format json</code></pre>
             return output;
         }
 
-        function notifyTerminalCommandFinished(pane, durationMs, hadOutput) {
+        function notifyTerminalCommandFinished(pane, durationMs, hadOutput, projectName = activeProject, paneId = pane?.paneId) {
             if (localStorage.getItem('terminal-command-notifications-enabled') !== 'true') return;
             const notifyInApp = localStorage.getItem('terminal-inapp-notifications') !== 'false';
             const notifyDesktop = localStorage.getItem('terminal-browser-notifications') === 'true';
@@ -7134,32 +7125,36 @@ kiro-cli whoami --format json</code></pre>
             const matched = (notifyOutput && hadOutput) || (notifyDuration && durationMs >= thresholdSeconds * 1000);
             if (!matched) return;
 
-            const isBackground = pane.element && !pane.element.classList.contains('active-pane');
+            const isBackground = pane?.element && !pane.element.classList.contains('active-pane');
             if (notifyInApp) {
-                if (isBackground) pane.needsAttention = true;
-                else pane.needsAttention = false;
-                updateTerminalTabs();
+                if (pane) {
+                    pane.needsAttention = !!isBackground;
+                    updateTerminalTabs();
+                }
                 playTerminalNotificationSound();
             }
             const seconds = (durationMs / 1000).toFixed(1);
-            const title = `Terminal ${terminalPanes.indexOf(pane) + 1} finished`;
+            const title = pane
+                ? `Terminal ${terminalPanes.indexOf(pane) + 1} finished`
+                : `Command finished · ${projectName}`;
             const message = `Command completed in ${seconds}s${hadOutput ? ' with output' : ''}.`;
-            if (notifyInApp) showTerminalCommandToast(title, message, pane);
+            const focusCommand = () => focusTerminalCommand(projectName, paneId);
+            if (notifyInApp) showTerminalCommandToast(title, message, pane, focusCommand);
             if (notifyDesktop && 'Notification' in window && Notification.permission === 'granted') {
                 try {
                     const notification = new Notification(title, {
                         body: message,
-                        tag: `terminal-command-${activeProject}-${pane.paneId}`,
+                        tag: `terminal-command-${projectName}-${paneId}`,
                         renotify: true
                     });
-                    notification.onclick = () => { window.focus(); pane.element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); notification.close(); };
+                    notification.onclick = () => { window.focus(); focusCommand(); notification.close(); };
                 } catch (e) {
                     console.warn('Could not show terminal desktop notification:', e);
                 }
             }
         }
 
-        function showTerminalCommandToast(title, message, pane) {
+        function showTerminalCommandToast(title, message, pane, onClick = null) {
             let toast = document.getElementById('terminal-command-toast');
             if (!toast) {
                 toast = document.createElement('button');
@@ -7172,12 +7167,26 @@ kiro-cli whoami --format json</code></pre>
             toast.querySelector('strong').textContent = title;
             toast.querySelector('span').textContent = message;
             toast.onclick = () => {
-                if (pane && !pane.element.classList.contains('active-pane')) pane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                if (onClick) onClick();
+                else if (pane && !pane.element.classList.contains('active-pane')) pane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
                 toast.style.display = 'none';
             };
             toast.style.display = 'block';
             clearTimeout(window._terminalCommandToastTimer);
             window._terminalCommandToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 6000);
+        }
+
+        async function focusTerminalCommand(projectName, paneId) {
+            if (!projectName) return;
+            window.focus();
+            if (activeProject !== projectName) {
+                const switched = await selectProject(projectName);
+                if (!switched) return;
+            }
+            const targetPane = terminalPanes.find(item => item.paneId === paneId);
+            if (targetPane && !targetPane.element.classList.contains('active-pane')) {
+                targetPane.element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            }
         }
 
         function testTerminalCommandNotification() {
@@ -14561,11 +14570,6 @@ kiro-cli whoami --format json</code></pre>
             
             const sendInput = async (dataStr) => {
                 const s = targetSocket || (socket && socket.connected ? socket : null);
-                const targetPane = terminalPanes.find(p => p.paneId === paneId && p.socket === s);
-                if (targetPane) {
-                    targetPane.commandStartedAt = Date.now();
-                    targetPane.commandHadOutput = false;
-                }
                 if (s && s.connected) {
                     s.emit('pty-input', {
                         project: projectName,
