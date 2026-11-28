@@ -6137,12 +6137,12 @@ class StatusBar(QMainWindow):
         base = "font-family: 'JetBrainsMono NFP'; font-size: 10pt; font-weight: bold;"
         self.upload_lb.setStyleSheet(_ns(up_f) + base); self.download_lb.setStyleSheet(_ns(dn_f) + base)
         self.disk_speed_lb.setText(f"{disk_write:04.1f} MB/s")
-        if disk_write >= 1.0:
-            disk_speed_style = "color: white; background: #087E9B;"
-        elif disk_write >= 0.5:
-            disk_speed_style = "color: white; background: #07516F;"
-        elif disk_write >= 0.1:
-            disk_speed_style = "color: #70E1FF; background: #10364B;"
+        if disk_write >= 10.0:
+            disk_speed_style = "color: white; background: #F00000; font-weight: 900;"
+        elif disk_write >= 5.0:
+            disk_speed_style = "color: white; background: #E34226;"
+        elif disk_write >= 1.0:
+            disk_speed_style = "color: white; background: #A8550A;"
         else:
             disk_speed_style = f"color: {CP_DIM}; background: {CP_BG};"
         self.disk_speed_lb.setStyleSheet(disk_speed_style + base + " padding: 0 7px;")
