@@ -187,6 +187,13 @@ Read this file only when relevant to the current task. When reading, reference t
 
 **Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
 
+## [2026-11-28] - Refresh GitHub Project Status After Commit and Reload
+
+- Persisted the updated GitHub project status after a commit and when new background check results arrive.
+- Kept opening the GitHub Projects modal passive; Check all remains the manual refresh, while configured background checks continue on schedule.
+
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+
 ## [2026-11-19] - Stream Rclone Project Sync Output in the Modal
 
 - Changed the Rclone Projects SRC → DST action to run the saved sync in place instead of opening a terminal tab.

@@ -11261,6 +11261,7 @@ kiro-cli whoami --format json</code></pre>
                 };
                 applyManager('github', githubProjectStatusByName, project => /github\.com/i.test(project.gitRemote || '') && project.pathExists);
                 applyManager('rclone', rcloneProjectStatusByName, project => project.hasRcloneDestination && project.pathExists);
+                if (resultsChanged) saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
                 updateProjectChangeBadges();
                 if (resultsChanged && document.getElementById('github-projects-modal')?.classList.contains('show')) renderGitHubProjectsModal();
                 if (resultsChanged && document.getElementById('rclone-projects-modal')?.classList.contains('show')) renderRcloneProjectsModal();
@@ -11671,6 +11672,7 @@ kiro-cli whoami --format json</code></pre>
                         githubProjectStatusByName.set(projectName, {...statusData, filesText, remoteText, checkedAt:Date.now(), hasChanges:!!(statusData.dirtyCount || statusData.ahead || statusData.behind || !statusData.remoteBranchExists), text:`${filesText}${remoteText ? ` · ${remoteText}` : ''}`});
                     } else githubProjectStatusByName.delete(projectName);
                 } catch (_) { githubProjectStatusByName.delete(projectName); }
+                saveProjectCheckResults('github-project-check-results-v1', githubProjectStatusByName);
                 try {
                     projects = await (await fetch('/api/projects')).json();
                     handleSearch();
