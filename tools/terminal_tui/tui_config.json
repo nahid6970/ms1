@@ -110,7 +110,7 @@
           "iconHoverMap": {}
         },
         {
-          "command": "taskkill /F /IM [[App Name]]",
+          "command": "function pkill { param([Parameter(Mandatory=$true)][string]$Name); $processes = Get-Process | Where-Object { $_.Name -like \"*$Name*\" }; if ($processes) { $processes | ForEach-Object { try { Stop-Process -Id $_.Id -Force -ErrorAction Stop; Write-Host \"Killed: $($_.Name) (PID: $($_.Id))\" -ForegroundColor Green } catch { Write-Host \"Failed to kill: $($_.Name) (PID: $($_.Id)) - $_\" -ForegroundColor Red } } } else { Write-Host \"No process found matching '$Name'\" -ForegroundColor Yellow } }; pkill -Name \"[[App Name]]\"",
           "global": true,
           "name": "Kill App",
           "windowTitle": "",
