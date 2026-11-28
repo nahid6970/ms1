@@ -150,7 +150,7 @@
             "text": "FD",
             "fg": "#FFFF7F",
             "font": [
-                "Consolas",
+                "JetBrainsMono Nerd Font",
                 15,
                 "bold"
             ],
@@ -2927,5 +2927,6 @@
     },
     "git_exclude_patterns": [
         "gg.json"
-    ]
+    ],
+    "show_disk_io_speed": true
 }

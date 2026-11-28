@@ -838,6 +838,22 @@ def get_disk_info():
 
 _net_last = {"sent": 0, "recv": 0}
 
+_disk_io_speed_last = {"read": 0, "write": 0, "time": 0.0}
+
+def get_disk_io_speed():
+    """Return system-wide disk read/write rates in MiB/s."""
+    try:
+        io = psutil.disk_io_counters()
+        now = time.time()
+        previous = _disk_io_speed_last
+        elapsed = now - previous["time"] if previous["time"] else 0.0
+        read_speed = max(0.0, io.read_bytes - previous["read"]) / elapsed / (1024 * 1024) if elapsed > 0 else 0.0
+        write_speed = max(0.0, io.write_bytes - previous["write"]) / elapsed / (1024 * 1024) if elapsed > 0 else 0.0
+        previous.update(read=io.read_bytes, write=io.write_bytes, time=now)
+        return read_speed, write_speed
+    except Exception:
+        return 0.0, 0.0
+
 def get_net_speed():
     io = psutil.net_io_counters()
     up   = (io.bytes_sent - _net_last["sent"]) / (1024 * 1024)
@@ -5480,6 +5496,9 @@ class StatusBar(QMainWindow):
         form_sb.addRow("POPUP Y OFFSET", popup_y_le)
         form_sb.addRow("", dock_chk)
         form_sb.addRow("", aot_chk)
+        disk_speed_chk = QCheckBox("SHOW DISK WRITE SPEED")
+        disk_speed_chk.setChecked(bool(self._config.get("show_disk_io_speed", False)))
+        form_sb.addRow("", disk_speed_chk)
         right_col.addWidget(grp_sb)
         grp_proc = QGroupBox("PROCESS MONITOR"); form_proc = QFormLayout(); grp_proc.setLayout(form_proc)
         proc_top_n_spin = QSpinBox(); proc_top_n_spin.setRange(1, 30); proc_top_n_spin.setValue(self._config.get("proc_top_n", 8))
@@ -5508,6 +5527,7 @@ class StatusBar(QMainWindow):
                     "enabled": rclone_enabled_chk.isChecked()
                 }
                 cfg["popup_y_offset"] = int(popup_y_offset_le.text()) if "popup_y_offset_le" in locals() else int(popup_y_le.text())
+                cfg["show_disk_io_speed"] = disk_speed_chk.isChecked()
                 
                 # Statusbar Geo
                 x_val = sb_x_le.text().strip()
@@ -6084,6 +6104,7 @@ class StatusBar(QMainWindow):
 
     def _update_info(self):
         cpu, ram = get_cpu_ram_info(); gpu = get_gpu_usage(); dc, dd = get_disk_info(); up, down = get_net_speed()
+        disk_read, disk_write = get_disk_io_speed()
         self.lb_cpu.setText(f"{cpu}%"); self.lb_ram.setText(f"{ram}%"); self.lb_gpu.update_usage(gpu)
         self.upload_lb.setText(f" ▲ {up} "); self.download_lb.setText(f" ▼ {down} ")
         
@@ -6091,7 +6112,8 @@ class StatusBar(QMainWindow):
         num_drives = len(drives)
         
         if num_drives >= 1:
-            self.lb_duc.setText(f"\uf0a0  {dc}%")
+            speed_text = f"  {disk_write:.1f} MB/s" if self._config.get("show_disk_io_speed", False) else ""
+            self.lb_duc.setText(f"\uf0a0  {dc}%{speed_text}")
             self.lb_duc.setToolTip(f"Drive {drives[0]} ({dc}%)")
             self.lb_duc.show()
         else:
