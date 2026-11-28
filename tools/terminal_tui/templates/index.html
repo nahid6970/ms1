@@ -7147,9 +7147,15 @@ kiro-cli whoami --format json</code></pre>
             if (notifyInApp) showTerminalCommandToast(title, message, pane);
             if (notifyDesktop && 'Notification' in window && Notification.permission === 'granted') {
                 try {
-                    const notification = new Notification(title, { body: message, tag: `terminal-command-${activeProject}-${pane.paneId}` });
+                    const notification = new Notification(title, {
+                        body: message,
+                        tag: `terminal-command-${activeProject}-${pane.paneId}`,
+                        renotify: true
+                    });
                     notification.onclick = () => { window.focus(); pane.element?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); notification.close(); };
-                } catch (e) {}
+                } catch (e) {
+                    console.warn('Could not show terminal desktop notification:', e);
+                }
             }
         }
 
