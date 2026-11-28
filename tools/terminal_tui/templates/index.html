@@ -5051,8 +5051,8 @@ kiro-cli whoami --format json</code></pre>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border-color);">
                 <div><h2 id="github-projects-title" style="margin:0; font-size:1rem;">GitHub Projects</h2></div>
                 <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                    <button id="github-projects-ai-commit-all" type="button" onclick="startGitHubBatchCommit()" title="Check projects, generate commit messages, then commit and push selected projects" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(168,85,247,.45);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .16s,border-color .16s,box-shadow .16s,transform .16s;" onmouseenter="this.style.background='rgba(168,85,247,.2)';this.style.borderColor='rgba(192,132,252,.75)';this.style.boxShadow='0 0 12px rgba(168,85,247,.14)'" onmouseleave="this.style.background='rgba(168,85,247,.1)';this.style.borderColor='rgba(168,85,247,.45)';this.style.boxShadow='none'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14z"/></svg><span>AI Commit</span></button>
-                    <button id="github-projects-check-all" type="button" onclick="checkAllGitHubProjects()" title="Fetch and check every GitHub project" style="display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid rgba(196,181,253,.55);border-radius:6px;background:rgba(196,181,253,.1);color:#c4b5fd;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .16s,border-color .16s,box-shadow .16s,transform .16s;" onmouseenter="this.style.background='rgba(196,181,253,.2)';this.style.borderColor='rgba(196,181,253,.8)';this.style.boxShadow='0 0 12px rgba(196,181,253,.12)'" onmouseleave="this.style.background='rgba(196,181,253,.1)';this.style.borderColor='rgba(196,181,253,.55)';this.style.boxShadow='none'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.2"/><path d="m7.7 10.5 1.9 1.9 3.8-4"/><path d="m16 16 4.5 4.5"/></svg><span>Check all</span></button>
+                    <button id="github-projects-ai-commit-all" type="button" onclick="startGitHubBatchCommit()" aria-label="AI commit all changed GitHub projects" title="AI commit all changed GitHub projects" style="width:34px;height:29px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(168,85,247,.45);border-radius:6px;background:rgba(168,85,247,.1);color:#c084fc;cursor:pointer;transition:background .16s,border-color .16s,box-shadow .16s,transform .16s;" onmouseenter="this.style.background='rgba(168,85,247,.2)';this.style.borderColor='rgba(192,132,252,.75)';this.style.boxShadow='0 0 12px rgba(168,85,247,.14)'" onmouseleave="this.style.background='rgba(168,85,247,.1)';this.style.borderColor='rgba(168,85,247,.45)';this.style.boxShadow='none'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14z"/></svg></button>
+                    <button id="github-projects-check-all" type="button" onclick="checkAllGitHubProjects()" aria-label="Check all GitHub projects" title="Fetch and check every GitHub project" style="width:34px;height:29px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(196,181,253,.55);border-radius:6px;background:rgba(196,181,253,.1);color:#c4b5fd;cursor:pointer;transition:background .16s,border-color .16s,box-shadow .16s,transform .16s;" onmouseenter="this.style.background='rgba(196,181,253,.2)';this.style.borderColor='rgba(196,181,253,.8)';this.style.boxShadow='0 0 12px rgba(196,181,253,.12)'" onmouseleave="this.style.background='rgba(196,181,253,.1)';this.style.borderColor='rgba(196,181,253,.55)';this.style.boxShadow='none'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.2"/><path d="m7.7 10.5 1.9 1.9 3.8-4"/><path d="m16 16 4.5 4.5"/></svg></button>
                     <button type="button" onclick="closeGitHubProjectsModal()" aria-label="Close" style="background:none;border:0;color:var(--text-secondary);font-size:1.4rem;cursor:pointer;">×</button>
                 </div>
             </div>
@@ -11818,7 +11818,7 @@ kiro-cli whoami --format json</code></pre>
             button.disabled = true;
             button.style.cursor = 'wait';
             button.title = 'Checking all projects and preparing commit messages…';
-            button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg><span>Checking…</span>';
+            button.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>';
             try {
                 setMainProgress('Checking all GitHub projects for uncommitted changes…');
                 const checked = await checkAllGitHubProjects();
@@ -11835,7 +11835,7 @@ kiro-cli whoami --format json</code></pre>
                     return;
                 }
                 const apiModel = localStorage.getItem('git-ai-commit-model') || localStorage.getItem('ai-model-gemini') || 'gemini-2.5-flash';
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg><span>Preparing…</span>';
+                button.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>';
                 button.title = 'Generating commit messages for changed projects…';
                 githubBatchCommitItems = [];
                 const inspectionErrors = [];
@@ -11887,7 +11887,7 @@ kiro-cli whoami --format json</code></pre>
                 button.disabled = false;
                 button.style.cursor = 'pointer';
                 button.title = 'Check projects, generate commit messages, then commit and push selected projects';
-                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14z"/></svg><span>AI Commit</span>';
+                button.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/><path d="m19 14 1.2 2.8L23 18l-2.8 1.2L19 22l-1.2-2.8L15 18l2.8-1.2L19 14z"/></svg>';
                 if (document.getElementById('github-batch-commit-modal').classList.contains('show')) renderGitHubBatchCommitItems();
             }
         }
@@ -11994,7 +11994,7 @@ kiro-cli whoami --format json</code></pre>
             refreshProjectAutoCheckCountdowns();
             checkButton.disabled = true;
             checkButton.style.cursor = 'wait';
-            checkButton.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg><span>Checking…</span>';
+            checkButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="animation:spin .8s linear infinite" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.2-8.6"/></svg>';
             message.style.display = 'block';
             message.style.color = 'var(--text-secondary)';
             message.textContent = `Checking ${linked.length} GitHub project${linked.length === 1 ? '' : 's'}…`;
@@ -12049,7 +12049,7 @@ kiro-cli whoami --format json</code></pre>
             finally { githubProjectCheckRunning = false; refreshProjectAutoCheckCountdowns(); }
             checkButton.disabled = false;
             checkButton.style.cursor = 'pointer';
-            checkButton.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.2"/><path d="m7.7 10.5 1.9 1.9 3.8-4"/><path d="m16 16 4.5 4.5"/></svg><span>Check all</span>';
+            checkButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7.2"/><path d="m7.7 10.5 1.9 1.9 3.8-4"/><path d="m16 16 4.5 4.5"/></svg>';
             updateProjectChangeBadges();
             const withChanges = [...githubProjectStatusByName.values()].filter(s => s.hasChanges && !s.error).length;
             const changesSuffix = withChanges
