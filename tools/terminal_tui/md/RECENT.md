@@ -5,18 +5,20 @@ Read this file only when relevant to the current task. When reading, reference t
 
 ## [2026-11-28] - Parameterized Bookmark Commands
 
-- Bookmark commands can use `[[Name]]` placeholders; running one opens a required-value form and substitutes the values before execution.
+- Bookmark commands use Jinja-safe `[[Name]]` placeholders; running one opens a required-value form and substitutes the values before execution.
 - Supports repeated and case-insensitive placeholder names from the workspace bookmark menu and command manager.
+- Keep literal double-curly examples out of Jinja-rendered HTML unless escaped; they cause template compilation errors.
 
-**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
 
 ## [2026-11-28] - Terminal Command Notifications
 
 - Added a master notification enable toggle, separate in-terminal GUI and desktop display toggles, output and configurable duration rules, and a test alert.
 - Command completion notifications appear for the active tab, background tabs, and commands that finish after switching workspaces; background tabs keep their attention marker.
 - Show the project name and elapsed time in both in-app and desktop alerts.
+- Filter echoed command input and ANSI/OSC controls out of the output rule so silent commands such as `Clear-Host` do not count as producing output.
 
-**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/RECENT.md`
+**Files Modified:** `app.py`, `templates/index.html`, `md/FEATURES.md`, `md/PROBLEMS_AND_FIXES.md`, `md/RECENT.md`
 
 ## [2026-11-26] - Preserve Full Bookmark SVG Source
 

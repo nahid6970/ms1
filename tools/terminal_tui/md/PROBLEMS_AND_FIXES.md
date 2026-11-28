@@ -2,6 +2,18 @@
 
 ---
 
+## [2026-11-28] - Home Page Returned HTTP 500 After Adding Bookmark Placeholder Help
+**Problem:** Opening the app home page returned an Internal Server Error.
+**Root Cause:** The literal `{{field:Name}}` example in `templates/index.html` was parsed as Jinja expression syntax and failed template compilation.
+**Solution:** Rendered the braces through HTML entities, then standardized bookmark placeholders on the Jinja-safe `[[Name]]` format.
+**Files Modified:** `templates/index.html`, `md/FEATURES.md`
+
+## [2026-11-28] - Output-Only Notification Triggered for Silent Commands
+**Problem:** A command such as `Clear-Host` could trigger the output notification rule even when it displayed no command result.
+**Root Cause:** The PTY echoes typed command text, and output detection counted that echo and ANSI terminal control sequences as command output.
+**Solution:** Buffer PTY text from command submission to the prompt marker, remove ANSI/OSC sequences and the echoed command line, then test for visible output.
+**Files Modified:** `app.py`, `md/FEATURES.md`
+
 ## [2026-11-26] - Saved Bookmark SVG Looked Incomplete
 **Problem:** A pasted SVG icon with multiple paths or other SVG features did not render correctly in the bookmark dropdown.
 **Root Cause:** An earlier save path stored a rebuilt, restricted SVG instead of the original source, which could discard paths, styles, gradients, and other markup.
